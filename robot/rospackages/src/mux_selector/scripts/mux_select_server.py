@@ -23,13 +23,15 @@ def select_device(device):
 
     # s1 most significant bit, s0 least significant bit
     # s1 --> gpio 18 (physical 15), s0 --> gpio 21 (physical 13)
+    # NOTE: on the final PCB the select logic will be inverted
+    # this is why selecting device 0 is mapped to (1, 1) --> (0, 0) 
     if not device in (0, 1, 2, 3):
         print("Invalid value, must be 0 or 1")
     else:
         if device == 0:
             print("Selecting device 0: Rover")
-            s0_val = 0
-            s1_val = 0
+            s0_val = 1
+            s1_val = 1
         elif device == 1:
             print("Selecting device 1: Arm")
             s0_val = 0
@@ -40,8 +42,8 @@ def select_device(device):
             s1_val = 0
         elif device == 3:
             print("Selecting device 3: Lidar")
-            s0_val = 1
-            s1_val = 1
+            s0_val = 0
+            s1_val = 0
 
     gpio_dir = "/sys/class/gpio"
 
