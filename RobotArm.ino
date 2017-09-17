@@ -13,10 +13,10 @@ IRrecv irrecv(ReceiverPin); //This create a Receiver object
 decode_results results; //This will store and code received
 
 //Declaring the servo's Pins
-const int APin = 2 ;
-const int RPin = 3 ;10
-const int ZPin = 4 ;
-const int CPin = 5 ;//For the Claw ServoMotor
+const int APin = 2;
+const int RPin = 3;
+const int ZPin = 4;
+const int CPin = 5;//For the Claw ServoMotor
 
 //Creating the servos
 Servo AServo; //Angle Servo
