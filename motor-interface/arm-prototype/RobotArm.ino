@@ -41,7 +41,7 @@ int CPosEQ[10];
 //Variables use throught out the program
 char Last =  'O'; //The last move that has been done
 int wait = 0; //This control the delays throught the loop
-int Step = 10; //Angle difference for each time a button is pressed
+int Step = 2; //Angle difference for each time a button is pressed
 bool EQ = 0; //This is the variable for GOTO VS AddPosition 
 
 
