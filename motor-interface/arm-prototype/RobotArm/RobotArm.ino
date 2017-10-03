@@ -1,7 +1,13 @@
+/*------------------------------------------------------------------------------------------------------------*/
+/*                                            Libraries & Classes                                             */
+/*------------------------------------------------------------------------------------------------------------*/
 #include<Servo.h> //Servo library
 #include "IRremote.h" //InfraRed remote library, also we need to remove <RobotIRremote> if installed
 #include <LiquidCrystal.h> //LCD library
 
+/*------------------------------------------------------------------------------------------------------------*/
+/*                                                  Variables                                                 */
+/*------------------------------------------------------------------------------------------------------------*/
 //Declaring the pins for the LCD
 LiquidCrystal lcd(7,8,9,10,11,12);
 
@@ -19,10 +25,10 @@ const int ZPin = 4;
 const int CPin = 5;//For the Claw ServoMotor
 
 //Creating the servos
-Servo AServo; //Angle Servo
-Servo RServo; //Radial Servo
-Servo ZServo; //Height Servo
-Servo CServo; //Claw Servo
+Servo AServo; // ANGLE Servo
+Servo RServo; // RADIAL Servo
+Servo ZServo; // HEIGHT Servo
+Servo CServo; // CLAW Servo
 
 //Declaring constants for the coordinate systems
 //I will use Polar coordinates to control the arm
@@ -281,7 +287,7 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
       AddPosition(9);
       break;
     }
-    case 0xFFFFFFFF: { //This is toggle when a button is hold, so it makes the last move it made
+    case 0xFFFFFFFF: { //This is toggle when a button is HELD, so it makes the last move it made
       Serial.println(" REPEAT");
       if (Last == 'R' && APos < AMax){ // If last was Right
          AServo.write(APos+5);
@@ -395,8 +401,6 @@ void loop() {
   delay(25);
 
 } // End of Loop
-
-
 
 //The goal of this program is to be able to control my robot arm with a IR remote control.
 //I would like that the robot is in sleep mode by default and when it receives an signal
