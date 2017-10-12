@@ -2,6 +2,15 @@
 
 ### Current Tasks
 
-- Based on ELEC motor and board choice, find and test libraries related to given motors
 - Create a motor class for stepper motors and servo motors which will act as the foundation of all motor related software tasks
-- Maintain some kind of understanding of GUI and physics squads' work for easier implementation in phase 2 (conceptual design phase)
+- reimplement or refactor `RobotArm.ino` to use Motor classes
+- work with GUI team and comms to integrate the motor interface
+
+
+#### Team Leads:  
+- Peter [@PeterGhimself](https://github.com/PeterGhimself)
+- Artem [@artemmikhalitsin](https://github.com/artemmikhalitsin)
+
+#### Motor-Interface:  
+- Kevin [@kcamcam](https://github.com/kcamcam)
+- Josh [@CraniumField](https://github.com/CraniumField)
