@@ -1,7 +1,13 @@
-#include<Servo.h> //Servo   library
+/*------------------------------------------------------------------------------------------------------------*/
+/*                                            Libraries & Classes                                             */
+/*------------------------------------------------------------------------------------------------------------*/
+#include<Servo.h> //Servo library
 #include "IRremote.h" //InfraRed remote library, also we need to remove <RobotIRremote> if installed
 #include <LiquidCrystal.h> //LCD library
 
+/*------------------------------------------------------------------------------------------------------------*/
+/*                                                  Variables                                                 */
+/*------------------------------------------------------------------------------------------------------------*/
 //Declaring the pins for the LCD
 LiquidCrystal lcd(7,8,9,10,11,12);
 
@@ -19,10 +25,10 @@ const int ZPin = 4;
 const int CPin = 5;//For the Claw ServoMotor
 
 //Creating the servos
-Servo AServo; //Angle Servo
-Servo RServo; //Radial Servo
-Servo ZServo; //Height Servo
-Servo CServo; //Claw Servo
+Servo AServo; // ANGLE Servo
+Servo RServo; // RADIAL Servo
+Servo ZServo; // HEIGHT Servo
+Servo CServo; // CLAW Servo
 
 //Declaring constants for the coordinate systems
 //I will use Polar coordinates to control the arm
@@ -42,7 +48,7 @@ int CPosEQ[10];
 char Last =  'O'; //The last move that has been done
 int wait = 0; //This control the delays throught the loop
 int Step = 2; //Angle difference for each time a button is pressed
-bool EQ = 0; //This is the variable for GOTO VS AddPosition 
+bool EQ = 0; //This is the variable for GOTO VS AddPosition
 
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -71,7 +77,7 @@ void GOTO(int A,int R,int Z, int C){
   RPos = R;
   ZPos = Z;
   CPos = C;
-  
+
   AServo.write(APos);
   RServo.write(RPos);
   ZServo.write(ZPos);
@@ -84,7 +90,7 @@ void Home(){ //Will reset the robot to its "Home" position when called
   RPos = 60;
   ZPos = 90;
   CPos = CMin;
-  
+
   AServo.write(APos);
   RServo.write(RPos);
   ZServo.write(ZPos);
@@ -127,20 +133,20 @@ void UpdateLCD() { //This will do as it says
 
 /*-----------------------------------------------REMOTE MODE------------------------------------------------------*/
 void RemoteMode() { //This function controls the robot arm from the IR remote
- 
+
   switch(results.value)  { // The values of the cases where obtain on the internet.
-    
+
     case 0xFFA25D: { //POWER //This will turn on/off the remote control mode
-      Serial.println("POWER"); 
+      Serial.println("POWER");
       break;
     }
     case 0xFFE21D: { //FUNC/STOP //This will  move the arm to its home position
-      Serial.println("FUNC/STOP"); 
+      Serial.println("FUNC/STOP");
       Home();
       break;
     }
     case 0xFF629D: { //VOL+ //This will move the arm forward
-      Serial.println("VOL+"); 
+      Serial.println("VOL+");
       if (RPos < RMax){
         Last = 'F';
         RPos+=Step;
@@ -187,7 +193,7 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
       break;
     }
     case 0xFFE01F: { //DOWN //This will move the arm down
-      Serial.println("DOWN");    
+      Serial.println("DOWN");
       if (ZPos > ZMin){
         Last = 'D';
         ZPos-=Step;
@@ -207,7 +213,7 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
       break;
     }
     case 0xFF906F: { //UP //This will move the arm up
-      Serial.println("UP");    
+      Serial.println("UP");
       if (ZPos < ZMax){
         Last = 'U';
         ZPos+=Step;
@@ -217,8 +223,8 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
       break;
     }
     case 0xFF9867: { //EQ // This decide whether to register the new coordinate or to simply goto the position
-      Serial.println("EQ"); 
-      Last = 'H';   
+      Serial.println("EQ");
+      Last = 'H';
       if (EQ ==0){
         EQ = 1;
       }
@@ -228,42 +234,42 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
       break;
     }
     case 0xFFB04F: { //ST/REPT //This does nothing.. for now ;)
-      Serial.println("ST/REPT");   
+      Serial.println("ST/REPT");
       break;
     }
     case 0xFF6897: { //0 //Registed Position #0
       Serial.println("0");
-      AddPosition(0);    
+      AddPosition(0);
       break;
     }
     case 0xFF30CF: { //1//Registed Position #1
-      Serial.println("1"); 
+      Serial.println("1");
       AddPosition(1);
       break;
     }
     case 0xFF18E7: { //2 //Registed Position #2
-      Serial.println("2");    
+      Serial.println("2");
       AddPosition(2);
       break;
     }
     case 0xFF7A85: { //3 //Registed Position #3
       Serial.println("3");
-      AddPosition(3);    
+      AddPosition(3);
       break;
     }
     case 0xFF10EF: { //4 //Registed Position #4
       Serial.println("4");
-      AddPosition(4);    
+      AddPosition(4);
       break;
     }
     case 0xFF38C7: { //5 //Registed Position #5
       Serial.println("5");
-      AddPosition(5);    
+      AddPosition(5);
       break;
     }
     case 0xFF5AA5: { //6 //Registed Position #6
       Serial.println("6");
-      AddPosition(6);    
+      AddPosition(6);
       break;
     }
     case 0xFF42BD: { //7 //Registed Position #7
@@ -273,15 +279,15 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
     }
     case 0xFF4AB5: { //8 //Registed Position #8
       Serial.println("8");
-      AddPosition(8);    
+      AddPosition(8);
       break;
     }
     case 0xFF52AD: { //9 //Registed Position #9
-      Serial.println("9"); 
-      AddPosition(9);   
+      Serial.println("9");
+      AddPosition(9);
       break;
     }
-    case 0xFFFFFFFF: { //This is toggle when a button is hold, so it makes the last move it made
+    case 0xFFFFFFFF: { //This is toggle when a button is HELD, so it makes the last move it made
       Serial.println(" REPEAT");
       if (Last == 'R' && APos < AMax){ // If last was Right
          AServo.write(APos+5);
@@ -313,7 +319,7 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
         ZServo.write(ZPos);
         delay(wait);
       }
-      break;  
+      break;
     }
     default: { //This is when the IR sensor doen't know what was the button pressed
       Serial.println(" other button   ");
@@ -321,13 +327,13 @@ void RemoteMode() { //This function controls the robot arm from the IR remote
     }
 
   }//End Case
-  
+
 } //End of RemoteMode
 
 /*----------------------------------SETUP-------------------------------------------*/
 void setup() {
   Serial.begin(9600);//Specifying the baudrate
-  
+
   //Attaching the servos to their Pin
   AServo.attach(APin);
   RServo.attach(RPin);
@@ -336,7 +342,7 @@ void setup() {
 
   //I will initialize the Robot position to "home"
   Home ();
-  
+
   //Enable the IR Receiver
   irrecv.enableIRIn();
 
@@ -359,12 +365,12 @@ void setup() {
   lcd.print("RobotArm Program");
   delay(3000);
   lcd.clear();
-  
+
 } //End of Setup
 
 /*-------------------------------------LOOP-------------------------------------------*/
 void loop() {
- 
+
   if(irrecv.decode(&results)){ //If the sensor detected any result
 
     RemoteMode(); //Switch the result to know what to do
@@ -385,18 +391,16 @@ void loop() {
     Serial.print("EQ = ");
     Serial.println(EQ);
     Serial.println();
-    
+
     irrecv.resume(); //Get ready for the next result
-        
+
   }//End If
 
   UpdateLCD();
-  
+
   delay(25);
 
 } // End of Loop
-
-
 
 //The goal of this program is to be able to control my robot arm with a IR remote control.
 //I would like that the robot is in sleep mode by default and when it receives an signal
