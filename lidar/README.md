@@ -2,6 +2,5 @@
 
 ### Current Tasks
 
-- Look through previous code and get a sense of how it works
-- Gain insight into LIDAR technology
 - Run a test of current LIDAR camera
+- Test using previous teams code, generate a report on it
