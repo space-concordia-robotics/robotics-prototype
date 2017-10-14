@@ -23,3 +23,4 @@ This repo contains the beginning of the new (2017-2018) robotics software team c
 #### GUI Team:
 - Beeri [@bnduwi](https://github.com/bnduwi)
 - Zayn [@ZaynMuhammad](https://github.com/ZaynMuhammad)
+- Line [@LineG](https://github.com/LineG)
