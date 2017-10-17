@@ -110,13 +110,13 @@
 // SA 8650B
 #define SANYO_HDR_MARK  3500  // seen range 3500
 #define SANYO_HDR_SPACE 950 //  seen 950
-#define SANYO_ONE_MARK  2400 // seen 2400  
+#define SANYO_ONE_MARK  2400 // seen 2400
 #define SANYO_ZERO_MARK 700 //  seen 700
 #define SANYO_DOUBLE_SPACE_USECS  800  // usually ssee 713 - not using ticks as get number wrapround
 #define SANYO_RPT_LENGTH 45000
 
 // Mitsubishi RM 75501
-// 14200 7 41 7 42 7 42 7 17 7 17 7 18 7 41 7 18 7 17 7 17 7 18 7 41 8 17 7 17 7 18 7 17 7 
+// 14200 7 41 7 42 7 42 7 17 7 17 7 18 7 41 7 18 7 17 7 17 7 18 7 41 8 17 7 17 7 18 7 17 7
 
 // #define MITSUBISHI_HDR_MARK  250  // seen range 3500
 #define MITSUBISHI_HDR_SPACE  350 //  7*50+100
@@ -166,8 +166,8 @@
 #define DISH_BITS 16
 
 #define TOLERANCE 25  // percent tolerance in measurements
-#define LTOL (1.0 - TOLERANCE/100.) 
-#define UTOL (1.0 + TOLERANCE/100.) 
+#define LTOL (1.0 - TOLERANCE/100.)
+#define UTOL (1.0 + TOLERANCE/100.)
 
 #define _GAP 5000 // Minimum map between transmissions
 #define GAP_TICKS (_GAP/USECPERTICK)
@@ -196,7 +196,7 @@ typedef struct {
   unsigned int timer;     // state timer, counts 50uS ticks.
   unsigned int rawbuf[RAWBUF]; // raw data
   uint8_t rawlen;         // counter of entries in rawbuf
-} 
+}
 irparams_t;
 
 // Defined in IRremote.cpp
@@ -428,17 +428,18 @@ extern volatile irparams_t irparams;
   OCR5A = SYSCLOCK * USECPERTICK / 1000000; \
   TCNT5 = 0; \
 })
+
 #if defined(CORE_OC5A_PIN)
-#define TIMER_PWM_PIN        CORE_OC5A_PIN
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#define TIMER_PWM_PIN        46  /* Arduino Mega */
-#else
-#error "Please add OC5A pin number here\n"
+	#define TIMER_PWM_PIN        CORE_OC5A_PIN
+	#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+	#define TIMER_PWM_PIN        46  /* Arduino Mega */
+	#else
+	#error "Please add OC5A pin number here\n"
 #endif
 
 
 #else // unknown timer
-#error "Internal code configuration error, no known IR_USE_TIMER# defined\n"
+	#error "Internal code configuration error, no known IR_USE_TIMER# defined\n"
 #endif
 
 
