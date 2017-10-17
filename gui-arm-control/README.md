@@ -1,4 +1,4 @@
-## gui-arm-control
+# gui-arm-control
 
 ### Current Tasks
 
@@ -17,7 +17,7 @@ The easiest way to have all the required setup done is to follow the instruction
 - `pacman -S mingw-w64-x86_64-glade`
 - `pacman -S mingw-w64-x86_64-devhelp`
 - If you develop in Python 3: `pacman -S mingw-w64-x86_64-python3-gobject`
-    or if you develop in Python 2: `pacman -S mingw-w64-x86_64-python2-gobject` (for our GUI purposes we are using Python 2)
+    or if you develop in Python 2: `pacman -S mingw-w64-x86_64-python2-gobject` (for our GUI purposes we are currently using Python 2)
 3. When the above is done, the set up is complete and:
 - Python is installed
 - GTK is installed
@@ -27,4 +27,11 @@ The easiest way to have all the required setup done is to follow the instruction
 Here's a [HOWTO](https://www.computerhope.com/issues/ch000549.htm) for different kinds of Windows.
 In this case you need to add `C:\mysys64\mingw64\bin`.
 
-
+#### Linux
+1. open up your terminal
+2. use your package manager to install the dependency needed to run a demo of the GUI with `python ArmGUILayout.py`:
+- `sudo apt-get install python-gtk2`
+- `sudo apt-get install libgtk-3-dev`
+3. Optional development tools:
+- `sudo apt-get install glade` - graphic interface designer
+- `sudo apt-get install geany` - text editor
