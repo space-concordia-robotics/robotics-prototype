@@ -1,6 +1,6 @@
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %INVERSE KINEMATICS FOR SPACE CONCORDIA ROBOTICS TEAM 2017%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+ %REPRESENTATION OF ARM WORKSPACE FOR SPACE CONCORDIA ROBOTICS TEAM 2017% 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %This code uses the Monte Carlo method to find the planar workspace of a 3R
 %arm. This configuration is similar to the one the team seeks to use for
