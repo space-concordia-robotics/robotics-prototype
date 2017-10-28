@@ -1,0 +1,21 @@
+The demo consists of two files that work together to communicate between PC and Arduino: ComArduino.py and ArduinoPC.ino
+
+Summary of both files:
+---------------------
+ComArduino.py
+---------------------
+__PROCEDURE__
+Opens serial connection to the arduino, which causes the arduino to reset.
+Waits for message from arduino to give it time to reset.
+Loops through a series of test messages:
+- Send message and display it on PC screen
+- wait for a reply and display it on the PC
+- any message sent with length = 0 from Arduino is interpreted as a debug message (prints to PC screen)
+
+__SENDING MESSAGES__
+To send a message to the arduino, we must preface the message with a start marker byte value of 254.
+The following byte will contain the number of characters in the original message, then the message follows.
+The message ends with a end marker byte of 255.
+
+__RECEIVING MESSAGES__
+
