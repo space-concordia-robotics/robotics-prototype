@@ -1,0 +1,6 @@
+Build communications object with arduino 
+
+	Look at previous years code  from robotics-rover-- more specifically use the umanager.py file in the "roboticsrov" directory
+	use PySerial module library (has useful functions)
+	
+		
