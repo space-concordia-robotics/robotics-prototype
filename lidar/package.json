@@ -1,0 +1,16 @@
+{
+  "name": "lidar",
+  "version": "1.0.0",
+  "description": "some node deps",
+  "main": "emailIPAddress.js",
+  "dependencies": {
+    "ip": "^1.1.5",
+    "nodemailer": "^4.3.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dave and pete",
+  "license": "ISC"
+}
