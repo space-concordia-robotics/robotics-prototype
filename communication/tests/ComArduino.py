@@ -223,10 +223,14 @@ def waitForArduino():
 #======================================
 
 import serial
+import serial.tools.list_ports
 import time
 
-# NOTE the user must ensure that the next line refers to the correct comm port
-ser = serial.Serial("/dev/ttyUSB0", 57600)
+# NOTE: just takes the first available com port, does not give option to select from multiple available ports yet
+ports = list(serial.tools.list_ports.comports())
+firstPortName = ports[0].name
+
+ser = serial.Serial("/dev/" + firstPortName, 57600)
 
 
 startMarker = 254
