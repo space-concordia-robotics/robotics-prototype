@@ -1,9 +1,13 @@
 ## lidar
 
-### Current Tasks
+### Current Tasks (phase 3)
 
-- Run a test of current LIDAR camera
-- Test using previous teams code, generate a report on it
+Sprint 1:
+~~- Get basic measurements out of LIDAR (using Arduino)~~
+- Assess accuracy of LIDAR readings compared to expected accuracy 
+
+Sprint 2:
+- Test processing measurement data using last years code/approach, integrate functioning version into new code base
 
 ## How to connect lidar module to odroid (no servos involved)
 

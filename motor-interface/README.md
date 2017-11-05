@@ -1,7 +1,9 @@
 ## motor-interface
 
-### Current Tasks
+### Current Tasks (Phase 3)
 
-- Create a motor class for stepper motors and servo motors which will act as the foundation of all motor related software tasks
-- reimplement or refactor `RobotArm.ino` to use Motor classes
-- work with GUI team to decide on expected data and comms to integrate the motor interface
+Sprint 1:
+- help GUI team by testing different methods of integrating mathlab code in pyGTK (keeping speed in mind), create at least one demo of the most likely method of integration
+
+Sprint 2:
+- fully integrate the results from testing the different methods
