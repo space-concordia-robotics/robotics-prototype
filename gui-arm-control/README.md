@@ -78,6 +78,6 @@ Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) 
 	![screenshot](http://pygobject.readthedocs.io/en/latest/_images/start_macos.png)  
 
 5. References  
-	- pygobject [docs](http://pygobject.readthedocs.io/en/latest/	getting_started.html)  
+	- pygobject [docs](http://pygobject.readthedocs.io/en/latest/getting_started.html)  
 	- the fix [link](https://github.com/jeffreywildman/homebrew-virt-manager/issues/73)  
 	- 	Big thanks to [@bnduwi](https://github.com/bnduwi) for taking the time to show me how to get it to work.
