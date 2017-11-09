@@ -31,7 +31,7 @@ This repo contains the beginning of the new (2017-2018) robotics software team c
 
 2. Copy your arduino source(s) into platformio/src/
 
-3. Navigate to playformio/ folder
+3. Navigate to platformio/ folder
 
 4. Upload the script via the following command: `platformio run -t upload`. This will both compile and upload the code.
 
