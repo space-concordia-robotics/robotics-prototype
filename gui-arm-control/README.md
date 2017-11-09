@@ -30,7 +30,7 @@ The easiest way to have all the required setup done is to follow the instruction
 3. When the above is done, the set up is complete and:
 - Python is installed
 - GTK is installed
-- Glade is installed 
+- Glade is installed
 (all of which can be found in the default installation folder `C:\mysys64\mingw64\bin`)
 4. To setup development the location for Python has to be added to your PATH environment variable.
 Here's a [HOWTO](https://www.computerhope.com/issues/ch000549.htm) for different kinds of Windows.
@@ -44,3 +44,40 @@ In this case you need to add `C:\mysys64\mingw64\bin`.
 3. Optional development tools:
 - `sudo apt-get install glade` - graphic interface designer
 - `sudo apt-get install geany` - text editor
+
+### OSX
+Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) installed and you have python 2.7 installed and linked to home brew.
+
+1. Instsall
+	- `$ brew install pygobject3 --with-python3 gtk+3`  
+
+2. The Fix
+	- makes sure the the installs you did with homebrew are recongized as environment variables
+	- `$ brew reinstall pygobject pygobject3`  
+	- `$ mkdir -p "$HOME/Library/Python/2.7/lib/python/site-packages"`  
+	- `$ echo  'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >>` `"$HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth"`  
+
+3. Create a Demo File  
+	- Create a file called **hello.py** with the following demo content
+
+	``` python
+	import gi
+	gi.require_version("Gtk", "3.0")
+	from gi.repository import Gtk
+
+	window = Gtk.Window(title="Hello World")
+	window.show()
+	window.connect("destroy", Gtk.main_quit)
+	Gtk.main()
+	```
+
+4. Run
+	- `$ cd to/your/directory/with/the/demo`  
+	- `$ python2 hello.py`  
+	- Voila! 😃  
+	![screenshot](http://pygobject.readthedocs.io/en/latest/_images/start_macos.png)  
+
+5. References  
+	- pygobject [docs](http://pygobject.readthedocs.io/en/latest/	getting_started.html)  
+	- the fix [link](https://github.com/jeffreywildman/homebrew-virt-manager/issues/73)  
+	- 	Big thanks to [@bnduwi](https://github.com/bnduwi) for taking the time to show me how to get it to work.
