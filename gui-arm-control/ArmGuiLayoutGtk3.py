@@ -2,7 +2,7 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 '''
 This will access and run the glade file
@@ -18,6 +18,16 @@ builder = Gtk.Builder()
 builder.add_from_file("ArmGuiLayout.glade")
 
 window = builder.get_object("ArmGuiLayoutWindow")
+
+# CSS Styling part
+screen = Gdk.Screen.get_default()
+css_provider = Gtk.CssProvider()
+css_provider.load_from_path('Styling.css')
+context = Gtk.StyleContext()
+context.add_provider_for_screen(screen, css_provider,
+  Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+
 window.show_all()
 
 Gtk.main()

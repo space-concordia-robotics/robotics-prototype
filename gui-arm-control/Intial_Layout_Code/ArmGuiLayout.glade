@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
   <object class="GtkWindow" id="ArmGuiLayoutWindow">
     <property name="name">ArmGuiLayoutWindow</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
-    <property name="window_position">center-on-parent</property>
+    <property name="default_width">1250</property>
+    <property name="default_height">800</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
@@ -15,26 +16,23 @@
           <object class="GtkGrid" id="Claw Button Layout">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">center</property>
-            <property name="row_spacing">2</property>
-            <property name="column_spacing">1</property>
+            <property name="halign">center</property>
+            <property name="margin_left">8</property>
+            <property name="margin_right">1</property>
+            <property name="row_homogeneous">True</property>
+            <property name="column_homogeneous">True</property>
             <child>
               <object class="GtkButton" id="Yaw Left">
                 <property name="label" translatable="yes">Yaw
 Left</property>
-                <property name="name">Yaw-left</property>
-                <property name="width_request">63</property>
-                <property name="height_request">60</property>
+                <property name="name">Yaw Left</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
@@ -42,17 +40,12 @@ Left</property>
                 <property name="label" translatable="yes">Pitch
 Up</property>
                 <property name="name">Pitch Up</property>
-                <property name="width_request">68</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="border_width">0</property>
               </object>
               <packing>
-                <property name="left_attach">2</property>
+                <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
               </packing>
             </child>
@@ -60,18 +53,14 @@ Up</property>
               <object class="GtkButton" id="Yaw Right">
                 <property name="label" translatable="yes">Yaw
 Right</property>
-                <property name="name">Yaw-Right</property>
-                <property name="width_request">63</property>
-                <property name="height_request">60</property>
+                <property name="name">Yaw Right</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">4</property>
-                <property name="top_attach">2</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
@@ -79,16 +68,12 @@ Right</property>
                 <property name="label" translatable="yes">Roll
 Left</property>
                 <property name="name">Roll Left</property>
-                <property name="width_request">66</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
+                <property name="left_attach">0</property>
                 <property name="top_attach">1</property>
               </packing>
             </child>
@@ -97,16 +82,12 @@ Left</property>
                 <property name="label" translatable="yes">Pitch
 Down</property>
                 <property name="name">Pitch Down</property>
-                <property name="width_request">63</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">2</property>
+                <property name="left_attach">1</property>
                 <property name="top_attach">1</property>
               </packing>
             </child>
@@ -115,16 +96,12 @@ Down</property>
                 <property name="label" translatable="yes">Roll
 Right</property>
                 <property name="name">Roll Right</property>
-                <property name="width_request">69</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">3</property>
+                <property name="left_attach">2</property>
                 <property name="top_attach">1</property>
               </packing>
             </child>
@@ -133,16 +110,12 @@ Right</property>
                 <property name="label" translatable="yes">Claw
 Open</property>
                 <property name="name">Claw Open</property>
-                <property name="width_request">63</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">start</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
+                <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
               </packing>
             </child>
@@ -151,36 +124,14 @@ Open</property>
                 <property name="label" translatable="yes">Claw
 Close</property>
                 <property name="name">Claw Close</property>
-                <property name="width_request">63</property>
-                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
               </object>
               <packing>
-                <property name="left_attach">3</property>
+                <property name="left_attach">2</property>
                 <property name="top_attach">2</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -202,23 +153,18 @@ Close</property>
                 <property name="name">Arm Button Layout</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="valign">center</property>
-                <property name="orientation">vertical</property>
-                <property name="row_spacing">2</property>
-                <property name="column_spacing">2</property>
+                <property name="halign">center</property>
+                <property name="margin_right">15</property>
+                <property name="row_homogeneous">True</property>
+                <property name="column_homogeneous">True</property>
                 <child>
                   <object class="GtkButton" id="Arm Forward">
                     <property name="label" translatable="yes">Arm
 Forward</property>
                     <property name="name">Arm Forward</property>
-                    <property name="width_request">60</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -230,8 +176,6 @@ Forward</property>
                     <property name="label" translatable="yes">Arm
 Back</property>
                     <property name="name">Arm Back</property>
-                    <property name="width_request">80</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -246,8 +190,6 @@ Back</property>
                     <property name="label" translatable="yes">Arm
 Up</property>
                     <property name="name">Arm Up</property>
-                    <property name="width_request">80</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -262,15 +204,13 @@ Up</property>
                     <property name="label" translatable="yes">Arm
 Left</property>
                     <property name="name">Arm Left</property>
-                    <property name="width_request">80</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
+                    <property name="top_attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -278,8 +218,6 @@ Left</property>
                     <property name="label" translatable="yes">Arm
 Down</property>
                     <property name="name">Arm Down</property>
-                    <property name="width_request">80</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -294,15 +232,13 @@ Down</property>
                     <property name="label" translatable="yes">Arm 
 Right</property>
                     <property name="name">Arm Right</property>
-                    <property name="width_request">80</property>
-                    <property name="height_request">60</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
-                    <property name="top_attach">1</property>
+                    <property name="top_attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -325,8 +261,7 @@ Right</property>
                 <property name="name">Error Logs Grid</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
+                <property name="margin_right">15</property>
                 <property name="column_homogeneous">True</property>
                 <child>
                   <object class="GtkLabel" id="Error Logs">

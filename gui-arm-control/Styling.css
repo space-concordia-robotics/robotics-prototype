@@ -1,0 +1,24 @@
+#blackBox {
+  background-color: black;
+}
+#redBox {
+  background-color: red;
+}
+.goldBox {
+  background-color: gold;
+}
+
+#blackBox {
+  background-color: black;
+}
+
+#ArmGuiLayoutWindow{
+  background-color: #b4abab;
+}
+
+#Yaw-left, #Yaw-Right{
+    color: white;
+    border-color: green;
+    background-color: green;
+    background-image:none;
+}
