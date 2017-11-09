@@ -29,10 +29,10 @@ This repo contains the beginning of the new (2017-2018) robotics software team c
 
 1. Make sure the arduino is plugged into the odroid
 
-2. Copy your arduino source(s) into platformio-test/src/
+2. Copy your arduino source(s) into platformio/src/
 
-3. Navigate to playformio-test/ folder
+3. Navigate to playformio/ folder
 
 4. Upload the script via the following command: `platformio run -t upload`. This will both compile and upload the code.
 
-Note: I didn't look into adding libraries yet but I'm pretty sure you want to place them in the platformio-test/lib folder. See [platformio lib help page](http://docs.platformio.org/en/latest/userguide/lib/index.html) to learn more
+Note: I didn't look into adding libraries yet but I'm pretty sure you want to place them in the platformio/lib folder. See [platformio lib help page](http://docs.platformio.org/en/latest/userguide/lib/index.html) to learn more
