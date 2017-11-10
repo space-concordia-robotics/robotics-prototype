@@ -27,7 +27,7 @@ context = Gtk.StyleContext()
 context.add_provider_for_screen(screen, css_provider,
   Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-
+window.connect("destroy", Gtk.main_quit)
 window.show_all()
 
 Gtk.main()
