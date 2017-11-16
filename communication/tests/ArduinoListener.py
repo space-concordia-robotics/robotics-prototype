@@ -11,14 +11,18 @@ import time
 ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 
-print("connecting to com port: " + firstPortName)
+print("Connecting to com port: " + firstPortName)
+
 # can we automate getting the bandwidth selected by the arduino
 # instead of hardcoding it?
 ser = serial.Serial("/dev/" + firstPortName, 9600)
+print("Connected to Port: " + firstPortName)
 
 f = open('Python_Log.dat','a')
+
 #Whenever we run the arduino, we output the time and date for the output 
 #just to organize the log file for when we need to see output
+
 f.write("=======================================================================\n")
 f.write("Program Run Current Log Time: " +  time.ctime()+"\n")
 f.write("=======================================================================\n")
@@ -31,13 +35,14 @@ f.write("=======================================================================
 #try catch block allows for a more graceful exit of our while loop.
 try:
 	while True:
-		f.write(print ser.readline())
+		f.write(ser.readline())
 except KeyboardInterrupt:
 	print("Serial Output Terminated!")
 
 print("Program Terminated")
-f.close()
 
+f.close()
+#stop writing to file
 
 
 
