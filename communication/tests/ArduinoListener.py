@@ -16,8 +16,30 @@ print("connecting to com port: " + firstPortName)
 # instead of hardcoding it?
 ser = serial.Serial("/dev/" + firstPortName, 9600)
 
+f = open('Python_Log.dat','a')
+#Whenever we run the arduino, we output the time and date for the output 
+#just to organize the log file for when we need to see output
+f.write("=======================================================================\n")
+f.write("Program Run Current Log Time: " +  time.ctime()+"\n")
+f.write("=======================================================================\n")
+
+
 # ctrl + c to stop infinite loop
 # might be better to let this break on some specific user input
 # such as 'x', for a more graceful exit
-while True:
-    print ser.readline()
+
+#try catch block allows for a more graceful exit of our while loop.
+try:
+	while True:
+		f.write(print ser.readline())
+except KeyboardInterrupt:
+	print("Serial Output Terminated!")
+
+print("Program Terminated")
+f.close()
+
+
+
+
+
+
