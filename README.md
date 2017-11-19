@@ -1,9 +1,8 @@
 # robotics-prototype
 This repo contains the beginning of the new (2017-2018) robotics software team code
 
-#### Team Leads:
+#### Software Team Lead:
 - Peter [@PeterGhimself](https://github.com/PeterGhimself)
-- Artem [@artemmikhalitsin](https://github.com/artemmikhalitsin)
 
 #### Lidar Team:
 - David [@Davidster](https://github.com/Davidster)
