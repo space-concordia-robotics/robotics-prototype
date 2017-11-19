@@ -1,0 +1,386 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:switches
+LIBS:relays
+LIBS:motors
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:RoboticsComponents
+LIBS:Communication System Circuitry-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 7050 6950 0    157  ~ 0
+Communication System Circuitry
+$Comp
+L Main_Computer MC?
+U 1 1 5A0D02FE
+P 2275 6025
+F 0 "MC?" H 2275 5675 60  0000 C CNN
+F 1 "Main_Computer" H 2275 6475 60  0000 C CNN
+F 2 "" H 2275 6025 60  0001 C CNN
+F 3 "" H 2275 6025 60  0001 C CNN
+	1    2275 6025
+	1    0    0    -1  
+$EndComp
+$Comp
+L XBee_Adaptor A1
+U 1 1 5A0D06C9
+P 2425 3800
+F 0 "A1" H 2700 3175 60  0000 C CNN
+F 1 "XBee_Adaptor" H 2400 4375 60  0000 C CNN
+F 2 "" H 500 3675 60  0001 C CNN
+F 3 "" H 500 3675 60  0001 C CNN
+	1    2425 3800
+	0    1    1    0   
+$EndComp
+$Comp
+L XBee_Adaptor A2
+U 1 1 5A0D071A
+P 7975 3775
+F 0 "A2" H 8275 3125 60  0000 C CNN
+F 1 "XBee_Adaptor" H 7950 4350 60  0000 C CNN
+F 2 "" H 6050 3650 60  0001 C CNN
+F 3 "" H 6050 3650 60  0001 C CNN
+	1    7975 3775
+	0    -1   -1   0   
+$EndComp
+$Comp
+L XBee_PRO_900 Xbee2
+U 1 1 5A0D0767
+P 6450 3825
+F 0 "Xbee2" H 6450 3125 60  0000 C CNN
+F 1 "XBee_PRO_900" H 6475 4650 60  0000 C CNN
+F 2 "" H 6650 3525 60  0001 C CNN
+F 3 "" H 6650 3525 60  0001 C CNN
+	1    6450 3825
+	0    -1   -1   0   
+$EndComp
+$Comp
+L XBee_PRO_900 Xbee1
+U 1 1 5A0D07C8
+P 4200 3775
+F 0 "Xbee1" H 4200 3075 60  0000 C CNN
+F 1 "XBee_PRO_900" H 4225 4600 60  0000 C CNN
+F 2 "" H 4400 3475 60  0001 C CNN
+F 3 "" H 4400 3475 60  0001 C CNN
+	1    4200 3775
+	0    1    1    0   
+$EndComp
+$Comp
+L ODroid_C1+ ODroid1
+U 1 1 5A0D081D
+P 10000 2325
+F 0 "ODroid1" H 10050 600 60  0000 C CNN
+F 1 "ODroid_C1+" H 10325 3875 60  0000 C CNN
+F 2 "" H 9700 3250 60  0001 C CNN
+F 3 "" H 9700 3250 60  0001 C CNN
+	1    10000 2325
+	1    0    0    -1  
+$EndComp
+Text Notes 5075 3800 0    60   ~ 0
+(((     )))
+Text Notes 5350 3500 3    60   ~ 0
+Radio Waves
+Wire Wire Line
+	8750 3725 9025 3725
+Wire Wire Line
+	9025 3725 9025 4675
+Wire Wire Line
+	9025 4675 10425 4675
+Wire Wire Line
+	10425 4675 10425 4175
+Wire Wire Line
+	4500 2975 4500 2950
+Wire Wire Line
+	4500 2950 2800 2950
+Wire Wire Line
+	2800 2950 2800 3175
+Wire Wire Line
+	4400 2975 4400 2900
+Wire Wire Line
+	4400 2900 2700 2900
+Wire Wire Line
+	2700 2900 2700 3175
+Wire Wire Line
+	2600 3175 2600 2850
+Wire Wire Line
+	2600 2850 4300 2850
+Wire Wire Line
+	4300 2850 4300 2975
+Wire Wire Line
+	2500 3175 2500 2800
+Wire Wire Line
+	2500 2800 4200 2800
+Wire Wire Line
+	4200 2800 4200 2975
+Wire Wire Line
+	2400 3175 2400 2750
+Wire Wire Line
+	2400 2750 4100 2750
+Wire Wire Line
+	4100 2750 4100 2975
+Wire Wire Line
+	2300 3175 2300 2700
+Wire Wire Line
+	2300 2700 4000 2700
+Wire Wire Line
+	4000 2700 4000 2975
+Wire Wire Line
+	2200 3175 2200 2650
+Wire Wire Line
+	2200 2650 3900 2650
+Wire Wire Line
+	3900 2650 3900 2975
+Wire Wire Line
+	2100 3175 2100 2600
+Wire Wire Line
+	2100 2600 3800 2600
+Wire Wire Line
+	3800 2600 3800 2975
+Wire Wire Line
+	2000 3175 2000 2550
+Wire Wire Line
+	2000 2550 3700 2550
+Wire Wire Line
+	3700 2550 3700 2975
+Wire Wire Line
+	3600 2975 3600 2500
+Wire Wire Line
+	3600 2500 1900 2500
+Wire Wire Line
+	1900 2500 1900 3175
+Wire Wire Line
+	4500 4625 4500 4650
+Wire Wire Line
+	4500 4650 2900 4650
+Wire Wire Line
+	2900 4650 2900 4400
+Wire Wire Line
+	4400 4625 4400 4700
+Wire Wire Line
+	4400 4700 2800 4700
+Wire Wire Line
+	2800 4700 2800 4400
+Wire Wire Line
+	4300 4625 4300 4750
+Wire Wire Line
+	4300 4750 2700 4750
+Wire Wire Line
+	2700 4750 2700 4400
+Wire Wire Line
+	4200 4625 4200 4800
+Wire Wire Line
+	4200 4800 2600 4800
+Wire Wire Line
+	2600 4800 2600 4400
+Wire Wire Line
+	4100 4625 4100 4850
+Wire Wire Line
+	4100 4850 2500 4850
+Wire Wire Line
+	2500 4850 2500 4400
+Wire Wire Line
+	4000 4625 4000 4900
+Wire Wire Line
+	4000 4900 2400 4900
+Wire Wire Line
+	2400 4900 2400 4400
+Wire Wire Line
+	3900 4625 3900 4950
+Wire Wire Line
+	3900 4950 2300 4950
+Wire Wire Line
+	2300 4950 2300 4400
+Wire Wire Line
+	3800 4625 3800 5000
+Wire Wire Line
+	3800 5000 2200 5000
+Wire Wire Line
+	2200 5000 2200 4400
+Wire Wire Line
+	3700 4625 3700 5050
+Wire Wire Line
+	3700 5050 2100 5050
+Wire Wire Line
+	2100 5050 2100 4400
+Wire Wire Line
+	3600 4625 3600 5100
+Wire Wire Line
+	3600 5100 2000 5100
+Wire Wire Line
+	2000 5100 2000 4400
+Wire Wire Line
+	2975 6000 2975 5300
+Wire Wire Line
+	2975 5300 1650 5300
+Wire Wire Line
+	1650 5300 1650 3850
+Wire Wire Line
+	6150 4625 6150 4650
+Wire Wire Line
+	6150 4650 7600 4650
+Wire Wire Line
+	7600 4650 7600 4400
+Wire Wire Line
+	6250 4625 6250 4700
+Wire Wire Line
+	6250 4700 7700 4700
+Wire Wire Line
+	7700 4700 7700 4400
+Wire Wire Line
+	6350 4625 6350 4750
+Wire Wire Line
+	6350 4750 7800 4750
+Wire Wire Line
+	7800 4750 7800 4400
+Wire Wire Line
+	6450 4625 6450 4800
+Wire Wire Line
+	6450 4800 7900 4800
+Wire Wire Line
+	7900 4800 7900 4400
+Wire Wire Line
+	6550 4625 6550 4850
+Wire Wire Line
+	6550 4850 8000 4850
+Wire Wire Line
+	8000 4850 8000 4400
+Wire Wire Line
+	6650 4625 6650 4900
+Wire Wire Line
+	6650 4900 8100 4900
+Wire Wire Line
+	8100 4900 8100 4400
+Wire Wire Line
+	6750 4625 6750 4950
+Wire Wire Line
+	6750 4950 8200 4950
+Wire Wire Line
+	8200 4950 8200 4400
+Wire Wire Line
+	6850 4625 6850 5000
+Wire Wire Line
+	6850 5000 8300 5000
+Wire Wire Line
+	8300 5000 8300 4400
+Wire Wire Line
+	6950 4625 6950 5050
+Wire Wire Line
+	6950 5050 8400 5050
+Wire Wire Line
+	8400 5050 8400 4400
+Wire Wire Line
+	7050 4625 7050 5100
+Wire Wire Line
+	7050 5100 8500 5100
+Wire Wire Line
+	8500 5100 8500 4400
+Wire Wire Line
+	8400 2500 8400 3175
+Text Notes 8100 7650 0    60   ~ 0
+15/11/2017
+Wire Wire Line
+	6150 2975 6150 2950
+Wire Wire Line
+	6150 2950 7500 2950
+Wire Wire Line
+	7500 2950 7500 3175
+Wire Wire Line
+	6250 2975 6250 2900
+Wire Wire Line
+	6250 2900 7600 2900
+Wire Wire Line
+	7600 2900 7600 3175
+Wire Wire Line
+	6350 2975 6350 2850
+Wire Wire Line
+	6350 2850 7700 2850
+Wire Wire Line
+	7700 2850 7700 3175
+Wire Wire Line
+	6450 2975 6450 2800
+Wire Wire Line
+	6450 2800 7800 2800
+Wire Wire Line
+	7800 2800 7800 3175
+Wire Wire Line
+	6550 2975 6550 2750
+Wire Wire Line
+	6550 2750 7900 2750
+Wire Wire Line
+	7900 2750 7900 3175
+Wire Wire Line
+	6650 2975 6650 2700
+Wire Wire Line
+	6650 2700 8000 2700
+Wire Wire Line
+	8000 2700 8000 3175
+Wire Wire Line
+	6750 2975 6750 2650
+Wire Wire Line
+	6750 2650 8100 2650
+Wire Wire Line
+	8100 2650 8100 3175
+Wire Wire Line
+	6850 2975 6850 2600
+Wire Wire Line
+	6850 2600 8200 2600
+Wire Wire Line
+	8200 2600 8200 3175
+Wire Wire Line
+	6950 2975 6950 2550
+Wire Wire Line
+	6950 2550 8300 2550
+Wire Wire Line
+	8300 2550 8300 3175
+Wire Wire Line
+	7050 2975 7050 2500
+Wire Wire Line
+	7050 2500 8400 2500
+NoConn ~ 2900 3175
+NoConn ~ 1900 4400
+NoConn ~ 1650 3650
+NoConn ~ 1650 3750
+NoConn ~ 8500 3175
+NoConn ~ 7500 4400
+NoConn ~ 8750 3825
+NoConn ~ 8750 3925
+$EndSCHEMATC
