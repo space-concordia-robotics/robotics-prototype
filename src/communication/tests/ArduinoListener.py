@@ -1,5 +1,6 @@
 #===============================================================================
-# this program will print out the serial output of a (via usb) connected arduino
+# this program prints out the serial output of a (via usb) connected arduino
+# and logs the output to a .dat file
 #===============================================================================
 
 import serial
@@ -27,24 +28,18 @@ f.write("=======================================================================
 f.write("Program Run Current Log Time: " +  time.ctime()+"\n")
 f.write("=======================================================================\n")
 
-
 # ctrl + c to stop infinite loop
-# might be better to let this break on some specific user input
-# such as 'x', for a more graceful exit
-
 #try catch block allows for a more graceful exit of our while loop.
+print("Ctrl + c to stop")
 try:
 	while True:
-		f.write(ser.readline())
+		readData = ser.readline()
+        print(readData)
+        f.write(readData)
 except KeyboardInterrupt:
-	print("Serial Output Terminated!")
+	print("\nSerial Output Terminated!")
 
 print("Program Terminated")
 
-f.close()
 #stop writing to file
-
-
-
-
-
+f.close()
