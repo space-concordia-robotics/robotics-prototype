@@ -1,0 +1,95 @@
+__INTRO__
+The demo consists of two files that work together to communicate between PC and Arduino: ComArduino.py and ArduinoPC.ino
+ArduinoPC.ino mainly uses the Arduino Serial library (which uses pins 0 (RX) and 1 (TX)) 
+and ComArduino mainly uses serialPy library (not "serial") for communication.
+
+To run demo:
+1. Upload "ArduinoPC.ino" sketch to your Arduino board.
+2. Run "sudo python ComArduino.py"
+
+if you run into issues with the "import serial" line, use "pip install pySerial" to install the python dependency
+
+---------------------
+ComArduino.py
+---------------------
+key functions: sendToArduino(str), recFromArduino()
+- sendToArduino(str)
+Send given string str to the Ardunio.
+str may contain characters with any of the values [0, 255].
+
+-recFromArduino()
+Returns array. First element contains number of bytes Arduino said it included in message.
+This can be used to check that the full message was received.
+2nd element contains the message as a string.
+
+__PROCEDURE__
+Opens serial connection to the arduino, which causes the arduino to reset.
+Waits for message from arduino to give it time to reset.
+Loops through a series of test messages:
+- Send message and display it on PC screen
+- wait for a reply and display it on the PC
+- any message sent with length = 0 from Arduino is interpreted as a debug message (prints to PC screen)
+
+__SENDING MESSAGES__
+To send a message to the arduino, we must preface the message with a start marker byte value of 254.
+The following byte will contain the number of characters in the original message, then the message follows.
+Any bytes in the message with values of 243, 254 or 255 will be converted into a pair of bytes
+[253, 0], [253, 1], [253, 2] as appropriate.
+The message ends with a end marker byte of 255.
+
+__RECEIVING MESSAGES__
+To receive a message from the arduino this program must Wait until the start marker is detected,
+save all subsequent bytes until the end marker is detected, and convert the pair of bytes
+back into intended single byte.
+
+----------------------
+ArduinoPC.ino
+----------------------
+This version uses a start marker 254 and an endmarker of 255.
+It uses 253 as a special byte to be able to reproduce 253, 254 and 255.
+It also sends data to the PC using the same system.
+If the number of bytes is 0 the PC will assume a debug string and just print it to the screen.
+
+-----------------------------------------------------------------------------------------
+__NOTES__
+
+For ComArduino.py
+- The program does not include any timeouts to deal with delays in communication.
+- The program does not search for the comport, the user must modify the code to include the correct reference.
+- bytesToString(str): convenience function to show contents of a string as a series of bye values
+to make it easy to verify data with non-ascii characters
+- this program does not include a checkbye that could be used to verify
+that there are no errors in the message. This can easily be added.
+
+For ArduinoPC.ino
+- Can only receive a maximum of 16 bytes. This must include start/end-markers,
+the length byte, and any extra bytes need to encode values of 253 or over.
+Can easily be modified to accept longer messages by changing #define maxMessage 16
+- Does not check for messages that are too long and assumes compliance from ComArduino.py.
+Extra code could be added to deal with too long messages.
+-----------------------------------------------------------------------------------------
+Parting notes:
+The fact that this demo needs to reset the arduino everytime to communicate will most probably
+create issues in terms of disrupting the running arduino code itself.
+The reseting is probably just unique to this demo and not intrinsic to these serial connections between
+arduino and PCs. 
+Our goal (int terms of the project) of this communication is to be able to read data outputted by the arduino program
+without affecting the code running on it, primarily.
+For the secondary goal, which is being able to change certain values within the arduino program itself,
+this demo might be a reasonable approach to doing that.
+We can test umanager.py class from last years team to send messages (without reseting).
+
+Additional:
+Will be implementing UDP commands for driving the arm, and inverse kinematics. 
+As with most streams, we will be sending commands very frequently so it's ok if we lose a few here and there.
+As for the inverse kinematics, on the rover side we can have set limits that will be checked before movements made.
+
+Phase 3 anticipations:
+- Either configure this demo or set up a listener from scratch on a serial port on the odroid
+to listen to Serial.print's from the Arduino. This can be achieved by using the same libraries/methodologies used in this demo.
+The only thing we need to make sure is to not implement resetting the arduino everytime communication is made.
+- Test umanager.py class from last years team to for sending cmds to arduino (as it is known to work)
+- Once LIDAR gets measurements, help bridge connection to GUI
+- Look into RF module configuration
+- If nothing to do, work on setting up logs for modules that are complete but don't have logs
+
