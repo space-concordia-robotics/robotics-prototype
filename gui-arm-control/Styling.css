@@ -80,3 +80,42 @@
     background-image:none;
 }
 
+#Open-Logs{
+	color: white;
+    border-color: green;
+    background-color: green;
+    background-image:none;
+}
+
+#Clear-Logs{
+	color: white;
+    border-color: red;
+    background-color: red;
+    background-image:none;
+}
+
+#motor-grid{
+	color: white;
+	border-color: #0000FF;
+	background-color: #2525a7;
+	background-image:none;
+	border: 4px #8A2BE2;
+}
+
+#motor-status-label{
+	background-color: #8080ff;
+}
+
+#motor-position-label{
+	background-color: #8080ff;
+}
+
+#motor-current-label{
+	background-color: #8080ff;
+}
+
+#stepper-motor-1-label{
+	background-color: red;
+}
+
+
