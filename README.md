@@ -44,3 +44,19 @@ This was accomplished by running `syncEmailer.sh` and adding the following line 
 @reboot /home/odroid/emailer/runEmailer.sh
 ```
 
+Let Peter or David know if you want to be added to this mailing list.
+
+### to connect to the odroid from home
+
+- Open a terminal (I recommend git bash if you're using windows)
+- SSH into Concordia's network with your netname (type the following into the terminal): 
+```
+ssh net_name@login.encs.concordia.ca
+```
+- It should ask you for a password, which will your ENCS password
+- Grab the latest IP address of the odroid from your email, then ssh into it: 
+```
+ssh odroid@ip_address
+```
+- It should ask you for a password, which will be `odroid`
+
