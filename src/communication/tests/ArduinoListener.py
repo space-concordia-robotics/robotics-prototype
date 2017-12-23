@@ -34,8 +34,8 @@ print("Ctrl + c to stop")
 try:
 	while True:
 		readData = ser.readline()
-        print(readData)
-        f.write(readData)
+		print(readData)
+		f.write(readData)
 except KeyboardInterrupt:
 	print("\nSerial Output Terminated!")
 
