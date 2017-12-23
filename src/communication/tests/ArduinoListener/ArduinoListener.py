@@ -49,7 +49,7 @@ for i in baud_rates:
 		
 		#if not, then we are not properly connected and keep looping
 		else:
-               	        print("connection failed at baudrate: " + str(i))
+			print("connection failed at baudrate: " + str(i))
 
 	#flush the buffer and close our serial connection
 	ser.flush()
@@ -74,7 +74,9 @@ f.write("=======================================================================
 #try catch block allows for a more graceful exit of our while loop.
 try:
 	while True:
-		f.write(ser.readline())
+		readData = ser.readline()
+		print(readData)
+		f.write(readData)
 except KeyboardInterrupt:
 	print("Serial Output Terminated!")
 
