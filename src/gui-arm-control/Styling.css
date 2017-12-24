@@ -1,0 +1,121 @@
+#blackBox {
+  background-color: black;
+}
+#redBox {
+  background-color: red;
+}
+.goldBox {
+  background-color: gold;
+}
+
+#blackBox {
+  background-color: black;
+}
+
+#ArmGuiLayoutWindow{
+  background-color: #b4abab;
+}
+
+#Yaw-left, #Yaw-Right{
+    color: white;
+    border-color: green;
+    background-color: green;
+    background-image:none;
+}
+
+#Yaw-Right{
+    border-radius: 0 52px 8px 0;
+}
+
+#Yaw-left{
+    border-radius: 52px 0 0 8px;
+}
+
+#Claw-Open, #Claw-Close{
+    color: white;
+    border-color: #fcb315;
+    background-color: #fcb315;
+    background-image:none;
+}
+
+#Pitch-Down, #Pitch-Up{
+    color: white;
+    border-color: #30016f;
+    background-color: #30016f;
+    background-image:none;
+}
+
+
+#Claw-Controls{
+    color: white;
+    border-color: #71797A;
+    background-color: #71797A;
+    background-image:none;
+    border: 4px solid yellow;
+}
+
+#arm-controls{
+    color: white;
+    border-color: #254A4F;
+    background-color: #254A4F;
+    background-image:none;
+    border: 4px solid cyan;
+}
+
+#claw-control-title, #arm-controls-title{
+    font-weight: bold;
+}
+
+#Arm-Down, #Arm-Up, #Arm-Left, #Arm-Right{
+    color: white;
+    border-color: #cc33ff;
+    background-color: #cc33ff;
+    background-image:none;
+}
+
+#Arm-Back, #Arm-Forward{
+    color: white;
+    border-color: #ff0000;
+    background-color: #ff0000;
+    background-image:none;
+}
+
+#Open-Logs{
+	color: white;
+    border-color: green;
+    background-color: green;
+    background-image:none;
+}
+
+#Clear-Logs{
+	color: white;
+    border-color: red;
+    background-color: red;
+    background-image:none;
+}
+
+#motor-grid{
+	color: white;
+	border-color: #0000FF;
+	background-color: #2525a7;
+	background-image:none;
+	border: 4px #8A2BE2;
+}
+
+#motor-status-label{
+	background-color: #8080ff;
+}
+
+#motor-position-label{
+	background-color: #8080ff;
+}
+
+#motor-current-label{
+	background-color: #8080ff;
+}
+
+#stepper-motor-1-label{
+	background-color: red;
+}
+
+
