@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.1 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
-  <!-- interface-css-provider-path Styling.css -->
   <object class="GtkWindow" id="ArmGuiLayoutWindow">
     <property name="name">ArmGuiLayoutWindow</property>
     <property name="can_focus">False</property>
@@ -755,8 +754,8 @@ Left</property>
                     <property name="image_position">right</property>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -792,8 +791,8 @@ Right</property>
                     <property name="valign">center</property>
                   </object>
                   <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">0</property>
+                    <property name="left_attach">4</property>
+                    <property name="top_attach">2</property>
                   </packing>
                 </child>
                 <child>

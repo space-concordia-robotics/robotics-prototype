@@ -1,5 +1,6 @@
 # This uses Gtk 3, so make sure that is installed before proceeding.
 import gi
+import datetime
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -32,15 +33,113 @@ def testButton(button):
 #def clearButton(button):
     #textbuffer = textarea.get_buffer()
     
+# // definitions of the handlers for the buttons
+def yawLeftButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
+
+def picthUpButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Pitch Up Clicked " + str(now) + "\n")
+
+def yawRightButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Yaw Right Clicked " + str(now) + "\n")
+
+def rollLeftButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Roll Left Clicked " + str(now) + "\n")
+
+def pitchDownButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Pitch Down Clicked " + str(now) + "\n")
+
+def rollRightButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Roll Right Clicked " + str(now) + "\n")
+
+def clawOpenButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Claw Open Clicked " + str(now) + "\n")
+
+def clawCloseButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Claw Close Clicked " + str(now) + "\n")
+
+def armUpButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Up Clicked " + str(now) + "\n")
+
+def armLeftButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Left Clicked " + str(now) + "\n")
+
+def armDownButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Down Clicked " + str(now) + "\n")
+
+def armRightButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Right Clicked " + str(now) + "\n")
+
+def armBackButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Back Clicked " + str(now) + "\n")
+
+def armFwdButtonClick(button):
+    now = datetime.datetime.now()
+    text_buffer = textarea.get_buffer()
+    end_iter = text_buffer.get_end_iter()
+    text_buffer.insert(end_iter, "> Arm Fwd Clicked " + str(now) + "\n")
 
 builder = Gtk.Builder()
-builder.add_from_file("ArmGuiLayout.glade")
+builder.add_from_file("ArmGuiLayout2.glade")
 
 # This is used to connect signals sent by the widgets in Glade
 # and assign them functionality using python code
 handlers = {
     "onTestClick": testButton,
     #"onClearClick": clearButton
+    "onYawLeftClicked": yawLeftButtonClick,
+    "onPitchUpClicked": picthUpButtonClick,
+    "onYawRightClicked": yawRightButtonClick,
+    "onRollLeftClicked": rollLeftButtonClick,
+    "onPitchDownClicked": pitchDownButtonClick,
+    "onRollRightClicked": rollRightButtonClick,
+    "onClawOpenClicked": clawOpenButtonClick,
+    "onClawCloseClicked": clawCloseButtonClick,
+    "onArmUpClicked": armUpButtonClick,
+    "onArmLeftClicked": armLeftButtonClick,
+    "onArmDownClicked": armDownButtonClick,
+    "onArmRightClicked": armRightButtonClick,
+    "onArmBackClicked": armBackButtonClick,
+    "onArmFwdClicked": armFwdButtonClick
 }
 builder.connect_signals(handlers)
 
@@ -48,6 +147,7 @@ textarea = builder.get_object("Error Log ")
 textinput = open("ErrorLogTest.txt", "r")
 
 window = builder.get_object("ArmGuiLayoutWindow")
+window.set_title("Space Concordia Robtotics GUI")
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
 

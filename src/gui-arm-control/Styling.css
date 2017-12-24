@@ -13,7 +13,7 @@
 }
 
 #ArmGuiLayoutWindow{
-  background-color: #b4abab;
+  background-color: #403e3e;
 }
 
 #Yaw-left, #Yaw-Right{
@@ -66,6 +66,10 @@
     font-weight: bold;
 }
 
+#Arm-Position-Label, #lidar, #error-logs-window, #motor-table-label{
+    font-weight: bold;color:white
+}
+
 #Arm-Down, #Arm-Up, #Arm-Left, #Arm-Right{
     color: white;
     border-color: #cc33ff;
@@ -99,23 +103,35 @@
 	border-color: #0000FF;
 	background-color: #2525a7;
 	background-image:none;
-	border: 4px #8A2BE2;
+	border: 4px solid #8A2BE2;padding: 12px 0 12px 0
 }
 
 #motor-status-label{
 	background-color: #8080ff;
+	font-weight: bold;
 }
 
 #motor-position-label{
 	background-color: #8080ff;
+	font-weight: bold;
 }
 
 #motor-current-label{
 	background-color: #8080ff;
+	font-weight: bold;
 }
 
-#stepper-motor-1-label{
-	background-color: red;
+#stepper-motor-1-label,#stepper-motor-3-label, #arm-servo-motor-1-label{
+	background-color: #8080ff;
 }
+
+#stepper-motor-2-label, #stepper-motor-4-label, #arm-servo-motor-2-label
+{background-color: #4343AE;}
+
+#stepper-motor-1-label,#stepper-motor-2-label,#stepper-motor-3-label, #stepper-motor-4-label,
+#arm-servo-motor-1-label, #arm-servo-motor-2-label
+{font-weight: bold;}
+
+
 
 
