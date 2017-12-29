@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow" id="ArmGuiLayoutWindow">
     <property name="name">ArmGuiLayoutWindow</property>
     <property name="can_focus">False</property>
@@ -254,6 +254,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -266,6 +268,9 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -279,6 +284,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -291,6 +298,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -303,6 +312,9 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -314,6 +326,8 @@ Current
                         <property name="name">stepper-motor-2-current</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -326,6 +340,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -337,6 +353,9 @@ Current
                         <property name="name">stepper-motor-3-angle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -348,6 +367,8 @@ Current
                         <property name="name">stepper-motor-3-current</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -360,6 +381,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -371,6 +394,8 @@ Current
                         <property name="name">stepper-motor-4-current</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -383,6 +408,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -394,6 +421,9 @@ Current
                         <property name="name">arm-servo-motor-1-angle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -405,6 +435,8 @@ Current
                         <property name="name">arm-servo-motor-1-current</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -417,6 +449,8 @@ Current
                         <property name="height_request">20</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -428,6 +462,12 @@ Current
                         <property name="name">arm-servo-motor-2-angle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
+                        <style>
+                          <class name="grayedOut"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -439,6 +479,8 @@ Current
                         <property name="name">arm-servo-motor-2-angle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -450,6 +492,9 @@ Current
                         <property name="name">stepper-motor-4-angle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="justification">right</property>
+                        <property name="cursor_visible">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -494,6 +539,7 @@ Current
                     <property name="shadow_type">etched-out</property>
                     <child>
                       <object class="GtkGrid" id="Claw Button Layout1">
+                        <property name="name">claw-container</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
@@ -672,7 +718,7 @@ Close</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
                 <child>
@@ -833,6 +879,60 @@ Fwd</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes"> Home 
+Position</property>
+                    <property name="name">hposbtn</property>
+                    <property name="width_request">100</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">end</property>
+                    <property name="margin_right">8</property>
+                    <property name="margin_bottom">5</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkGrid" id="switch-grid">
+                    <property name="name">switch-grid</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin_bottom">5</property>
+                    <child>
+                      <object class="GtkSwitch" id="man-auto-switch">
+                        <property name="name">man-auto-switch</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="Manual-Control">
+                        <property name="name">Manual-Control</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Manual Control</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
@@ -953,6 +1053,9 @@ Fwd</property>
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
 </interface>

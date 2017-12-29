@@ -25,10 +25,22 @@
 
 #Yaw-Right{
     border-radius: 0 52px 8px 0;
+    padding-left: 0px;
+    margin-left:0px
 }
 
 #Yaw-left{
     border-radius: 52px 0 0 8px;
+    padding-right: 0px;
+    margin-right:0px
+    }
+
+#hposbtn{
+border-radius: 10px
+}
+
+#stepper-motor-1-angle{
+    color: red;
 }
 
 #Claw-Open, #Claw-Close{
@@ -66,7 +78,7 @@
     font-weight: bold;
 }
 
-#Arm-Position-Label, #lidar, #error-logs-window, #motor-table-label{
+#Arm-Position-Label, #lidar, #error-logs-window, #motor-table-label,#Manual-Control{
     font-weight: bold;color:white
 }
 
@@ -75,6 +87,10 @@
     border-color: #cc33ff;
     background-color: #cc33ff;
     background-image:none;
+}
+
+#Arm-Up-Hide{
+    opacity:0.2
 }
 
 #Arm-Back, #Arm-Forward{
