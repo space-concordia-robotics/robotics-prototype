@@ -36,6 +36,13 @@ def testButton(button):
     
 # // definitions of the handlers for the buttons
 def yawLeftButtonClick(button):
+    if switch:
+        state2 = "on"
+    else:
+        state2 = "off"
+
+    print("The state is " + state2)
+
     now = datetime.datetime.now()
     text_buffer = textarea.get_buffer()
     end_iter = text_buffer.get_end_iter()
@@ -124,9 +131,106 @@ def toggleSwitchClick(button):
     end_iter = text_buffer.get_end_iter()
     text_buffer.insert(end_iter, "> onn")
 
+def homePostionBtnClicked(button):
+    '''
+    print("The text is: " + str(text))
+    #text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    '''
+
+    # For the the motor position the home value is set to 10 (is it done when in manual or auto)
+    text_buffer = smotor1.get_buffer()
+    text_buffer.set_text("10")
+
+    text_buffer = smotor2.get_buffer()
+    text_buffer.set_text("10")
+
+    text_buffer = smotor3.get_buffer()
+    text_buffer.set_text("10")
+
+    text_buffer = smotor4.get_buffer()
+    text_buffer.set_text("10")
+
+    text_buffer = asmotor1.get_buffer()
+    text_buffer.set_text("10")
+
+    text_buffer = asmotor2.get_buffer()
+    text_buffer.set_text("10")
+
+def stm1ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor1.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def stm1ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor1.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+def stm2ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor2.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def stm2ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor2.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+def stm3ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor3.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def stm3ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor3.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+def stm4ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor4.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def stm4ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = smotor4.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+def astm1ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = asmotor1.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def astm1ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = asmotor1.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+def astm2ButtonLeftClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = asmotor2.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) - 1))
+
+def astm2ButtonRightClicked(button):
+    # Get value in motor postion text box, change it an then re-enter it
+    text_buffer = asmotor2.get_buffer()
+    text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
+    text_buffer.set_text(str(int(text) + 1))
+
+
 def toggleBtnTest():
     # fill each of the displacement boxes with random numbers between 10 and 50
-    print ("Test load start")
     rand = random.randint(10, 71)
     text_buffer = smotor1.get_buffer()
     text_buffer.set_text(str(rand))
@@ -157,7 +261,6 @@ def on_switch_activated(self, sw):
 
     clawCtn = builder.get_object("Claw Button Layout1")
 
-
     #Get references to buttons that are then changed on switch
     yawLeftBtn = builder.get_object("Yaw Leftgit1")
     yawRightBtn = builder.get_object("Yaw Right1")
@@ -173,24 +276,77 @@ def on_switch_activated(self, sw):
     armFwdBtn = builder.get_object("Arm Forward1")
 
     armUpBtn = builder.get_object("Arm Up1")
-    clawCtn.remove(armUpBtn)
+    armDownBtn = builder.get_object("Arm Down1")
+
     if sw:
         state = "on"
-        Gtk.Button.set_label(yawLeftBtn, "STM1\n <<")
-        Gtk.Button.set_label(yawRightBtn, "STM1\n >>")
-        Gtk.Button.set_label(rollLeftBtn, "STM2\n <<")
-        Gtk.Button.set_label(rollRightBtn, "STM2\n >>")
-        Gtk.Button.set_label(clawOpenBtn, "STM3\n <<")
-        Gtk.Button.set_label(clawCloseBtn, "STM3\n >>")
-        Gtk.Button.set_label(pitchUpBtn, "STM4\n <<")
-        Gtk.Button.set_label(pitchDownBtn, "STM4\n >>")
+        Gtk.Button.set_label(yawLeftBtn, "SMT1\n <<")
+        Gtk.Button.set_label(yawRightBtn, "SMT1\n >>")
+        Gtk.Button.set_label(rollLeftBtn, "SMT2\n <<")
+        Gtk.Button.set_label(rollRightBtn, "SMT2\n >>")
+        Gtk.Button.set_label(clawOpenBtn, "SMT3\n <<")
+        Gtk.Button.set_label(clawCloseBtn, "SMT3\n >>")
+        Gtk.Button.set_label(pitchUpBtn, "SMT4\n <<")
+        Gtk.Button.set_label(pitchDownBtn, "SMT4\n >>")
         Gtk.Button.set_label(armLeftBtn, "ASM1\n <<")
         Gtk.Button.set_label(armRightBtn, "ASM1\n >>")
         Gtk.Button.set_label(armBackBtn, "ASM2\n <<")
         Gtk.Button.set_label(armFwdBtn, "ASM2\n >>")
 
+        # Change the view of buttons that the manual control don't use
         Gtk.Widget.set_name(armUpBtn, "Arm-Up-Hide")
-        armUpBtn.disconnect_by_func(onArmUpClicked)
+        Gtk.Widget.set_name(armDownBtn, "Arm-Down-Hide")
+        Gtk.Widget.set_sensitive(armUpBtn, False)
+        Gtk.Widget.set_sensitive(armDownBtn, False)
+
+        # make manual buttons switch handler code
+        yawLeftBtn.disconnect_by_func(handlers["onYawLeftClicked"])
+        handlers["onYawLeftClicked"] = stm1ButtonLeftClicked
+        yawLeftBtn.connect("clicked", handlers["onYawLeftClicked"])
+
+        yawRightBtn.disconnect_by_func(handlers["onYawRightClicked"])
+        handlers["onYawRightClicked"] = stm1ButtonRightClicked
+        yawRightBtn.connect("clicked", handlers["onYawRightClicked"])
+
+        rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
+        handlers["onRollLeftClicked"] = stm2ButtonLeftClicked
+        rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
+
+        rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
+        handlers["onRollRightClicked"] = stm2ButtonRightClicked
+        rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
+
+        clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
+        handlers["onClawOpenClicked"] = stm3ButtonLeftClicked
+        clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
+
+        clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
+        handlers["onClawCloseClicked"] = stm3ButtonRightClicked
+        clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
+
+        pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
+        handlers["onPitchUpClicked"] = stm4ButtonLeftClicked
+        pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
+
+        pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
+        handlers["onPitchDownClicked"] = stm4ButtonRightClicked
+        pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
+
+        armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
+        handlers["onArmLeftClicked"] = astm1ButtonLeftClicked
+        armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
+
+        armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
+        handlers["onArmRightClicked"] = astm1ButtonRightClicked
+        armRightBtn.connect("clicked", handlers["onArmRightClicked"])
+
+        armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
+        handlers["onArmBackClicked"] = astm2ButtonLeftClicked
+        armBackBtn.connect("clicked", handlers["onArmBackClicked"])
+
+        armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
+        handlers["onArmFwdClicked"] = astm2ButtonRightClicked
+        armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
     else:
         state = "off"
         Gtk.Button.set_label(yawLeftBtn, "Yaw\nLeft")
@@ -207,6 +363,59 @@ def on_switch_activated(self, sw):
         Gtk.Button.set_label(armFwdBtn, "Arm\nFwd")
 
         Gtk.Widget.set_name(armUpBtn, "Arm-Up")
+        Gtk.Widget.set_name(armDownBtn, "Arm-Down")
+        Gtk.Widget.set_sensitive(armUpBtn, True)
+        Gtk.Widget.set_sensitive(armDownBtn, True)
+
+        # Remove manual buttons switch handler code
+        yawLeftBtn.disconnect_by_func(handlers["onYawLeftClicked"])
+        handlers["onYawLeftClicked"] = yawLeftButtonClick
+        yawLeftBtn.connect("clicked", handlers["onYawLeftClicked"])
+
+        yawRightBtn.disconnect_by_func(handlers["onYawRightClicked"])
+        handlers["onYawRightClicked"] = yawRightButtonClick
+        yawRightBtn.connect("clicked", handlers["onYawRightClicked"])
+
+        rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
+        handlers["onRollLeftClicked"] = rollLeftButtonClick
+        rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
+
+        rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
+        handlers["onRollRightClicked"] = rollRightButtonClick
+        rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
+
+        clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
+        handlers["onClawOpenClicked"] = clawOpenButtonClick
+        clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
+
+        clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
+        handlers["onClawCloseClicked"] = clawCloseButtonClick
+        clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
+
+        pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
+        handlers["onPitchUpClicked"] = picthUpButtonClick
+        pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
+
+        pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
+        handlers["onPitchDownClicked"] = pitchDownButtonClick
+        pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
+
+        armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
+        handlers["onArmLeftClicked"] = armLeftButtonClick
+        armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
+
+        armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
+        handlers["onArmRightClicked"] = armRightButtonClick
+        armRightBtn.connect("clicked", handlers["onArmRightClicked"])
+
+        armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
+        handlers["onArmBackClicked"] = armBackButtonClick
+        armBackBtn.connect("clicked", handlers["onArmBackClicked"])
+
+        armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
+        handlers["onArmFwdClicked"] = armFwdButtonClick
+        armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
+
     #print("Switch was turned", state)
 
 
@@ -248,7 +457,8 @@ handlers = {
     "onArmDownClicked": armDownButtonClick,
     "onArmRightClicked": armRightButtonClick,
     "onArmBackClicked": armBackButtonClick,
-    "onArmFwdClicked": armFwdButtonClick
+    "onArmFwdClicked": armFwdButtonClick,
+    "onHomePostionClicked": homePostionBtnClicked
 
 }
 builder.connect_signals(handlers)
@@ -262,8 +472,4 @@ window.show_all()
 # textinput.close()
 if __name__ == "__main__":
     toggleBtnTest()
-    if state == "on":
-        print "The state is " + state
-    else:
-        print "State is " + state
     Gtk.main()

@@ -36,7 +36,7 @@
     }
 
 #hposbtn{
-border-radius: 10px
+border-radius: 30px 30px 30px 30px
 }
 
 #stepper-motor-1-angle{
@@ -89,7 +89,7 @@ border-radius: 10px
     background-image:none;
 }
 
-#Arm-Up-Hide{
+#Arm-Up-Hide, #Arm-Down-Hide{
     opacity:0.2
 }
 
@@ -119,7 +119,7 @@ border-radius: 10px
 	border-color: #0000FF;
 	background-color: #2525a7;
 	background-image:none;
-	border: 4px solid #8A2BE2;padding: 12px 0 12px 0
+	border: 4px solid #8A2BE2;padding: 52px 0 26px 0
 }
 
 #motor-status-label{
