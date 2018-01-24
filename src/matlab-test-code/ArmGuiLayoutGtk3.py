@@ -459,6 +459,8 @@ arm4y = [d1+l1*sin(aa)+l2*sin(aa+aa2) , d1+l1*sin(aa)+l2*sin(aa+aa2)+l3*sin(aa+a
 # Global Variables
 fig = Figure(dpi=50)
 ax = fig.add_subplot(111)
+canvas = FigureCanvas(fig)
+canvas.set_size_request(400,337)
 # Some helper functions
 def armpos(jointsX, jointsY, armsX, armsY):
     ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
@@ -529,22 +531,20 @@ builder.connect_signals(handlers)
 
 ########################## Matlab ARM Pos
 
-canvas = FigureCanvas(fig)
-canvas.set_size_request(400,337)
-scatterPoints(600)
-# These 4 variables can be modified and call the method
-# armpos to update the position of the arm
 jointsX = [joint1x, joint2x, joint3x]
 jointsY = [joint1y, joint2y, joint3y]
 armsX = [arm1x, arm2x, arm3x, arm4x]
 armsY = [arm1y, arm2y, arm3y, arm4y]
 
+scatterPoints(600)
 armpos(jointsX,jointsY,armsX,armsY)
+
 placeholder = builder.get_object("Arm Position Placeholder")
-# placeholder.add(canvas)
 placeholder.add_with_viewport(canvas)
+# placeholder.add(canvas)
 
 ###########################End Matlab Stuff
+
 window = builder.get_object("ArmGuiLayoutWindow")
 # sw = Gtk.ScrolledWindow()
 # window.add(sw)
