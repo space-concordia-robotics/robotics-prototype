@@ -7,11 +7,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 from math import sin, cos, pi
-from numpy import arange, pi, random, linspace
 from matplotlib.figure import Figure
-# from matplotlib import pyplot as plt
-import matplotlib.cm as cm
-# import matplotlib.pyplot as plt
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 '''
 This will access and run the glade file
@@ -429,6 +425,7 @@ def on_switch_activated(self, sw):
 # http://gtk3-matplotlib-cookbook.readthedocs.io/en/latest/hello-plot.html
 # The following code's comments have been removed for brevity
 # See armWorkSpace.py for detailed comments/instructions
+# Contstant Variables
 d1 = 0.5
 l1 = 1
 l2 = 1
@@ -445,16 +442,6 @@ aa3 = (amax3 + amin3) / 2
 adif = amax - amin
 adif2 = amax2 - amin2
 adif3 = amax3 - amin3
-numberOfScatterPoints = 6000
-x = [0] * numberOfScatterPoints
-y = [0] * numberOfScatterPoints
-for i in range(0,numberOfScatterPoints):
-    t2 = random.uniform(0,adif) + amin
-    t3 = random.uniform(0,adif2) + amin2
-    t4 = random.uniform(0,adif3) + amin3
-    x[i] = l1 * cos(t2) + l2 * cos(t2 + t3) + l3 * cos(t2 + t3 + t4)
-    y[i] = d1 + l1 * sin(t2) + l2 * sin(t2 + t3) + l3 * sin(t2 + t3 + t4)
-
 joint1x = 0
 joint1y = d1
 joint2x = l1*cos(aa)
@@ -469,23 +456,32 @@ arm3x = [l1*cos(aa) , l1*cos(aa)+l2*cos(aa+aa2)]
 arm3y = [d1+l1*sin(aa) , d1+l1*sin(aa)+l2*sin(aa+aa2)]
 arm4x = [l1*cos(aa)+l2*cos(aa+aa2) , l1*cos(aa)+l2*cos(aa+aa2)+l3*cos(aa+aa2+aa3)]
 arm4y = [d1+l1*sin(aa)+l2*sin(aa+aa2) , d1+l1*sin(aa)+l2*sin(aa+aa2)+l3*sin(aa+aa2+aa3)]
-## Create A Figure to add into the window
-fig = Figure(figsize=(1,1), dpi=80)
-## Add a subplot into thw window, who the fuck knows why
-ax = fig.add_subplot(1,1,1)
-ax.plot( joint1x , joint1y , 'ko' , markersize=7)
-ax.plot( joint2x , joint2y , 'ko' , markersize=7)
-ax.plot( joint3x , joint3y , 'ko' , markersize=7)
-ax.scatter(x,y,color='b',s=8,alpha=0.5)
-ax.plot( arm1x , arm1y ,'k' , linewidth=10)
-ax.plot( arm2x , arm2y , 'k' , linewidth=3)
-ax.plot( arm3x , arm3y , 'k' , linewidth= 3);
-ax.plot( arm4x , arm4y , 'k' , linewidth=3);
+# Global Variables
+fig = Figure(dpi=50)
+ax = fig.add_subplot(111)
+# Some helper functions
+def armpos(jointsX, jointsY, armsX, armsY):
+    ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
+    ax.plot( jointsX[1] , jointsY[1] , 'ko' , markersize=7) # segment 1 & 2 joint
+    ax.plot( jointsX[2] , jointsY[2] , 'ko' , markersize=7) # segment 2 & 3 joint
+    ax.plot( armsX[0] , armsY[0] ,'k' , linewidth=3) # the base
+    ax.plot( armsX[1] , armsY[1] , 'k' , linewidth=3) # segement 1
+    ax.plot( armsX[2] , armsY[2] , 'k' , linewidth= 3); # segement 2
+    ax.plot( armsX[3] , armsY[3] , 'k' , linewidth=3); # segement 3
+    return
 
-canvas = FigureCanvas(fig)
-canvas.set_size_request(400,337)
+def scatterPoints(numberOfScatterPoints):
+    x = [0] * numberOfScatterPoints # initialize some bigass arrays...slowly
+    y = [0] * numberOfScatterPoints # initialize some bigass arrays...slowly
+    for i in range(0,numberOfScatterPoints):
+        t2 = random.uniform(0,adif) + amin
+        t3 = random.uniform(0,adif2) + amin2
+        t4 = random.uniform(0,adif3) + amin3
+        x[i] = l1 * cos(t2) + l2 * cos(t2 + t3) + l3 * cos(t2 + t3 + t4)
+        y[i] = d1 + l1 * sin(t2) + l2 * sin(t2 + t3) + l3 * sin(t2 + t3 + t4)
+    ax.scatter(x,y,color='b',s=7,alpha=0.5)
+    return
 ###########################END MATLAB STUFF
-
 builder = Gtk.Builder()
 builder.add_from_file("ArmGuiLayout2.glade")
 
@@ -501,10 +497,6 @@ smotor4 = builder.get_object("Stepper Motor 4 Angle")
 asmotor1 = builder.get_object("Arm Servo Motor 1 Angle")
 asmotor2 = builder.get_object("Arm Servo Motor 2 Angle")
 
-########################## Matlab ARM Pos
-armposbox = builder.get_object("Arm Position Placeholder")
-armposbox.add(canvas)
-###########################END MATLAB STUFF
 
 #Get reference to button so we can update the label when switched to manual
 switch = builder.get_object("man-auto-switch")
@@ -534,7 +526,29 @@ handlers = {
 
 }
 builder.connect_signals(handlers)
+
+########################## Matlab ARM Pos
+
+canvas = FigureCanvas(fig)
+canvas.set_size_request(400,337)
+scatterPoints(600)
+# These 4 variables can be modified and call the method
+# armpos to update the position of the arm
+jointsX = [joint1x, joint2x, joint3x]
+jointsY = [joint1y, joint2y, joint3y]
+armsX = [arm1x, arm2x, arm3x, arm4x]
+armsY = [arm1y, arm2y, arm3y, arm4y]
+
+armpos(jointsX,jointsY,armsX,armsY)
+placeholder = builder.get_object("Arm Position Placeholder")
+# placeholder.add(canvas)
+placeholder.add_with_viewport(canvas)
+
+###########################End Matlab Stuff
 window = builder.get_object("ArmGuiLayoutWindow")
+# sw = Gtk.ScrolledWindow()
+# window.add(sw)
+# sw.add_with_viewport(canvas)
 window.set_title("Space Concordia Robtotics GUI")
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
