@@ -38,7 +38,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTextView" id="Arm Position Placeholder">
+                  <!-- <object class="GtkTextView" id="Arm Position Placeholder"> -->
+                  <object class="GtkScrolledWindow" id="Arm Position Placeholder">
                     <property name="name">Arm Position Placeholder</property>
                     <property name="width_request">400</property>
                     <property name="height_request">337</property>
@@ -77,7 +78,7 @@
                 </child>
                 <child>
                   <object class="GtkTextView" id="Lidar Placeholder">
-                    <property name="name">Arm Position Placeholder</property>
+                    <property name="name">lidar Placeholder</property>
                     <property name="width_request">765</property>
                     <property name="height_request">337</property>
                     <property name="visible">True</property>
@@ -146,7 +147,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="valign">start</property>
-                        <property name="label" translatable="yes">      Motor 
+                        <property name="label" translatable="yes">      Motor
      Position
 (Displacement)</property>
                       </object>
@@ -161,7 +162,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="valign">start</property>
-                        <property name="label" translatable="yes"> Motor 
+                        <property name="label" translatable="yes"> Motor
 Current
    (A)</property>
                       </object>
@@ -929,7 +930,7 @@ Down</property>
                         </child>
                         <child>
                           <object class="GtkButton" id="Arm Right1">
-                            <property name="label" translatable="yes">Arm 
+                            <property name="label" translatable="yes">Arm
 Right</property>
                             <property name="name">Arm-Right</property>
                             <property name="width_request">70</property>
@@ -1029,7 +1030,7 @@ Fwd</property>
                 </child>
                 <child>
                   <object class="GtkButton" id="hposbtn">
-                    <property name="label" translatable="yes"> Home 
+                    <property name="label" translatable="yes"> Home
 Position</property>
                     <property name="name">hposbtn</property>
                     <property name="width_request">100</property>
