@@ -9,7 +9,7 @@
 # used matplotlib for scatter and plot https://matplotlib.org/tutorials/introductory/pyplot.html
 # matplotlib also uses matlab syntax https://www.mathworks.com/help/matlab/ref/plot.html
 import random
-import math
+from math import sin, cos, pi
 import matplotlib.pyplot as plt
 ##### INITIALIZATION OF VARIABLES #####
 
@@ -17,7 +17,6 @@ d1 = 0.5 #Length of base (could include rover length)
 l1 = 1 #li = length of link i
 l2 = 1
 l3 = 0.25
-pi = math.pi;
 amax = (4 * pi) / 6 #amaxi = maximum angle link i can reach
 amin = pi / 6 #amini = minimum angle link i can reach
 amax2 = pi / 2
@@ -51,19 +50,18 @@ for i in range(0,numberOfScatterPoints):
     t2 = random.uniform(0,adif) + amin
     t3 = random.uniform(0,adif2) + amin2
     t4 = random.uniform(0,adif3) + amin3
-
     #The following 2 lines compute the x and y coordinates corresponding to the angles generated:
-    x[i] = l1 * math.cos(t2) + l2 * math.cos(t2 + t3) + l3 * math.cos(t2 + t3 + t4)
-    y[i] = d1 + l1 * math.sin(t2) + l2 * math.sin(t2 + t3) + l3 * math.sin(t2 + t3 + t4)
+    x[i] = l1 * cos(t2) + l2 * cos(t2 + t3) + l3 * cos(t2 + t3 + t4)
+    y[i] = d1 + l1 * sin(t2) + l2 * sin(t2 + t3) + l3 * sin(t2 + t3 + t4)
 
 
 #The following lines add black circles where the arm joints should be:
 joint1x = 0
 joint1y = d1
-joint2x = l1*math.cos(aa)
-joint2y = d1+l1*math.sin(aa)
-joint3x = l1*math.cos(aa)+l2*math.cos(aa+aa2)
-joint3y = d1+l1*math.sin(aa)+l2*math.sin(aa+aa2)
+joint2x = l1*cos(aa)
+joint2y = d1+l1*sin(aa)
+joint3x = l1*cos(aa)+l2*cos(aa+aa2)
+joint3y = d1+l1*sin(aa)+l2*sin(aa+aa2)
 plt.plot( joint1x , joint1y , 'ko' , markersize=7)
 plt.plot( joint2x , joint2y , 'ko' , markersize=7)
 plt.plot( joint3x , joint3y , 'ko' , markersize=7)
@@ -79,12 +77,12 @@ plt.scatter(x,y,color='b',s=8,alpha=0.5)
 # armX [start coordinate for X,end coordinate for X] , armY [start coordinate for Y,end coordinate for Y]
 arm1x = [0 , 0];
 arm1y = [0 , d1];
-arm2x = [0 , l1*math.cos(aa)];
-arm2y = [d1 , d1+l1*math.sin(aa)];
-arm3x = [l1*math.cos(aa) , l1*math.cos(aa)+l2*math.cos(aa+aa2)]
-arm3y = [d1+l1*math.sin(aa) , d1+l1*math.sin(aa)+l2*math.sin(aa+aa2)]
-arm4x = [l1*math.cos(aa)+l2*math.cos(aa+aa2) , l1*math.cos(aa)+l2*math.cos(aa+aa2)+l3*math.cos(aa+aa2+aa3)]
-arm4y = [d1+l1*math.sin(aa)+l2*math.sin(aa+aa2) , d1+l1*math.sin(aa)+l2*math.sin(aa+aa2)+l3*math.sin(aa+aa2+aa3)]
+arm2x = [0 , l1*cos(aa)];
+arm2y = [d1 , d1+l1*sin(aa)];
+arm3x = [l1*cos(aa) , l1*cos(aa)+l2*cos(aa+aa2)]
+arm3y = [d1+l1*sin(aa) , d1+l1*sin(aa)+l2*sin(aa+aa2)]
+arm4x = [l1*cos(aa)+l2*cos(aa+aa2) , l1*cos(aa)+l2*cos(aa+aa2)+l3*cos(aa+aa2+aa3)]
+arm4y = [d1+l1*sin(aa)+l2*sin(aa+aa2) , d1+l1*sin(aa)+l2*sin(aa+aa2)+l3*sin(aa+aa2+aa3)]
 
 #The following lines plot a figure representing the arm's configuration:
 plt.plot( arm1x , arm1y ,'k' , linewidth=10)
