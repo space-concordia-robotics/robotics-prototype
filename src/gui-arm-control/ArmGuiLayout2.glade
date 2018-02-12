@@ -30,7 +30,7 @@
                     <property name="name">Arm-Position-Label</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">ARM Position</property>
+                    <property name="label" translatable="yes">Arm Position TOP View</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -38,16 +38,39 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTextView" id="Arm Position Placeholder">
+                  <object class="GtkScrolledWindow" id="Arm Position Placeholder">
                     <property name="name">Arm Position Placeholder</property>
-                    <property name="width_request">400</property>
-                    <property name="height_request">337</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="margin_right">8</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="Arm-Position-Label1">
+                    <property name="name">Arm-Position-Label</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Arm Position SIDE View</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="Arm Position Placeholder1">
+                    <property name="name">Arm Position Placeholder</property>
+                    <property name="width_request">400</property>
+                    <property name="height_request">337</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
                     <property name="top_attach">1</property>
                   </packing>
                 </child>
@@ -68,7 +91,7 @@
                     <property name="name">lidar</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Lidar</property>
+                    <property name="label" translatable="yes">Camera View</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -77,12 +100,11 @@
                 </child>
                 <child>
                   <object class="GtkTextView" id="Lidar Placeholder">
-                    <property name="name">Arm Position Placeholder</property>
-                    <property name="width_request">765</property>
+                    <property name="name">lidar Placeholder</property>
+                    <property name="width_request">400</property>
                     <property name="height_request">337</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="border_width">156</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -114,6 +136,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_right">6</property>
+                <property name="margin_top">60</property>
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">none</property>
                 <child>
@@ -146,7 +169,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="valign">start</property>
-                        <property name="label" translatable="yes">      Motor 
+                        <property name="label" translatable="yes">      Motor
      Position
 (Displacement)</property>
                       </object>
@@ -161,7 +184,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="valign">start</property>
-                        <property name="label" translatable="yes"> Motor 
+                        <property name="label" translatable="yes"> Motor
 Current
    (A)</property>
                       </object>
@@ -526,8 +549,7 @@ Current
                 <property name="name">Error Logs Grid</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">center</property>
-                <property name="valign">start</property>
+                <property name="valign">end</property>
                 <property name="margin_left">8</property>
                 <property name="margin_bottom">10</property>
                 <property name="column_homogeneous">True</property>
@@ -568,6 +590,7 @@ Current
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <signal name="clicked" handler="onClearClick" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -581,6 +604,7 @@ Current
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <signal name="clicked" handler="onTestClick" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -654,26 +678,6 @@ Current
                         <property name="row_spacing">2</property>
                         <property name="column_spacing">1</property>
                         <child>
-                          <object class="GtkButton" id="Yaw Leftgit1">
-                            <property name="label" translatable="yes">Yaw
-Left</property>
-                            <property name="name">Yaw-left</property>
-                            <property name="width_request">70</property>
-                            <property name="height_request">60</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
-                            <property name="image_position">right</property>
-                            <signal name="clicked" handler="onYawLeftClicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkButton" id="Pitch Up1">
                             <property name="label" translatable="yes">Pitch
 Up</property>
@@ -689,25 +693,6 @@ Up</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="Yaw Right1">
-                            <property name="label" translatable="yes">Yaw
-Right</property>
-                            <property name="name">Yaw-Right</property>
-                            <property name="width_request">70</property>
-                            <property name="height_request">60</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
-                            <signal name="clicked" handler="onYawRightClicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
                             <property name="top_attach">0</property>
                           </packing>
                         </child>
@@ -805,6 +790,12 @@ Close</property>
                             <property name="left_attach">2</property>
                             <property name="top_attach">2</property>
                           </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
@@ -929,7 +920,7 @@ Down</property>
                         </child>
                         <child>
                           <object class="GtkButton" id="Arm Right1">
-                            <property name="label" translatable="yes">Arm 
+                            <property name="label" translatable="yes">Arm
 Right</property>
                             <property name="name">Arm-Right</property>
                             <property name="width_request">70</property>
@@ -1029,18 +1020,16 @@ Fwd</property>
                 </child>
                 <child>
                   <object class="GtkButton" id="hposbtn">
-                    <property name="label" translatable="yes"> Home 
+                    <property name="label" translatable="yes"> Home
 Position</property>
                     <property name="name">hposbtn</property>
                     <property name="width_request">100</property>
-                    <property name="height_request">20</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
                     <property name="valign">end</property>
                     <property name="margin_right">8</property>
-                    <property name="margin_bottom">2</property>
                     <signal name="clicked" handler="onHomePostionClicked" swapped="no"/>
                   </object>
                   <packing>

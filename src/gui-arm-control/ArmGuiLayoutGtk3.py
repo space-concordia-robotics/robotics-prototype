@@ -6,6 +6,9 @@ import random
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
+from math import sin, cos, pi
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 '''
 This will access and run the glade file
 If your glade file is not in the same directory as this python file,
@@ -28,12 +31,16 @@ Gtk.STYLE_PROVIDER_PRIORITY_USER)
 # Test button for error log. Will remove once error log can
 # read errors from other windows
 def testButton(button):
+    textinput = open("ErrorLogTest.txt", "r")
+
     textbuffer = textarea.get_buffer()
     textbuffer.set_text(textinput.read())
+    textinput.close()
 
-#def clearButton(button):
-    #textbuffer = textarea.get_buffer()
-    
+def clearButton(button):
+    textbuffer = textarea.get_buffer()
+    textbuffer.set_text("")
+
 # // definitions of the handlers for the buttons
 def yawLeftButtonClick(button):
     if switch:
@@ -262,8 +269,8 @@ def on_switch_activated(self, sw):
     clawCtn = builder.get_object("Claw Button Layout1")
 
     #Get references to buttons that are then changed on switch
-    yawLeftBtn = builder.get_object("Yaw Leftgit1")
-    yawRightBtn = builder.get_object("Yaw Right1")
+    #yawLeftBtn = builder.get_object("Yaw Leftgit1")
+    #yawRightBtn = builder.get_object("Yaw Right1")
     rollLeftBtn = builder.get_object("Roll Left1")
     rollRightBtn = builder.get_object("Roll Right1")
     clawOpenBtn = builder.get_object("Claw Open1")
@@ -280,34 +287,28 @@ def on_switch_activated(self, sw):
 
     if sw:
         state = "on"
-        Gtk.Button.set_label(yawLeftBtn, "SMT1\n <<")
-        Gtk.Button.set_label(yawRightBtn, "SMT1\n >>")
         Gtk.Button.set_label(rollLeftBtn, "SMT2\n <<")
         Gtk.Button.set_label(rollRightBtn, "SMT2\n >>")
         Gtk.Button.set_label(clawOpenBtn, "SMT3\n <<")
         Gtk.Button.set_label(clawCloseBtn, "SMT3\n >>")
-        Gtk.Button.set_label(pitchUpBtn, "SMT4\n <<")
-        Gtk.Button.set_label(pitchDownBtn, "SMT4\n >>")
+        Gtk.Button.set_label(pitchUpBtn, "SMT1\n <<")
+        Gtk.Button.set_label(pitchDownBtn, "SMT1\n >>")
         Gtk.Button.set_label(armLeftBtn, "ASM1\n <<")
         Gtk.Button.set_label(armRightBtn, "ASM1\n >>")
         Gtk.Button.set_label(armBackBtn, "ASM2\n <<")
         Gtk.Button.set_label(armFwdBtn, "ASM2\n >>")
 
         # Change the view of buttons that the manual control don't use
-        Gtk.Widget.set_name(armUpBtn, "Arm-Up-Hide")
-        Gtk.Widget.set_name(armDownBtn, "Arm-Down-Hide")
-        Gtk.Widget.set_sensitive(armUpBtn, False)
-        Gtk.Widget.set_sensitive(armDownBtn, False)
+        #Gtk.Widget.set_name(armUpBtn, "Arm-Up-Hide")
+        #Gtk.Widget.set_name(armDownBtn, "Arm-Down-Hide")
+
+        Gtk.Button.set_label(armUpBtn, "SMT4\n <<")
+        Gtk.Button.set_label(armDownBtn, "SMT4\n >>")
+
+        #Gtk.Widget.set_sensitive(armUpBtn, False)
+        #Gtk.Widget.set_sensitive(armDownBtn, False)
 
         # make manual buttons switch handler code
-        yawLeftBtn.disconnect_by_func(handlers["onYawLeftClicked"])
-        handlers["onYawLeftClicked"] = stm1ButtonLeftClicked
-        yawLeftBtn.connect("clicked", handlers["onYawLeftClicked"])
-
-        yawRightBtn.disconnect_by_func(handlers["onYawRightClicked"])
-        handlers["onYawRightClicked"] = stm1ButtonRightClicked
-        yawRightBtn.connect("clicked", handlers["onYawRightClicked"])
-
         rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
         handlers["onRollLeftClicked"] = stm2ButtonLeftClicked
         rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
@@ -324,13 +325,23 @@ def on_switch_activated(self, sw):
         handlers["onClawCloseClicked"] = stm3ButtonRightClicked
         clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
 
+
         pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-        handlers["onPitchUpClicked"] = stm4ButtonLeftClicked
+        handlers["onPitchUpClicked"] = stm1ButtonLeftClicked
         pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
 
         pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
-        handlers["onPitchDownClicked"] = stm4ButtonRightClicked
+        handlers["onPitchDownClicked"] = stm1ButtonRightClicked
         pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
+        # -----------------------------------
+        armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
+        handlers["onArmUpClicked"] = stm4ButtonLeftClicked
+        armUpBtn.connect("clicked", handlers["onArmUpClicked"])
+
+        armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
+        handlers["onArmDownClicked"] = stm4ButtonRightClicked
+        armDownBtn.connect("clicked", handlers["onArmDownClicked"])
+        # -----------------------------------
 
         armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
         handlers["onArmLeftClicked"] = astm1ButtonLeftClicked
@@ -349,8 +360,6 @@ def on_switch_activated(self, sw):
         armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
     else:
         state = "off"
-        Gtk.Button.set_label(yawLeftBtn, "Yaw\nLeft")
-        Gtk.Button.set_label(yawRightBtn, "Yaw\nRight")
         Gtk.Button.set_label(rollLeftBtn, "Roll\nLeft")
         Gtk.Button.set_label(rollRightBtn, "Roll\nRight")
         Gtk.Button.set_label(clawOpenBtn, "Claw\nOpen")
@@ -362,20 +371,15 @@ def on_switch_activated(self, sw):
         Gtk.Button.set_label(armBackBtn, "Arm\nBack")
         Gtk.Button.set_label(armFwdBtn, "Arm\nFwd")
 
-        Gtk.Widget.set_name(armUpBtn, "Arm-Up")
+        '''Gtk.Widget.set_name(armUpBtn, "Arm-Up")
         Gtk.Widget.set_name(armDownBtn, "Arm-Down")
         Gtk.Widget.set_sensitive(armUpBtn, True)
-        Gtk.Widget.set_sensitive(armDownBtn, True)
+        Gtk.Widget.set_sensitive(armDownBtn, True)'''
+
+        Gtk.Button.set_label(armUpBtn, "Arm\nUp")
+        Gtk.Button.set_label(armDownBtn, "Arm\nDown")
 
         # Remove manual buttons switch handler code
-        yawLeftBtn.disconnect_by_func(handlers["onYawLeftClicked"])
-        handlers["onYawLeftClicked"] = yawLeftButtonClick
-        yawLeftBtn.connect("clicked", handlers["onYawLeftClicked"])
-
-        yawRightBtn.disconnect_by_func(handlers["onYawRightClicked"])
-        handlers["onYawRightClicked"] = yawRightButtonClick
-        yawRightBtn.connect("clicked", handlers["onYawRightClicked"])
-
         rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
         handlers["onRollLeftClicked"] = rollLeftButtonClick
         rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
@@ -392,6 +396,7 @@ def on_switch_activated(self, sw):
         handlers["onClawCloseClicked"] = clawCloseButtonClick
         clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
 
+
         pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
         handlers["onPitchUpClicked"] = picthUpButtonClick
         pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
@@ -399,6 +404,17 @@ def on_switch_activated(self, sw):
         pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
         handlers["onPitchDownClicked"] = pitchDownButtonClick
         pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
+        # -----------------------------------
+        armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
+        handlers["onArmUpClicked"] = armUpButtonClick
+        armUpBtn.connect("clicked", handlers["onArmUpClicked"])
+
+        armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
+        handlers["onArmDownClicked"] = armDownButtonClick
+        armDownBtn.connect("clicked", handlers["onArmDownClicked"])
+        # -----------------------------------
+
+
 
         armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
         handlers["onArmLeftClicked"] = armLeftButtonClick
@@ -418,13 +434,78 @@ def on_switch_activated(self, sw):
 
     #print("Switch was turned", state)
 
+########################## Matlab ARM Pos ##########################
+# http://gtk3-matplotlib-cookbook.readthedocs.io/en/latest/hello-plot.html
+# The following code's comments have been removed for brevity
+# See armWorkSpace.py for detailed comments/instructions
+# Contstant Variables
+d1 = 0.5
+l1 = 1
+l2 = 1
+l3 = 0.25
+amax = (4 * pi) / 6
+amin = pi / 6
+amax2 = pi / 2
+amin2 = -(4 * pi / 6)
+amax3 = pi / 2
+amin3 = -2 * pi / 3
+aa = (amax + amin) / 2
+aa2 = (amax2 + amin2) / 2
+aa3 = (amax3 + amin3) / 2
+adif = amax - amin
+adif2 = amax2 - amin2
+adif3 = amax3 - amin3
+joint1x = 0
+joint1y = d1
+joint2x = l1*cos(aa)
+joint2y = d1+l1*sin(aa)
+joint3x = l1*cos(aa)+l2*cos(aa+aa2)
+joint3y = d1+l1*sin(aa)+l2*sin(aa+aa2)
+arm1x = [0 , 0];
+arm1y = [0 , d1];
+arm2x = [0 , l1*cos(aa)];
+arm2y = [d1 , d1+l1*sin(aa)];
+arm3x = [l1*cos(aa) , l1*cos(aa)+l2*cos(aa+aa2)]
+arm3y = [d1+l1*sin(aa) , d1+l1*sin(aa)+l2*sin(aa+aa2)]
+arm4x = [l1*cos(aa)+l2*cos(aa+aa2) , l1*cos(aa)+l2*cos(aa+aa2)+l3*cos(aa+aa2+aa3)]
+arm4y = [d1+l1*sin(aa)+l2*sin(aa+aa2) , d1+l1*sin(aa)+l2*sin(aa+aa2)+l3*sin(aa+aa2+aa3)]
+# Global Variables
+fig = Figure(dpi=50)
+ax = fig.add_subplot(111)
+canvas = FigureCanvas(fig)
+canvas.set_size_request(337,337)
 
+canvas1 = FigureCanvas(fig)
+canvas1.set_size_request(337,337)
+# Some helper functions
+def armpos(jointsX, jointsY, armsX, armsY):
+    ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
+    ax.plot( jointsX[1] , jointsY[1] , 'ko' , markersize=7) # segment 1 & 2 joint
+    ax.plot( jointsX[2] , jointsY[2] , 'ko' , markersize=7) # segment 2 & 3 joint
+    ax.plot( armsX[0] , armsY[0] ,'k' , linewidth=3) # the base
+    ax.plot( armsX[1] , armsY[1] , 'k' , linewidth=3) # segement 1
+    ax.plot( armsX[2] , armsY[2] , 'k' , linewidth= 3); # segement 2
+    ax.plot( armsX[3] , armsY[3] , 'k' , linewidth=3); # segement 3
+    return
 
+def scatterPoints(numberOfScatterPoints):
+    x = [0] * numberOfScatterPoints # initialize some bigass arrays...slowly
+    y = [0] * numberOfScatterPoints # initialize some bigass arrays...slowly
+    for i in range(0,numberOfScatterPoints):
+        t2 = random.uniform(0,adif) + amin
+        t3 = random.uniform(0,adif2) + amin2
+        t4 = random.uniform(0,adif3) + amin3
+        x[i] = l1 * cos(t2) + l2 * cos(t2 + t3) + l3 * cos(t2 + t3 + t4)
+        y[i] = d1 + l1 * sin(t2) + l2 * sin(t2 + t3) + l3 * sin(t2 + t3 + t4)
+    ax.scatter(x,y,color='b',s=7,alpha=0.5)
+    return
+###########################END MATLAB STUFF
 builder = Gtk.Builder()
 builder.add_from_file("ArmGuiLayout2.glade")
 
+
 textarea = builder.get_object("Error Log ")
-textinput = open("ErrorLogTest.txt", "r")
+
 
 #Get a reference to motor table text boxes
 smotor1 = builder.get_object("Stepper Motor 1 Angle")
@@ -433,6 +514,7 @@ smotor3 = builder.get_object("Stepper Motor 3 Angle")
 smotor4 = builder.get_object("Stepper Motor 4 Angle")
 asmotor1 = builder.get_object("Arm Servo Motor 1 Angle")
 asmotor2 = builder.get_object("Arm Servo Motor 2 Angle")
+
 
 #Get reference to button so we can update the label when switched to manual
 switch = builder.get_object("man-auto-switch")
@@ -443,7 +525,7 @@ switch.set_active(False)
 # and assign them functionality using python code
 handlers = {
     "onTestClick": testButton,
-    #"onClearClick": clearButton
+    "onClearClick": clearButton,
     "onYawLeftClicked": yawLeftButtonClick,
     "onPitchUpClicked": picthUpButtonClick,
     "onYawRightClicked": yawRightButtonClick,
@@ -463,7 +545,28 @@ handlers = {
 }
 builder.connect_signals(handlers)
 
+########################## Matlab ARM Pos
+
+jointsX = [joint1x, joint2x, joint3x]
+jointsY = [joint1y, joint2y, joint3y]
+armsX = [arm1x, arm2x, arm3x, arm4x]
+armsY = [arm1y, arm2y, arm3y, arm4y]
+
+scatterPoints(600)
+armpos(jointsX,jointsY,armsX,armsY)
+
+placeholder = builder.get_object("Arm Position Placeholder")
+placeholder1 = builder.get_object("Arm Position Placeholder1")
+placeholder.add_with_viewport(canvas)
+placeholder1.add_with_viewport(canvas1)
+# placeholder.add(canvas)
+
+###########################End Matlab Stuff
+
 window = builder.get_object("ArmGuiLayoutWindow")
+# sw = Gtk.ScrolledWindow()
+# window.add(sw)
+# sw.add_with_viewport(canvas)
 window.set_title("Space Concordia Robtotics GUI")
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
