@@ -36,11 +36,12 @@
     }
 
 #hposbtn{
-border-radius: 30px 30px 30px 30px
+border-radius: 30px 30px 30px 30px; padding: 0; margin: 0
 }
 
-#stepper-motor-1-angle{
-    color: red;
+#stepper-motor-1-angle, #stepper-motor-2-angle, #stepper-motor-3-angle,
+#stepper-motor-4-angle, #arm-servo-motor-1-angle, #arm-servo-motor-2-angle{
+    color: #3C3A39;
 }
 
 #Claw-Open, #Claw-Close{
@@ -119,7 +120,7 @@ border-radius: 30px 30px 30px 30px
 	border-color: #0000FF;
 	background-color: #2525a7;
 	background-image:none;
-	border: 4px solid #8A2BE2;padding: 52px 0 26px 0
+	border: 4px solid #8A2BE2;
 }
 
 #motor-status-label{

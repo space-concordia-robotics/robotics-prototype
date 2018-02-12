@@ -1,4 +1,7 @@
-Initializing......
+===== Rover Arm Error Log ======
+2005-03-19 15:10:26 Motor issue: No current in servor motor 1
+2005-03-20 15:10:26 Motor issue: command to move motor had no affect. No displacement detected
+2005-03-23 15:10:26 Arm issue: Arm was moved and positions are not accurate to determine next motor displacement
 
 Error logs currently reading input from file making sure it is running fine
 
