@@ -473,10 +473,8 @@ arm4y = [d1+l1*sin(aa)+l2*sin(aa+aa2) , d1+l1*sin(aa)+l2*sin(aa+aa2)+l3*sin(aa+a
 fig = Figure(dpi=50)
 ax = fig.add_subplot(111)
 canvas = FigureCanvas(fig)
-canvas.set_size_request(337,337)
+canvas.set_size_request(400,337)
 
-canvas1 = FigureCanvas(fig)
-canvas1.set_size_request(337,337)
 # Some helper functions
 def armpos(jointsX, jointsY, armsX, armsY):
     ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
@@ -556,9 +554,7 @@ scatterPoints(600)
 armpos(jointsX,jointsY,armsX,armsY)
 
 placeholder = builder.get_object("Arm Position Placeholder")
-placeholder1 = builder.get_object("Arm Position Placeholder1")
 placeholder.add_with_viewport(canvas)
-placeholder1.add_with_viewport(canvas1)
 # placeholder.add(canvas)
 
 ###########################End Matlab Stuff
