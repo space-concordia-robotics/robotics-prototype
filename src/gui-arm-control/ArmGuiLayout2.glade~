@@ -22,7 +22,6 @@
             <child>
               <object class="GtkGrid" id="Arm Position Grid">
                 <property name="name">Arm Position Grid</property>
-                <property name="width_request">-1</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="column_homogeneous">True</property>
@@ -31,7 +30,7 @@
                     <property name="name">Arm-Position-Label</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Arm Position</property>
+                    <property name="label" translatable="yes">Arm Position TOP View</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -102,7 +101,7 @@
                 <child>
                   <object class="GtkTextView" id="Lidar Placeholder">
                     <property name="name">lidar Placeholder</property>
-                    <property name="width_request">695</property>
+                    <property name="width_request">400</property>
                     <property name="height_request">337</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -550,7 +549,8 @@ Current
                 <property name="name">Error Logs Grid</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">end</property>
+                <property name="halign">center</property>
+                <property name="valign">start</property>
                 <property name="margin_left">8</property>
                 <property name="margin_bottom">10</property>
                 <property name="column_homogeneous">True</property>
