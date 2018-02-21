@@ -14,8 +14,13 @@
       <file leaf-file-name="ArmGuiLayoutGtk3.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gui-arm-control/ArmGuiLayoutGtk3.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="178">
               <caret line="557" column="17" lean-forward="true" selection-start-line="557" selection-start-column="17" selection-end-line="557" selection-end-column="17" />
+=======
+            <state relative-caret-position="93">
+              <caret line="555" column="60" lean-forward="false" selection-start-line="555" selection-start-column="60" selection-end-line="555" selection-end-column="60" />
+>>>>>>> master
               <folding />
             </state>
           </provider>
@@ -24,8 +29,13 @@
       <file leaf-file-name="ArmGuiLayout2.glade" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gui-arm-control/ArmGuiLayout2.glade">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="119">
               <caret line="104" column="65" lean-forward="false" selection-start-line="104" selection-start-column="65" selection-end-line="104" selection-end-column="65" />
+=======
+            <state relative-caret-position="-15436">
+              <caret line="81" column="20" lean-forward="false" selection-start-line="81" selection-start-column="20" selection-end-line="81" selection-end-column="20" />
+>>>>>>> master
               <folding />
             </state>
           </provider>
@@ -60,10 +70,11 @@
         <option value="$PROJECT_DIR$/gui-arm-control/Styling.css" />
         <option value="$PROJECT_DIR$/gui-arm-control/ArmGuiLayout2.glade" />
         <option value="$PROJECT_DIR$/gui-arm-control/ArmGuiLayoutGtk3.py" />
+        <option value="$PROJECT_DIR$/gui-arm-control/ArmGuiLayout2.glade" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="10" />
     <option name="y" value="20" />
     <option name="width" value="1346" />
@@ -185,7 +196,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14732143" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -307,6 +318,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/matlab-test-code/ArmGuiLayoutGtk3.py" />
     <entry file="file://$PROJECT_DIR$/gui-arm-control/Styling.css">
+<<<<<<< HEAD
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="527">
           <caret line="57" column="26" lean-forward="false" selection-start-line="57" selection-start-column="26" selection-end-line="57" selection-end-column="26" />
@@ -420,14 +432,32 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
           <caret line="104" column="65" lean-forward="false" selection-start-line="104" selection-start-column="65" selection-end-line="104" selection-end-column="65" />
+=======
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="527">
+          <caret line="57" column="26" lean-forward="false" selection-start-line="57" selection-start-column="26" selection-end-line="57" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gui-arm-control/ArmGuiLayout2.glade">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-15436">
+          <caret line="81" column="20" lean-forward="false" selection-start-line="81" selection-start-column="20" selection-end-line="81" selection-end-column="20" />
+>>>>>>> master
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gui-arm-control/ArmGuiLayoutGtk3.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
         <state relative-caret-position="178">
           <caret line="557" column="17" lean-forward="true" selection-start-line="557" selection-start-column="17" selection-end-line="557" selection-end-column="17" />
+=======
+        <state relative-caret-position="93">
+          <caret line="555" column="60" lean-forward="false" selection-start-line="555" selection-start-column="60" selection-end-line="555" selection-end-column="60" />
+>>>>>>> master
           <folding />
         </state>
       </provider>
