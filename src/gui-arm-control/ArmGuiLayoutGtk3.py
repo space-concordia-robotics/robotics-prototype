@@ -474,7 +474,6 @@ fig = Figure(dpi=50)
 ax = fig.add_subplot(111)
 canvas = FigureCanvas(fig)
 canvas.set_size_request(400,337)
-
 # Some helper functions
 def armpos(jointsX, jointsY, armsX, armsY):
     ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
@@ -555,7 +554,6 @@ armpos(jointsX,jointsY,armsX,armsY)
 
 placeholder = builder.get_object("Arm Position Placeholder")
 placeholder.add_with_viewport(canvas)
-# placeholder.add(canvas)
 
 ###########################End Matlab Stuff
 
