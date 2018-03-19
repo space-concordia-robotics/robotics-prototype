@@ -1,10 +1,16 @@
 # gui-arm-control
-Graphic User Interface (GUI) for controlling the arm, and receiving relevant info about the arm and it's environment. The GUI is developed using [PyGobject](http://pygobject.readthedocs.io/en/latest/index.html) a Python package which provides bindings for GObject based libraries such as GTK+, GStreamer, WebKitGTK+, GLib, GIO
+Graphic User Interface (GUI) for controlling the arm, and receiving relevant info about the arm and it's environment. The GUI is developed using [PyGobject](http://pygobject.readthedocs.io/en/latest/index.html) a Python package which provides bindings for GObject based libraries such as GTK+, GStreamer, WebKitGTK+, GLib, GIO. The library that will be used to develop our Python GUI application will be be GTK+.
 
 ### Set up
-For development you need to have Python, GTK+3, and Glade installed.
-Glade is a graphic interface designer used to generate GUI layout easily and then later program modifications according to needs.
-The easiest way to have all the required setup done is to follow the instructions found [here](https://www.gtk.org/download/windows.php) for windows, or [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) for linux.
+For development you need to have PyGobject installed, (includes GTK+), and [Glade](https://glade.gnome.org/) installed.
+Glade is Rapid Application DEvelopment (RAD) tool used to design user interfacesa graphic interfaces. With Glade we can generate GUI layout easily with event listeners defined and then later programmed in Python to apply modifications according to needs.
+
+Development can be done on Windows, Linux and MacOS. The easiest to work  with is Linux as it is more manageable when it comes to adding dependencies. The easiest way to have all the required setup done is to follow these instructions:
+- [Linux:](http://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-logo-ubuntu-debian-logo-debian)
+- [MacOS:](http://pygobject.readthedocs.io/en/latest/getting_started.html#macosx-logo-macos)
+- For Windows there are two option. You can install using MYSYS or doing a manual install.
+
+[Windows](https://www.gtk.org/download/windows.php) for windows, or [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) for linux.
 
 #### Windows
 1. Download MYSYS2 [here](http://www.msys2.org/). Run the installer.
