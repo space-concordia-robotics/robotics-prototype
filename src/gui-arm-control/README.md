@@ -1,5 +1,5 @@
 # gui-arm-control
-Graphic User Interface for controlling the arm, and receiving relevant info about the arm and it's environment.
+Graphic User Interface (GUI) for controlling the arm, and receiving relevant info about the arm and it's environment. The GUI is developed using [PyGobject](http://pygobject.readthedocs.io/en/latest/index.html) a Python package which provides bindings for GObject based libraries such as GTK+, GStreamer, WebKitGTK+, GLib, GIO
 
 ### Set up
 For development you need to have Python, GTK+3, and Glade installed.
