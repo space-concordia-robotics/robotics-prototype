@@ -7,10 +7,11 @@ Glade is Rapid Application Development (RAD) tool used to design user interfaces
 
 Development can be done on Windows, Linux and MacOS. The easiest to work with is Linux as it is more manageable when it comes to adding dependencies. The easiest way to have all the required setup done is to follow these instructions:
 - [Linux](http://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-logo-ubuntu-debian-logo-debian)
+    - Glade setup steps are [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) 
 - [MacOS](http://pygobject.readthedocs.io/en/latest/getting_started.html#macosx-logo-macos)
 - For Windows there are two options. The installation can be done using a manual install that involves seting up Python and then using an all in one installer to add PygObject which has the GTK+ features. The manual option is more flexible when dealing with dependcies. The other option is to use [MYSYS2](http://www.msys2.org/). MYSYS2 is ok but can present some issues when trying to add dependencies needed during developement. Therefore the manual install option is the best choice.
--- For the manual install follow the steps found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
--- For the setup using MYSYS2 follow the steps found [here](https://pygobject.readthedocs.io/en/latest/getting_started.html#windows-logo-windows)
+    - For the manual install follow the steps found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
+    - For the setup using MYSYS2 follow the steps found [here](https://pygobject.readthedocs.io/en/latest/getting_started.html#windows-logo-windows)
 
 Below is a summary of how to install PyGobject on Linux, MacOS and Windows:
 #### Linux
@@ -26,17 +27,15 @@ Below is a summary of how to install PyGobject on Linux, MacOS and Windows:
 Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) installed and you have python 2.7 installed and linked to home brew.
 
 1. Instsall
-    - `$ brew install pygobject3 --with-python3 gtk+3`  
-
+    - `$ brew install pygobject3 --with-python3 gtk+3` 
 2. The Fix
     - makes sure the the installs you did with homebrew are recongized as environment variables
     - `$ brew reinstall pygobject pygobject3`  
     - `$ mkdir -p "$HOME/Library/Python/2.7/lib/python/site-packages"`  
-    - `$ echo  'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >>` `"$HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth"`  
-
+    - `$ echo  'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >>` `"$HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth"` 
 3. Create a Demo File  
     - Create a file called **hello.py** with the following demo content
-
+    
     ``` python
     import gi
     gi.require_version("Gtk", "3.0")
@@ -78,7 +77,3 @@ For installation using MYSYS2 the steps are:
 4. To setup development the location for Python has to be added to your PATH environment variable.
 Here's a [HOWTO](https://www.computerhope.com/issues/ch000549.htm) for different kinds of Windows.
 In this case you need to add `C:\mysys64\mingw64\bin`.
-
-
-
-[Windows](https://www.gtk.org/download/windows.php) for windows, or [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) for linux
