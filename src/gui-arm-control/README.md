@@ -15,7 +15,8 @@ Development can be done on Windows, Linux and MacOS. The easiest to work with is
 3. Optional development tools:
 - `sudo apt-get install glade` - graphic interface designer
 - `sudo apt-get install geany` - text editor
-    - Glade setup steps are [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) 
+    
+Glade setup steps are [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) 
         
 ### OSX
 Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) installed and you have python 2.7 installed and linked to home brew.
@@ -54,8 +55,7 @@ Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) 
 - For Windows there are two options. The installation can be done using a manual install that involves seting up Python and then using an all in one installer to add PygObject which has the GTK+ features. The manual option is more flexible when dealing with dependcies. The other option is to use [MYSYS2](http://www.msys2.org/). MYSYS2 is ok but can present some issues when trying to add dependencies needed during developement. Therefore the manual install option is the best choice.
     - For the manual install follow the steps found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
     - For the setup using MYSYS2 follow the steps found [here](https://pygobject.readthedocs.io/en/latest/getting_started.html#windows-logo-windows)
-    
-#### Windows
+
 For the manual install involving first installing Python then PyGobject seperatly the steps are found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
  
 For installation using MYSYS2 the steps are:
