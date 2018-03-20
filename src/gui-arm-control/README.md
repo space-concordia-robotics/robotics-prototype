@@ -9,8 +9,8 @@ Development can be done on Windows, Linux and MacOS. The easiest to work with is
 - [Linux](http://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-logo-ubuntu-debian-logo-debian)
 - [MacOS](http://pygobject.readthedocs.io/en/latest/getting_started.html#macosx-logo-macos)
 - For Windows there are two options. The installation can be done using a manual install that involves seting up Python and then using an all in one installer to add PygObject which has the GTK+ features. The manual option is more flexible when dealing with dependcies. The other option is to use [MYSYS2](http://www.msys2.org/). MYSYS2 is ok but can present some issues when trying to add dependencies needed during developement. Therefore the manual install option is the best choice.
-- For the manual install follow the steps found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
-- For the setup using MYSYS2 follow the steps found [here](https://pygobject.readthedocs.io/en/latest/getting_started.html#windows-logo-windows)
+-- For the manual install follow the steps found [here](https://docs.google.com/document/d/19XExylHDHJGtTslYtsATP1ufoPLrfBZetDk1i3PyEb4/edit)
+-- For the setup using MYSYS2 follow the steps found [here](https://pygobject.readthedocs.io/en/latest/getting_started.html#windows-logo-windows)
 
 Below is a summary of how to install PyGobject on Linux, MacOS and Windows:
 #### Linux
