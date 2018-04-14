@@ -13,14 +13,17 @@ from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as Figur
 This will access and run the glade file
 If your glade file is not in the same directory as this python file,
 then you must specify the directory in the
-builder.add_from_file("xxx"), where xxx is your directory.
+builder.add_from_file("suhdude"), where suhdude is the name of the glade file, including relative path to it.
 
 The glade file is currently using textboxes as placeholders
 for the windows that will be implemented in the future.
 '''
 
 class AsimovOperation(Gtk.Window):
+	# static/class attributes go here
+
 	def __init__(self):
+		# intialize any object instance variables here
 		Gtk.Window.__init__(self, title="Asimov Operation")
 
 	# Test button for error log. Will remove once error log can
@@ -50,7 +53,7 @@ class AsimovOperation(Gtk.Window):
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
 
-	def picthUpButtonClick(self, button):
+	def pitchUpButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
@@ -391,7 +394,7 @@ class AsimovOperation(Gtk.Window):
 
 
 			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-			handlers["onPitchUpClicked"] = asimov_op.picthUpButtonClick
+			handlers["onPitchUpClicked"] = asimov_op.pitchUpButtonClick
 			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
 
 			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
@@ -499,7 +502,7 @@ if __name__ == "__main__":
 		"onTestClick": asimov_op.testButton,
 		"onClearClick": asimov_op.clearButton,
 		"onYawLeftClicked": asimov_op.yawLeftButtonClick,
-		"onPitchUpClicked": asimov_op.picthUpButtonClick,
+		"onPitchUpClicked": asimov_op.pitchUpButtonClick,
 		"onYawRightClicked": asimov_op.yawRightButtonClick,
 		"onRollLeftClicked": asimov_op.rollLeftButtonClick,
 		"onPitchDownClicked": asimov_op.pitchDownButtonClick,
@@ -566,7 +569,6 @@ if __name__ == "__main__":
 
 	placeholder = builder.get_object("Arm Position Placeholder")
 	placeholder.add_with_viewport(canvas)
-
 	###########################End Matlab Stuff
 
 
@@ -575,7 +577,7 @@ if __name__ == "__main__":
 	# sw = Gtk.ScrolledWindow()
 	# window.add(sw)
 	# sw.add_with_viewport(canvas)
-	window.set_title("Space Concordia Robtotics GUI")
+	window.set_title("Asimov Operation")
 	window.connect("destroy", Gtk.main_quit)
 	window.show_all()
 	asimov_op.toggleBtnTest()
