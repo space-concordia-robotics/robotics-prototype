@@ -25,22 +25,19 @@ class AsimovOperation(Gtk.Window):
 
 	# Test button for error log. Will remove once error log can
 	# read errors from other windows
-	@staticmethod
-	def testButton(button):
+	def testButton(self, button):
 		textinput = open("ErrorLogTest.txt", "r")
 
 		textbuffer = textarea.get_buffer()
 		textbuffer.set_text(textinput.read())
 		textinput.close()
 
-	@staticmethod
-	def clearButton(button):
+	def clearButton(self, button):
 		textbuffer = textarea.get_buffer()
 		textbuffer.set_text("")
 
 	# definitions of the handlers for the buttons
-	@staticmethod
-	def yawLeftButtonClick(button):
+	def yawLeftButtonClick(self, button):
 		if switch:
 			state2 = "on"
 		else:
@@ -53,105 +50,90 @@ class AsimovOperation(Gtk.Window):
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
 
-	@staticmethod
-	def picthUpButtonClick(button):
+	def picthUpButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Pitch Up Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def yawRightButtonClick(button):
+	def yawRightButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Yaw Right Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def rollLeftButtonClick(button):
+	def rollLeftButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Roll Left Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def pitchDownButtonClick(button):
+	def pitchDownButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Pitch Down Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def rollRightButtonClick(button):
+	def rollRightButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Roll Right Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def clawOpenButtonClick(button):
+	def clawOpenButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Claw Open Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def clawCloseButtonClick(button):
+	def clawCloseButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Claw Close Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armUpButtonClick(button):
+	def armUpButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Up Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armLeftButtonClick(button):
+	def armLeftButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Left Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armDownButtonClick(button):
+	def armDownButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Down Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armRightButtonClick(button):
+	def armRightButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Right Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armBackButtonClick(button):
+	def armBackButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Back Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def armFwdButtonClick(button):
+	def armFwdButtonClick(self, button):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Arm Fwd Clicked " + str(now) + "\n")
 
-	@staticmethod
-	def toggleSwitchClick(button):
+	def toggleSwitchClick(self, button):
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> onn")
 
-	@staticmethod
-	def homePostionBtnClicked(button):
+	def homePostionBtnClicked(self, button):
 		'''
 		print("The text is: " + str(text))
 		#text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
@@ -176,92 +158,79 @@ class AsimovOperation(Gtk.Window):
 		text_buffer = asmotor2.get_buffer()
 		text_buffer.set_text("10")
 
-	@staticmethod
-	def stm1ButtonLeftClicked(button):
+	def stm1ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor1.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def stm1ButtonRightClicked(button):
+	def stm1ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor1.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def stm2ButtonLeftClicked(button):
+	def stm2ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor2.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def stm2ButtonRightClicked(button):
+	def stm2ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor2.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def stm3ButtonLeftClicked(button):
+	def stm3ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor3.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def stm3ButtonRightClicked(button):
+	def stm3ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor3.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def stm4ButtonLeftClicked(button):
+	def stm4ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor4.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def stm4ButtonRightClicked(button):
+	def stm4ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = smotor4.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def astm1ButtonLeftClicked(button):
+	def astm1ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = asmotor1.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def astm1ButtonRightClicked(button):
+	def astm1ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = asmotor1.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def astm2ButtonLeftClicked(button):
+	def astm2ButtonLeftClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = asmotor2.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) - 1))
 
-	@staticmethod
-	def astm2ButtonRightClicked(button):
+	def astm2ButtonRightClicked(self, button):
 		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = asmotor2.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + 1))
 
-	@staticmethod
-	def toggleBtnTest():
+	def toggleBtnTest(self):
 		# fill each of the displacement boxes with random numbers between 10 and 50
 		rand = random.randint(10, 71)
 		text_buffer = smotor1.get_buffer()
@@ -306,7 +275,6 @@ class AsimovOperation(Gtk.Window):
 		armRightBtn = builder.get_object("Arm Right1")
 		armBackBtn = builder.get_object("Arm Back1")
 		armFwdBtn = builder.get_object("Arm Forward1")
-
 		armUpBtn = builder.get_object("Arm Up1")
 		armDownBtn = builder.get_object("Arm Down1")
 
@@ -335,53 +303,53 @@ class AsimovOperation(Gtk.Window):
 
 			# make manual buttons switch handler code
 			rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
-			handlers["onRollLeftClicked"] = AsimovOperation.stm2ButtonLeftClicked
+			handlers["onRollLeftClicked"] = asimov_op.stm2ButtonLeftClicked
 			rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
 
 			rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
-			handlers["onRollRightClicked"] = AsimovOperation.stm2ButtonRightClicked
+			handlers["onRollRightClicked"] = asimov_op.stm2ButtonRightClicked
 			rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
 
 			clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
-			handlers["onClawOpenClicked"] = AsimovOperation.stm3ButtonLeftClicked
+			handlers["onClawOpenClicked"] = asimov_op.stm3ButtonLeftClicked
 			clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
 
 			clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
-			handlers["onClawCloseClicked"] = AsimovOperation.stm3ButtonRightClicked
+			handlers["onClawCloseClicked"] = asimov_op.stm3ButtonRightClicked
 			clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
 
 
 			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-			handlers["onPitchUpClicked"] = AsimovOperation.stm1ButtonLeftClicked
+			handlers["onPitchUpClicked"] = asimov_op.stm1ButtonLeftClicked
 			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
 
 			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
-			handlers["onPitchDownClicked"] = AsimovOperation.stm1ButtonRightClicked
+			handlers["onPitchDownClicked"] = asimov_op.stm1ButtonRightClicked
 			pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
 			# -----------------------------------
 			armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
-			handlers["onArmUpClicked"] = AsimovOperation.stm4ButtonLeftClicked
+			handlers["onArmUpClicked"] = asimov_op.stm4ButtonLeftClicked
 			armUpBtn.connect("clicked", handlers["onArmUpClicked"])
 
 			armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
-			handlers["onArmDownClicked"] = AsimovOperation.stm4ButtonRightClicked
+			handlers["onArmDownClicked"] = asimov_op.stm4ButtonRightClicked
 			armDownBtn.connect("clicked", handlers["onArmDownClicked"])
 			# -----------------------------------
 
 			armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
-			handlers["onArmLeftClicked"] = AsimovOperation.astm1ButtonLeftClicked
+			handlers["onArmLeftClicked"] = asimov_op.astm1ButtonLeftClicked
 			armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
 
 			armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
-			handlers["onArmRightClicked"] = AsimovOperation.astm1ButtonRightClicked
+			handlers["onArmRightClicked"] = asimov_op.astm1ButtonRightClicked
 			armRightBtn.connect("clicked", handlers["onArmRightClicked"])
 
 			armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
-			handlers["onArmBackClicked"] = AsimovOperation.astm2ButtonLeftClicked
+			handlers["onArmBackClicked"] = asimov_op.astm2ButtonLeftClicked
 			armBackBtn.connect("clicked", handlers["onArmBackClicked"])
 
 			armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
-			handlers["onArmFwdClicked"] = AsimovOperation.astm2ButtonRightClicked
+			handlers["onArmFwdClicked"] = asimov_op.astm2ButtonRightClicked
 			armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
 		else:
 			state = "off"
@@ -406,60 +374,60 @@ class AsimovOperation(Gtk.Window):
 
 			# Remove manual buttons switch handler code
 			rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
-			handlers["onRollLeftClicked"] = rollLeftButtonClick
+			handlers["onRollLeftClicked"] = asimov_op.rollLeftButtonClick
 			rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
 
 			rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
-			handlers["onRollRightClicked"] = rollRightButtonClick
+			handlers["onRollRightClicked"] = asimov_op.rollRightButtonClick
 			rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
 
 			clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
-			handlers["onClawOpenClicked"] = clawOpenButtonClick
+			handlers["onClawOpenClicked"] = asimov_op.clawOpenButtonClick
 			clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
 
 			clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
-			handlers["onClawCloseClicked"] = clawCloseButtonClick
+			handlers["onClawCloseClicked"] = asimov_op.clawCloseButtonClick
 			clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
 
 
 			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-			handlers["onPitchUpClicked"] = picthUpButtonClick
+			handlers["onPitchUpClicked"] = asimov_op.picthUpButtonClick
 			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
 
 			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
-			handlers["onPitchDownClicked"] = pitchDownButtonClick
+			handlers["onPitchDownClicked"] = asimov_op.pitchDownButtonClick
 			pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
 			# -----------------------------------
 			armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
-			handlers["onArmUpClicked"] = armUpButtonClick
+			handlers["onArmUpClicked"] = asimov_op.armUpButtonClick
 			armUpBtn.connect("clicked", handlers["onArmUpClicked"])
 
 			armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
-			handlers["onArmDownClicked"] = armDownButtonClick
+			handlers["onArmDownClicked"] = asimov_op.armDownButtonClick
 			armDownBtn.connect("clicked", handlers["onArmDownClicked"])
 			# -----------------------------------
 
 
 
 			armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
-			handlers["onArmLeftClicked"] = armLeftButtonClick
+			handlers["onArmLeftClicked"] = asimov_op.armLeftButtonClick
 			armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
 
 			armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
-			handlers["onArmRightClicked"] = armRightButtonClick
+			handlers["onArmRightClicked"] = asimov_op.armRightButtonClick
 			armRightBtn.connect("clicked", handlers["onArmRightClicked"])
 
 			armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
-			handlers["onArmBackClicked"] = armBackButtonClick
+			handlers["onArmBackClicked"] = asimov_op.armBackButtonClick
 			armBackBtn.connect("clicked", handlers["onArmBackClicked"])
 
 			armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
-			handlers["onArmFwdClicked"] = armFwdButtonClick
+			handlers["onArmFwdClicked"] = asimov_op.armFwdButtonClick
 			armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
 
 		#print("Switch was turned", state)
 
-	# Some helper functions
+	# Some helper functions, keeping static since they should be in their own class
 	@staticmethod
 	def armpos(jointsX, jointsY, armsX, armsY):
 		ax.plot( jointsX[0] , jointsY[0] , 'ko' , markersize=7) # the base & segment 1
@@ -486,6 +454,8 @@ class AsimovOperation(Gtk.Window):
 # Need to close file, but program won't run if I include it
 # textinput.close()
 if __name__ == "__main__":
+
+	asimov_op = AsimovOperation()
 
 	# Global Variables
 	fig = Figure(dpi=50)
@@ -526,23 +496,23 @@ if __name__ == "__main__":
 	# This is used to connect signals sent by the widgets in Glade
 	# and assign them functionality using python code
 	handlers = {
-		"onTestClick": AsimovOperation.testButton,
-		"onClearClick": AsimovOperation.clearButton,
-		"onYawLeftClicked": AsimovOperation.yawLeftButtonClick,
-		"onPitchUpClicked": AsimovOperation.picthUpButtonClick,
-		"onYawRightClicked": AsimovOperation.yawRightButtonClick,
-		"onRollLeftClicked": AsimovOperation.rollLeftButtonClick,
-		"onPitchDownClicked": AsimovOperation.pitchDownButtonClick,
-		"onRollRightClicked": AsimovOperation.rollRightButtonClick,
-		"onClawOpenClicked": AsimovOperation.clawOpenButtonClick,
-		"onClawCloseClicked": AsimovOperation.clawCloseButtonClick,
-		"onArmUpClicked": AsimovOperation.armUpButtonClick,
-		"onArmLeftClicked": AsimovOperation.armLeftButtonClick,
-		"onArmDownClicked": AsimovOperation.armDownButtonClick,
-		"onArmRightClicked":AsimovOperation.armRightButtonClick,
-		"onArmBackClicked": AsimovOperation.armBackButtonClick,
-		"onArmFwdClicked": AsimovOperation.armFwdButtonClick,
-		"onHomePostionClicked": AsimovOperation.homePostionBtnClicked
+		"onTestClick": asimov_op.testButton,
+		"onClearClick": asimov_op.clearButton,
+		"onYawLeftClicked": asimov_op.yawLeftButtonClick,
+		"onPitchUpClicked": asimov_op.picthUpButtonClick,
+		"onYawRightClicked": asimov_op.yawRightButtonClick,
+		"onRollLeftClicked": asimov_op.rollLeftButtonClick,
+		"onPitchDownClicked": asimov_op.pitchDownButtonClick,
+		"onRollRightClicked": asimov_op.rollRightButtonClick,
+		"onClawOpenClicked": asimov_op.clawOpenButtonClick,
+		"onClawCloseClicked": asimov_op.clawCloseButtonClick,
+		"onArmUpClicked": asimov_op.armUpButtonClick,
+		"onArmLeftClicked": asimov_op.armLeftButtonClick,
+		"onArmDownClicked": asimov_op.armDownButtonClick,
+		"onArmRightClicked":asimov_op.armRightButtonClick,
+		"onArmBackClicked": asimov_op.armBackButtonClick,
+		"onArmFwdClicked": asimov_op.armFwdButtonClick,
+		"onHomePostionClicked": asimov_op.homePostionBtnClicked
 
 
 	}
@@ -608,5 +578,5 @@ if __name__ == "__main__":
 	window.set_title("Space Concordia Robtotics GUI")
 	window.connect("destroy", Gtk.main_quit)
 	window.show_all()
-	AsimovOperation.toggleBtnTest()
+	asimov_op.toggleBtnTest()
 	Gtk.main()
