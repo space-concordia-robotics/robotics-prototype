@@ -17,7 +17,11 @@ Development can be done on Windows, Linux and MacOS. The easiest to work with is
 - `sudo apt-get install geany` - text editor
     
 Glade setup steps are [here](https://prognotes.net/2015/12/installing-gtk-3-and-glade-development-tools-in-linux/) 
-        
+
+To install the dependencies for the arm position panel:
+`sudo apt-get install python-gi-cairo`
+`sudo pip install matplotlib`        
+
 ### OSX
 Before getting started it is assumed that you have [HomeBrew](https://brew.sh/) installed and you have python 2.7 installed and linked to home brew.
 
