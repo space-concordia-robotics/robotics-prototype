@@ -20,7 +20,7 @@ class Motor:
 		#self.alive = alive
 		#self.refresh_rate = refresh_rate
 
-	def __init__(self, name, max_angle, min_angle, max_current, min_current):
+	def __init__(self, name, max_angle, min_angle, max_current, min_current, home_angle):
 		self.name = name
 		self.set_max_min_angles(max_angle, min_angle)
 		self.set_max_min_currents(max_current, min_current)
@@ -47,8 +47,13 @@ class Motor:
 	def set_angle_position(self, angle):
 		if angle > self.min_angle and angle < self.max_angle:
 			self.angle_position = angle
+			return True
 		else:
-			print("unable to set angle position to " + angle + " for motor: " + self.name)
+			print("unable to set angle position to " + str(angle) + " for motor: " + self.name)
+			return False
+
+	def get_angle_position(self):
+		return self.angle_position
 
 	def set_refresh_rate(self, refresh_rate):
 		self.refresh_rate = refresh_rate
