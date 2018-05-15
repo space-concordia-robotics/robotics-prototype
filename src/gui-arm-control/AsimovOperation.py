@@ -52,11 +52,14 @@ class AsimovOperation(Gtk.Window):
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
 
-	def pitchUpButtonClick(self, button):
+	def do_the_thing(self, button, label):
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Pitch Up Clicked " + str(now) + "\n")
+		text_buffer.insert(end_iter, label + str(now) + "\n")
+
+	def pitchUpButtonClick(self, button, label):
+		self.do_the_thing(button, "> Pitch Up")
 
 	def yawRightButtonClick(self, button):
 		now = datetime.datetime.now()
