@@ -492,6 +492,7 @@ if __name__ == "__main__":
 	armPos.setVariables()
 	armPos.positionArm()
 
+	# add arm positon panel
 	placeholder = builder.get_object("Arm Position Placeholder")
 	placeholder.add_with_viewport(armPos.getCanvas())
 	###########################End Matlab Stuff
