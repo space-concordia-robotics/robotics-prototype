@@ -7,6 +7,12 @@ class StreamCatcher:
 		self.color = False # initial value to be decided during testing (whatever our camera defaults to)
 		self.buffer_container = 0 # place holder value for now, will be some kind of VideoCapture object, probably from opencv module
 
+	def set_resolution(self):
+		# set a new resolution for the camera feed
+		# if new resolution is acceptable, change resolution
+		# otherwise return false
+		return False
+	
 	def enable_stream(self):
 		# try to enable stream
 
