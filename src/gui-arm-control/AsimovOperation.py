@@ -52,91 +52,62 @@ class AsimovOperation(Gtk.Window):
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
 
-	def do_the_thing(self, button, label):
+	def send_to_console(self, label):
+		label = label + "\n" # pass by reference ftw
 		now = datetime.datetime.now()
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, label + str(now) + "\n")
+		text_buffer.insert(end_iter, label + str(now.strftime("%Y-%m-%d %H:%M:%S")) + "\n")
 
-	def pitchUpButtonClick(self, button, label):
-		self.do_the_thing(button, "> Pitch Up")
+	def pitchUpButtonClick(self, button):
+		self.send_to_console("> Pitch Up")
 
 	def yawRightButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Yaw Right Clicked " + str(now) + "\n")
+		self.send_to_console("> Yaw Right")
 
 	def rollLeftButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Roll Left Clicked " + str(now) + "\n")
+		self.send_to_console("> Roll Left")
 
 	def pitchDownButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Pitch Down Clicked " + str(now) + "\n")
+		self.send_to_console("> Pitch Down")
 
 	def rollRightButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Roll Right Clicked " + str(now) + "\n")
+		self.send_to_console("> Roll Right")
 
 	def clawOpenButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Claw Open Clicked " + str(now) + "\n")
+		self.send_to_console("> Claw Open")
 
 	def clawCloseButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Claw Close Clicked " + str(now) + "\n")
+		self.send_to_console("> Claw Close")
 
 	def armUpButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Up Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Up")
 
 	def armLeftButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Left Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Left")
 
 	def armDownButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Down Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Down")
 
 	def armRightButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Right Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Right")
 
 	def armBackButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Back Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Back")
 
 	def armFwdButtonClick(self, button):
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Arm Fwd Clicked " + str(now) + "\n")
+		self.send_to_console("> Arm Fwd")
 
 	def toggleSwitchClick(self, button):
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> onn")
+#		global state
+
+#		if state is "on":
+#		self.send_to_console("> On")
+#		else:
+#			self.send_to_console("> Off")
 
 	def homePostionBtnClicked(self, button):
 		'''
