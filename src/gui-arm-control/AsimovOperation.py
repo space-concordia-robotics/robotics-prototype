@@ -202,7 +202,7 @@ class AsimovOperation(Gtk.Window):
 
 	# switches call back functions for buttons from manual to auto
 	@staticmethod
-	def switch_to_manual_controls(button, event, handler_name, callback_func):
+	def switch_controls(button, event, handler_name, callback_func):
 		button.disconnect_by_func(handlers[handler_name])
 		handlers[handler_name] = callback_func
 		button.connect(event, handlers[handler_name])
@@ -253,18 +253,18 @@ class AsimovOperation(Gtk.Window):
 			#Gtk.Widget.set_sensitive(armDownBtn, False)
 
 			# make manual buttons switch handler code
-			asimov_op.switch_to_manual_controls(rollLeftBtn, "clicked", "onRollLeftClicked", asimov_op.stm2ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(rollRightBtn, "clicked", "onRollRightClicked", asimov_op.stm2ButtonRightClicked)
-			asimov_op.switch_to_manual_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.stm3ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(clawCloseBtn, "clicked", "onClawCloseClicked", asimov_op.stm3ButtonRightClicked)
-			asimov_op.switch_to_manual_controls(pitchUpBtn, "clicked", "onPitchUpClicked", asimov_op.stm1ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(pitchDownBtn, "clicked", "onPitchDownClicked", asimov_op.stm1ButtonRightClicked)
-			asimov_op.switch_to_manual_controls(armUpBtn, "clicked", "onArmUpClicked", asimov_op.stm4ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(armDownBtn, "clicked", "onArmDownClicked", asimov_op.stm4ButtonRightClicked)
-			asimov_op.switch_to_manual_controls(armLeftBtn, "clicked", "onArmLeftClicked", asimov_op.astm1ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(armRightBtn, "clicked", "onArmRightClicked", asimov_op.astm1ButtonRightClicked)
-			asimov_op.switch_to_manual_controls(armBackBtn, "clicked", "onArmBackClicked", asimov_op.astm2ButtonLeftClicked)
-			asimov_op.switch_to_manual_controls(armFwdBtn, "clicked", "onArmFwdClicked", asimov_op.astm2ButtonRightClicked)
+			asimov_op.switch_controls(rollLeftBtn, "clicked", "onRollLeftClicked", asimov_op.stm2ButtonLeftClicked)
+			asimov_op.switch_controls(rollRightBtn, "clicked", "onRollRightClicked", asimov_op.stm2ButtonRightClicked)
+			asimov_op.switch_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.stm3ButtonLeftClicked)
+			asimov_op.switch_controls(clawCloseBtn, "clicked", "onClawCloseClicked", asimov_op.stm3ButtonRightClicked)
+			asimov_op.switch_controls(pitchUpBtn, "clicked", "onPitchUpClicked", asimov_op.stm1ButtonLeftClicked)
+			asimov_op.switch_controls(pitchDownBtn, "clicked", "onPitchDownClicked", asimov_op.stm1ButtonRightClicked)
+			asimov_op.switch_controls(armUpBtn, "clicked", "onArmUpClicked", asimov_op.stm4ButtonLeftClicked)
+			asimov_op.switch_controls(armDownBtn, "clicked", "onArmDownClicked", asimov_op.stm4ButtonRightClicked)
+			asimov_op.switch_controls(armLeftBtn, "clicked", "onArmLeftClicked", asimov_op.astm1ButtonLeftClicked)
+			asimov_op.switch_controls(armRightBtn, "clicked", "onArmRightClicked", asimov_op.astm1ButtonRightClicked)
+			asimov_op.switch_controls(armBackBtn, "clicked", "onArmBackClicked", asimov_op.astm2ButtonLeftClicked)
+			asimov_op.switch_controls(armFwdBtn, "clicked", "onArmFwdClicked", asimov_op.astm2ButtonRightClicked)
 
 		else:
 			state = "off"
@@ -278,63 +278,23 @@ class AsimovOperation(Gtk.Window):
 			Gtk.Button.set_label(armRightBtn, "Arm\nRight")
 			Gtk.Button.set_label(armBackBtn, "Arm\nBack")
 			Gtk.Button.set_label(armFwdBtn, "Arm\nFwd")
-
-			'''Gtk.Widget.set_name(armUpBtn, "Arm-Up")
-			Gtk.Widget.set_name(armDownBtn, "Arm-Down")
-			Gtk.Widget.set_sensitive(armUpBtn, True)
-			Gtk.Widget.set_sensitive(armDownBtn, True)'''
-
 			Gtk.Button.set_label(armUpBtn, "Arm\nUp")
 			Gtk.Button.set_label(armDownBtn, "Arm\nDown")
 
 			# Remove manual buttons switch handler code
-			rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
-			handlers["onRollLeftClicked"] = asimov_op.rollLeftButtonClick
-			rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
-
-			rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
-			handlers["onRollRightClicked"] = asimov_op.rollRightButtonClick
-			rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
-
-			clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
-			handlers["onClawOpenClicked"] = asimov_op.clawOpenButtonClick
-			clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
-
-			clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
-			handlers["onClawCloseClicked"] = asimov_op.clawCloseButtonClick
-			clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
-
-			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-			handlers["onPitchUpClicked"] = asimov_op.pitchUpButtonClick
-			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
-
-			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
-			handlers["onPitchDownClicked"] = asimov_op.pitchDownButtonClick
-			pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
-
-			armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
-			handlers["onArmUpClicked"] = asimov_op.armUpButtonClick
-			armUpBtn.connect("clicked", handlers["onArmUpClicked"])
-
-			armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
-			handlers["onArmDownClicked"] = asimov_op.armDownButtonClick
-			armDownBtn.connect("clicked", handlers["onArmDownClicked"])
-
-			armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
-			handlers["onArmLeftClicked"] = asimov_op.armLeftButtonClick
-			armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
-
-			armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
-			handlers["onArmRightClicked"] = asimov_op.armRightButtonClick
-			armRightBtn.connect("clicked", handlers["onArmRightClicked"])
-
-			armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
-			handlers["onArmBackClicked"] = asimov_op.armBackButtonClick
-			armBackBtn.connect("clicked", handlers["onArmBackClicked"])
-
-			armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
-			handlers["onArmFwdClicked"] = asimov_op.armFwdButtonClick
-			armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
+			asimov_op.switch_controls(rollLeftBtn, "clicked", "onRollLeftClicked", asimov_op.rollLeftButtonClick)
+			asimov_op.switch_controls(rollRightBtn, "clicked", "onRollRightClicked", asimov_op.rollRightButtonClick)
+			asimov_op.switch_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.clawOpenButtonClick)
+			asimov_op.switch_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.clawOpenButtonClick)
+			asimov_op.switch_controls(clawCloseBtn, "clicked", "onClawCloseClicked", asimov_op.clawCloseButtonClick)
+			asimov_op.switch_controls(pitchUpBtn, "clicked", "onPitchUpClicked", asimov_op.pitchUpButtonClick)
+			asimov_op.switch_controls(pitchDownBtn, "clicked", "onDownUpClicked", asimov_op.pitchDownButtonClick)
+			asimov_op.switch_controls(ArmUpBtn, "clicked", "ArmUpClicked", asimov_op.armUpButtonClick)
+			asimov_op.switch_controls(ArmDownBtn, "clicked", "ArmDownClicked", asimov_op.armDownButtonClick)
+			asimov_op.switch_controls(ArmLeftBtn, "clicked", "ArmLeftClicked", asimov_op.armLeftButtonClick)
+			asimov_op.switch_controls(ArmRightBtn, "clicked", "ArmRightClicked", asimov_op.armRightButtonClick)
+			asimov_op.switch_controls(ArmBackBtn, "clicked", "ArmBackClicked", asimov_op.armBackButtonClick)
+			asimov_op.switch_controls(ArmFwdBtn, "clicked", "ArmFwdClicked", asimov_op.armFwdButtonClick)
 
 		#print("Switch was turned", state)
 
