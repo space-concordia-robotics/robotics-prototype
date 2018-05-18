@@ -7,7 +7,6 @@ from ArmPosition import ArmPosition
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
-
 '''
 This will access and run the glade file
 If your glade file is not in the same directory as this python file,
@@ -17,7 +16,6 @@ builder.add_from_file("suhdude"), where suhdude is the name of the glade file, i
 The glade file is currently using textboxes as placeholders
 for the windows that will be implemented in the future.
 '''
-
 class AsimovOperation(Gtk.Window):
 	# static/class attributes go here
 
@@ -134,8 +132,8 @@ class AsimovOperation(Gtk.Window):
 		text_buffer = asmotor2.get_buffer()
 		text_buffer.set_text("10")
 
+	# Get value in motor postion text box, change it an then re-enter it
 	def alter_angle(self, button, motor, magnitude):
-		# Get value in motor postion text box, change it an then re-enter it
 		text_buffer = motor.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + magnitude))
@@ -147,10 +145,10 @@ class AsimovOperation(Gtk.Window):
 		self.alter_angle(button, smotor1, +1)
 
 	def stm2ButtonLeftClicked(self, button):
-		self.alter_angle(button, smotor2, +1)
+		self.alter_angle(button, smotor2, -1)
 
 	def stm2ButtonRightClicked(self, button):
-		self.alter_angle(button, smotor2, -1)
+		self.alter_angle(button, smotor2, +1)
 
 	def stm3ButtonLeftClicked(self, button):
 		self.alter_angle(button, smotor3, -1)
@@ -202,6 +200,13 @@ class AsimovOperation(Gtk.Window):
 		text_buffer = asmotor2.get_buffer()
 		text_buffer.set_text(str(rand))
 
+	# switches call back functions for buttons from manual to auto
+	@staticmethod
+	def switch_to_manual_controls(button, event, handler_name, callback_func):
+		button.disconnect_by_func(handlers[handler_name])
+		handlers[handler_name] = callback_func
+		button.connect(event, handlers[handler_name])
+
 	@staticmethod
 	def on_switch_activated(self, sw):
 		global state
@@ -248,55 +253,19 @@ class AsimovOperation(Gtk.Window):
 			#Gtk.Widget.set_sensitive(armDownBtn, False)
 
 			# make manual buttons switch handler code
-			rollLeftBtn.disconnect_by_func(handlers["onRollLeftClicked"])
-			handlers["onRollLeftClicked"] = asimov_op.stm2ButtonLeftClicked
-			rollLeftBtn.connect("clicked", handlers["onRollLeftClicked"])
+			asimov_op.switch_to_manual_controls(rollLeftBtn, "clicked", "onRollLeftClicked", asimov_op.stm2ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(rollRightBtn, "clicked", "onRollRightClicked", asimov_op.stm2ButtonRightClicked)
+			asimov_op.switch_to_manual_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.stm3ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(clawCloseBtn, "clicked", "onClawCloseClicked", asimov_op.stm3ButtonRightClicked)
+			asimov_op.switch_to_manual_controls(pitchUpBtn, "clicked", "onPitchUpClicked", asimov_op.stm1ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(pitchDownBtn, "clicked", "onPitchDownClicked", asimov_op.stm1ButtonRightClicked)
+			asimov_op.switch_to_manual_controls(armUpBtn, "clicked", "onArmUpClicked", asimov_op.stm4ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(armDownBtn, "clicked", "onArmDownClicked", asimov_op.stm4ButtonRightClicked)
+			asimov_op.switch_to_manual_controls(armLeftBtn, "clicked", "onArmLeftClicked", asimov_op.astm1ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(armRightBtn, "clicked", "onArmRightClicked", asimov_op.astm1ButtonRightClicked)
+			asimov_op.switch_to_manual_controls(armBackBtn, "clicked", "onArmBackClicked", asimov_op.astm2ButtonLeftClicked)
+			asimov_op.switch_to_manual_controls(armFwdBtn, "clicked", "onArmFwdClicked", asimov_op.astm2ButtonRightClicked)
 
-			rollRightBtn.disconnect_by_func(handlers["onRollRightClicked"])
-			handlers["onRollRightClicked"] = asimov_op.stm2ButtonRightClicked
-			rollRightBtn.connect("clicked", handlers["onRollRightClicked"])
-
-			clawOpenBtn.disconnect_by_func(handlers["onClawOpenClicked"])
-			handlers["onClawOpenClicked"] = asimov_op.stm3ButtonLeftClicked
-			clawOpenBtn.connect("clicked", handlers["onClawOpenClicked"])
-
-			clawCloseBtn.disconnect_by_func(handlers["onClawCloseClicked"])
-			handlers["onClawCloseClicked"] = asimov_op.stm3ButtonRightClicked
-			clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
-
-
-			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
-			handlers["onPitchUpClicked"] = asimov_op.stm1ButtonLeftClicked
-			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
-
-			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
-			handlers["onPitchDownClicked"] = asimov_op.stm1ButtonRightClicked
-			pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
-			# -----------------------------------
-			armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
-			handlers["onArmUpClicked"] = asimov_op.stm4ButtonLeftClicked
-			armUpBtn.connect("clicked", handlers["onArmUpClicked"])
-
-			armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
-			handlers["onArmDownClicked"] = asimov_op.stm4ButtonRightClicked
-			armDownBtn.connect("clicked", handlers["onArmDownClicked"])
-			# -----------------------------------
-
-			armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
-			handlers["onArmLeftClicked"] = asimov_op.astm1ButtonLeftClicked
-			armLeftBtn.connect("clicked", handlers["onArmLeftClicked"])
-
-			armRightBtn.disconnect_by_func(handlers["onArmRightClicked"])
-			handlers["onArmRightClicked"] = asimov_op.astm1ButtonRightClicked
-			armRightBtn.connect("clicked", handlers["onArmRightClicked"])
-
-			armBackBtn.disconnect_by_func(handlers["onArmBackClicked"])
-			handlers["onArmBackClicked"] = asimov_op.astm2ButtonLeftClicked
-			armBackBtn.connect("clicked", handlers["onArmBackClicked"])
-
-			armFwdBtn.disconnect_by_func(handlers["onArmFwdClicked"])
-			handlers["onArmFwdClicked"] = asimov_op.astm2ButtonRightClicked
-			armFwdBtn.connect("clicked", handlers["onArmFwdClicked"])
 		else:
 			state = "off"
 			Gtk.Button.set_label(rollLeftBtn, "Roll\nLeft")
@@ -335,7 +304,6 @@ class AsimovOperation(Gtk.Window):
 			handlers["onClawCloseClicked"] = asimov_op.clawCloseButtonClick
 			clawCloseBtn.connect("clicked", handlers["onClawCloseClicked"])
 
-
 			pitchUpBtn.disconnect_by_func(handlers["onPitchUpClicked"])
 			handlers["onPitchUpClicked"] = asimov_op.pitchUpButtonClick
 			pitchUpBtn.connect("clicked", handlers["onPitchUpClicked"])
@@ -343,7 +311,7 @@ class AsimovOperation(Gtk.Window):
 			pitchDownBtn.disconnect_by_func(handlers["onPitchDownClicked"])
 			handlers["onPitchDownClicked"] = asimov_op.pitchDownButtonClick
 			pitchDownBtn.connect("clicked", handlers["onPitchDownClicked"])
-			# -----------------------------------
+
 			armUpBtn.disconnect_by_func(handlers["onArmUpClicked"])
 			handlers["onArmUpClicked"] = asimov_op.armUpButtonClick
 			armUpBtn.connect("clicked", handlers["onArmUpClicked"])
@@ -351,9 +319,6 @@ class AsimovOperation(Gtk.Window):
 			armDownBtn.disconnect_by_func(handlers["onArmDownClicked"])
 			handlers["onArmDownClicked"] = asimov_op.armDownButtonClick
 			armDownBtn.connect("clicked", handlers["onArmDownClicked"])
-			# -----------------------------------
-
-
 
 			armLeftBtn.disconnect_by_func(handlers["onArmLeftClicked"])
 			handlers["onArmLeftClicked"] = asimov_op.armLeftButtonClick
@@ -373,10 +338,7 @@ class AsimovOperation(Gtk.Window):
 
 		#print("Switch was turned", state)
 
-# Need to close file, but program won't run if I include it
-# textinput.close()
 if __name__ == "__main__":
-
 	asimov_op = AsimovOperation()
 
 	# CSS Styling part to make GUI look better
@@ -390,9 +352,7 @@ if __name__ == "__main__":
 	builder = Gtk.Builder()
 	builder.add_from_file("ArmGuiLayout2.glade")
 
-
 	textarea = builder.get_object("Error Log ")
-
 
 	# Get a reference to motor table text boxes
 	smotor1 = builder.get_object("Stepper Motor 1 Angle")
@@ -401,7 +361,6 @@ if __name__ == "__main__":
 	smotor4 = builder.get_object("Stepper Motor 4 Angle")
 	asmotor1 = builder.get_object("Arm Servo Motor 1 Angle")
 	asmotor2 = builder.get_object("Arm Servo Motor 2 Angle")
-
 
 	# Get reference to button so we can update the label when switched to manual
 	switch = builder.get_object("man-auto-switch")
@@ -439,8 +398,6 @@ if __name__ == "__main__":
 	# add arm positon panel
 	placeholder = builder.get_object("Arm Position Placeholder")
 	placeholder.add_with_viewport(armPos.getCanvas())
-	###########################End Matlab Stuff
-
 
 	# boiler plate gtk stuff
 	window = builder.get_object("ArmGuiLayoutWindow")
