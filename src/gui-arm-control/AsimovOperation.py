@@ -134,77 +134,47 @@ class AsimovOperation(Gtk.Window):
 		text_buffer = asmotor2.get_buffer()
 		text_buffer.set_text("10")
 
-	def stm1ButtonLeftClicked(self, button):
+	def alter_angle(self, button, motor, magnitude):
 		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor1.get_buffer()
+		text_buffer = motor.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		text_buffer.set_text(str(int(text) + magnitude))
+
+	def stm1ButtonLeftClicked(self, button):
+		self.alter_angle(button, smotor1, -1)
 
 	def stm1ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor1.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, smotor1, +1)
 
 	def stm2ButtonLeftClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor2.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		self.alter_angle(button, smotor2, +1)
 
 	def stm2ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor2.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, smotor2, -1)
 
 	def stm3ButtonLeftClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor3.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		self.alter_angle(button, smotor3, -1)
 
 	def stm3ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor3.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, smotor3, +1)
 
 	def stm4ButtonLeftClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor4.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		self.alter_angle(button, smotor4, -1)
 
 	def stm4ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = smotor4.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, smotor4, +1)
 
 	def astm1ButtonLeftClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = asmotor1.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		self.alter_angle(button, asmotor1, -1)
 
 	def astm1ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = asmotor1.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, asmotor1, +1)
 
 	def astm2ButtonLeftClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = asmotor2.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) - 1))
+		self.alter_angle(button, asmotor2, -1)
 
 	def astm2ButtonRightClicked(self, button):
-		# Get value in motor postion text box, change it an then re-enter it
-		text_buffer = asmotor2.get_buffer()
-		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + 1))
+		self.alter_angle(button, asmotor2, +1)
 
 	def toggleBtnTest(self):
 		# fill each of the displacement boxes with random numbers between 10 and 50
@@ -424,7 +394,7 @@ if __name__ == "__main__":
 	textarea = builder.get_object("Error Log ")
 
 
-	#Get a reference to motor table text boxes
+	# Get a reference to motor table text boxes
 	smotor1 = builder.get_object("Stepper Motor 1 Angle")
 	smotor2 = builder.get_object("Stepper Motor 2 Angle")
 	smotor3 = builder.get_object("Stepper Motor 3 Angle")
@@ -433,7 +403,7 @@ if __name__ == "__main__":
 	asmotor2 = builder.get_object("Arm Servo Motor 2 Angle")
 
 
-	#Get reference to button so we can update the label when switched to manual
+	# Get reference to button so we can update the label when switched to manual
 	switch = builder.get_object("man-auto-switch")
 	switch.connect("state-set", AsimovOperation.on_switch_activated)
 	switch.set_active(False)
