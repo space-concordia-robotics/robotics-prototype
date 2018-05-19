@@ -3,7 +3,7 @@ import gi
 import datetime # time stamps for test console logs
 import random # for generating random values in motor table
 from ArmPosition import ArmPosition
-
+import os
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -27,14 +27,19 @@ class AsimovOperation(Gtk.Window):
 	# read errors from other windows
 	def testButton(self, button):
 		textinput = open("ErrorLogTest.txt", "r")
-
-		textbuffer = textarea.get_buffer()
-		textbuffer.set_text(textinput.read())
+		self.send_to_console(textinput.read())
 		textinput.close()
 
 	def clearButton(self, button):
 		textbuffer = textarea.get_buffer()
 		textbuffer.set_text("")
+
+	def openLogButton(self, button):
+		# windows
+		#subprocess.Popen(r'explorer /select,"C:\path\of\folder\file"')
+		# linux
+		os.system("xdg-open '%s'" % "ErrorLogTest.txt")
+		self.send_to_console("ayyyyyyy")
 
 	# definitions of the handlers for the buttons
 	def yawLeftButtonClick(self, button):
@@ -133,10 +138,10 @@ class AsimovOperation(Gtk.Window):
 		text_buffer.set_text("10")
 
 	# Get value in motor postion text box, change it an then re-enter it
-	def alter_angle(self, button, motor, magnitude):
+	def alter_angle(self, button, motor, delta):
 		text_buffer = motor.get_buffer()
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
-		text_buffer.set_text(str(int(text) + magnitude))
+		text_buffer.set_text(str(int(text) + delta))
 
 	def stm1ButtonLeftClicked(self, button):
 		self.alter_angle(button, smotor1, -1)
@@ -332,6 +337,7 @@ if __name__ == "__main__":
 	handlers = {
 		"onTestClick": asimov_op.testButton,
 		"onClearClick": asimov_op.clearButton,
+		"onOpenLogClick": asimov_op.openLogButton,
 		"onYawLeftClicked": asimov_op.yawLeftButtonClick,
 		"onPitchUpClicked": asimov_op.pitchUpButtonClick,
 		"onYawRightClicked": asimov_op.yawRightButtonClick,
