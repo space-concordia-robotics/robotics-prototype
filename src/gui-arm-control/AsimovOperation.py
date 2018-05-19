@@ -39,7 +39,6 @@ class AsimovOperation(Gtk.Window):
 		#subprocess.Popen(r'explorer /select,"C:\path\of\folder\file"')
 		# linux
 		os.system("xdg-open '%s'" % "ErrorLogTest.txt")
-		self.send_to_console("ayyyyyyy")
 
 	# definitions of the handlers for the buttons
 	def yawLeftButtonClick(self, button):
@@ -119,23 +118,9 @@ class AsimovOperation(Gtk.Window):
 		'''
 
 		# For the the motor position the home value is set to 10 (is it done when in manual or auto)
-		text_buffer = smotor1.get_buffer()
-		text_buffer.set_text("10")
-
-		text_buffer = smotor2.get_buffer()
-		text_buffer.set_text("10")
-
-		text_buffer = smotor3.get_buffer()
-		text_buffer.set_text("10")
-
-		text_buffer = smotor4.get_buffer()
-		text_buffer.set_text("10")
-
-		text_buffer = asmotor1.get_buffer()
-		text_buffer.set_text("10")
-
-		text_buffer = asmotor2.get_buffer()
-		text_buffer.set_text("10")
+		buffers = [smotor1.get_buffer(), smotor2.get_buffer(), smotor3.get_buffer(), smotor4.get_buffer(), asmotor1.get_buffer(), asmotor2.get_buffer()]
+		for text_buffer in buffers:
+			text_buffer.set_text("10")
 
 	# Get value in motor postion text box, change it an then re-enter it
 	def alter_angle(self, button, motor, delta):
