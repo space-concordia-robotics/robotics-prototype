@@ -165,30 +165,12 @@ class AsimovOperation(Gtk.Window):
 		self.alter_angle(button, asmotor2, +1)
 
 	def toggleBtnTest(self):
-		# fill each of the displacement boxes with random numbers between 10 and 50
-		rand = random.randint(10, 71)
-		text_buffer = smotor1.get_buffer()
-		text_buffer.set_text(str(rand))
+		# fill each of the displacement boxes with random numbers between and including 10 and 71
+		buffers = [smotor1.get_buffer(), smotor2.get_buffer(), smotor3.get_buffer(), smotor4.get_buffer(), asmotor1.get_buffer(), asmotor2.get_buffer()]
 
-		rand = random.randint(10, 71)
-		text_buffer = smotor2.get_buffer()
-		text_buffer.set_text(str(rand))
-
-		rand = random.randint(10, 71)
-		text_buffer = smotor3.get_buffer()
-		text_buffer.set_text(str(rand))
-
-		rand = random.randint(10, 71)
-		text_buffer = smotor4.get_buffer()
-		text_buffer.set_text(str(rand))
-
-		rand = random.randint(10, 71)
-		text_buffer = asmotor1.get_buffer()
-		text_buffer.set_text(str(rand))
-
-		rand = random.randint(10, 71)
-		text_buffer = asmotor2.get_buffer()
-		text_buffer.set_text(str(rand))
+		for text_buffer in buffers:
+			rand = random.randint(10, 71)
+			text_buffer.set_text(str(rand))
 
 	# switches call back functions for buttons from manual to auto
 	@staticmethod
