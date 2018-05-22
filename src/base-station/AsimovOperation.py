@@ -4,6 +4,7 @@ import datetime # time stamps for test console logs
 import random # for generating random values in motor table
 from ArmPosition import ArmPosition
 import os
+import platform
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -38,7 +39,8 @@ class AsimovOperation(Gtk.Window):
 		# windows
 		#subprocess.Popen(r'explorer /select,"C:\path\of\folder\file"')
 		# linux
-		os.system("xdg-open '%s'" % "ErrorLogTest.txt")
+		if platform.system() == 'Linux':
+			os.system("xdg-open '%s'" % "ErrorLogTest.txt")
 
 	# definitions of the handlers for the buttons
 	def yawLeftButtonClick(self, button):
