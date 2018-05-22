@@ -5,6 +5,7 @@ import random # for generating random values in motor table
 from ArmPosition import ArmPosition
 import os
 import platform
+import subprocess
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -36,11 +37,18 @@ class AsimovOperation(Gtk.Window):
 		textbuffer.set_text("")
 
 	def openLogButton(self, button):
+		os_name = platform.system()
+		file_name = "ErrorLogTest.txt"
+
 		# windows
-		#subprocess.Popen(r'explorer /select,"C:\path\of\folder\file"')
+		if os_name == 'Windows':
+			subprocess.Popen(r'explorer /select,' + file_name)
 		# linux
-		if platform.system() == 'Linux':
-			os.system("xdg-open '%s'" % "ErrorLogTest.txt")
+		elif os_name == 'Linux':
+			os.system("xdg-open '%s'" % file_name)
+
+		elif os_name == 'Darwin':
+			subprocess.call(['open', file_name])
 
 	# definitions of the handlers for the buttons
 	def yawLeftButtonClick(self, button):
