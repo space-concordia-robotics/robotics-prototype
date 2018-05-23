@@ -185,10 +185,12 @@ class AsimovOperation(Gtk.Window):
 		# it's important that the order and size of these arrays correspond for the following loops to function properly
 		buttons = [rollLeftBtn, rollRightBtn, clawOpenBtn, clawCloseBtn, pitchUpBtn, pitchDownBtn, armLeftBtn, armRightBtn, armBackBtn, armFwdBtn, armUpBtn, armDownBtn]
 		automatic_labels = ["Roll\nLeft", "Roll\nRight", "Claw\nOpen", "Claw\nClose", "Pitch\nUp", "Pitch\nDown", "Arm\nLeft", "Arm\nRight", "Arm\nBack", "Arm\nFwd", "Arm\nUp", "Arm\nDown"]
-		manual_labels = ["DCM2\n <<", "DCM2\n >>", "STM3\n <<", "STM3\n >>", "STM1\n <<", "STM1\n >>", "STM4\n <<", "STM4\n >>", "ASM1\n <<", "ASM1\n >>", "ASM2\n >>", "ASM2\n <<"]
+		manual_labels = ["DCM2\n <<", "DCM2\n >>", "STM3\n <<", "STM3\n >>", "STM1\n <<", "STM1\n >>", "STM4\n <<", "STM4\n >>", "ASM1\n <<", "ASM1\n >>", "ASM2\n <<", "ASM2\n >>"]
 
 		automatic_event_names = ["onRollLeftClicked", "onRollRightClicked", "onClawOpenClicked", "onClawCloseClicked", "onPitchUpClicked", "onPitchDownClicked", "onArmLeftClicked", "onArmRightClicked", "onArmBackClicked", "onArmFwdClicked", "onArmUpClicked", "onArmDownClicked"]
-		manual_callbacks = [asimov_op.stm2ButtonLeftClicked, asimov_op.stm2ButtonRightClicked, asimov_op.stm3ButtonLeftClicked, asimov_op.stm3ButtonRightClicked, asimov_op.stm1ButtonLeftClicked, asimov_op.stm1ButtonRightClicked, asimov_op.stm4ButtonLeftClicked, asimov_op.stm4ButtonRightClicked, asimov_op.astm1ButtonLeftClicked, asimov_op.astm1ButtonRightClicked, asimov_op.astm2ButtonRightClicked, asimov_op.astm2ButtonLeftClicked]
+		automatic_callbacks = [asimov_op.rollLeftButtonClick, asimov_op.rollRightButtonClick, asimov_op.clawOpenButtonClick, asimov_op.clawCloseButtonClick, asimov_op.pitchUpButtonClick, asimov_op.pitchDownButtonClick, asimov_op.armLeftButtonClick, asimov_op.armRightButtonClick, asimov_op.armBackButtonClick, asimov_op.armFwdButtonClick, asimov_op.armUpButtonClick, asimov_op.armDownButtonClick]
+		manual_callbacks = [asimov_op.stm2ButtonLeftClicked, asimov_op.stm2ButtonRightClicked, asimov_op.stm3ButtonLeftClicked, asimov_op.stm3ButtonRightClicked, asimov_op.stm1ButtonLeftClicked, asimov_op.stm1ButtonRightClicked, asimov_op.stm4ButtonLeftClicked, asimov_op.stm4ButtonRightClicked, asimov_op.astm1ButtonLeftClicked, asimov_op.astm1ButtonRightClicked, asimov_op.astm2ButtonLeftClicked, asimov_op.astm2ButtonRightClicked]
+
 		if sw:
 			state = "on"
 
@@ -202,35 +204,14 @@ class AsimovOperation(Gtk.Window):
 
 		else:
 			state = "off"
-			Gtk.Button.set_label(rollLeftBtn, "Roll\nLeft")
-			Gtk.Button.set_label(rollRightBtn, "Roll\nRight")
-			Gtk.Button.set_label(clawOpenBtn, "Claw\nOpen")
-			Gtk.Button.set_label(clawCloseBtn, "Claw\nClose")
-			Gtk.Button.set_label(pitchUpBtn, "Pitch\nUp")
-			Gtk.Button.set_label(pitchDownBtn, "Pitch\nDown")
-			Gtk.Button.set_label(armLeftBtn, "Arm\nLeft")
-			Gtk.Button.set_label(armRightBtn, "Arm\nRight")
-			Gtk.Button.set_label(armBackBtn, "Arm\nBack")
-			Gtk.Button.set_label(armFwdBtn, "Arm\nFwd")
-			Gtk.Button.set_label(armUpBtn, "Arm\nUp")
-			Gtk.Button.set_label(armDownBtn, "Arm\nDown")
+
+			for button, label in zip(buttons, automatic_labels):
+				Gtk.Button.set_label(button, label)
 
 			# Remove manual buttons switch handler code
-			asimov_op.switch_controls(rollLeftBtn, "clicked", "onRollLeftClicked", asimov_op.rollLeftButtonClick)
-			asimov_op.switch_controls(rollRightBtn, "clicked", "onRollRightClicked", asimov_op.rollRightButtonClick)
-			asimov_op.switch_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.clawOpenButtonClick)
-			asimov_op.switch_controls(clawOpenBtn, "clicked", "onClawOpenClicked", asimov_op.clawOpenButtonClick)
-			asimov_op.switch_controls(clawCloseBtn, "clicked", "onClawCloseClicked", asimov_op.clawCloseButtonClick)
-			asimov_op.switch_controls(pitchUpBtn, "clicked", "onPitchUpClicked", asimov_op.pitchUpButtonClick)
-			asimov_op.switch_controls(pitchDownBtn, "clicked", "onPitchDownClicked", asimov_op.pitchDownButtonClick)
-			asimov_op.switch_controls(armUpBtn, "clicked", "onArmUpClicked", asimov_op.armUpButtonClick)
-			asimov_op.switch_controls(armDownBtn, "clicked", "onArmDownClicked", asimov_op.armDownButtonClick)
-			asimov_op.switch_controls(armLeftBtn, "clicked", "onArmLeftClicked", asimov_op.armLeftButtonClick)
-			asimov_op.switch_controls(armRightBtn, "clicked", "onArmRightClicked", asimov_op.armRightButtonClick)
-			asimov_op.switch_controls(armBackBtn, "clicked", "onArmBackClicked", asimov_op.armBackButtonClick)
-			asimov_op.switch_controls(armFwdBtn, "clicked", "onArmFwdClicked", asimov_op.armFwdButtonClick)
+			for button, event_name, event_callback in zip(buttons, automatic_event_names, automatic_callbacks):
+				asimov_op.switch_controls(button, "clicked", event_name, event_callback)
 
-		#print("Switch was turned", state)
 
 if __name__ == "__main__":
 	asimov_op = AsimovOperation()
