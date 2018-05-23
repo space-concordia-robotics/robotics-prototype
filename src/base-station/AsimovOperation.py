@@ -227,7 +227,7 @@ if __name__ == "__main__":
 	# End of CSS
 
 	builder = Gtk.Builder()
-	builder.add_from_file("ArmGuiLayout2.glade")
+	builder.add_from_file("Layout.glade")
 
 	textarea = builder.get_object("Error Log ")
 
