@@ -2,10 +2,10 @@
 import gi
 import datetime # time stamps for test console logs
 import random # for generating random values in motor table
-from ArmPosition import ArmPosition
-import os
-import platform
-import subprocess
+from ArmPosition import ArmPosition # arm position model rendering
+import os # to perform linux os operations
+import platform # to determine what os we're running on
+import subprocess # to perform windows/mac os operations
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
@@ -51,19 +51,6 @@ class AsimovOperation(Gtk.Window):
 			subprocess.call(['open', file_name])
 
 	# definitions of the handlers for the buttons
-	def yawLeftButtonClick(self, button):
-		if switch:
-			state2 = "on"
-		else:
-			state2 = "off"
-
-		print("The state is " + state2)
-
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, "> Yaw Left Clicked " + now.strftime("%Y-%m-%d %H:%M") + "\n")
-
 	def send_to_console(self, label):
 		label = label + "\n" # pass by reference ftw
 		now = datetime.datetime.now()
@@ -73,9 +60,6 @@ class AsimovOperation(Gtk.Window):
 
 	def pitchUpButtonClick(self, button):
 		self.send_to_console("> Pitch Up")
-
-	def yawRightButtonClick(self, button):
-		self.send_to_console("> Yaw Right")
 
 	def rollLeftButtonClick(self, button):
 		self.send_to_console("> Roll Left")
@@ -196,8 +180,6 @@ class AsimovOperation(Gtk.Window):
 		clawCtn = builder.get_object("Claw Button Layout1")
 
 		#Get references to buttons that are then changed on switch
-		#yawLeftBtn = builder.get_object("Yaw Leftgit1")
-		#yawRightBtn = builder.get_object("Yaw Right1")
 		rollLeftBtn = builder.get_object("Roll Left1")
 		rollRightBtn = builder.get_object("Roll Right1")
 		clawOpenBtn = builder.get_object("Claw Open1")
@@ -315,9 +297,7 @@ if __name__ == "__main__":
 		"onTestClick": asimov_op.testButton,
 		"onClearClick": asimov_op.clearButton,
 		"onOpenLogClick": asimov_op.openLogButton,
-		"onYawLeftClicked": asimov_op.yawLeftButtonClick,
 		"onPitchUpClicked": asimov_op.pitchUpButtonClick,
-		"onYawRightClicked": asimov_op.yawRightButtonClick,
 		"onRollLeftClicked": asimov_op.rollLeftButtonClick,
 		"onPitchDownClicked": asimov_op.pitchDownButtonClick,
 		"onRollRightClicked": asimov_op.rollRightButtonClick,
