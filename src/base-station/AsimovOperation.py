@@ -25,18 +25,26 @@ class AsimovOperation(Gtk.Window):
 		# intialize any object instance variables here
 		Gtk.Window.__init__(self, title="Asimov Operation")
 
+	# utility function for sending appending text into console
+	def send_to_console(self, label):
+		label = label + "\n" # pass by reference ftw
+		now = datetime.datetime.now()
+		text_buffer = textarea.get_buffer()
+		end_iter = text_buffer.get_end_iter()
+		text_buffer.insert(end_iter, label + str(now.strftime("%Y-%m-%d %H:%M:%S")) + "\n")
+
 	# Test button for error log. Will remove once error log can
 	# read errors from other windows
-	def testButton(self, button):
+	def test_btn(self, button):
 		textinput = open("ErrorLogTest.txt", "r")
 		self.send_to_console(textinput.read())
 		textinput.close()
 
-	def clearButton(self, button):
+	def clear_btn(self, button):
 		textbuffer = textarea.get_buffer()
 		textbuffer.set_text("")
 
-	def openLogButton(self, button):
+	def open_log_btn(self, button):
 		os_name = platform.system()
 		file_name = "ErrorLogTest.txt"
 
@@ -46,60 +54,54 @@ class AsimovOperation(Gtk.Window):
 		# linux
 		elif os_name == 'Linux':
 			os.system("xdg-open '%s'" % file_name)
-
+		# macOS
 		elif os_name == 'Darwin':
 			subprocess.call(['open', file_name])
 
-	# definitions of the handlers for the buttons
-	def send_to_console(self, label):
-		label = label + "\n" # pass by reference ftw
-		now = datetime.datetime.now()
-		text_buffer = textarea.get_buffer()
-		end_iter = text_buffer.get_end_iter()
-		text_buffer.insert(end_iter, label + str(now.strftime("%Y-%m-%d %H:%M:%S")) + "\n")
-
-	def pitchUpButtonClick(self, button):
+    # definitions of the handlers for the buttons
+	def pitch_up_clicked(self, button):
 		self.send_to_console("> Pitch Up")
 
-	def rollLeftButtonClick(self, button):
-		self.send_to_console("> Roll Left")
-
-	def pitchDownButtonClick(self, button):
+	def pitch_down_clicked(self, button):
 		self.send_to_console("> Pitch Down")
 
-	def rollRightButtonClick(self, button):
+	def roll_left_clicked(self, button):
+		self.send_to_console("> Roll Left")
+
+	def roll_right_clicked(self, button):
 		self.send_to_console("> Roll Right")
 
-	def clawOpenButtonClick(self, button):
+	def claw_open_clicked(self, button):
 		self.send_to_console("> Claw Open")
 
-	def clawCloseButtonClick(self, button):
+	def claw_close_clicked(self, button):
 		self.send_to_console("> Claw Close")
 
-	def armUpButtonClick(self, button):
+	def arm_up_clicked(self, button):
 		self.send_to_console("> Arm Up")
 
-	def armLeftButtonClick(self, button):
-		self.send_to_console("> Arm Left")
-
-	def armDownButtonClick(self, button):
+	def arm_down_clicked(self, button):
 		self.send_to_console("> Arm Down")
 
-	def armRightButtonClick(self, button):
+	def arm_left_clicked(self, button):
+		self.send_to_console("> Arm Left")
+
+	def arm_right_clicked(self, button):
 		self.send_to_console("> Arm Right")
 
-	def armBackButtonClick(self, button):
+	def arm_back_clicked(self, button):
 		self.send_to_console("> Arm Back")
 
-	def armFwdButtonClick(self, button):
+	def arm_fwd_clicked(self, button):
 		self.send_to_console("> Arm Fwd")
 
-	def toggleSwitchClick(self, button):
+	# not linked to anything currently
+	def toggle_switch_clicked(self, button):
 		text_buffer = textarea.get_buffer()
 		end_iter = text_buffer.get_end_iter()
 		text_buffer.insert(end_iter, "> onn")
 
-	def homePostionBtnClicked(self, button):
+	def home_position_clicked(self, button):
 		# For the the motor position the home value is set to 10 (is it done when in manual or auto)
 		buffers = [smotor1.get_buffer(), smotor2.get_buffer(), smotor3.get_buffer(), smotor4.get_buffer(), asmotor1.get_buffer(), asmotor2.get_buffer()]
 		for text_buffer in buffers:
@@ -111,43 +113,43 @@ class AsimovOperation(Gtk.Window):
 		text = text_buffer.get_text(text_buffer.get_start_iter(), text_buffer.get_end_iter(), False)
 		text_buffer.set_text(str(int(text) + delta))
 
-	def stm1ButtonLeftClicked(self, button):
+	def st_m1_left_clicked(self, button):
 		self.alter_angle(button, smotor1, -1)
 
-	def stm1ButtonRightClicked(self, button):
+	def st_m1_right_clicked(self, button):
 		self.alter_angle(button, smotor1, +1)
 
-	def stm2ButtonLeftClicked(self, button):
+	def dc_m2_left_clicked(self, button):
 		self.alter_angle(button, smotor2, -1)
 
-	def stm2ButtonRightClicked(self, button):
+	def dc_m2_right_clicked(self, button):
 		self.alter_angle(button, smotor2, +1)
 
-	def stm3ButtonLeftClicked(self, button):
+	def st_m3_left_clicked(self, button):
 		self.alter_angle(button, smotor3, -1)
 
-	def stm3ButtonRightClicked(self, button):
+	def st_m3_right_clicked(self, button):
 		self.alter_angle(button, smotor3, +1)
 
-	def stm4ButtonLeftClicked(self, button):
+	def st_m4_left_clicked(self, button):
 		self.alter_angle(button, smotor4, -1)
 
-	def stm4ButtonRightClicked(self, button):
+	def st_m4_right_clicked(self, button):
 		self.alter_angle(button, smotor4, +1)
 
-	def astm1ButtonLeftClicked(self, button):
+	def as_m1_left_clicked(self, button):
 		self.alter_angle(button, asmotor1, -1)
 
-	def astm1ButtonRightClicked(self, button):
+	def as_m1_right_clicked(self, button):
 		self.alter_angle(button, asmotor1, +1)
 
-	def astm2ButtonLeftClicked(self, button):
+	def as_m2_left_clicked(self, button):
 		self.alter_angle(button, asmotor2, -1)
 
-	def astm2ButtonRightClicked(self, button):
+	def as_m2_right_clicked(self, button):
 		self.alter_angle(button, asmotor2, +1)
 
-	def toggleBtnTest(self):
+	def init_rand_angles(self):
 		# fill each of the displacement boxes with random numbers between and including 10 and 71
 		buffers = [smotor1.get_buffer(), smotor2.get_buffer(), smotor3.get_buffer(), smotor4.get_buffer(), asmotor1.get_buffer(), asmotor2.get_buffer()]
 
@@ -169,27 +171,27 @@ class AsimovOperation(Gtk.Window):
 		clawCtn = builder.get_object("Claw Button Layout1")
 
 		#Get references to buttons that are then changed on switch
-		rollLeftBtn = builder.get_object("Roll Left1")
-		rollRightBtn = builder.get_object("Roll Right1")
-		clawOpenBtn = builder.get_object("Claw Open1")
-		clawCloseBtn = builder.get_object("Claw Close1")
-		pitchUpBtn = builder.get_object("Pitch Up1")
-		pitchDownBtn = builder.get_object("Pitch Down1")
-		armLeftBtn = builder.get_object("Arm Left1")
-		armRightBtn = builder.get_object("Arm Right1")
-		armBackBtn = builder.get_object("Arm Back1")
-		armFwdBtn = builder.get_object("Arm Forward1")
-		armUpBtn = builder.get_object("Arm Up1")
-		armDownBtn = builder.get_object("Arm Down1")
+		roll_left_btn = builder.get_object("Roll Left1")
+		roll_right_btn = builder.get_object("Roll Right1")
+		claw_open_btn = builder.get_object("Claw Open1")
+		claw_close_btn = builder.get_object("Claw Close1")
+		pitch_up_btn = builder.get_object("Pitch Up1")
+		pitch_down_btn = builder.get_object("Pitch Down1")
+		arm_up_btn = builder.get_object("Arm Up1")
+		arm_down_btn = builder.get_object("Arm Down1")
+		arm_left_btn = builder.get_object("Arm Left1")
+		arm_right_btn = builder.get_object("Arm Right1")
+		arm_back_btn = builder.get_object("Arm Back1")
+		arm_fwd_btn = builder.get_object("Arm Forward1")
 
 		# it's important that the order and size of these arrays correspond for the following loops to function properly
-		buttons = [rollLeftBtn, rollRightBtn, clawOpenBtn, clawCloseBtn, pitchUpBtn, pitchDownBtn, armLeftBtn, armRightBtn, armBackBtn, armFwdBtn, armUpBtn, armDownBtn]
-		automatic_labels = ["Roll\nLeft", "Roll\nRight", "Claw\nOpen", "Claw\nClose", "Pitch\nUp", "Pitch\nDown", "Arm\nLeft", "Arm\nRight", "Arm\nBack", "Arm\nFwd", "Arm\nUp", "Arm\nDown"]
-		manual_labels = ["DCM2\n <<", "DCM2\n >>", "STM3\n <<", "STM3\n >>", "STM1\n <<", "STM1\n >>", "STM4\n <<", "STM4\n >>", "ASM1\n <<", "ASM1\n >>", "ASM2\n <<", "ASM2\n >>"]
+		buttons = [roll_left_btn, roll_right_btn, claw_open_btn, claw_close_btn, pitch_up_btn, pitch_down_btn, arm_up_btn, arm_down_btn, arm_left_btn, arm_right_btn, arm_back_btn, arm_fwd_btn]
+		automatic_labels = ["Roll\nLeft", "Roll\nRight", "Claw\nOpen", "Claw\nClose", "Pitch\nUp", "Pitch\nDown", "Arm\nUp", "Arm\nDown", "Arm\nLeft", "Arm\nRight", "Arm\nBack", "Arm\nFwd"]
+		manual_labels = ["DCM2\n <<", "DCM2\n >>", "STM3\n <<", "STM3\n >>", "STM1\n <<", "STM1\n >>", "ASM1\n <<", "ASM1\n >>", "ASM2\n <<", "ASM2\n >>", "STM4\n <<", "STM4\n >>"]
 
-		automatic_event_names = ["onRollLeftClicked", "onRollRightClicked", "onClawOpenClicked", "onClawCloseClicked", "onPitchUpClicked", "onPitchDownClicked", "onArmLeftClicked", "onArmRightClicked", "onArmBackClicked", "onArmFwdClicked", "onArmUpClicked", "onArmDownClicked"]
-		automatic_callbacks = [asimov_op.rollLeftButtonClick, asimov_op.rollRightButtonClick, asimov_op.clawOpenButtonClick, asimov_op.clawCloseButtonClick, asimov_op.pitchUpButtonClick, asimov_op.pitchDownButtonClick, asimov_op.armLeftButtonClick, asimov_op.armRightButtonClick, asimov_op.armBackButtonClick, asimov_op.armFwdButtonClick, asimov_op.armUpButtonClick, asimov_op.armDownButtonClick]
-		manual_callbacks = [asimov_op.stm2ButtonLeftClicked, asimov_op.stm2ButtonRightClicked, asimov_op.stm3ButtonLeftClicked, asimov_op.stm3ButtonRightClicked, asimov_op.stm1ButtonLeftClicked, asimov_op.stm1ButtonRightClicked, asimov_op.stm4ButtonLeftClicked, asimov_op.stm4ButtonRightClicked, asimov_op.astm1ButtonLeftClicked, asimov_op.astm1ButtonRightClicked, asimov_op.astm2ButtonLeftClicked, asimov_op.astm2ButtonRightClicked]
+		automatic_event_names = ["onRollLeftClicked", "onRollRightClicked", "onClawOpenClicked", "onClawCloseClicked", "onPitchUpClicked", "onPitchDownClicked", "onArmUpClicked", "onArmDownClicked", "onArmLeftClicked", "onArmRightClicked", "onArmBackClicked", "onArmFwdClicked"]
+		automatic_callbacks = [asimov_op.roll_left_clicked, asimov_op.roll_right_clicked, asimov_op.claw_open_clicked, asimov_op.claw_close_clicked, asimov_op.pitch_up_clicked, asimov_op.pitch_down_clicked, asimov_op.arm_up_clicked, asimov_op.arm_down_clicked, asimov_op.arm_left_clicked, asimov_op.arm_right_clicked, asimov_op.arm_back_clicked, asimov_op.arm_fwd_clicked]
+		manual_callbacks = [asimov_op.dc_m2_left_clicked, asimov_op.dc_m2_right_clicked, asimov_op.st_m3_left_clicked, asimov_op.st_m3_right_clicked, asimov_op.st_m1_left_clicked, asimov_op.st_m1_right_clicked, asimov_op.st_m4_left_clicked, asimov_op.st_m4_right_clicked, asimov_op.as_m1_left_clicked, asimov_op.as_m1_right_clicked, asimov_op.as_m2_left_clicked, asimov_op.as_m2_right_clicked]
 
 		if sw:
 			state = "on"
@@ -245,22 +247,22 @@ if __name__ == "__main__":
 	# This is used to connect signals sent by the widgets in Glade
 	# and assign them functionality using python code
 	handlers = {
-		"onTestClick": asimov_op.testButton,
-		"onClearClick": asimov_op.clearButton,
-		"onOpenLogClick": asimov_op.openLogButton,
-		"onPitchUpClicked": asimov_op.pitchUpButtonClick,
-		"onRollLeftClicked": asimov_op.rollLeftButtonClick,
-		"onPitchDownClicked": asimov_op.pitchDownButtonClick,
-		"onRollRightClicked": asimov_op.rollRightButtonClick,
-		"onClawOpenClicked": asimov_op.clawOpenButtonClick,
-		"onClawCloseClicked": asimov_op.clawCloseButtonClick,
-		"onArmUpClicked": asimov_op.armUpButtonClick,
-		"onArmLeftClicked": asimov_op.armLeftButtonClick,
-		"onArmDownClicked": asimov_op.armDownButtonClick,
-		"onArmRightClicked":asimov_op.armRightButtonClick,
-		"onArmBackClicked": asimov_op.armBackButtonClick,
-		"onArmFwdClicked": asimov_op.armFwdButtonClick,
-		"onHomePostionClicked": asimov_op.homePostionBtnClicked
+		"onTestClick": asimov_op.test_btn,
+		"onClearClick": asimov_op.clear_btn,
+		"onOpenLogClick": asimov_op.open_log_btn,
+		"onPitchUpClicked": asimov_op.pitch_up_clicked,
+		"onRollLeftClicked": asimov_op.roll_left_clicked,
+		"onPitchDownClicked": asimov_op.pitch_down_clicked,
+		"onRollRightClicked": asimov_op.roll_right_clicked,
+		"onClawOpenClicked": asimov_op.claw_open_clicked,
+		"onClawCloseClicked": asimov_op.claw_close_clicked,
+		"onArmUpClicked": asimov_op.arm_up_clicked,
+		"onArmLeftClicked": asimov_op.arm_left_clicked,
+		"onArmDownClicked": asimov_op.arm_down_clicked,
+		"onArmRightClicked":asimov_op.arm_right_clicked,
+		"onArmBackClicked": asimov_op.arm_back_clicked,
+		"onArmFwdClicked": asimov_op.arm_fwd_clicked,
+		"onHomePostionClicked": asimov_op.home_position_clicked
 	}
 
 	builder.connect_signals(handlers)
@@ -281,5 +283,5 @@ if __name__ == "__main__":
 	window.set_title("Asimov Operation")
 	window.connect("destroy", Gtk.main_quit)
 	window.show_all()
-	asimov_op.toggleBtnTest()
+	asimov_op.init_rand_angles()
 	Gtk.main()
