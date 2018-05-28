@@ -1,3 +1,6 @@
+//TODO: python needs to check for message prefixes and this isn't implemented yet
+  
+  
 // Required libraries for Adafruit Motor Shield
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
@@ -30,7 +33,8 @@ Encoder DCEncoder(3,2);
 double kp[2], ki[2], kd[2];
 unsigned long lastTime;
 double output;
-double integralTerm, lastInput, error;
+double proportionalTerm, integralTerm, derivativeTerm;
+double lastInput, error;
 double outMin, outMax;
 const int PI_PIN_1 = 1;
 const int PI_PIN_3 = 2;
@@ -74,7 +78,7 @@ int i;
 
 void setup() {
   Serial.begin(9600); // Set up serial library at 9600 bps
-  
+    
   // Initializes the motor shields with the default frequency of 1.6KHz
   motorShield1.begin();
   motorShield2.begin(); 
@@ -240,24 +244,43 @@ double compute(int i) {
    /*How long since we last calculated*/
    unsigned long now = millis();
    double timeChange = (double)(now - lastTime);
-  
-   /*compute all the working error variables*/
+
    error = motorCommandAngle[i] - motorAngle[i];
+   
+   /* proportional term */
+   proportionalTerm = error*kp[i];
+   
+   if (proportionalTerm > outMax) {
+    proportionalTerm = outMax;
+   } else if (proportionalTerm < outMin) {
+    proportionalTerm = outMin;
+   }
+   
+   /* integral term */
    integralTerm += (ki[i] * error * timeChange);
    
    if (integralTerm > outMax) {
     integralTerm = outMax;
    } else if (integralTerm < outMin) {
-    integralTerm - outMin;
+    integralTerm = outMin;
    }
-   double dInput = (motorAngle[i] - lastInput) / timeChange;
+
+   /* derivative term */
+   derivativeTerm = kd[i]* (motorAngle[i] - lastInput) / timeChange;
   
+   if (derivativeTerm > outMax) {
+    derivativeTerm = outMax;
+   } else if (derivativeTerm < outMin) {
+    derivativeTerm = outMin;
+   }
+   
    /*compute PID output*/
-   output = kp[i] * error + integralTerm - kd[i] * dInput;
+   output = proportionalTerm + integralTerm + derivativeTerm;
+   
    if (output > outMax) {
     output = outMax;
    } else if (output < outMin) {
-    output - outMin;
+    output = outMin;
    }
   
    /*Remember some variables for next time*/
