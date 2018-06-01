@@ -1,5 +1,8 @@
 .DS_Store
 node_modules
 .idea
+**/.idea
+**/*.pyc
 src/gui-arm-control/.idea
 sh.exe.stackdump
+venv
