@@ -53,8 +53,8 @@ class AsimovOperation(Gtk.Window):
         self.asmotor2 = Motor(
             "Arm Servo Motor 2", max_angle, min_angle, max_current, min_current, home_angle)
         # intialize Microcontroller object representing the mother Arduino object containing Motor instance array
-        #self.arduino = Microcontroller(
-            #"Arduino", port, [self.smotor1, self.smotor2, self.smotor3, self.smotor4, self.asmotor1, self.asmotor2])
+        self.arduino = Microcontroller(
+            "Arduino", port, [self.smotor1, self.smotor2, self.smotor3, self.smotor4, self.asmotor1, self.asmotor2])
 
     # utility function for sending appending text into console
     def send_to_console(self, label):
