@@ -53,8 +53,8 @@ class AsimovOperation(Gtk.Window):
         self.asmotor2 = Motor(
             "Arm Servo Motor 2", max_angle, min_angle, max_current, min_current, home_angle)
         # intialize Microcontroller object representing the mother Arduino object containing Motor instance array
-        self.arduino = Microcontroller(
-            "Arduino", port, [self.smotor1, self.smotor2, self.smotor3, self.smotor4, self.asmotor1, self.asmotor2])
+        #self.arduino = Microcontroller(
+            #"Arduino", port, [self.smotor1, self.smotor2, self.smotor3, self.smotor4, self.asmotor1, self.asmotor2])
 
     # utility function for sending appending text into console
     def send_to_console(self, label):
@@ -310,7 +310,8 @@ if __name__ == "__main__":
         "onArmRightClicked": asimov_op.arm_right_clicked,
         "onArmBackClicked": asimov_op.arm_back_clicked,
         "onArmFwdClicked": asimov_op.arm_fwd_clicked,
-        "onHomePostionClicked": asimov_op.home_position_clicked
+        "onHomePostionClicked": asimov_op.home_position_clicked,
+        "on": asimov_op.CREATE-A-FUNC
     }
 
     builder.connect_signals(handlers)

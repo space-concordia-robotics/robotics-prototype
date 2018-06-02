@@ -1004,7 +1004,6 @@ Fwd</property>
                           <item translatable="yes">COM2</item>
                           <item translatable="yes">COM3</item>
                         </items>
-                        <signal name="changed" handler="onPortNumberChanged" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
