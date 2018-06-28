@@ -1,4 +1,0 @@
-flask
--->(Flask comes with Jinja and so on)
-Flask Bootstrap
-
