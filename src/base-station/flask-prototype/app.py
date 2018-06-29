@@ -11,5 +11,8 @@ app = flask.Flask(__name__)
 def index():
     return flask.render_template("Rover_GUI.html")
 
+@app.route("/BaseContainers")
+def base_containers():
+	return flask.render_template("BaseContainers.html")
 
-app.run(debug=True)
+app.run(debug=True) # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
