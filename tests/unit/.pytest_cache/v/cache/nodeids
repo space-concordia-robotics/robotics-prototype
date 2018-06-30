@@ -1,6 +1,0 @@
-[
-  "sample_class_test.py::TestClass::()::test_one", 
-  "sample_class_test.py::TestClass::()::test_two", 
-  "sample_sysexit_test.py::test_mytest", 
-  "sample_test.py::test_answer"
-]
