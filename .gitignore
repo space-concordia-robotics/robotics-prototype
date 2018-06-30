@@ -7,3 +7,5 @@ sh.exe.stackdump
 .idea/
 src/.idea/
 src/base-station/.idea
+__pycache__
+.pytest_cache
