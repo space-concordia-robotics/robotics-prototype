@@ -8,7 +8,10 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-	
+	<link rel="stylesheet" href="~/static/CSS/Rover_GUI_Style.css">
+	<script>
+	function entertext(){document.getElementById('test').value+="blablabla"}
+	</script>
 </head>
 <body style="height: 100%">
 
@@ -22,8 +25,61 @@
     		</div>
   		</div>
   		<div class="row align-items-end" style="height: 50%;">
-    		<div id="motor_table_container" class="col-sm-4 col-md-4 col-lg-4" style="background-color:#008ab8; height: 100%; border: solid 2px #006699;">
-      			<p style="text-align: center;"><b>Motor Table</b></p>
+    		<div id="motor_table_container" class="col-sm-4 col-md-4 col-lg-4" style="padding: 1px; background-color:#008ab8; height: 100%; border: solid 2px #006699;">
+				  <p style="text-align: center;"><b>Motor Table</b></p>
+				  <!--Motor Table-->
+				  <div class="col">
+					<!-- Table that monitors the rover's multiple motors-->
+					<table class="table table-sm table-bordered" style="font-size:11.5px;">
+						<thead class="thead-dark">
+						<tr>
+							<th scope="col"></th>
+							<th scope="col">Status(Alive/Dead)</th>
+							<th scope="col"> Motor Position(Displacement)</th>
+							<th scope="col">Motor Current(A)</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<th scope="row">Stepper Motor 1</th>
+							<!-- add backend code to update status/motor position/motor current-->
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row">DC Motor 2</th>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row">Stepper Motor 3</th>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row">Stepper Motor 4</th>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th scope="row">Arm Servo Motor 1</th>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th>Arm Servo Motor 2 </th>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
     		</div>
     		<div id="control_panel_container" class="col-sm-5 col-md-5 col-lg-5" style="background-color:#008ab8; height: 100%; border: solid 2px #006699;">
       			<p style="text-align: center;"><b>Control Panel</b></p>
@@ -31,7 +87,15 @@
 		        <button type="button" class="btn btn-primary" onclick="location.href = '/';" style="align: center;">Take me Home!</button>		
     		</div>
     		<div id="log_console_container" class="col-sm-3 col-md-3 col-lg-3" style="background-color:#008ab8; height: 100%; border: solid 2px #006699;">
-      			<p style="text-align: center;"><b>Log Console</b></p>
+				  <p style="text-align: center;"><b>Log Console</b></p>
+				  <!--log console-->
+				  <textarea id="test" rows ="15" cols="38">
+				  </textarea>
+				  <div class="btn-group" role="group" aria-label="Basic example">
+					<button type="button" class="btn btn-secondary">Open Logs</button>
+					<button type="button" class="btn btn-secondary">Clear Logs</button>
+					<button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
+				  </div>
     		</div>
 		</div>
 	</div>
