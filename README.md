@@ -1,5 +1,5 @@
 # robotics-prototype
-This repo contains the beginning of the new (2017-2018) Robotics software team code.
+This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
 ## Contributing and Development Environment Instructions
 Firstly, this project is built in Python 3.3+. You need to have a version of Python installed that is 3.3+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
@@ -48,7 +48,8 @@ First, ensure you activated your `venv` and you are in the root project director
 ```
 (venv) $ pip install -r requirements.txt
 ```
-**Note**: If you get any issues with installing the `pygobject` module (which is needed for running the GTK GUI, which will likely be replaced by a Flask front-end soon), read the follwing section on `pygobject3`, otherwise if all was good then just skip over it.
+**Note**: If you want to run the "legacy" GUI (AsimovOperation.py) you'll need to install the `pygobject` module (which is needed for running GTK GUI)
+However, this GUI will soon be replaced by a new one using flask, so unless your hellbent on running the old GUI, **feel free to skip the next section** (and keep in mind that the pygobject line in `requirements.txt` is commented out.
 
 #### Install and configure `pygobject3`
 If you ran into issues installing `pygobject` when trying to `pip install -r requirements.txt`, then here are possible reasons:
