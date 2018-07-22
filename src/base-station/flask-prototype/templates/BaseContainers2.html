@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+        *{
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .flex {
+            flex: 1;
+            background-color: aqua
+        }
+        .row, .row > * {
+            border: 0.5px solid #092B43;
+        }
+
+        .test{
+            background-color: #355C77;
+            border: 2px solid #092B43;
+            height: 100%
+        }
+
+        .continer_headers, thead{
+            color: #092B43;
+            font-weight: bolder;
+            text-align: center;
+        }
+
+        .continer_headers{
+
+            text-decoration: underline
+        }
+
+        #mnl_lbl{
+            color: #092B43;
+            font-weight: bold;
+         }
+
+        thead, .tg tr:first-child{
+            color: #6768A1;
+            font-weight: bold;
+        }
+
+        #mtrtable thead th, .tg tr:first-child{
+            text-align: center;
+            vertical-align: middle
+        }
+
+        #mtrtable thead tr:first-child, #mtrtable tbody th, .tg tr:first-child{
+            background-color: #101148;
+            color: #6768A1;
+        }
+
+        .vcenter {
+            display: inline-block;
+            vertical-align: middle;
+            float: none;
+        }
+
+        .tg{
+            border-spacing:0;
+            border-collapse:collapse; 
+        }
+
+        .tg tr:first-child{
+            border-bottom: 5px inset #05072F;
+         }
+
+         .tg th{
+            text-align: center
+         }
+
+        .tg td{
+            font-family:Arial, sans-serif;
+            font-size:14px;
+            padding:0;
+            margin: 0 0 -6px 0;
+            border-style:solid;
+            border-width:2px;
+            overflow:hidden;
+            word-break:normal;
+            border-style: none
+        }
+
+        #logs_btn button{
+            margin-right:3px;
+            background-color: #021929;
+            color: #E7CE85
+        }
+
+        .home_btn{
+            height: 34px; background-color: #092B43;color: #597C94
+        }
+
+         #logs_btn button:hover{
+            margin-right:3px;
+            background-color: #101148;
+            color: #597C94
+        }
+
+        .cntr_btn{
+            width:75px;
+            height:75px;
+            background-color: #05072F;
+            border: outset 2px #434586;
+            color: white
+        }
+
+        .cntr_btn:hover{
+            background-color: #05072F;
+            color: #385F7B;
+        }
+
+        .home_btn:hover{
+            height: 34px; background-color: #101148;
+            color: #E7BC85
+        }
+
+        /* ======= CREATE TOGGLE SWITCH ============== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 100px;
+            height: 34px;
+            margin: 0 ;
+            padding: 0
+        }
+
+        .switch input {display:none;}
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 56px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(36px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        
+
+    </style>
+    <script>
+        function entertext(){
+            document.getElementById('write_to_log').value += "blablabla\n"
+        }
+
+        function cleartext(){
+            document.getElementById('write_to_log').value =""
+        }
+    </script>
+</head>
+<body>
+
+<div class="container-full">
+    <div class="row">
+	  
+	  <div class="flex">
+		<div class="col-md-6 test">
+            <p class="continer_headers">Arm Postion</p>
+        </div>
+		<div class="col-md-6 test">
+            <p class="continer_headers">Arm Vision</p>
+            <svg width="600" height="200">
+                    <rect width="600" height="200" style="fill:rgb(0, 0, 0);stroke-width:10;stroke:rgb(0,0,0)" />
+                    <text fill="#ffffff" font-size="25" font-family="Verdana" x="80" y="186">Please Wait. Stream will start soon ...</text>
+            </svg>
+        </div>
+	  </div>
+	  <div class="flex">
+		<div class="col-md-4 test">
+            <p class="continer_headers">Motor Table</p>
+
+            <table class="table table-sm table-bordered " id="mtrtable" style="font-size:12px;background: #597C94">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Status<br/>(Alive/Dead)</th>
+                        <th scope="col"> Motor Position<br/>(Displacement)</th>
+                        <th scope="col">Motor Current (A)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Stepper<br/>Motor 1</th>
+                        <!-- add backend code to update status/motor position/motor current-->
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">DC<br/>Motor 2</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Stepper<br/>Motor 3</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Stepper<br/>Motor 4</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Arm Servo<br/>Motor 1</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Arm Servo<br/>Motor 2 </th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+		<div class="col-md-5 test">
+            <p class="continer_headers">Control Panel</p>
+            
+             
+                <div class="flex">
+                    <div class="col-md-6 test"  style="border-style:none"><br/>
+                        <button type="button" class="btn btn-secondary home_btn pull-right">
+                            Home Position
+                        </button>             
+                    </div>
+                    <div class="col-md-6 test"  id="mnl_lbl" style="border-style:none">
+                        <span class="vcenter">Manual Control ON/OFF</span><br/>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+
+                    </div>
+                      
+                </div>
+                <hr/><br/>
+
+                <div class="flex">
+                        <div class="col-md-6 test" style="border-style:none">
+                            <table class="tg pull-right">
+                                    <tr>
+                                        <th colspan="3">CLAW CONTROLS</th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td ><button type="button" class="cntr_btn">Pitch<br/>Up</button></td>
+                                        <td ></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><button type="button"  class="cntr_btn">Roll<br/>Left</button></td>
+                                        <td ><button type="button"  class="cntr_btn">Pitch<br/>Down</button></td>
+                                        <td ><button type="button"  class="cntr_btn">Roll<br/>Right</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><button type="button"  class="cntr_btn">Claw<br/>Open</button></td>
+                                        <td></td>
+                                        <td><button type="button"  class="cntr_btn">Claw<br/>Close</button></td>
+                                    </tr>
+                            </table>
+    
+                        </div>
+                        <div class="col-md-6 test"  style="border-style:none">
+                            <table class="tg">
+                                    <tr>
+                                        <th colspan="3">ARM CONTROLS</th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td ><button type="button"  class="cntr_btn">Arm<br/>Up</button></td>
+                                        <td ></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><button type="button"  class="cntr_btn">Arm<br/>Left</button></td>
+                                        <td ><button type="button"  class="cntr_btn">Arm<br/>Down</button></td>
+                                        <td ><button type="button"  class="cntr_btn">Arm<br/>Right</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><button type="button"  class="cntr_btn">Arm<br/>Back</button></td>
+                                        <td></td>
+                                        <td><button type="button"  class="cntr_btn">Arm<br/>Fwrd</button></td>
+                                    </tr>
+                            </table>
+                        </div>
+                          
+                    </div>
+                            
+            
+
+        </div>
+		<div class="col-md-3 test">
+            <p class="continer_headers">Log Console</p>
+            <!--log console-->
+				  <textarea id="write_to_log" rows="15" cols="38" style="background: #597C94">
+                    </textarea>
+                    <div class="btn-group" role="group" id="logs_btn">
+                      <button type="button" class="btn btn-secondary">Open Logs</button>
+                      <button type="button" class="btn btn-secondary" onclick="cleartext()">Clear Logs</button>
+                      <button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
+                    </div>
+        </div>
+	  
+	  </div>
+	  
+	</div>
+</div> <!-- /container full -->
+
+
+<script
+  src="https://code.jquery.com/jquery-1.12.4.min.js"
+  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+  crossorigin="anonymous"></script>
+</body>
+</html>
