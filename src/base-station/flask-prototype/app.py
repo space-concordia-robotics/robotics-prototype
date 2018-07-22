@@ -13,6 +13,10 @@ def index():
 
 @app.route("/BaseContainers")
 def base_containers():
+	return flask.render_template("BaseContainers.html")
+
+@app.route("/BaseContainers2")
+def base_containers2():
 	return flask.render_template("BaseContainers2.html")
 
 app.run(debug=True) # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
