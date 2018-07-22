@@ -1,12 +1,16 @@
+os: linux
+sudo: false
+dist: trusty
 language: python
-
 python:
-    - "2.7"
-    - "3.6"
+  #- "2.7" # not supported
+  - "3.6"
+
 # command to install dependencies
-#install:
-#	- pip install -r requirements.txt
+install:
+  - pip install -r requirements.txt
+  - pip install -e .
 
 script:
-    - cd tests/unit/
-    - pytest
+  # - cd tests/unit/ # unnecessary
+  - pytest
