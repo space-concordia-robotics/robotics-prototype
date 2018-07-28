@@ -116,6 +116,12 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
 - Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery). 
 
+#### Atom (tested on ubuntu 16.04)
+If you're using atom-editor setting up should be fairly easy.
+- In atom, navigate to `Edit -> Preferences/Settings -> Packages`
+- Search for and install `python-yapf`, follow the README but for your yapf path put your systems output of `which yapf` (`where yapf` for windows)
+- Search for and install `linter-pylint`, if you get any prompts to install further dependencies click `yes` each time 
+
 ## ODROID
 ### How to upload Arduino scripts from the odroid
 
