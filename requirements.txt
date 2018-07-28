@@ -7,7 +7,7 @@ more-itertools==4.2.0
 numpy==1.14.5
 pluggy==0.6.0
 py==1.5.4
-pycairo==1.17.1
+#pycairo==1.17.1
 #PyGObject==3.28.3 # unfortunately the version that Trusty supports for python3-gi is too outdated for pyobject 
 pyparsing==2.2.0
 pyserial==3.4
