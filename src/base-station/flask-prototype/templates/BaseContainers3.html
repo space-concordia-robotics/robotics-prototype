@@ -4,198 +4,382 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+	<title>SC Robotics GUI</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-
-    <title>Hello, world!</title>
-
+	<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 	<link href="../static/CSS/titatoggle-dist.css" rel="stylesheet">
-
-      <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-
-	<style>
-		@import url('http://twitter.github.com/bootstrap/assets/css/bootstrap.css');
-
-		html,body{height:100vh;background-color:#990000;}
+	<style type="text/css">
+		html,body{
+			height:100%;
+			background-color:#990000;}
 
 		.container {
 			height:100%;
-			
+			min-height:100%;				
 		}
 
 		.fill{
 			width:100%;
 			height:100%;
-			min-height:100%;
-			background-color:#990000;
-			padding:10px;
-			color:#efefef;
+			min-height:100%;		
+			min-width:100%;	
 		}
 
+		.map {
+			height: 100vh;
+			min-height: 100vh;
+		}	
 		
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:0;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:0;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
-.tg .tg-us36{border-color:inherit;vertical-align:top}
+		.tg, .tg2{
+			border-collapse:collapse;
+			border-spacing:0;
+		}
+		.tg td, .tg2 td{
+			font-family:Arial, sans-serif;
+			font-size:14px;
+			padding:0;
+			border-style:none;
+			border-width:0;
+			overflow:hidden;
+			word-break:normal;
+			border-color:#990000;
+		}
+		.tg th, .tg2 th{
+			font-family:Arial, sans-serif;
+			font-size:14px;
+			font-weight:normal;
+			padding:0;
+			border-style:solid;
+			border-width:1px;
+			overflow:hidden;
+			word-break:normal;
+			border-color:#990000;
+			text-align: center;
+			
+		}
+	
+		.tg tr:last-child, .autoCtrLable{
+			border-bottom: 5px inset #05072F;
+			color: #6768A1;
+			font-weight: bold;
+			background-color: #101148;
+		}
+	
+		.autoCtrLable {
+			padding:12px 5px 12px 5px;
+			margin-top:15px
+		}
 
-.myButton {
-	background-color:#44c767;
-	border:1px solid #18ab29;
-	display:inline-block;
-	cursor:pointer;
-	color:#ffffff;
-	font-family:Arial;
-	font-size:17px;
-	padding:0;
-	text-decoration:none;
-	text-shadow:0px 0px 0px #2f6627;
-	width: 80px;
-	height: 80px;
-	vertical-align: middle;
-}
-.myButton:hover {
-	background-color:#5cbf2a;
-}
-.myButton:active {
-	position:relative;
-	top:1px;
-}
+		.row, .row > * {
+				border: 0.5px solid #05072F;
+		}
 
-.row, .row > * {
-            border: 0.5px solid #092B43;
-        }
+		.cntr_btn{
+			width:80px;
+			height:80px;
+			background-color: #4A0000;
+			border: ridge 2px #434586;
+			color: white;
+			border-radius: 10px;
+		}
+		
+		.cntr_btn2{
+			width:80px;
+			height:80px;
+			background-color: #4A0000;
+			border: ridge 2px #434586;
+			color: white;
+		}
 
+		.cntr_btn:hover, .cntr_btn2:hover, #logs_btn button:hover	{
+			background-color: #05072F;
+			color: white;
+		}
+		
+		.cntr_btn_left{
+			border-radius: 10px 0 0 10px;
+			border-right-color: #4A0000;
+		}
+		
+		.cntr_btn_right{
+			border-radius: 0 10px 10px 0;
+			border-left-color: #4A0000;
+		}
+		
+		.cntr_btn_mid{
+			width:80px;
+			height:80px;
+			background-color: #4A0000;
+			border-top: ridge 2px #434586;
+			border-bottom: ridge 2px #434586;
+			border-left: ridge 2px #4A0000;
+			border-right: ridge 2px #4A0000;
+			color: white;
+		}
 
-</style>
+		.continer_headers, thead{
+			color: #092B43;
+			font-weight: bolder;
+			text-align: center;
+		}
 
-  </head>
-  <body>
-    <div class="container-fluid">
-		<div class="span5 fill">
-			<div class="row">
-				<div class="col-md-6">
-				  <img src="http://hajer.info/wp-content/uploads/2018/01/welpaper-lovely-3d-hd-wallpapers-of-welpaper.jpg" class="img-fluid" />
-				</div>
-				<div class="col-md-6">
-				  <img src="http://www.grup-pumsa.cat/uploadwallimgs/b/41/413832_%D8%B5%D9%88%D8%B1-wallpaper.jpg" class="img-fluid" alt="Responsive image" />
-				  
-				</div>
+		#mtrtable thead th, .tg tr:first-child{
+			text-align: center;
+			vertical-align: middle
+		}
+
+		#mtrtable thead tr:first-child, #mtrtable tbody th{
+			background-color: #101148;
+			color: #F0DAFA;
+			border: 2px solid #750000
+		}
+
+		#mtrtable, #mtrtable tr td{ 
+			border: 2px solid #750000;
+			text-align: center
+		}
+
+		.cntrMainBtn{
+			border-bottom: 2px solid #05072F;
+			border-top-style: none; 
+			border-left-style: none;
+			margin-bottom: 5px
+		}
+		
+		#logs_btn button{
+			background-color: #4A0000;
+			border: ridge 2px #434586;
+		}
 				
-			</div>
-			<div class="row">
-				<div class="col-md-2">
-				  <br/>
-				  <div class="form-group">
-						<textarea class="form-control rounded-0" id="exampleFormControlTextarea1" rows="8"></textarea>
-					</div>
-					<div class="btn-group btn-group-toggle" data-toggle="buttons">
-						  <label class="btn btn-secondary active">
-							<input type="radio" name="options" id="option1" autocomplete="off" checked> Active
-						  </label>
-						  <label class="btn btn-secondary">
-							<input type="radio" name="options" id="option2" autocomplete="off"> Radio
-						  </label>
-						  <label class="btn btn-secondary">
-							<input type="radio" name="options" id="option3" autocomplete="off"> Radio
-						  </label>
+	</style>
+
+	<script language="javascript" type="text/javascript">
+		
+		function entertext(){
+			document.getElementById('write_to_log').value += "blablabla\n";
+		}
+
+		function cleartext(){
+			document.getElementById('write_to_log').value ="";
+		}
+
+		function manualControl() {
+			var a = document.getElementById("ArmcontrolsOFF");
+			var b = document.getElementById("ArmcontrolsON");
+
+			if(a.style.display === "none"){
+				a.style.display = "block";
+				b.style.display = "none";
+			} else {
+				a.style.display = "none";
+				b.style.display = "block";
+				b.style.borderRadius = "0";
+			}
+		}
+
+	</script>
+		
+	</head>
+  <body>
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
+			<a class="navbar-brand" href="#"><img src="https://spaceconcordia.github.io/img/sclogo_header.png"></a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" d
+							ata-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" 
+							aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+				<ul class="navbar-nav mr-auto">
+						<a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01"
+							 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Settings</a>
+						<div class="dropdown-menu" aria-labelledby="dropdown01">
+							<a class="dropdown-item" href="#">Key board key mapping</a>
+							<a class="dropdown-item" href="#">Change camera stream FPS</a>
+							<a class="dropdown-item" href="#">...</a>
 						</div>
-					
+					</li>
+				</ul>
+			</div>
+	</nav><br/><br/>
+	<div style="margin-bottom:10px"></div>
+
+    <div class="container fill">
+		<div>
+			<div class="row">
+				<div class="col-md-6">
+					<h5 class="continer_headers">Arm Postion</h5>
+					<img src="http://hajer.info/wp-content/uploads/2018/01/welpaper-lovely-3d-hd-wallpapers-of-welpaper.jpg" class="img-fluid" />
 				</div>
-				<div class="col-md-6" align="center">
-				      <div class="row">
-                        <div class="col-sm-6" align="right" style="vertical-align:middle"><br/>
-                            <button type="button" class="btn btn-primary btn-lg fa fa-home" aria-hidden="true">
-                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home Position</span>
-                            </button>
-                        </div>
-                        <div class="col-sm-6"  align="left">
-                            <span><strong>Manual Control</strong> </span>
-                        <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                            <label>
-                                <input type="checkbox"><span> </span>
-                            </label>
-                        </div>
+				<div class="col-md-6">
+					<h5 class="continer_headers">Arm Vision</h5>
+					<img src="http://www.grup-pumsa.cat/uploadwallimgs/b/41/413832_%D8%B5%D9%88%D8%B1-wallpaper.jpg" class="img-fluid" alt="Responsive image" />
+				</div>				
+			</div>
+			
+			<div class="row">
+				<div class="col-md-3" align="center">
+					<h5 class="continer_headers">Log Console</h5>
+					<div class="form-group">
+						<textarea  id="write_to_log" rows="8" cols="33"></textarea><br/>
+						<!--log console buttons-->
+						<div class="btn-group" role="group" id="logs_btn">
+							<button type="button" class="btn btn-secondary">Open Logs</button>
+							<button type="button" class="btn btn-secondary" onclick="cleartext()">Clear Logs</button>
+							<button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
+						</div>
+					</div>
+				 		
+				</div>
+				<div class="col-md-5" align="center">
+					<h5 class="continer_headers">Control Panel</h5>
+					<div class="row cntrMainBtn">
+						<div class="col-sm-6" align="right" style="vertical-align:middle;border-style:none">
+							<button type="button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+								<span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home Position</span>
+							</button>
+						</div>
+						<div class="col-sm-6"  align="left" style="border-style:none;">
+							<span><strong>Manual Control</strong> </span>
+							<div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+							<label>
+								<input type="checkbox" onchange="manualControl()"><span> </span>
+							</label>
+							</div>
+						</div>
+					</div>
 
-                        </div>
-                    </div>
-
-
-					<table class="tg">
-					  <tr>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36" style="width:30px"></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-					  </tr>
-					  <tr>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-					  </tr>
-					  <tr>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-						<th class="tg-us36"></th>
-						<th class="tg-us36"><a href="#" class="myButton">green</a></th>
-					  </tr>
-					  				  
+					<table class="tg"  style="display: block"  id="ArmcontrolsOFF" >
+						<tr>
+							<td></td>
+							<td valign="bottom"><button type="button" class="cntr_btn"><strong>Pitch<br/>Up</strong></button></td>
+							<td></td>
+							<td style="width:30px"></td>
+							<td></td>
+							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Up</strong></button></th>
+							<td></td>
+						</tr>
+						<tr>
+							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Left</strong></button></td>
+							<td><button type="button"  class="cntr_btn"><strong>Pitch<br/>Down</strong></button></td>
+							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Right</strong></button></td>
+							<td></td>
+							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Left</strong></button></td>
+							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Down</strong></button></td>
+							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Right</strong></button></td>
+						</tr>
+						<tr>
+							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Open</strong></button></td>
+							<td></td>
+							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Close</strong></button></td>
+							<td></td>
+							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Back</strong></button></td>
+							<td></td>
+							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Fwrd</strong></button></td>
+						</tr>
+						<tr>
+							<th colspan="3"><strong>CLAW CONTROLS</strong></th>
+							<th style="width:30px;background:#990000;border: 1px solid #990000"></th>
+							<th colspan="3"><strong>ARM CONTROLS</strong></th>
+						</tr>									  
 					</table>
-				  
+
+					<!-- Automatic controlls section -->
+					<table class="tg2"  style="display: none; margin: 10px 0 0 23px" id="ArmcontrolsON">
+						<tr>
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM1</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+							<td style="width:30px"></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM4</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+						</tr>                                              
+						<tr>                                               
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM2</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+							<td></td>                                
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM1</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+						</tr>                                              
+						<tr>                                               
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM3</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+							<td></td>                                
+							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM2</strong></button></td>
+							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+						</tr>					  				  
+					</table>				  
 				</div>
 							
 				
-				<div class="col-md-4">
-				<br/>
-				  <table class="table">
-					  <thead class="thead-dark">
-						<tr>
-						  <th scope="col">#</th>
-						  <th scope="col">First</th>
-						  <th scope="col">Last</th>
-						  <th scope="col">Handle</th>
-						</tr>
-					  </thead>
-					  <tbody>
-						<tr>
-						  <th scope="row">1</th>
-						  <td>Mark</td>
-						  <td>Otto</td>
-						  <td>@mdo</td>
-						</tr>
-						<tr>
-						  <th scope="row">2</th>
-						  <td>Jacob</td>
-						  <td>Thornton</td>
-						  <td>@fat</td>
-						</tr>
-						<tr>
-						  <th scope="row">3</th>
-						  <td>Larry</td>
-						  <td>the Bird</td>
-						  <td>@twitter</td>
-						</tr>
-					  </tbody>
+				<div class="col-md-4 test">
+					<h5 class="continer_headers">Motor Table</h5>
+					<table class="table table-sm table-bordered " id="mtrtable" style="font-size:12px;background:#FDD3DF;text-align: left">
+						<thead class="thead-dark">
+							<tr>
+								<th scope="col"></th>
+								<th scope="col">Status<br/>(Alive/Dead)</th>
+								<th scope="col"> Motor Position<br/>(Displacement)</th>
+								<th scope="col">Motor Current (A)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<th scope="row">Stepper<br/>Motor 1</th>
+								<!-- add backend code to update status/motor position/motor current-->
+								<td>ALIVE</td>
+								<td>23</td>
+								<td>2.50</td>
+							</tr>
+							<tr>
+								<th scope="row">DC<br/>Motor 2</th>
+								<td>ALIVE</td>
+								<td>12</td>
+								<td>11.00</td>
+							</tr>
+							<tr>
+								<th scope="row">Stepper<br/>Motor 3</th>
+								<td>DEAD</td>
+								<td>84</td>
+								<td>7.45</td>
+							</tr>
+							<tr>
+								<th scope="row">Stepper<br/>Motor 4</th>
+								<td>DEAD</td>
+								<td>88</td>
+								<td></td>
+							</tr>
+							<tr>
+								<th scope="row">Arm Servo<br/>Motor 1</th>
+								<td>ALIVE</td>
+								<td>20</td>
+								<td>5.60</td>
+							</tr>
+							<tr>
+								<th>Arm Servo<br/>Motor 2 </th>
+								<td>ALIVE</td>
+								<td>67</td>
+								<td>12.34</td>
+							</tr>
+						</tbody>
 					</table>
 				</div>				
 			</div>
 		</div>
 	</div>
 
-    <!-- Optional JavaScript -->
+	
+	<!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-  </body>
+		
+	</body>
 </html>

@@ -9,7 +9,7 @@ app = flask.Flask(__name__)
 # Once we launch this, this will route us to the "../" page or index page and automatically render the Rover GUI
 @app.route("/")
 def index():
-    return flask.render_template("home.html")
+    return flask.render_template("BaseContainers3.html")
 
 @app.route("/BaseContainers")
 def base_containers():
