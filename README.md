@@ -118,10 +118,8 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 
 #### Atom (tested on ubuntu 16.04)
 If you're using atom-editor setting up should be fairly easy.
-- In atom, navigate to `Edit -> Preferences/Settings -> Packages`
-- Search for and install `python-yapf`, follow the README but for your yapf path put your systems output of `which yapf` (`where yapf` for windows)
-- Search for and install `linter-pylint`, if you get any prompts to install further dependencies click `yes` each time 
-- I would have thought the `linter-pylint` package would have covered that, but make sure to also run `pip3 install pylint` as well.
+- Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
+- Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
 ## ODROID
 ### How to upload Arduino scripts from the odroid
