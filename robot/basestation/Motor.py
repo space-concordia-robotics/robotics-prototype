@@ -12,15 +12,15 @@
 class Motor:
     # may or may not be used, pretty sure there's no overloading methods/constructors in python without needing to assign default values for the params
     # def __init__(self, min_angle, max_angle, home_angle, min_current, max_current, angle_position, electric_current, status, refresh_rate):
-                #self.min_angle = min_angle
-                #self.max_angle = max_angle
-                #self.home_angle = home_angle
-                #self.min_current = min_current
-                #self.max_current = max_current
-                #self.angle_position = angle_position
-                #self.electric_current = electric_current
-                #self.alive = alive
-                #self.refresh_rate = refresh_rate
+    #self.min_angle = min_angle
+    #self.max_angle = max_angle
+    #self.home_angle = home_angle
+    #self.min_current = min_current
+    #self.max_current = max_current
+    #self.angle_position = angle_position
+    #self.electric_current = electric_current
+    #self.alive = alive
+    #self.refresh_rate = refresh_rate
 
     def __init__(self, name, max_angle, min_angle, max_current, min_current, home_angle):
         self.name = name
@@ -29,7 +29,7 @@ class Motor:
 
     # will definitely have to be configured during testing
     # def home_position(self):
-        # self.angle_position = self.home_angle
+    # self.angle_position = self.home_angle
 
     # we'll have to callibrate the refreshrates for each motor during testing motors
     def set_refresh_rate(self, rate):
@@ -51,8 +51,7 @@ class Motor:
             self.angle_position = angle
             return True
         else:
-            print("unable to set angle position to " +
-                  str(angle) + " for motor: " + self.name)
+            print("unable to set angle position to " + str(angle) + " for motor: " + self.name)
             return False
 
     def get_angle_position(self):

@@ -19,9 +19,9 @@ print("Connecting to com port: " + firstPortName)
 ser = serial.Serial("/dev/" + firstPortName, 9600)
 print("Connected to Port: " + firstPortName)
 
-f = open('Python_Log.dat','a')
+f = open('Python_Log.dat', 'a')
 
-#Whenever we run the arduino, we output the time and date for the output 
+#Whenever we run the arduino, we output the time and date for the output
 #just to organize the log file for when we need to see output
 
 f.write("=======================================================================\n")
