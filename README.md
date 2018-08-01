@@ -116,8 +116,20 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
 - Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery). 
 
-#### Atom (tested on ubuntu 16.04)
+#### Atom (tested on ubuntu 16.04, Windows 7)
 If you're using atom-editor setting up should be fairly easy.
+
+##### Windows
+Note: It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
+
+- Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
+If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
+If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
+- Run `pylint --version`. If it fails with `RuntimeError: Inconsistent hierarchy` then go to the last python file in the stack trace (for me it was `functools.py`) and change `if not candidate` to `if candidate == None`.
+See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1388) on github.
+- If you've made it past the last two steps, proceed to run the commands listed under **Ubuntu** section underneath.
+
+##### Ubuntu
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
 - Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
