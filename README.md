@@ -120,8 +120,12 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 If you're using atom-editor setting up should be fairly easy.
 
 ##### Windows
-Note: It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
-
+**NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
+**NOTE:** Because the `.atom/config.cson` works for OSX and Linux, we aren't versioning the Windows equivalent configuration file.
+However, if you have issues such as `failed to spawn command pylint` or similar complaining about yapf, you may open the package settings and fix the paths yourself. \
+For example, change every `/` to `\`, and change the `venv/bin/whatever` to `venv\Scripts\whatever`.
+Make sure to apply these changes in the _atom package settings_, they will automatically take care of your system `config.cson` and take care of details (such as escaping the `\`s in the actual config file).
+ 
 - Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
 If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
 If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
