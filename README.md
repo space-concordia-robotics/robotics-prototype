@@ -132,6 +132,7 @@ If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and 
 - Run `pylint --version`. If it fails with `RuntimeError: Inconsistent hierarchy` then go to the last python file in the stack trace (for me it was `functools.py`) and change `if not candidate` to `if candidate == None`.
 See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1388) on github.
 - If you've made it past the last two steps, proceed to run the commands listed under **Ubuntu** section underneath.
+- If `apm --version` returns something along the lines of `command not found`, make sure to [add the path to your bin for atom to your path](https://www.java.com/en/download/help/path.xml).
 
 ##### Ubuntu
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
