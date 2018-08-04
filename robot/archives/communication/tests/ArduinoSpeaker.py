@@ -8,12 +8,12 @@ ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 
 print("connecting to com port: " + firstPortName)
-# can we automate getting the bandwidth selected by the arduino 
+# can we automate getting the bandwidth selected by the arduino
 # instead of hardcoding it?
 ser = serial.Serial("/dev/" + firstPortName, 9600)
 
 while True:
-    for i in range (0, 4):
+    for i in range(0, 4):
         if i == 0:
             ser.write('d')
             # doesn't work

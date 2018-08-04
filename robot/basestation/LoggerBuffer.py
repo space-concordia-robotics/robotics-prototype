@@ -1,7 +1,9 @@
 # class for logger buffer to be used to display logs
 # created using UML from SoAD
 
+
 class LoggerBugger:
+
     def __init__(self, log_file):
         """
         constructor

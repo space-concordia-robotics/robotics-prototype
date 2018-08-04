@@ -1,4 +1,11 @@
 {
     "python.pythonPath": "${workspaceFolder}/venv/bin/python",
-    "python.unitTest.pyTestEnabled": true
+    "python.unitTest.pyTestEnabled": true,
+    "python.formatting.provider": "yapf",
+    "python.linting.lintOnSave": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "markdown.styles": [
+        ".vscode/markdown.css"
+    ]
 }
