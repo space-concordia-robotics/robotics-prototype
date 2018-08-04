@@ -121,6 +121,7 @@ If you're using atom-editor setting up should be fairly easy.
 
 ##### Windows
 **NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
+
 **NOTE:** Because the `.atom/config.cson` works for OSX and Linux, we aren't versioning the Windows equivalent configuration file.
 However, if you have issues such as `failed to spawn command pylint` or similar complaining about yapf, you may open the package settings and fix the paths yourself. \
 For example, change every `/` to `\`, and change the `venv/bin/whatever` to `venv\Scripts\whatever`.
@@ -129,10 +130,10 @@ Make sure to apply these changes in the _atom package settings_, they will autom
 - Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
 If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
 If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
+- If `bin folder is _not_ missing, and `apm --version` returns something along the lines of `command not found`, make sure to [add the path to your bin for atom to your path](https://www.java.com/en/download/help/path.xml).
 - Run `pylint --version`. If it fails with `RuntimeError: Inconsistent hierarchy` then go to the last python file in the stack trace (for me it was `functools.py`) and change `if not candidate` to `if candidate == None`.
 See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1388) on github.
 - If you've made it past the last two steps, proceed to run the commands listed under **Ubuntu** section underneath.
-- If `apm --version` returns something along the lines of `command not found`, make sure to [add the path to your bin for atom to your path](https://www.java.com/en/download/help/path.xml).
 
 ##### Ubuntu
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
