@@ -64,7 +64,7 @@ class ClientConnection:
         if rep == 0:
             # the server is up so return true
             self.status = True
-            return self.status 
+            return self.status
         else:
             # the server is down so return false
             self.status = False
@@ -99,4 +99,3 @@ class ClientConnection:
         read the logs from the rover and return them
         :return:
         """
-
