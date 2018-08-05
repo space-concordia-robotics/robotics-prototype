@@ -1,4 +1,9 @@
 "*":
+  editor:
+    showIndentGuide: true
+    softTabs: true
+    tabType: "soft"
+    tabLength: 4
   "linter-pylint":
     pythonPath: "%p/venv/bin"
     rcFile: "%p/.pylintrc"
