@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # This is the controller page of the Flask GUI
 # Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
 
