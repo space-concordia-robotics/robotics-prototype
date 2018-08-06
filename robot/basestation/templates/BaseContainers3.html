@@ -16,21 +16,21 @@
 
 		.container {
 			height:100%;
-			min-height:100%;				
+			min-height:100%;
 		}
 
 		.fill{
 			width:100%;
 			height:100%;
-			min-height:100%;		
-			min-width:100%;	
+			min-height:100%;
+			min-width:100%;
 		}
 
 		.map {
 			height: 100vh;
 			min-height: 100vh;
-		}	
-		
+		}
+
 		.tg, .tg2{
 			border-collapse:collapse;
 			border-spacing:0;
@@ -56,16 +56,16 @@
 			word-break:normal;
 			border-color:#990000;
 			text-align: center;
-			
+
 		}
-	
+
 		.tg tr:last-child, .autoCtrLable{
 			border-bottom: 5px inset #05072F;
 			color: #6768A1;
 			font-weight: bold;
 			background-color: #101148;
 		}
-	
+
 		.autoCtrLable {
 			padding:12px 5px 12px 5px;
 			margin-top:15px
@@ -83,7 +83,7 @@
 			color: white;
 			border-radius: 10px;
 		}
-		
+
 		.cntr_btn2{
 			width:80px;
 			height:80px;
@@ -96,17 +96,17 @@
 			background-color: #05072F;
 			color: white;
 		}
-		
+
 		.cntr_btn_left{
 			border-radius: 10px 0 0 10px;
 			border-right-color: #4A0000;
 		}
-		
+
 		.cntr_btn_right{
 			border-radius: 0 10px 10px 0;
 			border-left-color: #4A0000;
 		}
-		
+
 		.cntr_btn_mid{
 			width:80px;
 			height:80px;
@@ -135,27 +135,27 @@
 			border: 2px solid #750000
 		}
 
-		#mtrtable, #mtrtable tr td{ 
+		#mtrtable, #mtrtable tr td{
 			border: 2px solid #750000;
 			text-align: center
 		}
 
 		.cntrMainBtn{
 			border-bottom: 2px solid #05072F;
-			border-top-style: none; 
+			border-top-style: none;
 			border-left-style: none;
 			margin-bottom: 5px
 		}
-		
+
 		#logs_btn button{
 			background-color: #4A0000;
 			border: ridge 2px #434586;
 		}
-				
+
 	</style>
 
 	<script language="javascript" type="text/javascript">
-		
+
 		function entertext(){
 			document.getElementById('write_to_log').value += "blablabla\n";
 		}
@@ -179,13 +179,13 @@
 		}
 
 	</script>
-		
+
 	</head>
   <body>
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
 			<a class="navbar-brand" href="#"><img src="https://spaceconcordia.github.io/img/sclogo_header.png"></a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" d
-							ata-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" 
+							ata-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
 							aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -215,11 +215,11 @@
 				<div class="col-md-6">
 					<h5 class="continer_headers">Arm Vision</h5>
 					<img src="http://www.grup-pumsa.cat/uploadwallimgs/b/41/413832_%D8%B5%D9%88%D8%B1-wallpaper.jpg" class="img-fluid" alt="Responsive image" />
-				</div>				
+				</div>
 			</div>
-			
+
 			<div class="row">
-				<div class="col-md-3" align="center">
+				<div class="col-md" align="center">
 					<h5 class="continer_headers">Log Console</h5>
 					<div class="form-group">
 						<textarea  id="write_to_log" rows="8" cols="33"></textarea><br/>
@@ -230,9 +230,9 @@
 							<button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
 						</div>
 					</div>
-				 		
+
 				</div>
-				<div class="col-md-5" align="center">
+				<div class="col-md" align="center">
 					<h5 class="continer_headers">Control Panel</h5>
 					<div class="row cntrMainBtn">
 						<div class="col-sm-6" align="right" style="vertical-align:middle;border-style:none">
@@ -248,77 +248,78 @@
 							</label>
 							</div>
 						</div>
-					</div>
 
-					<table class="tg"  style="display: block"  id="ArmcontrolsOFF" >
-						<tr>
-							<td></td>
-							<td valign="bottom"><button type="button" class="cntr_btn"><strong>Pitch<br/>Up</strong></button></td>
-							<td></td>
-							<td style="width:30px"></td>
-							<td></td>
-							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Up</strong></button></th>
-							<td></td>
-						</tr>
-						<tr>
-							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Left</strong></button></td>
-							<td><button type="button"  class="cntr_btn"><strong>Pitch<br/>Down</strong></button></td>
-							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Right</strong></button></td>
-							<td></td>
-							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Left</strong></button></td>
-							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Down</strong></button></td>
-							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Right</strong></button></td>
-						</tr>
-						<tr>
-							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Open</strong></button></td>
-							<td></td>
-							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Close</strong></button></td>
-							<td></td>
-							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Back</strong></button></td>
-							<td></td>
-							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Fwrd</strong></button></td>
-						</tr>
-						<tr>
-							<th colspan="3"><strong>CLAW CONTROLS</strong></th>
-							<th style="width:30px;background:#990000;border: 1px solid #990000"></th>
-							<th colspan="3"><strong>ARM CONTROLS</strong></th>
-						</tr>									  
-					</table>
+                        <!-- Manual controls section -->
+    					<table class="tg" style="display: block" id="ArmcontrolsOFF">
+    						<tr>
+    							<td></td>
+    							<td valign="bottom"><button type="button" class="cntr_btn"><strong>Pitch<br/>Up</strong></button></td>
+    							<td></td>
+    							<td style="width:30px"></td>
+    							<td></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Up</strong></button></th>
+    							<td></td>
+    						</tr>
+    						<tr>
+    							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Left</strong></button></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Pitch<br/>Down</strong></button></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Roll<br/>Right</strong></button></td>
+    							<td></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Left</strong></button></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Down</strong></button></td>
+    							<td><button type="button"  class="cntr_btn"><strong>Arm<br/>Right</strong></button></td>
+    						</tr>
+    						<tr>
+    							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Open</strong></button></td>
+    							<td></td>
+    							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Claw<br/>Close</strong></button></td>
+    							<td></td>
+    							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Back</strong></button></td>
+    							<td></td>
+    							<td><button type="button" class="cntr_btn" style="margin-bottom:6px"><strong>Arm<br/>Fwrd</strong></button></td>
+    						</tr>
+    						<tr>
+    							<th colspan="3"><strong>CLAW CONTROLS</strong></th>
+    							<th style="width:30px;background:#990000;border: 1px solid #990000"></th>
+    							<th colspan="3"><strong>ARM CONTROLS</strong></th>
+    						</tr>
+    					</table>
 
-					<!-- Automatic controlls section -->
-					<table class="tg2"  style="display: none; margin: 10px 0 0 23px" id="ArmcontrolsON">
-						<tr>
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM1</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-							<td style="width:30px"></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM4</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-						</tr>                                              
-						<tr>                                               
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM2</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-							<td></td>                                
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM1</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-						</tr>                                              
-						<tr>                                               
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM3</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-							<td></td>                                
-							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
-							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM2</strong></button></td>
-							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
-						</tr>					  				  
-					</table>				  
+    					<!-- Automatic controlls section -->
+    					<table class="tg2" style="display: none; margin: 10px 0 0 23px" id="ArmcontrolsON">
+    						<tr>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM1</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    							<td style="width:30px"></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM4</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    						</tr>
+    						<tr>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM2</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    							<td></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM1</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    						</tr>
+    						<tr>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>STM3</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    							<td></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_left fa fa-chevron-left fa-3x"></button></td>
+    							<td><button type="button" class="cntr_btn_mid" disabled><strong>ASM2</strong></button></td>
+    							<td><button type="button" class="cntr_btn2 cntr_btn_right fa fa-chevron-right fa-3x"></button></td>
+    						</tr>
+    					</table>
+                    </div>
 				</div>
-							
-				
-				<div class="col-md-4 test">
+
+
+				<div class="col-md test">
 					<h5 class="continer_headers">Motor Table</h5>
 					<table class="table table-sm table-bordered " id="mtrtable" style="font-size:12px;background:#FDD3DF;text-align: left">
 						<thead class="thead-dark">
@@ -369,17 +370,17 @@
 							</tr>
 						</tbody>
 					</table>
-				</div>				
+				</div>
 			</div>
 		</div>
 	</div>
 
-	
+
 	<!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-		
+
 	</body>
 </html>
