@@ -39,6 +39,7 @@ while True:
             print("Sending key: " + key)
             mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
         elif key == 'q':
+            mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
             print("\nTerminating connection.")
             break
     except:
