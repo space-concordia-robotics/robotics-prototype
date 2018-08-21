@@ -1,15 +1,12 @@
 $(function() {
-    var Site = {
+    const Site = {
         init: function() {
             this.bindEventHandlers();
         },
         bindEventHandlers: function() {
-            for (var i=0; i<this.eventHandlers.length; i++) {
-                this.bindEvent(this.eventHandlers[i]);
-            }
+            this.eventHandlers.forEach(eventHandler => this.bindEvent(eventHandler));
         },
         bindEvent: function(e) {
-            // e.$el.on(e.event, e.handler);
             e.$el.bind(e.event, function() {
                 $.getJSON(e.route, e.handler);
                 return false;
