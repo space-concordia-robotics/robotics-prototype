@@ -10,165 +10,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
         crossorigin="anonymous">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="../static/CSS/titatoggle-dist.css" rel="stylesheet">
-    <style type="text/css">
-        html,
-        body {
-            height: 100%;
-            background-color: #990000;
-        }
-
-        .container {
-            height: 100%;
-            min-height: 100%;
-        }
-
-        .fill {
-            width: 100%;
-            height: 100%;
-            min-height: 100%;
-            min-width: 100%;
-        }
-
-        .map {
-            height: 100vh;
-            min-height: 100vh;
-        }
-
-        .tg,
-        .tg2 {
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-
-        .tg td,
-        .tg2 td {
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            padding: 0;
-            border-style: none;
-            border-width: 0;
-            overflow: hidden;
-            word-break: normal;
-            border-color: #990000;
-        }
-
-        .tg th,
-        .tg2 th {
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            font-weight: normal;
-            padding: 0;
-            border-style: solid;
-            border-width: 1px;
-            overflow: hidden;
-            word-break: normal;
-            border-color: #990000;
-            text-align: center;
-
-        }
-
-        .tg tr:last-child,
-        .autoCtrLable {
-            border-bottom: 5px inset #05072F;
-            color: #6768A1;
-            font-weight: bold;
-            background-color: #101148;
-        }
-
-        .autoCtrLable {
-            padding: 12px 5px 12px 5px;
-            margin-top: 15px
-        }
-
-        .row,
-        .row>* {
-            border: 0.5px solid #05072F;
-        }
-
-        .cntr_btn {
-            width: 80px;
-            height: 80px;
-            background-color: #4A0000;
-            border: ridge 2px #434586;
-            color: white;
-            border-radius: 10px;
-        }
-
-        .cntr_btn2 {
-            width: 80px;
-            height: 80px;
-            background-color: #4A0000;
-            border: ridge 2px #434586;
-            color: white;
-        }
-
-        .cntr_btn:hover,
-        .cntr_btn2:hover,
-        #logs_btn button:hover {
-            background-color: #05072F;
-            color: white;
-        }
-
-        .cntr_btn_left {
-            border-radius: 10px 0 0 10px;
-            border-right-color: #4A0000;
-        }
-
-        .cntr_btn_right {
-            border-radius: 0 10px 10px 0;
-            border-left-color: #4A0000;
-        }
-
-        .cntr_btn_mid {
-            width: 80px;
-            height: 80px;
-            background-color: #4A0000;
-            border-top: ridge 2px #434586;
-            border-bottom: ridge 2px #434586;
-            border-left: ridge 2px #4A0000;
-            border-right: ridge 2px #4A0000;
-            color: white;
-        }
-
-        .continer_headers,
-        thead {
-            color: #092B43;
-            font-weight: bolder;
-            text-align: center;
-        }
-
-        #mtrtable thead th,
-        .tg tr:first-child {
-            text-align: center;
-            vertical-align: middle
-        }
-
-        #mtrtable thead tr:first-child,
-        #mtrtable tbody th {
-            background-color: #101148;
-            color: #F0DAFA;
-            border: 2px solid #750000
-        }
-
-        #mtrtable,
-        #mtrtable tr td {
-            border: 2px solid #750000;
-            text-align: center
-        }
-
-        .cntrMainBtn {
-            border-bottom: 2px solid #05072F;
-            border-top-style: none;
-            border-left-style: none;
-            margin-bottom: 5px
-        }
-
-        #logs_btn button {
-            background-color: #4A0000;
-            border: ridge 2px #434586;
-        }
-    </style>
+    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
+    <link href="../static/css/app.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script language="javascript" type="text/javascript">
@@ -518,16 +361,19 @@
                             <tr>
                                 <th scope="col"></th>
                                 <th scope="col">Status
-                                    <br/>(Alive/Dead)</th>
+                                    <br/>(Alive/Dead)
+                                </th>
                                 <th scope="col"> Motor Position
-                                    <br/>(Displacement)</th>
+                                    <br/>(Displacement)
+                                </th>
                                 <th scope="col">Motor Current (A)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <th scope="row">Stepper
-                                    <br/>Motor 1</th>
+                                    <br/>Motor 1
+                                </th>
                                 <!-- add backend code to update status/motor position/motor current-->
                                 <td>ALIVE</td>
                                 <td>23</td>
@@ -535,35 +381,40 @@
                             </tr>
                             <tr>
                                 <th scope="row">DC
-                                    <br/>Motor 2</th>
+                                    <br/>Motor 2
+                                </th>
                                 <td>ALIVE</td>
                                 <td>12</td>
                                 <td>11.00</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
-                                    <br/>Motor 3</th>
+                                    <br/>Motor 3
+                                </th>
                                 <td>DEAD</td>
                                 <td>84</td>
                                 <td>7.45</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
-                                    <br/>Motor 4</th>
+                                    <br/>Motor 4
+                                </th>
                                 <td>DEAD</td>
                                 <td>88</td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <th scope="row">Arm Servo
-                                    <br/>Motor 1</th>
+                                    <br/>Motor 1
+                                </th>
                                 <td>ALIVE</td>
                                 <td>20</td>
                                 <td>5.60</td>
                             </tr>
                             <tr>
                                 <th>Arm Servo
-                                    <br/>Motor 2 </th>
+                                    <br/>Motor 2
+                                </th>
                                 <td>ALIVE</td>
                                 <td>67</td>
                                 <td>12.34</td>
