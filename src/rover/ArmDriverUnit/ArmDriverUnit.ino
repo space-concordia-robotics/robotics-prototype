@@ -16,6 +16,14 @@
 void setup() {
   Serial.begin(BAUD_RATE);
 
+  Motor motor1(MOTOR1);
+  Motor motor2(MOTOR2);
+  Motor motor3(MOTOR3);
+  Motor motor4(MOTOR4);
+  Motor motor5(MOTOR5);
+  Motor motor6(MOTOR6);
+  
+  /////////// ignore after here
   pinMode(M1_STEP_PIN,   OUTPUT);
   pinMode(M1_DIR_PIN,    OUTPUT);
   pinMode(M2_STEP_PIN,   OUTPUT);

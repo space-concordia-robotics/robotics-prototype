@@ -1,6 +1,13 @@
 #ifndef MotorDriver_h
 #define MotorDriver_h
 
+#define DC_MOTOR 0
+#define STEPPER_MOTOR 1
+#define SERVO_MOTOR 2
+
+#define CLOCKWISE 0
+#define COUNTER_CLOCKWISE 1
+
 #define M1_STEP_HIGH        PORTD |=  0b10000000;
 #define M1_STEP_LOW         PORTD &= ~0b10000000;
 
