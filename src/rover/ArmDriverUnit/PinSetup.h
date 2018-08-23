@@ -1,5 +1,5 @@
-#ifndef MotorDriver_h
-#define MotorDriver_h
+#ifndef PINSETUP_H
+#define PINSETUP_H
 
 #define HEARTBEAT_PIN 13
 
@@ -17,8 +17,8 @@
 // 8-14 encoder interrupt pins
 // 3 direction pins, 3 step pins
 
-#define NUM_STEPPERS        2
-#define NUM_SERVOS          3
+#define NUM_STEPPERS        3
+#define NUM_SERVOS          2
 #define NUM_LIM_SW          4
 
 // steppers

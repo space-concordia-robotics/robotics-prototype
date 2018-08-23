@@ -1,29 +1,42 @@
 /*
-  ToDo:
-  1)PORT EVERYTHING TO ARDUINO MEGA OR ANOTHER MICOCONTROLLER WITH MORE INTERRUPTS (STM32)
-  2)incorporate limit switches for homing position on all motors
-  3)implement all the quadrature encoders
-  4)implement servo functionality
-  5)TBD
-*/
+  TODO:
+  -implement simple manual control:
+   -import stepper library and maybe DC library for simple manual control
+   -use libraries to write functions (that aren't optimized) for manual control
+   -rewrite parsing function to parts what tatum will be sending (x,y)
+  
+  -fix issue where i need to create the motor objects inside the motordriver header
+  -verify the Arduino.h inclusion since I'm actually using a teensy
+  
+  -implement appropriate timer ISRs that can take input from PID or manual control functions:
+   -rewrite all the register bit variables to use teensy registers for encoder/limit switch interrupts
+   -rewrite the motor control with timers for teensy, ensure control for all motors
+   
+  -implement PID for automatic control
+	-update parsing function or just go directly to ROSserial
+	
+  -incorporate limit switches for homing position on all motors
+ */
 
-#include "PinDefinitions.h"
-#include "MotorDriver.h"
+#include "PinSetup.h"
+#include "ArmMotor.h"
 
 #define BAUD_RATE 115200      //serial baud rate
 #define BUFFER_SIZE 100     //size of the buffer for the serial commands
 
 void setup() {
   Serial.begin(BAUD_RATE);
-
-  Motor motor1(MOTOR1);
-  Motor motor2(MOTOR2);
-  Motor motor3(MOTOR3);
-  Motor motor4(MOTOR4);
-  Motor motor5(MOTOR5);
-  Motor motor6(MOTOR6);
-  
+  /*
+  ArmMotor motor1(MOTOR1); //motor1.init();
+  ArmMotor motor2(MOTOR2);
+  ArmMotor motor3(MOTOR3);
+  ArmMotor motor4(MOTOR4);
+  ArmMotor motor5(MOTOR5);
+  ArmMotor motor6(MOTOR6);
+  */
   /////////// ignore after here
+
+  /*
   pinMode(M1_STEP_PIN,   OUTPUT);
   pinMode(M1_DIR_PIN,    OUTPUT);
   pinMode(M2_STEP_PIN,   OUTPUT);
@@ -55,26 +68,11 @@ void setup() {
 
   //start of the heartbeat timer
   startTime = millis();
+
+  */
 }
-
-void encoder_interrupt() {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;  //move by two bits (multiply by 4);
-
-  //read all bits on D register. shift ro right
-  //so pin 2 and 3 are now the lowest bits
-  //then AND this with 0X03 (0000 0011) to zero everything else
-  //then OR this with the last encoder state to get a 4 byte number
-  oldEncoderState |= ((PIND >> 2) & 0x03);
-
-  //AND this number with 0X0F to make sure its a
-  //4 bit unsigned number (0 to 15 decimal)
-  //then use that number as an index from the array to add or deduct a 1 from the
-  //count
-  dcMotor.encCount += dir[(oldEncoderState & 0x0F)];
-}
-
-ISR(TIMER1_COMPA_vect)
+/*
+void ISR(TIMER1_COMPA_vect)
 {
 
   for (int i = 0; i < NUM_STEPPERS; i++) {
@@ -100,7 +98,7 @@ ISR(TIMER1_COMPA_vect)
     }
   }
 }
-
+*//*
 void prepareMovement(int stepperNumber, float angle) {
 
   volatile stepperInfo& s = steppers[stepperNumber];
@@ -126,16 +124,16 @@ void prepareMovement(int stepperNumber, float angle) {
     }
   }
 }
-
+*//*
 void startMovement() {
   OCR1A = c0;
   TIMER1_INTERRUPTS_ON
 }
-
+*/
 void parseCommand(char* line) {
   char* pch;
   int term = 0;
-  int whichMotor = 0 
+  int whichMotor = 0;
 
   /*
      Currently Interprets :
@@ -153,7 +151,7 @@ void parseCommand(char* line) {
      E,stepper                  --> Enable or disable steppers to save power (no current draw)
 
   */
-
+  /*
   pch = strtok(line, ",");  //start from the begining of the line
 
   if (*pch == 'F') {
@@ -239,8 +237,9 @@ void parseCommand(char* line) {
   else {
     Serial.println("Command not found!");
   }
+*/
 }
-
+/*
 void prepareDCMotor(float angle) {
 
   dcMotor.desiredAngle = angle;
@@ -260,8 +259,9 @@ void prepareDCMotor(float angle) {
     }
   }
 }
-
+*/
 void loop() {
+  /*
   digitalWrite(LED_PIN, led_status);
 
   if (Serial.available()) {
@@ -289,7 +289,7 @@ void loop() {
     startTime = t2;
     led_status = !led_status;
   }
-
+  */
 }
 
 
