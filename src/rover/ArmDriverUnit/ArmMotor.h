@@ -1,18 +1,22 @@
 #ifndef ARMMOTOR_H
 #define ARMMOTOR_H
 
-#include <Arduino.h>
 #include "PinSetup.h"
-//#include "AbtinEncoder.h"
+#include "AbtinEncoder.h"
 
 /*
-#define DC_MOTOR 0
-#define STEPPER_MOTOR 1
-#define SERVO_MOTOR 2
-
-#define CLOCKWISE 0
-#define COUNTER_CLOCKWISE 1
-*/
+ * m1 base stepper (rotation)
+ * m2 shoulder dc (flexion)
+ * m3 elbow stepper (flexion)
+ * m4 wrist stepper (flexion
+ * m5 wrist servo (rotation)
+ * m6 end effector servo (pinching)
+ */
+ 
+// 3 pwm pins
+// 4-6 limit switch interrupt pins
+// 8-14 encoder interrupt pins
+// 3 direction pins, 3 step pins
 
 /*
 #define M1_STEP_HIGH        PORTD |=  0b10000000;
@@ -25,17 +29,9 @@
 #define TIMER1_INTERRUPTS_OFF   TIMSK1 &= ~(1 << OCIE1A);
 */
 
-enum motor_code {MOTOR1,MOTOR2,MOTOR3,MOTOR4,MOTOR5,MOTOR6};
+enum motor_code {MOTOR1=1,MOTOR2,MOTOR3,MOTOR4,MOTOR5,MOTOR6};
 enum motor_type {DC_MOTOR,STEPPER_MOTOR,SERVO_MOTOR};
 enum motor_direction {CLOCKWISE,COUNTER_CLOCKWISE};
-const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix
-
-void m1_encoder_interrupt();
-void m2_encoder_interrupt();
-void m3_encoder_interrupt();
-void m4_encoder_interrupt();
-void m5_encoder_interrupt();
-void m6_encoder_interrupt();
 
 /*
 unsigned int c0 = 1600;  // was 2000 * sqrt( 2 * angle / accel )
@@ -89,59 +85,59 @@ void M2Dir(int d) {
 */
 // todo: finish everything, make sure to use the right pins for the encoders
 class ArmMotor{
-	public:
-		volatile int encoderCount;
+  public:
+    //volatile int encoderCount;
     
     ArmMotor(int code);
-    //void init();
-		void update();
-		
-		void setMotorSpeed();
-		void setDesiredAngle();
-		float getCurrentAngle();
-	private:
-		int motorCode;
-		int motorType;
-		float currentAngle;
-		float desiredAngle;
-		bool isMovementDone;
-		
-		void changeMotorAngle(char direction, char speed);
-} motor1(MOTOR1),motor2(MOTOR2),motor3(MOTOR3),motor4(MOTOR4),motor5(MOTOR5),motor6(MOTOR6);;
+    
+    void setMotorSpeed();
+    float getCurrentAngle();
+    
+    void budgeMotor(int rotationDir);
+    void setDesiredAngle(float angle);
+    void update();
+  private:
+    int motorCode;
+    int motorType;
+    float currentAngle;
+    float desiredAngle;
+    bool isMovementDone;
+    
+}; //motor1(MOTOR1),motor2(MOTOR2),motor3(MOTOR3),motor4(MOTOR4),motor5(MOTOR5),motor6(MOTOR6);;
 
 //Motor::Motor(int code): motorCode(code){}
 
 //void Motor::init(){
 ArmMotor::ArmMotor(int code): motorCode(code){
-	// this code only runs at boot so order of switch statement not important
-	switch(motorCode){
-		case MOTOR1:
-			motorType=STEPPER_MOTOR;
-			attachInterrupt(M1_ENCODER_A, m1_encoder_interrupt, CHANGE);
-			attachInterrupt(M1_ENCODER_B, m1_encoder_interrupt, CHANGE);
-			break;
-		case MOTOR2:
-			motorType=DC_MOTOR;
+  // this code only runs at boot so order of switch statement not important
+  switch(motorCode){
+    case MOTOR1:
+      motorType=STEPPER_MOTOR;
+      attachInterrupt(M1_ENCODER_A, m1_encoder_interrupt, CHANGE);
+      attachInterrupt(M1_ENCODER_B, m1_encoder_interrupt, CHANGE);
+      break;
+    case MOTOR2:
+      motorType=DC_MOTOR;
       attachInterrupt(M2_ENCODER_A, m2_encoder_interrupt, CHANGE);
-			attachInterrupt(M2_ENCODER_B, m2_encoder_interrupt, CHANGE);
-			break;
-		case MOTOR3:
-		  motorType=STEPPER_MOTOR;
-			attachInterrupt(M3_ENCODER_A, m3_encoder_interrupt, CHANGE);
-			attachInterrupt(M3_ENCODER_B, m3_encoder_interrupt, CHANGE);
-			break;
-		case MOTOR4:
-			motorType=STEPPER_MOTOR;
-			attachInterrupt(M4_ENCODER_A, m4_encoder_interrupt, CHANGE);
-			attachInterrupt(M4_ENCODER_B, m4_encoder_interrupt, CHANGE);
-			break;
-		case MOTOR5:
-			motorType=SERVO_MOTOR;
-			break;
-		case MOTOR6:
-			motorType=SERVO_MOTOR;
-			break;
-	}
+      attachInterrupt(M2_ENCODER_B, m2_encoder_interrupt, CHANGE);
+      break;
+    case MOTOR3:
+      motorType=STEPPER_MOTOR;
+      attachInterrupt(M3_ENCODER_A, m3_encoder_interrupt, CHANGE);
+      attachInterrupt(M3_ENCODER_B, m3_encoder_interrupt, CHANGE);
+      break;
+    case MOTOR4:
+      motorType=STEPPER_MOTOR;
+      attachInterrupt(M4_ENCODER_A, m4_encoder_interrupt, CHANGE);
+      attachInterrupt(M4_ENCODER_B, m4_encoder_interrupt, CHANGE);
+      break;
+    case MOTOR5:
+      motorType=SERVO_MOTOR;
+      break;
+    case MOTOR6:
+      motorType=SERVO_MOTOR;
+      break;
+  }
 }
 
 /*
@@ -151,78 +147,38 @@ ArmMotor::ArmMotor(int code): motorCode(code){
  * tell the ISR how to move. but for now I can just make simple code that does the thing, I suppose.
 */
 
-void ArmMotor:moveMotor(void){
-	// arranged in order of which motor is predicted to be controlled the most
-	switch(motorType){
-		case STEPPER_MOTOR:
-			
-			break;
-		case DC_MOTOR:
-			break;
-		case SERVO_MOTOR:
-			if(direction==CLOCKWISE){
-				//pwm signal one way
-				analogWrite(
-			}
-			if(direction==COUNTER_CLOCKWISE){
-				//pwm signal other way
-			}
-			break;
-	}
+void ArmMotor::budgeMotor(int rotationDir){
+  // arranged in order of which motor is predicted to be controlled the most
+  switch(motorType){
+    case STEPPER_MOTOR:
+      
+      break;
+    case DC_MOTOR:
+      break;
+    case SERVO_MOTOR:
+      if(rotationDir==CLOCKWISE){
+        //pwm signal one way
+        
+      }
+      if(rotationDir==COUNTER_CLOCKWISE){
+        //pwm signal other way
+      }
+      break;
+  }
 }
 
-void ArmMotor::changeMotorAngle(char direction, char speed){
-	// arranged in order of which motor is predicted to be controlled the most
-	switch(motorType){
-		case STEPPER_MOTOR:
-			break;
-		case DC_MOTOR:
-			break;
-		case SERVO_MOTOR:
-			if(direction==CLOCKWISE){
-				//pwm signal one way
-			}
-			if(direction==COUNTER_CLOCKWISE){
-				//pwm signal other way
-			}
-			break;
-	}
+void ArmMotor::setDesiredAngle(float angle){
+  // arranged in order of which motor is predicted to be controlled the most
+  switch(motorType){
+    case STEPPER_MOTOR:
+      //stepper pid
+      break;
+    case DC_MOTOR:
+      //dc pid
+      break;
+    case SERVO_MOTOR:
+      //servo pid? idk if we'll use this
+      break;
+  }
 }
-
-void m1_encoder_interrupt(){
-  static unsigned int oldM1EncoderState = 0;
-  oldM1EncoderState <<= 2;  //move by two bits (multiply by 4);
-  //read all bits on D register. shift ro right
-  //so pin 2 and 3 are now the lowest bits
-  //then AND this with 0X03 (0000 0011) to zero everything else
-  //then OR this with the last encoder state to get a 4 byte number
-  oldM1EncoderState |= ((PIND >> 2) & 0x03);
-  //AND this number with 0X0F to make sure its a
-  //4 bit unsigned number (0 to 15 decimal)
-  //then use that number as an index from the array to add or deduct a 1 from the
-  //count
-  motor1.encoderCount += dir[(oldM1EncoderState & 0x0F)];
-}
-
-void m2_encoder_interrupt(){
-  static unsigned int oldM2EncoderState = 0;
-  oldM2EncoderState <<= 2;  //move by two bits (multiply by 4);
-  oldM2EncoderState |= ((PIND >> 2) & 0x03);
-  motor2.encoderCount += dir[(oldM2EncoderState & 0x0F)];
-}
-
-void m3_encoder_interrupt(){
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;  //move by two bits (multiply by 4);
-  oldEncoderState |= ((PIND >> 2) & 0x03);
-  motor3.encoderCount += dir[(oldEncoderState & 0x0F)];
-}
-
-void m4_encoder_interrupt(){
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;  //move by two bits (multiply by 4);
-  oldEncoderState |= ((PIND >> 2) & 0x03);
-  motor4.encoderCount += dir[(oldEncoderState & 0x0F)];
-}
-
 #endif

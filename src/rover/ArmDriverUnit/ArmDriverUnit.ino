@@ -6,7 +6,7 @@
    -rewrite parsing function to parts what tatum will be sending (x,y)
   
   -fix issue where i need to create the motor objects inside the motordriver header
-  -verify the Arduino.h inclusion since I'm actually using a teensy
+   -fixed: the issue is a circular dependency solved by placing the encoder count variables elsewhere
   
   -implement appropriate timer ISRs that can take input from PID or manual control functions:
    -rewrite all the register bit variables to use teensy registers for encoder/limit switch interrupts
@@ -16,6 +16,20 @@
 	-update parsing function or just go directly to ROSserial
 	
   -incorporate limit switches for homing position on all motors
+  
+  -timers
+   -systick is normally a heartbeat type thing
+   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
+   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
+    -decide frequency of motor control loop: figure out estimated time for loop
+   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
+    -
+   -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
+   -ftm+tpm has quadrature decoder?
+   -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
+   
+  -implement error checking?
+  -implement power management? sleep mode?
  */
 
 #include "PinSetup.h"
@@ -25,15 +39,16 @@
 #define BUFFER_SIZE 100     //size of the buffer for the serial commands
 
 void setup() {
+  setupPins();
   Serial.begin(BAUD_RATE);
-  /*
-  ArmMotor motor1(MOTOR1); //motor1.init();
-  ArmMotor motor2(MOTOR2);
-  ArmMotor motor3(MOTOR3);
-  ArmMotor motor4(MOTOR4);
-  ArmMotor motor5(MOTOR5);
-  ArmMotor motor6(MOTOR6);
-  */
+  
+  ArmMotor motor1(MOTOR1); // base stepper (rotation)
+  ArmMotor motor2(MOTOR2); // shoulder dc (flexion)
+  ArmMotor motor3(MOTOR3); // elbow stepper (flexion)
+  ArmMotor motor4(MOTOR4); // wrist stepper (flexion)
+  ArmMotor motor5(MOTOR5); // wrist servo (rotation)
+  ArmMotor motor6(MOTOR6); // end effector servo (pinching)
+	
   /////////// ignore after here
 
   /*
@@ -291,23 +306,3 @@ void loop() {
   }
   */
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
