@@ -5,12 +5,12 @@
 #include "AbtinEncoder.h"
 
 /*
- * m1 base stepper (rotation)
- * m2 shoulder dc (flexion)
- * m3 elbow stepper (flexion)
- * m4 wrist stepper (flexion
- * m5 wrist servo (rotation)
- * m6 end effector servo (pinching)
+   m1 base stepper (rotation)
+   m2 shoulder dc (flexion)
+   m3 elbow stepper (flexion)
+   m4 wrist stepper (flexion
+   m5 wrist servo (rotation)
+   m6 end effector servo (pinching)
  */
  
 // 3 pwm pins
@@ -19,158 +19,184 @@
 // 3 direction pins, 3 step pins
 
 /*
-#define M1_STEP_HIGH        PORTD |=  0b10000000;
-#define M1_STEP_LOW         PORTD &= ~0b10000000;
+  #define M1_STEP_HIGH        PORTD |=  0b10000000;
+  #define M1_STEP_LOW         PORTD &= ~0b10000000;
 
-#define M2_STEP_HIGH        PORTD |=  0b00100000;
-#define M2_STEP_LOW         PORTD &= ~0b00100000;
+  #define M2_STEP_HIGH        PORTD |=  0b00100000;
+  #define M2_STEP_LOW         PORTD &= ~0b00100000;
 
-#define TIMER1_INTERRUPTS_ON    TIMSK1 |=  (1 << OCIE1A);
-#define TIMER1_INTERRUPTS_OFF   TIMSK1 &= ~(1 << OCIE1A);
+  #define TIMER1_INTERRUPTS_ON    TIMSK1 |=  (1 << OCIE1A);
+  #define TIMER1_INTERRUPTS_OFF   TIMSK1 &= ~(1 << OCIE1A);
 */
 
-enum motor_code {MOTOR1=1,MOTOR2,MOTOR3,MOTOR4,MOTOR5,MOTOR6};
-enum motor_type {DC_MOTOR,STEPPER_MOTOR,SERVO_MOTOR};
-enum motor_direction {CLOCKWISE,COUNTER_CLOCKWISE};
+enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6};
+enum motor_type {DC_MOTOR, STEPPER_MOTOR, SERVO_MOTOR};
+enum motor_direction {CLOCKWISE, COUNTER_CLOCKWISE};
+
+#define BUDGE_TIME 1000
+//#define MAX_BUDGE_TIME 3 // don't allow budges to last very long
 
 /*
-unsigned int c0 = 1600;  // was 2000 * sqrt( 2 * angle / accel )
-
-struct stepperInfo {
+  unsigned int c0 = 1600;  // was 2000 * sqrt( 2 * angle / accel )
+  
+  struct stepperInfo {
   void (*dirFunc)(int);
   void (*stepFunc)();
   volatile float dir = 0;
   volatile float currentAngle = 0;
   volatile float desiredAngle = 0;
   volatile bool movementDone = true;
-};
+  };
 
-struct dcInfo {
+  struct dcInfo {
   volatile int dir = 127; // 0 to 255 where 127 is the midpoint and stops the motor
   volatile float currentAngle = 0;
   volatile float desiredAngle = 0;
   volatile bool dcMovementDone = false;
   volatile long encCount = 0;
-};
+  };
 
-struct servoInfo {
+  struct servoInfo {
   volatile int dir = 127; // 0 to 255 where 127 is the midpoint and stops the motor
   volatile float currentAngle = 0;
   volatile float desiredAngle = 0;
   volatile bool dcMovementDone = false;
   volatile long encCount = 0;
-};
+  };
 
-volatile stepperInfo steppers[NUM_STEPPERS];
-char serialBuffer[BUFFER_SIZE];
-volatile dcInfo dcMotor;
-bool led_status = true;
-int startTime = 0;
+  volatile stepperInfo steppers[NUM_STEPPERS];
+  char serialBuffer[BUFFER_SIZE];
+  volatile dcInfo dcMotor;
+  bool led_status = true;
+  int startTime = 0;
 
-void M1Step() {
+  void M1Step() {
   M1_STEP_HIGH
   M1_STEP_LOW
-}
-void M1Dir(int d) {
+  }
+  void M1Dir(int d) {
   digitalWrite(M1_DIR_PIN, d);
-}
+  }
 
-void M2Step() {
+  void M2Step() {
   M2_STEP_HIGH
   M2_STEP_LOW
-}
-void M2Dir(int d) {
+  }
+  void M2Dir(int d) {
   digitalWrite(M2_DIR_PIN, d);
-}
+  }
 */
 // todo: finish everything, make sure to use the right pins for the encoders
-class ArmMotor{
+class ArmMotor {
   public:
     //volatile int encoderCount;
-    
+    elapsedMillis sinceStart = 0;
+
     ArmMotor(int code);
-    
+
     void setMotorSpeed();
     float getCurrentAngle();
-    
-    void budge(int rotationDir);
+
+    void budge(int rotationDir, int rotationSpeed);
     void setDesiredAngle(float angle);
     void update();
   private:
     int motorCode;
     int motorType;
+	int pwmPin;
     float currentAngle;
     float desiredAngle;
     bool isMovementDone;
-    
+
 }; //motor1(MOTOR1),motor2(MOTOR2),motor3(MOTOR3),motor4(MOTOR4),motor5(MOTOR5),motor6(MOTOR6);;
 
 //Motor::Motor(int code): motorCode(code){}
 
 //void Motor::init(){
-ArmMotor::ArmMotor(int code): motorCode(code){
+ArmMotor::ArmMotor(int code): motorCode(code) {
   // this code only runs at boot so order of switch statement not important
-  switch(motorCode){
+  switch (motorCode) {
     case MOTOR1:
-      motorType=STEPPER_MOTOR;
+      motorType = STEPPER_MOTOR;
       attachInterrupt(M1_ENCODER_A, m1_encoder_interrupt, CHANGE);
       attachInterrupt(M1_ENCODER_B, m1_encoder_interrupt, CHANGE);
       break;
     case MOTOR2:
-      motorType=DC_MOTOR;
+      motorType = DC_MOTOR;
+      pwmPin = M2_PWM_PIN;
       attachInterrupt(M2_ENCODER_A, m2_encoder_interrupt, CHANGE);
       attachInterrupt(M2_ENCODER_B, m2_encoder_interrupt, CHANGE);
       break;
     case MOTOR3:
-      motorType=STEPPER_MOTOR;
+      motorType = STEPPER_MOTOR;
       attachInterrupt(M3_ENCODER_A, m3_encoder_interrupt, CHANGE);
       attachInterrupt(M3_ENCODER_B, m3_encoder_interrupt, CHANGE);
       break;
     case MOTOR4:
-      motorType=STEPPER_MOTOR;
+      motorType = STEPPER_MOTOR;
       attachInterrupt(M4_ENCODER_A, m4_encoder_interrupt, CHANGE);
       attachInterrupt(M4_ENCODER_B, m4_encoder_interrupt, CHANGE);
       break;
     case MOTOR5:
-      motorType=SERVO_MOTOR;
+      motorType = SERVO_MOTOR;
+	  pwmPin = M5_PWM_PIN;
       break;
     case MOTOR6:
-      motorType=SERVO_MOTOR;
+      motorType = SERVO_MOTOR;
+	  pwmPin = M6_PWM_PIN;
       break;
   }
 }
 
 /*
- * there could be background interrupt routines for all the motor types that wait for instructions...
- * so far we want the automatic control to be done through interrupts, and the thing that tells the
- * ISR how to move is the pid controller. so for manual control, i need another set of functions that
- * tell the ISR how to move. but for now I can just make simple code that does the thing, I suppose.
+   there could be background interrupt routines for all the motor types that wait for instructions...
+   so far we want the automatic control to be done through interrupts, and the thing that tells the
+   ISR how to move is the pid controller. so for manual control, i need another set of functions that
+   tell the ISR how to move. but for now I can just make simple code that does the thing, I suppose.
 */
 
-void ArmMotor::budge(int rotationDir){
+void ArmMotor::budge(int rotationDir, rotationSpeed){
   // arranged in order of which motor is predicted to be controlled the most
-  switch(motorType){
+  switch (motorType) {
     case STEPPER_MOTOR:
-      
       break;
     case DC_MOTOR:
+      Serial.println("starting");
+      sinceStart = 0;
+      if (rotationDir == CLOCKWISE) {
+        analogWrite(pwmPin, 120);
+        while (sinceStart < BUDGE_TIME) ;
+        analogWrite(pwmPin, 0);
+      }
+      if (rotationDir == COUNTER_CLOCKWISE) {
+        analogWrite(pwmPin, 60);
+        while (sinceStart < BUDGE_TIME) ;
+        analogWrite(pwmPin, 0);
+      }
+      Serial.println("stopping");
+      break;
       break;
     case SERVO_MOTOR:
-      if(rotationDir==CLOCKWISE){
-        //pwm signal one way
-        
+      Serial.println("starting");
+      sinceStart = 0;
+      if (rotationDir == CLOCKWISE) {
+        analogWrite(pwmPin, 120);
+        while (sinceStart < BUDGE_TIME) ;
+        analogWrite(pwmPin, 90);
       }
       if(rotationDir==COUNTER_CLOCKWISE){
-        //pwm signal other way
-
+		analogWrite(pwmPin, 60);
+		while (sinceStart < BUDGE_TIME) ;
+		analogWrite(pwmPin, 90);
       }
+	  Serial.println("stopping");
       break;
   }
 }
 
-void ArmMotor::setDesiredAngle(float angle){
+void ArmMotor::setDesiredAngle(float angle) {
   // arranged in order of which motor is predicted to be controlled the most
-  switch(motorType){
+  switch (motorType) {
     case STEPPER_MOTOR:
       //stepper pid
       break;
