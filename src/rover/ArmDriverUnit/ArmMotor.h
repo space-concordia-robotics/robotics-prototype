@@ -93,7 +93,7 @@ class ArmMotor{
     void setMotorSpeed();
     float getCurrentAngle();
     
-    void budgeMotor(int rotationDir);
+    void budge(int rotationDir);
     void setDesiredAngle(float angle);
     void update();
   private:
@@ -147,7 +147,7 @@ ArmMotor::ArmMotor(int code): motorCode(code){
  * tell the ISR how to move. but for now I can just make simple code that does the thing, I suppose.
 */
 
-void ArmMotor::budgeMotor(int rotationDir){
+void ArmMotor::budge(int rotationDir){
   // arranged in order of which motor is predicted to be controlled the most
   switch(motorType){
     case STEPPER_MOTOR:
@@ -162,6 +162,7 @@ void ArmMotor::budgeMotor(int rotationDir){
       }
       if(rotationDir==COUNTER_CLOCKWISE){
         //pwm signal other way
+
       }
       break;
   }

@@ -1,5 +1,7 @@
 /*
   TODO:
+  -for motor control, budge time is in seconds but this isn't very granular.
+   milliseconds is ideal but requires different parsing method for time length.
   -implement simple manual control:
    -import stepper library and maybe DC library for simple manual control
    -use libraries to write functions (that aren't optimized) for manual control
@@ -35,11 +37,13 @@
 #include "PinSetup.h"
 #include "ArmMotor.h"
 
-#define BAUD_RATE 115200      //serial baud rate
+#define BAUD_RATE 115200    //serial baud rate
 #define BUFFER_SIZE 100     //size of the buffer for the serial commands
 
+void parseCommand(char* line);
+
 void setup() {
-  setupPins();
+  pinSetup();
   Serial.begin(BAUD_RATE);
   
   ArmMotor motor1(MOTOR1); // base stepper (rotation)
@@ -48,20 +52,8 @@ void setup() {
   ArmMotor motor4(MOTOR4); // wrist stepper (flexion)
   ArmMotor motor5(MOTOR5); // wrist servo (rotation)
   ArmMotor motor6(MOTOR6); // end effector servo (pinching)
-	
-  /////////// ignore after here
 
   /*
-  pinMode(M1_STEP_PIN,   OUTPUT);
-  pinMode(M1_DIR_PIN,    OUTPUT);
-  pinMode(M2_STEP_PIN,   OUTPUT);
-  pinMode(M2_DIR_PIN,    OUTPUT);
-  pinMode(SERVO_PIN,   OUTPUT);
-  pinMode(ENCODER_A, INPUT);
-  pinMode(ENCODER_B, INPUT);
-  pinMode(DC_PWM_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
-
   steppers[0].dirFunc  = M1Dir;
   steppers[0].stepFunc = M1Step;
 
@@ -77,19 +69,13 @@ void setup() {
   TCCR1B |= ((1 << CS11) | (1 << CS10));
   interrupts();
 
-  //external interrupts
-  attachInterrupt(0, encoder_interrupt, CHANGE);
-  attachInterrupt(1, encoder_interrupt, CHANGE);
-
   //start of the heartbeat timer
   startTime = millis();
-
   */
 }
-/*
-void ISR(TIMER1_COMPA_vect)
-{
 
+/* void ISR(TIMER1_COMPA_vect)
+{
   for (int i = 0; i < NUM_STEPPERS; i++) {
     volatile stepperInfo& s = steppers[i];
 
@@ -113,8 +99,8 @@ void ISR(TIMER1_COMPA_vect)
     }
   }
 }
-*//*
-void prepareMovement(int stepperNumber, float angle) {
+*/
+/* void prepareMovement(int stepperNumber, float angle) {
 
   volatile stepperInfo& s = steppers[stepperNumber];
 
@@ -139,19 +125,153 @@ void prepareMovement(int stepperNumber, float angle) {
     }
   }
 }
-*//*
-void startMovement() {
+*/
+/* void startMovement() {
   OCR1A = c0;
   TIMER1_INTERRUPTS_ON
 }
 */
+
+/* void prepareDCMotor(float angle) {
+
+   dcMotor.desiredAngle = angle;
+  dcMotor.dcMovementDone = false;
+
+   if (dcMotor.currentAngle < dcMotor.desiredAngle) {
+    if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 180) {
+      dcMotor.dir = 100;
+    } else {
+      dcMotor.dir = 150;
+    }
+  } else {
+    if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 180) {
+      dcMotor.dir = 150;
+    } else {
+      dcMotor.dir = 100;
+    }
+  }
+}
+*/
+
+ void loop() {
+  
+  //digitalWrite(LED_PIN, led_status);
+
+   if (Serial.available()) { // make sure the whole message was received
+    Serial.readBytesUntil(10, serialBuffer, 100); //read until NL
+    Serial.print("GOT: ");
+    Serial.println(serialBuffer);
+	
+    //parseCommand(serialBuffer);           //parse the string
+	
+	/* 
+	 * instead of using the parse function i dumped the code here for now.
+	 * This code figures out which motor and which direction, code further
+	 * down actually tells the motors to move
+	 */
+	
+	//strtok() splits message by a delimiter string
+	char* msgElem = strtok(serialBuffer, " "); // look for first element (first tag)
+	if (*msgElem == 'motor'){
+		int whichMotor; int whichDir; int whichTime; int tempTimeVar;
+		msgElem = strtok(NULL, " "); // go to next msg element (motor number)
+		switch(*msgElem){ // determines which motor being used
+			case '1':
+				whichMotor = MOTOR1;
+				break;
+			case '2':
+				whichMotor = MOTOR2;
+				break;
+			case '3':
+				whichMotor = MOTOR3;
+				break;
+			case '4':
+				whichMotor = MOTOR4;
+				break;
+			case '5':
+				whichMotor = MOTOR5;
+				break;
+			case '6':
+				whichMotor = MOTOR6;
+				break;
+			default:
+				Serial.print("motor"); Serial.println(whichMotor);
+		}
+		msgElem = strtok(NULL, " "); //find the next message element (direction tag)
+		if (*msgElem == 'direction'){
+			msgElem = strtok(NULL, " "); // go to next msg element (direction)
+			switch(*msgElem){ // determines motor direction
+				case 'cw':
+					whichDir = CLOCKWISE;
+					Serial.println("clockwise");
+					break;
+				case 'ccw':
+					whichDir = COUNTER_CLOCKWISE;
+					Serial.println("counter-clockwise");
+					break;
+			}
+			msgElem = strtok(NULL, " "); //find the next message element (time tag)
+			if (*msgElem == 'time'){
+				msgElem = strtok(NULL, " "); //find the next message element (time in seconds)
+				/* because of how this works it only takes 0-3 sec, must rework later */
+				tempTimeVar = *msgElem - '0'; // example: '3' - '0' = 3
+				if (tempTimeVar <= MAX_BUDGE_TIME){ // don't allow budge movements to last a long time
+					whichTime = tempTimeVar;
+					Serial.print(whichTime); Serial.println("s");
+				}
+			}
+		}
+	}
+	memset(serialBuffer, 0, BUFFER_SIZE); //empty the buffer
+  }
+	//proto code for ArmMotor::update() function?
+	switch(whichMotor){ // tells the appropriate motor to move with ArmMotor.budge()
+		case MOTOR1:
+			motor1.budge(whichDir);
+			break;
+		case '2':
+			motor2.budge(whichDir);
+			break;
+		case '3':
+			motor3.budge(whichDir);
+			break;
+		case '4':
+			motor4.budge(whichDir);
+			break;
+		case '5':
+			motor5.budge(whichDir);
+			break;
+		case '6':
+			motor6.budge(whichDir);
+			break;
+	}
+  
+  /* //dcMotor.currentAngle = abs(dcMotor.encCount) / 5.555;
+  if (!dcMotor.dcMovementDone) {
+    //    Serial.print(dcMotor.encCount); Serial.print(","); Serial.println(dcMotor.currentAngle);
+    analogWrite(DC_PWM_PIN, dcMotor.dir);
+  }
+
+   //  if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 0.5 ) {
+  //    analogWrite(DC_PWM_PIN, 127);
+  //    dcMotor.dcMovementDone = true;
+  //  }
+*/
+  /* //heartbeat : blink LED every 1 second
+  int t2 = millis();
+  if ( (t2 - startTime) > 1000) {
+    startTime = t2;
+    led_status = !led_status;
+  }
+  */
+}
+
 void parseCommand(char* line) {
   char* pch;
   int term = 0;
   int whichMotor = 0;
 
-  /*
-     Currently Interprets :
+  /* Currently Interprets :
 
      S,StepperNumber,angle      --> Single stepper motor angle
      K,motor1angle, motor2angle --> Inverse kinematic
@@ -166,9 +286,10 @@ void parseCommand(char* line) {
      E,stepper                  --> Enable or disable steppers to save power (no current draw)
 
   */
-  /*
-  pch = strtok(line, ",");  //start from the begining of the line
 
+  pch = strtok(line, ",");  //start from the beginning of the line
+
+/*
   if (*pch == 'F') {
     Serial.println("Mode: Servo movement");
     pch = strtok(NULL, ","); //skip the prefix "F"
@@ -249,60 +370,9 @@ void parseCommand(char* line) {
       pch = strtok(NULL, ","); //continue from we left off
     }
   }
+
   else {
     Serial.println("Command not found!");
   }
-*/
-}
-/*
-void prepareDCMotor(float angle) {
 
-  dcMotor.desiredAngle = angle;
-  dcMotor.dcMovementDone = false;
-
-  if (dcMotor.currentAngle < dcMotor.desiredAngle) {
-    if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 180) {
-      dcMotor.dir = 100;
-    } else {
-      dcMotor.dir = 150;
-    }
-  } else {
-    if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 180) {
-      dcMotor.dir = 150;
-    } else {
-      dcMotor.dir = 100;
-    }
-  }
-}
-*/
-void loop() {
-  /*
-  digitalWrite(LED_PIN, led_status);
-
-  if (Serial.available()) {
-    Serial.readBytesUntil(10, serialBuffer, 100); //read until NL
-    Serial.print("GOT: ");
-    Serial.println(serialBuffer);
-    parseCommand(serialBuffer);           //parse the string
-    memset(serialBuffer, 0, BUFFER_SIZE); //empty the buffer
-  }
-
-  //dcMotor.currentAngle = abs(dcMotor.encCount) / 5.555;
-  if (!dcMotor.dcMovementDone) {
-    //    Serial.print(dcMotor.encCount); Serial.print(","); Serial.println(dcMotor.currentAngle);
-    analogWrite(DC_PWM_PIN, dcMotor.dir);
-  }
-
-  //  if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 0.5 ) {
-  //    analogWrite(DC_PWM_PIN, 127);
-  //    dcMotor.dcMovementDone = true;
-  //  }
-
-  //heartbeat : blink LED every 1 second
-  int t2 = millis();
-  if ( (t2 - startTime) > 1000) {
-    startTime = t2;
-    led_status = !led_status;
-  }
-  */
 }

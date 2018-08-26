@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "PinSetup.h"
 
-void setupPins(void){
+void pinSetup(void){
 	//pinMode(ENCODER_A, INPUT);
 	//pinMode(ENCODER_B, INPUT);
 	//pinMode(interruptPin, INPUT_PULLUP);

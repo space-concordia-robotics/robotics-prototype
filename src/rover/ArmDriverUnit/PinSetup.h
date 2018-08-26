@@ -67,5 +67,5 @@
 #define M6_ENCODER_A       37
 #define M6_ENCODER_B       38
 
-void setupPins(void);
+void pinSetup(void);
 #endif
