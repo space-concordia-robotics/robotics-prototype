@@ -20,12 +20,12 @@ html, body {
     min-height: 100vh;
 }
 
-.table_grp, .table_grp2 {
+.table-grp, .table-grp2 {
     border-collapse: collapse;
     border-spacing: 0;
 }
 
-.table_grp td, .table_grp2 td {
+.table-grp td, .table-grp2 td {
     font-family: Arial, sans-serif;
     font-size: 14px;
     padding: 0;
@@ -36,7 +36,7 @@ html, body {
     border-color: #990000;
 }
 
-.table_grp th, .table_grp2 th {
+.table-grp th, .table-grp2 th {
     font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: normal;
@@ -49,95 +49,90 @@ html, body {
     text-align: center;
 }
 
-.table_grp tr:last-child, .autoCtrLable {
+.table-grp tr:last-child {
     border-bottom: 5px inset #05072F;
-    color: #6768A1;
+    color: #6768a1;
     font-weight: bold;
     background-color: #101148;
 }
 
-.autoCtrLable {
-    padding: 12px 5px 12px 5px;
-    margin-top: 15px
-}
-
 .row, .row>* {
-    border: 0.5px solid #05072F;
+    border: 0.5px solid #05072f;
 }
 
-.control_btn {
+.control-btn {
     width: 80px;
     height: 80px;
-    background-color: #4A0000;
+    background-color: #4a0000;
     border: ridge 2px #434586;
     color: white;
     border-radius: 10px;
 }
 
-.control_btn2 {
+.control-btn2 {
     width: 80px;
     height: 80px;
-    background-color: #4A0000;
+    background-color: #4a0000;
     border: ridge 2px #434586;
     color: white;
 }
 
-.control_btn:hover, .control_btn2:hover, #logs_btn button:hover {
-    background-color: #05072F;
+.control-btn:hover, .control-btn2:hover, #logs_btn button:hover {
+    background-color: #05072f;
     color: white;
 }
 
-.control_btn_left {
+.control-btn-left {
     border-radius: 10px 0 0 10px;
-    border-right-color: #4A0000;
+    border-right-color: #4a0000;
 }
 
-.control_btn_right {
+.control-btn-right {
     border-radius: 0 10px 10px 0;
-    border-left-color: #4A0000;
+    border-left-color: #4a0000;
 }
 
-.control_btn_mid {
+.control-btn-mid {
     width: 80px;
     height: 80px;
-    background-color: #4A0000;
+    background-color: #4a0000;
     border-top: ridge 2px #434586;
     border-bottom: ridge 2px #434586;
-    border-left: ridge 2px #4A0000;
-    border-right: ridge 2px #4A0000;
+    border-left: ridge 2px #4a0000;
+    border-right: ridge 2px #4a0000;
     color: white;
 }
 
-.continer_headers, thead {
-    color: #092B43;
+.container-header, thead {
+    color: #092b43;
     font-weight: bolder;
     text-align: center;
 }
 
-#mtrtable thead th, .table_grp tr:first-child {
+#motor_table thead th, .table-grp tr:first-child {
     text-align: center;
     vertical-align: middle
 }
 
-#mtrtable thead tr:first-child, #mtrtable tbody th {
+#motor_table thead tr:first-child, #motor_table tbody th {
     background-color: #101148;
     color: #F0DAFA;
     border: 2px solid #750000
 }
 
-#mtrtable, #mtrtable tr td {
+#motor_table, #motor_table tr td {
     border: 2px solid #750000;
     text-align: center
 }
 
-.control_main_btn {
-    border-bottom: 2px solid #05072F;
+.control-main-btn {
+    border-bottom: 2px solid #05072f;
     border-top-style: none;
     border-left-style: none;
     margin-bottom: 5px
 }
 
 #logs_btn button {
-    background-color: #4A0000;
+    background-color: #4a0000;
     border: ridge 2px #434586;
 }
