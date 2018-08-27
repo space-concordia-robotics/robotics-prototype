@@ -1,10 +1,10 @@
-'''
-This class acts as a simple wrapper for the port options used when initializing
-a `Serial` class instance
-'''
-
-
 class Port(object):
+    """Serial object options class wrapper.
+
+    This class acts as a simple wrapper for the port options used when initializin
+    a `Serial` class instance
+    """
+
     def __init__(self, path, baudrate, timeout):
         self.set_path(path)
         self.set_baudrate(baudrate)
