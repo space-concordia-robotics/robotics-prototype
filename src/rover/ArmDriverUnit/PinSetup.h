@@ -4,14 +4,14 @@
 #define HEARTBEAT_PIN 13
 
 /*
- * m1 base stepper (rotation)
- * m2 shoulder dc (flexion)
- * m3 elbow stepper (flexion)
- * m4 wrist stepper (flexion
- * m5 wrist servo (rotation)
- * m6 end effector servo (pinching)
- */
- 
+   m1 base stepper (rotation)
+   m2 shoulder dc (flexion)
+   m3 elbow stepper (flexion)
+   m4 wrist stepper (flexion
+   m5 wrist servo (rotation)
+   m6 end effector servo (pinching)
+*/
+
 // 3 pwm pins
 // 4-6 limit switch interrupt pins
 // 8-14 encoder interrupt pins
