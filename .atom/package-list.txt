@@ -1,0 +1,8 @@
+atomic-management@0.3.1
+busy-signal@1.4.3
+intentions@1.1.5
+linter@2.2.0
+linter-pylint@2.1.1
+linter-ui-default@1.7.1
+python-yapf@0.14.0
+

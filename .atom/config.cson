@@ -1,0 +1,13 @@
+"*":
+  editor:
+    showIndentGuide: true
+    softTabs: true
+    tabType: "soft"
+    tabLength: 4
+  "linter-pylint":
+    pythonPath: "%p/venv/bin"
+    rcFile: "%p/.pylintrc"
+  "linter-ui-default":
+    showPanel: true
+  "python-yapf":
+    yapfStyle: "{based_on_style: google, column_limit: 120}"
