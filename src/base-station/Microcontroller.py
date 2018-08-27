@@ -1,15 +1,17 @@
-import serial
 import struct
-
-'''
-This will act as the mother class to represent the Arduino (Microcontroller) 
-that will contain other class component objects thanks to the wonders of
-OO composition design patterns.
-'''
+import serial
 
 
 class Microcontroller:
-    def __init__(self, name, port, motors=[]):
+    """Microcontroller or SoaC class acting as a `serial` wrapper.
+    
+    This will act as the mother class to represent the Arduino (Microcontroller) 
+    that will contain other class component objects thanks to the wonders of
+    OO composition design patterns.
+
+    """
+
+    def __init__(self, name, port, motors):
         self.name = name
         self.set_port(port)
         self.set_motors(motors)
@@ -31,10 +33,11 @@ class Microcontroller:
 
     def write(self, name, data):
         for motor in self.motors:
-            if motor.name.replace(' ', '-').lower() in name:
+            if motor.name in name:
+                print(data)
                 motor.write(self.serial, data)
 
     def read(self, name):
         for motor in self.motors:
-            if motor.name.replace(' ', '-').lower() in name:
-                return motor.read(serial)
+            if motor.name in name:
+                return motor.read(self.serial)
