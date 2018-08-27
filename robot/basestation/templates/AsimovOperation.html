@@ -1,412 +1,417 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>SC Robotics GUI</title>
 
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-        <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-        <link href="../static/CSS/titatoggle-dist.css" rel="stylesheet">
-        <link href="../static/CSS/app.css" rel="stylesheet">
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-        <script src="../static/js/helpers.js" async></script>
-        <script src="../static/js/app.js" async></script>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SC Robotics GUI</title>
 
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+        crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
+    <link href="../static/css/app.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script src="../static/js/helpers.js" async></script>
+    <script src="../static/js/app.js" async></script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
             crossorigin="anonymous" async></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-            crossorigin="anonymous" async></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
-            crossorigin="anonymous" async></script>
-    </head>
-    <body>
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-            <a class="navbar-brand" href="#">
-                <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" d ata-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
-                aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous" async></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em"
+        crossorigin="anonymous" async></script>
+</head>
 
-            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-                <ul class="navbar-nav mr-auto">
-                    <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="false">Settings</a>
-                    <div class="dropdown-menu" aria-labelledby="dropdown01">
-                        <a class="dropdown-item" href="#">Key board key mapping</a>
-                        <a class="dropdown-item" href="#">Change camera stream FPS</a>
-                        <a class="dropdown-item" href="#">...</a>
-                    </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        <br>
-        <br>
-        <div style="margin-bottom:10px"></div>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
+        <a class="navbar-brand" href="#">
+            <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" d ata-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <div class="container fill">
-            <div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 class="container-header">Arm Postion</h5>
-                        <img src="http://hajer.info/wp-content/uploads/2018/01/welpaper-lovely-3d-hd-wallpapers-of-welpaper.jpg" class="img-fluid"
-                        />
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="container-header">Arm Vision</h5>
-                        <img src="http://www.grup-pumsa.cat/uploadwallimgs/b/41/413832_%D8%B5%D9%88%D8%B1-wallpaper.jpg" class="img-fluid" alt="Responsive image"
-                        />
-                    </div>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">Settings</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    <a class="dropdown-item" href="#">Key board key mapping</a>
+                    <a class="dropdown-item" href="#">Change camera stream FPS</a>
+                    <a class="dropdown-item" href="#">...</a>
                 </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <br>
+    <br>
+    <div style="margin-bottom:10px"></div>
 
-                <div class="row">
-                    <div class="col-md" align="center">
-                        <h5 class="container-header">Log Console</h5>
-                        <div class="form-group">
-                            <textarea id="write-to-log" rows="8" cols="33"></textarea>
-                            <br>
-                            <!--log console buttons-->
-                            <div class="btn-group" role="group" id="logs-btn">
-                                <a href=# id=click_btn>
-                                    <button type="button" class="btn btn-secondary">Open Logs</button>
-                                </a>
-                                <a href=# id=click_btn>
-                                    <button type="button" class="btn btn-secondary" onclick="cleartext()">Clear Logs</button>
-                                </a>
-                                <a href=# id=click_btn>
-                                    <button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
-                                </a>
-                            </div>
-                        </div>
+    <div class="container fill">
+        <div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="container-header">Arm Postion</h5>
+                    <img src="http://hajer.info/wp-content/uploads/2018/01/welpaper-lovely-3d-hd-wallpapers-of-welpaper.jpg" class="img-fluid"
+                    />
+                </div>
+                <div class="col-md-6">
+                    <h5 class="container-header">Arm Vision</h5>
+                    <img src="http://www.grup-pumsa.cat/uploadwallimgs/b/41/413832_%D8%B5%D9%88%D8%B1-wallpaper.jpg" class="img-fluid" alt="Responsive image"
+                    />
+                </div>
+            </div>
 
-                    </div>
-                    <div class="col-md" align="center">
-                        <h5 class="container-header">Control Panel</h5>
-                        <div class="row control-main-btn">
-                            <div class="col-sm-6" align="right" style="vertical-align:middle;border-style:none">
-                                <button type="button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                                    <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home Position</span>
-                                </button>
-                            </div>
-                            <div class="col-sm-6" align="left" style="border-style:none;">
-                                <span>
-                                    <strong>Manual Control</strong>
-                                </span>
-                                <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                                    <label>
-                                        <input type="checkbox" onchange="manualControl()">
-                                        <span> </span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Manual controls section -->
-                            <table class="table-grp" style="display: block" id="ArmcontrolsOFF">
-                                <tr>
-                                    <td></td>
-                                    <td valign="bottom">
-                                        <a href=# id=click_btn_pitch_up>
-                                            <button type="button" class="control-btn">
-                                                <strong>Pitch
-                                                    <br>Up</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td style="width:30px"></td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_up>
-                                            <button type="button" class="control-btn">
-                                                <strong>Arm
-                                                    <br>Up</strong>
-                                            </button>
-                                        </a>
-                                        </th>
-                                        <td></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href=# id=click_btn_roll_left>
-                                            <button type="button" class="control-btn">
-                                                <strong>Roll
-                                                    <br>Left</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_pitch_down>
-                                            <button type="button" class="control-btn">
-                                                <strong>Pitch
-                                                    <br>Down</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_roll_right>
-                                            <button type="button" class="control-btn">
-                                                <strong>Roll
-                                                    <br>Right</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_left>
-                                            <button type="button" class="control-btn">
-                                                <strong>Arm
-                                                    <br>Left</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_down>
-                                            <button type="button" class="control-btn">
-                                                <strong>Arm
-                                                    <br>Down</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_right>
-                                            <button type="button" class="control-btn">
-                                                <strong>Arm
-                                                    <br>Right</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href=# id=click_btn_claw_open>
-                                            <button type="button" class="control-btn" style="margin-bottom:6px">
-                                                <strong>Claw
-                                                    <br>Open</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_claw_close>
-                                            <button type="button" class="control-btn" style="margin-bottom:6px">
-                                                <strong>Claw
-                                                    <br>Close</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_back>
-                                            <button type="button" class="control-btn" style="margin-bottom:6px">
-                                                <strong>Arm
-                                                    <br>Back</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_arm_forward>
-                                            <button type="button" class="control-btn" style="margin-bottom:6px">
-                                                <strong>Arm
-                                                    <br>Fwrd</strong>
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <strong>CLAW CONTROLS</strong>
-                                    </th>
-                                    <th style="width:30px;background:#990000;border: 1px solid #990000"></th>
-                                    <th colspan="3">
-                                        <strong>ARM CONTROLS</strong>
-                                    </th>
-                                </tr>
-                            </table>
-
-                            <!-- Automatic controlls section -->
-                            <table class="table-grp2" style="display: none; margin: 10px 0 0 23px" id="ArmcontrolsON">
-                                <tr>
-                                    <td>
-                                        <a href=# id=click_btn_motor1_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M1</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor1_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td style="width:30px"></td>
-                                    <td>
-                                        <a href=# id=click_btn_motor2_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M2</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor2_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href=# id=click_btn_motor3_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M3</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor3_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_motor4_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M4</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor4_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href=# id=click_btn_motor5_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M5</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor5_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td>
-                                        <a href=# id=click_btn_motor6_ccw>
-                                            <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="control-btn-mid" disabled>
-                                            <strong>M6</strong>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <a href=# id=click_btn_motor6_cw>
-                                            <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
+            <div class="row">
+                <div class="col-md" align="center">
+                    <h5 class="container-header">Log Console</h5>
+                    <div class="form-group">
+                        <textarea id="write-to-log" rows="8" style="min-width: 100%;"></textarea>
+                        <br>
+                        <!--log console buttons-->
+                        <div class="btn-group" role="group" id="logs-btn">
+                            <a href=# id=click_btn>
+                                <button type="button" class="btn btn-secondary">Open Logs</button>
+                            </a>
+                            <a href=# id=click_btn>
+                                <button type="button" class="btn btn-secondary" onclick="cleartext()">Clear Logs</button>
+                            </a>
+                            <a href=# id=click_btn>
+                                <button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="col-md">
-                        <h5 class="container-header">Motor Table</h5>
-                        <table class="table table-sm table-bordered " id="motor-table" style="font-size:12px;background:#FDD3DF;text-align: left">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th scope="col"></th>
-                                    <th scope="col">Status
-                                        <br>(Alive/Dead)
+                </div>
+                <div class="col-md" align="center">
+                    <h5 class="container-header">Control Panel</h5>
+                    <div class="row control-main-btn">
+                        <div class="col-sm-6" align="right" style="vertical-align:middle; border-style:none">
+                            <button type="button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home Position</span>
+                            </button>
+                        </div>
+                        <div class="col-sm-6" align="left" style="border-style:none;">
+                            <span>
+                                <strong>Manual Control</strong>
+                            </span>
+                            <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                <label>
+                                    <input type="checkbox" onchange="manualControl()">
+                                    <span> </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Automatic controls section -->
+                        <table class="table-grp" style="display: block" id="ArmcontrolsOFF" align="center">
+                            <tr>
+                                <td></td>
+                                <td valign="bottom">
+                                    <a href=# id="click_btn_pitch_up">
+                                        <button type="button" class="control-btn">
+                                            <strong>Pitch
+                                                <br>Up</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td style="width:30px"></td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_arm_up">
+                                        <button type="button" class="control-btn">
+                                            <strong>Arm
+                                                <br>Up</strong>
+                                        </button>
+                                    </a>
                                     </th>
-                                    <th scope="col"> Motor Position
-                                        <br>(Displacement)
-                                    </th>
-                                    <th scope="col">Motor Current (A)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">Stepper
-                                        <br>Motor 1
-                                    </th>
-                                    <!-- add backend code to update status/motor position/motor current-->
-                                    <td>ALIVE</td>
-                                    <td>23</td>
-                                    <td>2.50</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">DC
-                                        <br>Motor 2
-                                    </th>
-                                    <td>ALIVE</td>
-                                    <td>12</td>
-                                    <td>11.00</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Stepper
-                                        <br>Motor 3
-                                    </th>
-                                    <td>DEAD</td>
-                                    <td>84</td>
-                                    <td>7.45</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Stepper
-                                        <br>Motor 4
-                                    </th>
-                                    <td>DEAD</td>
-                                    <td>88</td>
                                     <td></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Arm Servo
-                                        <br>Motor 1
-                                    </th>
-                                    <td>ALIVE</td>
-                                    <td>20</td>
-                                    <td>5.60</td>
-                                </tr>
-                                <tr>
-                                    <th>Arm Servo
-                                        <br>Motor 2
-                                    </th>
-                                    <td>ALIVE</td>
-                                    <td>67</td>
-                                    <td>12.34</td>
-                                </tr>
-                            </tbody>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href=# id="click_btn_roll_left">
+                                        <button type="button" class="control-btn">
+                                            <strong>Roll
+                                                <br>Left</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_pitch_down">
+                                        <button type="button" class="control-btn">
+                                            <strong>Pitch
+                                                <br>Down</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_roll_right">
+                                        <button type="button" class="control-btn">
+                                            <strong>Roll
+                                                <br>Right</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_arm_left">
+                                        <button type="button" class="control-btn">
+                                            <strong>Arm
+                                                <br>Left</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_arm_down">
+                                        <button type="button" class="control-btn">
+                                            <strong>Arm
+                                                <br>Down</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_arm_right">
+                                        <button type="button" class="control-btn">
+                                            <strong>Arm
+                                                <br>Right</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href=# id="click_btn_claw_open">
+                                        <button type="button" class="control-btn" style="margin-bottom:6px">
+                                            <strong>Claw
+                                                <br>Open</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_claw_close">
+                                        <button type="button" class="control-btn" style="margin-bottom:6px">
+                                            <strong>Claw
+                                                <br>Close</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_arm_back">
+                                        <button type="button" class="control-btn" style="margin-bottom:6px">
+                                            <strong>Arm
+                                                <br>Back</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_arm_forward">
+                                        <button type="button" class="control-btn" style="margin-bottom:6px">
+                                            <strong>Arm
+                                                <br>Fwrd</strong>
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th colspan="3">
+                                    <strong>CLAW CONTROLS</strong>
+                                </th>
+                                <th style="width:30px; background:#990000; border:0px solid #990000"></th>
+                                <th colspan="3">
+                                    <strong>ARM CONTROLS</strong>
+                                </th>
+                            </tr>
+                        </table>
+
+                        <!-- Manual controls section -->
+                        <table class="table-grp2" style="display: none;" id="ArmcontrolsON" align="center">
+                            <tr>
+                                <td>
+                                    <a href=# id="click_btn_motor1_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M1</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor1_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td style="width:30px"></td>
+                                <td>
+                                    <a href=# id="click_btn_motor2_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M2</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor2_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href=# id="click_btn_motor3_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M3</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor3_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_motor4_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M4</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor4_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href=# id="click_btn_motor5_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M5</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor5_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <a href=# id="click_btn_motor6_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M6</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href=# id="click_btn_motor6_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
+
+                <div class="col-md">
+                    <h5 class="container-header">Motor Table</h5>
+                    <table class="table table-sm table-bordered" id="motor-table" style="font-size:12px; background:#FDD3DF; text-align: left">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Status
+                                    <br>(Alive/Dead)
+                                </th>
+                                <th scope="col"> Motor Position
+                                    <br>(Displacement)
+                                </th>
+                                <th scope="col">Motor Current (A)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Stepper
+                                    <br>Motor 1
+                                </th>
+                                <!-- add backend code to update status/motor position/motor current-->
+                                <td>ALIVE</td>
+                                <td>23</td>
+                                <td>2.50</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">DC
+                                    <br>Motor 2
+                                </th>
+                                <td>ALIVE</td>
+                                <td>12</td>
+                                <td>11.00</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Stepper
+                                    <br>Motor 3
+                                </th>
+                                <td>DEAD</td>
+                                <td>84</td>
+                                <td>7.45</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Stepper
+                                    <br>Motor 4
+                                </th>
+                                <td>DEAD</td>
+                                <td>88</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Arm Servo
+                                    <br>Motor 1
+                                </th>
+                                <td>ALIVE</td>
+                                <td>20</td>
+                                <td>5.60</td>
+                            </tr>
+                            <tr>
+                                <th>Arm Servo
+                                    <br>Motor 2
+                                </th>
+                                <td>ALIVE</td>
+                                <td>67</td>
+                                <td>12.34</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+    </div>
 
-    </body>
+</body>
+
 </html>
