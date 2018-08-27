@@ -1,9 +1,9 @@
 function entertext() {
-    document.getElementById('write_to_log').value += "Test log ...\n";
+    document.getElementById('write-to-log').value += "Test log ...\n";
 }
 
 function cleartext() {
-    document.getElementById('write_to_log').value = "";
+    document.getElementById('write-to-log').value = "";
 }
 
 function manualControl() {
