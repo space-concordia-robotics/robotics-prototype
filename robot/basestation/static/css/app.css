@@ -50,14 +50,14 @@ html, body {
 }
 
 .table-grp tr:last-child {
-    border-bottom: 5px inset #05072F;
+    border-bottom: 0px inset #05072F;
     color: #6768a1;
     font-weight: bold;
     background-color: #101148;
 }
 
 .row, .row>* {
-    border: 0.5px solid #05072f;
+    border: 0px solid #05072f;
 }
 
 .control-btn {
@@ -126,7 +126,7 @@ html, body {
 }
 
 .control-main-btn {
-    border-bottom: 2px solid #05072f;
+    border-bottom: 0px solid #05072f;
     border-top-style: none;
     border-left-style: none;
     margin-bottom: 5px
