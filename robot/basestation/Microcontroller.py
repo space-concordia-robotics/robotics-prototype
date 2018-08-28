@@ -1,10 +1,9 @@
-import struct
 import serial
 
 
 class Microcontroller:
     """Microcontroller or SoaC class acting as a `serial` wrapper.
-    
+
     This will act as the mother class to represent the Arduino (Microcontroller) 
     that will contain other class component objects thanks to the wonders of
     OO composition design patterns.
