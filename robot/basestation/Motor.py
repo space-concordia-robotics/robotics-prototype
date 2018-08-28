@@ -1,23 +1,20 @@
-# based off UML diagram in SoAD: https://docs.google.com/document/d/1QEaR5sP7aWUMgJukAuCMeTT6QKM80vOXxO7XymeWWns/edit
-# you will need to be signed into your spaceconcordia email account to be able to view/edit this document
-# feel free to add feedback in the form of gdocs comment
-
-# agile manifesto:
-# individuals and interactions over processes and tools
-# working software over comprehensive documentation
-# customer collaboration over contract negotiation
-# responding to change over following a plan
+# Based off UML diagram in SoAD:
+# https://docs.google.com/document/d/1QEaR5sP7aWUMgJukAuCMeTT6QKM80vOXxO7XymeWWns/edit
+# you will need to be signed into your spaceconcordia email account to be able to
+# view/edit this document feel free to add feedback in the form of gdocs comment
 
 
 class Motor:
-    # may or may not be used, pretty sure there's no overloading methods/constructors in python without needing to assign default values for the params
-    # def __init__(self, min_angle, max_angle, home_angle, min_current, max_current, angle_position, electric_current, status, refresh_rate):
+    # May or may not be used, pretty sure there's no overloading methods/constructors
+    # in python without needing to assign default values for the params
+    # def __init__(self, min_angle, max_angle, home_angle, min_current, max_current,
+    # angle_position, electric_current, status, refresh_rate):
     #self.min_angle = min_angle
     #self.max_angle = max_angle
     #self.home_angle = home_angle
+    #self.angle_position = angle_position
     #self.min_current = min_current
     #self.max_current = max_current
-    #self.angle_position = angle_position
     #self.electric_current = electric_current
     #self.alive = alive
     #self.refresh_rate = refresh_rate
@@ -25,56 +22,52 @@ class Motor:
     def __init__(self, name, max_angle, min_angle, max_current, min_current,
                  home_angle):
         self.name = name
-        self.set_max_min_angles(max_angle, min_angle)
-        self.set_max_min_currents(max_current, min_current)
-        # self.set_max_min_angles(max_angle, min_angle)
-        # self.set_max_min_currents(max_current, min_current)
-        # self.set_angle_position(home_angle)
-        # self.set_refresh_rate(90)
-        # self.set_electric_current(min_current)
+        self.__max_angle = max_angle
+        self.__min_angle = min_angle
+        self.__max_current = max_current
+        self.__min_current = min_current
+        self.angle_position = home_angle
 
-    # will definitely have to be configured during testing
-    # def home_position(self):
-    # self.angle_position = self.home_angle
+    # Very dangerous, we must know exactly what these values are beforehand
+    # Should only be set in constructor and are private attributes.
+    # def set_max_min_angles(self, maxval, minval):
+    #     self.max_angle = maxval
+    #     self.min_angle = minval
 
-    # we'll have to callibrate the refreshrates for each motor during testing motors
-    def set_refresh_rate(self, rate):
-        self.refresh_rate = rate
+    @property
+    def angle_position(self):
+        return self.__angle_position
 
-    # very dangerous, we must know exactly what these values are beforehand
-    def set_max_min_angles(self, maxval, minval):
-        self.max_angle = maxval
-        self.min_angle = minval
-
-    # very dangerous, we must know exactly what these values are beforehand
-    def set_max_min_currents(self, maxval, minval):
-        self.max_current = maxval
-        self.min_current = minval
-
-    # we don't want to intentionally try to set angle positions out of the possible ranges
-    def set_angle_position(self, angle):
-        if angle > self.min_angle and angle < self.max_angle:
-            self.angle_position = angle
+    # We don't want to intentionally try to set angle positions out of the possible ranges
+    @angle_position.setter
+    def angle_position(self, angle_position):
+        if angle_position > self.__min_angle and angle_position < self.__max_angle:
+            self.__angle_position = angle_position
             return True
         else:
-            print("unable to set angle position to " + str(angle) +
+            print("unable to set angle position to " + str(angle_position) +
                   " for motor: " + self.name)
             return False
 
-    def get_angle_position(self):
-        return self.angle_position
+    # Very dangerous, we must know exactly what these values are beforehand
+    # Should only be set in constructor and are private attributes.
+    # def set_max_min_currents(self, maxval, minval):
+    #     self.max_current = maxval
+    #     self.min_current = minval
 
-    def get_electric_current(self):
+    @property
+    def electric_current(self):
         # get_current_sensor_reading()
-        return self.electric_current
+        return self.__electric_current
 
-    # no restriction otherwise we can't detect when out of bounds
-    def set_electric_current(self, current):
-        self.electric_current = current
+    # No restriction otherwise we can't detect when out of bounds
+    @electric_current.setter
+    def electric_current(self, electric_current):
+        self.__electric_current = electric_current
 
-    # logic based off of electric current being in safety range (for now)
+    # Logic based off of electric current being in safety range (for now)
     # --------------------------------------------------------------------
-    # to fully implement logic of motor status, we need to establish a way
+    # To fully implement logic of motor status, we need to establish a way
     # to keep track of when the motor is moving (perhaps by using
     # a method that sees if the angle position of the motor is changing)
     # If it is moving and the current is within expected value range
@@ -86,26 +79,36 @@ class Motor:
     # If it is in expected idle current range or and moving,
     # it may be that there is a power issue, and perhaps the motor
     # has just died and is turning because the arm is "falling down"
-    # at that point
-    def update_status(self):
-        if self.electric_current > self.max_current:
-            self.alive = False
+    # at that point.
+    @property
+    def alive(self):
+        if self.electric_current > self.__max_current:
+            return False
         else:
-            self.alive = True
+            return True
 
-    def write(self, serial, angle):
+    # We'll have to callibrate the refresh rates for each motor during testing motors
+    @property
+    def refresh_rate(self):
+        return self.__refresh_rate
+
+    @refresh_rate.setter
+    def refresh_rate(self, refresh_rate):
+        self.__refresh_rate = refresh_rate
+
+    def write(self, serial_port, angle):
         # self.set_angle_position(angle)
         # print(int(self.get_angle_position()))
         # serial.write(struct.pack('>B', int(self.get_angle_position())))
         # serial.write(str.encode(str(self.get_angle_position())))
         print('Name' + self.name)
         print(f'motor {self.name} direction {angle}')
-        serial.write(
+        serial_port.write(
             str.encode(
                 f'motor {self.name} direction {angle} speed 0 time 1000 '))
         # serial.write(180)
 
-    def read(self, serial):
-        str1 = serial.readline()
+    def read(self, serial_port):
+        str1 = serial_port.readline()
         print(str1.decode())
-        return int(self.get_angle_position())
+        return int(self.angle_position)
