@@ -3,10 +3,11 @@
 # Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
 
 import flask
-# T0DO: Rename modules to lowercase
-from robot.basestation.Motor import Motor
-from robot.basestation.Port import Port
-from robot.basestation.Microcontroller import Microcontroller
+
+# TODO: Rename modules to lowercase
+from robot.basestation.motor import Motor
+from robot.basestation.serialport import SerialPort
+from robot.basestation.microcontroller import Microcontroller
 
 app = flask.Flask(__name__)
 
@@ -34,11 +35,12 @@ m5 = Motor("5", max_angle, min_angle, max_current, min_current, home_angle)
 m6 = Motor("6", max_angle, min_angle, max_current, min_current, home_angle)
 
 # Initialize a Port instance used to connect to teensy via serial
-port = Port(path="/dev/cu.usbmodem3049051", baudrate=9600, timeout=1)
+# port = SerialPort(path="/dev/cu.usbmodem3049051", baudrate=9600, timeout=1)
+serial_port = SerialPort()
 
 # Intialize `Microcontroller` object representing the mother Arduino object
-# containing `Motor`` instance array
-teensy = Microcontroller("Arduino", port, [m1, m2, m3, m4, m5, m6])
+# containing `Motor` instance array
+teensy = Microcontroller("Arduino", serial_port, [m1, m2, m3, m4, m5, m6])
 
 
 # Automatic controls
