@@ -1,4 +1,10 @@
 import serial
+import serial.tools.list_ports
+
+
+def get_open_comports():
+    ports = [port for port in serial.tools.list_ports.comports()]
+    return ports
 
 
 class SerialPort(serial.Serial):
@@ -8,7 +14,8 @@ class SerialPort(serial.Serial):
     a `Serial` class instance
     """
 
-    def __init__(self, path, baudrate, timeout):
+    # TODO: Add `type.hints` to overload without path specified
+    def __init__(self, path=get_open_comports()[0], baudrate=9600, timeout=1):
         self.path = path
         self.baudrate = baudrate
         self.timeout = timeout
