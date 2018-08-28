@@ -100,7 +100,9 @@ class Motor:
         # serial.write(str.encode(str(self.get_angle_position())))
         print('Name' + self.name)
         print(f'motor {self.name} direction {angle}')
-        serial.write(str.encode(f'motor {self.name} direction {angle}'))
+        serial.write(
+            str.encode(
+                f'motor {self.name} direction {angle} speed 0 time 1000 '))
         # serial.write(180)
 
     def read(self, serial):
