@@ -22,10 +22,16 @@ class Motor:
     #self.alive = alive
     #self.refresh_rate = refresh_rate
 
-    def __init__(self, name, max_angle, min_angle, max_current, min_current, home_angle):
+    def __init__(self, name, max_angle, min_angle, max_current, min_current,
+                 home_angle):
         self.name = name
         self.set_max_min_angles(max_angle, min_angle)
         self.set_max_min_currents(max_current, min_current)
+        # self.set_max_min_angles(max_angle, min_angle)
+        # self.set_max_min_currents(max_current, min_current)
+        # self.set_angle_position(home_angle)
+        # self.set_refresh_rate(90)
+        # self.set_electric_current(min_current)
 
     # will definitely have to be configured during testing
     # def home_position(self):
@@ -36,14 +42,14 @@ class Motor:
         self.refresh_rate = rate
 
     # very dangerous, we must know exactly what these values are beforehand
-    def set_max_min_angles(self, max, min):
-        self.max_angle = max
-        self.min_angle = min
+    def set_max_min_angles(self, maxval, minval):
+        self.max_angle = maxval
+        self.min_angle = minval
 
     # very dangerous, we must know exactly what these values are beforehand
-    def set_max_min_currents(self, max, min):
-        self.max_current = max
-        self.min_current = min
+    def set_max_min_currents(self, maxval, minval):
+        self.max_current = maxval
+        self.min_current = minval
 
     # we don't want to intentionally try to set angle positions out of the possible ranges
     def set_angle_position(self, angle):
@@ -51,7 +57,8 @@ class Motor:
             self.angle_position = angle
             return True
         else:
-            print("unable to set angle position to " + str(angle) + " for motor: " + self.name)
+            print("unable to set angle position to " + str(angle) +
+                  " for motor: " + self.name)
             return False
 
     def get_angle_position(self):
@@ -85,3 +92,18 @@ class Motor:
             self.alive = False
         else:
             self.alive = True
+
+    def write(self, serial, angle):
+        # self.set_angle_position(angle)
+        # print(int(self.get_angle_position()))
+        # serial.write(struct.pack('>B', int(self.get_angle_position())))
+        # serial.write(str.encode(str(self.get_angle_position())))
+        print('Name' + self.name)
+        print(f'motor {self.name} direction {angle}')
+        serial.write(str.encode(f'motor {self.name} direction {angle}'))
+        # serial.write(180)
+
+    def read(self, serial):
+        str1 = serial.readline()
+        print(str1.decode())
+        return int(self.get_angle_position())
