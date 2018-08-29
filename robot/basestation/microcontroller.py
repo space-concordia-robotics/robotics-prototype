@@ -10,7 +10,28 @@ class Microcontroller:
     def __init__(self, name, serial_port, motors):
         self.name = name
         self.serial_port = serial_port
-        self.motors = motors
+        self.motors = self.Collection(motors)
+        for motor in motors:
+            motor.serial_port = serial_port
+
+    class Collection:
+        def __init__(self, motors):
+            self.elements = motors
+
+        def __iter__(self):
+            return iter(self.elements)
+
+        @property
+        def elements(self):
+            return self.__elements
+
+        @elements.setter
+        def elements(self, elements):
+            self.__elements = elements
+
+        def get(self, name=None):
+            return next((motor for motor in self.elements
+                         if motor.name == name))
 
     @property
     def name(self):
@@ -25,7 +46,7 @@ class Microcontroller:
         return self.__serial_port
 
     @serial_port.setter
-    def setter(self, serial_port):
+    def serial_port(self, serial_port):
         self.__serial_port = serial_port
 
     @property

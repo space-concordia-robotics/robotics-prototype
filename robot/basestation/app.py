@@ -20,7 +20,7 @@ def index():
 
 
 # Declare some placeholder values for `Motor.__init__` parameters
-max_angle = 180
+max_angle = 160
 min_angle = 0
 max_current = 3
 min_current = 0
@@ -40,7 +40,7 @@ serial_port = SerialPort()
 
 # Intialize `Microcontroller` object representing the mother Arduino object
 # containing `Motor` instance array
-teensy = Microcontroller("Arduino", serial_port, [m1, m2, m3, m4, m5, m6])
+teensy = Microcontroller("teensy", serial_port, [m1, m2, m3, m4, m5, m6])
 
 
 # Automatic controls
@@ -193,6 +193,13 @@ def click_btn_motor5_cw():
 def click_btn_motor6_ccw():
     print("click_btn_motor6_ccw")
     teensy.write(m6.name, "1")
+    # motor = teensy.motors.get(name="6")
+    # print(motor.name)
+    # print(motor.serial_port)
+
+    # print(f'Before: {motor.serial_port.read()} ; {motor.angle_position}')
+    # teensy.motors.get(name="6").rotate(20, direction='ccw')
+    # print(f'After: {motor.serial_port.read()} ; {motor.angle_position}')
     return ""
 
 
@@ -200,6 +207,10 @@ def click_btn_motor6_ccw():
 def click_btn_motor6_cw():
     print("click_btn_motor6_cw")
     teensy.write(m6.name, "0")
+    # motor = teensy.motors.get(name="6")
+    # print(f'Before: {motor.serial_port.read()} ; {motor.angle_position}')
+    # teensy.motors.get(name="6").rotate(20, direction='cw')
+    # print(f'After: {motor.serial_port.read()} ; {motor.angle_position}')
     return ""
 
 
