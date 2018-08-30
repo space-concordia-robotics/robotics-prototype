@@ -21,6 +21,8 @@
 #define NUM_SERVOS          2
 #define NUM_LIM_SW          4
 
+#define DC_STOP 194
+
 // steppers
 
 #define M1_ENABLE_PIN       2

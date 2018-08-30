@@ -39,13 +39,16 @@ enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 
 #define MAX_SPEED 3 // 4 speed options
 #define DEFAULT_SPEED 0 // default speed is slowest
-#define MAX_COUNTS 5 // max number of times a motor can turn in a specific direction
+#define MAX_COUNTS 3 // max number of times a motor can turn in a specific direction
 
 // pwm speed control
-#define PWM_STOP 127 // may not be used but motor is supposed to stop at 50% duty cycle (127/255)
+//#define PWM_STOP 127 // may not be used but motor is supposed to stop at 50% duty cycle (127/255)
+#define PWM_STOP 193 // fix for frosh
 // speed 0, slowest (+/-32)
-#define PWM_CW0 160
-#define PWM_CCW0 96
+//#define PWM_CW0 160
+//#define PWM_CCW0 96
+#define PWM_CW0 255 // fix for frosh, speed 0
+#define PWM_CCW0 120 // fix for frosh, speed 0
 // speed 1 (+/-64)
 #define PWM_CW1 192
 #define PWM_CCW1 64
@@ -70,15 +73,15 @@ enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 class ArmMotor {
   public:
     //volatile int encoderCount;
-    elapsedMillis sinceStart = 0; // for time of motor budging
-    elapsedMillis sinceStep = 0; // for time between stepper steps
+    elapsedMillis sinceStart; // for time of motor budging
+    elapsedMillis sinceStep; // for time between stepper steps
 
     ArmMotor(int code); // decides what type of motor it is, needs to turn into subclasses instead
 
     //void setMotorSpeed();
     //float getCurrentAngle();
 
-    void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime); // budges motor for short period of time
+    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME); // budges motor for short period of time
     //void setDesiredAngle(float angle);
     //void update();
   private:
@@ -87,6 +90,7 @@ class ArmMotor {
 
     int rightCount, leftCount = 0; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
+    int cwSpeed, ccwSpeed; unsigned int stepInterval;
 
     //float currentAngle, desiredAngle; // for angle control
     //bool isMovementDone;
@@ -144,9 +148,8 @@ ArmMotor::ArmMotor(int code): motorCode(code) {
    tell the ISR how to move. but for now I can just make simple code that does the thing, I suppose.
 */
 
-void ArmMotor::budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME) {
+void ArmMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   // arranged in order of which motor is predicted to be controlled the most
-  int cwSpeed, ccwSpeed; unsigned int stepInterval; // perhaps should be placed elsewhere, not sure
   if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
@@ -215,19 +218,19 @@ void ArmMotor::budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, u
             cwSpeed = PWM_CW3; ccwSpeed = PWM_CCW3;
             break;
         }
-        Serial.println("starting");
+        Serial.println("starting dc");
         sinceStart = 0;
         if (budgeDir == CLOCKWISE && canTurnRight) {
           analogWrite(pwmPin, cwSpeed);
           while (sinceStart < budgeTime) ; // wait
-          analogWrite(pwmPin, PWM_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+          analogWrite(pwmPin, DC_STOP); // sets duty cycle to 50% which corresponds to 0 speed
         }
         if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
           analogWrite(pwmPin, ccwSpeed);
           while (sinceStart < budgeTime) ; // wait
-          analogWrite(pwmPin, PWM_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+          analogWrite(pwmPin, DC_STOP); // sets duty cycle to 50% which corresponds to 0 speed
         }
-        Serial.println("stopping");
+        Serial.println("stopping dc");
         break;
       case SERVO_MOTOR:
         switch (budgeSpeed) {
@@ -244,7 +247,7 @@ void ArmMotor::budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, u
             cwSpeed = PWM_CW3; ccwSpeed = PWM_CCW3;
             break;
         }
-        Serial.println("starting");
+        Serial.println("starting servo");
         pinMode(pwmPin, OUTPUT);
         sinceStart = 0;
         if (budgeDir == CLOCKWISE && canTurnRight) {
@@ -252,13 +255,13 @@ void ArmMotor::budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, u
           while (sinceStart < budgeTime) ; // wait
           analogWrite(pwmPin, PWM_STOP); // sets duty cycle to 50% which corresponds to 0 speed
         }
-        if (budgeDir == CLOCKWISE && canTurnRight) {
+        if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
           analogWrite(pwmPin, ccwSpeed);
           while (sinceStart < budgeTime) ; // wait
           analogWrite(pwmPin, PWM_STOP); // sets duty cycle to 50% which corresponds to 0 speed
         }
-        pinMode(pwmPin, INPUT); // sets pin to floating input. This is necessary to cut power to servo because otherwise it jitters, gets hot, drains power
-        Serial.println("stopping");
+        //pinMode(pwmPin, INPUT); // sets pin to floating input. This is necessary to cut power to servo because otherwise it jitters, gets hot, drains power
+        Serial.println("stopping servo");
         break;
     }
   }

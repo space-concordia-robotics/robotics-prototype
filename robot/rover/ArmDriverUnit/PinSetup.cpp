@@ -31,6 +31,7 @@ void pinSetup(void) {
   // DC motor
 
   pinMode(M2_PWM_PIN, OUTPUT);
+  analogWrite(M2_PWM_PIN,DC_STOP);
   /*pinMode(M2_UART_TX, OUTPUT);
     pinMode(M2_UART_RX, INPUT);*/
   pinMode(M2_ENCODER_A, INPUT_PULLUP);
@@ -41,6 +42,7 @@ void pinSetup(void) {
   // servos
 
   pinMode(M5_PWM_PIN, OUTPUT);
+  analogWrite(M5_PWM_PIN,DC_STOP);
   pinMode(M5_ENCODER_A, INPUT_PULLUP);
   pinMode(M5_ENCODER_B, INPUT_PULLUP);
 

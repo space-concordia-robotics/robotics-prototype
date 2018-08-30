@@ -23,7 +23,7 @@ class SerialParser {
     int tempSpeedVar;
     unsigned int tempTimeVar;
 };
-
+    
 SerialParser::SerialParser(void) {
   Serial.begin(BAUD_RATE);
 }
@@ -48,30 +48,24 @@ void SerialParser::parseSerial(void) {
       switch (*msgElem) { // determines which motor being used
         case '1':
           whichMotor = MOTOR1;
-          Serial.print("motor 1");
           break;
         case '2':
           whichMotor = MOTOR2;
-          Serial.print("motor 2");
           break;
         case '3':
           whichMotor = MOTOR3;
-          Serial.print("motor 3");
           break;
         case '4':
           whichMotor = MOTOR4;
-          Serial.print("motor 4");
           break;
         case '5':
           whichMotor = MOTOR5;
-          Serial.print("motor 5");
           break;
         case '6':
           whichMotor = MOTOR6;
-          Serial.print("motor 6");
           break;
       }
-      Serial.print("motor"); Serial.println(whichMotor);
+      Serial.print("motor "); Serial.println(whichMotor);
       msgElem = strtok(NULL, " "); // find the next message element (direction tag)
       if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok(NULL, " "); // go to next msg element (direction)
@@ -100,7 +94,7 @@ void SerialParser::parseSerial(void) {
           tempTimeVar = atoi(msgElem); // converts to int
           if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
             whichTime = tempTimeVar;
-            Serial.print(whichTime); Serial.println("s");
+            Serial.print(whichTime); Serial.println("ms movement");
           }
         }
       }
