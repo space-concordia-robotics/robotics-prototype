@@ -1,37 +1,47 @@
-int incomingByte;
-int LONG_PAUSE = 200;
-int SHORT_PAUSE = 100;
-// the setup function runs once when you press reset or power the board
-void setup() {
-    // open serial port, set data rate to 9600
-    Serial.begin(9600);
-    // initialize digital pin LED_BUILTIN as an output.
-    pinMode(LED_BUILTIN, OUTPUT);
-}
+#include <Servo.h> 
+ 
+Servo myServo;  // create servo object to control a servo 
+                // a maximum of eight servo objects can be created 
+ 
+int SERVO_PIN_9 = 9;
+int REST = 89;
+int OFFSET = 10;
+int CW = REST - OFFSET;
+int CCW = REST + OFFSET;
+int BUDGE_TIME = 99;
+int BAUD_RATE = 9600;
+unsigned long startTime = 0;
+unsigned long currentTime = 0;
 
-// the loop function runs over and over again forever
-void loop() {
-    // do things only when you receive data
+void setup() 
+{ 
+    myServo.attach(SERVO_PIN_9);  // attaches the servo on pin 9 to the servo object 
+    myServo.write(REST); // this actually stops the motor
+    Serial.begin(BAUD_RATE);
+} 
+ 
+ 
+void loop() 
+{ 
 
-    if (Serial.available() > 0) {
-        // read the incoming byte
-        incomingByte = Serial.read();
+    if (Serial.available()) {
+        char cmd = Serial.read();
+        Serial.println("cmd: ");
+        Serial.println(cmd);
 
-        if (incomingByte == 'w') {
-            for (int i = 0; i < 3; i ++) {
-                digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-                delay(SHORT_PAUSE);                // wait for a bit
-                digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-                delay(SHORT_PAUSE);                // wait for a bit
-            }
+        if (cmd == 'w') {
+            Serial.println("Moving CW");
+            myServo.write(CW); // rotate clockwise
+            delay(BUDGE_TIME);
+            Serial.println("Stop");
+            myServo.write(REST);
         }
-        else if (incomingByte == 's') {
-            for (int i = 0; i < 5; i++) {
-                digitalWrite(LED_BUILTIN, HIGH);
-                delay(LONG_PAUSE);
-                digitalWrite(LED_BUILTIN, LOW);
-                delay(LONG_PAUSE);
-            }
+        else if (cmd == 's') {
+            Serial.println("Moving CCW");
+            myServo.write(CCW); // rotate counter clockwise
+            delay(BUDGE_TIME);
+            Serial.println("Stop");
+            myServo.write(REST);
         }
     }
 }
