@@ -1,5 +1,5 @@
-#ifndef ARMMOTOR_H
-#define ARMMOTOR_H
+#ifndef DCMOTOR_H
+#define DCMOTOR_H
 
 #include <Arduino.h>
 #include "PinSetup.h"
@@ -24,18 +24,18 @@
 // for 5v output
 /*// pwm speed control
   //#define DC_STOP 127 // motor is supposed to stop at 50% duty cycle (127/255)
-// speed 0, slowest
-#define DC_CW0 DC_STOP+32
-#define DC_CCW0 DC_STOP-32
-// speed 1
-#define DC_CW1 DC_STOP+64
-#define DC_CCW1 DC_STOP-64
-// speed 2
-#define DC_CW2 DC_STOP+96
-#define DC_CCW2 DC_STOP-96  
-// speed 3, fastest
-#define DC_CW3 255
-#define DC_CCW3 1
+  // speed 0, slowest
+  #define DC_CW0 DC_STOP+32
+  #define DC_CCW0 DC_STOP-32
+  // speed 1
+  #define DC_CW1 DC_STOP+64
+  #define DC_CCW1 DC_STOP-64
+  // speed 2
+  #define DC_CW2 DC_STOP+96
+  #define DC_CCW2 DC_STOP-96
+  // speed 3, fastest
+  #define DC_CW3 255
+  #define DC_CCW3 1
 */
 
 class DCMotor {
@@ -43,13 +43,14 @@ class DCMotor {
     //volatile int encoderCount;
     elapsedMillis sinceStart;
 
+    static int numDCMotors;
     //int gearRatio;
     //float maxCWAngle, maxCCWAngle;
     //float currentAngle, desiredAngle;
 
     //int maxSpeed;
     int cwSpeed, ccwSpeed;
-    //bool movementDone;
+    bool movementDone;
 
     int rightCount, leftCount; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
@@ -71,9 +72,12 @@ class DCMotor {
     //void (*encoderInterrupt)(void);
 };
 
+int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
+
 DCMotor::DCMotor(int pwmPin, int encA, int encB)://, void (*encoder_interrupt)(void)):
   pwmPin(pwmPin), encA(encA), encB(encB)
 {
+  numDCMotors++;
   /*encoder_interrupt = &encoder_interrupt;
     attachInterrupt(encA, encoder_interrupt, CHANGE);
     attachInterrupt(encB, encoder_interrupt, CHANGE);*/
@@ -81,6 +85,7 @@ DCMotor::DCMotor(int pwmPin, int encA, int encB)://, void (*encoder_interrupt)(v
 
 void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+    movementDone = false;
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("turning dc clockwise");
@@ -90,10 +95,8 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       canTurnLeft = true; Serial.println("turning dc counter-clockwise");
       leftCount++; rightCount--;
     }
-    Serial.print("right dc count ");Serial.println(rightCount);
-    Serial.print("left dc count ");Serial.println(leftCount);
-    Serial.print("right dc bool ");Serial.println(canTurnRight);
-    Serial.print("left dc bool ");Serial.println(canTurnLeft);
+    Serial.print("right dc count "); Serial.println(rightCount);
+    Serial.print("left dc count "); Serial.println(leftCount);
     switch (budgeSpeed) {
       case 0:
         cwSpeed = DC_CW0; ccwSpeed = DC_CCW0;
@@ -108,7 +111,7 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
         cwSpeed = DC_CW3; ccwSpeed = DC_CCW3;
         break;
     }
-    Serial.print("setting dc speed level to ");Serial.println(budgeSpeed);
+    Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
     sinceStart = 0;
     if (budgeDir == CLOCKWISE && canTurnRight) {
       analogWrite(pwmPin, cwSpeed);
@@ -120,7 +123,7 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, DC_STOP); // sets duty cycle to 50% which corresponds to 0 speed
     }
-    Serial.println("dc movement done");
+    movementDone = true; Serial.println("dc movement done");
     canTurnRight = false; canTurnLeft = false;
   }
 }

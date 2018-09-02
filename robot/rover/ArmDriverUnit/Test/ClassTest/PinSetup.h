@@ -21,8 +21,6 @@ enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines
 enum motor_direction {CLOCKWISE, COUNTER_CLOCKWISE}; // defines motor directions
 enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 
-#define NUM_STEPPERS        3
-#define NUM_SERVOS          2
 #define NUM_LIM_SW          4
 
 // limits in ms for amount of time the motor can budge
