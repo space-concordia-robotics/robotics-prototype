@@ -2,7 +2,7 @@
 
 import sys, click
 from socket import socket, AF_INET, SOCK_DGRAM
-from time import sleep
+import time
 
 PORT_NUMBER = 5000
 SIZE = 1024
@@ -27,20 +27,27 @@ print(
     format(SERVER_IP, PORT_NUMBER))
 
 mySocket = socket(AF_INET, SOCK_DGRAM)
+currentMillis = lambda: int(round(time.time() * 1000))
+lastCmdSent = 0
+THROTTLE_TIME = 100
 
 while True:
     try:
-        key = click.getchar()
 
-        if key == 'w':
-            print("Sending key: " + key)
-            mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
-        elif key == 's':
-            print("Sending key: " + key)
-            mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
-        elif key == 'q':
-            mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
-            print("\nTerminating connection.")
-            break
+        if currentMillis() - lastCmdSent > THROTTLE_TIME:
+            key = click.getchar()
+
+            if key == 'w':
+                print("Sending key: " + key + ", cmd --> Forward")
+                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
+                lastCmdSent = currentMillis()
+            elif key == 's':
+                print("Sending key: " + key + ", cmd --> Back")
+                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
+                lastCmdSent = currentMillis()
+            elif key == 'q':
+                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
+                print("\nTerminating connection.")
+                break
     except:
         break
