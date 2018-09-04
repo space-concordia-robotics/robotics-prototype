@@ -75,15 +75,14 @@ class Motor:
             raise ValueError('`angle` cannot be negative and direction `cw`')
 
         self.angle_position = self.angle_position + angle
-        self.serial_port.write(str.encode(str(self.angle_position)))
+        self.serial_port.write(str.encode(str(self.angle_position) + '\n'))
 
     def write(self, serial_port, angle):
         print('Name' + self.name)
         print(f'motor {self.name} direction {angle}')
         serial_port.write(
             str.encode(
-                f'motor {self.name} direction {angle} speed 0 time 1000 '))
-        # serial_port.write(str.encode(f'{angle}'))
+                f'motor {self.name} direction {angle} speed 0 time 500'))
 
     def read(self, serial_port):
         str1 = serial_port.readline()
