@@ -20,7 +20,8 @@ int tempSpeedVar;
 unsigned int tempTimeVar;
 
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B);
-DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B);
+//DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
+DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // for new driver
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_ENCODER_A, M3_ENCODER_B);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_ENCODER_A, M4_ENCODER_B);
 ServoMotor motor5(M5_PWM_PIN, M5_ENCODER_A, M5_ENCODER_B);
@@ -80,11 +81,30 @@ void loop() {
     memset(serialBuffer, 0, BUFFER_SIZE); //empty the buffer
   }
 
-  if (budgeCommand.whichMotor == MOTOR2) {
+  if (budgeCommand.whichMotor > 0 && budgeCommand.whichMotor <= 6) {
     Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
-    motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
   }
-  budgeCommand.whichMotor = 0; // this was a quick fix so that at the next loop it will wait for a new message
+  switch (budgeCommand.whichMotor) {
+    case MOTOR1:
+      motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+    case MOTOR2:
+      motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+    case MOTOR3:
+      motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+    case MOTOR4:
+      motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+    case MOTOR5:
+      motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+    case MOTOR6:
+      motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      break;
+  }
+  budgeCommand.whichMotor = 0; // reset whichMotor so the microcontroller doesn't try to move a motor next loop
   // in practice perhaps the whole struct should be destroyed, otherwise it must be reset each time
 }
 

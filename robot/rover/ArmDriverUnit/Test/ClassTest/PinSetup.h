@@ -65,8 +65,9 @@ enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 // DC motor
 
 #define M2_PWM_PIN         30
-#define M2_UART_TX         32
-#define M2_UART_RX         31
+#define M2_DIR_PIN         31 // for new driver
+//#define M2_UART_TX         32 // for sabertooth
+//#define M2_UART_RX         31 // for sabertooth
 #define M2_ENCODER_A       26
 #define M2_ENCODER_B       27
 #define M2_LIMIT_SW_FLEX   28

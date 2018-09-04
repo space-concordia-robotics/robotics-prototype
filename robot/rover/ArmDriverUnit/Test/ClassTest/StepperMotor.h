@@ -5,10 +5,10 @@
 //#include "AbtinEncoder.h"
 
 // time interval between stepper steps
-#define STEP_INTERVAL0 10
+#define STEP_INTERVAL0 35
 #define STEP_INTERVAL1 25
-#define STEP_INTERVAL2 50
-#define STEP_INTERVAL3 100
+#define STEP_INTERVAL2 10
+#define STEP_INTERVAL3 3
 
 class StepperMotor {
   public:
@@ -86,10 +86,10 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
         stepInterval = STEP_INTERVAL3;
         break;
     }
-    Serial.print("setting servo step interval to "); Serial.println(stepInterval);
+    Serial.print("setting step interval to "); Serial.println(stepInterval);
     if (budgeDir == CLOCKWISE && canTurnRight) {
       digitalWriteFast(dirPin, HIGH);
-      digitalWriteFast(enablePin, HIGH);
+      digitalWriteFast(enablePin, LOW);
       sinceStart = 0;
       while (sinceStart < budgeTime) {
         // motor driver is fast enough to recognize this quickly rising and falling edge
@@ -101,7 +101,7 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       digitalWriteFast(dirPin, LOW);
-      digitalWriteFast(enablePin, HIGH);
+      digitalWriteFast(enablePin, LOW);
       sinceStart = 0;
       while (sinceStart < budgeTime) {
         // motor driver is fast enough to recognize this quickly rising and falling edge
@@ -111,8 +111,9 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
         while (sinceStep < stepInterval) ; // wait until it's time to step again
       }
     }
-    movementDone = true; Serial.println("servo movement done");
-    digitalWriteFast(enablePin, LOW); // be sure to disconnect power to stepper so it doesn't get hot / drain power
+    movementDone = true; Serial.println("stepper movement done");
+    digitalWriteFast(enablePin, HIGH); // be sure to disconnect power to stepper so it doesn't get hot / drain power
+    canTurnRight = false; canTurnLeft = false;
   }
 }
 
