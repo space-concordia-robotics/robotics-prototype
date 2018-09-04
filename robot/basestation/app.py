@@ -3,6 +3,7 @@
 # Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
 
 import flask
+# import time
 
 # TODO: Rename modules to lowercase
 from robot.basestation.motor import Motor
@@ -44,173 +45,172 @@ teensy = Microcontroller("teensy", serial_port, [m1, m2, m3, m4, m5, m6])
 
 
 # Automatic controls
-@app.route("/click_btn_pitch_up")
-def click_pitch_up():
-    print("click_btn_pitch_up")
+@app.route("/mousedown_btn_pitch_up")
+def mousedown_btn_pitch_up():
+    print("mousedown_btn_pitch_up")
     return ""
 
 
-@app.route("/click_btn_pitch_down")
-def click_btn_pitch_down():
-    print("click_btn_pitch_down")
+@app.route("/mousedown_btn_pitch_down")
+def mousedown_btn_pitch_down():
+    print("mousedown_btn_pitch_down")
     return ""
 
 
-@app.route("/click_btn_roll_left")
-def click_btn_roll_left():
-    print("click_btn_roll_left")
+@app.route("/mousedown_btn_roll_left")
+def mousedown_btn_roll_left():
+    print("mousedown_btn_roll_left")
     return ""
 
 
-@app.route("/click_btn_roll_right")
-def click_btn_roll_right():
-    print("click_btn_roll_right")
+@app.route("/mousedown_btn_roll_right")
+def mousedown_btn_roll_right():
+    print("mousedown_btn_roll_right")
     return ""
 
 
-@app.route("/click_btn_claw_open")
-def click_btn_claw_open():
-    print("click_btn_claw_open")
+@app.route("/mousedown_btn_claw_open")
+def mousedown_btn_claw_open():
+    print("mousedown_btn_claw_open")
     return ""
 
 
-@app.route("/click_btn_claw_close")
-def click_btn_claw_close():
-    print("click_btn_claw_close")
+@app.route("/mousedown_btn_claw_close")
+def mousedown_btn_claw_close():
+    print("mousedown_btn_claw_close")
     return ""
 
 
-@app.route("/click_btn_arm_up")
-def click_btn_arm_up():
-    print("click_btn_arm_up")
+@app.route("/mousedown_btn_arm_up")
+def mousedown_btn_arm_up():
+    print("mousedown_btn_arm_up")
     return ""
 
 
-@app.route("/click_btn_arm_down")
-def click_btn_arm_down():
-    print("click_btn_arm_down")
+@app.route("/mousedown_btn_arm_down")
+def mousedown_btn_arm_down():
+    print("mousedown_btn_arm_down")
     return ""
 
 
-@app.route("/click_btn_arm_left")
-def click_btn_arm_left():
-    print("click_btn_arm_left")
+@app.route("/mousedown_btn_arm_left")
+def mousedown_btn_arm_left():
+    print("mousedown_btn_arm_left")
     return ""
 
 
-@app.route("/click_btn_arm_right")
-def click_btn_arm_right():
-    print("click_btn_arm_right")
+@app.route("/mousedown_btn_arm_right")
+def mousedown_btn_arm_right():
+    print("mousedown_btn_arm_right")
     return ""
 
 
-@app.route("/click_btn_arm_back")
-def click_btn_arm_back():
-    print("click_btn_arm_back")
+@app.route("/mousedown_btn_arm_back")
+def mousedown_btn_arm_back():
+    print("mousedown_btn_arm_back")
     return ""
 
 
-@app.route("/click_btn_arm_forward")
-def click_btn_arm_forward():
-    print("click_btn_arm_forward")
+@app.route("/mousedown_btn_arm_forward")
+def mousedown_btn_arm_forward():
+    print("mousedown_btn_arm_forward")
     return ""
 
 
 # Manual controls
-@app.route("/click_btn_motor1_ccw")
-def click_btn_motor1_ccw():
-    print("click_btn_motor1_ccw")
-    # teensy.write("Motor 1", teensy.read("Motor 1") - 10)
-    teensy.write(m1.name, "1")
+@app.route("/mousedown_btn_motor1_ccw")
+def mousedown_btn_motor1_ccw():
+    print("mousedown_btn_motor1_ccw")
+    teensy.motors.get(name="1").rotate(20, direction='ccw')
+    # teensy.write(m1.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor1_cw")
-def click_btn_motor1_cw():
-    print("click_btn_motor1_cw")
-    # teensy.write(m1.name, teensy.read("Motor 1") + 10)
-    teensy.write(m1.name, "0")
+@app.route("/mousedown_btn_motor1_cw")
+def mousedown_btn_motor1_cw():
+    print("/mousedown_btn_motor1_cw")
+    teensy.motors.get(name="1").rotate(20, direction='cw')
+    # teensy.write(m1.name, "0")
     return ""
 
 
-@app.route("/click_btn_motor2_ccw")
-def click_btn_motor2_ccw():
-    print("click_btn_motor2_ccw")
-    teensy.write(m2.name, "1")
+@app.route("/mousedown_btn_motor2_ccw")
+def mousedown_btn_motor2_ccw():
+    print("mousedown_btn_motor2_ccw")
+    teensy.motors.get(name="2").rotate(20, direction='ccw')
+    # teensy.write(m2.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor2_cw")
-def click_btn_motor2_cw():
-    print("click_btn_motor2_cw")
-    teensy.write(m2.name, "0")
+@app.route("/mousedown_btn_motor2_cw")
+def mousedown_btn_motor2_cw():
+    print("mousedown_btn_motor2_cw")
+    teensy.motors.get(name="2").rotate(20, direction='cw')
+    # teensy.write(m2.name, "0")
     return ""
 
 
-@app.route("/click_btn_motor3_ccw")
-def click_btn_motor3_ccw():
-    print("click_btn_motor3_ccw")
-    teensy.write(m3.name, "1")
+@app.route("/mousedown_btn_motor3_ccw")
+def mousedown_btn_motor3_ccw():
+    print("mousedown_btn_motor3_ccw")
+    teensy.motors.get(name="3").rotate(20, direction='ccw')
+    # teensy.write(m3.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor3_cw")
-def click_btn_motor3_cw():
-    print("click_btn_motor3_cw")
-    teensy.write(m3.name, "0")
+@app.route("/mousedown_btn_motor3_cw")
+def mousedown_btn_motor3_cw():
+    print("mousedown_btn_motor3_cw")
+    teensy.motors.get(name="3").rotate(20, direction='cw')
+    # teensy.write(m3.name, "0")
     return ""
 
 
-@app.route("/click_btn_motor4_ccw")
-def click_btn_motor4_ccw():
-    print("click_btn_motor4_ccw")
-    teensy.write(m4.name, "1")
+@app.route("/mousedown_btn_motor4_ccw")
+def mousedown_btn_motor4_ccw():
+    print("mousedown_btn_motor4_ccw")
+    teensy.motors.get(name="4").rotate(20, direction='ccw')
+    # teensy.write(m4.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor4_cw")
-def click_btn_motor4_cw():
-    print("click_btn_motor4_cw")
-    teensy.write(m4.name, "0")
+@app.route("/mousedown_btn_motor4_cw")
+def mousedown_btn_motor4_cw():
+    print("mousedown_btn_motor4_cw")
+    teensy.motors.get(name="4").rotate(20, direction='cw')
+    # teensy.write(m4.name, "0")
     return ""
 
 
-@app.route("/click_btn_motor5_ccw")
-def click_btn_motor5_ccw():
-    print("click_btn_motor5_ccw")
-    teensy.write(m5.name, "1")
+@app.route("/mousedown_btn_motor5_ccw")
+def mousedown_btn_motor5_ccw():
+    print("mousedown_btn_motor5_ccw")
+    teensy.motors.get(name="5").rotate(20, direction='ccw')
+    # teensy.write(m5.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor5_cw")
-def click_btn_motor5_cw():
-    print("click_btn_motor5_cw")
-    teensy.write(m5.name, "0")
+@app.route("/mousedown_btn_motor5_cw")
+def mousedown_btn_motor5_cw():
+    print("mousedown_btn_motor5_cw")
+    teensy.motors.get(name="5").rotate(20, direction='cw')
+    # teensy.write(m5.name, "0")
     return ""
 
 
-@app.route("/click_btn_motor6_ccw")
-def click_btn_motor6_ccw():
-    print("click_btn_motor6_ccw")
-    teensy.write(m6.name, "1")
-    # motor = teensy.motors.get(name="6")
-    # print(motor.name)
-    # print(motor.serial_port)
-
-    # print(f'Before: {motor.serial_port.read()} ; {motor.angle_position}')
-    # teensy.motors.get(name="6").rotate(20, direction='ccw')
-    # print(f'After: {motor.serial_port.read()} ; {motor.angle_position}')
+@app.route("/mousedown_btn_motor6_ccw")
+def mousedown_btn_motor6_ccw():
+    print("mousedown_btn_motor6_ccw")
+    teensy.motors.get(name="6").rotate(20, direction='ccw')
+    # teensy.write(m6.name, "1")
     return ""
 
 
-@app.route("/click_btn_motor6_cw")
-def click_btn_motor6_cw():
-    print("click_btn_motor6_cw")
-    teensy.write(m6.name, "0")
-    # motor = teensy.motors.get(name="6")
-    # print(f'Before: {motor.serial_port.read()} ; {motor.angle_position}')
-    # teensy.motors.get(name="6").rotate(20, direction='cw')
-    # print(f'After: {motor.serial_port.read()} ; {motor.angle_position}')
+@app.route("/mousedown_btn_motor6_cw")
+def mousedown_btn_motor6_cw():
+    print("mousedown_btn_motor6_cw")
+    teensy.motors.get(name="6").rotate(20, direction='cw')
+    # teensy.write(m6.name, "0")
     return ""
 
 
