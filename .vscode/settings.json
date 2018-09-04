@@ -7,5 +7,7 @@
     "python.linting.pylintEnabled": true,
     "markdown.styles": [
         ".vscode/markdown.css"
-    ]
+    ],
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
