@@ -2,9 +2,17 @@
 This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
 ## Contributing and Development Environment Instructions
-Firstly, this project is built in Python 3.3+. You need to have a version of Python installed that is 3.3+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+Firstly, this project is built in Python 3.3+ and JavaScript (ES6). You need to have a version of Python installed that is 3.3+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
-Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project. 
+Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy. 
+
+### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
+Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
+```
+$ npm install
+```
+
+This command will install all of the required dependencies (mostly just ESLint stuff at the time of writing) as depicted in the `package.json` file.
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
