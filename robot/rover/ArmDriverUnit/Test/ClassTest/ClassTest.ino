@@ -3,10 +3,17 @@
 #include "DCMotor.h"
 #include "ServoMotor.h"
 
+/* serial */
 #define BAUD_RATE 115200 // serial baud rate
+
+/* parsing */
 #define BUFFER_SIZE 100  // size of the buffer for the serial commands
 
-int motor;
+char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
+char **parsePtr; // used in strtok_r, which is the reentrant version of strtok
+int tempMotorVar;
+int tempSpeedVar;
+unsigned int tempTimeVar;
 
 struct budgeInfo {
   int whichMotor;
@@ -15,9 +22,21 @@ struct budgeInfo {
   unsigned int whichTime;
 } budgeCommand;
 
-char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-int tempSpeedVar;
-unsigned int tempTimeVar;
+/* motor contruction */
+// to reduce constructor parameters i wanted to make structs but it may make the code even messier
+/*
+struct dcPins {
+  
+};
+
+struct servoPins{
+  
+};
+
+struct stepperPins {
+  
+};
+*/
 
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B);
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
@@ -38,16 +57,16 @@ void loop() {
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: "); Serial.println(serialBuffer); // send back what was received
 
-    char* msgElem = strtok(serialBuffer, " "); // look for first element (first tag)
+    char* msgElem = strtok_r(serialBuffer, " ", parsePtr); // look for first element (first tag)
     if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
-      msgElem = strtok(NULL, " "); // go to next msg element (motor number)
-      motor = atoi(msgElem);
-      if (motor > 0 && motor < 10) budgeCommand.whichMotor = motor;
+      msgElem = strtok_r(NULL, " ", parsePtr); // go to next msg element (motor number)
+      tempMotorVar = atoi(msgElem);
+      if (tempMotorVar > 0 && tempMotorVar < 10) budgeCommand.whichMotor = tempMotorVar;
       else Serial.println("bad motor number");
       Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
-      msgElem = strtok(NULL, " "); // find the next message element (direction tag)
+      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (direction tag)
       if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok(NULL, " "); // go to next msg element (direction)
+        msgElem = strtok_r(NULL, " ", parsePtr); // go to next msg element (direction)
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
             budgeCommand.whichDir = CLOCKWISE;
@@ -59,18 +78,18 @@ void loop() {
             break;
         }
       }
-      msgElem = strtok(NULL, " "); // find the next message element (speed tag)
+      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (speed tag)
       if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok(NULL, " "); // find the next message element (integer representing speed level)
+        msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (integer representing speed level)
         tempSpeedVar = atoi(msgElem); // converts to int
         if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
           budgeCommand.whichSpeed = tempSpeedVar; // set the actual speed
           Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
         }
       }
-      msgElem = strtok(NULL, " "); // find the next message element (time tag)
+      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (time tag)
       if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok(NULL, " "); // find the next message element (time in seconds)
+        msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (time in seconds)
         tempTimeVar = atoi(msgElem); // converts to int
         if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
           budgeCommand.whichTime = tempTimeVar;
