@@ -49,7 +49,7 @@ class DCMotor : public RoverMotor {
   public:
     void encoder_interrupt(void);
     int encoderPinA, encoderPinB; // must be public for interrupt to work?
-    volatile int encoderCount;
+    volatile long encoderCount;
     const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
     static int numDCMotors;
     //int gearRatio;
@@ -82,7 +82,6 @@ DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift
 /*
   void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
-    movementDone = false;
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("turning dc clockwise");
@@ -111,64 +110,87 @@ DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift
     Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
     sinceStart = 0;
     if (budgeDir == CLOCKWISE && canTurnRight) {
+      movementDone = false;
       analogWrite(pwmPin, cwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, DC_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("dc movement done");
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
+      movementDone = false;
       analogWrite(pwmPin, ccwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, DC_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("dc movement done");
     }
-    movementDone = true; Serial.println("dc movement done");
     canTurnRight = false; canTurnLeft = false;
   }
   }
 */
 
 void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
-    movementDone = false;
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
-      canTurnRight = true; Serial.println("turning dc clockwise");
+      canTurnRight = true; Serial.println("preparing to turn dc clockwise");
       rightCount++; leftCount--;
     }
-    if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
-      canTurnLeft = true; Serial.println("turning dc counter-clockwise");
+    else if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
+      canTurnLeft = true; Serial.println("preparing to turn dc counter-clockwise");
       leftCount++; rightCount--;
     }
+    else Serial.println("max turn count reached");
     Serial.print("right dc count "); Serial.println(rightCount);
     Serial.print("left dc count "); Serial.println(leftCount);
-    switch (budgeSpeed) {
-      case 0:
-        cwSpeed = DC_S0; ccwSpeed = DC_S0;
-        break;
-      case 1:
-        cwSpeed = DC_S1; ccwSpeed = DC_S1;
-        break;
-      case 2:
-        cwSpeed = DC_S2; ccwSpeed = DC_S2;
-        break;
-      case 3:
-        cwSpeed = DC_S3; ccwSpeed = DC_S3;
-        break;
-    }
-    Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
-    sinceStart = 0;
+
     if (budgeDir == CLOCKWISE && canTurnRight) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          cwSpeed = DC_S0; ccwSpeed = DC_S0;
+          break;
+        case 1:
+          cwSpeed = DC_S1; ccwSpeed = DC_S1;
+          break;
+        case 2:
+          cwSpeed = DC_S2; ccwSpeed = DC_S2;
+          break;
+        case 3:
+          cwSpeed = DC_S3; ccwSpeed = DC_S3;
+          break;
+      }
+      Serial.print("setting dc speed level to "); Serial.println(budgeSpeed); Serial.println("starting dc movement");
       digitalWrite(directionPin, LOW);
+      sinceStart = 0;
       analogWrite(pwmPin, cwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, 0); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("dc movement done");
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          cwSpeed = DC_S0; ccwSpeed = DC_S0;
+          break;
+        case 1:
+          cwSpeed = DC_S1; ccwSpeed = DC_S1;
+          break;
+        case 2:
+          cwSpeed = DC_S2; ccwSpeed = DC_S2;
+          break;
+        case 3:
+          cwSpeed = DC_S3; ccwSpeed = DC_S3;
+          break;
+      }
+      Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
+      sinceStart = 0;
       digitalWrite(directionPin, HIGH);
       analogWrite(pwmPin, ccwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, 0); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("dc movement done");
     }
-    movementDone = true; Serial.println("dc movement done");
     canTurnRight = false; canTurnLeft = false;
   }
 }

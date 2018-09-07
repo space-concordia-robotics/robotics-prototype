@@ -15,7 +15,7 @@ class StepperMotor : public RoverMotor {
   public:
     void encoder_interrupt();
     int encoderPinA, encoderPinB;
-    volatile int encoderCount;
+    volatile long encoderCount;
     const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
     static int numStepperMotors;
     //int gearRatio;
@@ -41,35 +41,37 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int
 }
 
 void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
-    movementDone = false;
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
-      canTurnRight = true; Serial.println("turning stepper clockwise");
+      canTurnRight = true; Serial.println("preparing to turn stepper clockwise");
       rightCount++; leftCount--;
     }
-    if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
-      canTurnLeft = true; Serial.println("turning stepper counter-clockwise");
+    else if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
+      canTurnLeft = true; Serial.println("preparing to turn stepper counter-clockwise");
       leftCount++; rightCount--;
     }
+    else Serial.println("max turn count reached");
     Serial.print("right stepper count "); Serial.println(rightCount);
     Serial.print("left stepper count "); Serial.println(leftCount);
-    switch (budgeSpeed) {
-      case 0:
-        stepInterval = STEP_INTERVAL0;
-        break;
-      case 1:
-        stepInterval = STEP_INTERVAL1;
-        break;
-      case 2:
-        stepInterval = STEP_INTERVAL2;
-        break;
-      case 3:
-        stepInterval = STEP_INTERVAL3;
-        break;
-    }
-    Serial.print("setting step interval to "); Serial.println(stepInterval);
+
     if (budgeDir == CLOCKWISE && canTurnRight) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          stepInterval = STEP_INTERVAL0;
+          break;
+        case 1:
+          stepInterval = STEP_INTERVAL1;
+          break;
+        case 2:
+          stepInterval = STEP_INTERVAL2;
+          break;
+        case 3:
+          stepInterval = STEP_INTERVAL3;
+          break;
+      }
+      Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, HIGH);
       digitalWriteFast(enablePin, LOW);
       sinceStart = 0;
@@ -80,8 +82,25 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
         sinceStep = 0;
         while (sinceStep < stepInterval) ; // wait until it's time to step again
       }
+      movementDone = true; Serial.println("stepper movement done");
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          stepInterval = STEP_INTERVAL0;
+          break;
+        case 1:
+          stepInterval = STEP_INTERVAL1;
+          break;
+        case 2:
+          stepInterval = STEP_INTERVAL2;
+          break;
+        case 3:
+          stepInterval = STEP_INTERVAL3;
+          break;
+      }
+      Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, LOW);
       digitalWriteFast(enablePin, LOW);
       sinceStart = 0;
@@ -92,8 +111,8 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
         sinceStep = 0;
         while (sinceStep < stepInterval) ; // wait until it's time to step again
       }
+      movementDone = true; Serial.println("stepper movement done");
     }
-    movementDone = true; Serial.println("stepper movement done");
     digitalWriteFast(enablePin, HIGH); // be sure to disconnect power to stepper so it doesn't get hot / drain power
     canTurnRight = false; canTurnLeft = false;
   }

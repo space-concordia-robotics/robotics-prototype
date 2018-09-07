@@ -1,3 +1,58 @@
+/*
+  TODO:
+  -suggesgtion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
+  -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
+  -(always) clean up code, comment code
+  -(later) implement power management? sleep mode?
+  -(later) implement PID for automatic control
+    -update parsing function to take in angles or just go directly to ROSserial, probably the former
+  -(done) solve many problems by creating motor type subclasses
+  -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
+  -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
+  -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
+  -(need abtin's magic) figure out how to step up to 5v for the sabertooth
+  -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
+  -(done) instead of resetting budgeCommand, perform some kind of check so that the motor doesn't spin forever?
+
+  -(done) implement budge function:
+   -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
+   -(done) implement limit for max turns in right/left directions
+   -(done) connect and test all motor types with budge()
+
+  -(now) determine motor angles thru encoder interrupts
+   -(done) replace strtok with strtok_r when implementing interrupts
+   -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
+   -(now) figure out better way to check max motor count than accessing motor1 object
+   -(now) solve encoder direction change issue?
+   -(now) ensure interrupts function with new class structure
+   -(next) confirm all the pins will work with interrupts and not stepping on each other
+   -figure out encoder resolutions and gear ratios
+   -(next) make sure there is  max/min angle limitation with encoders
+   -determine whether it's worth it to use the built in quadrature decoders
+
+  -(next step) timers
+   -systick is normally a heartbeat type thing
+   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
+   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
+   -implement heartbeat after deciding on best timer for it
+   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
+    -currently using whatever is connected to the pwm pins for timing pwm
+    -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
+    -ftm+tpm has quadrature decoder?
+    -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
+
+  -(next) simultaneous motor control with timers
+   -(next) decide whether to use abtin's software interrupt or simpler method for simultaneous motor control
+    -implement appropriate software interrupts that can take input from PID or manual control functions?
+    -decide frequency of motor control loop: figure out estimated time for loop
+    -rewrite the motor control with timers for teensy, ensure control for all motors
+
+  -(next next step) external interrupts for limit switches
+   -rewrite all the register bit variables to use teensy registers for limit switch interrupts
+   -incorporate limit switches for homing position on all motors
+   -implement homing function on boot
+*/
+
 #include "PinSetup.h"
 
 #include "RoverMotor.h"
@@ -12,17 +67,17 @@
 #define BUFFER_SIZE 100  // size of the buffer for the serial commands
 
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-char **parsePtr; // used in strtok_r, which is the reentrant version of strtok
+char *restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
 int tempMotorVar; // checks the motor before giving the data to the struct below
 int tempSpeedVar; // checks the speed before giving the data to the struct below
 unsigned int tempTimeVar; // checks the time before giving the data to the struct below
 
 struct budgeInfo { // info from parsing functionality is packaged and given to motor control functionality
-  int whichMotor;
-  int whichDir;
-  int whichSpeed;
-  unsigned int whichTime;
-} budgeCommand;
+  int whichMotor = 0;
+  int whichDir = 0;
+  int whichSpeed = 0;
+  unsigned int whichTime = 0;
+} budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
 
 /* motor contruction */
 // to reduce constructor parameters i wanted to make structs but it may make the code even messier.. try typedefs?
@@ -72,41 +127,44 @@ void setup() {
   // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
   attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
-  
+
   attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
 
   attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
-  
+
   attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
 
   /*
-  attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
-  attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
-  
-  attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
-  attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
+    attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
+    attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
+
+    attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
+    attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
   */
 }
 
 void loop() {
 
   if (Serial.available()) { // if a message was sent to the Teensy
+    Serial.println("=======================================================");
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: "); Serial.println(serialBuffer); // send back what was received
-
-    char* msgElem = strtok_r(serialBuffer, " ", parsePtr); // look for first element (first tag)
+    char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
     if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
-      msgElem = strtok_r(NULL, " ", parsePtr); // go to next msg element (motor number)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
       tempMotorVar = atoi(msgElem);
-      if (tempMotorVar > 0 && tempMotorVar < 10) budgeCommand.whichMotor = tempMotorVar;
-      else Serial.println("bad motor number");
-      Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
-      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (direction tag)
+      // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
+      if (tempMotorVar > 0 && tempMotorVar <= motor1.numMotors) {
+        budgeCommand.whichMotor = tempMotorVar;
+        Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
+      }
+      else Serial.println("motor does not exist");
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
       if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", parsePtr); // go to next msg element (direction)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction)
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
             budgeCommand.whichDir = CLOCKWISE;
@@ -118,18 +176,18 @@ void loop() {
             break;
         }
       }
-      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (speed tag)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
       if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (integer representing speed level)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
         tempSpeedVar = atoi(msgElem); // converts to int
         if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
-          budgeCommand.whichSpeed = tempSpeedVar; // set the actual speed
-          Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
+          budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
+          Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed - 1); // minus 1 to be consistent with incoming message
         }
       }
-      msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (time tag)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
       if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", parsePtr); // find the next message element (time in seconds)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
         tempTimeVar = atoi(msgElem); // converts to int
         if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
           budgeCommand.whichTime = tempTimeVar;
@@ -138,32 +196,36 @@ void loop() {
       }
     }
     memset(serialBuffer, 0, BUFFER_SIZE); //empty the buffer
+    restOfMessage = serialBuffer; // reset pointer
   }
 
-  if (budgeCommand.whichMotor > 0 && budgeCommand.whichMotor <= 6) {
-    Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
+  if (budgeCommand.whichMotor > 0) {
+    if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
+      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
+      Serial.println("=======================================================");
+      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
+        case MOTOR1:
+          motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+        case MOTOR2:
+          motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+        case MOTOR3:
+          motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+        case MOTOR4:
+          motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+        case MOTOR5:
+          motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+        case MOTOR6:
+          motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          break;
+      }
+    }
+    else Serial.println("bad motor command");
   }
-  switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
-    case MOTOR1:
-      motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-    case MOTOR2:
-      motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-    case MOTOR3:
-      motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-    case MOTOR4:
-      motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-    case MOTOR5:
-      motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-    case MOTOR6:
-      motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      break;
-  }
+  budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
 
-  budgeCommand.whichMotor = 0; // reset whichMotor so the microcontroller doesn't try to move a motor next loop
-  // in practice perhaps the whole struct should be destroyed, otherwise it must be reset each time
 }

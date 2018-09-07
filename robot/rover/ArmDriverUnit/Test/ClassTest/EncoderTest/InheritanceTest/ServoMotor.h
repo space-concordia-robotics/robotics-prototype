@@ -63,46 +63,66 @@ ServoMotor::ServoMotor(int pwmPin):
 }
 
 void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
-    movementDone = false;
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
-      canTurnRight = true; Serial.println("turning servo clockwise");
+      canTurnRight = true; Serial.println("preparing to turn servo clockwise");
       rightCount++; leftCount--;
     }
-    if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
-      canTurnLeft = true; Serial.println("turning servo counter-clockwise");
+    else if (budgeDir == COUNTER_CLOCKWISE && leftCount < MAX_COUNTS) {
+      canTurnLeft = true; Serial.println("preparing to turn servo counter-clockwise");
       leftCount++; rightCount--;
     }
+    else Serial.println("max turn count reached");
     Serial.print("right servo count "); Serial.println(rightCount);
     Serial.print("left servo count "); Serial.println(leftCount);
-    switch (budgeSpeed) {
-      case 0:
-        cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
-        break;
-      case 1:
-        cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
-        break;
-      case 2:
-        cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
-        break;
-      case 3:
-        cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
-        break;
-    }
-    Serial.print("setting servo speed level to "); Serial.println(budgeSpeed);
-    sinceStart = 0;
+
     if (budgeDir == CLOCKWISE && canTurnRight) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
+          break;
+        case 1:
+          cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
+          break;
+        case 2:
+          cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
+          break;
+        case 3:
+          cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
+          break;
+      }
+      Serial.print("setting servo speed level to "); Serial.println(budgeSpeed); Serial.println("starting servo movement");
+      sinceStart = 0;
       analogWrite(pwmPin, cwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, SERVO_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("servo movement done");
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
+      movementDone = false;
+      switch (budgeSpeed) {
+        case 0:
+          cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
+          break;
+        case 1:
+          cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
+          break;
+        case 2:
+          cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
+          break;
+        case 3:
+          cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
+          break;
+      }
+      Serial.print("setting servo speed level to "); Serial.println(budgeSpeed);
+      sinceStart = 0;
       analogWrite(pwmPin, ccwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, SERVO_STOP); // sets duty cycle to 50% which corresponds to 0 speed
+      movementDone = true; Serial.println("servo movement done");
     }
-    movementDone = true; Serial.println("servo movement done");
     canTurnRight = false; canTurnLeft = false;
   }
 }
