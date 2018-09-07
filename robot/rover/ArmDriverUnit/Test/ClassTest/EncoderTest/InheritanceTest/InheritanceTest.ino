@@ -50,12 +50,18 @@ ServoMotor motor5(M5_PWM_PIN);
 ServoMotor motor6(M6_PWM_PIN);
 
 // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
-//void m1WrapperISR(void){ motor1.encoder_interrupt(); }
+void m1WrapperISR(void) {
+  motor1.encoder_interrupt();
+}
 void m2WrapperISR(void) {
   motor2.encoder_interrupt();
 }
-//void m3WrapperISR(void){ motor3.encoder_interrupt(); }
-//void m4WrapperISR(void){ motor4.encoder_interrupt(); }
+void m3WrapperISR(void) {
+  motor3.encoder_interrupt();
+}
+void m4WrapperISR(void) {
+  motor4.encoder_interrupt();
+}
 //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
 //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
 
@@ -64,8 +70,25 @@ void setup() {
   Serial.begin(BAUD_RATE); Serial.setTimeout(50); // checks serial port every 50ms
 
   // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
+  attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
+  attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
+  
   attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
+
+  attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
+  attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
+  
+  attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
+  attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
+
+  /*
+  attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
+  attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
+  
+  attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
+  attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
+  */
 }
 
 void loop() {
