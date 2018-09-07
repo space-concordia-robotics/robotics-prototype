@@ -18,11 +18,14 @@
 // 3 direction pins, 3 step pins
 
 enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines 6 motors
-enum motor_direction {CLOCKWISE, COUNTER_CLOCKWISE}; // defines motor directions
-enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
+enum motor_direction {CLOCKWISE, COUNTER_CLOCKWISE}; // defines motor directions // can go into ArmMotor
+enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed // can go into ArmMotor
+
+const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 
 #define NUM_LIM_SW          4
 
+// can go into ArmMotor
 // limits in ms for amount of time the motor can budge
 #define MAX_BUDGE_TIME 3000
 #define MIN_BUDGE_TIME 100
@@ -31,6 +34,7 @@ enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 #define MAX_SPEED 3
 #define MAX_COUNTS 3
 
+// can go into ArmMotor
 #define SERVO_STOP 189 // for 3.3v
 //#define SERVO_STOP 127 // for 5v
 #define DC_STOP 189//194 // for 3.3v
@@ -97,4 +101,5 @@ enum motor_speed {SPEED0, SPEED1, SPEED2, SPEED3}; // defines motor speed
 #define M6_ENCODER_B       38
 
 void pinSetup(void);
+
 #endif

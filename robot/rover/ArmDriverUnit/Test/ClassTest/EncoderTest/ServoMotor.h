@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-//#include "AbtinEncoder.h"
 
 // for 3.3v output
 // pwm speed control

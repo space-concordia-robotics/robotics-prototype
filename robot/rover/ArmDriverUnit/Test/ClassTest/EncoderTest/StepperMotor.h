@@ -2,7 +2,7 @@
 #define STEPPERMOTOR_H
 
 #include <Arduino.h>
-//#include "AbtinEncoder.h"
+#include "PinSetup.h"
 
 // time interval between stepper steps
 #define STEP_INTERVAL0 35

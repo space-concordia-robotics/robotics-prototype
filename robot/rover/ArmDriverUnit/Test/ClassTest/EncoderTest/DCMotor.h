@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-//#include "AbtinEncoder.h"
 
 // for new driver
 #define DC_S0 60
@@ -47,63 +46,52 @@
 
 class DCMotor {
   public:
-    //volatile int encoderCount;
-    elapsedMillis sinceStart;
+    elapsedMillis sinceStart; // can go into ArmMotor
 
+    void encoder_interrupt(void);
+    int encoderPinA, encoderPinB; // must be public for interrupt to work?
+    volatile int encoderCount;
     static int numDCMotors;
     //int gearRatio;
-    //float maxCWAngle, maxCCWAngle;
-    //float currentAngle, desiredAngle;
+    //float maxCWAngle, maxCCWAngle; // can go into ArmMotor
+    //float currentAngle, desiredAngle; // can go into ArmMotor
 
-    //int maxSpeed;
-    int cwSpeed, ccwSpeed;
-    bool movementDone;
+    //int maxSpeed; // can go into ArmMotor
+    int cwSpeed, ccwSpeed; // can go into ArmMotor
+    bool movementDone; // can go into ArmMotor
 
-    int rightCount, leftCount; // counters to make sure budge doesn't go too far
-    bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
+    int rightCount, leftCount; // counters to make sure budge doesn't go too far // can go into ArmMotor
+    bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not // can go into ArmMotor
 
     //DCMotor(int pwmPin, int encA, int encB); // for sabertooth
-    DCMotor(int dirPin, int pwmPin, int encA, int encB); // for new driver
+    DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift); // for new driver
 
-    //void setMaxCWAngle(int angle);
-    //void setMaxCCWAngle(int angle);
-    //void setMaxSpeed();
-    //void setDesiredAngle(float angle);
-    //float getCurrentAngle();
+    //void setMaxCWAngle(int angle); // can go into ArmMotor
+    //void setMaxCCWAngle(int angle); // can go into ArmMotor
+    //void setMaxSpeed(); // can go into ArmMotor
+    //void setDesiredAngle(float angle); // can go into ArmMotor
+    //float getCurrentAngle(); // can go into ArmMotor
     // budges motor for short period of time
-    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
-    //void update();
-    
-    void encoder_interrupt(void);
-    volatile int encoderCount;
-    int encoderPort = M2_ENCODER_PORT;
-    int encoderShift = M2_ENCODER_SHIFT;
-
+    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
+    //void update(); // can go into ArmMotor
 
   private:
     int pwmPin;
-    int dirPin; // for new driver
-    int encA, encB;
-
-    //void (*encoderInterrupt)(void);
+    int directionPin; // for new driver
+    int encoderPort, encoderShift;
 };
 
 int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
 
 // for sabertooth
-//DCMotor::DCMotor(int pwmPin, int encA, int encB)://, void (*encoder_interrupt)(void)):
+//DCMotor::DCMotor(int pwmPin, int encA, int encB):
 //  pwmPin(pwmPin), encA(encA), encB(encB)
 
 // for new driver
-DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB)://, void (*encoder_interrupt)(void)):
-  dirPin(dirPin), pwmPin(pwmPin), encA(encA), encB(encB)
-//DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB), void (*encoder_interrupt)(void)):
-//  dirPin(dirPin), pwmPin(pwmPin), encA(encA), encB(encB)
+DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift):
+  directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift)
 {
   numDCMotors++;
-  //encoder_interrupt = &encoder_interrupt;
-  attachInterrupt(encA,encoder_interrupt,CHANGE);
-  //attachInterrupt(encB,encoder_interrupt,CHANGE);
 }
 
 /*
@@ -184,13 +172,13 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
     sinceStart = 0;
     if (budgeDir == CLOCKWISE && canTurnRight) {
-      digitalWrite(dirPin, LOW);
+      digitalWrite(directionPin, LOW);
       analogWrite(pwmPin, cwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, 0); // sets duty cycle to 50% which corresponds to 0 speed
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
-      digitalWrite(dirPin, HIGH);
+      digitalWrite(directionPin, HIGH);
       analogWrite(pwmPin, ccwSpeed);
       while (sinceStart < budgeTime) ; // wait
       analogWrite(pwmPin, 0); // sets duty cycle to 50% which corresponds to 0 speed
@@ -200,12 +188,19 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
-void encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0b1011; // solves bug where the encoder counts backwards for one count
+void DCMotor::encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0b1011; // solves bug where the encoder counts backwards for one count... but this may not work in practise
   Serial.println(encoderCount);
-  oldEncoderState <<= 2;
+  oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((encoderPort >> encoderShift) & 0x03);
-  encoderCount += dir[(oldEncoderState & 0x0F)];
+  /*
+     encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
+     shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
+     now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
+     you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
+     the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
+  */
+  encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
 }
 
 #endif

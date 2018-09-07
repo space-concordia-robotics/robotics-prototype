@@ -1,5 +1,4 @@
 #include "PinSetup.h"
-#include "AbtinEncoder.h"
 
 #include "StepperMotor.h"
 #include "DCMotor.h"
@@ -13,11 +12,11 @@
 
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
 char **parsePtr; // used in strtok_r, which is the reentrant version of strtok
-int tempMotorVar;
-int tempSpeedVar;
-unsigned int tempTimeVar;
+int tempMotorVar; // checks the motor before giving the data to the struct below
+int tempSpeedVar; // checks the speed before giving the data to the struct below
+unsigned int tempTimeVar; // checks the time before giving the data to the struct below
 
-struct budgeInfo {
+struct budgeInfo { // info from parsing functionality is packaged and given to motor control functionality
   int whichMotor;
   int whichDir;
   int whichSpeed;
@@ -25,7 +24,7 @@ struct budgeInfo {
 } budgeCommand;
 
 /* motor contruction */
-// to reduce constructor parameters i wanted to make structs but it may make the code even messier
+// to reduce constructor parameters i wanted to make structs but it may make the code even messier.. try typedefs?
 /*
   struct dcPins {
 
@@ -40,22 +39,32 @@ struct budgeInfo {
   };
 */
 
+// instantiate motor objects here. only dcmotor currently supports interrupts
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B);
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
-DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // for new driver
+DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT); // for new driver
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_ENCODER_A, M3_ENCODER_B);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_ENCODER_A, M4_ENCODER_B);
 ServoMotor motor5(M5_PWM_PIN, M5_ENCODER_A, M5_ENCODER_B);
 ServoMotor motor6(M6_PWM_PIN, M6_ENCODER_A, M6_ENCODER_B);
 
+// create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
+//void m1WrapperISR(void){ motor1.encoder_interrupt(); }
+void m2WrapperISR(void) {
+  motor2.encoder_interrupt();
+}
+//void m3WrapperISR(void){ motor3.encoder_interrupt(); }
+//void m4WrapperISR(void){ motor4.encoder_interrupt(); }
+//void m5WrapperISR(void){ motor5.encoder_interrupt(); }
+//void m6WrapperISR(void){ motor6.encoder_interrupt(); }
+
 void setup() {
   pinSetup();
   Serial.begin(BAUD_RATE); Serial.setTimeout(50); // checks serial port every 50ms
-  //attachInterrupt(M2_ENCODER_A, motor2.encoder_interrupt, CHANGE);
-  //attachInterrupt(M2_ENCODER_B, motor2.encoder_interrupt, CHANGE);
-  
-  //attachInterrupt(M2_ENCODER_A, m2_encoder_interrupt, CHANGE);
-  //attachInterrupt(M2_ENCODER_B, m2_encoder_interrupt, CHANGE);
+
+  // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
+  attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
+  attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
 }
 
 void loop() {
@@ -110,7 +119,7 @@ void loop() {
   if (budgeCommand.whichMotor > 0 && budgeCommand.whichMotor <= 6) {
     Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
   }
-  switch (budgeCommand.whichMotor) {
+  switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
     case MOTOR1:
       motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
       break;
@@ -130,10 +139,7 @@ void loop() {
       motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
       break;
   }
-  
-  //Serial.println(m2EncoderCount); delay(100);
+
   budgeCommand.whichMotor = 0; // reset whichMotor so the microcontroller doesn't try to move a motor next loop
   // in practice perhaps the whole struct should be destroyed, otherwise it must be reset each time
 }
-
-
