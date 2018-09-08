@@ -140,7 +140,7 @@ void StepperMotor::encoder_interrupt(void) {
 }
 
 float StepperMotor::getCurrentAngle() {
-  currentAngle = (float)encoderCount * 360.0 / (/*encoderResolution*/ 48 * gearRatio);
+  currentAngle = (float)encoderCount * 360.0 / (encoderResolution * gearRatio);
   return currentAngle;
 }
 

@@ -214,7 +214,7 @@ void DCMotor::encoder_interrupt(void) {
 }
 
 float DCMotor::getCurrentAngle() {
-  currentAngle = (float)encoderCount / (encoderResolution * gearRatio * 360);
+  currentAngle = (float)encoderCount * 360.0 / (encoderResolution * gearRatio);
   return currentAngle;
 }
 
