@@ -50,11 +50,11 @@
 #define M3_ENABLE_PIN      17
 #define M3_DIR_PIN         20
 #define M3_STEP_PIN        21
-// 18&19 are on port B with bits 2&3 respectively
+// 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
-#define M3_ENCODER_SHIFT   CORE_PIN18_BIT
-#define M3_ENCODER_A       18
-#define M3_ENCODER_B       19
+#define M3_ENCODER_SHIFT   CORE_PIN19_BIT
+#define M3_ENCODER_A       19
+#define M3_ENCODER_B       18
 #define M3_LIMIT_SW_FLEX   22
 #define M3_LIMIT_SW_EXTEND 23
 

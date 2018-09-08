@@ -55,7 +55,7 @@ class DCMotor : public RoverMotor {
     //int gearRatio;
 
     //DCMotor(int pwmPin, int encA, int encB); // for sabertooth
-    DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift); // for new driver
+    DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift); // for new driver
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
@@ -63,7 +63,8 @@ class DCMotor : public RoverMotor {
   private:
     int pwmPin;
     int directionPin; // for new driver
-    int encoderPort, encoderShift;
+    uint32_t encoderPort;
+    int encoderShift;
 };
 
 int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
@@ -73,7 +74,7 @@ int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize 
 //  pwmPin(pwmPin), encA(encA), encB(encB)
 
 // for new driver
-DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, int port, int shift):
+DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift):
   directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift)
 {
   numDCMotors++;

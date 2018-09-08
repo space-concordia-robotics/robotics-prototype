@@ -20,7 +20,7 @@ class StepperMotor : public RoverMotor {
     static int numStepperMotors;
     //int gearRatio;
 
-    StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, int port, int shift);//, void (*ISR)(void);
+    StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift);//, void (*ISR)(void);
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
@@ -29,12 +29,13 @@ class StepperMotor : public RoverMotor {
     int enablePin, directionPin, stepPin;
     elapsedMillis sinceStep;
     unsigned int stepInterval;
-    int encoderPort, encoderShift;
+    uint32_t encoderPort;
+    int encoderShift;
 };
 
 int StepperMotor::numStepperMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
 
-StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, int port, int shift):
+StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift):
   enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift)
 {
   numStepperMotors++;
@@ -123,6 +124,9 @@ void StepperMotor::encoder_interrupt(void) {
   Serial.println(encoderCount);
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((encoderPort >> encoderShift) & 0x03);
+  Serial.println(encoderShift);
+  Serial.println(encoderPort, BIN);
+  Serial.println(oldEncoderState, BIN);
   /*
      encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
      shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit

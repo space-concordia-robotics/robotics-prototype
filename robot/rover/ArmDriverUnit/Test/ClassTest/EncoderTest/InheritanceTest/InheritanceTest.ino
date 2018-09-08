@@ -23,8 +23,8 @@
    -(done) replace strtok with strtok_r when implementing interrupts
    -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
    -(now) figure out better way to check max motor count than accessing motor1 object
-   -(now) solve encoder direction change issue?
-   -(now) ensure interrupts function with new class structure
+   -(now) solve encoder direction change issue? not necessary
+   -(now) ensure interrupts function with new class structure - can't pass GPIOx_PDIr through variable?
    -(next) confirm all the pins will work with interrupts and not stepping on each other
    -figure out encoder resolutions and gear ratios
    -(next) make sure there is  max/min angle limitation with encoders
@@ -95,6 +95,8 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   };
 */
 
+const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+
 // instantiate motor objects here. only dcmotor currently supports interrupts
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT);
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
@@ -104,39 +106,89 @@ StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_ENCODER_A, M4_ENC
 ServoMotor motor5(M5_PWM_PIN);
 ServoMotor motor6(M6_PWM_PIN);
 
-// create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
-void m1WrapperISR(void) {
+/*
+  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
+  void m1WrapperISR(void) {
   motor1.encoder_interrupt();
-}
-void m2WrapperISR(void) {
+  }
+  void m2WrapperISR(void) {
   motor2.encoder_interrupt();
-}
-void m3WrapperISR(void) {
+  }
+  void m3WrapperISR(void) {
   motor3.encoder_interrupt();
-}
-void m4WrapperISR(void) {
+  }
+  void m4WrapperISR(void) {
   motor4.encoder_interrupt();
+  }
+  //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
+  //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
+*/
+
+// if these don't register fast enough, use global volatile long encoderCount variables per motor instead of acccessing objects twice
+void m1_encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0;
+  Serial.print("m1 "); Serial.println(motor1.encoderCount);
+  oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
+  oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
+  /*
+      encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
+      shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
+      now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
+      you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
+      the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
+  */
+  motor1.encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
 }
-//void m5WrapperISR(void){ motor5.encoder_interrupt(); }
-//void m6WrapperISR(void){ motor6.encoder_interrupt(); }
+void m2_encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0;
+  Serial.print("m2 "); Serial.println(motor2.encoderCount);
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
+  motor2.encoderCount += dir[(oldEncoderState & 0x0F)];
+}
+void m3_encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0;
+  Serial.println("m3 "); //Serial.println(motor3.encoderCount);
+  //Serial.println(M3_ENCODER_PORT,BIN);
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
+  motor3.encoderCount += dir[(oldEncoderState & 0x0F)];
+}
+void m4_encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0;
+  Serial.print("m4 "); Serial.println(motor4.encoderCount);
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
+  motor4.encoderCount += dir[(oldEncoderState & 0x0F)];
+}
 
 void setup() {
   pinSetup();
   Serial.begin(BAUD_RATE); Serial.setTimeout(50); // checks serial port every 50ms
 
   // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
-  attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
-  attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
+  attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
+  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+  attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
+  attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
+  attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
+  attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
+  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
+  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
-  attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
+  /*
+    attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
+    attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
 
-  attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
-  attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
+    attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
+    attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
 
-  attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
-  attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
+    attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
+    attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
 
+    attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
+    attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
+  */
   /*
     attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
     attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
