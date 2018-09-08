@@ -8,7 +8,7 @@ import subprocess
 import re
 
 PORT_NUMBER = 5000
-#SIZE = 1024
+SIZE = 1024
 
 if len(sys.argv) < 2:  # first one is the name of the file
     print(
@@ -62,6 +62,24 @@ mySocket = socket(AF_INET, SOCK_DGRAM)
 currentMillis = lambda: int(round(time.time() * 1000))
 lastCmdSent = 0
 THROTTLE_TIME = 100
+
+# get and send client IP address over to server for feedback
+ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
+ifconfig = ifconfigOutput.stdout.decode()
+lines = ifconfig.splitlines() # delimit by newline into array
+myIpAddress = "ip:"
+
+for line in lines:
+    if "inet addr" in line and not "127.0.0.1" in line:
+        clientIP = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
+        myIpAddress += clientIP
+
+print("Sending " + myIpAddress + "...")
+
+while True:
+    mySocket.sendto(str.encode(myIpAddress), (SERVER_IP, PORT_NUMBER))
+    time.sleep(1)
+    print("Reattempting")
 
 while True:
     try:
