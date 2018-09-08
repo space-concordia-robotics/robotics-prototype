@@ -18,12 +18,12 @@ class StepperMotor : public RoverMotor {
     volatile long encoderCount;
     const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
     static int numStepperMotors;
-    //int gearRatio;
 
-    StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift);//, void (*ISR)(void);
+    StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio);
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    float getCurrentAngle();
 
   private:
     int enablePin, directionPin, stepPin;
@@ -31,12 +31,14 @@ class StepperMotor : public RoverMotor {
     unsigned int stepInterval;
     uint32_t encoderPort;
     int encoderShift;
+    int encoderResolution;
+    float gearRatio;
 };
 
 int StepperMotor::numStepperMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
 
-StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift):
-  enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift)
+StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):
+  enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
 {
   numStepperMotors++;
 }
@@ -135,6 +137,11 @@ void StepperMotor::encoder_interrupt(void) {
      the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   */
   encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+}
+
+float StepperMotor::getCurrentAngle() {
+  currentAngle = (float)encoderCount * 360.0 / (/*encoderResolution*/ 48 * gearRatio);
+  return currentAngle;
 }
 
 #endif

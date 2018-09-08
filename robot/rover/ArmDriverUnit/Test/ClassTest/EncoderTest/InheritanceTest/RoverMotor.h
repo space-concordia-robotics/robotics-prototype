@@ -13,7 +13,7 @@ class RoverMotor {
     elapsedMillis sinceStart; // automatically increments every millisecond
     static int numMotors;
     //float maxCWAngle, maxCCWAngle;
-    //float currentAngle, desiredAngle;
+    float currentAngle, desiredAngle;
 
     //int maxSpeed;
     int cwSpeed, ccwSpeed;
@@ -28,7 +28,7 @@ class RoverMotor {
     //void setMaxCCWAngle(int angle);
     //void setMaxSpeed();
     //void setDesiredAngle(float angle);
-    //float getCurrentAngle();
+    //virtual float getCurrentAngle(void);
 
     // budges motor for short period of time
     virtual void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);

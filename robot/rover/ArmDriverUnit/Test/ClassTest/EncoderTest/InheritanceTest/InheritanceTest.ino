@@ -77,6 +77,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   int whichDir = 0;
   int whichSpeed = 0;
   unsigned int whichTime = 0;
+  bool angleRequest = false;
 } budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
 
 /* motor contruction */
@@ -98,11 +99,15 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
 const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
-StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT);
+StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_ENCODER_A, M1_ENCODER_B,
+                    M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION, M1_GEAR_RATIO);
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
-DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT); // for new driver
-StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT);
-StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT);
+DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B, M2_GEAR_RATIO,
+               M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION); // for new driver
+StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_ENCODER_A, M3_ENCODER_B,
+                    M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION, M3_GEAR_RATIO);
+StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_ENCODER_A, M4_ENCODER_B,
+                    M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN);
 ServoMotor motor6(M6_PWM_PIN);
 
@@ -214,8 +219,11 @@ void loop() {
         Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
       }
       else Serial.println("motor does not exist");
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (angle tag)
+      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+        budgeCommand.angleRequest = true;
+      }
+      else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction)
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
@@ -227,23 +235,23 @@ void loop() {
             Serial.println("parsed direction counter-clockwise");
             break;
         }
-      }
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
-      if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
-        tempSpeedVar = atoi(msgElem); // converts to int
-        if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
-          budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
-          Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed - 1); // minus 1 to be consistent with incoming message
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
+        if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
+          msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
+          tempSpeedVar = atoi(msgElem); // converts to int
+          if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
+            budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
+            Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed - 1); // minus 1 to be consistent with incoming message
+          }
         }
-      }
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
-      if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
-        tempTimeVar = atoi(msgElem); // converts to int
-        if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
-          budgeCommand.whichTime = tempTimeVar;
-          Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
+        if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
+          msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
+          tempTimeVar = atoi(msgElem); // converts to int
+          if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
+            budgeCommand.whichTime = tempTimeVar;
+            Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
+          }
         }
       }
     }
@@ -275,6 +283,31 @@ void loop() {
           motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
       }
+    }
+    else if (budgeCommand.angleRequest) {
+      float angle;
+      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
+        case MOTOR1:
+          angle = motor1.getCurrentAngle();
+          break;
+        case MOTOR2:
+          angle = motor2.getCurrentAngle();
+          break;
+        case MOTOR3:
+          angle = motor3.getCurrentAngle();
+          break;
+        case MOTOR4:
+          angle = motor4.getCurrentAngle();
+          break;
+          /*
+        case MOTOR5:
+          angle = motor5.getCurrentAngle();
+          break;
+        case MOTOR6:
+          angle = motor6.getCurrentAngle();
+          break;*/
+      }
+      Serial.println(angle,10);
     }
     else Serial.println("bad motor command");
   }

@@ -52,19 +52,21 @@ class DCMotor : public RoverMotor {
     volatile long encoderCount;
     const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
     static int numDCMotors;
-    //int gearRatio;
 
     //DCMotor(int pwmPin, int encA, int encB); // for sabertooth
-    DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift); // for new driver
+    DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio); // for new driver
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
+    float getCurrentAngle();
 
   private:
     int pwmPin;
     int directionPin; // for new driver
     uint32_t encoderPort;
     int encoderShift;
+    int encoderResolution;
+    float gearRatio;
 };
 
 int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
@@ -74,8 +76,8 @@ int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize 
 //  pwmPin(pwmPin), encA(encA), encB(encB)
 
 // for new driver
-DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift):
-  directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift)
+DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):
+  directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
 {
   numDCMotors++;
 }
@@ -209,6 +211,11 @@ void DCMotor::encoder_interrupt(void) {
      the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   */
   encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+}
+
+float DCMotor::getCurrentAngle() {
+  currentAngle = (float)encoderCount / (encoderResolution * gearRatio * 360);
+  return currentAngle;
 }
 
 #endif

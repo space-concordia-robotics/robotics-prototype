@@ -49,6 +49,7 @@ class ServoMotor : public RoverMotor {
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    //float getCurrentAngle();
 
   private:
     int pwmPin;

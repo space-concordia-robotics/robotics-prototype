@@ -46,6 +46,8 @@
 #define M1_ENCODER_B        8
 #define M1_LIMIT_SW_CW      9
 #define M1_LIMIT_SW_CCW    10
+#define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
+#define M1_GEAR_RATIO      40.0 // temporary, unknown
 
 #define M3_ENABLE_PIN      17
 #define M3_DIR_PIN         20
@@ -57,6 +59,8 @@
 #define M3_ENCODER_B       18
 #define M3_LIMIT_SW_FLEX   22
 #define M3_LIMIT_SW_EXTEND 23
+#define M3_ENCODER_RESOLUTION 2000
+#define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
 
 #define M4_ENABLE_PIN      24
 #define M4_DIR_PIN         25
@@ -68,6 +72,8 @@
 #define M4_ENCODER_B       12
 #define M4_LIMIT_SW_FLEX   15
 #define M4_LIMIT_SW_EXTEND 16
+#define M4_ENCODER_RESOLUTION 2000
+#define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
 
 // DC motor
 
@@ -82,6 +88,8 @@
 #define M2_ENCODER_B       27
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
+#define M2_ENCODER_RESOLUTION 48 // counts per motor shaft revolution
+#define M2_GEAR_RATIO      99.508*20.0 // planetary gear chained to worm gear drive
 
 // servos
 
