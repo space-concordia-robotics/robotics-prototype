@@ -48,14 +48,16 @@ class ServoMotor : public RoverMotor {
     ServoMotor(int pwmPin);
 
     // budges motor for short period of time
-    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
+               unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    void setVelocity(int motorDir, int motorSpeed);
     //float getCurrentAngle();
 
   private:
     int pwmPin;
 };
 
-int ServoMotor::numServoMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
+int ServoMotor::numServoMotors=0; // must initialize variable outside of class
 
 ServoMotor::ServoMotor(int pwmPin):
   pwmPin(pwmPin)
@@ -64,7 +66,8 @@ ServoMotor::ServoMotor(int pwmPin):
 }
 
 void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+      && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("preparing to turn servo clockwise");
@@ -126,6 +129,10 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     canTurnRight = false; canTurnLeft = false;
   }
+}
+
+void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
+  ;
 }
 
 #endif

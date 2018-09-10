@@ -47,17 +47,21 @@
 
 class DCMotor : public RoverMotor {
   public:
-    void encoder_interrupt(void);
+    //void encoder_interrupt(void);
     int encoderPinA, encoderPinB; // must be public for interrupt to work?
     volatile long encoderCount;
-    const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+    //quadrature encoder matrix below corresponds to the correct direction for a specific set of prev and current encoder states
+    const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
     static int numDCMotors;
 
     //DCMotor(int pwmPin, int encA, int encB); // for sabertooth
-    DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio); // for new driver
+    DCMotor(int dirPin, int pwmPin, int encA, int encB,
+            uint32_t port, int shift, int encRes, float gearRatio); // for new driver
 
     // budges motor for short period of time
-    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
+    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
+               unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
+    void setVelocity(int motorDir, int motorSpeed);
     float getCurrentAngle();
 
   private:
@@ -69,15 +73,17 @@ class DCMotor : public RoverMotor {
     float gearRatio;
 };
 
-int DCMotor::numDCMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
+int DCMotor::numDCMotors=0; // must initialize variable outside of class
 
 // for sabertooth
 //DCMotor::DCMotor(int pwmPin, int encA, int encB):
 //  pwmPin(pwmPin), encA(encA), encB(encB)
 
 // for new driver
-DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):
-  directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
+DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB,
+                 uint32_t port, int shift, int encRes, float gearRatio):
+  directionPin(dirPin), pwmPin(pwmPin), encoderPinA(encA), encoderPinB(encB),
+  encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
 {
   numDCMotors++;
 }
@@ -132,7 +138,8 @@ DCMotor::DCMotor(int dirPin, int pwmPin, int encA, int encB, uint32_t port, int 
 */
 
 void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+      && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("preparing to turn dc clockwise");
@@ -198,19 +205,23 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
-void DCMotor::encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0b1011; // solves bug where the encoder counts backwards for one count... but this may not work in practise
+/*
+  void DCMotor::encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0;
   Serial.println(encoderCount);
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((encoderPort >> encoderShift) & 0x03);
-  /*
-     encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
-     shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
-     now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
-     you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
-     the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
-  */
+  //     encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
+  //     shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
+  //     now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
+  //     you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
+  //     the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+  }
+*/
+
+void DCMotor::setVelocity(int motorDir, int motorSpeed) {
+  ;
 }
 
 float DCMotor::getCurrentAngle() {

@@ -13,16 +13,20 @@
 
 class StepperMotor : public RoverMotor {
   public:
-    void encoder_interrupt();
+    // encoder_interrupt();
     int encoderPinA, encoderPinB;
     volatile long encoderCount;
-    const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+    //quadrature encoder matrix below corresponds to the correct direction for a specific set of prev and current encoder states
+    const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
     static int numStepperMotors;
 
-    StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio);
+    StepperMotor(int enablePin, int dirPin, int stepPin,
+                 int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio);
 
     // budges motor for short period of time
-    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
+               unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+    void setVelocity(int motorDir, int motorSpeed);
     float getCurrentAngle();
 
   private:
@@ -35,16 +39,19 @@ class StepperMotor : public RoverMotor {
     float gearRatio;
 };
 
-int StepperMotor::numStepperMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
+int StepperMotor::numStepperMotors=0; // must initialize variable outside of class
 
-StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):
-  enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
+StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin,
+                           int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):
+  enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), encoderPinA(encA), encoderPinB(encB),
+  encoderPort(port), encoderShift(shift), encoderResolution(encRes), gearRatio(gearRatio)
 {
   numStepperMotors++;
 }
 
 void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+      && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("preparing to turn stepper clockwise");
@@ -121,22 +128,26 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
-void StepperMotor::encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0b1011; // solves bug where the encoder counts backwards for one count... but this may not work in practise
+/*
+  void StepperMotor::encoder_interrupt(void) {
+  static unsigned int oldEncoderState = 0; //0b1011; // solves bug where the encoder counts backwards for one count... but this may not work in practise
   Serial.println(encoderCount);
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((encoderPort >> encoderShift) & 0x03);
   Serial.println(encoderShift);
   Serial.println(encoderPort, BIN);
   Serial.println(oldEncoderState, BIN);
-  /*
-     encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
-     shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
-     now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
-     you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
-     the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
-  */
+  //     encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
+  //     shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
+  //     now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
+  //     you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
+  //     the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+  }
+*/
+
+void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
+  ;
 }
 
 float StepperMotor::getCurrentAngle() {

@@ -24,22 +24,22 @@ class RoverMotor {
     int rightCount, leftCount; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
 
-    //void setMaxCWAngle(int angle);
-    //void setMaxCCWAngle(int angle);
+    //void setMaxCWAngle(int angle); // need to have defined it for servos first
+    //void setMaxCCWAngle(int angle); // need to have defined it for servos first
     //void setMaxSpeed();
-    //void setDesiredAngle(float angle);
-    //virtual float getCurrentAngle(void);
-
-    // budges motor for short period of time
-    virtual void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED, unsigned int budgeTime = DEFAULT_BUDGE_TIME);
-
+    //void setDesiredAngle(float angle); // need to have defined it for servos first
+    //virtual float getCurrentAngle(void) = 0; // need to have defined it for servos first
+    private:
+    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime)=0; // budges motor for short period of time
+    virtual void setVelocity(int motorDir, int motorSpeed)=0; // sets motor speed until next timer interrupt
+    
     //void update(); // can go into ArmMotor
 
   protected:
 
 };
 
-int RoverMotor::numMotors = 0; // C++ is annoying and we need this to initialize the variable to 0
+int RoverMotor::numMotors=0; // must initialize variable outside of class
 
 RoverMotor::RoverMotor() {
   numMotors++;

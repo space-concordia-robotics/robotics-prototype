@@ -22,7 +22,7 @@
   -(now) determine motor angles thru encoder interrupts
    -(done) replace strtok with strtok_r when implementing interrupts
    -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
-   -(now) figure out better way to check max motor count than accessing motor1 object
+   -(now) figure out better way to check max motor count than accessing motor1 object: RoverMotor::numMotors, need to test
    -(done-ish) solve encoder direction change issue? not necessary
    -(done-ish) ensure interrupts function with new class structure - can't pass GPIOx_PDIr through variable?
    -(now) confirm all the pins will work with interrupts and not stepping on each other
@@ -64,11 +64,14 @@
 
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
-
-/* parsing */
+#define SERIAL_PRINT_INTERVAL 2000 // how often should teensy send angle data
+#define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100  // size of the buffer for the serial commands
 
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
+elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
+
+/* parsing */
 char *restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
 int tempMotorVar; // checks the motor before giving the data to the struct below
 int tempSpeedVar; // checks the speed before giving the data to the struct below
@@ -79,7 +82,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   int whichDir = 0;
   int whichSpeed = 0;
   unsigned int whichTime = 0;
-  bool angleRequest = false;
+  //bool angleRequest = false;
 } budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
 
 /* motor contruction */
@@ -171,7 +174,7 @@ void m4_encoder_interrupt(void) {
 
 void setup() {
   pinSetup();
-  Serial.begin(BAUD_RATE); Serial.setTimeout(50); // checks serial port every 50ms
+  Serial.begin(BAUD_RATE); Serial.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
 
   // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
@@ -203,6 +206,8 @@ void setup() {
     attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
     attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
   */
+
+  sinceAnglePrint = 0;
 }
 
 void loop() {
@@ -216,17 +221,17 @@ void loop() {
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
       tempMotorVar = atoi(msgElem);
       // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
-      if (tempMotorVar > 0 && tempMotorVar <= motor1.numMotors) {
+      if (tempMotorVar > 0 && tempMotorVar <= RoverMotor::numMotors) {
         budgeCommand.whichMotor = tempMotorVar;
         Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
       }
       else Serial.println("motor does not exist");
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (angle tag)
-      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
-        budgeCommand.angleRequest = true;
-      }
-      else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
+//      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+//        budgeCommand.angleRequest = true;
+//      }
+      /*else*/ if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
             budgeCommand.whichDir = CLOCKWISE;
@@ -286,6 +291,7 @@ void loop() {
           break;
       }
     }
+    /*
     else if (budgeCommand.angleRequest) {
       float angle;
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
@@ -301,18 +307,30 @@ void loop() {
         case MOTOR4:
           angle = motor4.getCurrentAngle();
           break;
-          /*
-            case MOTOR5:
-            angle = motor5.getCurrentAngle();
-            break;
-            case MOTOR6:
-            angle = motor6.getCurrentAngle();
-            break;*/
+//        case MOTOR5:
+//          angle = motor5.getCurrentAngle();
+//          break;
+//        case MOTOR6:
+//          angle = motor6.getCurrentAngle();
+//          break;
       }
-      Serial.println(angle, 10);
+      Serial.print("$A,Angle: motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" angle: "); Serial.println(angle, 10);
     }
-    else Serial.println("bad motor command");
+    */
+    else Serial.println("$E,Error: bad motor command");
   }
   budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
+
+  // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
+  if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) {
+    Serial.print("Motor Angles: ");
+    Serial.print(motor1.getCurrentAngle());Serial.print(",");
+    Serial.print(motor2.getCurrentAngle());Serial.print(",");
+    Serial.print(motor3.getCurrentAngle());Serial.print(",");
+    Serial.println(motor4.getCurrentAngle());//Serial.print(",");
+    //Serial.print(motor5.getCurrentAngle());Serial.print(",");
+    //Serial.print(motor6.getCurrentAngle());Serial.print(",");
+    sinceAnglePrint=0; // reset the timer
+  }
 
 }
