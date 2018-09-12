@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, click
-from socket import socket, AF_INET, SOCK_DGRAM
+from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
 import time
 import os
 import subprocess
@@ -51,14 +51,22 @@ if os.name == "posix":
     ORIGINAL_DELAY = xsetVals[0]
     ORIGINAL_REFRESH = xsetVals[1]
 
-    print("\nSetting delay rate to {} and refresh rate to {}".format(TARGET_DELAY, TARGET_REFRESH))
+    print("\nSetting delay rate to {} and refresh rate to {} ...".format(TARGET_DELAY, TARGET_REFRESH))
     setX = 'xset r rate ' + str(TARGET_DELAY) + ' ' + str(TARGET_REFRESH)
     subprocess.Popen(setX.split())
 
 resetX = 'xset r rate ' + str(ORIGINAL_DELAY) + ' ' + str(ORIGINAL_REFRESH)
 
-# setting up socket stuff
+hostName = gethostbyname('0.0.0.0')
+# UDP socket for sending drive cmds
 mySocket = socket(AF_INET, SOCK_DGRAM)
+# make socket reachable by any address (rather than only visible to same machine that it's running on)
+mySocket.bind((hostName, PORT_NUMBER))
+
+# potential TCP stuff?
+## TCP socket for sending server the client's IP address
+## TcpSocket = socket(AF_INET, SOCK_STREAM)
+
 currentMillis = lambda: int(round(time.time() * 1000))
 lastCmdSent = 0
 THROTTLE_TIME = 100
@@ -68,39 +76,62 @@ ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
 ifconfig = ifconfigOutput.stdout.decode()
 lines = ifconfig.splitlines() # delimit by newline into array
 myIpAddress = "ip:"
+handshake = ""
 
 for line in lines:
     if "inet addr" in line and not "127.0.0.1" in line:
         clientIP = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
         myIpAddress += clientIP
 
-print("Sending " + myIpAddress + "...")
-
 while True:
-    mySocket.sendto(str.encode(myIpAddress), (SERVER_IP, PORT_NUMBER))
-    time.sleep(1)
-    print("Reattempting")
+    try:
+        print("Attempting to send: \"" + myIpAddress + "\" ...")
+        mySocket.sendto(str.encode(myIpAddress), (SERVER_IP, PORT_NUMBER))
+        print("IP address sent\n")
+        #time.sleep(1)
+
+        print("Listening for acknowledgement from server ...")
+
+        # listen (right away) for incoming acknowledgement
+        (handshake, addr) = mySocket.recvfrom(SIZE)
+        handshake = handshake.decode()
+        print("Acknowledgment received: " + str(handshake) + "\n")
+
+        if handshake == "ip_known":
+            break
+
+    except:
+        break
+
+print("Ready for sending drive commands!\n")
 
 while True:
     try:
         key = click.getchar()
 
         if currentMillis() - lastCmdSent > THROTTLE_TIME:
-            print("waited {} milliseconds to move".format(currentMillis() - lastCmdSent))
+            # for debugging
+            #print("waited {} milliseconds to move".format(currentMillis() - lastCmdSent))
             if key == 'w':
-                print("Sending key: " + key + ", command: Forward")
+                print("Sending key: " + key)
                 mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
                 lastCmdSent = currentMillis()
             elif key == 's':
-                print("Sending key: " + key + ", command: Back")
+                print("Sending key: " + key)
                 mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
                 lastCmdSent = currentMillis()
             elif key == 'q':
                 mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
                 print("\nTerminating connection.")
-                print("\nResetting delay rate back to {} and refresh rate back to {}".format(ORIGINAL_DELAY, ORIGINAL_REFRESH))
+                print("Resetting delay rate back to {} and refresh rate back to {}".format(ORIGINAL_DELAY, ORIGINAL_REFRESH))
                 subprocess.Popen(resetX.split())
                 break
+
+            # wait till receive a response
+            (feedback, addr) = mySocket.recvfrom(SIZE)
+
+            if feedback:
+                print(feedback.decode())
 
     except:
         break

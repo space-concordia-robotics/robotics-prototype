@@ -8,6 +8,8 @@ from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import sys, traceback
 import serial
 import serial.tools.list_ports
+import time
+import re
 
 PORT_NUMBER = 5000
 SIZE = 1024
@@ -23,14 +25,38 @@ elif len(sys.argv) >= 3:
 hostName = gethostbyname('0.0.0.0')
 mySocket = socket(AF_INET, SOCK_DGRAM)
 mySocket.bind((hostName, PORT_NUMBER))
+#TcpSocket = socket(AF_INET, SOCK_STREAM)
 
 # set up connection to arduino
 ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName)
 ser = serial.Serial('/dev/' + firstPortName, 9600)
+clientIP = ""
 
 print("Rover server listening on port {} \n".format(PORT_NUMBER))
+
+try:
+    (data, addr) = mySocket.recvfrom(SIZE)
+    clientIpMsg = data.decode()
+
+    # for debugging
+    #print("clientIpMsg = " + clientIpMsg)
+    clientIP = re.findall('\d+\.\d+\.\d+\.\d+', clientIpMsg)[0]
+
+    if clientIP:
+        print("Client IP received: " + str(clientIP))
+        time.sleep(1)
+        print("Sending acknowledgment")
+        mySocket.sendto(str.encode("ip_known"), (clientIP, PORT_NUMBER))
+        print("Acknowledgement sent")
+except:
+    print("Exception in user code:")
+    print("-"*60)
+    traceback.print_exc(file=sys.stdout)
+    print("-"*60)
+
+print("Ready for incoming drive cmds!\n")
 
 while True:
     try:
@@ -38,10 +64,12 @@ while True:
         command = data.decode()
 
         if command == 'w':
-            print("Forward")
+            print("cmd: w --> action: Forward")
+            mySocket.sendto(str.encode("Forward"), (clientIP, PORT_NUMBER))
             ser.write(str.encode(command))
         elif command == 's':
-            print("Back")
+            print("cmd: s --> action: Back")
+            mySocket.sendto(str.encode("Back"), (clientIP, PORT_NUMBER))
             ser.write(str.encode(command))
         elif command == 'q':
             print("\nTerminating connection.")
