@@ -57,7 +57,7 @@
 
 #include "PinSetup.h"
 
-#include "RoverMotor.h"
+#include "RobotMotor.h"
 #include "StepperMotor.h"
 #include "DCMotor.h"
 #include "ServoMotor.h"
@@ -221,15 +221,15 @@ void loop() {
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
       tempMotorVar = atoi(msgElem);
       // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
-      if (tempMotorVar > 0 && tempMotorVar <= RoverMotor::numMotors) {
+      if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
         budgeCommand.whichMotor = tempMotorVar;
         Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
       }
       else Serial.println("motor does not exist");
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-//      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
-//        budgeCommand.angleRequest = true;
-//      }
+      //      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+      //        budgeCommand.angleRequest = true;
+      //      }
       /*else*/ if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
         switch (*msgElem) { // determines motor direction
@@ -273,6 +273,7 @@ void loop() {
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
           motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+          motor1.updatePID(motor1.currentAngle, motor1.desiredAngle);
           break;
         case MOTOR2:
           motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
@@ -292,7 +293,7 @@ void loop() {
       }
     }
     /*
-    else if (budgeCommand.angleRequest) {
+      else if (budgeCommand.angleRequest) {
       float angle;
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
@@ -307,15 +308,15 @@ void loop() {
         case MOTOR4:
           angle = motor4.getCurrentAngle();
           break;
-//        case MOTOR5:
-//          angle = motor5.getCurrentAngle();
-//          break;
-//        case MOTOR6:
-//          angle = motor6.getCurrentAngle();
-//          break;
+      //        case MOTOR5:
+      //          angle = motor5.getCurrentAngle();
+      //          break;
+      //        case MOTOR6:
+      //          angle = motor6.getCurrentAngle();
+      //          break;
       }
       Serial.print("$A,Angle: motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" angle: "); Serial.println(angle, 10);
-    }
+      }
     */
     else Serial.println("$E,Error: bad motor command");
   }
@@ -324,13 +325,13 @@ void loop() {
   // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) {
     Serial.print("Motor Angles: ");
-    Serial.print(motor1.getCurrentAngle());Serial.print(",");
-    Serial.print(motor2.getCurrentAngle());Serial.print(",");
-    Serial.print(motor3.getCurrentAngle());Serial.print(",");
+    Serial.print(motor1.getCurrentAngle()); Serial.print(",");
+    Serial.print(motor2.getCurrentAngle()); Serial.print(",");
+    Serial.print(motor3.getCurrentAngle()); Serial.print(",");
     Serial.println(motor4.getCurrentAngle());//Serial.print(",");
     //Serial.print(motor5.getCurrentAngle());Serial.print(",");
     //Serial.print(motor6.getCurrentAngle());Serial.print(",");
-    sinceAnglePrint=0; // reset the timer
+    sinceAnglePrint = 0; // reset the timer
   }
 
 }

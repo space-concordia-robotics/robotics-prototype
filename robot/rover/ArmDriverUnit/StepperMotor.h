@@ -3,7 +3,8 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RoverMotor.h"
+#include "RobotMotor.h"
+#include "RobotPID.h"
 
 // time interval between stepper steps
 #define STEP_INTERVAL0 35
@@ -11,7 +12,7 @@
 #define STEP_INTERVAL2 10
 #define STEP_INTERVAL3 3
 
-class StepperMotor : public RoverMotor {
+class StepperMotor : public RobotMotor, public RobotPID {
   public:
     // encoder_interrupt();
     int encoderPinA, encoderPinB;
@@ -39,7 +40,7 @@ class StepperMotor : public RoverMotor {
     float gearRatio;
 };
 
-int StepperMotor::numStepperMotors=0; // must initialize variable outside of class
+int StepperMotor::numStepperMotors = 0; // must initialize variable outside of class
 
 StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin,
                            int encA, int encB, uint32_t port, int shift, int encRes, float gearRatio):

@@ -3,7 +3,8 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RoverMotor.h"
+#include "RobotMotor.h"
+#include "RobotPID.h"
 
 // for new driver
 #define DC_S0 60
@@ -45,7 +46,7 @@
   #define DC_CCW3 1
 */
 
-class DCMotor : public RoverMotor {
+class DCMotor : public RobotMotor, RobotPID {
   public:
     //void encoder_interrupt(void);
     int encoderPinA, encoderPinB; // must be public for interrupt to work?
@@ -73,7 +74,7 @@ class DCMotor : public RoverMotor {
     float gearRatio;
 };
 
-int DCMotor::numDCMotors=0; // must initialize variable outside of class
+int DCMotor::numDCMotors = 0; // must initialize variable outside of class
 
 // for sabertooth
 //DCMotor::DCMotor(int pwmPin, int encA, int encB):

@@ -3,7 +3,8 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RoverMotor.h"
+#include "RobotMotor.h"
+#include "RobotPID.h"
 
 // for 3.3v output
 // pwm speed control
@@ -38,7 +39,7 @@
   #define SERVO_CCW3 1
 */
 
-class ServoMotor : public RoverMotor {
+class ServoMotor : public RobotMotor, RobotPID {
   public:
     //volatile int encoderCount;
 
@@ -57,7 +58,7 @@ class ServoMotor : public RoverMotor {
     int pwmPin;
 };
 
-int ServoMotor::numServoMotors=0; // must initialize variable outside of class
+int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
 
 ServoMotor::ServoMotor(int pwmPin):
   pwmPin(pwmPin)
