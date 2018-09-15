@@ -5,8 +5,6 @@ int CW = REST - OFFSET;
 int CCW = REST + OFFSET;
 int BUDGE_TIME = 100;
 int BAUD_RATE = 9600;
-unsigned long startTime = 0;
-unsigned long currentTime = 0;
 
 void setup() 
 { 
