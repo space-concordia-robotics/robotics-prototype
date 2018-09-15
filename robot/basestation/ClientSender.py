@@ -10,6 +10,9 @@ import os
 import subprocess
 import re
 
+# returns current time in milliseconds
+currentMillis = lambda: int(round(time.time() * 1000))
+
 # get original delay and refresh, in case not 500, 33
 def getOriginalDelayAndRefresh():
     if os.name == "posix":
@@ -37,6 +40,19 @@ def setX(delay, refresh):
     setXCmd = 'xset r rate ' + str(delay) + ' ' + str(refresh)
     print("\nSetting delay rate to {} and refresh rate to {} ...".format(delay, refresh))
     subprocess.Popen(setXCmd.split())
+
+# get my own IP address
+def getMyIP():
+    ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
+    ifconfig = ifconfigOutput.stdout.decode()
+    lines = ifconfig.splitlines() # delimit by newline into array
+    myIpAddress = ""
+
+    for line in lines:
+        if "inet addr" in line and not "127.0.0.1" in line:
+            myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
+
+    return myIpAddress
 
 PORT_NUMBER = 5000
 SIZE = 1024
@@ -66,7 +82,7 @@ TARGET_REFRESH = 60
 # these values are default on ubuntu 16.04
 originalDelay = 500
 originalRefresh = 33
-
+# get original xset delay and refresh values
 originalXsetVals = getOriginalDelayAndRefresh()
 originalDelay = originalXsetVals[0]
 originalRefresh = originalXsetVals[1]
@@ -77,26 +93,14 @@ mySocket = socket(AF_INET, SOCK_DGRAM)
 # make socket reachable by any address (rather than only visible to same machine that it's running on)
 mySocket.bind((hostName, PORT_NUMBER))
 
-currentMillis = lambda: int(round(time.time() * 1000))
+# for controlling command throughput
 lastCmdSent = 0
 THROTTLE_TIME = 100
 
-# get my own IP address
-def getMyIP():
-    ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
-    ifconfig = ifconfigOutput.stdout.decode()
-    lines = ifconfig.splitlines() # delimit by newline into array
-    myIpAddress = ""
-
-    for line in lines:
-        if "inet addr" in line and not "127.0.0.1" in line:
-            myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
-
-    return myIpAddress
-
+# for sending IP/receiving acknowledgment
 handshake = ""
-# format: 'ip:192.168.2.13'
-clientIP = "ip:" + getMyIP()
+IP_KNOWN = "ip_known" # acknowledgment message
+clientIP = "ip:" + getMyIP() # format -> ip:192.168.2.13
 
 # send client IP address over to server for feedback
 while True:
@@ -113,7 +117,7 @@ while True:
         handshake = handshake.decode()
         print("Acknowledgment received: " + str(handshake) + "\n")
 
-        if handshake == "ip_known":
+        if handshake == IP_KNOWN:
             break
 
     except:

@@ -35,6 +35,7 @@ firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName)
 ser = serial.Serial('/dev/' + firstPortName, 9600)
 clientIP = ""
+IP_KNOWN = "ip_known"
 
 print("Rover server listening on port {} \n".format(PORT_NUMBER))
 
@@ -50,7 +51,7 @@ try:
         print("Client IP received: " + str(clientIP))
         time.sleep(1)
         print("Sending acknowledgment")
-        mySocket.sendto(str.encode("ip_known"), (clientIP, PORT_NUMBER))
+        mySocket.sendto(str.encode(IP_KNOWN), (clientIP, PORT_NUMBER))
         print("Acknowledgement sent")
 except:
     print("Exception in user code:")
