@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-# will listen on any incoming messages on the same network
+# make sure to run this script before ClientSender.py !
+# This will listen on any incoming messages on the same network
 # and display them as they get received,
-# as well as send corresponding commands over serial to a usb connected arduino
+# as well as send corresponding commands over serial to a usb connected arduino,
+# along with acknowledgment message per drive command received
 
 from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import sys, traceback

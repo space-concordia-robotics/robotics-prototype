@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# make sure that you start ServerListener.py process on odroid first before running this script!
+
 import sys
 import click
 from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
@@ -79,22 +81,28 @@ currentMillis = lambda: int(round(time.time() * 1000))
 lastCmdSent = 0
 THROTTLE_TIME = 100
 
-# get and send client IP address over to server for feedback
-ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
-ifconfig = ifconfigOutput.stdout.decode()
-lines = ifconfig.splitlines() # delimit by newline into array
-myIpAddress = "ip:"
+# get my own IP address
+def getMyIP():
+    ifconfigOutput = subprocess.run(['ifconfig'], stdout=subprocess.PIPE)
+    ifconfig = ifconfigOutput.stdout.decode()
+    lines = ifconfig.splitlines() # delimit by newline into array
+    myIpAddress = ""
+
+    for line in lines:
+        if "inet addr" in line and not "127.0.0.1" in line:
+            myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
+
+    return myIpAddress
+
 handshake = ""
+# format: 'ip:192.168.2.13'
+clientIP = "ip:" + getMyIP()
 
-for line in lines:
-    if "inet addr" in line and not "127.0.0.1" in line:
-        clientIP = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
-        myIpAddress += clientIP
-
+# send client IP address over to server for feedback
 while True:
     try:
-        print("Attempting to send: \"" + myIpAddress + "\" ...")
-        mySocket.sendto(str.encode(myIpAddress), (SERVER_IP, PORT_NUMBER))
+        print("Attempting to send: \"" + clientIP + "\" ...")
+        mySocket.sendto(str.encode(clientIP), (SERVER_IP, PORT_NUMBER))
         print("IP address sent\n")
         #time.sleep(1)
 
