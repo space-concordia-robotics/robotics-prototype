@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import sys, click
+import sys
+import click
 from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
 import time
 import os
@@ -14,7 +15,7 @@ if len(sys.argv) < 2:  # first one is the name of the file
     print(
         "please pass a destination ip address/port of the listener to send this message to, port is optional and will default to 5000"
     )
-    print("example usage: python ClientSender.py 127.0.0.1 5000")
+    print("example usage: python ClientSender.py <ip of odroid> <optional port number, default: 5000>")
     sys.exit(1)
 
 if len(sys.argv) == 3:
@@ -36,6 +37,7 @@ TARGET_REFRESH = 60
 ORIGINAL_DELAY = 500
 ORIGINAL_REFRESH = 33
 
+# get original delay and refresh, in case not 500, 33
 if os.name == "posix":
     xsetOutput = subprocess.run(['xset', '-q'], stdout=subprocess.PIPE)
     xsetConfig = xsetOutput.stdout.decode()
@@ -55,7 +57,9 @@ if os.name == "posix":
     setX = 'xset r rate ' + str(TARGET_DELAY) + ' ' + str(TARGET_REFRESH)
     subprocess.Popen(setX.split())
 
-resetX = 'xset r rate ' + str(ORIGINAL_DELAY) + ' ' + str(ORIGINAL_REFRESH)
+def setX(delay, refresh):
+    setXCmd = 'xset r rate ' + str(delay) + ' ' + str(refresh)
+    subprocess.Popen(setXCmd.split())
 
 hostName = gethostbyname('0.0.0.0')
 # UDP socket for sending drive cmds
@@ -101,7 +105,7 @@ while True:
             break
 
     except:
-        subprocess.Popen(resetX.split())
+        setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
         break
 
 print("Ready for sending drive commands!\n")
@@ -125,7 +129,7 @@ while True:
                 mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
                 print("\nTerminating connection.")
                 print("Resetting delay rate back to {} and refresh rate back to {}".format(ORIGINAL_DELAY, ORIGINAL_REFRESH))
-                subprocess.Popen(resetX.split())
+                setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
                 break
 
             # wait till receive a response
@@ -135,5 +139,5 @@ while True:
                 print(feedback.decode())
 
     except:
-        subprocess.Popen(resetX.split())
+        setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
         break
