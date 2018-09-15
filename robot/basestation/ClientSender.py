@@ -8,6 +8,34 @@ import os
 import subprocess
 import re
 
+# get original delay and refresh, in case not 500, 33
+def getOriginalDelayAndRefresh():
+    if os.name == "posix":
+        xsetOutput = subprocess.run(['xset', '-q'], stdout=subprocess.PIPE)
+        xsetConfig = xsetOutput.stdout.decode()
+        lines = xsetConfig.splitlines() # delimit by newline into array
+        delayAndRefreshStr = "empty"
+
+        # get the specific line we are looking for
+        for line in lines:
+            if "delay" in line:
+                delayAndRefreshStr = line
+
+        xsetVals = re.findall(r'\d+', delayAndRefreshStr)
+        originalDelay = xsetVals[0]
+        originalRefresh = xsetVals[1]
+
+        #setX = 'xset r rate ' + str(TARGET_DELAY) + ' ' + str(TARGET_REFRESH)
+        #subprocess.Popen(setX.split())
+
+        return (originalDelay, originalRefresh)
+
+# set delay and refresh rate using UNIX xset
+def setX(delay, refresh):
+    setXCmd = 'xset r rate ' + str(delay) + ' ' + str(refresh)
+    print("\nSetting delay rate to {} and refresh rate to {} ...".format(delay, refresh))
+    subprocess.Popen(setXCmd.split())
+
 PORT_NUMBER = 5000
 SIZE = 1024
 
@@ -34,42 +62,18 @@ print(
 TARGET_DELAY = 100
 TARGET_REFRESH = 60
 # these values are default on ubuntu 16.04
-ORIGINAL_DELAY = 500
-ORIGINAL_REFRESH = 33
+originalDelay = 500
+originalRefresh = 33
 
-# get original delay and refresh, in case not 500, 33
-if os.name == "posix":
-    xsetOutput = subprocess.run(['xset', '-q'], stdout=subprocess.PIPE)
-    xsetConfig = xsetOutput.stdout.decode()
-    lines = xsetConfig.splitlines() # delimit by newline into array
-    delayAndRefreshStr = "empty"
-
-    # get the specific line we are looking for
-    for line in lines:
-        if "delay" in line:
-            delayAndRefreshStr = line
-
-    xsetVals = re.findall(r'\d+', delayAndRefreshStr)
-    ORIGINAL_DELAY = xsetVals[0]
-    ORIGINAL_REFRESH = xsetVals[1]
-
-    print("\nSetting delay rate to {} and refresh rate to {} ...".format(TARGET_DELAY, TARGET_REFRESH))
-    setX = 'xset r rate ' + str(TARGET_DELAY) + ' ' + str(TARGET_REFRESH)
-    subprocess.Popen(setX.split())
-
-def setX(delay, refresh):
-    setXCmd = 'xset r rate ' + str(delay) + ' ' + str(refresh)
-    subprocess.Popen(setXCmd.split())
+originalXsetVals = getOriginalDelayAndRefresh()
+originalDelay = originalXsetVals[0]
+originalRefresh = originalXsetVals[1]
 
 hostName = gethostbyname('0.0.0.0')
 # UDP socket for sending drive cmds
 mySocket = socket(AF_INET, SOCK_DGRAM)
 # make socket reachable by any address (rather than only visible to same machine that it's running on)
 mySocket.bind((hostName, PORT_NUMBER))
-
-# potential TCP stuff?
-## TCP socket for sending server the client's IP address
-## TcpSocket = socket(AF_INET, SOCK_STREAM)
 
 currentMillis = lambda: int(round(time.time() * 1000))
 lastCmdSent = 0
@@ -105,9 +109,10 @@ while True:
             break
 
     except:
-        setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
+        setX(originalDelay, originalRefresh)
         break
 
+setX(TARGET_DELAY, TARGET_REFRESH)
 print("Ready for sending drive commands!\n")
 
 while True:
@@ -128,8 +133,8 @@ while True:
             elif key == 'q':
                 mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
                 print("\nTerminating connection.")
-                print("Resetting delay rate back to {} and refresh rate back to {}".format(ORIGINAL_DELAY, ORIGINAL_REFRESH))
-                setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
+                #print("Resetting delay rate back to {} and refresh rate back to {}".format(originalDelay, originalRefresh))
+                setX(originalDelay, originalRefresh)
                 break
 
             # wait till receive a response
@@ -139,5 +144,6 @@ while True:
                 print(feedback.decode())
 
     except:
-        setX(ORIGINAL_DELAY, ORIGINAL_REFRESH)
+        setX(originalDelay, originalRefresh)
         break
+
