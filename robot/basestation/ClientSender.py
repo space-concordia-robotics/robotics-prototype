@@ -101,6 +101,7 @@ while True:
             break
 
     except:
+        subprocess.Popen(resetX.split())
         break
 
 print("Ready for sending drive commands!\n")
@@ -134,4 +135,5 @@ while True:
                 print(feedback.decode())
 
     except:
+        subprocess.Popen(resetX.split())
         break
