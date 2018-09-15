@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RobotMotor.h"
+#include "RoverMotor.h"
 
 // time interval between stepper steps
 #define STEP_INTERVAL0 35
@@ -11,7 +11,7 @@
 #define STEP_INTERVAL2 10
 #define STEP_INTERVAL3 3
 
-class StepperMotor : public RobotMotor {
+class StepperMotor : public RoverMotor {
   public:
     static int numStepperMotors;
 

@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RobotMotor.h"
+#include "RoverMotor.h"
 
 // for 3.3v output
 // pwm speed control
@@ -38,7 +38,7 @@
   #define SERVO_CCW3 1
 */
 
-class ServoMotor : public RobotMotor {
+class ServoMotor : public RoverMotor {
   public:
     static int numServoMotors;
 

@@ -1,15 +1,14 @@
-#ifndef ROBOTMOTOR_H
-#define ROBOTMOTOR_H
+#ifndef ROVERMOTOR_H
+#define ROVERMOTOR_H
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RobotPID.h"
 
 enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines 6 motors
 enum motor_direction {CLOCKWISE = 1, COUNTER_CLOCKWISE}; // defines motor directions // can go into ArmMotor
 enum motor_speed {SPEED0 = 1, SPEED1, SPEED2, SPEED3}; // defines motor speed // can go into ArmMotor
 
-class RobotMotor {
+class RoverMotor {
   public:
     elapsedMillis sinceStart; // automatically increments every millisecond
     static int numMotors;
@@ -21,15 +20,13 @@ class RobotMotor {
     int encoderPinA, encoderPinB;
     volatile long encoderCount;
 
-    RobotPID motorPID;
-
     //int maxSpeed;
     int cwSpeed, ccwSpeed;
     bool movementDone;
 
-    RobotMotor();
+    RoverMotor();
     void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
-
+    
     int rightCount, leftCount; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
 
@@ -53,16 +50,15 @@ class RobotMotor {
     int encoderShift;
     int encoderResolution;
     float gearRatio;
-
 };
 
-int RobotMotor::numMotors = 0; // must initialize variable outside of class
+int RoverMotor::numMotors = 0; // must initialize variable outside of class
 
-RobotMotor::RobotMotor() {
+RoverMotor::RoverMotor() {
   numMotors++;
 }
 
-void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes)//:
+void RoverMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes)//:
 //encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes)
 {
   hasEncoder = true;

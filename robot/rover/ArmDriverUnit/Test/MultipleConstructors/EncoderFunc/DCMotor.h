@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RobotMotor.h"
+#include "RoverMotor.h"
 
 // for new driver
 #define DC_S0 60
@@ -45,7 +45,7 @@
   #define DC_CCW3 1
 */
 
-class DCMotor : public RobotMotor {
+class DCMotor : public RoverMotor {
   public:
     static int numDCMotors;
 

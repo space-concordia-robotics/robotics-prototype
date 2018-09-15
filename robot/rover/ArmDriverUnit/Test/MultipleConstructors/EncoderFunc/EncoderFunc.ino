@@ -1,63 +1,6 @@
-/*
-  TODO:
-  -suggesgtion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
-  -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
-  -(always) clean up code, comment code
-  -(later) implement power management? sleep mode?
-  -(soon) implement PID for automatic control
-    -update parsing function to take in angles or just go directly to ROSserial, probably the former
-  -(done) solve many problems by creating motor type subclasses
-  -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
-  -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
-  -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-  -(need abtin's magic) figure out how to step up to 5v for the sabertooth
-  -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
-  -(done) instead of resetting budgeCommand, perform some kind of check so that the motor doesn't spin forever?
-
-  -(done) implement budge function:
-   -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
-   -(done) implement limit for max turns in right/left directions
-   -(done) connect and test all motor types with budge()
-
-  -(now) determine motor angles thru encoder interrupts
-   -(done) replace strtok with strtok_r when implementing interrupts
-   -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
-   -(now) figure out better way to check max motor count than accessing motor1 object: RoverMotor::numMotors, need to test
-   -(done-ish) solve encoder direction change issue? not necessary
-   -(done-ish) ensure interrupts function with new class structure - can't pass GPIOx_PDIr through variable?
-   -(now) confirm all the pins will work with interrupts and not stepping on each other
-   -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
-   -(done-ish) can determine motor angles for dc and steppers, not servos and can't declare virtual function
-   -(now) make sure there is  max/min angle limitation with encoders
-   -(now) deal with overflow of encoderCount
-   -determine whether it's worth it to use the built in quadrature decoders
-
-  -(next step) timers
-   -systick is normally a heartbeat type thing
-   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
-   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
-   -implement heartbeat after deciding on best timer for it
-   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
-    -currently using whatever is connected to the pwm pins for timing pwm
-    -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
-    -ftm+tpm has quadrature decoder?
-    -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
-
-  -(next) simultaneous motor control with timers
-   -(next) decide whether to use abtin's software interrupt or simpler method for simultaneous motor control
-    -implement appropriate software interrupts that can take input from PID or manual control functions?
-    -decide frequency of motor control loop: figure out estimated time for loop
-    -rewrite the motor control with timers for teensy, ensure control for all motors
-
-  -(next next step) external interrupts for limit switches
-   -rewrite all the register bit variables to use teensy registers for limit switch interrupts
-   -incorporate limit switches for homing position on all motors
-   -implement homing function on boot
-*/
-
 #include "PinSetup.h"
 
-#include "RobotMotor.h"
+#include "RoverMotor.h"
 #include "StepperMotor.h"
 #include "DCMotor.h"
 #include "ServoMotor.h"
@@ -83,25 +26,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   int whichSpeed = 0;
   unsigned int whichTime = 0;
   //bool angleRequest = false;
-  bool angleCommand = false;
-  float whichAngle = 0.0;
 } budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
-
-/* motor contruction */
-// to reduce constructor parameters i wanted to make structs but it may make the code even messier.. try typedefs?
-/*
-  struct dcPins {
-
-  };
-
-  struct servoPins{
-
-  };
-
-  struct stepperPins {
-
-  };
-*/
 
 const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 
@@ -120,24 +45,6 @@ void m3_encoder_interrupt(void);
 void m4_encoder_interrupt(void);
 //void m5_encoder_interrupt(void);
 //void m6_encoder_interrupt(void);
-
-/*
-  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
-  void m1WrapperISR(void) {
-  motor1.encoder_interrupt();
-  }
-  void m2WrapperISR(void) {
-  motor2.encoder_interrupt();
-  }
-  void m3WrapperISR(void) {
-  motor3.encoder_interrupt();
-  }
-  void m4WrapperISR(void) {
-  motor4.encoder_interrupt();
-  }
-  //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
-  //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
-*/
 
 void setup() {
   pinSetup();
@@ -194,19 +101,16 @@ void loop() {
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
       tempMotorVar = atoi(msgElem);
       // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
-      if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
+      if (tempMotorVar > 0 && tempMotorVar <= RoverMotor::numMotors) {
         budgeCommand.whichMotor = tempMotorVar;
         Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
       }
       else Serial.println("motor does not exist");
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
-        budgeCommand.angleCommand = true;
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
-        budgeCommand.whichAngle = atof(msgElem); // converts to float
-        Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
-      }
-      else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
+      //      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+      //        budgeCommand.angleRequest = true;
+      //      }
+      /*else*/ if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
@@ -243,31 +147,27 @@ void loop() {
   }
 
   if (budgeCommand.whichMotor > 0) {
-    if (budgeCommand.angleCommand) {
-      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" desired angle (degrees) is: "); Serial.println(budgeCommand.whichAngle);
+    if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
+      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
-          motor1.desiredAngle = budgeCommand.whichAngle;
-          motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
+          motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
         case MOTOR2:
-          motor2.desiredAngle = budgeCommand.whichAngle;
-          motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+          motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
         case MOTOR3:
-          motor3.desiredAngle = budgeCommand.whichAngle;
-          motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
+          motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
         case MOTOR4:
-          motor4.desiredAngle = budgeCommand.whichAngle;
-          motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
+          motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
         case MOTOR5:
-          //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
+          motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
         case MOTOR6:
-          //motor6.motorPID.updatePID(motor6.currentAngle, motor6.desiredAngle);
+          motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
       }
     }
@@ -297,31 +197,6 @@ void loop() {
       Serial.print("$A,Angle: motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" angle: "); Serial.println(angle, 10);
       }
     */
-    else if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
-      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
-      Serial.println("=======================================================");
-      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
-        case MOTOR1:
-          motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
-          break;
-        case MOTOR2:
-          motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR3:
-          motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR4:
-          motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR5:
-          motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR6:
-          motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-      }
-    }
     else Serial.println("$E,Error: bad motor command");
   }
   budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
@@ -378,18 +253,18 @@ void m4_encoder_interrupt(void) {
   motor4.encoderCount += dir[(oldEncoderState & 0x0F)];
 }
 /*
-  void m5_encoder_interrupt(void) {
+void m5_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.print("m5 "); Serial.println(motor5.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
   motor5.encoderCount += dir[(oldEncoderState & 0x0F)];
-  }
-  void m6_encoder_interrupt(void) {
+}
+void m6_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.print("m6 "); Serial.println(motor6.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
   motor6.encoderCount += dir[(oldEncoderState & 0x0F)];
-  }
+}
 */
