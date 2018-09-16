@@ -49,7 +49,9 @@ def getMyIP():
     myIpAddress = ""
 
     for line in lines:
-        if "inet addr" in line and not "127.0.0.1" in line:
+        testLine = line.lower()
+        if ("inet addr" in testLine and "bcast" in testLine) or ("inet" in testLine and "broadcast" in testLine) and not "127.0.0.1" in testLine:
+            print("line: " + line)
             myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
 
     return myIpAddress
