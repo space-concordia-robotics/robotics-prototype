@@ -12,9 +12,9 @@ class RobotPID {
     float maxOutputValue = 300.0;
     float minOutputValue = 15.0;
 
-    int kp=10;
-    int ki=1;
-    int kd=2;
+    int kp=1;
+    int ki=0;
+    int kd=0;
     //unsigned int dt; // period at which the pid is called
     elapsedMillis dt;//sincePID;
     float pTerm, iTerm, dTerm;

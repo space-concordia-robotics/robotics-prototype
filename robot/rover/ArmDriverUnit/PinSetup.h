@@ -25,8 +25,8 @@
 #define MIN_BUDGE_TIME 100
 #define DEFAULT_BUDGE_TIME 500
 #define DEFAULT_SPEED 0
-#define MAX_SPEED 3
-#define MAX_COUNTS 3
+#define MAX_SPEED 4
+#define MAX_COUNTS 4
 
 // can go into ArmMotor
 #define SERVO_STOP 189 // for 3.3v
@@ -88,8 +88,8 @@
 #define M2_ENCODER_B       27
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
-#define M2_ENCODER_RESOLUTION 48 // counts per motor shaft revolution
-#define M2_GEAR_RATIO      99.508*20.0 // planetary gear chained to worm gear drive
+#define M2_ENCODER_RESOLUTION 7*2 //48 // counts per motor shaft revolution
+#define M2_GEAR_RATIO      163.0 //99.508*20.0 // planetary gear chained to worm gear drive
 
 // servos
 

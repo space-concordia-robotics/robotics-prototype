@@ -148,16 +148,16 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           cwSpeed = DC_S0; ccwSpeed = DC_S0;
           break;
-        case 1:
+        case 2:
           cwSpeed = DC_S1; ccwSpeed = DC_S1;
           break;
-        case 2:
+        case 3:
           cwSpeed = DC_S2; ccwSpeed = DC_S2;
           break;
-        case 3:
+        case 4:
           cwSpeed = DC_S3; ccwSpeed = DC_S3;
           break;
       }
@@ -172,16 +172,16 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           cwSpeed = DC_S0; ccwSpeed = DC_S0;
           break;
-        case 1:
+        case 2:
           cwSpeed = DC_S1; ccwSpeed = DC_S1;
           break;
-        case 2:
+        case 3:
           cwSpeed = DC_S2; ccwSpeed = DC_S2;
           break;
-        case 3:
+        case 4:
           cwSpeed = DC_S3; ccwSpeed = DC_S3;
           break;
       }

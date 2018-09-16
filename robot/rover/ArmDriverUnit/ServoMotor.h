@@ -83,16 +83,16 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
           break;
-        case 1:
+        case 2:
           cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
           break;
-        case 2:
+        case 3:
           cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
           break;
-        case 3:
+        case 4:
           cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
           break;
       }
@@ -106,16 +106,16 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
           break;
-        case 1:
+        case 2:
           cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
           break;
-        case 2:
+        case 3:
           cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
           break;
-        case 3:
+        case 4:
           cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
           break;
       }

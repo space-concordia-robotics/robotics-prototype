@@ -63,7 +63,7 @@
 
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
-#define SERIAL_PRINT_INTERVAL 2000 // how often should teensy send angle data
+#define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100  // size of the buffer for the serial commands
 
@@ -185,8 +185,8 @@ void setup() {
     attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
   */
 
-  stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
-  dcTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
+  //dcTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   //servoTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
@@ -257,8 +257,8 @@ void loop() {
       Serial.println("=======================================================");
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
-          motor1.movementDone = false;
-          motor1.enablePower();
+          //motor1.movementDone = false;
+          //motor1.enablePower();
           // If I do the code like this, it means that once the motor achieves the correct position,
           // it will stop and never recorrect until a new angle request is sent.
           // Also, technically updatePID should only be called in the stepper interrupt.
@@ -271,14 +271,14 @@ void loop() {
           motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
           break;
         case MOTOR3:
-          motor3.movementDone = false;
-          motor3.enablePower();
+          //motor3.movementDone = false;
+          //motor3.enablePower();
           motor3.desiredAngle = budgeCommand.whichAngle;
           motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
           break;
         case MOTOR4:
-          motor4.movementDone = false;
-          motor4.enablePower();
+          //motor4.movementDone = false;
+          //motor4.enablePower();
           motor4.desiredAngle = budgeCommand.whichAngle;
           motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
           break;

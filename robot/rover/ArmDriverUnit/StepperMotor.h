@@ -82,16 +82,16 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           stepInterval = STEP_INTERVAL0;
           break;
-        case 1:
+        case 2:
           stepInterval = STEP_INTERVAL1;
           break;
-        case 2:
+        case 3:
           stepInterval = STEP_INTERVAL2;
           break;
-        case 3:
+        case 4:
           stepInterval = STEP_INTERVAL3;
           break;
       }
@@ -111,16 +111,16 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
       switch (budgeSpeed) {
-        case 0:
+        case 1:
           stepInterval = STEP_INTERVAL0;
           break;
-        case 1:
+        case 2:
           stepInterval = STEP_INTERVAL1;
           break;
-        case 2:
+        case 3:
           stepInterval = STEP_INTERVAL2;
           break;
-        case 3:
+        case 4:
           stepInterval = STEP_INTERVAL3;
           break;
       }
