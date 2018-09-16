@@ -5,6 +5,7 @@ class RobotPID {
   public:
     int dir;
     int motorSpeed;
+    bool movementDone = true;
 
     // all of these values are arbitrary and should be set from outside the object
     float angleTolerance = 2.0;

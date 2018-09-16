@@ -9,6 +9,8 @@ enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines
 enum motor_direction {CLOCKWISE = 1, COUNTER_CLOCKWISE}; // defines motor directions // can go into ArmMotor
 enum motor_speed {SPEED0 = 1, SPEED1, SPEED2, SPEED3}; // defines motor speed // can go into ArmMotor
 
+//const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+
 class RobotMotor {
   public:
     elapsedMillis sinceStart; // automatically increments every millisecond
@@ -46,7 +48,7 @@ class RobotMotor {
 
   protected:
     //quadrature encoder matrix below corresponds to the correct direction for a specific set of prev and current encoder states
-    const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
+    //const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 
     bool hasEncoder;
     uint32_t encoderPort;

@@ -16,6 +16,9 @@ class StepperMotor : public RobotMotor {
     static int numStepperMotors;
 
     StepperMotor(int enablePin, int dirPin, int stepPin, float gearRatio);
+    void singleStep(int dir);
+    void enablePower();
+    void disablePower();
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
@@ -37,6 +40,27 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float gearRat
   numStepperMotors++;
   this->gearRatio = gearRatio;
   hasEncoder = false;
+}
+
+void StepperMotor::enablePower(){
+  digitalWriteFast(enablePin, LOW);
+}
+
+void StepperMotor::disablePower(){
+  digitalWriteFast(enablePin, HIGH);
+}
+
+void StepperMotor::singleStep(int dir) {
+  switch (dir) {
+    case CLOCKWISE:
+      digitalWriteFast(directionPin, HIGH);
+      break;
+    case COUNTER_CLOCKWISE:
+      digitalWriteFast(directionPin, LOW);
+      break;
+  }
+  digitalWriteFast(stepPin, HIGH);
+  digitalWriteFast(stepPin, LOW);
 }
 
 void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {

@@ -4,8 +4,8 @@
   -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
   -(always) clean up code, comment code
   -(later) implement power management? sleep mode?
-  -(soon) implement PID for automatic control
-    -update parsing function to take in angles or just go directly to ROSserial, probably the former
+  -(done-ish) PID implemented for DC motor but need to adjust all variables
+    -(done) update parsing function to take in angles
   -(done) solve many problems by creating motor type subclasses
   -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
   -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
@@ -22,15 +22,14 @@
   -(now) determine motor angles thru encoder interrupts
    -(done) replace strtok with strtok_r when implementing interrupts
    -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
-   -(now) figure out better way to check max motor count than accessing motor1 object: RoverMotor::numMotors, need to test
    -(done-ish) solve encoder direction change issue? not necessary
-   -(done-ish) ensure interrupts function with new class structure - can't pass GPIOx_PDIr through variable?
+   -(issue) interrupt functions must be defined outside of classes...
    -(now) confirm all the pins will work with interrupts and not stepping on each other
    -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
-   -(done-ish) can determine motor angles for dc and steppers, not servos and can't declare virtual function
+   -(done-ish) can determine motor angles for dc and steppers, not servos
    -(now) make sure there is  max/min angle limitation with encoders
    -(now) deal with overflow of encoderCount
-   -determine whether it's worth it to use the built in quadrature decoders
+   -(now) determine whether it's worth it to use the built in quadrature decoders
 
   -(next step) timers
    -systick is normally a heartbeat type thing
@@ -82,15 +81,13 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   int whichDir = 0;
   int whichSpeed = 0;
   unsigned int whichTime = 0;
-  //bool angleRequest = false;
   bool angleCommand = false;
   float whichAngle = 0.0;
 } budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
 
 /* motor contruction */
 // to reduce constructor parameters i wanted to make structs but it may make the code even messier.. try typedefs?
-/*
-  struct dcPins {
+/*  struct dcPins {
 
   };
 
@@ -114,6 +111,13 @@ StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
+IntervalTimer stepperTimer;
+IntervalTimer dcTimer;
+IntervalTimer servoTimer;
+
+//RobotMotor motorArray[] = {motor1, motor2, motor3, motor4, motor5, motor6}; doesn't work rip
+StepperMotor stepperArray[] = {motor1, motor3, motor4};
+
 void m1_encoder_interrupt(void);
 void m2_encoder_interrupt(void);
 void m3_encoder_interrupt(void);
@@ -121,8 +125,7 @@ void m4_encoder_interrupt(void);
 //void m5_encoder_interrupt(void);
 //void m6_encoder_interrupt(void);
 
-/*
-  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
+/*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
   void m1WrapperISR(void) {
   motor1.encoder_interrupt();
   }
@@ -138,6 +141,10 @@ void m4_encoder_interrupt(void);
   //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
   //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
 */
+
+void stepperInterrupt(void);
+void dcInterrupt(void);
+void servoInterrupt(void);
 
 void setup() {
   pinSetup();
@@ -159,8 +166,7 @@ void setup() {
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  /*
-    attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
+  /*    attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
     attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
 
     attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
@@ -172,13 +178,16 @@ void setup() {
     attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
     attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
   */
-  /*
-    attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
+  /*    attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
     attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
 
     attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
     attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
   */
+
+  stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
+  dcTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //servoTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
 }
@@ -248,6 +257,12 @@ void loop() {
       Serial.println("=======================================================");
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
+          motor1.movementDone = false;
+          motor1.enablePower();
+          // If I do the code like this, it means that once the motor achieves the correct position,
+          // it will stop and never recorrect until a new angle request is sent.
+          // Also, technically updatePID should only be called in the stepper interrupt.
+          // Well, technically it should only be used for the DC motor....
           motor1.desiredAngle = budgeCommand.whichAngle;
           motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
           break;
@@ -256,10 +271,14 @@ void loop() {
           motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
           break;
         case MOTOR3:
+          motor3.movementDone = false;
+          motor3.enablePower();
           motor3.desiredAngle = budgeCommand.whichAngle;
           motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
           break;
         case MOTOR4:
+          motor4.movementDone = false;
+          motor4.enablePower();
           motor4.desiredAngle = budgeCommand.whichAngle;
           motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
           break;
@@ -300,10 +319,10 @@ void loop() {
     else if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
       Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
+
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
           motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
           break;
         case MOTOR2:
           motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
@@ -325,6 +344,10 @@ void loop() {
     else Serial.println("$E,Error: bad motor command");
   }
   budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
+
+  if (motor1.movementDone) motor1.disablePower();
+  if (motor3.movementDone) motor3.disablePower();
+  if (motor4.movementDone) motor4.disablePower();
 
   // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) {
@@ -393,3 +416,33 @@ void m4_encoder_interrupt(void) {
   motor6.encoderCount += dir[(oldEncoderState & 0x0F)];
   }
 */
+
+void stepperInterrupt(void) {
+  static int nextInterval = 0;
+  int i = 3;
+  // code to decide which motor to turn goes here, or code just turns all motors
+  if (!stepperArray[i - 1].movementDone) {
+    // code to decide how fast the motor will turn and in which direction
+    int dir = CLOCKWISE;
+    nextInterval = 25000;
+    //set a minimum step period somewhere
+    //nextInterval = stepperArray[i-1].motorPID.updatePID(stepperArray[i-1].currentAngle, stepperArray[i-1].desiredAngle);
+    stepperArray[i - 1].singleStep(dir);
+    stepperTimer.update(nextInterval);
+  }
+}
+
+void dcInterrupt(void) {
+  // code to decide which motor to turn goes here, or code just turns all motors
+  motor2.getCurrentAngle();
+  // rethink the PID? needs to set a direction AND a speed
+  motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+  int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+  int dir = CLOCKWISE;
+  motor2.setVelocity(dir, motorSpeed);
+}
+
+void servoInterrupt(void) {
+  ;
+}
+
