@@ -6,10 +6,10 @@
 #include "RobotMotor.h"
 
 // for new driver
-#define DC_S0 60
-#define DC_S1 130
-#define DC_S2 190
-#define DC_S3 255
+#define DC_S1 60
+#define DC_S2 130
+#define DC_S3 190
+#define DC_S4 255
 
 // for 3.3v output, sabertooth
 /*// pwm speed control
@@ -76,7 +76,7 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   directionPin(dirPin), pwmPin(pwmPin)
 {
   numDCMotors++;
-  this->gearRatio = gearRatio;
+  this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
 }
 
@@ -130,7 +130,7 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
 */
 
 void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
       && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
@@ -149,16 +149,16 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          cwSpeed = DC_S0; ccwSpeed = DC_S0;
-          break;
-        case 2:
           cwSpeed = DC_S1; ccwSpeed = DC_S1;
           break;
-        case 3:
+        case 2:
           cwSpeed = DC_S2; ccwSpeed = DC_S2;
           break;
-        case 4:
+        case 3:
           cwSpeed = DC_S3; ccwSpeed = DC_S3;
+          break;
+        case 4:
+          cwSpeed = DC_S4; ccwSpeed = DC_S4;
           break;
       }
       Serial.print("setting dc speed level to "); Serial.println(budgeSpeed); Serial.println("starting dc movement");
@@ -173,16 +173,16 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          cwSpeed = DC_S0; ccwSpeed = DC_S0;
-          break;
-        case 2:
           cwSpeed = DC_S1; ccwSpeed = DC_S1;
           break;
-        case 3:
+        case 2:
           cwSpeed = DC_S2; ccwSpeed = DC_S2;
           break;
-        case 4:
+        case 3:
           cwSpeed = DC_S3; ccwSpeed = DC_S3;
+          break;
+        case 4:
+          cwSpeed = DC_S4; ccwSpeed = DC_S4;
           break;
       }
       Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
@@ -218,12 +218,12 @@ void DCMotor::setVelocity(int motorDir, int motorSpeed) {
 
 float DCMotor::getCurrentAngle() {
   if (hasEncoder) {
-    currentAngle = (float)encoderCount * 360.0 / (encoderResolution * gearRatio);
+    currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;
   }
   else {
     Serial.println("$E,Error: motor does not have encoder");
-    return 404.0; // wants a return value, at least this value should be invalid
+    return 40404040404.0; // wants a return value, at least this value should be invalid
   }
 }
 

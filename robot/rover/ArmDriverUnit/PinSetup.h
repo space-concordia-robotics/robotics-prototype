@@ -24,7 +24,7 @@
 #define MAX_BUDGE_TIME 3000
 #define MIN_BUDGE_TIME 100
 #define DEFAULT_BUDGE_TIME 500
-#define DEFAULT_SPEED 0
+#define DEFAULT_SPEED 1
 #define MAX_SPEED 4
 #define MAX_COUNTS 4
 

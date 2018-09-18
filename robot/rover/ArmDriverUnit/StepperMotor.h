@@ -6,10 +6,10 @@
 #include "RobotMotor.h"
 
 // time interval between stepper steps
-#define STEP_INTERVAL0 35
-#define STEP_INTERVAL1 25
-#define STEP_INTERVAL2 10
-#define STEP_INTERVAL3 3
+#define STEP_INTERVAL1 35
+#define STEP_INTERVAL2 25
+#define STEP_INTERVAL3 10
+#define STEP_INTERVAL4 3
 
 class StepperMotor : public RobotMotor {
   public:
@@ -38,15 +38,15 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float gearRat
   enablePin(enablePin), directionPin(dirPin), stepPin(stepPin)
 {
   numStepperMotors++;
-  this->gearRatio = gearRatio;
+  this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
 }
 
-void StepperMotor::enablePower(){
+void StepperMotor::enablePower() {
   digitalWriteFast(enablePin, LOW);
 }
 
-void StepperMotor::disablePower(){
+void StepperMotor::disablePower() {
   digitalWriteFast(enablePin, HIGH);
 }
 
@@ -64,7 +64,7 @@ void StepperMotor::singleStep(int dir) {
 }
 
 void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
       && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
@@ -83,16 +83,16 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          stepInterval = STEP_INTERVAL0;
-          break;
-        case 2:
           stepInterval = STEP_INTERVAL1;
           break;
-        case 3:
+        case 2:
           stepInterval = STEP_INTERVAL2;
           break;
-        case 4:
+        case 3:
           stepInterval = STEP_INTERVAL3;
+          break;
+        case 4:
+          stepInterval = STEP_INTERVAL4;
           break;
       }
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
@@ -112,16 +112,16 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          stepInterval = STEP_INTERVAL0;
-          break;
-        case 2:
           stepInterval = STEP_INTERVAL1;
           break;
-        case 3:
+        case 2:
           stepInterval = STEP_INTERVAL2;
           break;
-        case 4:
+        case 3:
           stepInterval = STEP_INTERVAL3;
+          break;
+        case 4:
+          stepInterval = STEP_INTERVAL4;
           break;
       }
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
@@ -166,12 +166,12 @@ void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
 
 float StepperMotor::getCurrentAngle() {
   if (hasEncoder) {
-    currentAngle = (float)encoderCount * 360.0 / (encoderResolution * gearRatio);
+    currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;
   }
   else {
     Serial.println("$E,Error: motor does not have encoder");
-    return 404.0; // wants a return value, at least this value should be invalid
+    return 40404040404.0; // wants a return value, at least this value should be invalid
   }
 }
 

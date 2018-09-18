@@ -9,17 +9,17 @@
 // pwm speed control
 //#define SERVO_STOP 189 // motor is supposed to stop at 50% duty cycle (127/255)
 // speed 0, slowest
-#define SERVO_CW0 SERVO_STOP+15
-#define SERVO_CCW0 SERVO_STOP-15
+#define SERVO_CW1 SERVO_STOP+15
+#define SERVO_CCW1 SERVO_STOP-15
 // speed 1
-#define SERVO_CW1 SERVO_STOP+30
-#define SERVO_CCW1 SERVO_STOP-30
+#define SERVO_CW2 SERVO_STOP+30
+#define SERVO_CCW2 SERVO_STOP-30
 // speed 2
-#define SERVO_CW2 SERVO_STOP+50
-#define SERVO_CCW2 SERVO_STOP-50
+#define SERVO_CW3 SERVO_STOP+50
+#define SERVO_CCW3 SERVO_STOP-50
 // speed 3, fastest
-#define SERVO_CW3 255
-#define SERVO_CCW3 SERVO_STOP-(255-SERVO_STOP)
+#define SERVO_CW4 255
+#define SERVO_CCW4 SERVO_STOP-(255-SERVO_STOP)
 
 // for 5v output
 /*// pwm speed control
@@ -60,12 +60,12 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   pwmPin(pwmPin)
 {
   numServoMotors++;
-  this->gearRatio = gearRatio;
+  this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
 }
 
 void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed <= MAX_SPEED
+  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
       && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
@@ -84,16 +84,16 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
-          break;
-        case 2:
           cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
           break;
-        case 3:
+        case 2:
           cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
           break;
-        case 4:
+        case 3:
           cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
+          break;
+        case 4:
+          cwSpeed = SERVO_CW4; ccwSpeed = SERVO_CCW4;
           break;
       }
       Serial.print("setting servo speed level to "); Serial.println(budgeSpeed); Serial.println("starting servo movement");
@@ -107,16 +107,16 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
       movementDone = false;
       switch (budgeSpeed) {
         case 1:
-          cwSpeed = SERVO_CW0; ccwSpeed = SERVO_CCW0;
-          break;
-        case 2:
           cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
           break;
-        case 3:
+        case 2:
           cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
           break;
-        case 4:
+        case 3:
           cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
+          break;
+        case 4:
+          cwSpeed = SERVO_CW4; ccwSpeed = SERVO_CCW4;
           break;
       }
       Serial.print("setting servo speed level to "); Serial.println(budgeSpeed);
