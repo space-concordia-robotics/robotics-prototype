@@ -3,34 +3,38 @@
 
 class RobotPID {
   public:
-    int dir;
-    int motorSpeed;
-    bool movementDone = true;
+    // these variables are accessed outside of ISRs
+    volatile bool movementDone;
+    volatile int dir;
+    volatile float pidOutput; // only updated at the end of the calculations
+    int motorSpeed; // not even used yet
 
-    // all of these values are arbitrary and should be set from outside the object
+    // motor-dependent constants... currently arbitrary values. to be set in setup() probably
     float angleTolerance = 2.0;
     float maxOutputValue = 300.0;
     float minOutputValue = 15.0;
-
     int kp = 1;
     int ki = 0;
     int kd = 0;
+
+    RobotPID();
+    void updatePID(volatile float& currentAngle, float& desiredAngle);
+
+  private:
     //unsigned int dt; // period at which the pid is called
     elapsedMillis dt;//sincePID;
     float pTerm, iTerm, dTerm;
-
     float error;
     float previousError;
     float errorSum;
-    float pidOutput;
-
-    void updatePID(float& currentAngle, float& desiredAngle);
-  private:
-  protected:
-
+    float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
 
-void RobotPID::updatePID(float& currentAngle, float& desiredAngle) {
+RobotPID::RobotPID(){
+  movementDone=true;
+}
+
+void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {
 
   error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
   // if the angle is outside the tolerance, move
@@ -51,12 +55,13 @@ void RobotPID::updatePID(float& currentAngle, float& desiredAngle) {
     //derivativeTerm = kd[i]* (motorAngle[i] - lastInput) / timeChange;
     //double _dError = (_error - _previousError) / _dT / 1000.0;   //derivative
     Serial.print("D output is: "); Serial.println(dTerm);
-    pidOutput = pTerm + iTerm + dTerm;
-    Serial.print("PID output is: "); Serial.println(pidOutput);
-    if (pidOutput > 0) dir = 1; else dir = -1; // positive dir is ccw, negative is cw
+    pidSum = pTerm + iTerm + dTerm;
+    Serial.print("PID output is: "); Serial.println(pidSum);
+    if (pidSum > 0) dir = 1; else dir = -1; // positive dir is ccw, negative is cw
     Serial.print("direction is: "); Serial.println(dir);
-    if (fabs(pidOutput) > maxOutputValue) pidOutput = maxOutputValue; // give max output
-    if (fabs(pidOutput) < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
+    if (fabs(pidSum) > maxOutputValue) pidOutput = maxOutputValue; // give max output
+    if (fabs(pidSum) < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
+    else pidOutput = pidSum;
 
     // set motor speed somewhere
 

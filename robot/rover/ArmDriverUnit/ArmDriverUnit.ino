@@ -61,6 +61,9 @@
 #include "DCMotor.h"
 #include "ServoMotor.h"
 
+#define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
+#define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
+
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
 #define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
@@ -186,8 +189,8 @@ void setup() {
   */
 
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
-  //dcTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
-  //servoTimer.begin(dcInterrupt, 20000); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //servoTimer.begin(dcInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
 }
@@ -434,6 +437,7 @@ void stepperInterrupt(void) {
 
 void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
+  if(!motor2.movementDone)
   motor2.getCurrentAngle();
   // rethink the PID? needs to set a direction AND a speed
   motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);

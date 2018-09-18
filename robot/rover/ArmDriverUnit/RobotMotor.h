@@ -16,10 +16,11 @@ class RobotMotor {
     elapsedMillis sinceStart; // automatically increments every millisecond
     static int numMotors;
     //float maxCWAngle, maxCCWAngle;
-    float currentAngle, desiredAngle;
+    volatile float currentAngle; // can be updated within timer interrupts
+    float desiredAngle;
 
     // encoder_interrupt();
-    void attachMotor();
+    void attachEncoder();
     int encoderPinA, encoderPinB;
     volatile long encoderCount;
 
