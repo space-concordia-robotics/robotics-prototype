@@ -14,5 +14,6 @@ pyserial==3.4
 python-dateutil==2.7.3
 pytz==2018.5
 six==1.11.0
+click==6.7
 flask==1.0.2
 flask-bootstrap==3.3.7.1
