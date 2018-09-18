@@ -21,6 +21,9 @@
 #define SERVO_CW4 255
 #define SERVO_CCW4 SERVO_STOP-(255-SERVO_STOP)
 
+const int servoCwSpeedArray[] = {SERVO_CW1, SERVO_CW2, SERVO_CW3, SERVO_CW4};
+const int servoCcwSpeedArray[] = {SERVO_CCW1, SERVO_CCW2, SERVO_CCW3, SERVO_CCW4};
+
 // for 5v output
 /*// pwm speed control
   //#define SERVO_STOP 127 // motor is supposed to stop at 50% duty cycle (127/255)
@@ -82,20 +85,8 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
 
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
-          break;
-        case 2:
-          cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
-          break;
-        case 3:
-          cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
-          break;
-        case 4:
-          cwSpeed = SERVO_CW4; ccwSpeed = SERVO_CCW4;
-          break;
-      }
+      cwSpeed = servoCwSpeedArray[budgeSpeed];
+      ccwSpeed = servoCcwSpeedArray[budgeSpeed];
       Serial.print("setting servo speed level to "); Serial.println(budgeSpeed); Serial.println("starting servo movement");
       sinceStart = 0;
       analogWrite(pwmPin, cwSpeed);
@@ -105,20 +96,8 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          cwSpeed = SERVO_CW1; ccwSpeed = SERVO_CCW1;
-          break;
-        case 2:
-          cwSpeed = SERVO_CW2; ccwSpeed = SERVO_CCW2;
-          break;
-        case 3:
-          cwSpeed = SERVO_CW3; ccwSpeed = SERVO_CCW3;
-          break;
-        case 4:
-          cwSpeed = SERVO_CW4; ccwSpeed = SERVO_CCW4;
-          break;
-      }
+      cwSpeed = servoCwSpeedArray[budgeSpeed];
+      ccwSpeed = servoCcwSpeedArray[budgeSpeed];
       Serial.print("setting servo speed level to "); Serial.println(budgeSpeed);
       sinceStart = 0;
       analogWrite(pwmPin, ccwSpeed);

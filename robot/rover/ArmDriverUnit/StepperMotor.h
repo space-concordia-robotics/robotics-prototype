@@ -11,6 +11,8 @@
 #define STEP_INTERVAL3 10
 #define STEP_INTERVAL4 3
 
+const int stepIntervalArray[] = {STEP_INTERVAL1, STEP_INTERVAL2, STEP_INTERVAL3, STEP_INTERVAL4};
+
 class StepperMotor : public RobotMotor {
   public:
     static int numStepperMotors;
@@ -81,20 +83,7 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
 
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          stepInterval = STEP_INTERVAL1;
-          break;
-        case 2:
-          stepInterval = STEP_INTERVAL2;
-          break;
-        case 3:
-          stepInterval = STEP_INTERVAL3;
-          break;
-        case 4:
-          stepInterval = STEP_INTERVAL4;
-          break;
-      }
+      stepInterval = stepIntervalArray[budgeSpeed];
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, HIGH);
       digitalWriteFast(enablePin, LOW);
@@ -110,20 +99,7 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          stepInterval = STEP_INTERVAL1;
-          break;
-        case 2:
-          stepInterval = STEP_INTERVAL2;
-          break;
-        case 3:
-          stepInterval = STEP_INTERVAL3;
-          break;
-        case 4:
-          stepInterval = STEP_INTERVAL4;
-          break;
-      }
+      stepInterval = stepIntervalArray[budgeSpeed];
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, LOW);
       digitalWriteFast(enablePin, LOW);

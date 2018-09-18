@@ -11,6 +11,8 @@
 #define DC_S3 190
 #define DC_S4 255
 
+const int dcSpeedArray[] = {DC_S1, DC_S2, DC_S3, DC_S4};
+
 // for 3.3v output, sabertooth
 /*// pwm speed control
   //#define DC_STOP 189 // motor is supposed to stop at 50% duty cycle (127/255)
@@ -147,20 +149,7 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
 
     if (budgeDir == CLOCKWISE && canTurnRight) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          cwSpeed = DC_S1; ccwSpeed = DC_S1;
-          break;
-        case 2:
-          cwSpeed = DC_S2; ccwSpeed = DC_S2;
-          break;
-        case 3:
-          cwSpeed = DC_S3; ccwSpeed = DC_S3;
-          break;
-        case 4:
-          cwSpeed = DC_S4; ccwSpeed = DC_S4;
-          break;
-      }
+      cwSpeed = ccwSpeed = dcSpeedArray[budgeSpeed];
       Serial.print("setting dc speed level to "); Serial.println(budgeSpeed); Serial.println("starting dc movement");
       digitalWrite(directionPin, LOW);
       sinceStart = 0;
@@ -171,20 +160,7 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       movementDone = false;
-      switch (budgeSpeed) {
-        case 1:
-          cwSpeed = DC_S1; ccwSpeed = DC_S1;
-          break;
-        case 2:
-          cwSpeed = DC_S2; ccwSpeed = DC_S2;
-          break;
-        case 3:
-          cwSpeed = DC_S3; ccwSpeed = DC_S3;
-          break;
-        case 4:
-          cwSpeed = DC_S4; ccwSpeed = DC_S4;
-          break;
-      }
+      cwSpeed = ccwSpeed = dcSpeedArray[budgeSpeed];
       Serial.print("setting dc speed level to "); Serial.println(budgeSpeed);
       sinceStart = 0;
       digitalWrite(directionPin, HIGH);
