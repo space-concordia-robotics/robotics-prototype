@@ -1,32 +1,33 @@
 /*
   TODO:
-  -suggesgtion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
+  -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
   -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
   -(always) clean up code, comment code
   -(later) implement power management? sleep mode?
-  -(done-ish) PID implemented for DC motor but need to adjust all variables
+  -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
     -(done) update parsing function to take in angles
-  -(done) solve many problems by creating motor type subclasses
   -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
   -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
   -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-  -(need abtin's magic) figure out how to step up to 5v for the sabertooth
+  -(done-ish) drivers that accept 3.3v probably internally deal with it so that 3.3v is max speed
   -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
-  -(done) instead of resetting budgeCommand, perform some kind of check so that the motor doesn't spin forever?
-
+  
   -(done) implement budge function:
    -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
    -(done) implement limit for max turns in right/left directions
    -(done) connect and test all motor types with budge()
+   -(next) clean up budge code to make it easier to read and reduce repetition
+   
+  -(next) clean up parsing code to make it easier to read and reduce repetition
 
   -(now) determine motor angles thru encoder interrupts
-   -(done) replace strtok with strtok_r when implementing interrupts
-   -(done) rewrite all the register bit variables to use teensy registers for encoder interrupts
+   -(done) all the pin and register definitions are based on the teensy, this would need to be changed for a different microcontroller
    -(done-ish) solve encoder direction change issue? not necessary
    -(issue) interrupt functions must be defined outside of classes...
    -(now) confirm all the pins will work with interrupts and not stepping on each other
    -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
    -(done-ish) can determine motor angles for dc and steppers, not servos
+   -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
    -(now) make sure there is  max/min angle limitation with encoders
    -(now) deal with overflow of encoderCount
    -(now) determine whether it's worth it to use the built in quadrature decoders
@@ -44,14 +45,16 @@
 
   -(next) simultaneous motor control with timers
    -(next) decide whether to use abtin's software interrupt or simpler method for simultaneous motor control
-    -implement appropriate software interrupts that can take input from PID or manual control functions?
-    -decide frequency of motor control loop: figure out estimated time for loop
-    -rewrite the motor control with timers for teensy, ensure control for all motors
+    -(now) implement appropriate software interrupts that can take input from PID or manual control functions
+    -(now) decide frequency of motor control loop: figure out estimated time for loop
+    -(later) rewrite the motor control with timers for teensy, ensure control for all motors
 
   -(next next step) external interrupts for limit switches
-   -rewrite all the register bit variables to use teensy registers for limit switch interrupts
-   -incorporate limit switches for homing position on all motors
-   -implement homing function on boot
+   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
+   -(waiting for the switches) incorporate limit switches for homing position on all motors
+   -(later) implement homing function on boot
+
+  -even more notes in josh notes.txt and in google drive
 */
 
 #include "PinSetup.h"

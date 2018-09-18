@@ -1,66 +1,8 @@
 
 /*
-  unsigned int c0 = 1600;  // was 2000 * sqrt( 2 * angle / accel )
-
-  struct stepperInfo {
-  void (*dirFunc)(int);
-  void (*stepFunc)();
-  volatile float dir = 0;
-  volatile float currentAngle = 0;
-  volatile float desiredAngle = 0;
-  volatile bool movementDone = true;
-  };
-
-  struct dcInfo {
-  volatile int dir = 127; // 0 to 255 where 127 is the midpoint and stops the motor
-  volatile float currentAngle = 0;
-  volatile float desiredAngle = 0;
-  volatile bool dcMovementDone = false;
-  volatile long encCount = 0;
-  };
-
-  struct servoInfo {
-  volatile int dir = 127; // 0 to 255 where 127 is the midpoint and stops the motor
-  volatile float currentAngle = 0;
-  volatile float desiredAngle = 0;
-  volatile bool dcMovementDone = false;
-  volatile long encCount = 0;
-  };
-
-  volatile stepperInfo steppers[NUM_STEPPERS];
-  char serialBuffer[BUFFER_SIZE];
-  volatile dcInfo dcMotor;
-  bool led_status = true;
-  int startTime = 0;
-
-  void M1Step() {
-  M1_STEP_HIGH
-  M1_STEP_LOW
-  }
-  void M1Dir(int d) {
-  digitalWrite(M1_DIR_PIN, d);
-  }
-
-  void M2Step() {
-  M2_STEP_HIGH
-  M2_STEP_LOW
-  }
-  void M2Dir(int d) {
-  digitalWrite(M2_DIR_PIN, d);
-  }
-*/
-
-
-
 
  setup(){
   /*
-  steppers[0].dirFunc  = M1Dir;
-  steppers[0].stepFunc = M1Step;
-
-   steppers[1].dirFunc  = M2Dir;
-  steppers[1].stepFunc = M2Step;
-
    noInterrupts();
   TCCR1A = 0;
   TCCR1B = 0;
@@ -76,27 +18,7 @@
 }
 
  loop(){
-
-   /* //dcMotor.currentAngle = abs(dcMotor.encCount) / 5.555;
-  if (!dcMotor.dcMovementDone) {
-    //    Serial.print(dcMotor.encCount); Serial.print(","); Serial.println(dcMotor.currentAngle);
-    analogWrite(DC_PWM_PIN, dcMotor.dir);
-  }
-
-   //  if (abs(dcMotor.currentAngle - dcMotor.desiredAngle) < 0.5 ) {
-  //    analogWrite(DC_PWM_PIN, 127);
-  //    dcMotor.dcMovementDone = true;
-  //  }
-*/
-  /* //heartbeat : blink LED every 1 second
-  int t2 = millis();
-  if ( (t2 - startTime) > 1000) {
-    startTime = t2;
-    led_status = !led_status;
-  }
-  */
-
-
+  
  }
 
 
