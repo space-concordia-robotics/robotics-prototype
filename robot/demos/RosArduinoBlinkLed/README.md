@@ -35,8 +35,9 @@ Just make sure to create a new virtual environment (because there were some issu
 - `. test/bin/activate`
 - `pip install pyyaml`
 - `pip install rospkg`
+- `pip install click`
 
-Now you should be good to run the python publisher script, which will toggle the LED every 4 seconds:
+Now you should be good to run the python publisher script, which will toggle the LED when the you press 't', and exit the program on 'q':
 
 - `./blinkLED.py`
 
