@@ -27,3 +27,17 @@ Make sure to use the correct serial port:
 Finally, you can toggle the LED using [rostopic](http://wiki.ros.org/rostopic):
 
 - `rostopic pub toggle_led std_msgs/Empty --once`
+
+Or can also run the python script `blinkLED.py`.
+Just make sure to create a new virtual environment (because there were some issues trying to get it to work with our current one):
+
+- `virtualenv -p python3 test`
+- `. test/bin/activate`
+- `pip install pyyaml`
+- `pip install rospkg`
+
+Now you should be good to run the python publisher script, which will toggle the LED every 4 seconds:
+
+- `./blinkLED.py`
+
+[This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to get 'er done.
