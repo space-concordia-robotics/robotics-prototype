@@ -1,62 +1,3 @@
-/*
-  TODO:
-  -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
-  -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
-  -(always) clean up code, comment code
-  -(later) implement power management? sleep mode?
-  -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
-    -(done) update parsing function to take in angles
-  -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
-  -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
-  -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-  -(done-ish) drivers that accept 3.3v probably internally deal with it so that 3.3v is max speed
-  -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
-  
-  -(done) implement budge function:
-   -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
-   -(done) implement limit for max turns in right/left directions
-   -(done) connect and test all motor types with budge()
-   -(next) clean up budge code to make it easier to read and reduce repetition
-   
-  -(next) clean up parsing code to make it easier to read and reduce repetition
-
-  -(now) determine motor angles thru encoder interrupts
-   -(done) all the pin and register definitions are based on the teensy, this would need to be changed for a different microcontroller
-   -(done-ish) solve encoder direction change issue? not necessary
-   -(issue) interrupt functions must be defined outside of classes...
-   -(now) confirm all the pins will work with interrupts and not stepping on each other
-   -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
-   -(done-ish) can determine motor angles for dc and steppers, not servos
-   -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
-   -(now) make sure there is  max/min angle limitation with encoders
-   -(now) deal with overflow of encoderCount
-   -(now) determine whether it's worth it to use the built in quadrature decoders
-
-  -(next step) timers
-   -systick is normally a heartbeat type thing
-   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
-   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
-   -implement heartbeat after deciding on best timer for it
-   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
-    -currently using whatever is connected to the pwm pins for timing pwm
-    -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
-    -ftm+tpm has quadrature decoder?
-    -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
-
-  -(next) simultaneous motor control with timers
-   -(next) decide whether to use abtin's software interrupt or simpler method for simultaneous motor control
-    -(now) implement appropriate software interrupts that can take input from PID or manual control functions
-    -(now) decide frequency of motor control loop: figure out estimated time for loop
-    -(later) rewrite the motor control with timers for teensy, ensure control for all motors
-
-  -(next next step) external interrupts for limit switches
-   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
-   -(waiting for the switches) incorporate limit switches for homing position on all motors
-   -(later) implement homing function on boot
-
-  -even more notes in josh notes.txt and in google drive
-*/
-
 #include "PinSetup.h"
 
 #include "RobotMotor.h"
@@ -66,6 +7,7 @@
 
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
+#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
 
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
@@ -78,9 +20,9 @@ elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 
 /* parsing */
 char *restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
-int tempMotorVar; // checks the motor before giving the data to the struct below
-int tempSpeedVar; // checks the speed before giving the data to the struct below
-unsigned int tempTimeVar; // checks the time before giving the data to the struct below
+//int tempMotorVar; // checks the motor before giving the data to the struct below
+//int tempSpeedVar; // checks the speed before giving the data to the struct below
+//unsigned int tempTimeVar; // checks the time before giving the data to the struct below
 
 struct budgeInfo { // info from parsing functionality is packaged and given to motor control functionality
   int whichMotor = 0;
@@ -91,41 +33,27 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   float whichAngle = 0.0;
 } budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
 
-/* motor contruction */
-// to reduce constructor parameters i wanted to make structs but it may make the code even messier.. try typedefs?
-/*  struct dcPins {
-
-  };
-
-  struct servoPins{
-
-  };
-
-  struct stepperPins {
-
-  };
-*/
-
 const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
-StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_GEAR_RATIO);
+StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
 DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for new driver
-StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_GEAR_RATIO);
-StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_GEAR_RATIO);
+StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
+StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
-
-//RobotMotor* m1 = motor1.this;
-//RobotMotor* motorArray[]={m1};
 
 IntervalTimer stepperTimer;
 IntervalTimer dcTimer;
 IntervalTimer servoTimer;
 
+elapsedMillis sinceStepperCheck;
+
 //RobotMotor motorArray[] = {motor1, motor2, motor3, motor4, motor5, motor6}; doesn't work rip
-StepperMotor stepperArray[] = {motor1, motor3, motor4};
+//StepperMotor stepperArray[] = {motor1, motor3, motor4};
+
+void printMotorAngles();
 
 void m1_encoder_interrupt(void);
 void m2_encoder_interrupt(void);
@@ -133,23 +61,6 @@ void m3_encoder_interrupt(void);
 void m4_encoder_interrupt(void);
 //void m5_encoder_interrupt(void);
 //void m6_encoder_interrupt(void);
-
-/*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
-  void m1WrapperISR(void) {
-  motor1.encoder_interrupt();
-  }
-  void m2WrapperISR(void) {
-  motor2.encoder_interrupt();
-  }
-  void m3WrapperISR(void) {
-  motor3.encoder_interrupt();
-  }
-  void m4WrapperISR(void) {
-  motor4.encoder_interrupt();
-  }
-  //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
-  //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
-*/
 
 void stepperInterrupt(void);
 void dcInterrupt(void);
@@ -175,30 +86,12 @@ void setup() {
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  /*    attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
-    attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
-
-    attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
-    attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
-
-    attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
-    attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
-
-    attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
-    attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
-  */
-  /*    attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
-    attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
-
-    attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
-    attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
-  */
-
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   //servoTimer.begin(dcInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
+  sinceStepperCheck = 0;
 }
 
 void loop() {
@@ -210,7 +103,7 @@ void loop() {
     char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
     if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
-      tempMotorVar = atoi(msgElem);
+      int tempMotorVar = atoi(msgElem);
       // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
       if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
         budgeCommand.whichMotor = tempMotorVar;
@@ -221,8 +114,12 @@ void loop() {
       if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
         budgeCommand.angleCommand = true;
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
-        budgeCommand.whichAngle = atof(msgElem); // converts to float
-        Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
+        float tempAngleVar = atof(msgElem); // converts to float
+        if (tempAngleVar > -720.0 && tempAngleVar < 720.0) {
+          budgeCommand.whichAngle = tempAngleVar;
+          Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
+        }
+        else Serial.println("angle is out of bounds");
       }
       else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
@@ -239,7 +136,7 @@ void loop() {
         msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
         if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
           msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
-          tempSpeedVar = atoi(msgElem); // converts to int
+          int tempSpeedVar = atoi(msgElem); // converts to int
           if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
             budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
             Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed - 1); // minus 1 to be consistent with incoming message
@@ -248,7 +145,7 @@ void loop() {
         msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
         if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
           msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
-          tempTimeVar = atoi(msgElem); // converts to int
+          unsigned int tempTimeVar = atoi(msgElem); // converts to int
           if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
             budgeCommand.whichTime = tempTimeVar;
             Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
@@ -280,11 +177,23 @@ void loop() {
           motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
           break;
         case MOTOR3:
-          //motor3.movementDone = false;
-          //motor3.enablePower();
-          motor3.desiredAngle = budgeCommand.whichAngle;
-          motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
-          break;
+          {
+            motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.getCurrentAngle(); // find the angle difference
+
+            // determine the direction
+            if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
+            else motor3.motorPID.openLoopDir = -1;
+
+            // if the error is big enough to justify movement
+            if (fabs(motor3.motorPID.openLoopError) > motor3.motorPID.angleTolerance) {
+              motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) / motor3.stepResolution; // calculate the number of steps to take
+              motor3.enablePower(); // give power to the stepper finally
+              motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            }
+            //motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
+            break;
+          }
         case MOTOR4:
           //motor4.movementDone = false;
           //motor4.enablePower();
@@ -299,36 +208,11 @@ void loop() {
           break;
       }
     }
-    /*
-      else if (budgeCommand.angleRequest) {
-      float angle;
-      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
-        case MOTOR1:
-          angle = motor1.getCurrentAngle();
-          break;
-        case MOTOR2:
-          angle = motor2.getCurrentAngle();
-          break;
-        case MOTOR3:
-          angle = motor3.getCurrentAngle();
-          break;
-        case MOTOR4:
-          angle = motor4.getCurrentAngle();
-          break;
-      //        case MOTOR5:
-      //          angle = motor5.getCurrentAngle();
-      //          break;
-      //        case MOTOR6:
-      //          angle = motor6.getCurrentAngle();
-      //          break;
-      }
-      Serial.print("$A,Angle: motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" angle: "); Serial.println(angle, 10);
-      }
-    */
     else if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
       Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
 
+      //motorArray[budgeCommand.whichMotor-1].budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
           motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
@@ -354,22 +238,91 @@ void loop() {
   }
   budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
 
-  if (motor1.movementDone) motor1.disablePower();
-  if (motor3.movementDone) motor3.disablePower();
-  if (motor4.movementDone) motor4.disablePower();
+  if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
+    // all of this code should probably go into a function called "calculate motor steps" or something...
+    // this code is very similar to what happens above when it decides which motor should turn after receiving a command
+    // this code also assumes that the correct amount of steps will take it to the right spot
+    // this means that it doesn't account for faulty angle calculations from the encoder or the motor resolution...
+    int remainingSteps = motor3.motorPID.numSteps - motor3.motorPID.stepCount;
+    float imaginedRemainingAngle = remainingSteps * motor3.stepResolution; // how far does the motor think it needs to go
+    float actualRemainingAngle = motor3.desiredAngle - motor3.getCurrentAngle(); // how far does it actually need to go
+    float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
+
+    if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
+    else discrepancy = -1;
+
+    if (fabs(discrepancy) > motor3.motorPID.angleTolerance) {
+      motor3.motorPID.numSteps = fabs(discrepancy) / motor3.stepResolution; // calculate the number of steps to take
+      motor3.enablePower(); // give power to the stepper finally
+      motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+    }
+    sinceStepperCheck = 0;
+  }
+
+  if (motor1.motorPID.movementDone) motor1.disablePower();
+  if (motor3.motorPID.movementDone) motor3.disablePower();
+  if (motor4.motorPID.movementDone) motor4.disablePower();
 
   // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) {
-    Serial.print("Motor Angles: ");
-    Serial.print(motor1.getCurrentAngle()); Serial.print(",");
-    Serial.print(motor2.getCurrentAngle()); Serial.print(",");
-    Serial.print(motor3.getCurrentAngle()); Serial.print(",");
-    Serial.println(motor4.getCurrentAngle());//Serial.print(",");
-    //Serial.print(motor5.getCurrentAngle());Serial.print(",");
-    //Serial.print(motor6.getCurrentAngle());Serial.print(",");
+    printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
 
+}
+
+void printMotorAngles() {
+  Serial.print("Motor Angles: ");
+  Serial.print(motor1.getCurrentAngle()); Serial.print(",");
+  Serial.print(motor2.getCurrentAngle()); Serial.print(",");
+  Serial.print(motor3.getCurrentAngle()); Serial.print(",");
+  Serial.println(motor4.getCurrentAngle());//Serial.print(",");
+  //Serial.print(motor5.getCurrentAngle());Serial.print(",");
+  //Serial.print(motor6.getCurrentAngle());Serial.print(",");
+}
+
+/*
+  void stepperInterrupt(void) {
+  static int nextInterval = 0;
+  int i = 3;
+  // code to decide which motor to turn goes here, or code just turns all motors
+  if (!stepperArray[i - 1].movementDone) {
+    // code to decide how fast the motor will turn and in which direction
+    int dir = CLOCKWISE;
+    nextInterval = 25000;
+    //set a minimum step period somewhere
+    //nextInterval = stepperArray[i-1].motorPID.updatePID(stepperArray[i-1].currentAngle, stepperArray[i-1].desiredAngle);
+    stepperArray[i - 1].singleStep(dir);
+    stepperTimer.update(nextInterval);
+  }
+  }
+*/
+
+// this function has constant step interval
+void stepperInterrupt(void) {
+  static int nextInterval = 0;
+  if (!motor3.motorPID.movementDone) {
+    motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
+    motor3.motorPID.stepCount++;
+    nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
+    stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
+  }
+  else motor3.motorPID.stepCount = 0; // reset the counter
+}
+
+void dcInterrupt(void) {
+  // code to decide which motor to turn goes here, or code just turns all motors
+  if (!motor2.motorPID.movementDone)
+    motor2.getCurrentAngle();
+  // rethink the PID? needs to set a direction AND a speed
+  motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+  int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+  int dir = CLOCKWISE;
+  motor2.setVelocity(dir, motorSpeed);
+}
+
+void servoInterrupt(void) {
+  ;
 }
 
 // if these don't register fast enough, use global volatile long encoderCount variables per motor instead of acccessing objects twice
@@ -425,34 +378,3 @@ void m4_encoder_interrupt(void) {
   motor6.encoderCount += dir[(oldEncoderState & 0x0F)];
   }
 */
-
-void stepperInterrupt(void) {
-  static int nextInterval = 0;
-  int i = 3;
-  // code to decide which motor to turn goes here, or code just turns all motors
-  if (!stepperArray[i - 1].movementDone) {
-    // code to decide how fast the motor will turn and in which direction
-    int dir = CLOCKWISE;
-    nextInterval = 25000;
-    //set a minimum step period somewhere
-    //nextInterval = stepperArray[i-1].motorPID.updatePID(stepperArray[i-1].currentAngle, stepperArray[i-1].desiredAngle);
-    stepperArray[i - 1].singleStep(dir);
-    stepperTimer.update(nextInterval);
-  }
-}
-
-void dcInterrupt(void) {
-  // code to decide which motor to turn goes here, or code just turns all motors
-  if(!motor2.movementDone)
-  motor2.getCurrentAngle();
-  // rethink the PID? needs to set a direction AND a speed
-  motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
-  int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
-  int dir = CLOCKWISE;
-  motor2.setVelocity(dir, motorSpeed);
-}
-
-void servoInterrupt(void) {
-  ;
-}
-

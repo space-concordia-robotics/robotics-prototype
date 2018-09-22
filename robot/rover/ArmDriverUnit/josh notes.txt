@@ -1,20 +1,19 @@
-stepper angle check needs to occur each software interrupt or every few interrupts because if the movement messes up in the middle we need a check... could do this in main loop actually
+rename getcurrentangle to calccurrentangle
+make setdesiredangle,getdesiredangle functions
 
-for now do steppers with constant period, worry about the ramping up and down later because probably requires individual timer interrupts
+stepper angle check needs to occur each software interrupt or every few interrupts because if the movement messes up in the middle we need a check... have put this into the main loop
+
+for now doing steppers with constant period, worry about the ramping up and down later because probably requires individual timer interrupts
 
 what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
-
-need step angle resolution and factor based on microstepping, though in our code there's no microstepping
 
 check recommended pid time interval period
 
 servo: estimate calculation based on speed and time
 
-make sure all variables affected by interrupts are volatile
+(always) make sure all variables affected by interrupts are volatile
 
-for steppers the check is more to do with whether the amount of steps has been reached and if not, try to step more
-
-whereas for dc they control voltage so the issue there is whether the pid tries to go to max voltage
+for steppers the check is more to do with whether the amount of steps has been reached and if not, try to step more... whereas for dc they control voltage so the issue there is whether the pid tries to go to max voltage
 
 what happens if a new command tells the motor to turn in opposite direction? abrupt changes are bad. if the stepper is trying to turn but hasn't gotten anywhere there should be a check in the microcontroller that there's an issue (there can also be a check in the gui)
 
@@ -34,6 +33,7 @@ initialization function should maybe sweep to both ends of the arm's range? or m
 don't worry about 3.3v because the driver probably compares the 3.3pwm with the 3.3vcc
 
 option to disable pid?
+option to halt motors?
 
 fuzzy logic followed by pid? just fuzzy logic? different pid constants based on how large the error is? small-medium error has large constants and medium high has smaller ones so it doesn't overreact?
 
