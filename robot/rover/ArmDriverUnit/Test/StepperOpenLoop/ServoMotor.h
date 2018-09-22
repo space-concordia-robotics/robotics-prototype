@@ -63,6 +63,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   pwmPin(pwmPin)
 {
   numServoMotors++;
+  this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
   budgeMovementDone = true;

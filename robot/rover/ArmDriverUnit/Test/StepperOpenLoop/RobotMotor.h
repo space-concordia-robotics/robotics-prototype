@@ -18,6 +18,7 @@ class RobotMotor {
     //float maxCWAngle, maxCCWAngle;
     volatile float currentAngle; // can be updated within timer interrupts
     float desiredAngle;
+    float gearRatio;
 
     // encoder_interrupt();
     void attachEncoder();

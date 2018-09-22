@@ -48,6 +48,7 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), fullStepResolution(stepRes), steppingMode(stepMode)
 {
   numStepperMotors++;
+  this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
   stepResolution = fullStepResolution * steppingMode;

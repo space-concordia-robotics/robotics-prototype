@@ -187,7 +187,7 @@ void loop() {
 
             // if the error is big enough to justify movement
             if (fabs(motor3.motorPID.openLoopError) > motor3.motorPID.angleTolerance) {
-              motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) / motor3.stepResolution; // calculate the number of steps to take
+              motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
               motor3.enablePower(); // give power to the stepper finally
               motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
             }
@@ -248,13 +248,24 @@ void loop() {
     float actualRemainingAngle = motor3.desiredAngle - motor3.getCurrentAngle(); // how far does it actually need to go
     float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
 
-    if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
-    else discrepancy = -1;
-
+    // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
+    // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
+    // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
     if (fabs(discrepancy) > motor3.motorPID.angleTolerance) {
-      motor3.motorPID.numSteps = fabs(discrepancy) / motor3.stepResolution; // calculate the number of steps to take
-      motor3.enablePower(); // give power to the stepper finally
-      motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+      // it's possible the check happens during movement, but there needs to be ample
+      if (!motor3.motorPID.movementDone && actualRemainingAngle > motor3.motorPID.angleTolerance) {
+        // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
+        // the motor interrupt assumes the step count and direction are unchanged!!!!
+        motor3.motorPID.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
+      }
+      // it's possible the check happens when the motor is at rest
+      else {
+        if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
+        else discrepancy = -1;
+        motor3.enablePower();
+        motor3.motorPID.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
+        motor3.motorPID.movementDone = false;
+      }
     }
     sinceStepperCheck = 0;
   }
@@ -301,13 +312,18 @@ void printMotorAngles() {
 // this function has constant step interval
 void stepperInterrupt(void) {
   static int nextInterval = 0;
-  if (!motor3.motorPID.movementDone) {
+  // movementDone can be set elsewhere... so can numSteps
+  if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
     motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
     motor3.motorPID.stepCount++;
     nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
-    stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
   }
-  else motor3.motorPID.stepCount = 0; // reset the counter
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor3.motorPID.stepCount = 0; // reset the counter
+    motor3.motorPID.movementDone = true;
+    motor3.disablePower();
+  }
+  stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 
 void dcInterrupt(void) {

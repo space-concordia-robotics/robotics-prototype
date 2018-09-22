@@ -78,6 +78,7 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   directionPin(dirPin), pwmPin(pwmPin)
 {
   numDCMotors++;
+  this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
   budgeMovementDone = true;
