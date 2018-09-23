@@ -7,12 +7,15 @@ import click
 import sys
 
 def talker():
+
     msg = Empty() # empty message
     # topic name: toggle_led
     pub = rospy.Publisher('toggle_led', Empty)
     # node name
+    print("\nInitializing led_toggler node...")
     rospy.init_node('led_toggler', anonymous=True)
     rate = rospy.Rate(10) # 10 Hz
+    print("Press 't' to toggle the LED, or 'q' to quit\n")
 
     while not rospy.is_shutdown():
         input = click.getchar()
@@ -21,7 +24,7 @@ def talker():
             print("Toggling LED")
             pub.publish(msg)
         elif input == 'q':
-            print("Exiting")
+            print("\nExiting...")
             sys.exit(0)
 
         rate.sleep()

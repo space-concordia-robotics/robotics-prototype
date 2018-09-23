@@ -13,6 +13,10 @@ I installed ROS using the quick install script from the ROS programming book:
 
 For setting up [Arduino IDE](https://www.arduino.cc/en/Main/Software), follow instructions [here](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
 
+Make sure you run the following commands to install rosserial libraries:
+- `sudo apt-get install ros-kinetic-serial-arduino`
+- `sudo apt-get install ros-kinetic-serial`
+
 ## Running the demo
 
 Launch [roscore](http://wiki.ros.org/roscore) in a new terminal window:
@@ -44,3 +48,22 @@ Now you should be good to run the python publisher script, which will toggle the
 [This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to get 'er done.
 
 Note that you will most probably have to delete and recreate your virtual environment folder again for this to work.
+
+I was able to test running on multiple machines over the same network by configuring the machines as such:
+
+Laptop (master):
+- ROS_MASTER_URI=http://localhost:11311
+- ROS_HOSTNAME=`hostname`
+ 
+Odroid (w/ Arduino):
+- ROS_MASTER_URI:http://<Laptop IP>
+- ROS_HOSTNAME=`hostname`
+
+Since I wasn't able to ping `odroid` hostname from my laptop (and vice versa), I had to edit my `/etc/hosts` file for each device
+to make sure the hostnames would resolve to their corresponding IP addresses.
+[This article](https://bencane.com/2013/10/29/managing-dns-locally-with-etchosts/) explains in more detail about managing DNS locally with `/etc/hosts`.
+
+Assuming you can now ping hostnames of each devices bi-directionally, to run the demo remotely:
+- On your machine run `roscore`
+- On the odroid run `rosrun rosserial_python serial_node.py /dev/ttyACM0`
+- On your machine run `rostopic pub toggle_led std_msgs/Empty --once`, or `./blinkLED.py` for a slightly more interactive experience
