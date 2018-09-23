@@ -24,9 +24,11 @@ Launch [roscore](http://wiki.ros.org/roscore) in a new terminal window:
 - `roscore`
 
 Next, run the rosserial client application that forwards your Arduino messages ti the rest of ROS.
-Make sure to use the correct serial port:
+Make sure to use the correct serial port, in my case it was ttyACM0.
+If you're not sure what yours is, connect your arduino and run `ls /dev/tty*`.
+If you're still not sure, unplug the arduino, run the same command and compare what's missing.
 
-- `rosrun rosserial_python serial_node.py /dev/ttyUSB0`
+- `rosrun rosserial_python serial_node.py /dev/ttyACM0`
 
 Finally, you can toggle the LED using [rostopic](http://wiki.ros.org/rostopic):
 
@@ -43,6 +45,8 @@ NOTE: to run this script with no errors, you will most probably have to delete a
 [This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to this part done.
 
 ### Multiple machines
+
+[This tutorial](http://wiki.ros.org/ROS/Tutorials/MultipleMachines) explains the setup necessary for running on multiple machines.
 
 I was able to test running on multiple machines over the same network by configuring the machines as such:
 
