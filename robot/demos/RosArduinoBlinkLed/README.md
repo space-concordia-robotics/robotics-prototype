@@ -43,7 +43,4 @@ Now you should be good to run the python publisher script, which will toggle the
 
 [This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to get 'er done.
 
-# Known Issues
-- As previously mentioned, something about our current virtual environment setup is causing this error to appear everytime
-I try to run the script with it activated:
-`python: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.25' not found (required by python)`
+Note that you will most probably have to delete and recreate your virtual environment folder again for this to work.
