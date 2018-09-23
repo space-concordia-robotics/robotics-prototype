@@ -1,6 +1,4 @@
-# ROS Arduino Blink LED
-
-Essentially testing the code provided in the beginner ROS tutorials ([here](http://wiki.ros.org/rosserial_arduino/Tutorials/Blink))
+# ROS Arduino Blink LED Demo
 
 ## Setup
 
@@ -19,6 +17,8 @@ Make sure you run the following commands to install rosserial libraries:
 
 ## Running the demo
 
+### One machine
+
 Launch [roscore](http://wiki.ros.org/roscore) in a new terminal window:
 
 - `roscore`
@@ -33,21 +33,16 @@ Finally, you can toggle the LED using [rostopic](http://wiki.ros.org/rostopic):
 - `rostopic pub toggle_led std_msgs/Empty --once`
 
 Or can also run the python script `blinkLED.py`.
-Just make sure to create a new virtual environment (because there were some issues trying to get it to work with our current one):
-
-- `virtualenv -p python3 test`
-- `. test/bin/activate`
-- `pip install pyyaml`
-- `pip install rospkg`
-- `pip install click`
 
 Now you should be good to run the python publisher script, which will toggle the LED when the you press 't', and exit the program on 'q':
 
 - `./blinkLED.py`
 
-[This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to get 'er done.
+NOTE: to run this script with no errors, you will most probably have to delete and recreate your virtual environment folder again for this to work.
 
-Note that you will most probably have to delete and recreate your virtual environment folder again for this to work.
+[This link](http://wiki.ros.org/rospy/Overview/Publishers%20and%20Subscribers) was useful in figuring out how to this part done.
+
+### Multiple machines
 
 I was able to test running on multiple machines over the same network by configuring the machines as such:
 
