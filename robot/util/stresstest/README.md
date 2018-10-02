@@ -1,19 +1,28 @@
 # Odroid Stress Test
 
-## Setup
+## Setup (optional)
 
-If you don't already have a script where you keep your bash functions
+This setup is optional, if you wish to test the functions on your system console without running the script.
+If you just wish to run the script itself, you can skip this setup.
 
-Create one with: `touch ~/.bash_cmds.sh` (prepending the . makes it a hidden file)
+Copy the script to your home folder
 
-Add the functions in the `.bash_cmds.sh` script
+- `cp .bash_cmds.sh ~/`
 
-Make sure your ~/.bashrc sources ~/.bash_cmds.sh: append `. ~/.bash_cmds.sh` to your bashrc
-Once you do this, you'll be able to call the bash function from your terminal (after sourcing ~/.bashrc, which happens everytime you open a new terminal). This has been tested to work both on the odroid running ubuntuMATE and on the space lab's ubuntu machine runing ubuntu desktop 16.04.
+Make sure your ~/.bashrc sources ~/.bash_cmds.sh: append `. ~/.bash_cmds.sh` to your `~/.bashrc` file
+
+Once you do this, you'll be able to call the bash function from your terminal (after sourcing ~/.bashrc again, which happens everytime you open a new terminal). 
 
 ## Running the test
 
-Run the stress test with: `./stress_test.sh`. It will default to run for 60 seconds.
-It should print the cpu clock frequency and temperature every second, and once it's done the exit status and runtime.
+IMPORTANT: For the case of the odroid, if you see that the cpu temperature is above 80 degrees celsius you should stop the process.
+
+Run the stress test with: `./stress_test.sh`. It will run for 60 seconds by default.
+It should print the cpu clock frequency and temperature every second, and once it's done the exit status and runtime of the process.
 
 You may specify how long to run the command for by simply adding the value in seconds as a first argument when to the script, so with `./stress_test.sh 10` it will run for 10 seconds.
+You may also exit early via `Ctrl + c`.
+
+NOTE: Since this script intended to run on the odroid, which has ARM architecture, the method for getting the current clock frequency requires access to a file owned by root, and must therefore be ran with `sudo` (but does not on x86).
+
+Example: `sudo ./stress_test.sh 10`
