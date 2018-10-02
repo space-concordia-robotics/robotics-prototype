@@ -3,15 +3,28 @@
 ## Setup (optional)
 
 This setup is optional, if you wish to test the functions on your system console without running the script.
+
+Existing functions:
+
+- get_arch
+- get_cpu_temp
+- get_cpu_freq
+- print_cpu_temp
+- print_cpu_freq
+- print_cpu_temp_freq
+- print_cpu_freq_temp
+
 If you just wish to run the script itself, you can skip this setup.
 
 Copy the script to your home folder
 
-- `cp .bash_cmds.sh ~/`
+- `cp bash_cmds.sh ~/`
 
-Make sure your ~/.bashrc sources ~/.bash_cmds.sh: append `. ~/.bash_cmds.sh` to your `~/.bashrc` file
+Make sure your ~/.bashrc sources ~/bash_cmds.sh: append `. ~/bash_cmds.sh` to your `~/.bashrc` file
 
 Once you do this, you'll be able to call the bash function from your terminal (after sourcing ~/.bashrc again, which happens everytime you open a new terminal). 
+
+You may optionally prepend a '.' to `bash_cmds.sh` if you wish for it to be a hidden file.
 
 ## Running the test
 

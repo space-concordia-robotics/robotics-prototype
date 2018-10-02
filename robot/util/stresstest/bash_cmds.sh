@@ -25,6 +25,22 @@ function get_cpu_freq() {
     echo $raw_freq
 }
 
+# get architecture
+function get_arch() {
+    architecture_mixed_case=$(uname -a)
+    # to lower case
+    architecture=${architecture_mixed_case,,}
+
+    if [[ $architecture = *"arm"* ]]; then
+        echo "arm"
+    elif [[ $architecture = *"x86"* ]]; then
+        echo "x86"
+    else
+        echo "WARNING: get_arch()"
+        echo "--> unhandled architecture: $architecture"
+    fi
+}
+
 # format and print CPU temp
 function print_cpu_temp() {
     raw_temp=`get_cpu_temp`
@@ -35,18 +51,19 @@ function print_cpu_temp() {
 function print_cpu_freq() {
     raw_freq=`get_cpu_freq`
 
-    # if on ARM architecture (i.e. odroid)
-    architecture_mixed_case=$(uname -a)
-    # to lower case
-    architecture=${architecture_mixed_case,,}
+    architecture=`get_arch`
 
     if [[ $architecture = *"arm"* ]]; then
         echo "CPU freq: $raw_freq KHz"
-    else
+    elif [[ $architecture = *"x86"* ]]; then
         echo "CPU freq: $raw_freq MHz"
     fi
 }
 
 function print_cpu_temp_freq() {
     print_cpu_temp `get_cpu_temp` && print_cpu_freq `get_cpu_freq`
+}
+
+function print_cpu_freq_temp() {
+    print_cpu_freq `get_cpu_freq` && print_cpu_temp `get_cpu_temp`
 }
