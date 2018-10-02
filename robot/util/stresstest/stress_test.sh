@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
-# need to install "stress" via "apt-get install stress" before running this script
+
+# check if stress is installed
+PKG_OK=$(dpkg-query -W --showformat='${Status}\n' stress|grep "install ok installed")
+
+echo "Checking for dependencies... $PKG_OK"
+if [ "" == "$PKG_OK" ]; then
+    echo "Dependency not found: stress"
+    echo "To install: sudo apt-get install stress"
+    exit 1
+fi
 
 # source functions containing script
 . .bash_cmds.sh
@@ -10,6 +19,8 @@ end=$((SECONDS+60))
 if [ "$#" -ne 2 ]; then
     end=$((SECONDS+$1))
 fi
+
+echo
 
 while [ $SECONDS -lt $end ];
 do
