@@ -42,14 +42,24 @@ function get_arch() {
 }
 
 # format and print CPU temp
+# expects 5 digit number for proper formatting
 function print_cpu_temp() {
-    raw_temp=`get_cpu_temp`
+    if [ $1 ]; then
+        raw_temp=$1
+    else
+        raw_temp=`get_cpu_temp`
+    fi
+
     echo "CPU temp: ${raw_temp%???}.${raw_temp#??} C"
 }
 
 # format and print CPU freq
 function print_cpu_freq() {
-    raw_freq=`get_cpu_freq`
+    if [ $1 ]; then
+        raw_freq=$1
+    else
+        raw_freq=`get_cpu_freq`
+    fi
 
     architecture=`get_arch`
 
@@ -61,9 +71,18 @@ function print_cpu_freq() {
 }
 
 function print_cpu_temp_freq() {
-    print_cpu_temp `get_cpu_temp` && print_cpu_freq `get_cpu_freq`
+    # is parameter 2 zero length?
+    if [ $2 ]; then
+        print_cpu_temp $1 && print_cpu_freq $2
+    else
+        print_cpu_temp `get_cpu_temp` && print_cpu_freq `get_cpu_freq`
+    fi
 }
 
 function print_cpu_freq_temp() {
-    print_cpu_freq `get_cpu_freq` && print_cpu_temp `get_cpu_temp`
+    if [ $2 ]; then
+        print_cpu_freq $1 && print_cpu_temp $2
+    else
+        print_cpu_freq `get_cpu_freq` && print_cpu_temp `get_cpu_temp`
+    fi
 }

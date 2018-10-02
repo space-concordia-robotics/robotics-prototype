@@ -2,7 +2,7 @@
 
 ## Setup (optional)
 
-This setup is optional, if you wish to test the functions on your system console without running the script.
+This setup is optional, if you wish to test the functions on your system console at any point in time after setting up.
 
 Existing functions:
 
@@ -15,6 +15,7 @@ Existing functions:
 - print_cpu_freq_temp
 
 If you just wish to run the script itself, you can skip this setup.
+If you want to test the functions but only temporarily, source the file with: `. ~/bash_cmds.sh`.
 
 Copy the script to your home folder
 
