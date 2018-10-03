@@ -3,7 +3,7 @@ from subprocess import check_output
 from re import search
 
 def get_arch():
-    output = check_output(["uname", "-a"])
+    output = check_output(["uname", "-a"]).decode()
     output = output.lower()
 
     if "arm" in output:
@@ -26,8 +26,9 @@ def get_cpu_freq():
 
     if arch == "arm":
         # this requires sudo priveleges to open
-        f = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq")
+        f = open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", "r")
         raw_freq = f.read.rstrip()
+        f.close()
     elif arch == "x86":
         cmd = "lscpu | grep 'CPU MHz'"
         output = check_output(cmd, shell=True).decode()
@@ -37,7 +38,6 @@ def get_cpu_freq():
     return raw_freq
 
 def report_temp(freq):
-    #freq_str = str(freq)
     print("CPU temp: " + freq[:2] + "." + freq[2:] + " C")
 
 def report_freq(temp, arch):
