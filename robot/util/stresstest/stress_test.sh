@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # check if stress is installed
+echo "Checking for dependencies..."
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' stress|grep "install ok installed")
 
-echo "Checking for dependencies... $PKG_OK"
 if [ "" == "$PKG_OK" ]; then
     echo "Dependency not found: stress"
     echo "To install: sudo apt-get install stress"
@@ -11,7 +11,7 @@ if [ "" == "$PKG_OK" ]; then
 fi
 
 # source functions containing script
-. .bash_cmds.sh
+. bash_cmds.sh
 
 # end after 60 seconds (default case)
 end=$((SECONDS+60))
@@ -24,6 +24,6 @@ echo
 
 while [ $SECONDS -lt $end ];
 do
-get_cpu_temp_freq && sleep 1;
+print_cpu_temp_freq && sleep 1;
 test $? -gt 128 && break;
 done& stress -c 4 -t `echo $end`s
