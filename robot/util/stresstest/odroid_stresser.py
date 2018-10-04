@@ -49,11 +49,11 @@ def report_temp(freq, prepend=""):
         print(prepend + "CPU temp: " + freq[:2] + "." + freq[2:] + " C")
 
 
-def report_freq(temp, arch):
+def report_freq(temp, arch, prepend=""):
     if arch == "arm":
-        print("CPU freq: " + str(temp) + " KHz")
+        print(prepend + "CPU freq: " + str(temp) + " KHz")
     elif arch == "x86":
-        print("CPU freq: " + str(temp) + " MHz")
+        print(prepend + "CPU freq: " + str(temp) + " MHz")
     else:
         print("Uknown architecture:")
         print(arch)
@@ -91,7 +91,10 @@ if len(argv) == 2:
 
 max_temp = int(get_cpu_temp()) + 5000
 min_temp = max_temp - 5000
-avg_temp = 0
+max_freq = float(get_cpu_freq()) + 50
+min_freq = max_freq - 50
+temp_sum = 0
+freq_sum = 0
 
 try:
     stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
@@ -99,8 +102,9 @@ try:
 
     while time() < end:
         temp = int(get_cpu_temp())
-        freq = get_cpu_freq()
-        avg_temp += temp
+        freq = float(get_cpu_freq())
+        temp_sum += temp
+        freq_sum += freq
 
         report_temp_freq(temp, freq, arch)
 
@@ -109,6 +113,12 @@ try:
 
         if temp < min_temp:
             min_temp = temp
+
+        if freq > max_freq:
+            max_freq = freq
+
+        if freq < min_freq:
+            min_freq = freq
 
         sleep(1)
 
@@ -125,13 +135,22 @@ except:
     # keep waiting
 #    sleep(1)
 
-avg_temp = avg_temp / (runtime * 1.0)
-# account for extra trailing 0's
+avg_freq = freq_sum / (runtime * 1.0)
+avg_temp = temp_sum / (runtime * 1.0)
+# scale down to account for extra trailing 0's
 avg_temp = avg_temp / 1000
+
+print("\nTemperature stats:")
 
 report_temp(min_temp, "Min ")
 report_temp(max_temp, "Max ")
 report_temp(avg_temp, "Avg ")
+
+print("\nClock speed stats:")
+
+report_freq(min_freq, arch, "Min ")
+report_freq(max_freq, arch, "Max ")
+report_freq(avg_freq, arch, "Avg ")
 
 # self assurance tests
 """
