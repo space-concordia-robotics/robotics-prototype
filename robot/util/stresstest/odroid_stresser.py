@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from subprocess import check_output
+from subprocess import check_output, Popen
 from re import search
-from sys import exit, argv
+from sys import exit, argv, stdout
 from time import time, sleep
+import traceback
 
 def get_arch():
     output = check_output(["uname", "-a"]).decode()
@@ -82,11 +83,16 @@ if len(argv) == 2:
     end = time() + runtime
 
 try:
+    stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
+    Popen(stress_test_cmd.split(" "))
+
     while time() < end:
         report_temp_freq(get_cpu_temp(), get_cpu_freq(), arch)
         sleep(1)
+
 except:
     print("\nTerminating stress test")
+
 # self assurance tests
 """
 report_temp_(temp)
