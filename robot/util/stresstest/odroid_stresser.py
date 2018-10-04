@@ -40,8 +40,14 @@ def get_cpu_freq():
 
     return raw_freq
 
-def report_temp(freq):
-    print("CPU temp: " + freq[:2] + "." + freq[2:] + " C")
+def report_temp(freq, prepend=""):
+    freq = str(freq)
+
+    if "." in freq:
+        print(prepend + "CPU temp: " + freq + " C")
+    else:
+        print(prepend + "CPU temp: " + freq[:2] + "." + freq[2:] + " C")
+
 
 def report_freq(temp, arch):
     if arch == "arm":
@@ -72,7 +78,8 @@ if output == "":
     exit(1)
 
 # default 60 seconds run time
-end = time() + 60
+runtime = 60
+end = time() + runtime
 
 print()
 
@@ -82,16 +89,49 @@ if len(argv) == 2:
     runtime = int(argv[1])
     end = time() + runtime
 
+max_temp = int(get_cpu_temp()) + 5000
+min_temp = max_temp - 5000
+avg_temp = 0
+
 try:
     stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
-    Popen(stress_test_cmd.split(" "))
+    p = Popen(stress_test_cmd.split(" "))
 
     while time() < end:
-        report_temp_freq(get_cpu_temp(), get_cpu_freq(), arch)
+        temp = int(get_cpu_temp())
+        freq = get_cpu_freq()
+        avg_temp += temp
+
+        report_temp_freq(temp, freq, arch)
+
+        if temp > max_temp:
+            max_temp = temp
+
+        if temp < min_temp:
+            min_temp = temp
+
         sleep(1)
 
-except:
+except KeyboardInterrupt:
     print("\nTerminating stress test")
+except:
+    print("Exception in user code:")
+    print("-"*60)
+    traceback.print_exc(file=stdout)
+    print("-"*60)
+
+# paranoia
+#while p.poll() is None:
+    # keep waiting
+#    sleep(1)
+
+avg_temp = avg_temp / (runtime * 1.0)
+# account for extra trailing 0's
+avg_temp = avg_temp / 1000
+
+report_temp(min_temp, "Min ")
+report_temp(max_temp, "Max ")
+report_temp(avg_temp, "Avg ")
 
 # self assurance tests
 """
