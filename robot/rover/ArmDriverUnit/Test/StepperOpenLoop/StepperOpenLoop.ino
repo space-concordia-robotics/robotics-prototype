@@ -5,9 +5,14 @@
 #include "DCMotor.h"
 #include "ServoMotor.h"
 
+#define STEPPER_PID_PERIOD 25*1000
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
-#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
+#define STEPPER_CHECK_INTERVAL 2000
+//#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
+
+#define ENCODER_NVIC_PRIORITY 100
+#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
 
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
@@ -52,6 +57,8 @@ elapsedMillis sinceStepperCheck;
 
 //RobotMotor motorArray[] = {motor1, motor2, motor3, motor4, motor5, motor6}; doesn't work rip
 //StepperMotor stepperArray[] = {motor1, motor3, motor4};
+//void *m1,m2,m3,m4,m5,m6;
+//void * motorArray[] = {m1,m2,m3,m4,m5,m6};
 
 void printMotorAngles();
 
@@ -86,6 +93,8 @@ void setup() {
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
+  stepperTimer.begin(stepperInterrupt, STEPPER_PID_PERIOD); //1000ms
+  stepperTimer.priority(MOTOR_NVIC_PRIORITY);
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   //servoTimer.begin(dcInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
@@ -123,6 +132,7 @@ void loop() {
       }
       else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
+        //float tempDirVar = atof(msgElem); // converts to float
         switch (*msgElem) { // determines motor direction
           case '0': // arbitrarily (for now) decided 0 is clockwise
             budgeCommand.whichDir = CLOCKWISE;
@@ -137,9 +147,9 @@ void loop() {
         if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
           msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
           int tempSpeedVar = atoi(msgElem); // converts to int
-          if (tempSpeedVar <= MAX_SPEED) { // make sure the subtraction made sense. Tf it's above 9, it doesn't
+          if (tempSpeedVar <= MAX_SPEED - 1) { // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
             budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
-            Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed - 1); // minus 1 to be consistent with incoming message
+            Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
           }
         }
         msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
@@ -208,7 +218,8 @@ void loop() {
           break;
       }
     }
-    else if (budgeCommand.whichDir > 0 && budgeCommand.whichSpeed > 0 && budgeCommand.whichTime > 0) {
+    else if ( (budgeCommand.whichDir == 1 || budgeCommand.whichDir == -1) && budgeCommand.whichSpeed > 0
+              && budgeCommand.whichTime > 0) {
       Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
 
@@ -238,40 +249,64 @@ void loop() {
   }
   budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
 
+
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
     // all of this code should probably go into a function called "calculate motor steps" or something...
     // this code is very similar to what happens above when it decides which motor should turn after receiving a command
     // this code also assumes that the correct amount of steps will take it to the right spot
     // this means that it doesn't account for faulty angle calculations from the encoder or the motor resolution...
     int remainingSteps = motor3.motorPID.numSteps - motor3.motorPID.stepCount;
-    float imaginedRemainingAngle = remainingSteps * motor3.stepResolution; // how far does the motor think it needs to go
+    //float imaginedAngle = motor3.motorPID.stepCount * motor3.stepResolution * motor3.gearRatioReciprocal;
+    //float actualAngle = motor3.getCurrentAngle();
+    float imaginedRemainingAngle = remainingSteps * motor3.stepResolution * motor3.gearRatioReciprocal; // how far does the motor think it needs to go
     float actualRemainingAngle = motor3.desiredAngle - motor3.getCurrentAngle(); // how far does it actually need to go
     float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
 
-    // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
-    // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
-    // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
-    if (fabs(discrepancy) > motor3.motorPID.angleTolerance) {
-      // it's possible the check happens during movement, but there needs to be ample
-      if (!motor3.motorPID.movementDone && actualRemainingAngle > motor3.motorPID.angleTolerance) {
-        // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
-        // the motor interrupt assumes the step count and direction are unchanged!!!!
-        motor3.motorPID.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
-      }
-      // it's possible the check happens when the motor is at rest
-      else {
-        if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
-        else discrepancy = -1;
-        motor3.enablePower();
-        motor3.motorPID.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
-        motor3.motorPID.movementDone = false;
-      }
-    }
+    //Serial.print(imaginedAngle); Serial.println(" imagined angle");
+    //Serial.print(actualAngle); Serial.println(" actual angle");
+    Serial.print(imaginedRemainingAngle); Serial.println(" imagined remaining angle");
+    Serial.print(actualRemainingAngle); Serial.println(" actual remaining angle");
+    Serial.print(discrepancy); Serial.println(" degrees behind expected position");
+
+    /*
+
+        // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
+        // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
+        // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
+        if (fabs(discrepancy) > 2) {
+          Serial.println("discrepancy is too high and motor is moving, adjusting step number");
+        //if (fabs(discrepancy) > motor3.motorPID.angleTolerance) {
+          // it's possible the check happens during movement, but there needs to be ample
+          if (!motor3.motorPID.movementDone && actualRemainingAngle > motor3.motorPID.angleTolerance) {
+            Serial.println("enough angle between current position and desired position");
+            // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
+            // the motor interrupt assumes the step count and direction are unchanged!!!!
+            motor3.motorPID.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
+            //numsteps gets updated but imagined angle doesnt...?
+          }
+          // it's possible the check happens when the motor is at rest
+          else {
+            Serial.println("discrepancy is too high and motor is done moving, adjusting step number");
+            if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
+            else discrepancy = -1;
+            motor3.enablePower();
+            motor3.motorPID.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
+            motor3.motorPID.movementDone = false;
+          }
+        }
+
+    */
+
     sinceStepperCheck = 0;
+    /*
+      if (motor3.motorPID.movementDone) {
+      Serial.println("Disabling power");
+      motor3.disablePower();
+      }*/
   }
 
   if (motor1.motorPID.movementDone) motor1.disablePower();
-  if (motor3.motorPID.movementDone) motor3.disablePower();
+  //if (motor3.motorPID.movementDone) motor3.disablePower();
   if (motor4.motorPID.movementDone) motor4.disablePower();
 
   // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
@@ -309,8 +344,9 @@ void printMotorAngles() {
   }
 */
 
-// this function has constant step interval
-void stepperInterrupt(void) {
+/*
+  // this function has constant step interval
+  void stepperInterrupt(void) {
   static int nextInterval = 0;
   // movementDone can be set elsewhere... so can numSteps
   if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
@@ -323,7 +359,27 @@ void stepperInterrupt(void) {
     motor3.motorPID.movementDone = true;
     motor3.disablePower();
   }
-  stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
+  //stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
+  }
+*/
+
+void stepperInterrupt(void) {
+  static int nextInterval = STEPPER_PID_PERIOD;
+  // movementDone can be set elsewhere... so can numSteps
+  if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
+    motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
+    motor3.motorPID.stepCount++;
+    Serial.print(motor3.motorPID.openLoopDir); Serial.println(" direction");
+    Serial.print(motor3.motorPID.stepCount); Serial.println(" steps taken");
+    Serial.print(motor3.motorPID.numSteps); Serial.println(" steps total");
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor3.motorPID.stepCount = 0; // reset the counter
+    motor3.motorPID.movementDone = true;
+    motor3.disablePower();
+    //Serial.println("waiting for command");
+  }
+  //stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 
 void dcInterrupt(void) {

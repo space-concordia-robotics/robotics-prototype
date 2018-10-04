@@ -51,8 +51,8 @@
 #define M1_GEAR_RATIO      40.0 // temporary, unknown
 
 #define M3_ENABLE_PIN      17
-#define M3_DIR_PIN         20
 #define M3_STEP_PIN        21
+#define M3_DIR_PIN         20
 // 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
 #define M3_ENCODER_SHIFT   CORE_PIN19_BIT

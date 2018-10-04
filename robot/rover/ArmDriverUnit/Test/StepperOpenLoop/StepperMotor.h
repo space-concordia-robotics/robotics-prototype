@@ -77,8 +77,8 @@ void StepperMotor::singleStep(int dir) {
 }
 
 void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
-  if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
-      && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
+  if ( (budgeDir == COUNTER_CLOCKWISE || budgeDir == CLOCKWISE) && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
+       && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
       canTurnRight = true; Serial.println("preparing to turn stepper clockwise");
@@ -94,15 +94,13 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
 
     if (budgeDir == CLOCKWISE && canTurnRight) {
       budgeMovementDone = false;
-      stepInterval = stepIntervalArray[budgeSpeed];
+      stepInterval = stepIntervalArray[budgeSpeed - 1];
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, HIGH);
-      digitalWriteFast(enablePin, LOW);
+      enablePower();
       sinceStart = 0;
       while (sinceStart < budgeTime) {
-        // motor driver is fast enough to recognize this quickly rising and falling edge
-        digitalWriteFast(stepPin, HIGH);
-        digitalWriteFast(stepPin, LOW);
+        singleStep(budgeDir);
         sinceStep = 0;
         while (sinceStep < stepInterval) ; // wait until it's time to step again
       }
@@ -110,21 +108,19 @@ void StepperMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
     }
     if (budgeDir == COUNTER_CLOCKWISE && canTurnLeft) {
       budgeMovementDone = false;
-      stepInterval = stepIntervalArray[budgeSpeed];
+      stepInterval = stepIntervalArray[budgeSpeed - 1];
       Serial.print("setting step interval to "); Serial.println(stepInterval); Serial.println("starting stepper movement");
       digitalWriteFast(directionPin, LOW);
-      digitalWriteFast(enablePin, LOW);
+      enablePower();
       sinceStart = 0;
       while (sinceStart < budgeTime) {
-        // motor driver is fast enough to recognize this quickly rising and falling edge
-        digitalWriteFast(stepPin, HIGH);
-        digitalWriteFast(stepPin, LOW);
+        singleStep(budgeDir);
         sinceStep = 0;
         while (sinceStep < stepInterval) ; // wait until it's time to step again
       }
       budgeMovementDone = true; Serial.println("stepper movement done");
     }
-    digitalWriteFast(enablePin, HIGH); // be sure to disconnect power to stepper so it doesn't get hot / drain power
+    disablePower(); // be sure to disconnect power to stepper so it doesn't get hot / drain power
     canTurnRight = false; canTurnLeft = false;
   }
 }

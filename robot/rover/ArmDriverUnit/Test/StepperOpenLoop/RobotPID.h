@@ -5,7 +5,7 @@ class RobotPID {
   public:
     //temp stuff for stepper open loop control
     int openLoopDir;
-    int openLoopError;
+    float openLoopError;
     int numSteps;
     volatile int stepCount;
 
