@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from subprocess import check_output
 from re import search
+from sys import exit, argv
+from time import time, sleep
 
 def get_arch():
     output = check_output(["uname", "-a"]).decode()
@@ -56,7 +58,38 @@ def report_temp_freq(temp, freq, arch):
 
 def report_freq_temp(freq, temp, arch):
     report_freq(freq, arch)
-    report_temp(temp)
+
+
+print("Checking for dependencies...")
+PKG_OK="dpkg-query -W --showformat='${Status}\n' stress | grep 'install ok installed'"
+
+output = check_output(PKG_OK, shell=True).decode()
+
+if output == "":
+    print("Dependency not found: stress")
+    print("To install on debian: sudo apt-get install stress")
+    exit(1)
+
+# default 60 seconds run time
+end = time() + 60
+
+print()
+
+arch = get_arch()
+
+if len(argv) == 2:
+    runtime = int(argv[1])
+    end = time() + runtime
+
+try:
+    while time() < end:
+        report_temp_freq(get_cpu_temp(), get_cpu_freq(), arch)
+        sleep(1)
+except:
+    print("\nTerminating stress test")
+# self assurance tests
+"""
+report_temp_(temp)
 
 cpu_arch = get_arch()
 print("get_arch: " + cpu_arch)
@@ -72,3 +105,4 @@ print("")
 
 report_temp_freq(cpu_temp, cpu_freq, cpu_arch)
 report_freq_temp(cpu_freq, cpu_temp, cpu_arch)
+"""
