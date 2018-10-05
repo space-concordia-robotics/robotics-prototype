@@ -17,6 +17,7 @@ class RobotMotor {
     static int numMotors;
     //float maxCWAngle, maxCCWAngle;
     volatile float currentAngle; // can be updated within timer interrupts
+    volatile bool movementDone;
     float desiredAngle;
     float gearRatio;
     float gearRatioReciprocal;
@@ -64,6 +65,7 @@ int RobotMotor::numMotors = 0; // must initialize variable outside of class
 
 RobotMotor::RobotMotor() {
   numMotors++;
+  movementDone = true;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes)//:

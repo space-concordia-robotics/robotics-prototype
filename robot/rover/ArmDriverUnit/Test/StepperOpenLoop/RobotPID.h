@@ -10,7 +10,7 @@ class RobotPID {
     volatile int stepCount;
 
     // these variables are accessed outside of ISRs
-    volatile bool movementDone;
+    //volatile bool movementDone;
     volatile int dir;
     volatile float pidOutput; // only updated at the end of the calculations
     int motorSpeed; // not even used yet
@@ -37,7 +37,7 @@ class RobotPID {
 };
 
 RobotPID::RobotPID() {
-  movementDone = true;
+  //movementDone = true;
 }
 
 void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {

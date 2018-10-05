@@ -65,8 +65,8 @@
 #define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
 
 #define M4_ENABLE_PIN      24
-#define M4_DIR_PIN         25
 #define M4_STEP_PIN        14
+#define M4_DIR_PIN         25
 // 11&12 are on port C with bits 6&7 respectively
 #define M4_ENCODER_PORT    GPIOC_PDIR
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT

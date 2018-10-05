@@ -1,3 +1,16 @@
+/*
+   I need to decide where movementDone is changed. does the pid decide that the movement is done and then the timer interrupts know not to turn motors?
+   Right now there's a periodic check for STEPPERS that if there's a discrepancy then the stepper angle is adjusted. This is necessary because
+   the steppers are controlled in open loop. So in this periodic check, it could also choose to disable the dc motor PID for example, eliminating the need
+   to modify this variable which seems to not be related to the PID, and do it outside the pid object. that being the case, this loop is for stepper control,
+   so it would also need to check dc control? given how often it checks it should be okay though........
+   otherwise the pid WIll need to be inherited by the motor class and then implemented based on the motor type
+   the advantage of this is that different motors have different types of speed output so it could be directly adapted inside the pid vs outside of it but
+   that also may be bad coding practice.
+
+   I also need to figure out where it's a good idea to disable interrupts so htat I don't read a value while it's being modified
+*/
+
 #include "PinSetup.h"
 
 #include "RobotMotor.h"
@@ -5,14 +18,14 @@
 #include "DCMotor.h"
 #include "ServoMotor.h"
 
-#define STEPPER_PID_PERIOD 25*1000
+#define STEPPER_PID_PERIOD 30*1000
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define STEPPER_CHECK_INTERVAL 2000
 //#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
 
-#define ENCODER_NVIC_PRIORITY 100
-#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
+#define ENCODER_NVIC_PRIORITY 100 // should be higher priority tan most other things, quick calculations and happens very frequently
+#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4 // lower priority than motors but still important
 
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
@@ -49,16 +62,23 @@ StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, 
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
-IntervalTimer stepperTimer;
+IntervalTimer m3StepperTimer;
+IntervalTimer m4StepperTimer;
 IntervalTimer dcTimer;
 IntervalTimer servoTimer;
 
 elapsedMillis sinceStepperCheck;
 
-//RobotMotor motorArray[] = {motor1, motor2, motor3, motor4, motor5, motor6}; doesn't work rip
-//StepperMotor stepperArray[] = {motor1, motor3, motor4};
-//void *m1,m2,m3,m4,m5,m6;
-//void * motorArray[] = {m1,m2,m3,m4,m5,m6};
+/*
+StepperMotor *m1 = &motor1;
+DCMotor *m2 = &motor2;
+StepperMotor *m3 = &motor3;
+StepperMotor *m4 = &motor4;
+ServoMotor *m5 = &motor5;
+ServoMotor *m6 = &motor6;
+
+void *motorArray[] = {m1, m2, m3, m4, m5, m6};
+*/
 
 void printMotorAngles();
 
@@ -69,9 +89,12 @@ void m4_encoder_interrupt(void);
 //void m5_encoder_interrupt(void);
 //void m6_encoder_interrupt(void);
 
-void stepperInterrupt(void);
+void m3StepperInterrupt(void);
+void m4StepperInterrupt(void);
 void dcInterrupt(void);
 void servoInterrupt(void);
+
+void parseSerial(void);
 
 void setup() {
   pinSetup();
@@ -93,8 +116,10 @@ void setup() {
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  stepperTimer.begin(stepperInterrupt, STEPPER_PID_PERIOD); //1000ms
-  stepperTimer.priority(MOTOR_NVIC_PRIORITY);
+  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
+  m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
+  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
+  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   //servoTimer.begin(dcInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
@@ -109,61 +134,8 @@ void loop() {
     Serial.println("=======================================================");
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: "); Serial.println(serialBuffer); // send back what was received
-    char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
-    if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
-      int tempMotorVar = atoi(msgElem);
-      // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
-      if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
-        budgeCommand.whichMotor = tempMotorVar;
-        Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
-      }
-      else Serial.println("motor does not exist");
-      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
-        budgeCommand.angleCommand = true;
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
-        float tempAngleVar = atof(msgElem); // converts to float
-        if (tempAngleVar > -720.0 && tempAngleVar < 720.0) {
-          budgeCommand.whichAngle = tempAngleVar;
-          Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
-        }
-        else Serial.println("angle is out of bounds");
-      }
-      else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
-        //float tempDirVar = atof(msgElem); // converts to float
-        switch (*msgElem) { // determines motor direction
-          case '0': // arbitrarily (for now) decided 0 is clockwise
-            budgeCommand.whichDir = CLOCKWISE;
-            Serial.println("parsed direction clockwise");
-            break;
-          case '1': // arbitrarily (for now) decided 1 is counter-clockwise
-            budgeCommand.whichDir = COUNTER_CLOCKWISE;
-            Serial.println("parsed direction counter-clockwise");
-            break;
-        }
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
-        if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
-          msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
-          int tempSpeedVar = atoi(msgElem); // converts to int
-          if (tempSpeedVar <= MAX_SPEED - 1) { // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
-            budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
-            Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
-          }
-        }
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
-        if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
-          msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
-          unsigned int tempTimeVar = atoi(msgElem); // converts to int
-          if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
-            budgeCommand.whichTime = tempTimeVar;
-            Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
-          }
-        }
-      }
-    }
-    memset(serialBuffer, 0, BUFFER_SIZE); //empty the buffer
+    parseSerial(); // goes through the message and puts the appropriate data into budgeCommand struct
+    memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
     restOfMessage = serialBuffer; // reset pointer
   }
 
@@ -187,28 +159,48 @@ void loop() {
           motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
           break;
         case MOTOR3:
-          {
-            motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-            motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.getCurrentAngle(); // find the angle difference
+          //((StepperMotor *)motorArray[budgeCommand.whichMotor-1])->desiredAngle = budgeCommand.whichAngle; // I hate this
+          /*
+             I wanted to have an array for motor1,motor2, etc and then just use commands like the above,
+             but in order for that to work i still need to use that type caster beforehand, which defeats hte purpose
+             of the array. the point is to not have to have cases but i still need them...
+          */
+          motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.getCurrentAngle(); // find the angle difference
 
-            // determine the direction
-            if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
-            else motor3.motorPID.openLoopDir = -1;
+          // determine the direction
+          if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
+          else motor3.motorPID.openLoopDir = -1;
 
-            // if the error is big enough to justify movement
-            if (fabs(motor3.motorPID.openLoopError) > motor3.motorPID.angleTolerance) {
-              motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
-              motor3.enablePower(); // give power to the stepper finally
-              motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
-            }
-            //motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
-            break;
+          // if the error is big enough to justify movement
+          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+          if ( (fabs(motor3.motorPID.openLoopError) * motor3.gearRatio) > motor3.motorPID.angleTolerance) {
+            motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
+            motor3.enablePower(); // give power to the stepper finally
+            //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
           }
+          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+          //motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
+          break;
         case MOTOR4:
-          //motor4.movementDone = false;
-          //motor4.enablePower();
-          motor4.desiredAngle = budgeCommand.whichAngle;
-          motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
+          motor4.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.getCurrentAngle(); // find the angle difference
+
+          // determine the direction
+          if (motor4.motorPID.openLoopError >= 0) motor4.motorPID.openLoopDir = 1;
+          else motor4.motorPID.openLoopDir = -1;
+
+          // if the error is big enough to justify movement
+          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+          if ( (fabs(motor4.motorPID.openLoopError) * motor4.gearRatio) > motor4.motorPID.angleTolerance) {
+            motor4.motorPID.numSteps = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio / motor4.stepResolution; // calculate the number of steps to take
+            motor4.enablePower(); // give power to the stepper finally
+            //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            motor4.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+          }
+          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+          //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
           break;
         case MOTOR5:
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
@@ -251,10 +243,37 @@ void loop() {
 
 
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
+    /* this code could (should?) also disable power */
+  //if (motor1.motorPID.movementDone) motor1.disablePower();
+  //if (motor3.motorPID.movementDone) motor3.disablePower();
+  //if (motor4.motorPID.movementDone) motor4.disablePower();
+  /* this code could (should?) determine when servo/dc motor movement is done */
+  /*
+  if ( fabs(motor2.desiredAngle - motor2.getCurrentAngle() ) < motor2.motorPID.angleTolerance){
+    motor2.motorPID.movementDone = true;
+  }
+  if ( fabs(motor5.desiredAngle - motor5.getCurrentAngle() ) < motor5.motorPID.angleTolerance){
+    motor5.motorPID.movementDone = true;
+  }
+  if ( fabs(motor6.desiredAngle - motor6.getCurrentAngle() ) < motor6.motorPID.angleTolerance){
+    motor6.motorPID.movementDone = true;
+  }
+  */
+  
     // all of this code should probably go into a function called "calculate motor steps" or something...
     // this code is very similar to what happens above when it decides which motor should turn after receiving a command
     // this code also assumes that the correct amount of steps will take it to the right spot
     // this means that it doesn't account for faulty angle calculations from the encoder or the motor resolution...
+
+    //motor4
+    int m4remainingSteps = motor4.motorPID.numSteps - motor4.motorPID.stepCount;
+    //float m4imaginedAngle = motor4.motorPID.stepCount * motor4.stepResolution * motor4.gearRatioReciprocal;
+    //float m4actualAngle = motor4.getCurrentAngle();
+    float m4imaginedRemainingAngle = m4remainingSteps * motor4.stepResolution * motor4.gearRatioReciprocal; // how far does the motor think it needs to go
+    float m4actualRemainingAngle = motor4.desiredAngle - motor4.getCurrentAngle(); // how far does it actually need to go
+    float m4discrepancy = m4actualRemainingAngle - m4imaginedRemainingAngle ;
+    
+    //motor3
     int remainingSteps = motor3.motorPID.numSteps - motor3.motorPID.stepCount;
     //float imaginedAngle = motor3.motorPID.stepCount * motor3.stepResolution * motor3.gearRatioReciprocal;
     //float actualAngle = motor3.getCurrentAngle();
@@ -264,29 +283,33 @@ void loop() {
 
     //Serial.print(imaginedAngle); Serial.println(" imagined angle");
     //Serial.print(actualAngle); Serial.println(" actual angle");
-    Serial.print(imaginedRemainingAngle); Serial.println(" imagined remaining angle");
-    Serial.print(actualRemainingAngle); Serial.println(" actual remaining angle");
-    Serial.print(discrepancy); Serial.println(" degrees behind expected position");
+    //Serial.print(imaginedRemainingAngle); Serial.println(" imagined remaining angle");
+    //Serial.print(actualRemainingAngle); Serial.println(" actual remaining angle");
+    //Serial.print(discrepancy); Serial.println(" degrees behind expected position");
 
     /*
 
         // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
         // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
         // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
-        if (fabs(discrepancy) > 2) {
+        if (fabs(discrepancy) * motor3.gearRatio > motor3.motorPID.angleTolerance) {
           Serial.println("discrepancy is too high and motor is moving, adjusting step number");
-        //if (fabs(discrepancy) > motor3.motorPID.angleTolerance) {
-          // it's possible the check happens during movement, but there needs to be ample
-          if (!motor3.motorPID.movementDone && actualRemainingAngle > motor3.motorPID.angleTolerance) {
-            Serial.println("enough angle between current position and desired position");
-            // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
-            // the motor interrupt assumes the step count and direction are unchanged!!!!
-            motor3.motorPID.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
-            //numsteps gets updated but imagined angle doesnt...?
+          // it's possible the check happens during movement, but there needs to be ample distance to move
+          if (!motor3.movementDone) {
+          // if actualRemainingAngle is negative it means the arm moved way further than it should have
+            if(actualRemainingAngle<0) motor3.movementDone=true; // abort
+            else if(actualRemainingAngle > motor3.motorPID.angleTolerance){
+              Serial.println("enough angle between current position and desired position to adjust during movement");
+              // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
+              // the motor interrupt assumes the step count and direction are unchanged!!!!
+              motor3.motorPID.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
+              //numsteps gets updated but imagined angle doesnt...?
+            }
+            else Serial.println("not enough angle between current position and desired position to adjust during movement, waiting for movement to end");
           }
-          // it's possible the check happens when the motor is at rest
-          else {
+          else { // it's possible the check happens when the motor is at rest
             Serial.println("discrepancy is too high and motor is done moving, adjusting step number");
+            // it's possible the angle is too far in either direction, so this makes sure that it goes to the right spot
             if (discrepancy >= 0) motor3.motorPID.openLoopDir = 1;
             else discrepancy = -1;
             motor3.enablePower();
@@ -298,16 +321,8 @@ void loop() {
     */
 
     sinceStepperCheck = 0;
-    /*
-      if (motor3.motorPID.movementDone) {
-      Serial.println("Disabling power");
-      motor3.disablePower();
-      }*/
   }
 
-  if (motor1.motorPID.movementDone) motor1.disablePower();
-  //if (motor3.motorPID.movementDone) motor3.disablePower();
-  if (motor4.motorPID.movementDone) motor4.disablePower();
 
   // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) {
@@ -344,47 +359,53 @@ void printMotorAngles() {
   }
 */
 
-/*
-  // this function has constant step interval
-  void stepperInterrupt(void) {
-  static int nextInterval = 0;
-  // movementDone can be set elsewhere... so can numSteps
-  if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
-    motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
-    motor3.motorPID.stepCount++;
-    nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
-  }
-  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-    motor3.motorPID.stepCount = 0; // reset the counter
-    motor3.motorPID.movementDone = true;
-    motor3.disablePower();
-  }
-  //stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
-  }
-*/
-
-void stepperInterrupt(void) {
+void m3StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   // movementDone can be set elsewhere... so can numSteps
-  if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
+  //if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
+  if (!motor3.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
     motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
     motor3.motorPID.stepCount++;
-    Serial.print(motor3.motorPID.openLoopDir); Serial.println(" direction");
-    Serial.print(motor3.motorPID.stepCount); Serial.println(" steps taken");
-    Serial.print(motor3.motorPID.numSteps); Serial.println(" steps total");
+    //nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
+    //Serial.print(motor3.motorPID.openLoopDir); Serial.println(" direction");
+    //Serial.print(motor3.motorPID.stepCount); Serial.println(" steps taken");
+    //Serial.print(motor3.motorPID.numSteps); Serial.println(" steps total");
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor3.motorPID.stepCount = 0; // reset the counter
-    motor3.motorPID.movementDone = true;
+    //motor3.motorPID.movementDone = true;
+    motor3.movementDone = true;
     motor3.disablePower();
     //Serial.println("waiting for command");
   }
-  //stepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
+  //m3StepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
+}
+void m4StepperInterrupt(void) {
+  static int nextInterval = STEPPER_PID_PERIOD;
+  // movementDone can be set elsewhere... so can numSteps
+  //if (!motor4.motorPID.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
+  if (!motor4.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
+    motor4.singleStep(motor4.motorPID.openLoopDir); // direction was set beforehand
+    motor4.motorPID.stepCount++;
+    //nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
+    //Serial.print(motor4.motorPID.openLoopDir); Serial.println(" direction");
+    //Serial.print(motor4.motorPID.stepCount); Serial.println(" steps taken");
+    //Serial.print(motor4.motorPID.numSteps); Serial.println(" steps total");
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor4.motorPID.stepCount = 0; // reset the counter
+    //motor4.motorPID.movementDone = true;
+    motor4.movementDone = true;
+    motor4.disablePower();
+    //Serial.println("waiting for command");
+  }
+  //m4StepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 
 void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
-  if (!motor2.motorPID.movementDone)
+  //if (!motor2.motorPID.movementDone)
+  if (!motor2.movementDone)
     motor2.getCurrentAngle();
   // rethink the PID? needs to set a direction AND a speed
   motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
@@ -450,3 +471,61 @@ void m4_encoder_interrupt(void) {
   motor6.encoderCount += dir[(oldEncoderState & 0x0F)];
   }
 */
+
+void parseSerial(void) {
+  char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
+  if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
+    msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
+    int tempMotorVar = atoi(msgElem);
+    // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
+    if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
+      budgeCommand.whichMotor = tempMotorVar;
+      Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
+    }
+    else Serial.println("motor does not exist");
+    msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
+    if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+      budgeCommand.angleCommand = true;
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
+      float tempAngleVar = atof(msgElem); // converts to float
+      if (tempAngleVar > -720.0 && tempAngleVar < 720.0) {
+        budgeCommand.whichAngle = tempAngleVar;
+        Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
+      }
+      else Serial.println("angle is out of bounds");
+    }
+    else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
+      //float tempDirVar = atof(msgElem); // converts to float
+      switch (*msgElem) { // determines motor direction
+        case '0': // arbitrarily (for now) decided 0 is clockwise
+          budgeCommand.whichDir = CLOCKWISE;
+          Serial.println("parsed direction clockwise");
+          break;
+        case '1': // arbitrarily (for now) decided 1 is counter-clockwise
+          budgeCommand.whichDir = COUNTER_CLOCKWISE;
+          Serial.println("parsed direction counter-clockwise");
+          break;
+      }
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (speed tag)
+      if (String(msgElem) == "speed") { // msgElem is a char array so it's safer to convert to string first
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
+        int tempSpeedVar = atoi(msgElem); // converts to int
+        if (tempSpeedVar <= MAX_SPEED - 1) { // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
+          budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
+          Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
+        }
+      }
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
+      if (String(msgElem) == "time") { // msgElem is a char array so it's safer to convert to string first
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
+        unsigned int tempTimeVar = atoi(msgElem); // converts to int
+        if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
+          budgeCommand.whichTime = tempTimeVar;
+          Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
+        }
+      }
+    }
+  }
+}
+
