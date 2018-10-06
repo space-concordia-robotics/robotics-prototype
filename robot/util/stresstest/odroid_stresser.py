@@ -1,10 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from subprocess import check_output, Popen
 from re import search
 from sys import exit, argv, stdout
 from time import time, sleep
 import traceback
+import datetime
 
+#TODO:
+# - kill process on early exit
+# - look into avg bug
+# - make summation/average calculation more space efficient
 def get_arch():
     output = check_output(["uname", "-a"]).decode()
     output = output.lower()
@@ -40,31 +45,22 @@ def get_cpu_freq():
 
     return raw_freq
 
-def report_temp(freq, prepend=""):
-    freq = str(freq)
+def report_temp(temp, prepend=""):
+    temp = str(temp)
 
-    if "." in freq:
-        print(prepend + "CPU temp: " + freq + " C")
+    if "." in temp:
+        return prepend + "CPU temp: " + temp + " C"
     else:
-        print(prepend + "CPU temp: " + freq[:2] + "." + freq[2:] + " C")
+        return prepend + "CPU temp: " + temp[:2] + "." + temp[2:] + " C"
 
 
-def report_freq(temp, arch, prepend=""):
+def report_freq(freq, arch, prepend=""):
     if arch == "arm":
-        print(prepend + "CPU freq: " + str(temp) + " KHz")
+        return prepend + "CPU freq: " + str(freq) + " KHz"
     elif arch == "x86":
-        print(prepend + "CPU freq: " + str(temp) + " MHz")
+        return prepend + "CPU freq: " + str(freq) + " MHz"
     else:
-        print("Uknown architecture:")
-        print(arch)
-
-
-def report_temp_freq(temp, freq, arch):
-    report_temp(temp)
-    report_freq(freq, arch)
-
-def report_freq_temp(freq, temp, arch):
-    report_freq(freq, arch)
+        return "Unkown architecture: " + arch
 
 
 print("Checking for dependencies...")
@@ -97,6 +93,12 @@ temp_sum = 0
 freq_sum = 0
 
 try:
+    # create log file
+    time_stamp = time()
+    date_stamp = datetime.datetime.fromtimestamp(time_stamp).strftime("%Y-%m-%d_%H:%M:%S")
+    log_file = open("stress-test-results_" + date_stamp + ".log", "w")
+    log_file.write("Started stress test: " + date_stamp + "\n\n")
+
     stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
     p = Popen(stress_test_cmd.split(" "))
 
@@ -106,7 +108,13 @@ try:
         temp_sum += temp
         freq_sum += freq
 
-        report_temp_freq(temp, freq, arch)
+        temp_report = report_temp(temp)
+        print(temp_report)
+        log_file.write(temp_report + "\n")
+
+        freq_report = report_freq(freq, arch)
+        print(freq_report)
+        log_file.write(freq_report + "\n")
 
         if temp > max_temp:
             max_temp = temp
@@ -141,16 +149,36 @@ avg_temp = temp_sum / (runtime * 1.0)
 avg_temp = avg_temp / 1000
 
 print("\nTemperature stats:")
+log_file.write("\nTemperature stats:\n")
 
-report_temp(min_temp, "Min ")
-report_temp(max_temp, "Max ")
-report_temp(avg_temp, "Avg ")
+min_temp_report = report_temp(min_temp, "Min ")
+max_temp_report = report_temp(max_temp, "Max ")
+avg_temp_report = report_temp(avg_temp, "Avg ")
+
+print(min_temp_report)
+print(max_temp_report)
+print(avg_temp_report)
+
+log_file.write(min_temp_report + "\n")
+log_file.write(max_temp_report + "\n")
+log_file.write(avg_temp_report + "\n")
 
 print("\nClock speed stats:")
+log_file.write("\nClock speed stats:\n")
 
-report_freq(min_freq, arch, "Min ")
-report_freq(max_freq, arch, "Max ")
-report_freq(avg_freq, arch, "Avg ")
+min_freq_report = report_freq(min_freq, arch, "Min ")
+max_freq_report = report_freq(max_freq, arch, "Max ")
+avg_freq_report = report_freq(avg_freq, arch, "Avg ")
+
+print(min_freq_report)
+print(max_freq_report)
+print(avg_freq_report)
+
+log_file.write(min_freq_report + "\n")
+log_file.write(max_freq_report + "\n")
+log_file.write(avg_freq_report + "\n")
+
+log_file.close()
 
 # self assurance tests
 """
@@ -171,3 +199,4 @@ print("")
 report_temp_freq(cpu_temp, cpu_freq, cpu_arch)
 report_freq_temp(cpu_freq, cpu_temp, cpu_arch)
 """
+
