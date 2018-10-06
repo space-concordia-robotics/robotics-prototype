@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-from subprocess import check_output, Popen
 from re import search
-from sys import exit, argv, stdout
 from time import time, sleep
 import traceback
 import datetime
+import os
+import subprocess
+import sys
 
 def get_arch():
-    output = check_output(["uname", "-a"]).decode()
+    output = subprocess.check_output(["uname", "-a"]).decode()
     output = output.lower()
 
     if "arm" in output:
@@ -35,7 +36,7 @@ def get_cpu_freq():
         f.close()
     elif arch == "x86":
         cmd = "lscpu | grep 'CPU MHz'"
-        output = check_output(cmd, shell=True).decode()
+        output = subprocess.check_output(cmd, shell=True).decode()
         raw_freq = output.split("\n")[0]
         raw_freq = search('\d+\.\d+', raw_freq).group(0)
 
@@ -94,16 +95,18 @@ def final_report(freq_sum, temp_sum, runtime, log_file):
     log_file.write(max_freq_report + "\n")
     log_file.write(avg_freq_report + "\n")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("Checking for dependencies...")
-    PKG_OK="dpkg-query -W --showformat='${Status}\n' stress | grep 'install ok installed'"
 
-    output = check_output(PKG_OK, shell=True).decode()
+    devnull = open(os.devnull, "w")
+    return_val = subprocess.call(["dpkg", "-s", "stress"], stdout=devnull, stderr=subprocess.STDOUT)
+    devnull.close()
 
-    if output == "":
+    if return_val != 0:
         print("Dependency not found: stress")
         print("To install on debian: sudo apt-get install stress")
-        exit(1)
+        sys.exit(1)
+
 
     # default 60 seconds run time
     runtime = 60
@@ -114,8 +117,8 @@ if __name__ == '__main__':
     arch = get_arch()
 
     # get user defined runtime, if given
-    if len(argv) == 2:
-        runtime = int(argv[1])
+    if len(sys.argv) == 2:
+        runtime = int(sys.argv[1])
         end = time() + runtime
 
     max_temp = int(get_cpu_temp()) + 5000
@@ -134,7 +137,7 @@ if __name__ == '__main__':
         log_file.write("Started stress test: " + date_stamp + "\n\n")
 
         stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
-        p = Popen(stress_test_cmd.split(" "))
+        p = subprocess.Popen(stress_test_cmd.split(" "))
 
         while time() < end:
             i += 1
@@ -169,12 +172,13 @@ if __name__ == '__main__':
         print("\nTerminating stress test early")
         final_report(freq_sum, temp_sum, i, log_file)
         log_file.close()
-        exit(0)
+        sys.exit(0)
     except:
         print("Exception in user code:")
         print("-"*60)
-        traceback.print_exc(file=stdout)
+        traceback.print_exc(file=sys.stdout)
         print("-"*60)
+        sys.exit(1)
 
     # paranoia
     #while p.poll() is None:
