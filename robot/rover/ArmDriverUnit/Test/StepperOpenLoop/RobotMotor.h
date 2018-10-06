@@ -39,15 +39,15 @@ class RobotMotor {
     int rightCount, leftCount; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
 
+    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) = 0; // budges motor for short period of time
+    virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed until next timer interrupt
+
     //void setMaxCWAngle(int angle); // need to have defined it for servos first
     //void setMaxCCWAngle(int angle); // need to have defined it for servos first
     //void setMaxSpeed();
     //void setDesiredAngle(float angle); // need to have defined it for servos first
-    //virtual float getCurrentAngle(void) = 0; // need to have defined it for servos first
+    //virtual float calcCurrentAngle(void) = 0; // need to have defined it for servos first
   private:
-    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) = 0; // budges motor for short period of time
-    virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed until next timer interrupt
-
     //void update(); // can go into ArmMotor
 
   protected:

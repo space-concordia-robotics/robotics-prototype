@@ -51,7 +51,7 @@ class ServoMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
     void setVelocity(int motorDir, int motorSpeed);
-    //float getCurrentAngle();
+    //float calcCurrentAngle();
 
   private:
     int pwmPin;

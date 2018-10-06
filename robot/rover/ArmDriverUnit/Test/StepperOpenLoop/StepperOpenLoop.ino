@@ -69,7 +69,6 @@ IntervalTimer servoTimer;
 
 elapsedMillis sinceStepperCheck;
 
-/*
 StepperMotor *m1 = &motor1;
 DCMotor *m2 = &motor2;
 StepperMotor *m3 = &motor3;
@@ -77,8 +76,8 @@ StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5;
 ServoMotor *m6 = &motor6;
 
-void *motorArray[] = {m1, m2, m3, m4, m5, m6};
-*/
+RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
+
 
 void printMotorAngles();
 
@@ -91,8 +90,9 @@ void m4_encoder_interrupt(void);
 
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
-void dcInterrupt(void);
-void servoInterrupt(void);
+void m2DCInterrupt(void);
+void m5ServoInterrupt(void);
+void m6ServoInterrupt(void);
 
 void parseSerial(void);
 
@@ -115,6 +115,13 @@ void setup() {
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+
+  motor1.motorPID.setAngleTolerance(1.8 * 3);
+  motor2.motorPID.setAngleTolerance(2.0);
+  motor3.motorPID.setAngleTolerance(1.8 * 3);
+  motor4.motorPID.setAngleTolerance(1.8 * 3);
+  motor5.motorPID.setAngleTolerance(2.0);
+  motor6.motorPID.setAngleTolerance(2.0);
 
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
@@ -166,7 +173,7 @@ void loop() {
              of the array. the point is to not have to have cases but i still need them...
           */
           motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.getCurrentAngle(); // find the angle difference
+          motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
           if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
@@ -185,7 +192,7 @@ void loop() {
           break;
         case MOTOR4:
           motor4.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.getCurrentAngle(); // find the angle difference
+          motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
           if (motor4.motorPID.openLoopError >= 0) motor4.motorPID.openLoopDir = 1;
@@ -204,6 +211,21 @@ void loop() {
           break;
         case MOTOR5:
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
+          motor5.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          motor5.motorPID.openLoopError = motor5.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
+
+          // determine the direction
+          if (motor5.motorPID.openLoopError >= 0) motor5.motorPID.openLoopDir = 1;
+          else motor5.motorPID.openLoopDir = -1;
+
+          // if the error is big enough to justify movement
+          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+          if ( (fabs(motor5.motorPID.openLoopError) * motor5.gearRatio) > motor5.motorPID.angleTolerance) {
+            motor4.motorPID.numMillis = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio / motor4.stepResolution; // calculate the number of steps to take
+            motor4.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+          }
+          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+          //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
           break;
         case MOTOR6:
           //motor6.motorPID.updatePID(motor6.currentAngle, motor6.desiredAngle);
@@ -215,8 +237,10 @@ void loop() {
       Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
 
-      //motorArray[budgeCommand.whichMotor-1].budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
+      // activate budge command for appropriate motor
+      motorArray[budgeCommand.whichMotor - 1]->budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      /*
+        switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
           motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
@@ -235,7 +259,7 @@ void loop() {
         case MOTOR6:
           motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
           break;
-      }
+        }*/
     }
     else Serial.println("$E,Error: bad motor command");
   }
@@ -244,22 +268,22 @@ void loop() {
 
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
     /* this code could (should?) also disable power */
-  //if (motor1.motorPID.movementDone) motor1.disablePower();
-  //if (motor3.motorPID.movementDone) motor3.disablePower();
-  //if (motor4.motorPID.movementDone) motor4.disablePower();
-  /* this code could (should?) determine when servo/dc motor movement is done */
-  /*
-  if ( fabs(motor2.desiredAngle - motor2.getCurrentAngle() ) < motor2.motorPID.angleTolerance){
-    motor2.motorPID.movementDone = true;
-  }
-  if ( fabs(motor5.desiredAngle - motor5.getCurrentAngle() ) < motor5.motorPID.angleTolerance){
-    motor5.motorPID.movementDone = true;
-  }
-  if ( fabs(motor6.desiredAngle - motor6.getCurrentAngle() ) < motor6.motorPID.angleTolerance){
-    motor6.motorPID.movementDone = true;
-  }
-  */
-  
+    //if (motor1.motorPID.movementDone) motor1.disablePower();
+    //if (motor3.motorPID.movementDone) motor3.disablePower();
+    //if (motor4.motorPID.movementDone) motor4.disablePower();
+    /* this code could (should?) determine when servo/dc motor movement is done */
+    /*
+      if ( fabs(motor2.desiredAngle - motor2.calcCurrentAngle() ) < motor2.motorPID.angleTolerance){
+      motor2.motorPID.movementDone = true;
+      }
+      if ( fabs(motor5.desiredAngle - motor5.calcCurrentAngle() ) < motor5.motorPID.angleTolerance){
+      motor5.motorPID.movementDone = true;
+      }
+      if ( fabs(motor6.desiredAngle - motor6.calcCurrentAngle() ) < motor6.motorPID.angleTolerance){
+      motor6.motorPID.movementDone = true;
+      }
+    */
+
     // all of this code should probably go into a function called "calculate motor steps" or something...
     // this code is very similar to what happens above when it decides which motor should turn after receiving a command
     // this code also assumes that the correct amount of steps will take it to the right spot
@@ -268,17 +292,17 @@ void loop() {
     //motor4
     int m4remainingSteps = motor4.motorPID.numSteps - motor4.motorPID.stepCount;
     //float m4imaginedAngle = motor4.motorPID.stepCount * motor4.stepResolution * motor4.gearRatioReciprocal;
-    //float m4actualAngle = motor4.getCurrentAngle();
+    //float m4actualAngle = motor4.calcCurrentAngle();
     float m4imaginedRemainingAngle = m4remainingSteps * motor4.stepResolution * motor4.gearRatioReciprocal; // how far does the motor think it needs to go
-    float m4actualRemainingAngle = motor4.desiredAngle - motor4.getCurrentAngle(); // how far does it actually need to go
+    float m4actualRemainingAngle = motor4.desiredAngle - motor4.calcCurrentAngle(); // how far does it actually need to go
     float m4discrepancy = m4actualRemainingAngle - m4imaginedRemainingAngle ;
-    
+
     //motor3
     int remainingSteps = motor3.motorPID.numSteps - motor3.motorPID.stepCount;
     //float imaginedAngle = motor3.motorPID.stepCount * motor3.stepResolution * motor3.gearRatioReciprocal;
-    //float actualAngle = motor3.getCurrentAngle();
+    //float actualAngle = motor3.calcCurrentAngle();
     float imaginedRemainingAngle = remainingSteps * motor3.stepResolution * motor3.gearRatioReciprocal; // how far does the motor think it needs to go
-    float actualRemainingAngle = motor3.desiredAngle - motor3.getCurrentAngle(); // how far does it actually need to go
+    float actualRemainingAngle = motor3.desiredAngle - motor3.calcCurrentAngle(); // how far does it actually need to go
     float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
 
     //Serial.print(imaginedAngle); Serial.println(" imagined angle");
@@ -334,12 +358,12 @@ void loop() {
 
 void printMotorAngles() {
   Serial.print("Motor Angles: ");
-  Serial.print(motor1.getCurrentAngle()); Serial.print(",");
-  Serial.print(motor2.getCurrentAngle()); Serial.print(",");
-  Serial.print(motor3.getCurrentAngle()); Serial.print(",");
-  Serial.println(motor4.getCurrentAngle());//Serial.print(",");
-  //Serial.print(motor5.getCurrentAngle());Serial.print(",");
-  //Serial.print(motor6.getCurrentAngle());Serial.print(",");
+  Serial.print(motor1.calcCurrentAngle()); Serial.print(",");
+  Serial.print(motor2.calcCurrentAngle()); Serial.print(",");
+  Serial.print(motor3.calcCurrentAngle()); Serial.print(",");
+  Serial.println(motor4.calcCurrentAngle());//Serial.print(",");
+  //Serial.print(motor5.calcCurrentAngle());Serial.print(",");
+  //Serial.print(motor6.calcCurrentAngle());Serial.print(",");
 }
 
 /*
@@ -402,11 +426,11 @@ void m4StepperInterrupt(void) {
   //m4StepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 
-void dcInterrupt(void) {
+void m2DCInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
   //if (!motor2.motorPID.movementDone)
   if (!motor2.movementDone)
-    motor2.getCurrentAngle();
+    motor2.calcCurrentAngle();
   // rethink the PID? needs to set a direction AND a speed
   motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
   int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
@@ -414,7 +438,16 @@ void dcInterrupt(void) {
   motor2.setVelocity(dir, motorSpeed);
 }
 
-void servoInterrupt(void) {
+// final implementation would have the PID being called in these interrupts
+
+void m5ServoInterrupt(void) {
+  if (!motor5.movementDone) {
+    //motor5.calcCurrentAngle();
+    ;
+  }
+}
+
+void m6ServoInterrupt(void) {
   ;
 }
 

@@ -60,7 +60,7 @@ class DCMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
     void setVelocity(int motorDir, int motorSpeed);
-    float getCurrentAngle();
+    float calcCurrentAngle();
 
   private:
     int pwmPin;
@@ -194,7 +194,7 @@ void DCMotor::setVelocity(int motorDir, int motorSpeed) {
   ;
 }
 
-float DCMotor::getCurrentAngle() {
+float DCMotor::calcCurrentAngle() {
   if (hasEncoder) {
     currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;

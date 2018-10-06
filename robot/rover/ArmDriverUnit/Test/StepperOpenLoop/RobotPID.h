@@ -4,27 +4,31 @@
 class RobotPID {
   public:
     //temp stuff for stepper open loop control
-    int openLoopDir;
-    float openLoopError;
-    int numSteps;
-    volatile int stepCount;
+    int openLoopDir; // public variable for open loop control of steppers and servos
+    float openLoopError; // public variable for open loop control of steppers and servos
+    int numSteps; // how many steps to take for stepper to reach desired position
+    int numMillis; // how many milliseconds for servo to reach desired position
+    volatile int stepCount; // how many steps the stepper has taken since it started moving
 
     // these variables are accessed outside of ISRs
     //volatile bool movementDone;
-    volatile int dir;
+    volatile int dir; // closed loop direction
     volatile float pidOutput; // only updated at the end of the calculations
     int motorSpeed; // not even used yet
 
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
-    float angleTolerance = 2.0;
-    float maxOutputValue = 300.0;
-    float minOutputValue = 15.0;
+    float angleTolerance;
+    float maxOutputValue;
+    float minOutputValue;
     int kp = 1;
     int ki = 0;
     int kd = 0;
 
     RobotPID();
     void updatePID(volatile float& currentAngle, float& desiredAngle);
+    void setAngleTolerance(float tolerance);
+    void setOutputLimits(float min, float max);
+    void setGainConstants(float kp, float ki, float kd);
 
   private:
     //unsigned int dt; // period at which the pid is called
@@ -38,6 +42,11 @@ class RobotPID {
 
 RobotPID::RobotPID() {
   //movementDone = true;
+  // default values
+  kp = 1.0; ki = 0.0; kd = 0.0;
+  angleTolerance = 2.0;
+  minOutputValue = 15.0;
+  maxOutputValue = 300.0;
 }
 
 void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {
@@ -77,6 +86,21 @@ void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {
   }
   // if the angle is within the tolerance, don't move
   else ; // stop motor?
+}
+
+void RobotPID::setAngleTolerance(float tolerance) {
+  angleTolerance = tolerance;
+}
+
+void RobotPID::setOutputLimits(float minVal, float maxVal) {
+  maxOutputValue = maxVal;
+  minOutputValue = minVal;
+}
+
+void RobotPID::setGainConstants(float kp, float ki, float kd) {
+  this->kp = kp;
+  this->ki = ki;
+  this->kd = kd;
 }
 
 #endif
