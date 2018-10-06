@@ -7,9 +7,9 @@ import traceback
 import datetime
 
 #TODO:
-# - kill process on early exit
 # - look into avg bug
 # - make summation/average calculation more space efficient
+
 def get_arch():
     output = check_output(["uname", "-a"]).decode()
     output = output.lower()
@@ -62,6 +62,43 @@ def report_freq(freq, arch, prepend=""):
     else:
         return "Unkown architecture: " + arch
 
+def final_report(freq_sum, temp_sum, runtime, log_file):
+    avg_freq = freq_sum / (runtime * 1.0)
+    avg_temp = temp_sum / (runtime * 1.0)
+    # scale down to account for extra trailing 0's
+    avg_temp = avg_temp / 1000
+
+    print("\nTemperature stats:")
+    log_file.write("\nTemperature stats:\n")
+
+    min_temp_report = report_temp(min_temp, "Min ")
+    max_temp_report = report_temp(max_temp, "Max ")
+    avg_temp_report = report_temp(avg_temp, "Avg ")
+
+    print(min_temp_report)
+    print(max_temp_report)
+    print(avg_temp_report)
+
+    log_file.write(min_temp_report + "\n")
+    log_file.write(max_temp_report + "\n")
+    log_file.write(avg_temp_report + "\n")
+
+    print("\nClock speed stats:")
+    log_file.write("\nClock speed stats:\n")
+
+    min_freq_report = report_freq(min_freq, arch, "Min ")
+    max_freq_report = report_freq(max_freq, arch, "Max ")
+    avg_freq_report = report_freq(avg_freq, arch, "Avg ")
+
+    print(min_freq_report)
+    print(max_freq_report)
+    print(avg_freq_report)
+
+    log_file.write(min_freq_report + "\n")
+    log_file.write(max_freq_report + "\n")
+    log_file.write(avg_freq_report + "\n")
+
+
 
 print("Checking for dependencies...")
 PKG_OK="dpkg-query -W --showformat='${Status}\n' stress | grep 'install ok installed'"
@@ -81,6 +118,7 @@ print()
 
 arch = get_arch()
 
+# get user defined runtime, if given
 if len(argv) == 2:
     runtime = int(argv[1])
     end = time() + runtime
@@ -131,7 +169,10 @@ try:
         sleep(1)
 
 except KeyboardInterrupt:
-    print("\nTerminating stress test")
+    print("\nTerminating stress test early")
+    final_report(freq_sum, temp_sum, runtime, log_file)
+    log_file.close()
+    exit(0)
 except:
     print("Exception in user code:")
     print("-"*60)
@@ -143,46 +184,14 @@ except:
     # keep waiting
 #    sleep(1)
 
-avg_freq = freq_sum / (runtime * 1.0)
-avg_temp = temp_sum / (runtime * 1.0)
-# scale down to account for extra trailing 0's
-avg_temp = avg_temp / 1000
 
-print("\nTemperature stats:")
-log_file.write("\nTemperature stats:\n")
-
-min_temp_report = report_temp(min_temp, "Min ")
-max_temp_report = report_temp(max_temp, "Max ")
-avg_temp_report = report_temp(avg_temp, "Avg ")
-
-print(min_temp_report)
-print(max_temp_report)
-print(avg_temp_report)
-
-log_file.write(min_temp_report + "\n")
-log_file.write(max_temp_report + "\n")
-log_file.write(avg_temp_report + "\n")
-
-print("\nClock speed stats:")
-log_file.write("\nClock speed stats:\n")
-
-min_freq_report = report_freq(min_freq, arch, "Min ")
-max_freq_report = report_freq(max_freq, arch, "Max ")
-avg_freq_report = report_freq(avg_freq, arch, "Avg ")
-
-print(min_freq_report)
-print(max_freq_report)
-print(avg_freq_report)
-
-log_file.write(min_freq_report + "\n")
-log_file.write(max_freq_report + "\n")
-log_file.write(avg_freq_report + "\n")
+final_report(freq_sum, temp_sum, runtime, log_file)
 
 log_file.close()
 
 # self assurance tests
 """
-report_temp_(temp)
+report_temp(temp)
 
 cpu_arch = get_arch()
 print("get_arch: " + cpu_arch)
@@ -194,7 +203,7 @@ print("get_cpu_freq: " + cpu_freq + "\n")
 report_temp(cpu_temp)
 report_freq(cpu_freq, cpu_arch)
 
-print("")
+print()
 
 report_temp_freq(cpu_temp, cpu_freq, cpu_arch)
 report_freq_temp(cpu_freq, cpu_temp, cpu_arch)
