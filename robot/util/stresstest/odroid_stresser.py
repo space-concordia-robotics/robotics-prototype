@@ -6,10 +6,6 @@ from time import time, sleep
 import traceback
 import datetime
 
-#TODO:
-# - look into avg bug
-# - make summation/average calculation more space efficient
-
 def get_arch():
     output = check_output(["uname", "-a"]).decode()
     output = output.lower()
@@ -98,114 +94,93 @@ def final_report(freq_sum, temp_sum, runtime, log_file):
     log_file.write(max_freq_report + "\n")
     log_file.write(avg_freq_report + "\n")
 
+if __name__ == '__main__':
+    print("Checking for dependencies...")
+    PKG_OK="dpkg-query -W --showformat='${Status}\n' stress | grep 'install ok installed'"
 
+    output = check_output(PKG_OK, shell=True).decode()
 
-print("Checking for dependencies...")
-PKG_OK="dpkg-query -W --showformat='${Status}\n' stress | grep 'install ok installed'"
+    if output == "":
+        print("Dependency not found: stress")
+        print("To install on debian: sudo apt-get install stress")
+        exit(1)
 
-output = check_output(PKG_OK, shell=True).decode()
-
-if output == "":
-    print("Dependency not found: stress")
-    print("To install on debian: sudo apt-get install stress")
-    exit(1)
-
-# default 60 seconds run time
-runtime = 60
-end = time() + runtime
-
-print()
-
-arch = get_arch()
-
-# get user defined runtime, if given
-if len(argv) == 2:
-    runtime = int(argv[1])
+    # default 60 seconds run time
+    runtime = 60
     end = time() + runtime
 
-max_temp = int(get_cpu_temp()) + 5000
-min_temp = max_temp - 5000
-max_freq = float(get_cpu_freq()) + 50
-min_freq = max_freq - 50
-temp_sum = 0
-freq_sum = 0
+    print()
 
-try:
-    # create log file
-    time_stamp = time()
-    date_stamp = datetime.datetime.fromtimestamp(time_stamp).strftime("%Y-%m-%d_%H:%M:%S")
-    log_file = open("stress-test-results_" + date_stamp + ".log", "w")
-    log_file.write("Started stress test: " + date_stamp + "\n\n")
+    arch = get_arch()
 
-    stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
-    p = Popen(stress_test_cmd.split(" "))
+    # get user defined runtime, if given
+    if len(argv) == 2:
+        runtime = int(argv[1])
+        end = time() + runtime
 
-    while time() < end:
-        temp = int(get_cpu_temp())
-        freq = float(get_cpu_freq())
-        temp_sum += temp
-        freq_sum += freq
+    max_temp = int(get_cpu_temp()) + 5000
+    min_temp = max_temp - 5000
+    max_freq = float(get_cpu_freq()) + 50
+    min_freq = max_freq - 50
+    temp_sum = 0
+    freq_sum = 0
+    i = 0
 
-        temp_report = report_temp(temp)
-        print(temp_report)
-        log_file.write(temp_report + "\n")
+    try:
+        # create log file
+        time_stamp = time()
+        date_stamp = datetime.datetime.fromtimestamp(time_stamp).strftime("%Y-%m-%d_%H:%M:%S")
+        log_file = open("stress-test-results_" + date_stamp + ".log", "w")
+        log_file.write("Started stress test: " + date_stamp + "\n\n")
 
-        freq_report = report_freq(freq, arch)
-        print(freq_report)
-        log_file.write(freq_report + "\n")
+        stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
+        p = Popen(stress_test_cmd.split(" "))
 
-        if temp > max_temp:
-            max_temp = temp
+        while time() < end:
+            i += 1
+            temp = int(get_cpu_temp())
+            freq = float(get_cpu_freq())
+            temp_sum += temp
+            freq_sum += freq
 
-        if temp < min_temp:
-            min_temp = temp
+            temp_report = report_temp(temp)
+            print(temp_report)
+            log_file.write(temp_report + "\n")
 
-        if freq > max_freq:
-            max_freq = freq
+            freq_report = report_freq(freq, arch)
+            print(freq_report)
+            log_file.write(freq_report + "\n")
 
-        if freq < min_freq:
-            min_freq = freq
+            if temp > max_temp:
+                max_temp = temp
 
-        sleep(1)
+            if temp < min_temp:
+                min_temp = temp
 
-except KeyboardInterrupt:
-    print("\nTerminating stress test early")
-    final_report(freq_sum, temp_sum, runtime, log_file)
+            if freq > max_freq:
+                max_freq = freq
+
+            if freq < min_freq:
+                min_freq = freq
+
+            sleep(1)
+
+    except KeyboardInterrupt:
+        print("\nTerminating stress test early")
+        final_report(freq_sum, temp_sum, i, log_file)
+        log_file.close()
+        exit(0)
+    except:
+        print("Exception in user code:")
+        print("-"*60)
+        traceback.print_exc(file=stdout)
+        print("-"*60)
+
+    # paranoia
+    #while p.poll() is None:
+        # keep waiting
+    #    sleep(1)
+
+
+    final_report(freq_sum, temp_sum, i, log_file)
     log_file.close()
-    exit(0)
-except:
-    print("Exception in user code:")
-    print("-"*60)
-    traceback.print_exc(file=stdout)
-    print("-"*60)
-
-# paranoia
-#while p.poll() is None:
-    # keep waiting
-#    sleep(1)
-
-
-final_report(freq_sum, temp_sum, runtime, log_file)
-
-log_file.close()
-
-# self assurance tests
-"""
-report_temp(temp)
-
-cpu_arch = get_arch()
-print("get_arch: " + cpu_arch)
-cpu_temp = get_cpu_temp()
-print("get_cpu_temp: " + cpu_temp)
-cpu_freq = get_cpu_freq()
-print("get_cpu_freq: " + cpu_freq + "\n")
-
-report_temp(cpu_temp)
-report_freq(cpu_freq, cpu_arch)
-
-print()
-
-report_temp_freq(cpu_temp, cpu_freq, cpu_arch)
-report_freq_temp(cpu_freq, cpu_temp, cpu_arch)
-"""
-
