@@ -3,7 +3,8 @@
 ## Running the stress test (Python)
 
 If on x86 architecture, run the script with: `./odroid_stresser.py 10` for 10 seconds of runtime. If no runtime is specified, it will default to 60 seconds.
-If on arm architecture, run the script with `sudo ./odroid_stresser.py`
+If on ARM architecture, run the script with `sudo ./odroid_stresser.py`. This is mainly because the function that gets the frequency of the clock speed needs to read from
+different file locations, based off what architecture you are running this script on.
 
 You may stop the process at anytime with `Ctrl + c`.
 
