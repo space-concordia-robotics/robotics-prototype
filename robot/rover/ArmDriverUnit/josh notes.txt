@@ -1,9 +1,9 @@
-rename getcurrentangle to calccurrentangle
 make setdesiredangle,getdesiredangle functions
 
-stepper angle check needs to occur each software interrupt or every few interrupts because if the movement messes up in the middle we need a check... have put this into the main loop
+make logic for continuous vs position servos
+make logic for sabertooth vs cytron driver?
 
-for now doing steppers with constant period, worry about the ramping up and down later because probably requires individual timer interrupts
+stepper angle check needs to occur each software interrupt or every few interrupts because if the movement messes up in the middle we need a check... have put this into the main loop
 
 what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 

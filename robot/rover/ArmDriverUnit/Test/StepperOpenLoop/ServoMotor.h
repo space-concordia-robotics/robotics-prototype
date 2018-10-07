@@ -111,8 +111,21 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
+// takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
-  ;
+  int dutyCycle;
+  if (motorSpeed > motorPID.maxOutputValue) motorSpeed = motorPID.maxOutputValue;
+  if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
+  switch (motorDir) {
+    case CLOCKWISE:
+      dutyCycle = SERVO_STOP + motorSpeed;
+      break;
+    case COUNTER_CLOCKWISE:
+      dutyCycle = SERVO_STOP - motorSpeed;
+      break;
+  }
+  if (dutyCycle > 255) dutyCycle = 255;
+  if (dutyCycle < 0) dutyCycle = 0;
 }
 
 #endif

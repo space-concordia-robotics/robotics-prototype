@@ -123,6 +123,9 @@ void setup() {
   motor5.motorPID.setAngleTolerance(2.0);
   motor6.motorPID.setAngleTolerance(2.0);
 
+  motor5.motorPID.setOutputLimits(0, 128);
+  motor6.motorPID.setOutputLimits(0, 128);
+
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
@@ -218,11 +221,15 @@ void loop() {
           if (motor5.motorPID.openLoopError >= 0) motor5.motorPID.openLoopDir = 1;
           else motor5.motorPID.openLoopDir = -1;
 
+          motor5.motorPID.openLoopSpeed = 50; // 50% speed
+          motor5.motorPID.openLoopGain = 5.0; // totally random guess, needs to be tested
+          motor5.motorPID.timeCount = 0;
+
           // if the error is big enough to justify movement
           // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
           if ( (fabs(motor5.motorPID.openLoopError) * motor5.gearRatio) > motor5.motorPID.angleTolerance) {
-            motor4.motorPID.numMillis = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio / motor4.stepResolution; // calculate the number of steps to take
-            motor4.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            motor5.motorPID.numMillis = fabs(motor5.motorPID.openLoopError) * motor5.gearRatio * 1000.0 * motor5.motorPID.openLoopGain / motor5.motorPID.openLoopSpeed; // calculate how long to turn for
+            motor5.movementDone = false; // this flag being false lets the timer interrupt move the stepper
           }
           else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
@@ -239,27 +246,6 @@ void loop() {
 
       // activate budge command for appropriate motor
       motorArray[budgeCommand.whichMotor - 1]->budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-      /*
-        switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
-        case MOTOR1:
-          motor1.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR2:
-          motor2.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR3:
-          motor3.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR4:
-          motor4.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR5:
-          motor5.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        case MOTOR6:
-          motor6.budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
-          break;
-        }*/
     }
     else Serial.println("$E,Error: bad motor command");
   }
@@ -276,6 +262,8 @@ void loop() {
       if ( fabs(motor2.desiredAngle - motor2.calcCurrentAngle() ) < motor2.motorPID.angleTolerance){
       motor2.motorPID.movementDone = true;
       }
+    */
+    /*
       if ( fabs(motor5.desiredAngle - motor5.calcCurrentAngle() ) < motor5.motorPID.angleTolerance){
       motor5.motorPID.movementDone = true;
       }
@@ -386,7 +374,6 @@ void printMotorAngles() {
 void m3StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   // movementDone can be set elsewhere... so can numSteps
-  //if (!motor3.motorPID.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
   if (!motor3.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
     motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
     motor3.motorPID.stepCount++;
@@ -407,28 +394,19 @@ void m3StepperInterrupt(void) {
 void m4StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   // movementDone can be set elsewhere... so can numSteps
-  //if (!motor4.motorPID.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
   if (!motor4.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
     motor4.singleStep(motor4.motorPID.openLoopDir); // direction was set beforehand
     motor4.motorPID.stepCount++;
-    //nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
-    //Serial.print(motor4.motorPID.openLoopDir); Serial.println(" direction");
-    //Serial.print(motor4.motorPID.stepCount); Serial.println(" steps taken");
-    //Serial.print(motor4.motorPID.numSteps); Serial.println(" steps total");
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor4.motorPID.stepCount = 0; // reset the counter
-    //motor4.motorPID.movementDone = true;
     motor4.movementDone = true;
     motor4.disablePower();
-    //Serial.println("waiting for command");
   }
-  //m4StepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 
 void m2DCInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
-  //if (!motor2.motorPID.movementDone)
   if (!motor2.movementDone)
     motor2.calcCurrentAngle();
   // rethink the PID? needs to set a direction AND a speed
@@ -440,10 +418,14 @@ void m2DCInterrupt(void) {
 
 // final implementation would have the PID being called in these interrupts
 
+// for now these interrupts are open loop only, unless encoders are integrated into the servos
 void m5ServoInterrupt(void) {
-  if (!motor5.movementDone) {
-    //motor5.calcCurrentAngle();
-    ;
+  // movementDone can be set elsewhere... so can numSteps
+  if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
+    motor5.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor5.movementDone = true;
   }
 }
 

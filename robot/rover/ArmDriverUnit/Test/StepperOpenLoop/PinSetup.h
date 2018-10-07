@@ -19,6 +19,11 @@
 
 #define NUM_LIM_SW          4
 
+#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
+//#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+//#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
+//#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+
 // can go into ArmMotor
 // limits in ms for amount of time the motor can budge
 #define MAX_BUDGE_TIME 3000
@@ -27,12 +32,6 @@
 #define DEFAULT_SPEED 1
 #define MAX_SPEED 4
 #define MAX_COUNTS 4
-
-// can go into ArmMotor
-#define SERVO_STOP 189 // for 3.3v
-//#define SERVO_STOP 127 // for 5v
-#define DC_STOP 189//194 // for 3.3v
-//#define DC_STOP 127 // for 5v
 
 // steppers
 
