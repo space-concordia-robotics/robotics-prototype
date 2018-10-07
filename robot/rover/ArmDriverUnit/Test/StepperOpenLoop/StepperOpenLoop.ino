@@ -91,8 +91,11 @@ void m4_encoder_interrupt(void);
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
 void m2DCInterrupt(void);
+void servoInterrupt(void);
+/*
 void m5ServoInterrupt(void);
 void m6ServoInterrupt(void);
+*/
 
 void parseSerial(void);
 
@@ -132,7 +135,8 @@ void setup() {
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
-  servoTimer.begin(m5ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //servoTimer.begin(m5ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   //servoTimer.begin(m6ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
@@ -216,7 +220,7 @@ void loop() {
         case MOTOR5:
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
           motor5.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor5.motorPID.openLoopError = motor5.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
+          motor5.motorPID.openLoopError = motor5.desiredAngle; //- motor5.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
           if (motor5.motorPID.openLoopError >= 0) motor5.motorPID.openLoopDir = 1;
@@ -234,9 +238,29 @@ void loop() {
             //Serial.println(motor5.motorPID.numMillis);
           }
           else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-          //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
+          //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
           break;
         case MOTOR6:
+          //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
+          motor6.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          motor6.motorPID.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
+
+          // determine the direction
+          if (motor6.motorPID.openLoopError >= 0) motor6.motorPID.openLoopDir = 1;
+          else motor6.motorPID.openLoopDir = -1;
+
+          motor6.motorPID.openLoopSpeed = 50; // 50% speed
+          motor6.motorPID.openLoopGain = 5.0; // totally random guess, needs to be tested
+          motor6.motorPID.timeCount = 0;
+
+          // if the error is big enough to justify movement
+          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+          if ( (fabs(motor6.motorPID.openLoopError) * motor6.gearRatio) > motor6.motorPID.angleTolerance) {
+            motor6.motorPID.numMillis = fabs(motor6.motorPID.openLoopError) * motor6.gearRatio * 1000.0 * motor6.motorPID.openLoopGain / motor6.motorPID.openLoopSpeed; // calculate how long to turn for
+            motor6.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            //Serial.println(motor6.motorPID.numMillis);
+          }
+          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           //motor6.motorPID.updatePID(motor6.currentAngle, motor6.desiredAngle);
           break;
       }
@@ -420,6 +444,29 @@ void m2DCInterrupt(void) {
 
 // final implementation would have the PID being called in these interrupts
 
+void servoInterrupt(void) {
+  // movementDone can be set elsewhere... so can numSteps
+  // motor 5
+  if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
+    //Serial.println("command being processed");
+    motor5.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor5.movementDone = true;
+    motor5.stopRotation();
+  }
+  // motor 6
+  if (!motor6.movementDone && motor6.motorPID.timeCount < motor6.motorPID.numMillis) {
+    //Serial.println("command being processed");
+    motor6.setVelocity(motor6.motorPID.openLoopDir, motor6.motorPID.openLoopSpeed);
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor6.movementDone = true;
+    motor6.stopRotation();
+  }
+}
+
+/*
 // for now these interrupts are open loop only, unless encoders are integrated into the servos
 void m5ServoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
@@ -434,9 +481,17 @@ void m5ServoInterrupt(void) {
 }
 
 void m6ServoInterrupt(void) {
-  ;
+    // movementDone can be set elsewhere... so can numSteps
+  if (!motor6.movementDone && motor6.motorPID.timeCount < motor6.motorPID.numMillis) {
+    //Serial.println("command being processed");
+    motor6.setVelocity(motor6.motorPID.openLoopDir, motor6.motorPID.openLoopSpeed);
+  }
+  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+    motor6.movementDone = true;
+    motor6.stopRotation();
+  }
 }
-
+*/
 // if these don't register fast enough, use global volatile long encoderCount variables per motor instead of acccessing objects twice
 void m1_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
