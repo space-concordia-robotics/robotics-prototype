@@ -51,6 +51,7 @@ class ServoMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
     void setVelocity(int motorDir, int motorSpeed);
+    void stopRotation(void);
     //float calcCurrentAngle();
 
   private:
@@ -111,6 +112,10 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
+void ServoMotor::stopRotation(void){
+  analogWrite(pwmPin,SERVO_STOP);
+}
+
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
@@ -126,6 +131,7 @@ void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   }
   if (dutyCycle > 255) dutyCycle = 255;
   if (dutyCycle < 0) dutyCycle = 0;
+  analogWrite(pwmPin, dutyCycle);
 }
 
 #endif

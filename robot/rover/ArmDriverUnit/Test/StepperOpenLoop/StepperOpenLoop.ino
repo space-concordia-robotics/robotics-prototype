@@ -132,7 +132,8 @@ void setup() {
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
-  //servoTimer.begin(dcInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  servoTimer.begin(m5ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  //servoTimer.begin(m6ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -230,6 +231,7 @@ void loop() {
           if ( (fabs(motor5.motorPID.openLoopError) * motor5.gearRatio) > motor5.motorPID.angleTolerance) {
             motor5.motorPID.numMillis = fabs(motor5.motorPID.openLoopError) * motor5.gearRatio * 1000.0 * motor5.motorPID.openLoopGain / motor5.motorPID.openLoopSpeed; // calculate how long to turn for
             motor5.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            //Serial.println(motor5.motorPID.numMillis);
           }
           else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
@@ -422,10 +424,12 @@ void m2DCInterrupt(void) {
 void m5ServoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
   if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
+    //Serial.println("command being processed");
     motor5.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor5.movementDone = true;
+    motor5.stopRotation();
   }
 }
 
