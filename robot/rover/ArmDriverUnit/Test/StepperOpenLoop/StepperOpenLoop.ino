@@ -51,7 +51,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   unsigned int whichTime = 0;
   bool angleCommand = false;
   float whichAngle = 0.0;
-} budgeCommand, emptyBudgeCommand; // emptyBudgeCommand is used to reset the struct when the loop restarts
+} motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 
@@ -152,45 +152,45 @@ void loop() {
     Serial.println("=======================================================");
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: "); Serial.println(serialBuffer); // send back what was received
-    parseSerial(); // goes through the message and puts the appropriate data into budgeCommand struct
+    parseSerial(); // goes through the message and puts the appropriate data into motorCommand struct
     memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
     restOfMessage = serialBuffer; // reset pointer
   }
 
-  if (budgeCommand.whichMotor > 0) {
-    if (budgeCommand.angleCommand) {
-      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.print(" desired angle (degrees) is: "); Serial.println(budgeCommand.whichAngle);
+  if (motorCommand.whichMotor > 0) {
+    if (motorCommand.angleCommand) {
+      Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
       Serial.println("=======================================================");
-      switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
+      switch (motorCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
-          if (budgeCommand.whichAngle > motor1.minimumAngle && budgeCommand.whichAngle < motor1.maximumAngle) {
+          if (motorCommand.whichAngle > motor1.minimumAngle && motorCommand.whichAngle < motor1.maximumAngle) {
             //motor1.movementDone = false;
             //motor1.enablePower();
             // If I do the code like this, it means that once the motor achieves the correct position,
             // it will stop and never recorrect until a new angle request is sent.
             // Also, technically updatePID should only be called in the stepper interrupt.
             // Well, technically it should only be used for the DC motor....
-            motor1.desiredAngle = budgeCommand.whichAngle;
+            motor1.desiredAngle = motorCommand.whichAngle;
             motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR2:
-          if (budgeCommand.whichAngle > motor2.minimumAngle && budgeCommand.whichAngle < motor2.maximumAngle) {
-            motor2.desiredAngle = budgeCommand.whichAngle;
+          if (motorCommand.whichAngle > motor2.minimumAngle && motorCommand.whichAngle < motor2.maximumAngle) {
+            motor2.desiredAngle = motorCommand.whichAngle;
             motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR3:
-          if (budgeCommand.whichAngle > motor3.minimumAngle && budgeCommand.whichAngle < motor3.maximumAngle) {
-            //((StepperMotor *)motorArray[budgeCommand.whichMotor-1])->desiredAngle = budgeCommand.whichAngle; // I hate this
+          if (motorCommand.whichAngle > motor3.minimumAngle && motorCommand.whichAngle < motor3.maximumAngle) {
+            //((StepperMotor *)motorArray[motorCommand.whichMotor-1])->desiredAngle = motorCommand.whichAngle; // I hate this
             /*
                I wanted to have an array for motor1,motor2, etc and then just use commands like the above,
                but in order for that to work i still need to use that type caster beforehand, which defeats hte purpose
                of the array. the point is to not have to have cases but i still need them...
             */
-            motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor3.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
             motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
@@ -211,8 +211,8 @@ void loop() {
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR4:
-          if (budgeCommand.whichAngle > motor4.minimumAngle && budgeCommand.whichAngle < motor4.maximumAngle) {
-            motor4.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          if (motorCommand.whichAngle > motor4.minimumAngle && motorCommand.whichAngle < motor4.maximumAngle) {
+            motor4.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
             motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
@@ -234,7 +234,7 @@ void loop() {
           break;
         case MOTOR5:
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
-          motor5.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+          motor5.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
           motor5.motorPID.openLoopError = motor5.desiredAngle; //- motor5.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
@@ -256,9 +256,9 @@ void loop() {
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
           break;
         case MOTOR6:
-          if (budgeCommand.whichAngle > motor6.minimumAngle && budgeCommand.whichAngle < motor6.maximumAngle) {
+          if (motorCommand.whichAngle > motor6.minimumAngle && motorCommand.whichAngle < motor6.maximumAngle) {
             //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
-            motor6.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor6.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
             motor6.motorPID.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
@@ -283,17 +283,17 @@ void loop() {
           break;
       }
     }
-    else if ( (budgeCommand.whichDir == 1 || budgeCommand.whichDir == -1) && budgeCommand.whichSpeed > 0
-              && budgeCommand.whichTime > 0) {
-      Serial.print("motor "); Serial.print(budgeCommand.whichMotor); Serial.println(" to move");
+    else if ( (motorCommand.whichDir == 1 || motorCommand.whichDir == -1) && motorCommand.whichSpeed > 0
+              && motorCommand.whichTime > 0) {
+      Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
 
       // activate budge command for appropriate motor
-      motorArray[budgeCommand.whichMotor - 1]->budge(budgeCommand.whichDir, budgeCommand.whichSpeed, budgeCommand.whichTime);
+      motorArray[motorCommand.whichMotor - 1]->budge(motorCommand.whichDir, motorCommand.whichSpeed, motorCommand.whichTime);
     }
     else Serial.println("$E,Error: bad motor command");
   }
-  budgeCommand = emptyBudgeCommand; // reset budgeCommand so the microcontroller doesn't try to move a motor next loop
+  motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
 
 
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
@@ -571,18 +571,18 @@ void parseSerial(void) {
     int tempMotorVar = atoi(msgElem);
     // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
     if (tempMotorVar > 0 && tempMotorVar <= RobotMotor::numMotors) {
-      budgeCommand.whichMotor = tempMotorVar;
-      Serial.print("parsed motor "); Serial.println(budgeCommand.whichMotor);
+      motorCommand.whichMotor = tempMotorVar;
+      Serial.print("parsed motor "); Serial.println(motorCommand.whichMotor);
     }
     else Serial.println("motor does not exist");
     msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
     if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
-      budgeCommand.angleCommand = true;
+      motorCommand.angleCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
       float tempAngleVar = atof(msgElem); // converts to float
       if (tempAngleVar > -720.0 && tempAngleVar < 720.0) {
-        budgeCommand.whichAngle = tempAngleVar;
-        Serial.print("parsed desired angle "); Serial.println(budgeCommand.whichAngle);
+        motorCommand.whichAngle = tempAngleVar;
+        Serial.print("parsed desired angle "); Serial.println(motorCommand.whichAngle);
       }
       else Serial.println("angle is out of bounds");
     }
@@ -591,11 +591,11 @@ void parseSerial(void) {
       //float tempDirVar = atof(msgElem); // converts to float
       switch (*msgElem) { // determines motor direction
         case '0': // arbitrarily (for now) decided 0 is clockwise
-          budgeCommand.whichDir = CLOCKWISE;
+          motorCommand.whichDir = CLOCKWISE;
           Serial.println("parsed direction clockwise");
           break;
         case '1': // arbitrarily (for now) decided 1 is counter-clockwise
-          budgeCommand.whichDir = COUNTER_CLOCKWISE;
+          motorCommand.whichDir = COUNTER_CLOCKWISE;
           Serial.println("parsed direction counter-clockwise");
           break;
       }
@@ -604,8 +604,8 @@ void parseSerial(void) {
         msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (integer representing speed level)
         int tempSpeedVar = atoi(msgElem); // converts to int
         if (tempSpeedVar <= MAX_SPEED - 1) { // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
-          budgeCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
-          Serial.print("parsed speed level: "); Serial.println(budgeCommand.whichSpeed);
+          motorCommand.whichSpeed = tempSpeedVar + 1; // set the actual speed, enum starts with 1
+          Serial.print("parsed speed level: "); Serial.println(motorCommand.whichSpeed);
         }
       }
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time tag)
@@ -613,8 +613,8 @@ void parseSerial(void) {
         msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (time in seconds)
         unsigned int tempTimeVar = atoi(msgElem); // converts to int
         if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
-          budgeCommand.whichTime = tempTimeVar;
-          Serial.print("parsed time interval "); Serial.print(budgeCommand.whichTime); Serial.println("ms");
+          motorCommand.whichTime = tempTimeVar;
+          Serial.print("parsed time interval "); Serial.print(motorCommand.whichTime); Serial.println("ms");
         }
       }
     }
