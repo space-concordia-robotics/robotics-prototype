@@ -76,32 +76,16 @@ def final_report(freq_min_max_sum, temp_min_max_sum, runtime, log_file):
     print("\nTemperature stats:")
     log_file.write("\nTemperature stats:\n")
 
-    min_temp_report = report_temp(temp_min_max_sum[0], "Min ")
-    max_temp_report = report_temp(temp_min_max_sum[1], "Max ")
-    avg_temp_report = report_temp(avg_temp, "Avg ")
-
-    print(min_temp_report)
-    print(max_temp_report)
-    print(avg_temp_report)
-
-    log_file.write(min_temp_report + "\n")
-    log_file.write(max_temp_report + "\n")
-    log_file.write(avg_temp_report + "\n")
+    print_and_log(report_temp(temp_min_max_sum[0], "Min "), log_file)
+    print_and_log(report_temp(temp_min_max_sum[1], "Max "), log_file)
+    print_and_log(report_temp(avg_temp, "Avg "), log_file)
 
     print("\nClock speed stats:")
     log_file.write("\nClock speed stats:\n")
 
-    min_freq_report = report_freq(freq_min_max_sum[0], arch, "Min ")
-    max_freq_report = report_freq(freq_min_max_sum[1], arch, "Max ")
-    avg_freq_report = report_freq(avg_freq, arch, "Avg ")
-
-    print(min_freq_report)
-    print(max_freq_report)
-    print(avg_freq_report)
-
-    log_file.write(min_freq_report + "\n")
-    log_file.write(max_freq_report + "\n")
-    log_file.write(avg_freq_report + "\n")
+    print_and_log(report_freq(freq_min_max_sum[0], arch, "Min "), log_file)
+    print_and_log(report_freq(freq_min_max_sum[1], arch, "Max "), log_file)
+    print_and_log(report_freq(avg_freq, arch, "Avg "), log_file)
 
 
 def check_dependencies():
@@ -115,6 +99,12 @@ def check_dependencies():
         print("Dependency not found: stress")
         print("To install on debian: sudo apt-get install stress")
         sys.exit(1)
+
+
+def print_and_log(msg, log_file):
+    print(msg)
+    log_file.write(msg + "\n")
+
 
 def run_stress_test():
     # default 60 seconds run time
@@ -153,13 +143,8 @@ def run_stress_test():
             temp_sum += temp
             freq_sum += freq
 
-            temp_report = report_temp(temp)
-            print(temp_report)
-            log_file.write(temp_report + "\n")
-
-            freq_report = report_freq(freq, arch)
-            print(freq_report)
-            log_file.write(freq_report + "\n")
+            print_and_log(report_temp(temp), log_file)
+            print_and_log(report_freq(freq, arch), log_file)
 
             if temp > max_temp:
                 max_temp = temp
