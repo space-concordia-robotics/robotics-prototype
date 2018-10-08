@@ -65,18 +65,19 @@ def report_freq(freq, arch, prepend=""):
     return "Unkown architecture: " + arch
 
 
-def final_report(freq_sum, freq_min, freq_max, temp_sum, temp_min, temp_max, runtime, log_file):
+# average is to be calculated from sum, min and max values already supplied
+def final_report(freq_min_max_sum, temp_min_max_sum, runtime, log_file):
     arch = get_arch()
-    avg_freq = freq_sum / (runtime * 1.0)
-    avg_temp = temp_sum / (runtime * 1.0)
+    avg_freq = freq_min_max_sum[2] / (runtime * 1.0)
+    avg_temp = temp_min_max_sum[2] / (runtime * 1.0)
     # scale down to account for extra trailing 0's
     avg_temp = avg_temp / 1000
 
     print("\nTemperature stats:")
     log_file.write("\nTemperature stats:\n")
 
-    min_temp_report = report_temp(temp_min, "Min ")
-    max_temp_report = report_temp(temp_max, "Max ")
+    min_temp_report = report_temp(temp_min_max_sum[0], "Min ")
+    max_temp_report = report_temp(temp_min_max_sum[1], "Max ")
     avg_temp_report = report_temp(avg_temp, "Avg ")
 
     print(min_temp_report)
@@ -90,8 +91,8 @@ def final_report(freq_sum, freq_min, freq_max, temp_sum, temp_min, temp_max, run
     print("\nClock speed stats:")
     log_file.write("\nClock speed stats:\n")
 
-    min_freq_report = report_freq(freq_min, arch, "Min ")
-    max_freq_report = report_freq(freq_max, arch, "Max ")
+    min_freq_report = report_freq(freq_min_max_sum[0], arch, "Min ")
+    max_freq_report = report_freq(freq_min_max_sum[1], arch, "Max ")
     avg_freq_report = report_freq(avg_freq, arch, "Avg ")
 
     print(min_freq_report)
@@ -103,7 +104,7 @@ def final_report(freq_sum, freq_min, freq_max, temp_sum, temp_min, temp_max, run
     log_file.write(avg_freq_report + "\n")
 
 
-def run_stress_test():
+def check_dependencies():
     print("Checking for dependencies...")
 
     devnull = open(os.devnull, "w")
@@ -115,13 +116,13 @@ def run_stress_test():
         print("To install on debian: sudo apt-get install stress")
         sys.exit(1)
 
+def run_stress_test():
     # default 60 seconds run time
     runtime = 60
     end = time() + runtime
+    arch = get_arch()
 
     print()
-
-    arch = get_arch()
 
     # get user defined runtime, if given
     if len(sys.argv) == 2:
@@ -143,8 +144,7 @@ def run_stress_test():
         log_file = open("stress-test-results_" + date_stamp + ".log", "w")
         log_file.write("Started stress test: " + date_stamp + "\n\n")
 
-        stress_test_cmd = "stress -c 4 -t " + str(runtime) + "s"
-        subprocess.Popen(stress_test_cmd.split(" "))
+        subprocess.Popen(("stress -c 4 -t " + str(runtime) + "s").split(" "))
 
         while time() < end:
             i += 1
@@ -177,11 +177,11 @@ def run_stress_test():
 
     except KeyboardInterrupt:
         print("\nTerminating stress test early")
-        final_report(freq_sum, min_freq, max_freq, temp_sum, min_temp, max_temp, i, log_file)
+        final_report([min_freq, max_freq, freq_sum], [min_temp, max_temp, temp_sum], i, log_file)
         log_file.close()
         sys.exit(0)
 
-    final_report(freq_sum, min_freq, max_freq, temp_sum, min_temp, max_temp, i, log_file)
+    final_report([min_freq, max_freq, freq_sum], [min_temp, max_temp, temp_sum], i, log_file)
     log_file.close()
 
 
