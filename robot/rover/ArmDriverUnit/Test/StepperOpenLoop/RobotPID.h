@@ -14,7 +14,6 @@ class RobotPID {
     float openLoopGain; // multiplier so that speed calculation works for given speed
 
     // these variables are accessed outside of ISRs
-    //volatile bool movementDone;
     volatile int dir; // closed loop direction
     volatile float pidOutput; // only updated at the end of the calculations
     int motorSpeed; // not even used yet
@@ -23,14 +22,14 @@ class RobotPID {
     float angleTolerance;
     float maxOutputValue;
     float minOutputValue;
-    int kp = 1;
-    int ki = 0;
-    int kd = 0;
+    int kp;
+    int ki;
+    int kd;
 
     RobotPID();
     void updatePID(volatile float& currentAngle, float& desiredAngle);
     void setAngleTolerance(float tolerance);
-    void setOutputLimits(float min, float max);
+    void setOutputLimits(float minVal, float maxVal);
     void setGainConstants(float kp, float ki, float kd);
 
   private:

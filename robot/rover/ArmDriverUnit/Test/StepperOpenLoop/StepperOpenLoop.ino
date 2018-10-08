@@ -1,4 +1,6 @@
 /*
+ * perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
+ * 
    I need to decide where movementDone is changed. does the pid decide that the movement is done and then the timer interrupts know not to turn motors?
    Right now there's a periodic check for STEPPERS that if there's a discrepancy then the stepper angle is adjusted. This is necessary because
    the steppers are controlled in open loop. So in this periodic check, it could also choose to disable the dc motor PID for example, eliminating the need
@@ -118,6 +120,13 @@ void setup() {
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+
+  motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
+  motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
+  motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
+  motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
+  //motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
+  motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
 
   motor1.motorPID.setAngleTolerance(1.8 * 3);
   motor2.motorPID.setAngleTolerance(2.0);

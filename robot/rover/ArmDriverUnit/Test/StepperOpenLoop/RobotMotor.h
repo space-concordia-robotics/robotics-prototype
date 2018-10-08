@@ -13,47 +13,48 @@ enum motor_speed {SPEED1 = 1, SPEED2, SPEED3, SPEED4}; // defines motor speed //
 
 class RobotMotor {
   public:
-    elapsedMillis sinceStart; // automatically increments every millisecond
+    // these variables are set at start and normally don't change during the main loop
     static int numMotors;
-    //float maxCWAngle, maxCCWAngle;
-    volatile float currentAngle; // can be updated within timer interrupts
-    volatile bool movementDone;
-    float desiredAngle;
+    int encoderPinA, encoderPinB;
     float gearRatio;
     float gearRatioReciprocal;
-
-    // encoder_interrupt();
-    void attachEncoder();
-    int encoderPinA, encoderPinB;
-    volatile long encoderCount;
-
-    RobotPID motorPID;
-
+    float maximumAngle, minimumAngle;
+    bool hasAngleLimits;
     //int maxSpeed;
+
+    RobotPID motorPID; // used for speed and angle control
+
+    // these variables change during the main loop
+    elapsedMillis sinceStart; // automatically increments every millisecond
+    volatile long encoderCount; // incremented inside encoder interrupts
+    volatile float currentAngle; // can be updated within timer interrupts
+    float desiredAngle;
+    volatile bool movementDone;
+
+    // specifically for budge()
     int cwSpeed, ccwSpeed;
     bool budgeMovementDone;
-
-    RobotMotor();
-    void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
-
     int rightCount, leftCount; // counters to make sure budge doesn't go too far
     bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
 
-    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) = 0; // budges motor for short period of time
-    virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed until next timer interrupt
+    RobotMotor();
+    void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
+    void setAngleLimits(float minAngle, float maxAngle);
 
-    //void setMaxCWAngle(int angle); // need to have defined it for servos first
-    //void setMaxCCWAngle(int angle); // need to have defined it for servos first
+    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) = 0; // budges motor for short period of time
+
+    virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed until next timer interrupt
     //void setMaxSpeed();
     //void setDesiredAngle(float angle); // need to have defined it for servos first
     //virtual float calcCurrentAngle(void) = 0; // need to have defined it for servos first
+
   private:
-    //void update(); // can go into ArmMotor
+    //void update(); // not sure if this will be necessary anymore
 
   protected:
+    // the following variables are specific to encoders
     //quadrature encoder matrix below corresponds to the correct direction for a specific set of prev and current encoder states
     //const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
-
     bool hasEncoder;
     uint32_t encoderPort;
     int encoderShift;
@@ -66,6 +67,7 @@ int RobotMotor::numMotors = 0; // must initialize variable outside of class
 RobotMotor::RobotMotor() {
   numMotors++;
   movementDone = true;
+  hasAngleLimits = false;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes)//:
@@ -77,6 +79,12 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
   encoderPort = port;
   encoderShift = shift;
   encoderResolution = encRes;
+}
+
+void RobotMotor::setAngleLimits(float minAngle, float maxAngle) {
+  minimumAngle = minAngle;
+  maximumAngle = maxAngle;
+  hasAngleLimits = true;
 }
 
 #endif
