@@ -1,3 +1,11 @@
+stop command to motors
+
+all joints moving at same speed? command to adjust speed that internally adjusts each motor's speed so even at new speeds they turn at the same speed
+
+custom speed control so a specific motor can move faster if desired
+
+deal with relative vs absolute angle control issues
+
 make setdesiredangle,getdesiredangle functions
 
 make logic for continuous vs position servos
@@ -8,8 +16,6 @@ stepper angle check needs to occur each software interrupt or every few interrup
 what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 
 check recommended pid time interval period
-
-servo: estimate calculation based on speed and time
 
 (always) make sure all variables affected by interrupts are volatile
 
