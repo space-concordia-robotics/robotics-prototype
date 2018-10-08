@@ -10,3 +10,4 @@
 **/env
 **/.envrc
 **/stress-test-results_*
+**/node_modules
