@@ -31,8 +31,10 @@ Now you may use 'w' for moving the motor forward, 's' for back, 'q' to terminate
 ## Known Issues
 - If your basestation and rover computers are both connected to `ConcordiaUniversity`, then you will not be able to run this
 demo properly if your basestation is connected to the network via WiFi. It *will* however work if the basestation is connected using ethernet.
-A possible work around for this is either using somebody's 3G Wifi hotspot to connect both devices to or to create WLAN for both devices to connect.
-These possible work arounds have not yet been tested.
+A possible work around for this is either using a Wifi hotspot to connect both devices to or to create WLAN for both devices to connect.
+~~These possible work arounds have not yet been tested.~~ Using a Wifi hotspot was tested and works sending commands from a laptop when both devices are
+connected to the same hotspot. Though during a public demo in EV, due to the high density of people there was a lot of interference (compared to the space lab)
+and the response times of the connection were to slow to properly demo.
 - After "spamming" the controls to test how much they can handle, it seemed that after a certain amount of time the UDP packets being delivered
 slowed down significantly. This is not 100% confirmed, but may be an issue related to ConcordiaUniversity network configuration. Perhaps if a certain threshold is reached,
 these types of signal streams are throttled by the network.

@@ -55,7 +55,7 @@ Laptop (master):
 - ROS_HOSTNAME=`hostname`
  
 Odroid (w/ Arduino):
-- ROS_MASTER_URI:http://<Laptop IP>
+- ROS_MASTER_URI:http://`<Laptop IP>`
 - ROS_HOSTNAME=`hostname`
 
 Since I wasn't able to ping `odroid` hostname from my laptop (and vice versa), I had to edit my `/etc/hosts` file for each device

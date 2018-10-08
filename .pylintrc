@@ -63,7 +63,6 @@ confidence=
 disable=
     # disabled by me,
     locally-disabled,
-    missing-docstring,
     fixme,
     # disabled by default,
     import-star-module-level,
