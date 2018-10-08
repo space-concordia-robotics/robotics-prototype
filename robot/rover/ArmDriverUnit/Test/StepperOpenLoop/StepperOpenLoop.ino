@@ -1,6 +1,6 @@
 /*
- * perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
- * 
+   perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
+
    I need to decide where movementDone is changed. does the pid decide that the movement is done and then the timer interrupts know not to turn motors?
    Right now there's a periodic check for STEPPERS that if there's a discrepancy then the stepper angle is adjusted. This is necessary because
    the steppers are controlled in open loop. So in this periodic check, it could also choose to disable the dc motor PID for example, eliminating the need
@@ -92,12 +92,8 @@ void m4_encoder_interrupt(void);
 
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
-void m2DCInterrupt(void);
+void dcInterrupt(void);
 void servoInterrupt(void);
-/*
-void m5ServoInterrupt(void);
-void m6ServoInterrupt(void);
-*/
 
 void parseSerial(void);
 
@@ -145,8 +141,6 @@ void setup() {
   //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
   //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
-  //servoTimer.begin(m5ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
-  //servoTimer.begin(m6ServoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -169,62 +163,74 @@ void loop() {
       Serial.println("=======================================================");
       switch (budgeCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
-          //motor1.movementDone = false;
-          //motor1.enablePower();
-          // If I do the code like this, it means that once the motor achieves the correct position,
-          // it will stop and never recorrect until a new angle request is sent.
-          // Also, technically updatePID should only be called in the stepper interrupt.
-          // Well, technically it should only be used for the DC motor....
-          motor1.desiredAngle = budgeCommand.whichAngle;
-          motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
+          if (budgeCommand.whichAngle > motor1.minimumAngle && budgeCommand.whichAngle < motor1.maximumAngle) {
+            //motor1.movementDone = false;
+            //motor1.enablePower();
+            // If I do the code like this, it means that once the motor achieves the correct position,
+            // it will stop and never recorrect until a new angle request is sent.
+            // Also, technically updatePID should only be called in the stepper interrupt.
+            // Well, technically it should only be used for the DC motor....
+            motor1.desiredAngle = budgeCommand.whichAngle;
+            motor1.motorPID.updatePID(motor1.currentAngle, motor1.desiredAngle);
+          }
+          else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR2:
-          motor2.desiredAngle = budgeCommand.whichAngle;
-          motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+          if (budgeCommand.whichAngle > motor2.minimumAngle && budgeCommand.whichAngle < motor2.maximumAngle) {
+            motor2.desiredAngle = budgeCommand.whichAngle;
+            motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+          }
+          else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR3:
-          //((StepperMotor *)motorArray[budgeCommand.whichMotor-1])->desiredAngle = budgeCommand.whichAngle; // I hate this
-          /*
-             I wanted to have an array for motor1,motor2, etc and then just use commands like the above,
-             but in order for that to work i still need to use that type caster beforehand, which defeats hte purpose
-             of the array. the point is to not have to have cases but i still need them...
-          */
-          motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
+          if (budgeCommand.whichAngle > motor3.minimumAngle && budgeCommand.whichAngle < motor3.maximumAngle) {
+            //((StepperMotor *)motorArray[budgeCommand.whichMotor-1])->desiredAngle = budgeCommand.whichAngle; // I hate this
+            /*
+               I wanted to have an array for motor1,motor2, etc and then just use commands like the above,
+               but in order for that to work i still need to use that type caster beforehand, which defeats hte purpose
+               of the array. the point is to not have to have cases but i still need them...
+            */
+            motor3.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor3.motorPID.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
 
-          // determine the direction
-          if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
-          else motor3.motorPID.openLoopDir = -1;
+            // determine the direction
+            if (motor3.motorPID.openLoopError >= 0) motor3.motorPID.openLoopDir = 1;
+            else motor3.motorPID.openLoopDir = -1;
 
-          // if the error is big enough to justify movement
-          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-          if ( (fabs(motor3.motorPID.openLoopError) * motor3.gearRatio) > motor3.motorPID.angleTolerance) {
-            motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
-            motor3.enablePower(); // give power to the stepper finally
-            //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
-            motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            // if the error is big enough to justify movement
+            // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+            if ( (fabs(motor3.motorPID.openLoopError) * motor3.gearRatio) > motor3.motorPID.angleTolerance) {
+              motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
+              motor3.enablePower(); // give power to the stepper finally
+              //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+              motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            }
+            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+            //motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
           }
-          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-          //motor3.motorPID.updatePID(motor3.currentAngle, motor3.desiredAngle);
+          else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR4:
-          motor4.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
+          if (budgeCommand.whichAngle > motor4.minimumAngle && budgeCommand.whichAngle < motor4.maximumAngle) {
+            motor4.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor4.motorPID.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
 
-          // determine the direction
-          if (motor4.motorPID.openLoopError >= 0) motor4.motorPID.openLoopDir = 1;
-          else motor4.motorPID.openLoopDir = -1;
+            // determine the direction
+            if (motor4.motorPID.openLoopError >= 0) motor4.motorPID.openLoopDir = 1;
+            else motor4.motorPID.openLoopDir = -1;
 
-          // if the error is big enough to justify movement
-          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-          if ( (fabs(motor4.motorPID.openLoopError) * motor4.gearRatio) > motor4.motorPID.angleTolerance) {
-            motor4.motorPID.numSteps = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio / motor4.stepResolution; // calculate the number of steps to take
-            motor4.enablePower(); // give power to the stepper finally
-            //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
-            motor4.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            // if the error is big enough to justify movement
+            // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+            if ( (fabs(motor4.motorPID.openLoopError) * motor4.gearRatio) > motor4.motorPID.angleTolerance) {
+              motor4.motorPID.numSteps = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio / motor4.stepResolution; // calculate the number of steps to take
+              motor4.enablePower(); // give power to the stepper finally
+              //motor3.motorPID.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+              motor4.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            }
+            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+            //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
           }
-          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-          //motor4.motorPID.updatePID(motor4.currentAngle, motor4.desiredAngle);
+          else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR5:
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
@@ -250,27 +256,30 @@ void loop() {
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
           break;
         case MOTOR6:
-          //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
-          motor6.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
-          motor6.motorPID.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
+          if (budgeCommand.whichAngle > motor6.minimumAngle && budgeCommand.whichAngle < motor6.maximumAngle) {
+            //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
+            motor6.desiredAngle = budgeCommand.whichAngle; // set the desired angle based on the command
+            motor6.motorPID.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
 
-          // determine the direction
-          if (motor6.motorPID.openLoopError >= 0) motor6.motorPID.openLoopDir = 1;
-          else motor6.motorPID.openLoopDir = -1;
+            // determine the direction
+            if (motor6.motorPID.openLoopError >= 0) motor6.motorPID.openLoopDir = 1;
+            else motor6.motorPID.openLoopDir = -1;
 
-          motor6.motorPID.openLoopSpeed = 50; // 50% speed
-          motor6.motorPID.openLoopGain = 5.0; // totally random guess, needs to be tested
-          motor6.motorPID.timeCount = 0;
+            motor6.motorPID.openLoopSpeed = 50; // 50% speed
+            motor6.motorPID.openLoopGain = 5.0; // totally random guess, needs to be tested
+            motor6.motorPID.timeCount = 0;
 
-          // if the error is big enough to justify movement
-          // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-          if ( (fabs(motor6.motorPID.openLoopError) * motor6.gearRatio) > motor6.motorPID.angleTolerance) {
-            motor6.motorPID.numMillis = fabs(motor6.motorPID.openLoopError) * motor6.gearRatio * 1000.0 * motor6.motorPID.openLoopGain / motor6.motorPID.openLoopSpeed; // calculate how long to turn for
-            motor6.movementDone = false; // this flag being false lets the timer interrupt move the stepper
-            //Serial.println(motor6.motorPID.numMillis);
+            // if the error is big enough to justify movement
+            // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+            if ( (fabs(motor6.motorPID.openLoopError) * motor6.gearRatio) > motor6.motorPID.angleTolerance) {
+              motor6.motorPID.numMillis = fabs(motor6.motorPID.openLoopError) * motor6.gearRatio * 1000.0 * motor6.motorPID.openLoopGain / motor6.motorPID.openLoopSpeed; // calculate how long to turn for
+              motor6.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+              //Serial.println(motor6.motorPID.numMillis);
+            }
+            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+            //motor6.motorPID.updatePID(motor6.currentAngle, motor6.desiredAngle);
           }
-          else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-          //motor6.motorPID.updatePID(motor6.currentAngle, motor6.desiredAngle);
+          else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
       }
     }
@@ -440,7 +449,7 @@ void m4StepperInterrupt(void) {
   }
 }
 
-void m2DCInterrupt(void) {
+void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
   if (!motor2.movementDone)
     motor2.calcCurrentAngle();
@@ -476,8 +485,8 @@ void servoInterrupt(void) {
 }
 
 /*
-// for now these interrupts are open loop only, unless encoders are integrated into the servos
-void m5ServoInterrupt(void) {
+  // for now these interrupts are open loop only, unless encoders are integrated into the servos
+  void m5ServoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
   if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
     //Serial.println("command being processed");
@@ -487,9 +496,9 @@ void m5ServoInterrupt(void) {
     motor5.movementDone = true;
     motor5.stopRotation();
   }
-}
+  }
 
-void m6ServoInterrupt(void) {
+  void m6ServoInterrupt(void) {
     // movementDone can be set elsewhere... so can numSteps
   if (!motor6.movementDone && motor6.motorPID.timeCount < motor6.motorPID.numMillis) {
     //Serial.println("command being processed");
@@ -499,7 +508,7 @@ void m6ServoInterrupt(void) {
     motor6.movementDone = true;
     motor6.stopRotation();
   }
-}
+  }
 */
 // if these don't register fast enough, use global volatile long encoderCount variables per motor instead of acccessing objects twice
 void m1_encoder_interrupt(void) {
