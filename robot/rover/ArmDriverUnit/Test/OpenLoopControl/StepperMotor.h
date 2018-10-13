@@ -26,14 +26,14 @@ class StepperMotor : public RobotMotor {
 
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
     void singleStep(int dir);
-    void enablePower();
-    void disablePower();
+    void enablePower(void);
+    void disablePower(void);
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
     void setVelocity(int motorDir, int motorSpeed);
-    float calcCurrentAngle();
+    float calcCurrentAngle(void);
 
   private:
     int enablePin, directionPin, stepPin;
@@ -55,11 +55,11 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   budgeMovementDone = true;
 }
 
-void StepperMotor::enablePower() {
+void StepperMotor::enablePower(void) {
   digitalWriteFast(enablePin, LOW);
 }
 
-void StepperMotor::disablePower() {
+void StepperMotor::disablePower(void) {
   digitalWriteFast(enablePin, HIGH);
 }
 
@@ -147,7 +147,7 @@ void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
   ;
 }
 
-float StepperMotor::calcCurrentAngle() {
+float StepperMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
     currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;

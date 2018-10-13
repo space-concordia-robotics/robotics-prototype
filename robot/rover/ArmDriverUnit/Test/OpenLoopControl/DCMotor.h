@@ -59,8 +59,9 @@ class DCMotor : public RobotMotor {
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
+    void stopRotation(void);
     void setVelocity(int motorDir, int motorSpeed);
-    float calcCurrentAngle();
+    float calcCurrentAngle(void);
 
   private:
     int pwmPin;
@@ -190,11 +191,25 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 */
 
-void DCMotor::setVelocity(int motorDir, int motorSpeed) {
-  ;
+void DCMotor::stopRotation(void){
+  analogWrite(pwmPin,0);
 }
 
-float DCMotor::calcCurrentAngle() {
+void DCMotor::setVelocity(int motorDir, int motorSpeed) {
+  if (motorSpeed > motorPID.maxOutputValue) motorSpeed = motorPID.maxOutputValue;
+  if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
+  switch (motorDir) {
+    case CLOCKWISE:
+      digitalWrite(directionPin, LOW);
+      break;
+    case COUNTER_CLOCKWISE:
+      digitalWrite(directionPin, HIGH);
+      break;
+  }
+  analogWrite(pwmPin, motorSpeed);
+}
+
+float DCMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
     currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;

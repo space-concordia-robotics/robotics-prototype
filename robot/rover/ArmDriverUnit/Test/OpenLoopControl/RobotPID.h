@@ -45,6 +45,7 @@ class RobotPID {
 RobotPID::RobotPID() {
   //movementDone = true;
   // default values
+  openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
   kp = 1.0; ki = 0.0; kd = 0.0;
   angleTolerance = 2.0;

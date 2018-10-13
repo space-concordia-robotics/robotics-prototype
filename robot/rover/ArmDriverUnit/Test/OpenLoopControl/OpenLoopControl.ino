@@ -117,22 +117,36 @@ void setup() {
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
-  motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
-  motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
-  motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
-  //motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
-  motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
+  { // shaft angle tolerance setters
+    motor1.motorPID.setAngleTolerance(1.8 * 3);
+    motor2.motorPID.setAngleTolerance(2.0);
+    motor3.motorPID.setAngleTolerance(1.8 * 3);
+    motor4.motorPID.setAngleTolerance(1.8 * 3);
+    motor5.motorPID.setAngleTolerance(2.0);
+    motor6.motorPID.setAngleTolerance(2.0);
+  }
 
-  motor1.motorPID.setAngleTolerance(1.8 * 3);
-  motor2.motorPID.setAngleTolerance(2.0);
-  motor3.motorPID.setAngleTolerance(1.8 * 3);
-  motor4.motorPID.setAngleTolerance(1.8 * 3);
-  motor5.motorPID.setAngleTolerance(2.0);
-  motor6.motorPID.setAngleTolerance(2.0);
+  { // motor angle limit setters
+    motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
+    motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
+    motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
+    motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
+    //motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
+    motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
+  }
 
+  motor2.motorPID.setOutputLimits(0, 255);
   motor5.motorPID.setOutputLimits(0, 128);
   motor6.motorPID.setOutputLimits(0, 128);
+
+  { // open loop setters
+    motor1.isOpenLoop = true; motor1.hasRamping = false;
+    motor2.isOpenLoop = true; motor2.hasRamping = false;
+    motor3.isOpenLoop = true; motor3.hasRamping = false;
+    motor4.isOpenLoop = true; motor4.hasRamping = false;
+    motor5.isOpenLoop = true; motor5.hasRamping = false;
+    motor6.isOpenLoop = true; motor6.hasRamping = false;
+  }
 
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
@@ -417,70 +431,106 @@ void printMotorAngles() {
 
 void m3StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
-  // movementDone can be set elsewhere... so can numSteps
-  if (!motor3.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
-    motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
-    motor3.motorPID.stepCount++;
-    //nextInterval = stepIntervalArray[1] * 1000; // speed 2 is 25ms steps
-    //Serial.print(motor3.motorPID.openLoopDir); Serial.println(" direction");
-    //Serial.print(motor3.motorPID.stepCount); Serial.println(" steps taken");
-    //Serial.print(motor3.motorPID.numSteps); Serial.println(" steps total");
+  if (motor3.isOpenLoop) { // open loop control
+    // movementDone can be set elsewhere... so can numSteps
+    if (!motor3.movementDone && motor3.motorPID.stepCount < motor3.motorPID.numSteps) {
+      motor3.singleStep(motor3.motorPID.openLoopDir); // direction was set beforehand
+      motor3.motorPID.stepCount++;
+      if (motor3.hasRamping) { // if speed ramping is enabled
+        // following code has array index that should be incremented each interrupt
+        nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
+        m3StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
+      }
+      //Serial.print(motor3.motorPID.openLoopDir); Serial.println(" direction");
+      //Serial.print(motor3.motorPID.stepCount); Serial.println(" steps taken");
+      //Serial.print(motor3.motorPID.numSteps); Serial.println(" steps total");
+    }
+    else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      motor3.motorPID.stepCount = 0; // reset the counter
+      //motor3.motorPID.movementDone = true;
+      motor3.movementDone = true;
+      motor3.disablePower();
+      //Serial.println("waiting for command");
+    }
   }
-  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-    motor3.motorPID.stepCount = 0; // reset the counter
-    //motor3.motorPID.movementDone = true;
-    motor3.movementDone = true;
-    motor3.disablePower();
-    //Serial.println("waiting for command");
+  else { // closed loop control
+    ;
   }
-  //m3StepperTimer.update(nextInterval); // need to check if im allowed to call this within the interrupt
 }
 void m4StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
-  // movementDone can be set elsewhere... so can numSteps
-  if (!motor4.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
-    motor4.singleStep(motor4.motorPID.openLoopDir); // direction was set beforehand
-    motor4.motorPID.stepCount++;
+  if (motor4.isOpenLoop) { // open loop control
+    if (!motor4.movementDone && motor4.motorPID.stepCount < motor4.motorPID.numSteps) {
+      motor4.singleStep(motor4.motorPID.openLoopDir); // direction was set beforehand
+      motor4.motorPID.stepCount++;
+      if (motor4.hasRamping) { // if speed ramping is enabled
+        // following code has array index that should be incremented each interrupt
+        nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
+        m4StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
+      }
+    }
+    else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      motor4.motorPID.stepCount = 0; // reset the counter
+      motor4.movementDone = true;
+      motor4.disablePower();
+    }
   }
-  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-    motor4.motorPID.stepCount = 0; // reset the counter
-    motor4.movementDone = true;
-    motor4.disablePower();
+  else { // closed loop control
+    ;
   }
 }
 
 void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
-  if (!motor2.movementDone)
-    motor2.calcCurrentAngle();
-  // rethink the PID? needs to set a direction AND a speed
-  motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
-  int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
-  int dir = CLOCKWISE;
-  motor2.setVelocity(dir, motorSpeed);
+  if (motor2.isOpenLoop) { // open loop control
+    if (!motor2.movementDone && motor2.motorPID.timeCount < motor2.motorPID.numMillis) {
+      motor2.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+    }
+    else{
+      motor2.movementDone = true;
+      motor2.stopRotation();
+    }
+  }
+  else { // closed loop control, incomplete
+    if (!motor2.movementDone) {
+      // rethink the PID? needs to set a direction AND a speed
+      //motor2.calcCurrentAngle();
+      //motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
+      //int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+      //motor2.setVelocity(dir, motorSpeed);
+    }
+  }
 }
-
 // final implementation would have the PID being called in these interrupts
 
 void servoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
   // motor 5
-  if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
-    //Serial.println("command being processed");
-    motor5.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+  if (motor5.isOpenLoop) { // open loop control
+    if (!motor5.movementDone && motor5.motorPID.timeCount < motor5.motorPID.numMillis) {
+      //Serial.println("command being processed");
+      motor5.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+    }
+    else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      motor5.movementDone = true;
+      motor5.stopRotation();
+    }
   }
-  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-    motor5.movementDone = true;
-    motor5.stopRotation();
+  else { // closed loop control
+    ;
   }
   // motor 6
-  if (!motor6.movementDone && motor6.motorPID.timeCount < motor6.motorPID.numMillis) {
-    //Serial.println("command being processed");
-    motor6.setVelocity(motor6.motorPID.openLoopDir, motor6.motorPID.openLoopSpeed);
+  if (motor6.isOpenLoop) { // open loop control
+    if (!motor6.movementDone && motor6.motorPID.timeCount < motor6.motorPID.numMillis) {
+      motor6.setVelocity(motor6.motorPID.openLoopDir, motor6.motorPID.openLoopSpeed);
+    }
+    else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      motor6.movementDone = true;
+      motor6.stopRotation();
+    }
   }
-  else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-    motor6.movementDone = true;
-    motor6.stopRotation();
+  else { // closed loop control
+    ;
   }
 }
 

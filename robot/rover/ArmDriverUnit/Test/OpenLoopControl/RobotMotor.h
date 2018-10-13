@@ -20,6 +20,8 @@ class RobotMotor {
     float gearRatioReciprocal;
     float maximumAngle, minimumAngle;
     bool hasAngleLimits;
+    bool isOpenLoop; // decides whether to use the PID or not
+    bool hasRamping; // decides whether to ramp the speed in open loop
     //int maxSpeed;
 
     RobotPID motorPID; // used for speed and angle control
@@ -68,6 +70,8 @@ RobotMotor::RobotMotor() {
   numMotors++;
   movementDone = true;
   hasAngleLimits = false;
+  isOpenLoop = true; // by default don't use PID
+  hasRamping = false; // by default don't ramp the speed
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes)//:

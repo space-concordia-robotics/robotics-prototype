@@ -21,6 +21,7 @@
 
 #define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+//only needed for sabertooth
 //#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
 
