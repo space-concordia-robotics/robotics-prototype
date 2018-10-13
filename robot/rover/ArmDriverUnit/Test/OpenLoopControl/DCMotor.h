@@ -191,11 +191,12 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 */
 
-void DCMotor::stopRotation(void){
-  analogWrite(pwmPin,0);
+void DCMotor::stopRotation(void) {
+  analogWrite(pwmPin, 0);
 }
 
 void DCMotor::setVelocity(int motorDir, int motorSpeed) {
+  int dutyCycle;
   if (motorSpeed > motorPID.maxOutputValue) motorSpeed = motorPID.maxOutputValue;
   if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
   switch (motorDir) {
@@ -206,7 +207,8 @@ void DCMotor::setVelocity(int motorDir, int motorSpeed) {
       digitalWrite(directionPin, HIGH);
       break;
   }
-  analogWrite(pwmPin, motorSpeed);
+  dutyCycle = motorSpeed * 255 / 100;
+  analogWrite(pwmPin, dutyCycle);
 }
 
 float DCMotor::calcCurrentAngle(void) {

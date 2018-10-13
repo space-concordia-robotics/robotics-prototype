@@ -123,14 +123,15 @@ void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
-      dutyCycle = SERVO_STOP + motorSpeed;
+      dutyCycle = SERVO_STOP + motorSpeed*128/100;
       break;
     case COUNTER_CLOCKWISE:
-      dutyCycle = SERVO_STOP - motorSpeed;
+      dutyCycle = SERVO_STOP - motorSpeed*128/100;
       break;
   }
   if (dutyCycle > 255) dutyCycle = 255;
   if (dutyCycle < 0) dutyCycle = 0;
+  
   analogWrite(pwmPin, dutyCycle);
 }
 
