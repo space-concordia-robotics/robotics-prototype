@@ -48,6 +48,7 @@ const int dcSpeedArray[] = {DC_S1, DC_S2, DC_S3, DC_S4};
 */
 
 class DCMotor : public RobotMotor {
+
   public:
     static int numDCMotors;
 
@@ -64,8 +65,9 @@ class DCMotor : public RobotMotor {
     float calcCurrentAngle(void);
 
   private:
-    int pwmPin;
     int directionPin; // for new driver
+    int pwmPin;
+
 };
 
 int DCMotor::numDCMotors = 0; // must initialize variable outside of class

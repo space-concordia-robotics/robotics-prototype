@@ -1,7 +1,10 @@
 /*
    perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
 
+   technically i can use my motorarray shorthand to shorten the switch/case thing significantly
+
    gotta figure out the correspondence between direction pin's high/low and motor rotation direction
+   set velocity should only set velocity and writing to pins happens outside in interrupt functions? or in dedicated function?
 
    I need to decide where movementDone is changed. does the pid decide that the movement is done and then the timer interrupts know not to turn motors?
    Right now there's a periodic check for STEPPERS that if there's a discrepancy then the stepper angle is adjusted. This is necessary because
@@ -55,7 +58,8 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   float whichAngle = 0.0;
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
-const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+//quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
@@ -81,7 +85,6 @@ ServoMotor *m5 = &motor5;
 ServoMotor *m6 = &motor6;
 
 RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
-
 
 void printMotorAngles();
 
@@ -137,9 +140,14 @@ void setup() {
     motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
   }
 
-  motor2.motorPID.setOutputLimits(0, 50);
-  motor5.motorPID.setOutputLimits(0, 50);
-  motor6.motorPID.setOutputLimits(0, 50);
+  { // max (and min) speed setters
+    motor1.motorPID.setOutputLimits(0, 50);
+    motor2.motorPID.setOutputLimits(0, 50);
+    motor3.motorPID.setOutputLimits(0, 50);
+    motor4.motorPID.setOutputLimits(0, 50);
+    motor5.motorPID.setOutputLimits(0, 50);
+    motor6.motorPID.setOutputLimits(0, 50);
+  }
 
   { // open loop setters
     motor1.isOpenLoop = true; motor1.hasRamping = false;
@@ -154,8 +162,7 @@ void setup() {
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  //stepperTimer.begin(stepperInterrupt, STEP_INTERVAL1 * 1000); //25ms
-  //dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
 
   sinceAnglePrint = 0;
@@ -175,7 +182,8 @@ void loop() {
 
   if (motorCommand.whichMotor > 0) {
     if (motorCommand.angleCommand) {
-      Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
+      Serial.print("motor "); Serial.print(motorCommand.whichMotor);
+      Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
       Serial.println("=======================================================");
       switch (motorCommand.whichMotor) { // move a motor based on which one was commanded
         case MOTOR1:
@@ -208,10 +216,10 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( (fabs(motor2.motorPID.openLoopError) * motor2.gearRatio) > motor2.motorPID.angleTolerance) {
-              motor2.motorPID.numMillis = fabs(motor2.motorPID.openLoopError) * motor2.gearRatio * 1000.0 * motor2.motorPID.openLoopGain
-                                          / motor2.motorPID.openLoopSpeed; // calculate how long to turn for
-              motor2.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+            if ( fabs(motor2.motorPID.openLoopError) > motor2.motorPID.angleTolerance * motor2.gearRatioReciprocal) {
+              motor2.motorPID.numMillis = (fabs(motor2.motorPID.openLoopError) * motor2.gearRatio / motor2.motorPID.openLoopSpeed)
+                                          * 1000.0 * motor2.motorPID.openLoopGain; // calculate how long to turn for
+              motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
               //Serial.println(motor2.motorPID.numMillis);
             }
             else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
@@ -236,7 +244,7 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( (fabs(motor3.motorPID.openLoopError) * motor3.gearRatio) > motor3.motorPID.angleTolerance) {
+            if ( fabs(motor3.motorPID.openLoopError) > motor3.motorPID.angleTolerance * motor3.gearRatioReciprocal) {
               motor3.motorPID.numSteps = fabs(motor3.motorPID.openLoopError) * motor3.gearRatio
                                          / motor3.stepResolution; // calculate the number of steps to take
               motor3.enablePower(); // give power to the stepper finally
@@ -259,7 +267,7 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( (fabs(motor4.motorPID.openLoopError) * motor4.gearRatio) > motor4.motorPID.angleTolerance) {
+            if ( fabs(motor4.motorPID.openLoopError) > motor4.motorPID.angleTolerance * motor4.gearRatioReciprocal) {
               motor4.motorPID.numSteps = fabs(motor4.motorPID.openLoopError) * motor4.gearRatio
                                          / motor4.stepResolution; // calculate the number of steps to take
               motor4.enablePower(); // give power to the stepper finally
@@ -272,6 +280,7 @@ void loop() {
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR5:
+          // this motor has no max or min angle because it must be able to spin like a screwdriver
           //motor5.motorPID.updatePID(motor5.currentAngle, motor5.desiredAngle);
           motor5.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
           motor5.motorPID.openLoopError = motor5.desiredAngle; //- motor5.calcCurrentAngle(); // find the angle difference
@@ -286,9 +295,9 @@ void loop() {
 
           // if the error is big enough to justify movement
           // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-          if ( (fabs(motor5.motorPID.openLoopError) * motor5.gearRatio) > motor5.motorPID.angleTolerance) {
-            motor5.motorPID.numMillis = fabs(motor5.motorPID.openLoopError) * motor5.gearRatio * 1000.0 * motor5.motorPID.openLoopGain
-                                        / motor5.motorPID.openLoopSpeed; // calculate how long to turn for
+          if ( fabs(motor5.motorPID.openLoopError) > motor5.motorPID.angleTolerance * motor5.gearRatioReciprocal) {
+            motor5.motorPID.numMillis = (fabs(motor5.motorPID.openLoopError) * motor5.gearRatio / motor5.motorPID.openLoopSpeed)
+                                        * 1000.0 * motor5.motorPID.openLoopGain; // calculate how long to turn for
             motor5.movementDone = false; // this flag being false lets the timer interrupt move the stepper
             //Serial.println(motor5.motorPID.numMillis);
           }
@@ -311,9 +320,9 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( (fabs(motor6.motorPID.openLoopError) * motor6.gearRatio) > motor6.motorPID.angleTolerance) {
-              motor6.motorPID.numMillis = fabs(motor6.motorPID.openLoopError) * motor6.gearRatio * 1000.0 * motor6.motorPID.openLoopGain
-                                          / motor6.motorPID.openLoopSpeed; // calculate how long to turn for
+            if ( fabs(motor6.motorPID.openLoopError)  > motor6.motorPID.angleTolerance * motor6.gearRatioReciprocal) {
+              motor6.motorPID.numMillis = (fabs(motor6.motorPID.openLoopError) * motor6.gearRatio / motor6.motorPID.openLoopSpeed)
+                                          * 1000.0 * motor6.motorPID.openLoopGain; // calculate how long to turn for
               motor6.movementDone = false; // this flag being false lets the timer interrupt move the stepper
               //Serial.println(motor6.motorPID.numMillis);
             }
@@ -484,6 +493,7 @@ void m3StepperInterrupt(void) {
     ;
   }
 }
+
 void m4StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   if (motor4.isOpenLoop) { // open loop control
@@ -517,13 +527,16 @@ void dcInterrupt(void) {
       motor2.movementDone = true;
       motor2.stopRotation();
     }
+    // would be nice to have some kind of check for the above functions so the command only runs if there's been a change
+    // e.g. movementDone changed or the speed or numMillis changed
   }
   else { // closed loop control, incomplete
     if (!motor2.movementDone) {
       // rethink the PID? needs to set a direction AND a speed
       //motor2.calcCurrentAngle();
       //motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
-      //int motorSpeed = motor2.motorPID.pidOutput * 255; // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+      // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+      //int motorSpeed = motor2.motorPID.pidOutput * 255;
       //motor2.setVelocity(dir, motorSpeed);
     }
   }
@@ -600,7 +613,8 @@ void m1_encoder_interrupt(void) {
       you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
       the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   */
-  motor1.encoderCount += dir[(oldEncoderState & 0x0F)]; // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+  // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+  motor1.encoderCount += dir[(oldEncoderState & 0x0F)];
 }
 void m2_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;

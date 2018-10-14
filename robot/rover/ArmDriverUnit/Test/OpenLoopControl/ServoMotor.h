@@ -112,8 +112,8 @@ void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 }
 
-void ServoMotor::stopRotation(void){
-  analogWrite(pwmPin,SERVO_STOP);
+void ServoMotor::stopRotation(void) {
+  analogWrite(pwmPin, SERVO_STOP);
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
@@ -123,15 +123,17 @@ void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
-      dutyCycle = SERVO_STOP + motorSpeed*128/100;
+      dutyCycle = SERVO_STOP + motorSpeed * 128 / 100;
       break;
     case COUNTER_CLOCKWISE:
-      dutyCycle = SERVO_STOP - motorSpeed*128/100;
+      dutyCycle = SERVO_STOP - motorSpeed * 128 / 100;
       break;
+    default:
+      dutyCycle = 0;
   }
   if (dutyCycle > 255) dutyCycle = 255;
   if (dutyCycle < 0) dutyCycle = 0;
-  
+
   analogWrite(pwmPin, dutyCycle);
 }
 
