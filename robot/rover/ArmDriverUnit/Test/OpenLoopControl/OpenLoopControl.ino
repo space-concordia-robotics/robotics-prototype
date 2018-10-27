@@ -1,8 +1,66 @@
 /*
+  TODO:
+  -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
+  -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
+  -(always) clean up code, comment code
+  -(done-ish) implement power management? sleep mode? marc says the power savings are negligible compared to other power savings
+  -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
+    -(done) update parsing function to take in angles
+  -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
+  -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
+  -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
+  -(done-ish) drivers that accept 3.3v probably internally deal with it so that 3.3v is max speed
+  -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
+
+  -(done) implement budge function:
+   -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
+   -(done) implement limit for max turns in right/left directions
+   -(done) connect and test all motor types with budge()
+   -(next) clean up budge code to make it easier to read and reduce repetition
+   -(next) budge code doesn't work anymore with software interrupts, so I may just scrap it... or later i can figure out what's wrong with it
+
+  -(next) clean up parsing code to make it easier to read and reduce repetition
+
+  -(now) determine motor angles thru encoder interrupts
+   -(done) all the pin and register definitions are based on the teensy, this would need to be changed for a different microcontroller
+   -(done-ish) solve encoder direction change issue? not necessary
+   -(issue) interrupt functions must be defined outside of classes...
+   -(now) confirm all the pins will work with interrupts and not stepping on each other
+   -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
+   -(done-ish) can determine motor angles for dc and steppers, not servos
+   -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
+   -(done) make sure there is  max/min angle limitation with encoders
+   -(now) deal with overflow of encoderCount
+   -(now) determine whether it's worth it to use the built in quadrature decoders
+
+  -(next step) timers
+   -systick is normally a heartbeat type thing
+   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
+   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
+   -implement heartbeat after deciding on best timer for it
+   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
+    -currently using whatever is connected to the pwm pins for timing pwm
+    -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
+    -ftm+tpm has quadrature decoder?
+    -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
+
+  -(next) simultaneous motor control with timers
+   -(done) currently using IntervalTimers for software interrupts, may go lower level if necessary
+   -(done-ish) software interrupts can take input from open loop control but need to refine everything and add closed loop control
+    -(now) decide frequency of motor control loop: figure out estimated time for loop
+    -(done) rewrote the motor control with timers for teensy, ensuring control for all motors
+   -more comments in next comment block
+
+  -(next next step) external interrupts for limit switches
+   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
+   -(waiting for the switches) incorporate limit switches for homing position on all motors
+   -(later) implement homing function on boot
+
+  -even more notes in josh notes.txt and in google drive
+*/
+/*
    perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
-
    technically i can use my motorarray shorthand to shorten the switch/case thing significantly
-
    gotta figure out the correspondence between direction pin's high/low and motor rotation direction
    set velocity should only set velocity and writing to pins happens outside in interrupt functions? or in dedicated function?
 
@@ -28,6 +86,7 @@
 #define STEPPER_PID_PERIOD 30*1000
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
+
 #define STEPPER_CHECK_INTERVAL 2000
 //#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
 
@@ -121,6 +180,10 @@ void setup() {
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
 
   { // shaft angle tolerance setters
     motor1.motorPID.setAngleTolerance(1.8 * 3);
@@ -163,7 +226,9 @@ void setup() {
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  dcTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  servoTimer.priority(MOTOR_NVIC_PRIORITY);
 
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -521,7 +586,8 @@ void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
   if (motor2.isOpenLoop) { // open loop control
     if (!motor2.movementDone && motor2.motorPID.timeCount < motor2.motorPID.numMillis) {
-      motor2.setVelocity(motor5.motorPID.openLoopDir, motor5.motorPID.openLoopSpeed);
+      motor2.setVelocity(motor2.motorPID.openLoopDir, motor2.motorPID.openLoopSpeed);
+      Serial.print("Beep");
     }
     else {
       motor2.movementDone = true;
@@ -711,4 +777,20 @@ void parseSerial(void) {
     }
   }
 }
-
+/*
+  // takes the key (speed, time, etc) and updates?outputs? the next value
+  // this one is for unsigned ints, would need to define separate ones for other data types?
+  parseKey(String key, unsigned int valueOut, String delimeter, unsigned int minVal, unsigned int maxVal) {
+  char *msgElem = strtok_r(NULL, delimeter, &restOfMessage); // find the next message element
+  if (String(msgElem) == key) { // msgElem is a char array so it's safer to convert to string first
+    msgElem = strtok_r(NULL, delimeter, &restOfMessage); // find the next message element (time in seconds)
+    unsigned int tempVar = atoi(msgElem); // converts to int
+    //if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
+    if (tempVar <= maxVal && tempVar >= minVal) {
+      //motorCommand.whichTime = tempTimeVar;
+      valueOut = tempVar;
+      Serial.print("parsed time interval "); Serial.print(motorCommand.whichTime); Serial.println("ms");
+    }
+  }
+  }
+*/
