@@ -121,7 +121,8 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
 const int encoderStates [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
-StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
+//StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
+DCMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for new driver
 //DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
 DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for new driver
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
@@ -136,7 +137,8 @@ IntervalTimer servoTimer;
 
 elapsedMillis sinceStepperCheck;
 
-StepperMotor *m1 = &motor1;
+//StepperMotor *m1 = &motor1;
+DCMotor *m1 = &motor1;
 DCMotor *m2 = &motor2;
 StepperMotor *m3 = &motor3;
 StepperMotor *m4 = &motor4;
@@ -186,7 +188,8 @@ void setup() {
   //attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
 
   { // shaft angle tolerance setters
-    motor1.pidController.setAngleTolerance(1.8 * 3);
+    //motor1.pidController.setAngleTolerance(1.8 * 3);
+    motor1.pidController.setAngleTolerance(2.0);
     motor2.pidController.setAngleTolerance(2.0);
     motor3.pidController.setAngleTolerance(1.8 * 3);
     motor4.pidController.setAngleTolerance(1.8 * 3);
@@ -593,10 +596,25 @@ void m4StepperInterrupt(void) {
 
 void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
+  // check motor 2 for dc motor control planning
+  // motor 1
+  if (motor1.isOpenLoop) { // open loop control
+    if (!motor1.movementDone && motor1.timeCount < motor1.numMillis) {
+      motor1.setVelocity(motor1.openLoopDirection, motor1.openLoopSpeed);
+      Serial.print("Beep");
+    }
+    else {
+      motor1.movementDone = true;
+      motor1.stopRotation();
+    }
+  }
+  else { // closed loop control, incomplete
+    ;
+  }
+  // motor 2
   if (motor2.isOpenLoop) { // open loop control
     if (!motor2.movementDone && motor2.timeCount < motor2.numMillis) {
       motor2.setVelocity(motor2.openLoopDirection, motor2.openLoopSpeed);
-      Serial.print("Beep");
     }
     else {
       motor2.movementDone = true;

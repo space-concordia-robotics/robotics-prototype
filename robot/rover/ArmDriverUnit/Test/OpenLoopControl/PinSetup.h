@@ -36,9 +36,10 @@
 
 // steppers
 
-#define M1_ENABLE_PIN       2
+//#define M1_ENABLE_PIN       2
 #define M1_DIR_PIN          5
-#define M1_STEP_PIN         6
+//#define M1_STEP_PIN         6
+#define M1_PWM_PIN          6
 // 7&8 are on port D with bits 2&3 respectively
 #define M1_ENCODER_PORT    GPIOD_PDIR
 #define M1_ENCODER_SHIFT   CORE_PIN7_BIT
