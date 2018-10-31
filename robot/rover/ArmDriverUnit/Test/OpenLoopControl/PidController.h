@@ -3,23 +3,9 @@
 
 class PidController {
   public:
-
-    /*
-      //temp stuff for open loop control
-      int openLoopDirection; // public variable for open loop control
-      float openLoopError; // public variable for open loop control
-      int openLoopSpeed; // angular speed of dc/servo (degrees/second)
-      float openLoopGain; // speed correction factor for dc/servo
-      int numSteps; // how many steps to take for stepper to reach desired position
-      unsigned int numMillis; // how many milliseconds for dc/servo to reach desired position
-      volatile int stepCount; // how many steps the stepper has taken since it started moving
-      elapsedMillis timeCount; // how long has the dc/servo been turning for
-    */
-
     // these variables are accessed outside of ISRs
-    volatile int dir; // closed loop direction
+    //volatile int dir; // closed loop direction
     volatile float pidOutput; // only updated at the end of the calculations
-    int motorSpeed; // not even used yet
 
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
     float angleTolerance;
@@ -36,8 +22,7 @@ class PidController {
     void setGainConstants(float kp, float ki, float kd);
 
   private:
-    //unsigned int dt; // period at which the pid is called
-    elapsedMillis dt;//sincePID;
+    elapsedMillis dt;
     float pTerm, iTerm, dTerm;
     float error;
     float previousError;
@@ -46,13 +31,10 @@ class PidController {
 };
 
 PidController::PidController() {
-  //movementDone = true;
   // default values
-  //openLoopSpeed = 0; // no speed by default;
-  //openLoopGain = 1.0; // temp open loop control
   kp = 1.0; ki = 0.0; kd = 0.0;
   angleTolerance = 2.0;
-  minOutputValue = 0.0;
+  minOutputValue = -50.0;
   maxOutputValue = 50.0;
 }
 
@@ -79,10 +61,10 @@ void PidController::updatePID(volatile float& currentAngle, float& desiredAngle)
     Serial.print("D output is: "); Serial.println(dTerm);
     pidSum = pTerm + iTerm + dTerm;
     Serial.print("PID output is: "); Serial.println(pidSum);
-    if (pidSum > 0) dir = 1; else dir = -1; // positive dir is ccw, negative is cw
-    Serial.print("direction is: "); Serial.println(dir);
-    if (fabs(pidSum) > maxOutputValue) pidOutput = maxOutputValue; // give max output
-    if (fabs(pidSum) < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
+    //if (pidSum > 0) dir = 1; else dir = -1; // positive dir is ccw, negative is cw
+    //Serial.print("direction is: "); Serial.println(dir);
+    if (pidSum > maxOutputValue) pidOutput = maxOutputValue; // give max output
+    if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
     else pidOutput = pidSum;
 
     // set motor speed somewhere
@@ -92,7 +74,7 @@ void PidController::updatePID(volatile float& currentAngle, float& desiredAngle)
     dt = 0; //sincePID=0;
   }
   // if the angle is within the tolerance, don't move
-  else ; // stop motor?
+  else pidOutput=0; // speed is 0
 }
 
 void PidController::setAngleTolerance(float tolerance) {
