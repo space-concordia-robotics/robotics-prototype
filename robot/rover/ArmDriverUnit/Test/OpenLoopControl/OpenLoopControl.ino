@@ -110,7 +110,7 @@ char *restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant 
 
 struct budgeInfo { // info from parsing functionality is packaged and given to motor control functionality
   int whichMotor = 0;
-  int whichDir = 0;
+  int whichDirection = 0;
   int whichSpeed = 0;
   unsigned int whichTime = 0;
   bool angleCommand = false;
@@ -118,7 +118,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
-const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
+const int encoderStates [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
 StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
@@ -292,8 +292,8 @@ void loop() {
             //motor2.motorPID.updatePID(motor2.currentAngle, motor2.desiredAngle);
 
             // determine the direction
-            if (motor2.openLoopError >= 0) motor2.openLoopDir = 1;
-            else motor2.openLoopDir = -1;
+            if (motor2.openLoopError >= 0) motor2.openLoopDirection = 1;
+            else motor2.openLoopDirection = -1;
 
             motor2.timeCount = 0;
 
@@ -325,8 +325,8 @@ void loop() {
             motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
-            if (motor3.openLoopError >= 0) motor3.openLoopDir = 1;
-            else motor3.openLoopDir = -1;
+            if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
+            else motor3.openLoopDirection = -1;
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
@@ -347,8 +347,8 @@ void loop() {
             motor4.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
-            if (motor4.openLoopError >= 0) motor4.openLoopDir = 1;
-            else motor4.openLoopDir = -1;
+            if (motor4.openLoopError >= 0) motor4.openLoopDirection = 1;
+            else motor4.openLoopDirection = -1;
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
@@ -370,8 +370,8 @@ void loop() {
           motor5.openLoopError = motor5.desiredAngle; //- motor5.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
-          if (motor5.openLoopError >= 0) motor5.openLoopDir = 1;
-          else motor5.openLoopDir = -1;
+          if (motor5.openLoopError >= 0) motor5.openLoopDirection = 1;
+          else motor5.openLoopDirection = -1;
 
           motor5.openLoopSpeed = 50; // 50% speed
           motor5.timeCount = 0;
@@ -394,8 +394,8 @@ void loop() {
             motor6.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
-            if (motor6.openLoopError >= 0) motor6.openLoopDir = 1;
-            else motor6.openLoopDir = -1;
+            if (motor6.openLoopError >= 0) motor6.openLoopDirection = 1;
+            else motor6.openLoopDirection = -1;
 
             motor6.openLoopSpeed = 50; // 50% speed
             motor6.timeCount = 0;
@@ -415,13 +415,13 @@ void loop() {
           break;
       }
     }
-    else if ( (motorCommand.whichDir == 1 || motorCommand.whichDir == -1) && motorCommand.whichSpeed > 0
+    else if ( (motorCommand.whichDirection == 1 || motorCommand.whichDirection == -1) && motorCommand.whichSpeed > 0
               && motorCommand.whichTime > 0) {
       Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.println(" to move");
       Serial.println("=======================================================");
 
       // activate budge command for appropriate motor
-      motorArray[motorCommand.whichMotor - 1]->budge(motorCommand.whichDir, motorCommand.whichSpeed, motorCommand.whichTime);
+      motorArray[motorCommand.whichMotor - 1]->budge(motorCommand.whichDirection, motorCommand.whichSpeed, motorCommand.whichTime);
     }
     else Serial.println("$E,Error: bad motor command");
   }
@@ -498,7 +498,7 @@ void loop() {
           else { // it's possible the check happens when the motor is at rest
             Serial.println("discrepancy is too high and motor is done moving, adjusting step number");
             // it's possible the angle is too far in either direction, so this makes sure that it goes to the right spot
-            if (discrepancy >= 0) motor3.openLoopDir = 1;
+            if (discrepancy >= 0) motor3.openLoopDirection = 1;
             else discrepancy = -1;
             motor3.enablePower();
             motor3.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
@@ -553,14 +553,14 @@ void m3StepperInterrupt(void) {
   if (motor3.isOpenLoop) { // open loop control
     // movementDone can be set elsewhere... so can numSteps
     if (!motor3.movementDone && motor3.stepCount < motor3.numSteps) {
-      motor3.singleStep(motor3.openLoopDir); // direction was set beforehand
+      motor3.singleStep(motor3.openLoopDirection); // direction was set beforehand
       motor3.stepCount++;
       if (motor3.hasRamping) { // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
         nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
         m3StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
       }
-      //Serial.print(motor3.openLoopDir); Serial.println(" direction");
+      //Serial.print(motor3.openLoopDirection); Serial.println(" direction");
       //Serial.print(motor3.stepCount); Serial.println(" steps taken");
       //Serial.print(motor3.numSteps); Serial.println(" steps total");
     }
@@ -581,7 +581,7 @@ void m4StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   if (motor4.isOpenLoop) { // open loop control
     if (!motor4.movementDone && motor4.stepCount < motor4.numSteps) {
-      motor4.singleStep(motor4.openLoopDir); // direction was set beforehand
+      motor4.singleStep(motor4.openLoopDirection); // direction was set beforehand
       motor4.stepCount++;
       if (motor4.hasRamping) { // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
@@ -604,7 +604,7 @@ void dcInterrupt(void) {
   // code to decide which motor to turn goes here, or code just turns all motors
   if (motor2.isOpenLoop) { // open loop control
     if (!motor2.movementDone && motor2.timeCount < motor2.numMillis) {
-      motor2.setVelocity(motor2.openLoopDir, motor2.openLoopSpeed);
+      motor2.setVelocity(motor2.openLoopDirection, motor2.openLoopSpeed);
       Serial.print("Beep");
     }
     else {
@@ -633,7 +633,7 @@ void servoInterrupt(void) {
   if (motor5.isOpenLoop) { // open loop control
     if (!motor5.movementDone && motor5.timeCount < motor5.numMillis) {
       //Serial.println("command being processed");
-      motor5.setVelocity(motor5.openLoopDir, motor5.openLoopSpeed);
+      motor5.setVelocity(motor5.openLoopDirection, motor5.openLoopSpeed);
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor5.movementDone = true;
@@ -646,7 +646,7 @@ void servoInterrupt(void) {
   // motor 6
   if (motor6.isOpenLoop) { // open loop control
     if (!motor6.movementDone && motor6.timeCount < motor6.numMillis) {
-      motor6.setVelocity(motor6.openLoopDir, motor6.openLoopSpeed);
+      motor6.setVelocity(motor6.openLoopDirection, motor6.openLoopSpeed);
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor6.movementDone = true;
@@ -664,7 +664,7 @@ void servoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
   if (!motor5.movementDone && motor5.timeCount < motor5.numMillis) {
     //Serial.println("command being processed");
-    motor5.setVelocity(motor5.openLoopDir, motor5.openLoopSpeed);
+    motor5.setVelocity(motor5.openLoopDirection, motor5.openLoopSpeed);
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor5.movementDone = true;
@@ -676,7 +676,7 @@ void servoInterrupt(void) {
     // movementDone can be set elsewhere... so can numSteps
   if (!motor6.movementDone && motor6.timeCount < motor6.numMillis) {
     //Serial.println("command being processed");
-    motor6.setVelocity(motor6.openLoopDir, motor6.openLoopSpeed);
+    motor6.setVelocity(motor6.openLoopDirection, motor6.openLoopSpeed);
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor6.movementDone = true;
@@ -698,14 +698,14 @@ void m1_encoder_interrupt(void) {
       the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
   */
   // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
-  motor1.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 void m2_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.print("m2 "); Serial.println(motor2.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
-  motor2.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 void m3_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
@@ -713,14 +713,14 @@ void m3_encoder_interrupt(void) {
   //Serial.println(M3_ENCODER_PORT,BIN);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
-  motor3.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 void m4_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.print("m4 "); Serial.println(motor4.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
-  motor4.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 /*
   void m5_encoder_interrupt(void) {
@@ -728,14 +728,14 @@ void m4_encoder_interrupt(void) {
   Serial.print("m5 "); Serial.println(motor5.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
-  motor5.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
   }
   void m6_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.print("m6 "); Serial.println(motor6.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
-  motor6.encoderCount += dir[(oldEncoderState & 0x0F)];
+  motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
   }
 */
 
@@ -766,11 +766,11 @@ void parseSerial(void) {
       //float tempDirVar = atof(msgElem); // converts to float
       switch (*msgElem) { // determines motor direction
         case '0': // arbitrarily (for now) decided 0 is clockwise
-          motorCommand.whichDir = CLOCKWISE;
+          motorCommand.whichDirection = CLOCKWISE;
           Serial.println("parsed direction clockwise");
           break;
         case '1': // arbitrarily (for now) decided 1 is counter-clockwise
-          motorCommand.whichDir = COUNTER_CLOCKWISE;
+          motorCommand.whichDirection = COUNTER_CLOCKWISE;
           Serial.println("parsed direction counter-clockwise");
           break;
       }

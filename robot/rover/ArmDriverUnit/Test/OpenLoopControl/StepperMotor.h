@@ -36,7 +36,7 @@ class StepperMotor : public RobotMotor {
     float calcCurrentAngle(void);
 
     // stuff for open loop control
-    int openLoopDir; // public variable for open loop control
+    int openLoopDirection; // public variable for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
     float openLoopGain; // speed correction factor

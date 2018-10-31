@@ -64,15 +64,13 @@ class DCMotor : public RobotMotor {
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
-
     // stuff for open loop control
-    int openLoopDir; // public variable for open loop control
+    int openLoopDirection; // public variable for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
     float openLoopGain; // speed correction factor
     unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
     elapsedMillis timeCount; // how long has the dc motor been turning for
-
 
   private:
     int directionPin; // for new driver
