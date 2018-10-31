@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "PinSetup.h"
-#include "RobotPID.h"
+#include "PidController.h"
 
 enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines 6 motors
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions // can go into ArmMotor
@@ -24,7 +24,7 @@ class RobotMotor {
     bool hasRamping; // decides whether to ramp the speed in open loop
     //int maxSpeed;
 
-    RobotPID motorPID; // used for speed and angle control
+    PidController pidController; // used for speed and angle control
 
     // these variables change during the main loop
     elapsedMillis sinceStart; // automatically increments every millisecond

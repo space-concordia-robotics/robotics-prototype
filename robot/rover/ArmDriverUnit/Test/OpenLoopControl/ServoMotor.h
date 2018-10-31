@@ -130,8 +130,8 @@ void ServoMotor::stopRotation(void) {
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
-  if (motorSpeed > motorPID.maxOutputValue) motorSpeed = motorPID.maxOutputValue;
-  if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
+  if (motorSpeed > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
+  if (motorSpeed < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
       dutyCycle = SERVO_STOP + motorSpeed * 128 / 100;

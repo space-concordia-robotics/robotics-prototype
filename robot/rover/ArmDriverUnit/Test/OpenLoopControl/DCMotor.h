@@ -210,8 +210,8 @@ void DCMotor::stopRotation(void) {
 
 void DCMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
-  if (motorSpeed > motorPID.maxOutputValue) motorSpeed = motorPID.maxOutputValue;
-  if (motorSpeed < motorPID.minOutputValue) motorSpeed = motorPID.minOutputValue;
+  if (motorSpeed > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
+  if (motorSpeed < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
       digitalWrite(directionPin, LOW);

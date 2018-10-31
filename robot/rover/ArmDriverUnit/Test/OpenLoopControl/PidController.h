@@ -1,7 +1,7 @@
-#ifndef ROBOTPID_H
-#define ROBOTPID_H
+#ifndef PIDCONTROLLER_H
+#define PIDCONTROLLER_H
 
-class RobotPID {
+class PidController {
   public:
 
     /*
@@ -29,7 +29,7 @@ class RobotPID {
     int ki;
     int kd;
 
-    RobotPID();
+    PidController();
     void updatePID(volatile float& currentAngle, float& desiredAngle);
     void setAngleTolerance(float tolerance);
     void setOutputLimits(float minVal, float maxVal);
@@ -45,7 +45,7 @@ class RobotPID {
     float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
 
-RobotPID::RobotPID() {
+PidController::PidController() {
   //movementDone = true;
   // default values
   //openLoopSpeed = 0; // no speed by default;
@@ -56,7 +56,7 @@ RobotPID::RobotPID() {
   maxOutputValue = 50.0;
 }
 
-void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {
+void PidController::updatePID(volatile float& currentAngle, float& desiredAngle) {
 
   error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
   // if the angle is outside the tolerance, move
@@ -95,16 +95,16 @@ void RobotPID::updatePID(volatile float& currentAngle, float& desiredAngle) {
   else ; // stop motor?
 }
 
-void RobotPID::setAngleTolerance(float tolerance) {
+void PidController::setAngleTolerance(float tolerance) {
   angleTolerance = tolerance;
 }
 
-void RobotPID::setOutputLimits(float minVal, float maxVal) {
+void PidController::setOutputLimits(float minVal, float maxVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;
 }
 
-void RobotPID::setGainConstants(float kp, float ki, float kd) {
+void PidController::setGainConstants(float kp, float ki, float kd) {
   this->kp = kp;
   this->ki = ki;
   this->kd = kd;
