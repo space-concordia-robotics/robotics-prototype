@@ -64,6 +64,16 @@ class DCMotor : public RobotMotor {
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
+
+    // stuff for open loop control
+    int openLoopDir; // public variable for open loop control
+    float openLoopError; // public variable for open loop control
+    int openLoopSpeed; // angular speed (degrees/second)
+    float openLoopGain; // speed correction factor
+    unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
+    elapsedMillis timeCount; // how long has the dc motor been turning for
+
+
   private:
     int directionPin; // for new driver
     int pwmPin;
@@ -85,6 +95,9 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
   budgeMovementDone = true;
+
+  openLoopSpeed = 0; // no speed by default;
+  openLoopGain = 1.0; // temp open loop control
 }
 
 /*

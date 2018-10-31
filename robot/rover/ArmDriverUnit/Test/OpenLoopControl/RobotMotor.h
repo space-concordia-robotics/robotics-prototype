@@ -47,7 +47,7 @@ class RobotMotor {
 
     virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed until next timer interrupt
     //void setMaxSpeed();
-    //void setDesiredAngle(float angle); // need to have defined it for servos first
+    bool setDesiredAngle(float angle); // need to have defined it for servos first
     //virtual float calcCurrentAngle(void) = 0; // need to have defined it for servos first
 
   private:
@@ -89,6 +89,17 @@ void RobotMotor::setAngleLimits(float minAngle, float maxAngle) {
   minimumAngle = minAngle;
   maximumAngle = maxAngle;
   hasAngleLimits = true;
+}
+
+bool RobotMotor::setDesiredAngle(float angle) {
+  if (angle > minimumAngle && angle < maximumAngle) {
+    desiredAngle = angle;
+    return true;
+  }
+  else {
+    Serial.println("$E,Alert: requested angle is not within angle limits.");
+    return false;
+  }
 }
 
 #endif

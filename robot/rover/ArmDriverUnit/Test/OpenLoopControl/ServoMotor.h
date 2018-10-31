@@ -54,6 +54,14 @@ class ServoMotor : public RobotMotor {
     void stopRotation(void);
     //float calcCurrentAngle();
 
+    // stuff for open loop control
+    int openLoopDir; // public variable for open loop control
+    float openLoopError; // public variable for open loop control
+    int openLoopSpeed; // angular speed (degrees/second)
+    float openLoopGain; // speed correction factor
+    unsigned int numMillis; // how many milliseconds for servo to reach desired position
+    elapsedMillis timeCount; // how long has the servo been turning for
+
   private:
     int pwmPin;
 };
@@ -68,6 +76,9 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
   budgeMovementDone = true;
+
+  openLoopSpeed = 0; // no speed by default;
+  openLoopGain = 1.0; // temp open loop control
 }
 
 void ServoMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {

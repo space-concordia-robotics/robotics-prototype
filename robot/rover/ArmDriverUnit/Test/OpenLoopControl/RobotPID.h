@@ -3,15 +3,18 @@
 
 class RobotPID {
   public:
-    //temp stuff for open loop control
-    int openLoopDir; // public variable for open loop control of steppers and servos
-    float openLoopError; // public variable for open loop control of steppers and servos
-    int numSteps; // how many steps to take for stepper to reach desired position
-    unsigned int numMillis; // how many milliseconds for servo to reach desired position
-    int openLoopSpeed; // angular speed of servo (degrees/second)
-    volatile int stepCount; // how many steps the stepper has taken since it started moving
-    elapsedMillis timeCount; // how long has the servo been turning for
-    float openLoopGain; // multiplier so that speed calculation works for given speed
+
+    /*
+      //temp stuff for open loop control
+      int openLoopDir; // public variable for open loop control
+      float openLoopError; // public variable for open loop control
+      int openLoopSpeed; // angular speed of dc/servo (degrees/second)
+      float openLoopGain; // speed correction factor for dc/servo
+      int numSteps; // how many steps to take for stepper to reach desired position
+      unsigned int numMillis; // how many milliseconds for dc/servo to reach desired position
+      volatile int stepCount; // how many steps the stepper has taken since it started moving
+      elapsedMillis timeCount; // how long has the dc/servo been turning for
+    */
 
     // these variables are accessed outside of ISRs
     volatile int dir; // closed loop direction
@@ -45,8 +48,8 @@ class RobotPID {
 RobotPID::RobotPID() {
   //movementDone = true;
   // default values
-  openLoopSpeed = 0; // no speed by default;
-  openLoopGain = 1.0; // temp open loop control
+  //openLoopSpeed = 0; // no speed by default;
+  //openLoopGain = 1.0; // temp open loop control
   kp = 1.0; ki = 0.0; kd = 0.0;
   angleTolerance = 2.0;
   minOutputValue = 0.0;

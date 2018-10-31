@@ -35,6 +35,14 @@ class StepperMotor : public RobotMotor {
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
+    // stuff for open loop control
+    int openLoopDir; // public variable for open loop control
+    float openLoopError; // public variable for open loop control
+    int openLoopSpeed; // angular speed (degrees/second)
+    float openLoopGain; // speed correction factor
+    int numSteps; // how many steps to take for stepper to reach desired position
+    volatile int stepCount; // how many steps the stepper has taken since it started moving
+
   private:
     int enablePin, directionPin, stepPin;
     elapsedMillis sinceStep;
@@ -53,6 +61,9 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   hasEncoder = false;
   stepResolution = fullStepResolution * steppingMode;
   budgeMovementDone = true;
+
+  openLoopSpeed = 0; // no speed by default;
+  openLoopGain = 1.0; // temp open loop control
 }
 
 void StepperMotor::enablePower(void) {
