@@ -283,32 +283,23 @@ void loop() {
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR2:
-          //if (motorCommand.whichAngle > motor2.minimumAngle && motorCommand.whichAngle < motor2.maximumAngle) {
           if (motor2.setDesiredAngle(motorCommand.whichAngle)) {
-            //motor2.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
+            if (motor2.isOpenLoop) {
+              motor2.openLoopError = motor2.desiredAngle;
 
-            motor2.openLoopError = motor2.desiredAngle;
-            //motor2.calcCurrentAngle(); // find the angle difference
-            //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+              // determine the direction
+              if (motor2.openLoopError >= 0) motor2.openLoopDirection = 1;
+              else motor2.openLoopDirection = -1;
 
-            // determine the direction
-            if (motor2.openLoopError >= 0) motor2.openLoopDirection = 1;
-            else motor2.openLoopDirection = -1;
-
-            motor2.timeCount = 0;
-
-            // if the error is big enough to justify movement
-            // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            //motor2.calcTurningDuration();
-
-            if ( fabs(motor2.openLoopError) > motor2.pidController.angleTolerance * motor2.gearRatioReciprocal) {
-              motor2.numMillis = (fabs(motor2.openLoopError) * motor2.gearRatio / motor2.openLoopSpeed)
-                                 * 1000.0 * motor2.openLoopGain; // calculate how long to turn for
-              motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
-              //Serial.println(motor2.numMillis);
+              motor2.calcTurningDuration();
+              motor2.timeCount = 0;
             }
-            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-            //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+            else {
+              // actually shouldn't the pid only be updated in the timer interrupt?
+              //motor2.calcCurrentAngle(); // find the angle difference
+              //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+            }
+            motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
