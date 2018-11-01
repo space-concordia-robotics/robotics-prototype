@@ -178,6 +178,7 @@ void StepperMotor::calcNumSteps(void) {
   if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {
     numSteps = fabs(openLoopError) * gearRatio / stepResolution; // calculate the number of steps to take
   }
+  else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
 }
 
 #endif

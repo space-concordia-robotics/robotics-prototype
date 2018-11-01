@@ -295,7 +295,6 @@ void loop() {
           break;
         case MOTOR2:
           if (motor2.setDesiredAngle(motorCommand.whichAngle)) {
-            if (fabs(motor2.openLoopError) > motor2.pidController.angleTolerance * motor2.gearRatioReciprocal) {
             if (motor2.isOpenLoop) {
               motor2.openLoopError = motor2.desiredAngle;
 
@@ -312,33 +311,28 @@ void loop() {
               //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
             }
             motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
-            }
-            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR3:
           // motor3.setDesiredAngle(motorCommand.whichAngle); // setDesiredAngle(float angle) { if (angle < this.minimumAgle || angle > this.maximumAngle) { throw new IllegalArgumentException("You retard")}}
           if (motor3.setDesiredAngle(motorCommand.whichAngle)) {
-            if (fabs(motor3.openLoopError) > motor3.pidController.angleTolerance * motor3.gearRatioReciprocal) {
-              if (motor3.isOpenLoop) {
-                motor3.openLoopError = motor3.desiredAngle;
+            if (motor3.isOpenLoop) {
+              motor3.openLoopError = motor3.desiredAngle;
 
-                // determine the direction
-                if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
-                else motor3.openLoopDirection = -1;
+              // determine the direction
+              if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
+              else motor3.openLoopDirection = -1;
 
-                motor3.calcNumSteps();
-                motor3.enablePower(); // give power to the stepper finally
-              }
-              else {
-                // pid stuff
-                //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
-                //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
-              }
-              motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
+              motor3.calcNumSteps();
+              motor3.enablePower(); // give power to the stepper finally
             }
-            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+            else {
+              // pid stuff
+              //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
+              //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
+            }
+            motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
