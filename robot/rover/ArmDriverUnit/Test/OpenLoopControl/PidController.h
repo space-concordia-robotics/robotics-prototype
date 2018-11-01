@@ -74,7 +74,7 @@ void PidController::updatePID(volatile float& currentAngle, float& desiredAngle)
     dt = 0; //sincePID=0;
   }
   // if the angle is within the tolerance, don't move
-  else pidOutput=0; // speed is 0
+  else pidOutput = 0; // speed is 0
 }
 
 void PidController::setAngleTolerance(float tolerance) {

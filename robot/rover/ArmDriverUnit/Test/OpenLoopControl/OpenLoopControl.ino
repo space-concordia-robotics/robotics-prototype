@@ -83,6 +83,9 @@
 #include "DCMotor.h"
 #include "ServoMotor.h"
 
+#define OPEN 1
+#define CLOSED 2
+
 #define STEPPER_PID_PERIOD 30*1000
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
@@ -115,6 +118,7 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   unsigned int whichTime = 0;
   bool angleCommand = false;
   float whichAngle = 0.0;
+  int loopState = 0;
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -267,6 +271,7 @@ void loop() {
   }
 
   if (motorCommand.whichMotor > 0) {
+    // make motors move
     if (motorCommand.angleCommand) {
       Serial.print("motor "); Serial.print(motorCommand.whichMotor);
       Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
@@ -409,6 +414,14 @@ void loop() {
           break;
       }
     }
+    // set loop states
+    else if (motorCommand.loopState == OPEN) {
+      motorArray[motorCommand.whichMotor]->isOpenLoop = true;
+    }
+    else if (motorCommand.loopState == CLOSED) {
+      motorArray[motorCommand.whichMotor]->isOpenLoop = false;
+    }
+    // for budge commands
     else if ( (motorCommand.whichDirection == 1 || motorCommand.whichDirection == -1) && motorCommand.whichSpeed > 0
               && motorCommand.whichTime > 0) {
       Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.println(" to move");
@@ -769,6 +782,19 @@ void parseSerial(void) {
         Serial.print("parsed desired angle "); Serial.println(motorCommand.whichAngle);
       }
       else Serial.println("angle is out of bounds");
+    }
+    if (String(msgElem) == "loop") { // msgElem is a char array so it's safer to convert to string first
+      motorCommand.angleCommand = true;
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
+      if (String(msgElem) == "open") {
+        motorCommand.loopState = OPEN;
+        Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
+      }
+      if (String(msgElem) == "closed") {
+        motorCommand.loopState = CLOSED;
+        Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
+      }
+      else Serial.println("invalid loop state");
     }
     else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
