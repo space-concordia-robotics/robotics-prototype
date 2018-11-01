@@ -72,6 +72,9 @@
   11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
   12) i should remove budge() as it's beeing replaced by the open loop control commands and will remove unnecessary variables
   13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
+  14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
+  15) implement setVelocity() for stepper motors
+  16) calcCurrentAngle() shouldn't just output an absurd value if it didn't work... deal with it
 */
 
 #include "PinSetup.h"
@@ -238,10 +241,10 @@ void setup() {
     // open loop gain is only for time-based open loop control
     motor3.isOpenLoop = true; motor3.hasRamping = false;
     motor3.openLoopSpeed = 50; // 50% speed
-    
+
     motor4.isOpenLoop = true; motor4.hasRamping = false;
     motor4.openLoopSpeed = 50; // 50% speed
-    
+
     motor5.isOpenLoop = true; motor5.hasRamping = false;
     motor5.openLoopSpeed = 50; // 50% speed
     motor5.openLoopGain = 5.0; // totally random guess, needs to be tested
@@ -649,7 +652,8 @@ void dcInterrupt(void) {
       //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
       // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
       //int motorSpeed = motor2.pidController.pidOutput * 255;
-      //motor2.setVelocity(dir, motorSpeed);
+      // motor2.calcDirection(motorSpeed); //does this work? it expects an angular error but at the end of the day...
+      //motor2.setVelocity(motor2.rotationDirection, motorSpeed);
     }
   }
 }

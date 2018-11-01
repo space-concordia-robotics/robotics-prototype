@@ -43,11 +43,11 @@ class RobotMotor {
     // setup functions
     RobotMotor();
     void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
-    void setAngleLimits(float minAngle, float maxAngle);
+    void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
 
     virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
     //void setMaxSpeed();
-    void calcDirection(float error);
+    void calcDirection(float error); // updates rotationDirection based on the angular error inputted
     bool setDesiredAngle(float angle); // need to have defined it for servos first
     //virtual float calcCurrentAngle(void) = 0; // need to have defined it for servos first
 

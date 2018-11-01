@@ -54,7 +54,7 @@ class DcMotor : public RobotMotor {
 
     //DcMotor(int pwmPin, int encA, int encB); // for sabertooth
 
-    // for new driver
+    // for cytron
     DcMotor(int dirPin, int pwmPin, float gearRatio);
 
     // budges motor for short period of time
@@ -62,9 +62,9 @@ class DcMotor : public RobotMotor {
                unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
-    
+
     void stopRotation(void);
-    void setVelocity(int motorDir, int motorSpeed);
+    void setVelocity(int motorDir, int motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     float calcCurrentAngle(void);
 
     // stuff for open loop control
@@ -91,6 +91,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   directionPin(dirPin), pwmPin(pwmPin)
 {
   numDcMotors++;
+  // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
@@ -212,8 +213,9 @@ void DcMotor::stopRotation(void) {
 
 void DcMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
-  if (motorSpeed > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
-  if (motorSpeed < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
+  // makes sure the speed is within the limits set in the pid during setup
+  if (motorSpeed * rotationDirection > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
+  if (motorSpeed * rotationDirection < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
       digitalWrite(directionPin, LOW);

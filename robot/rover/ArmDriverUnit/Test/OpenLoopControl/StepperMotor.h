@@ -22,7 +22,7 @@ const int stepIntervalArray[] = {STEP_INTERVAL1, STEP_INTERVAL2, STEP_INTERVAL3,
 class StepperMotor : public RobotMotor {
   public:
     static int numStepperMotors;
-    float stepResolution;
+    float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
 
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
     void singleStep(int dir);
@@ -34,9 +34,9 @@ class StepperMotor : public RobotMotor {
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
-    
+
     void setVelocity(int motorDir, int motorSpeed);
-    float calcCurrentAngle(void);
+    float calcCurrentAngle(void); // calculates the joint's angle based on encoderCount
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -46,7 +46,7 @@ class StepperMotor : public RobotMotor {
 
   private:
     int enablePin, directionPin, stepPin;
-    elapsedMillis sinceStep;
+    elapsedMillis sinceStep; // used in budge()
     unsigned int stepInterval;
     float fullStepResolution, steppingMode;
 };
@@ -57,6 +57,7 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), fullStepResolution(stepRes), steppingMode(stepMode)
 {
   numStepperMotors++;
+  // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;

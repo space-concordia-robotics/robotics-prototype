@@ -52,10 +52,10 @@ class ServoMotor : public RobotMotor {
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
-    
-    void setVelocity(int motorDir, int motorSpeed);
+
+    void setVelocity(int motorDir, int motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void stopRotation(void);
-    //float calcCurrentAngle();
+    //float calcCurrentAngle(); // needs encoders first, but then this will just go into RobotMotor
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -74,6 +74,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   pwmPin(pwmPin)
 {
   numServoMotors++;
+  // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
@@ -132,8 +133,9 @@ void ServoMotor::stopRotation(void) {
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
-  if (motorSpeed > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
-  if (motorSpeed < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
+  // makes sure the speed is within the limits set in the pid during setup
+  if (motorSpeed * rotationDirection > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
+  if (motorSpeed * rotationDirection < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
   switch (motorDir) {
     case CLOCKWISE:
       dutyCycle = SERVO_STOP + motorSpeed * 128 / 100;
