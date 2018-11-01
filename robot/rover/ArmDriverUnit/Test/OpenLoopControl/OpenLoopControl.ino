@@ -302,15 +302,17 @@ void loop() {
               if (motor2.openLoopError >= 0) motor2.openLoopDirection = 1;
               else motor2.openLoopDirection = -1;
 
-              motor2.calcTurningDuration();
-              motor2.timeCount = 0;
+              if (motor2.calcTurningDuration()) {
+                motor2.timeCount = 0;
+                motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+              }
             }
             else {
               // actually shouldn't the pid only be updated in the timer interrupt?
               //motor2.calcCurrentAngle(); // find the angle difference
               //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+              //motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
             }
-            motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
@@ -324,15 +326,17 @@ void loop() {
               if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
               else motor3.openLoopDirection = -1;
 
-              motor3.calcNumSteps();
-              motor3.enablePower(); // give power to the stepper finally
+              if (motor3.calcNumSteps()) {
+                motor3.enablePower(); // give power to the stepper finally
+                motor3.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+              }
             }
             else {
               // pid stuff
               //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
               //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
+              //motor3.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
             }
-            motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
