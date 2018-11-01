@@ -32,6 +32,9 @@ class StepperMotor : public RobotMotor {
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
+
+    void calcNumSteps(void);
+
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
@@ -166,6 +169,14 @@ float StepperMotor::calcCurrentAngle(void) {
   else {
     Serial.println("$E,Error: motor does not have encoder");
     return 40404040404.0; // wants a return value, at least this value should be invalid
+  }
+}
+
+void StepperMotor::calcNumSteps(void) {
+  // if the error is big enough to justify movement
+  // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+  if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {
+    numSteps = fabs(openLoopError) * gearRatio / stepResolution; // calculate the number of steps to take
   }
 }
 

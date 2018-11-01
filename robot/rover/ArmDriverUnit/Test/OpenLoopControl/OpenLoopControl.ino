@@ -295,6 +295,7 @@ void loop() {
           break;
         case MOTOR2:
           if (motor2.setDesiredAngle(motorCommand.whichAngle)) {
+            if (fabs(motor2.openLoopError) > motor2.pidController.angleTolerance * motor2.gearRatioReciprocal) {
             if (motor2.isOpenLoop) {
               motor2.openLoopError = motor2.desiredAngle;
 
@@ -311,35 +312,33 @@ void loop() {
               //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
             }
             motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+            }
+            else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
         case MOTOR3:
           // motor3.setDesiredAngle(motorCommand.whichAngle); // setDesiredAngle(float angle) { if (angle < this.minimumAgle || angle > this.maximumAngle) { throw new IllegalArgumentException("You retard")}}
-          if (motorCommand.whichAngle > motor3.minimumAngle && motorCommand.whichAngle < motor3.maximumAngle) {
-            //((StepperMotor *)motorArray[motorCommand.whichMotor-1])->desiredAngle = motorCommand.whichAngle; // I hate this
-            /*
-               I wanted to have an array for motor1,motor2, etc and then just use commands like the above,
-               but in order for that to work i still need to use that type caster beforehand, which defeats hte purpose
-               of the array. the point is to not have to have cases but i still need them...
-            */
-            motor3.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
-            motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
+          if (motor3.setDesiredAngle(motorCommand.whichAngle)) {
+            if (fabs(motor3.openLoopError) > motor3.pidController.angleTolerance * motor3.gearRatioReciprocal) {
+              if (motor3.isOpenLoop) {
+                motor3.openLoopError = motor3.desiredAngle;
 
-            // determine the direction
-            if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
-            else motor3.openLoopDirection = -1;
+                // determine the direction
+                if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
+                else motor3.openLoopDirection = -1;
 
-            // if the error is big enough to justify movement
-            // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( fabs(motor3.openLoopError) > motor3.pidController.angleTolerance * motor3.gearRatioReciprocal) {
-              motor3.numSteps = fabs(motor3.openLoopError) * motor3.gearRatio
-                                / motor3.stepResolution; // calculate the number of steps to take
-              motor3.enablePower(); // give power to the stepper finally
+                motor3.calcNumSteps();
+                motor3.enablePower(); // give power to the stepper finally
+              }
+              else {
+                // pid stuff
+                //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
+                //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
+              }
               motor3.movementDone = false; // this flag being false lets the timer interrupt move the stepper
             }
             else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
-            //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
@@ -426,10 +425,10 @@ void loop() {
     }
     // reset something
     else if (motorCommand.resetCommand) {
-      if (motorCommand.resetAngleValue){
-      motorArray[motorCommand.whichMotor]->currentAngle = 0.0;
+      if (motorCommand.resetAngleValue) {
+        motorArray[motorCommand.whichMotor]->currentAngle = 0.0;
       }
-      else if (motorCommand.resetJointPosition){
+      else if (motorCommand.resetJointPosition) {
         ; // for later
       }
     }

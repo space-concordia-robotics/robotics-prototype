@@ -241,8 +241,7 @@ void DCMotor::calcTurningDuration(void) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
   if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {
-    numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed)
-                * 1000.0 * openLoopGain; // calculate how long to turn for
+    numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
     //Serial.println(numMillis);
   }
   else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
