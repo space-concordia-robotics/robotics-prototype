@@ -119,6 +119,9 @@ struct budgeInfo { // info from parsing functionality is packaged and given to m
   bool angleCommand = false;
   float whichAngle = 0.0;
   int loopState = 0;
+  bool resetCommand = false;
+  bool resetAngleValue = false;
+  bool resetJointPosition = false;
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -420,6 +423,15 @@ void loop() {
     }
     else if (motorCommand.loopState == CLOSED) {
       motorArray[motorCommand.whichMotor]->isOpenLoop = false;
+    }
+    // reset something
+    else if (motorCommand.resetCommand) {
+      if (motorCommand.resetAngleValue){
+      motorArray[motorCommand.whichMotor]->currentAngle = 0.0;
+      }
+      else if (motorCommand.resetJointPosition){
+        ; // for later
+      }
     }
     // for budge commands
     else if ( (motorCommand.whichDirection == 1 || motorCommand.whichDirection == -1) && motorCommand.whichSpeed > 0
@@ -762,6 +774,7 @@ void m4_encoder_interrupt(void) {
 */
 
 void parseSerial(void) {
+  // check for motor command
   char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
   if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
     msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
@@ -772,6 +785,7 @@ void parseSerial(void) {
       Serial.print("parsed motor "); Serial.println(motorCommand.whichMotor);
     }
     else Serial.println("motor does not exist");
+    // check for angle command
     msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
     if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
       motorCommand.angleCommand = true;
@@ -783,6 +797,7 @@ void parseSerial(void) {
       }
       else Serial.println("angle is out of bounds");
     }
+    // check for loop state command
     if (String(msgElem) == "loop") { // msgElem is a char array so it's safer to convert to string first
       motorCommand.angleCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
@@ -796,6 +811,21 @@ void parseSerial(void) {
       }
       else Serial.println("invalid loop state");
     }
+    // check for angle reset command
+    if (String(msgElem) == "reset") { // msgElem is a char array so it's safer to convert to string first
+      motorCommand.resetCommand = true;
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
+      if (String(msgElem) == "angle") {
+        motorCommand.resetAngleValue  = true;
+        Serial.print("parsed request to reset angle value");
+      }
+      if (String(msgElem) == "position") {
+        motorCommand.resetJointPosition = true;
+        Serial.print("parsed request to reset joint position");
+      }
+      else Serial.println("invalid reset request");
+    }
+    // check for budge command: direction, speed, time
     else if (String(msgElem) == "direction") { // msgElem is a char array so it's safer to convert to string first
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (direction value)
       //float tempDirVar = atof(msgElem); // converts to float
