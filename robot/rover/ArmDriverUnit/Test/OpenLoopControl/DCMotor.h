@@ -47,15 +47,15 @@ const int dcSpeedArray[] = {DC_S1, DC_S2, DC_S3, DC_S4};
   #define DC_CCW3 1
 */
 
-class DCMotor : public RobotMotor {
+class DcMotor : public RobotMotor {
 
   public:
-    static int numDCMotors;
+    static int numDcMotors;
 
-    //DCMotor(int pwmPin, int encA, int encB); // for sabertooth
+    //DcMotor(int pwmPin, int encA, int encB); // for sabertooth
 
     // for new driver
-    DCMotor(int dirPin, int pwmPin, float gearRatio);
+    DcMotor(int dirPin, int pwmPin, float gearRatio);
 
     // budges motor for short period of time
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
@@ -80,17 +80,17 @@ class DCMotor : public RobotMotor {
 
 };
 
-int DCMotor::numDCMotors = 0; // must initialize variable outside of class
+int DcMotor::numDcMotors = 0; // must initialize variable outside of class
 
 // for sabertooth
-//DCMotor::DCMotor(int pwmPin, int encA, int encB):
+//DcMotor::DcMotor(int pwmPin, int encA, int encB):
 //  pwmPin(pwmPin), encA(encA), encB(encB)
 
 // for new driver
-DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
+DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   directionPin(dirPin), pwmPin(pwmPin)
 {
-  numDCMotors++;
+  numDcMotors++;
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   hasEncoder = false;
@@ -101,7 +101,7 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
 }
 
 /*
-  void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
+  void DcMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   if (budgeDir <= 1 && budgeSpeed <= MAX_SPEED && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
     if (budgeDir == CLOCKWISE && rightCount < MAX_COUNTS) {
@@ -149,7 +149,7 @@ DCMotor::DCMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   }
 */
 
-void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
+void DcMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   if (budgeDir <= COUNTER_CLOCKWISE && budgeSpeed > 0 && budgeSpeed <= MAX_SPEED
       && budgeTime <= MAX_BUDGE_TIME && budgeTime >= MIN_BUDGE_TIME) {
     // following if statements ensure motor only moves if within count limit, updates current count
@@ -192,7 +192,7 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
 }
 
 /*
-  void DCMotor::encoder_interrupt(void) {
+  void DcMotor::encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   Serial.println(encoderCount);
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
@@ -206,11 +206,11 @@ void DCMotor::budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) {
   }
 */
 
-void DCMotor::stopRotation(void) {
+void DcMotor::stopRotation(void) {
   analogWrite(pwmPin, 0);
 }
 
-void DCMotor::setVelocity(int motorDir, int motorSpeed) {
+void DcMotor::setVelocity(int motorDir, int motorSpeed) {
   int dutyCycle;
   if (motorSpeed > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
   if (motorSpeed < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
@@ -226,7 +226,7 @@ void DCMotor::setVelocity(int motorDir, int motorSpeed) {
   analogWrite(pwmPin, dutyCycle);
 }
 
-float DCMotor::calcCurrentAngle(void) {
+float DcMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
     currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
     return currentAngle;
@@ -237,7 +237,7 @@ float DCMotor::calcCurrentAngle(void) {
   }
 }
 
-void DCMotor::calcTurningDuration(void) {
+void DcMotor::calcTurningDuration(void) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
   if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {

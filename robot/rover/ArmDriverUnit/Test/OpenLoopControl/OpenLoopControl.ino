@@ -80,7 +80,7 @@
 
 #include "RobotMotor.h"
 #include "StepperMotor.h"
-#include "DCMotor.h"
+#include "DcMotor.h"
 #include "ServoMotor.h"
 
 #define OPEN 1
@@ -129,9 +129,9 @@ const int encoderStates [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
 //StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
-DCMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for new driver
-//DCMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
-DCMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for new driver
+DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for new driver
+//DcMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
+DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for new driver
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
@@ -145,8 +145,8 @@ IntervalTimer servoTimer;
 elapsedMillis sinceStepperCheck;
 
 //StepperMotor *m1 = &motor1;
-DCMotor *m1 = &motor1;
-DCMotor *m2 = &motor2;
+DcMotor *m1 = &motor1;
+DcMotor *m2 = &motor2;
 StepperMotor *m3 = &motor3;
 StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5;
