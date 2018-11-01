@@ -33,7 +33,8 @@ class StepperMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
-    bool calcNumSteps(void);
+    bool calcNumSteps(float angle);
+    void setDirection(float angle);
 
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
@@ -172,17 +173,22 @@ float StepperMotor::calcCurrentAngle(void) {
   }
 }
 
-bool StepperMotor::calcNumSteps(void) {
+bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-  if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {
-    numSteps = fabs(openLoopError) * gearRatio / stepResolution; // calculate the number of steps to take
+  if ( fabs(angle) > pidController.angleTolerance * gearRatioReciprocal) {
+    numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
     return true;
   }
   else {
     Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
     return false;
   }
+}
+
+void StepperMotor::setDirection(float angle) {
+  if (angle >= 0) openLoopDirection = 1;
+  else openLoopDirection = -1;
 }
 
 #endif

@@ -75,6 +75,16 @@
 
    I also need to figure out where it's a good idea to disable interrupts so htat I don't read a value while it's being modified
 */
+/*
+  1) motor4 calculates the error by subtracting the desired minus the current angle... but it's open loop? can keep track of imagined current angle and then this calculation actually makes sense though! this means changning what I wrote for motor2&3
+  2) setDirection method sets the open loop direction right now.. i need to deal with this and have only one direction variable
+  3) need to rearrange open loop variables to RobotMotor when it makes sense
+  5) direction should be determined outside of the pid
+  6) angleTolerance is motorPID attribute and not motor attribute?
+  7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
+  8) there's a command to reset a motor position but no implementation
+  9) add command to turn ramping on or off for motor5.hasRamping = false;
+*/
 
 #include "PinSetup.h"
 
@@ -296,13 +306,8 @@ void loop() {
         case MOTOR2:
           if (motor2.setDesiredAngle(motorCommand.whichAngle)) {
             if (motor2.isOpenLoop) {
-              motor2.openLoopError = motor2.desiredAngle;
-
-              // determine the direction
-              if (motor2.openLoopError >= 0) motor2.openLoopDirection = 1;
-              else motor2.openLoopDirection = -1;
-
-              if (motor2.calcTurningDuration()) {
+              motor2.setDirection(motor2.openLoopError);
+              if (motor2.calcTurningDuration(motor2.openLoopError)) {
                 motor2.timeCount = 0;
                 motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
               }
@@ -320,13 +325,8 @@ void loop() {
           // motor3.setDesiredAngle(motorCommand.whichAngle); // setDesiredAngle(float angle) { if (angle < this.minimumAgle || angle > this.maximumAngle) { throw new IllegalArgumentException("You retard")}}
           if (motor3.setDesiredAngle(motorCommand.whichAngle)) {
             if (motor3.isOpenLoop) {
-              motor3.openLoopError = motor3.desiredAngle;
-
-              // determine the direction
-              if (motor3.openLoopError >= 0) motor3.openLoopDirection = 1;
-              else motor3.openLoopDirection = -1;
-
-              if (motor3.calcNumSteps()) {
+              motor3.setDirection(motor3.openLoopError);
+              if (motor3.calcNumSteps(motor3.openLoopError)) {
                 motor3.enablePower(); // give power to the stepper finally
                 motor3.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
               }

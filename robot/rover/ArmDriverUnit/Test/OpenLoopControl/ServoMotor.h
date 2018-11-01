@@ -51,7 +51,8 @@ class ServoMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
-    bool calcTurningDuration(void);
+    bool calcTurningDuration(float angle);
+    void setDirection(float angle);
 
     void setVelocity(int motorDir, int motorSpeed);
     void stopRotation(void);
@@ -151,11 +152,11 @@ void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
   analogWrite(pwmPin, dutyCycle);
 }
 
-bool ServoMotor::calcTurningDuration(void) {
+bool ServoMotor::calcTurningDuration(float angle) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-  if ( fabs(openLoopError) > pidController.angleTolerance * gearRatioReciprocal) {
-    numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
+  if ( fabs(angle) > pidController.angleTolerance * gearRatioReciprocal) {
+    numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
     //Serial.println(numMillis);
     return true;
   }
@@ -163,6 +164,11 @@ bool ServoMotor::calcTurningDuration(void) {
     Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
     return false;
   }
+}
+
+void ServoMotor::setDirection(float angle) {
+  if (angle >= 0) openLoopDirection = 1;
+  else openLoopDirection = -1;
 }
 
 #endif
