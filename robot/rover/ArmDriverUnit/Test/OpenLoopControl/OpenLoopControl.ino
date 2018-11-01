@@ -320,7 +320,7 @@ void loop() {
           if (motor3.setDesiredAngle(motorCommand.whichAngle)) {
             if (motor3.isOpenLoop) {
               //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
-              motor3.setDirection(motor3.openLoopError);
+              motor3.calcDirection(motor3.openLoopError);
               // calculates how many steps to take to get to the desired position, assuming no slipping
               if (motor3.calcNumSteps(motor3.openLoopError)) { // also returns false if the open loop error is too small
                 motor3.enablePower(); // give power to the stepper finally
@@ -343,8 +343,8 @@ void loop() {
             motor4.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
-            if (motor4.openLoopError >= 0) motor4.openLoopDirection = 1;
-            else motor4.openLoopDirection = -1;
+            if (motor4.openLoopError >= 0) motor4.rotationDirection = 1;
+            else motor4.rotationDirection = -1;
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
@@ -366,8 +366,8 @@ void loop() {
           motor5.openLoopError = motor5.desiredAngle; //- motor5.calcCurrentAngle(); // find the angle difference
 
           // determine the direction
-          if (motor5.openLoopError >= 0) motor5.openLoopDirection = 1;
-          else motor5.openLoopDirection = -1;
+          if (motor5.openLoopError >= 0) motor5.rotationDirection = 1;
+          else motor5.rotationDirection = -1;
 
           motor5.openLoopSpeed = 50; // 50% speed
           motor5.timeCount = 0;
@@ -390,8 +390,8 @@ void loop() {
             motor6.openLoopError = motor6.desiredAngle; //- motor6.calcCurrentAngle(); // find the angle difference
 
             // determine the direction
-            if (motor6.openLoopError >= 0) motor6.openLoopDirection = 1;
-            else motor6.openLoopDirection = -1;
+            if (motor6.openLoopError >= 0) motor6.rotationDirection = 1;
+            else motor6.rotationDirection = -1;
 
             motor6.openLoopSpeed = 50; // 50% speed
             motor6.timeCount = 0;
@@ -511,7 +511,7 @@ void loop() {
           else { // it's possible the check happens when the motor is at rest
             Serial.println("discrepancy is too high and motor is done moving, adjusting step number");
             // it's possible the angle is too far in either direction, so this makes sure that it goes to the right spot
-            if (discrepancy >= 0) motor3.openLoopDirection = 1;
+            if (discrepancy >= 0) motor3.rotationDirection = 1;
             else discrepancy = -1;
             motor3.enablePower();
             motor3.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
@@ -566,14 +566,14 @@ void m3StepperInterrupt(void) {
   if (motor3.isOpenLoop) { // open loop control
     // movementDone can be set elsewhere... so can numSteps
     if (!motor3.movementDone && motor3.stepCount < motor3.numSteps) {
-      motor3.singleStep(motor3.openLoopDirection); // direction was set beforehand
+      motor3.singleStep(motor3.rotationDirection); // direction was set beforehand
       motor3.stepCount++;
       if (motor3.hasRamping) { // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
         nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
         m3StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
       }
-      //Serial.print(motor3.openLoopDirection); Serial.println(" direction");
+      //Serial.print(motor3.rotationDirection); Serial.println(" direction");
       //Serial.print(motor3.stepCount); Serial.println(" steps taken");
       //Serial.print(motor3.numSteps); Serial.println(" steps total");
     }
@@ -594,7 +594,7 @@ void m4StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD;
   if (motor4.isOpenLoop) { // open loop control
     if (!motor4.movementDone && motor4.stepCount < motor4.numSteps) {
-      motor4.singleStep(motor4.openLoopDirection); // direction was set beforehand
+      motor4.singleStep(motor4.rotationDirection); // direction was set beforehand
       motor4.stepCount++;
       if (motor4.hasRamping) { // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
@@ -619,7 +619,7 @@ void dcInterrupt(void) {
   // motor 1
   if (motor1.isOpenLoop) { // open loop control
     if (!motor1.movementDone && motor1.timeCount < motor1.numMillis) {
-      motor1.setVelocity(motor1.openLoopDirection, motor1.openLoopSpeed);
+      motor1.setVelocity(motor1.rotationDirection, motor1.openLoopSpeed);
       Serial.print("Beep");
     }
     else {
@@ -633,7 +633,7 @@ void dcInterrupt(void) {
   // motor 2
   if (motor2.isOpenLoop) { // open loop control
     if (!motor2.movementDone && motor2.timeCount < motor2.numMillis) {
-      motor2.setVelocity(motor2.openLoopDirection, motor2.openLoopSpeed);
+      motor2.setVelocity(motor2.rotationDirection, motor2.openLoopSpeed);
     }
     else {
       motor2.movementDone = true;
@@ -661,7 +661,7 @@ void servoInterrupt(void) {
   if (motor5.isOpenLoop) { // open loop control
     if (!motor5.movementDone && motor5.timeCount < motor5.numMillis) {
       //Serial.println("command being processed");
-      motor5.setVelocity(motor5.openLoopDirection, motor5.openLoopSpeed);
+      motor5.setVelocity(motor5.rotationDirection, motor5.openLoopSpeed);
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor5.movementDone = true;
@@ -674,7 +674,7 @@ void servoInterrupt(void) {
   // motor 6
   if (motor6.isOpenLoop) { // open loop control
     if (!motor6.movementDone && motor6.timeCount < motor6.numMillis) {
-      motor6.setVelocity(motor6.openLoopDirection, motor6.openLoopSpeed);
+      motor6.setVelocity(motor6.rotationDirection, motor6.openLoopSpeed);
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor6.movementDone = true;
@@ -692,7 +692,7 @@ void servoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
   if (!motor5.movementDone && motor5.timeCount < motor5.numMillis) {
     //Serial.println("command being processed");
-    motor5.setVelocity(motor5.openLoopDirection, motor5.openLoopSpeed);
+    motor5.setVelocity(motor5.rotationDirection, motor5.openLoopSpeed);
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor5.movementDone = true;
@@ -704,7 +704,7 @@ void servoInterrupt(void) {
     // movementDone can be set elsewhere... so can numSteps
   if (!motor6.movementDone && motor6.timeCount < motor6.numMillis) {
     //Serial.println("command being processed");
-    motor6.setVelocity(motor6.openLoopDirection, motor6.openLoopSpeed);
+    motor6.setVelocity(motor6.rotationDirection, motor6.openLoopSpeed);
   }
   else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
     motor6.movementDone = true;

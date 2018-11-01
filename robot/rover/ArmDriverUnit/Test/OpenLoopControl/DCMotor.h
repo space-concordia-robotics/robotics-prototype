@@ -62,14 +62,12 @@ class DcMotor : public RobotMotor {
                unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
-    void setDirection(float angle);
-
+    
     void stopRotation(void);
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
     // stuff for open loop control
-    int openLoopDirection; // public variable for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
     float openLoopGain; // speed correction factor
@@ -250,11 +248,6 @@ bool DcMotor::calcTurningDuration(float angle) {
   else {
     return false;
   }
-}
-
-void DcMotor::setDirection(float angle) {
-  if (angle >= 0) openLoopDirection = 1;
-  else openLoopDirection = -1;
 }
 
 #endif

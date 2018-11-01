@@ -34,13 +34,11 @@ class StepperMotor : public RobotMotor {
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
-    void setDirection(float angle);
-
+    
     void setVelocity(int motorDir, int motorSpeed);
     float calcCurrentAngle(void);
 
     // stuff for open loop control
-    int openLoopDirection; // public variable for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
     int numSteps; // how many steps to take for stepper to reach desired position
@@ -181,11 +179,6 @@ bool StepperMotor::calcNumSteps(float angle) {
   else {
     return false;
   }
-}
-
-void StepperMotor::setDirection(float angle) {
-  if (angle >= 0) openLoopDirection = 1;
-  else openLoopDirection = -1;
 }
 
 #endif
