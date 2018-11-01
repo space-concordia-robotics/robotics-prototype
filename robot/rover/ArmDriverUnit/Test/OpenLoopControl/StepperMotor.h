@@ -33,7 +33,7 @@ class StepperMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
-    bool calcNumSteps(float angle);
+    bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     void setDirection(float angle);
 
     void setVelocity(int motorDir, int motorSpeed);
@@ -43,7 +43,6 @@ class StepperMotor : public RobotMotor {
     int openLoopDirection; // public variable for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
-    float openLoopGain; // speed correction factor
     int numSteps; // how many steps to take for stepper to reach desired position
     volatile int stepCount; // how many steps the stepper has taken since it started moving
 
@@ -67,7 +66,6 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   budgeMovementDone = true;
 
   openLoopSpeed = 0; // no speed by default;
-  openLoopGain = 1.0; // temp open loop control
 }
 
 void StepperMotor::enablePower(void) {
@@ -181,7 +179,6 @@ bool StepperMotor::calcNumSteps(float angle) {
     return true;
   }
   else {
-    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
     return false;
   }
 }

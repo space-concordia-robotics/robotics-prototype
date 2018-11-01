@@ -5,7 +5,7 @@
 #include "PinSetup.h"
 #include "RobotMotor.h"
 
-// for new driver
+// for cytron
 #define DC_S1 60
 #define DC_S2 130
 #define DC_S3 190
@@ -61,7 +61,7 @@ class DcMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME); // can go into ArmMotor
 
-    bool calcTurningDuration(float angle);
+    bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     void setDirection(float angle);
 
     void stopRotation(void);
@@ -248,7 +248,6 @@ bool DcMotor::calcTurningDuration(float angle) {
     return true;
   }
   else {
-    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
     return false;
   }
 }

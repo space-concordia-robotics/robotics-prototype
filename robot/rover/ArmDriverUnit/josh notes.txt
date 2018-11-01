@@ -1,9 +1,8 @@
-option to disable pid?
-option to halt motors? stop command to motors
+command to stop all motors
+command to adjust a motor's speed
+command to adjust all motor speeds?
 
 all joints moving at same speed? command to adjust speed that internally adjusts each motor's speed so even at new speeds they turn at the same speed
-
-custom speed control so a specific motor can move faster if desired
 
 deal with relative vs absolute angle control issues
 
@@ -11,8 +10,6 @@ make setdesiredangle,getdesiredangle functions
 
 make logic for continuous vs position servos
 make logic for sabertooth vs cytron driver?
-
-stepper angle check needs to occur each software interrupt or every few interrupts because if the movement messes up in the middle we need a check... have put this into the main loop
 
 what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 

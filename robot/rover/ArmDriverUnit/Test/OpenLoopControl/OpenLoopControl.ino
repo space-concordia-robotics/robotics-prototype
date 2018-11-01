@@ -5,12 +5,7 @@
   -(always) clean up code, comment code
   -(done-ish) implement power management? sleep mode? marc says the power savings are negligible compared to other power savings
   -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
-    -(done) update parsing function to take in angles
-  -(done) leave serial.print debugging messages unless it really takes too much time (doubt)
-  -(done) figure out how to solve the servo jitter. setting pins to INPUT probably fixes it
   -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-  -(done-ish) drivers that accept 3.3v probably internally deal with it so that 3.3v is max speed
-  -(done-ish) figure out how to send motor info from parsing function to budgeMotor etc
 
   -(done) implement budge function:
    -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
@@ -22,14 +17,12 @@
   -(next) clean up parsing code to make it easier to read and reduce repetition
 
   -(now) determine motor angles thru encoder interrupts
-   -(done) all the pin and register definitions are based on the teensy, this would need to be changed for a different microcontroller
    -(done-ish) solve encoder direction change issue? not necessary
    -(issue) interrupt functions must be defined outside of classes...
    -(now) confirm all the pins will work with interrupts and not stepping on each other
    -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
    -(done-ish) can determine motor angles for dc and steppers, not servos
    -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
-   -(done) make sure there is  max/min angle limitation with encoders
    -(now) deal with overflow of encoderCount
    -(now) determine whether it's worth it to use the built in quadrature decoders
 
@@ -45,10 +38,8 @@
     -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
 
   -(next) simultaneous motor control with timers
-   -(done) currently using IntervalTimers for software interrupts, may go lower level if necessary
-   -(done-ish) software interrupts can take input from open loop control but need to refine everything and add closed loop control
+   -(done-ish) software interrupts can take input from open loop control but need to refine everything and finish closed loop control
     -(now) decide frequency of motor control loop: figure out estimated time for loop
-    -(done) rewrote the motor control with timers for teensy, ensuring control for all motors
    -more comments in next comment block
 
   -(next next step) external interrupts for limit switches
@@ -64,26 +55,23 @@
    gotta figure out the correspondence between direction pin's high/low and motor rotation direction
    set velocity should only set velocity and writing to pins happens outside in interrupt functions? or in dedicated function?
 
-   I need to decide where movementDone is changed. does the pid decide that the movement is done and then the timer interrupts know not to turn motors?
-   Right now there's a periodic check for STEPPERS that if there's a discrepancy then the stepper angle is adjusted. This is necessary because
-   the steppers are controlled in open loop. So in this periodic check, it could also choose to disable the dc motor PID for example, eliminating the need
-   to modify this variable which seems to not be related to the PID, and do it outside the pid object. that being the case, this loop is for stepper control,
-   so it would also need to check dc control? given how often it checks it should be okay though........
-   otherwise the pid WIll need to be inherited by the motor class and then implemented based on the motor type
-   the advantage of this is that different motors have different types of speed output so it could be directly adapted inside the pid vs outside of it but
-   that also may be bad coding practice.
-
-   I also need to figure out where it's a good idea to disable interrupts so htat I don't read a value while it's being modified
+   I need to figure out where it's a good idea to disable interrupts so htat I don't read a value while it's being modified
 */
 /*
   1) motor4 calculates the error by subtracting the desired minus the current angle... but it's open loop? can keep track of imagined current angle and then this calculation actually makes sense though! this means changning what I wrote for motor2&3
   2) setDirection method sets the open loop direction right now.. i need to deal with this and have only one direction variable
   3) need to rearrange open loop variables to RobotMotor when it makes sense
+  4) should i change parseSerial to take in a char array?
   5) direction should be determined outside of the pid
   6) angleTolerance is motorPID attribute and not motor attribute?
   7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
   8) there's a command to reset a motor position but no implementation
   9) add command to turn ramping on or off for motor5.hasRamping = false;
+  10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
+      but then i set openloopspeed to 50 in the setup()???? i need to rething the velocity vs speed vs direction stuff!
+  11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
+  12) i should remove budge() as it's beeing replaced by the open loop control commands and will remove unnecessary variables
+  13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
 */
 
 #include "PinSetup.h"
@@ -93,14 +81,11 @@
 #include "DcMotor.h"
 #include "ServoMotor.h"
 
-#define OPEN 1
-#define CLOSED 2
-
-#define STEPPER_PID_PERIOD 30*1000
+#define STEPPER_PID_PERIOD 30*1000 // initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 40000 // 40ms, because typical pwm signals have 20ms periods
 
-#define STEPPER_CHECK_INTERVAL 2000
+#define STEPPER_CHECK_INTERVAL 2000 // much longer period, used for testing/debugging
 //#define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
 
 #define ENCODER_NVIC_PRIORITY 100 // should be higher priority tan most other things, quick calculations and happens very frequently
@@ -112,26 +97,26 @@
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100  // size of the buffer for the serial commands
 
-char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
-
 /* parsing */
+char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
 char *restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
-//int tempMotorVar; // checks the motor before giving the data to the struct below
-//int tempSpeedVar; // checks the speed before giving the data to the struct below
-//unsigned int tempTimeVar; // checks the time before giving the data to the struct below
 
-struct budgeInfo { // info from parsing functionality is packaged and given to motor control functionality
-  int whichMotor = 0;
-  int whichDirection = 0;
-  int whichSpeed = 0;
-  unsigned int whichTime = 0;
-  bool angleCommand = false;
-  float whichAngle = 0.0;
-  int loopState = 0;
-  bool resetCommand = false;
-  bool resetAngleValue = false;
-  bool resetJointPosition = false;
+/*
+  info from parsing functionality is packaged and given to motor control functionality.
+  many of these are set to 0 so that the message can reset, thus making sure that
+  the code later on doesn't inadvertently make a motor move when it wasn't supposed to
+*/
+struct commandInfo {
+  int whichMotor = 0; // which motor was requested to do something
+  int whichDirection = 0; // set the direction
+  int whichSpeed = 0; // set the speed
+  unsigned int whichTime = 0; // how long to turn for
+  bool angleCommand = false; // for regular operations, indicates that it's to control an angle
+  float whichAngle = 0.0; // for regular operations, which angle to go to
+  int loopState = 0; // for choosing between open loop or closed loop control
+  bool resetCommand = false; // indicates that something should be reset
+  bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
+  bool resetJointPosition = false; // for moving a joint to its neutral position
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -139,21 +124,21 @@ const int encoderStates [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 
 // instantiate motor objects here. only dcmotor currently supports interrupts
 //StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
-DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for new driver
+DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
 //DcMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
-DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for new driver
+DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for cytron
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
+// timer interrupts
+IntervalTimer dcTimer; // motors 1&2
 IntervalTimer m3StepperTimer;
 IntervalTimer m4StepperTimer;
-IntervalTimer dcTimer;
-IntervalTimer servoTimer;
+IntervalTimer servoTimer; // motors 5&6
 
-elapsedMillis sinceStepperCheck;
-
+// motor array prep work: making pointers to motor objects
 //StepperMotor *m1 = &motor1;
 DcMotor *m1 = &motor1;
 DcMotor *m2 = &motor2;
@@ -162,10 +147,15 @@ StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5;
 ServoMotor *m6 = &motor6;
 
+// I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
 RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
+
+elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
+elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
 void printMotorAngles();
 
+// declare encoder interrupt service routines. They must be global.
 void m1_encoder_interrupt(void);
 void m2_encoder_interrupt(void);
 void m3_encoder_interrupt(void);
@@ -173,24 +163,26 @@ void m4_encoder_interrupt(void);
 //void m5_encoder_interrupt(void);
 //void m6_encoder_interrupt(void);
 
+// declare timer interrupt service routines, where the motors actually get controlled.
+// stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
+void dcInterrupt(void); // manages motors 1&2
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
-void dcInterrupt(void);
-void servoInterrupt(void);
+void servoInterrupt(void); // manages motors 5&6
 
-void parseSerial(void);
+void parseSerial(void); // goes through the message and puts relevant data into the motorCommand struct
 
 void setup() {
-  pinSetup();
+  pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   Serial.begin(BAUD_RATE); Serial.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
 
-  // to clean up: each motor with an encoder needs to setup that encoder
+  // each motor with an encoder needs to setup that encoder
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
   motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
 
-  // to clean up: each motor needs to attach 2 interrupts, which is a lot of lines of code
+  // each motor needs to attach 2 interrupts, which is a lot of lines of code
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
@@ -205,12 +197,12 @@ void setup() {
   //attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
 
   { // shaft angle tolerance setters
-    //motor1.pidController.setAngleTolerance(1.8 * 3);
-    motor1.pidController.setAngleTolerance(2.0);
+    //motor1.pidController.setAngleTolerance(1.8 * 3); // if it was a stepper
+    motor1.pidController.setAngleTolerance(2.0); // randomly chosen for dc
     motor2.pidController.setAngleTolerance(2.0);
-    motor3.pidController.setAngleTolerance(1.8 * 3);
+    motor3.pidController.setAngleTolerance(1.8 * 3); // 1.8 is the min stepper resolution so I gave it +/- tolerance
     motor4.pidController.setAngleTolerance(1.8 * 3);
-    motor5.pidController.setAngleTolerance(2.0);
+    motor5.pidController.setAngleTolerance(2.0); // randomly chosen for servo
     motor6.pidController.setAngleTolerance(2.0);
   }
 
@@ -223,16 +215,18 @@ void setup() {
     motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
   }
 
-  { // max (and min) speed setters
-    motor1.pidController.setOutputLimits(0, 50);
-    motor2.pidController.setOutputLimits(0, 50);
-    motor3.pidController.setOutputLimits(0, 50);
-    motor4.pidController.setOutputLimits(0, 50);
-    motor5.pidController.setOutputLimits(0, 50);
-    motor6.pidController.setOutputLimits(0, 50);
+  { // max (and min) speed setters, I limit it to 50% for safety.
+    // Abtin thinks 50% should be a hard limit that can't be modified this easily
+    motor1.pidController.setOutputLimits(-50, 50);
+    motor2.pidController.setOutputLimits(-50, 50);
+    motor3.pidController.setOutputLimits(-50, 50);
+    motor4.pidController.setOutputLimits(-50, 50);
+    motor5.pidController.setOutputLimits(-50, 50);
+    motor6.pidController.setOutputLimits(-50, 50);
   }
 
-  { // open loop setters
+  { // open loop setters. By default the motors are open loop, have constant velocity profiles (no ramping),
+    // operate at 50% max speed, and the gains should vary based on which motor it is
     motor1.isOpenLoop = true; motor1.hasRamping = false;
     motor1.openLoopSpeed = 50; // 50% speed
     motor1.openLoopGain = 5.0; // totally random guess, needs to be tested
@@ -241,14 +235,13 @@ void setup() {
     motor2.openLoopSpeed = 50; // 50% speed
     motor2.openLoopGain = 5.0; // totally random guess, needs to be tested
 
+    // open loop gain is only for time-based open loop control
     motor3.isOpenLoop = true; motor3.hasRamping = false;
     motor3.openLoopSpeed = 50; // 50% speed
-    motor3.openLoopGain = 5.0; // totally random guess, needs to be tested
-
+    
     motor4.isOpenLoop = true; motor4.hasRamping = false;
     motor4.openLoopSpeed = 50; // 50% speed
-    motor4.openLoopGain = 5.0; // totally random guess, needs to be tested
-
+    
     motor5.isOpenLoop = true; motor5.hasRamping = false;
     motor5.openLoopSpeed = 50; // 50% speed
     motor5.openLoopGain = 5.0; // totally random guess, needs to be tested
@@ -256,18 +249,18 @@ void setup() {
     motor6.isOpenLoop = true; motor6.hasRamping = false;
     motor6.openLoopSpeed = 50; // 50% speed
     motor6.openLoopGain = 5.0; // totally random guess, needs to be tested
-
   }
 
-  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
+  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); //1000ms
+  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
-  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); //need to choose a period... went with 20ms because that's typical pwm period for servos...
+  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 
+  // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
 }
@@ -283,14 +276,14 @@ void loop() {
     restOfMessage = serialBuffer; // reset pointer
   }
 
-  if (motorCommand.whichMotor > 0) {
+  if (motorCommand.whichMotor > 0) { // 0 means there was an invalid command and therefore motors shouldn't be controlled
     // make motors move
     if (motorCommand.angleCommand) {
       Serial.print("motor "); Serial.print(motorCommand.whichMotor);
       Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
       Serial.println("=======================================================");
       switch (motorCommand.whichMotor) { // move a motor based on which one was commanded
-        case MOTOR1:
+        case MOTOR1: // for now motor1 code is bad
           if (motorCommand.whichAngle > motor1.minimumAngle && motorCommand.whichAngle < motor1.maximumAngle) {
             //motor1.movementDone = false;
             //motor1.enablePower();
@@ -303,44 +296,48 @@ void loop() {
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
-        case MOTOR2:
-          if (motor2.setDesiredAngle(motorCommand.whichAngle)) {
+        case MOTOR2: // dc motor control using helper functions
+          if (motor2.setDesiredAngle(motorCommand.whichAngle)) { // this method returns true if the command is within joint angle limits
             if (motor2.isOpenLoop) {
-              motor2.setDirection(motor2.openLoopError);
-              if (motor2.calcTurningDuration(motor2.openLoopError)) {
-                motor2.timeCount = 0;
-                motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+              //motor2.openLoopError = motor2.desiredAngle - motor2.calcCurrentAngle(); // find the angle difference
+              motor2.calcDirection(motor2.openLoopError); // decides whether to rotate cw or ccw
+              // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
+              if (motor2.calcTurningDuration(motor2.openLoopError)) { // returns false if the open loop error is too small
+                motor2.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
+                motor2.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
               }
+              else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
             else {
               // actually shouldn't the pid only be updated in the timer interrupt?
               //motor2.calcCurrentAngle(); // find the angle difference
-              //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
-              //motor2.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+              //motor2.movementDone = false;
             }
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
-        case MOTOR3:
-          // motor3.setDesiredAngle(motorCommand.whichAngle); // setDesiredAngle(float angle) { if (angle < this.minimumAgle || angle > this.maximumAngle) { throw new IllegalArgumentException("You retard")}}
+        case MOTOR3: // stepper motor control using helper functions
           if (motor3.setDesiredAngle(motorCommand.whichAngle)) {
             if (motor3.isOpenLoop) {
+              //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
               motor3.setDirection(motor3.openLoopError);
-              if (motor3.calcNumSteps(motor3.openLoopError)) {
+              // calculates how many steps to take to get to the desired position, assuming no slipping
+              if (motor3.calcNumSteps(motor3.openLoopError)) { // also returns false if the open loop error is too small
                 motor3.enablePower(); // give power to the stepper finally
-                motor3.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+                motor3.movementDone = false;
               }
+              else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
             else {
               // pid stuff
-              //motor3.openLoopError = motor3.desiredAngle - motor3.calcCurrentAngle(); // find the angle difference
-              //motor3.pidController.updatePID(motor3.currentAngle, motor3.desiredAngle);
-              //motor3.movementDone = false; // this flag being false lets the timer interrupt control the dc motor speed
+              //motor3.calcCurrentAngle();
+              //motor3.enablePower();
+              //motor3.movementDone = false;
             }
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
-        case MOTOR4:
+        case MOTOR4: // stepper motor control without helper functions, naturally this is messy
           if (motorCommand.whichAngle > motor4.minimumAngle && motorCommand.whichAngle < motor4.maximumAngle) {
             motor4.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
             motor4.openLoopError = motor4.desiredAngle - motor4.calcCurrentAngle(); // find the angle difference
@@ -362,7 +359,7 @@ void loop() {
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
           break;
-        case MOTOR5:
+        case MOTOR5: // servo control without helper functions, naturally this is messy
           // this motor has no max or min angle because it must be able to spin like a screwdriver
           //motor5.pidController.updatePID(motor5.currentAngle, motor5.desiredAngle);
           motor5.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
@@ -386,7 +383,7 @@ void loop() {
           else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
           //motor5.pidController.updatePID(motor5.currentAngle, motor5.desiredAngle);
           break;
-        case MOTOR6:
+        case MOTOR6: // servo control without helper functions, naturally this is messy
           if (motorCommand.whichAngle > motor6.minimumAngle && motorCommand.whichAngle < motor6.maximumAngle) {
             //motor5.pidController.updatePID(motor5.currentAngle, motor5.desiredAngle);
             motor6.desiredAngle = motorCommand.whichAngle; // set the desired angle based on the command
@@ -414,14 +411,14 @@ void loop() {
           break;
       }
     }
-    // set loop states
-    else if (motorCommand.loopState == OPEN) {
+    // set loop states for appropriate motor
+    else if (motorCommand.loopState == OPEN_LOOP) {
       motorArray[motorCommand.whichMotor]->isOpenLoop = true;
     }
-    else if (motorCommand.loopState == CLOSED) {
+    else if (motorCommand.loopState == CLOSED_LOOP) {
       motorArray[motorCommand.whichMotor]->isOpenLoop = false;
     }
-    // reset something
+    // reset the motor angle's variable or actually control the motor to reset it to neutral position
     else if (motorCommand.resetCommand) {
       if (motorCommand.resetAngleValue) {
         motorArray[motorCommand.whichMotor]->currentAngle = 0.0;
@@ -437,7 +434,7 @@ void loop() {
       Serial.println("=======================================================");
 
       // activate budge command for appropriate motor
-      motorArray[motorCommand.whichMotor - 1]->budge(motorCommand.whichDirection, motorCommand.whichSpeed, motorCommand.whichTime);
+      motorArray[motorCommand.whichMotor]->budge(motorCommand.whichDirection, motorCommand.whichSpeed, motorCommand.whichTime);
     }
     else Serial.println("$E,Error: bad motor command");
   }
@@ -565,7 +562,7 @@ void printMotorAngles() {
 */
 
 void m3StepperInterrupt(void) {
-  static int nextInterval = STEPPER_PID_PERIOD;
+  static int nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
   if (motor3.isOpenLoop) { // open loop control
     // movementDone can be set elsewhere... so can numSteps
     if (!motor3.movementDone && motor3.stepCount < motor3.numSteps) {
@@ -799,11 +796,11 @@ void parseSerial(void) {
       motorCommand.angleCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
       if (String(msgElem) == "open") {
-        motorCommand.loopState = OPEN;
+        motorCommand.loopState = OPEN_LOOP;
         Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
       }
       if (String(msgElem) == "closed") {
-        motorCommand.loopState = CLOSED;
+        motorCommand.loopState = CLOSED_LOOP;
         Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
       }
       else Serial.println("invalid loop state");

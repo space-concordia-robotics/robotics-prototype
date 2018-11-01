@@ -51,7 +51,7 @@ class ServoMotor : public RobotMotor {
     void budge(int budgeDir = CLOCKWISE, int budgeSpeed = DEFAULT_SPEED,
                unsigned int budgeTime = DEFAULT_BUDGE_TIME);
 
-    bool calcTurningDuration(float angle);
+    bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     void setDirection(float angle);
 
     void setVelocity(int motorDir, int motorSpeed);
@@ -161,7 +161,6 @@ bool ServoMotor::calcTurningDuration(float angle) {
     return true;
   }
   else {
-    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
     return false;
   }
 }
