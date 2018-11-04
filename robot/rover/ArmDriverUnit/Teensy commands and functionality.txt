@@ -1,0 +1,73 @@
+proposed boot procedure:
+-teensy wakes up, checks motor angles previously saved into EEPROM
+-refuses to move until:
+-either request for robot arm initialization routine (described below)
+-or override to control a specific joint in case of emergency
+-or perhaps there should be a handshake with the odroid before even the above occurs
+-then it awaits normal commands
+-on shutdown:
+-reset arm back to neutral position
+-save the states of each angle back to EEPROM
+
+the reason for saving angles to eeprom was really in case of emergencies where the thing was shut down
+before the motors could go back to neutral, so idk if this is really necessary because in an emergency
+the arm may not have time to save angles before shutting off... and hten it's kinda useless to remember previous
+states if we expect the states to be in neutral position
+
+from teensy:
+-message containing all of the angle values at once
+-error messages
+
+
+to teensy:
+
+reset arm position:
+-force motors to seek their max and min angles until they hit limit switches
+-this lets the teensy reconfirm the max and min angles, measured by teensy vs expected values
+-motors then seek neutral position
+-initialization function should maybe sweep to both ends of the arm's range?
+-or maybe just do this when the arm design is finalized and init function only goes one direction
+
+open loop vs closed loop:
+-command tells teensy to use open loop or closed loop control
+-if open loop control, another command can tell it to use regular speed profiles or constant speed
+-if open loop control, if motors have encoders they will check every so often if they're at the position they imagine
+-steppers could have the option of being in closed loop control but they can work in open loop as they are precise
+-command to update pid constants?
+
+motor movement control:
+-command requests a certain joint to bend to a certain angle (only for arm?)
+-command requests multiple motors to move to angles simultaneously
+-command that changes the speed of a specific motor
+-command that adjusts the relative speeds of all the motors based on a factor
+-set speed and then set position or set speed and position at once?
+	-in the first case the speed is set until the next time it's changed
+	-in the second case the speed is set only for that movement
+-command requests a certain joint to move at a certain speed (only for wheels?)
+
+misc:
+-request teensy status?
+-request to flush the buffer?
+
+resets/emergencies:
+-(debugging?)command requests teensy to set a specific joint to neutral position
+-(debugging?)command requests teensy to reset variable holding joint angle (to 0 degrees)
+-command tells teensy to stop all motors from moving
+-command tells teensy to stop specific motor from moving
+
+
+internal hardware/code issues/functionality:
+motors:
+-communications should be done through ROS
+-closed loop control for speed should be added for rover wheels Teensy
+-motors have the option of having angle limits or not, allowing some motors to spin forever and others to be limited
+-if a motor hits a limit switch before it expected to, teensy should adjust motor angle
+-if a motor thinks it's at the end of its course but it hasn't hit the limit switch yet, adjust angle so it can go the whole way?
+-perhaps a command to switch the direction logic in case direction pins are backwards?
+-motors reject angle requests if outside of angle limits or if the angle is too small for the motor shaft to accurately reach it
+-commands to update other variables? gear ratio? encoder resolution? motor speed (max and min) limits?
+-add support for cytron vs sabertooth drivers
+-add support for continuous vs position servos
+heartbeat:
+-heartbeat can visually display errors based on LED blinking pattern
+-regular operation has simple blink pattern, different patterns for different errors

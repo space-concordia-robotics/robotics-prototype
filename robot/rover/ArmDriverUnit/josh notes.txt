@@ -1,15 +1,6 @@
-command to stop all motors
-command to adjust a motor's speed
-command to adjust all motor speeds?
-
-all joints moving at same speed? command to adjust speed that internally adjusts each motor's speed so even at new speeds they turn at the same speed
-
 deal with relative vs absolute angle control issues
 
 make setdesiredangle,getdesiredangle functions
-
-make logic for continuous vs position servos
-make logic for sabertooth vs cytron driver?
 
 what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 
@@ -31,8 +22,6 @@ we don't want to miss messages, we need to know if messages were missed, for exa
 
 quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore
 quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?)
-
-initialization function should maybe sweep to both ends of the arm's range? or maybe just do this when the arm design is finalized and init function only goes one direction
 
 don't worry about 3.3v because the driver probably has schmidtt triggers that deal with it
 

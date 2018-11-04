@@ -94,6 +94,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
   // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  this->encoderResolutionReciprocal = 1 / encoderResolution; // preemptively reduce floating point calculation time
   hasEncoder = false;
   budgeMovementDone = true;
 
@@ -230,7 +231,7 @@ void DcMotor::setVelocity(int motorDir, int motorSpeed) {
 
 float DcMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
-    currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
+    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     return currentAngle;
   }
   else {
@@ -242,9 +243,8 @@ float DcMotor::calcCurrentAngle(void) {
 bool DcMotor::calcTurningDuration(float angle) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-  if ( fabs(angle) > pidController.angleTolerance * gearRatioReciprocal) {
+  if ( fabs(angle) > pidController.jointAngleTolerance) {
     numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
-    //Serial.println(numMillis);
     return true;
   }
   else {

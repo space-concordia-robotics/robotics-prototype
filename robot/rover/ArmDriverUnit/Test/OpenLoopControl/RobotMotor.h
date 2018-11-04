@@ -17,6 +17,7 @@ class RobotMotor {
     int encoderPinA, encoderPinB;
     float gearRatio;
     float gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
+    float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
     float maximumAngle, minimumAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
     bool hasAngleLimits; // a wrist which wants to turn infinitely will be constrained by angle limits
     bool isOpenLoop; // decides whether to use the PID or not

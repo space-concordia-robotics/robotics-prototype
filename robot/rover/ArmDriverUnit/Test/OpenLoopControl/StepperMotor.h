@@ -161,7 +161,7 @@ void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
 
 float StepperMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
-    currentAngle = encoderCount * 360.0 * gearRatioReciprocal * (1 / encoderResolution);
+    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     return currentAngle;
   }
   else {
@@ -173,7 +173,7 @@ float StepperMotor::calcCurrentAngle(void) {
 bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
   // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-  if ( fabs(angle) > pidController.angleTolerance * gearRatioReciprocal) {
+  if ( fabs(angle) > pidController.jointAngleTolerance) {
     numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
     return true;
   }

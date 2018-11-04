@@ -3,16 +3,8 @@
   -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
   -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
   -(always) clean up code, comment code
-  -(done-ish) implement power management? sleep mode? marc says the power savings are negligible compared to other power savings
   -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
   -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-
-  -(done) implement budge function:
-   -(done) parsing procedure can process direction, speed and time, which have defaults in budge()
-   -(done) implement limit for max turns in right/left directions
-   -(done) connect and test all motor types with budge()
-   -(next) clean up budge code to make it easier to read and reduce repetition
-   -(next) budge code doesn't work anymore with software interrupts, so I may just scrap it... or later i can figure out what's wrong with it
 
   -(next) clean up parsing code to make it easier to read and reduce repetition
 
@@ -59,22 +51,22 @@
 */
 /*
   1) motor4 calculates the error by subtracting the desired minus the current angle... but it's open loop? can keep track of imagined current angle and then this calculation actually makes sense though! this means changning what I wrote for motor2&3
-  2) setDirection method sets the open loop direction right now.. i need to deal with this and have only one direction variable
-  3) need to rearrange open loop variables to RobotMotor when it makes sense
   4) should i change parseSerial to take in a char array?
-  5) direction should be determined outside of the pid
   6) angleTolerance is motorPID attribute and not motor attribute?
   7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
   8) there's a command to reset a motor position but no implementation
   9) add command to turn ramping on or off for motor5.hasRamping = false;
   10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
-      but then i set openloopspeed to 50 in the setup()???? i need to rething the velocity vs speed vs direction stuff!
+      but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
   11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
   12) i should remove budge() as it's beeing replaced by the open loop control commands and will remove unnecessary variables
   13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
   14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
   15) implement setVelocity() for stepper motors
   16) calcCurrentAngle() shouldn't just output an absurd value if it didn't work... deal with it
+
+  FIX ALL MOTOR CODE EXCEPT MOTOR2
+  DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
 */
 
 #include "PinSetup.h"
@@ -116,7 +108,8 @@ struct commandInfo {
   unsigned int whichTime = 0; // how long to turn for
   bool angleCommand = false; // for regular operations, indicates that it's to control an angle
   float whichAngle = 0.0; // for regular operations, which angle to go to
-  int loopState = 0; // for choosing between open loop or closed loop control
+  bool loopCommand = false; // for choosing between open loop or closed loop control
+  int loopState = 0; // what type of loop state it is
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
@@ -200,13 +193,13 @@ void setup() {
   //attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
 
   { // shaft angle tolerance setters
-    //motor1.pidController.setAngleTolerance(1.8 * 3); // if it was a stepper
-    motor1.pidController.setAngleTolerance(2.0); // randomly chosen for dc
-    motor2.pidController.setAngleTolerance(2.0);
-    motor3.pidController.setAngleTolerance(1.8 * 3); // 1.8 is the min stepper resolution so I gave it +/- tolerance
-    motor4.pidController.setAngleTolerance(1.8 * 3);
-    motor5.pidController.setAngleTolerance(2.0); // randomly chosen for servo
-    motor6.pidController.setAngleTolerance(2.0);
+    //motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
+    motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+    motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
+    motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
+    motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
+    motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+    motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
   }
 
   { // motor angle limit setters
@@ -303,7 +296,8 @@ void loop() {
           if (motor2.setDesiredAngle(motorCommand.whichAngle)) { // this method returns true if the command is within joint angle limits
             if (motor2.isOpenLoop) {
               //motor2.openLoopError = motor2.desiredAngle - motor2.calcCurrentAngle(); // find the angle difference
-              motor2.calcDirection(motor2.openLoopError); // decides whether to rotate cw or ccw
+              motor2.openLoopError = motorCommand.whichAngle;
+              motor2.calcDirection(motor2.openLoopError); // determine rotation direction
               // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
               if (motor2.calcTurningDuration(motor2.openLoopError)) { // returns false if the open loop error is too small
                 motor2.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
@@ -311,10 +305,10 @@ void loop() {
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
-            else {
+            else if (!motor2.isOpenLoop) {
               // actually shouldn't the pid only be updated in the timer interrupt?
               //motor2.calcCurrentAngle(); // find the angle difference
-              //motor2.movementDone = false;
+              motor2.movementDone = false;
             }
           }
           else Serial.println("$E,Alert: requested angle is not within angle limits.");
@@ -351,7 +345,7 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( fabs(motor4.openLoopError) > motor4.pidController.angleTolerance * motor4.gearRatioReciprocal) {
+            if ( fabs(motor4.openLoopError) > motor4.pidController.jointAngleTolerance) {
               motor4.numSteps = fabs(motor4.openLoopError) * motor4.gearRatio
                                 / motor4.stepResolution; // calculate the number of steps to take
               motor4.enablePower(); // give power to the stepper finally
@@ -377,7 +371,7 @@ void loop() {
 
           // if the error is big enough to justify movement
           // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-          if ( fabs(motor5.openLoopError) > motor5.pidController.angleTolerance * motor5.gearRatioReciprocal) {
+          if ( fabs(motor5.openLoopError) > motor5.pidController.jointAngleTolerance) {
             motor5.numMillis = (fabs(motor5.openLoopError) * motor5.gearRatio / motor5.openLoopSpeed)
                                * 1000.0 * motor5.openLoopGain; // calculate how long to turn for
             motor5.movementDone = false; // this flag being false lets the timer interrupt move the stepper
@@ -401,7 +395,7 @@ void loop() {
 
             // if the error is big enough to justify movement
             // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-            if ( fabs(motor6.openLoopError)  > motor6.pidController.angleTolerance * motor6.gearRatioReciprocal) {
+            if ( fabs(motor6.openLoopError) > motor6.pidController.jointAngleTolerance) {
               motor6.numMillis = (fabs(motor6.openLoopError) * motor6.gearRatio / motor6.openLoopSpeed)
                                  * 1000.0 * motor6.openLoopGain; // calculate how long to turn for
               motor6.movementDone = false; // this flag being false lets the timer interrupt move the stepper
@@ -415,16 +409,83 @@ void loop() {
       }
     }
     // set loop states for appropriate motor
-    else if (motorCommand.loopState == OPEN_LOOP) {
-      motorArray[motorCommand.whichMotor]->isOpenLoop = true;
-    }
-    else if (motorCommand.loopState == CLOSED_LOOP) {
-      motorArray[motorCommand.whichMotor]->isOpenLoop = false;
+    else if (motorCommand.loopCommand) {
+      /* // doesn't work!!!
+        if (motorCommand.loopState == OPEN_LOOP) {
+        motorArray[motorCommand.whichMotor]->isOpenLoop = true;
+        }
+        else if (motorCommand.loopState == CLOSED_LOOP) {
+        motorArray[motorCommand.whichMotor]->isOpenLoop = false;
+        }
+      */
+      if (motorCommand.loopState == OPEN_LOOP) {
+        switch (motorCommand.whichMotor) {
+          case MOTOR1:
+            motor1.isOpenLoop = true;
+            break;
+          case MOTOR2:
+            motor2.isOpenLoop = true;
+            break;
+          case MOTOR3:
+            motor3.isOpenLoop = true;
+            break;
+          case MOTOR4:
+            motor4.isOpenLoop = true;
+            break;
+          case MOTOR5:
+            motor5.isOpenLoop = true;
+            break;
+          case MOTOR6:
+            motor6.isOpenLoop = true;
+            break;
+        }
+      }
+      else if (motorCommand.loopState == CLOSED_LOOP) {
+        switch (motorCommand.whichMotor) {
+          case MOTOR1:
+            motor1.isOpenLoop = false;
+            break;
+          case MOTOR2:
+            motor2.isOpenLoop = false;
+            break;
+          case MOTOR3:
+            motor3.isOpenLoop = false;
+            break;
+          case MOTOR4:
+            motor4.isOpenLoop = false;
+            break;
+          case MOTOR5:
+            motor5.isOpenLoop = false;
+            break;
+          case MOTOR6:
+            motor6.isOpenLoop = false;
+            break;
+        }
+      }
     }
     // reset the motor angle's variable or actually control the motor to reset it to neutral position
     else if (motorCommand.resetCommand) {
       if (motorCommand.resetAngleValue) {
-        motorArray[motorCommand.whichMotor]->currentAngle = 0.0;
+        switch (motorCommand.whichMotor) {
+          case MOTOR1:
+            motor1.currentAngle = 0.0;
+            break;
+          case MOTOR2:
+            motor2.currentAngle = 0.0;
+            break;
+          case MOTOR3:
+            motor3.currentAngle = 0.0;
+            break;
+          case MOTOR4:
+            motor4.currentAngle = 0.0;
+            break;
+          case MOTOR5:
+            motor5.currentAngle = 0.0;
+            break;
+          case MOTOR6:
+            motor6.currentAngle = 0.0;
+            break;
+        }
       }
       else if (motorCommand.resetJointPosition) {
         ; // for later
@@ -451,15 +512,15 @@ void loop() {
     //if (motor4.movementDone) motor4.disablePower();
     /* this code could (should?) determine when servo/dc motor movement is done */
     /*
-      if ( fabs(motor2.desiredAngle - motor2.calcCurrentAngle() ) < motor2.pidController.angleTolerance){
+      if ( fabs(motor2.desiredAngle - motor2.calcCurrentAngle() ) < motor2.pidController.jointAngleTolerance){
       motor2.movementDone = true;
       }
     */
     /*
-      if ( fabs(motor5.desiredAngle - motor5.calcCurrentAngle() ) < motor5.pidController.angleTolerance){
+      if ( fabs(motor5.desiredAngle - motor5.calcCurrentAngle() ) < motor5.pidController.jointAngleTolerance){
       motor5.movementDone = true;
       }
-      if ( fabs(motor6.desiredAngle - motor6.calcCurrentAngle() ) < motor6.pidController.angleTolerance){
+      if ( fabs(motor6.desiredAngle - motor6.calcCurrentAngle() ) < motor6.pidController.jointAngleTolerance){
       motor6.movementDone = true;
       }
     */
@@ -496,13 +557,13 @@ void loop() {
         // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
         // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
         // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
-        if (fabs(discrepancy) * motor3.gearRatio > motor3.pidController.angleTolerance) {
+        if (fabs(discrepancy) > motor3.pidController.jointAngleTolerance) {
           Serial.println("discrepancy is too high and motor is moving, adjusting step number");
           // it's possible the check happens during movement, but there needs to be ample distance to move
           if (!motor3.movementDone) {
           // if actualRemainingAngle is negative it means the arm moved way further than it should have
             if(actualRemainingAngle<0) motor3.movementDone=true; // abort
-            else if(actualRemainingAngle > motor3.pidController.angleTolerance){
+            else if(actualRemainingAngle > motor3.pidController.jointAngleTolerance){
               Serial.println("enough angle between current position and desired position to adjust during movement");
               // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
               // the motor interrupt assumes the step count and direction are unchanged!!!!
@@ -623,7 +684,6 @@ void dcInterrupt(void) {
   if (motor1.isOpenLoop) { // open loop control
     if (!motor1.movementDone && motor1.timeCount < motor1.numMillis) {
       motor1.setVelocity(motor1.rotationDirection, motor1.openLoopSpeed);
-      Serial.print("Beep");
     }
     else {
       motor1.movementDone = true;
@@ -635,29 +695,39 @@ void dcInterrupt(void) {
   }
   // motor 2
   if (motor2.isOpenLoop) { // open loop control
-    if (!motor2.movementDone && motor2.timeCount < motor2.numMillis) {
+    if (!motor2.movementDone && motor2.timeCount <= motor2.numMillis) {
       motor2.setVelocity(motor2.rotationDirection, motor2.openLoopSpeed);
     }
     else {
       motor2.movementDone = true;
       motor2.stopRotation();
     }
-    // would be nice to have some kind of check for the above functions so the command only runs if there's been a change
-    // e.g. movementDone changed or the speed or numMillis changed
   }
-  else { // closed loop control, incomplete
+  // would be nice to have some kind of check for the above functions so the command only runs if there's been a change
+  // e.g. movementDone changed or the speed or numMillis changed
+  else if (!motor2.isOpenLoop) { // closed loop control, incomplete
     if (!motor2.movementDone) {
       // rethink the PID? needs to set a direction AND a speed
-      //motor2.calcCurrentAngle();
-      //motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
-      // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
-      //int motorSpeed = motor2.pidController.pidOutput * 255;
-      // motor2.calcDirection(motorSpeed); //does this work? it expects an angular error but at the end of the day...
-      //motor2.setVelocity(motor2.rotationDirection, motorSpeed);
+      Serial.println(motor2.calcCurrentAngle());
+      motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+      if (motor2.pidController.pidOutput == 0) {
+        Serial.println("done");
+        motor2.movementDone = true;
+        motor2.stopRotation();
+      }
+      else {
+        // 255 is arbitrary value... some conversion probably required between pid output and motor speed input
+        int motorSpeed = motor2.pidController.pidOutput * 255 / 100;
+        Serial.println(motorSpeed);
+        motor2.calcDirection(motorSpeed); //does this work? it expects an angular error but at the end of the day...
+        motor2.setVelocity(motor2.rotationDirection, motorSpeed);
+      }
+    }
+    else {
+      motor2.stopRotation();
     }
   }
 }
-// final implementation would have the PID being called in these interrupts
 
 void servoInterrupt(void) {
   // movementDone can be set elsewhere... so can numSteps
@@ -734,7 +804,7 @@ void m1_encoder_interrupt(void) {
 }
 void m2_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
-  Serial.print("m2 "); Serial.println(motor2.encoderCount);
+  //Serial.print("m2 "); Serial.println(motor2.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
   motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
@@ -796,30 +866,30 @@ void parseSerial(void) {
       else Serial.println("angle is out of bounds");
     }
     // check for loop state command
-    if (String(msgElem) == "loop") { // msgElem is a char array so it's safer to convert to string first
-      motorCommand.angleCommand = true;
+    else if (String(msgElem) == "loop") { // msgElem is a char array so it's safer to convert to string first
+      motorCommand.loopCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
       if (String(msgElem) == "open") {
         motorCommand.loopState = OPEN_LOOP;
-        Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
+        Serial.println("parsed desired loop state "); Serial.println(motorCommand.loopState);
       }
-      if (String(msgElem) == "closed") {
+      else if (String(msgElem) == "closed") {
         motorCommand.loopState = CLOSED_LOOP;
-        Serial.print("parsed desired loop state "); Serial.println(motorCommand.loopState);
+        Serial.println("parsed desired loop state "); Serial.println(motorCommand.loopState);
       }
       else Serial.println("invalid loop state");
     }
     // check for angle reset command
-    if (String(msgElem) == "reset") { // msgElem is a char array so it's safer to convert to string first
+    else if (String(msgElem) == "reset") { // msgElem is a char array so it's safer to convert to string first
       motorCommand.resetCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
       if (String(msgElem) == "angle") {
         motorCommand.resetAngleValue  = true;
-        Serial.print("parsed request to reset angle value");
+        Serial.println("parsed request to reset angle value");
       }
-      if (String(msgElem) == "position") {
+      else if (String(msgElem) == "position") {
         motorCommand.resetJointPosition = true;
-        Serial.print("parsed request to reset joint position");
+        Serial.println("parsed request to reset joint position");
       }
       else Serial.println("invalid reset request");
     }
