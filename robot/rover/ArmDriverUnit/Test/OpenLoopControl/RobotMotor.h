@@ -7,7 +7,6 @@
 
 enum motor_code {MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6}; // defines 6 motors
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
-enum motor_speed {SPEED1 = 1, SPEED2, SPEED3, SPEED4}; // defines motor speed
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
 
 class RobotMotor {
@@ -32,14 +31,6 @@ class RobotMotor {
     volatile float currentAngle; // can be updated within timer interrupts
     float desiredAngle;
     volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
-
-    // specifically for budge()
-    elapsedMillis sinceStart; // keeps track of how long a motor has been turning
-    int cwSpeed, ccwSpeed;
-    bool budgeMovementDone;
-    int rightCount, leftCount; // counters to make sure budge doesn't go too far
-    bool canTurnRight = false; bool canTurnLeft = false; // bools that tell code to move or not
-    virtual void budge(int budgeDir, int budgeSpeed, unsigned int budgeTime) = 0; // budges motor for short period of time
 
     // setup functions
     RobotMotor();

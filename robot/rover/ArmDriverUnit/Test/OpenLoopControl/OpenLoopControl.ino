@@ -59,7 +59,6 @@
   10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
       but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
   11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
-  12) i should remove budge() as it's beeing replaced by the open loop control commands and will remove unnecessary variables
   13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
   14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
   15) implement setVelocity() for stepper motors
@@ -490,15 +489,6 @@ void loop() {
       else if (motorCommand.resetJointPosition) {
         ; // for later
       }
-    }
-    // for budge commands
-    else if ( (motorCommand.whichDirection == 1 || motorCommand.whichDirection == -1) && motorCommand.whichSpeed > 0
-              && motorCommand.whichTime > 0) {
-      Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.println(" to move");
-      Serial.println("=======================================================");
-
-      // activate budge command for appropriate motor
-      motorArray[motorCommand.whichMotor]->budge(motorCommand.whichDirection, motorCommand.whichSpeed, motorCommand.whichTime);
     }
     else Serial.println("$E,Error: bad motor command");
   }
