@@ -67,6 +67,10 @@
   19) perhaps the constructor should take a series of structs, one for each type
   20) fix that issue with discrepancy that's related to the periodic angle checks
   21) seemed like the pid was running non stop even before requesting an angle?
+  22) control code for stepper closed loop isn't implemented even though structure exists
+  23) motor angle checks for open loop control remains to be fixed, updated, implemented
+  24) resetjointposition remains to be implemented
+  25) commands to stop motors from turning would be nice already
 
   FIX ALL MOTOR CODE EXCEPT MOTOR2
   DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
