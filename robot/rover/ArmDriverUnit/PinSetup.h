@@ -19,6 +19,12 @@
 
 #define NUM_LIM_SW          4
 
+#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
+//#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+//only needed for sabertooth
+//#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
+//#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+
 // can go into ArmMotor
 // limits in ms for amount of time the motor can budge
 #define MAX_BUDGE_TIME 3000
@@ -28,30 +34,29 @@
 #define MAX_SPEED 4
 #define MAX_COUNTS 4
 
-// can go into ArmMotor
-#define SERVO_STOP 189 // for 3.3v
-//#define SERVO_STOP 127 // for 5v
-#define DC_STOP 189//194 // for 3.3v
-//#define DC_STOP 127 // for 5v
-
 // steppers
 
-#define M1_ENABLE_PIN       2
-#define M1_DIR_PIN          5
-#define M1_STEP_PIN         6
-// 7&8 are on port D with bits 2&3 respectively
-#define M1_ENCODER_PORT    GPIOD_PDIR
-#define M1_ENCODER_SHIFT   CORE_PIN7_BIT
-#define M1_ENCODER_A        7
-#define M1_ENCODER_B        8
-#define M1_LIMIT_SW_CW      9
-#define M1_LIMIT_SW_CCW    10
-#define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
-#define M1_GEAR_RATIO      40.0 // temporary, unknown
+/*
+  #define M1_ENABLE_PIN       2
+  #define M1_DIR_PIN          5
+  #define M1_STEP_PIN         6
+  // 7&8 are on port D with bits 2&3 respectively
+  #define M1_ENCODER_PORT    GPIOD_PDIR
+  #define M1_ENCODER_SHIFT   CORE_PIN7_BIT
+  #define M1_ENCODER_A        7
+  #define M1_ENCODER_B        8
+  #define M1_LIMIT_SW_CW      9
+  #define M1_LIMIT_SW_CCW    10
+  #define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
+  #define M1_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
+  #define M1_GEAR_RATIO      40.0 // temporary, unknown
+  #define M1_MINIMUM_ANGLE   -175.0
+  #define M1_MAXIMUM_ANGLE   175.0
+*/
 
 #define M3_ENABLE_PIN      17
-#define M3_DIR_PIN         20
 #define M3_STEP_PIN        21
+#define M3_DIR_PIN         20
 // 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
 #define M3_ENCODER_SHIFT   CORE_PIN19_BIT
@@ -60,11 +65,14 @@
 #define M3_LIMIT_SW_FLEX   22
 #define M3_LIMIT_SW_EXTEND 23
 #define M3_ENCODER_RESOLUTION 2000
+#define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
+#define M3_MINIMUM_ANGLE   -115.0
+#define M3_MAXIMUM_ANGLE   35.0
 
 #define M4_ENABLE_PIN      24
-#define M4_DIR_PIN         25
 #define M4_STEP_PIN        14
+#define M4_DIR_PIN         25
 // 11&12 are on port C with bits 6&7 respectively
 #define M4_ENCODER_PORT    GPIOC_PDIR
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT
@@ -73,9 +81,27 @@
 #define M4_LIMIT_SW_FLEX   15
 #define M4_LIMIT_SW_EXTEND 16
 #define M4_ENCODER_RESOLUTION 2000
+#define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
+#define M4_MINIMUM_ANGLE   -55.0
+#define M4_MAXIMUM_ANGLE   40.0
 
-// DC motor
+// DC motors
+
+#define M1_DIR_PIN          5
+#define M1_PWM_PIN          6
+// 7&8 are on port D with bits 2&3 respectively
+#define M1_ENCODER_PORT    GPIOD_PDIR
+#define M1_ENCODER_SHIFT   CORE_PIN7_BIT
+#define M1_ENCODER_A        7
+#define M1_ENCODER_B        8
+#define M1_LIMIT_SW_CW      9
+#define M1_LIMIT_SW_CCW    10
+#define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
+#define M1_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
+#define M1_GEAR_RATIO      40.0 // temporary, unknown
+#define M1_MINIMUM_ANGLE   -175.0
+#define M1_MAXIMUM_ANGLE   175.0
 
 #define M2_PWM_PIN         30
 #define M2_DIR_PIN         31 // for new driver
@@ -89,7 +115,9 @@
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
 #define M2_ENCODER_RESOLUTION 7*2 //48 // counts per motor shaft revolution
-#define M2_GEAR_RATIO      163.0 //99.508*20.0 // planetary gear chained to worm gear drive
+#define M2_GEAR_RATIO      188//163.0 //99.508*20.0 // planetary gear chained to worm gear drive
+#define M2_MINIMUM_ANGLE   -75.0
+#define M2_MAXIMUM_ANGLE   55.0
 
 // servos
 
@@ -101,6 +129,9 @@
   #define M5_ENCODER_B       34
 */
 #define M5_GEAR_RATIO      1 // there is a ratio here that I don't know yet
+//#define M5_MINIMUM_ANGLE
+//#define M5_MAXIMUM_ANGLE
+// no angle limits because this one can be used as a screwdriver
 
 #define M6_PWM_PIN         36
 /*
@@ -110,6 +141,8 @@
   #define M6_ENCODER_B       38
 */
 #define M6_GEAR_RATIO      1 // there is a ratio here that I don't know yet
+#define M6_MINIMUM_ANGLE   5.0
+#define M6_MAXIMUM_ANGLE   45.0
 
 void pinSetup(void);
 
