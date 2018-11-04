@@ -1,78 +1,11 @@
 /*
-  TODO:
-  -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
-  -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
-  -(always) clean up code, comment code
-  -(always) make sure variables modded in ISRs and used externally are volatile
-  -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
-  -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-  -(next) clean up parsing code to make it easier to read and reduce repetition
-
-  -(done-ish) determine motor angles thru encoder interrupts
-   -(done-ish) solve encoder direction change issue? not necessary
-   -(issue) interrupt functions must be defined outside of classes...
-   -(now) confirm all the pins will work with interrupts and not stepping on each other
-   -(done-ish) encoder resolution and gear ratios determined for most motors but not m1,m5,m6
-   -(done-ish) can determine motor angles for dc and steppers, not servos
-   -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
-   -(now) deal with overflow of encoderCount
-   -(now) determine whether it's worth it to use the built in quadrature decoders
-
-  -(next step) timers
-   -systick is normally a heartbeat type thing
-   -lptmr runs even on low power mode, maybe this should be heartbeat instead?
-   -pit is used for intervaltimer objects, there are 4 and they work like interrupts
-   -implement heartbeat after deciding on best timer for it
-   -pwm: teensy has 6 16bit pwm timers and apparently 22 total pwm options:
-    -currently using whatever is connected to the pwm pins for timing pwm
-    -teensy pwm page mentions ftm and tpm timers which aren't mentioned in the page with other timesr
-    -ftm+tpm has quadrature decoder?
-    -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
-
-  -(next) simultaneous motor control with timers
-   -(done-ish) software interrupts can take input from open loop control but need to refine everything and finish closed loop control
-   -more comments in next comment block
-
-  -(next next step) external interrupts for limit switches
-   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
-   -(waiting for the switches) incorporate limit switches for homing position on all motors
-   -(later) implement homing function on boot
-
-  -even more notes in josh notes.txt and in google drive
-*/
-/*
-   perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
-   technically i can use my motorarray shorthand to shorten the switch/case thing significantly
-   gotta figure out the correspondence between direction pin's high/low and motor rotation direction
-   set velocity should only set velocity and writing to pins happens outside in interrupt functions? or in dedicated function?
-
-   I need to figure out where it's a good idea to disable interrupts so htat I don't read a value while it's being modified
-*/
-/*
-  1) motor4 calculates the error by subtracting the desired minus the current angle... but it's open loop? can keep track of imagined current angle and then this calculation actually makes sense though! this means changning what I wrote for motor2&3
-  4) should i change parseSerial to take in a char array?
-  6) angleTolerance is motorPID attribute and not motor attribute?
-  7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
-  8) there's a command to reset a motor position but no implementation
-  9) add command to turn ramping on or off for motor5.hasRamping = false;
-  10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
-      but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
-  11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
-  13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
-  14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
-  15) implement setVelocity() for stepper motors
-  16) calcCurrentAngle() shouldn't just output an absurd value if it didn't work... deal with it
-  17) perhaps the initialization of motor angle parameters should be its own function
-  18) perhaps the initialization of the motor's pins should also be its own function
-  19) perhaps the constructor should take a series of structs, one for each type
-  20) fix that issue with discrepancy that's related to the periodic angle checks
-  21) seemed like the pid was running non stop even before requesting an angle?
-
-  FIX ALL MOTOR CODE EXCEPT MOTOR2
-  DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
+   Description of code goes here.
+   This code began development sometime around July 20 2018 and is still being updated as of November 4 2018.
 */
 
 #include "PinSetup.h"
+#include "Notes.h" // holds todo info
+#include "Ideas.h" // holds bits of code that haven't been implemented
 
 #include "RobotMotor.h"
 #include "StepperMotor.h"
@@ -137,39 +70,10 @@ IntervalTimer m3StepperTimer;
 IntervalTimer m4StepperTimer;
 IntervalTimer servoTimer; // motors 5&6
 
-// motor array prep work: making pointers to motor objects
-//StepperMotor *m1 = &motor1;
-DcMotor *m1 = &motor1;
-DcMotor *m2 = &motor2;
-StepperMotor *m3 = &motor3;
-StepperMotor *m4 = &motor4;
-ServoMotor *m5 = &motor5;
-ServoMotor *m6 = &motor6;
-
-// I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
-RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
-
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
 void printMotorAngles();
-
-/*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
-  void m1WrapperISR(void) {
-  motor1.encoder_interrupt();
-  }
-  void m2WrapperISR(void) {
-  motor2.encoder_interrupt();
-  }
-  void m3WrapperISR(void) {
-  motor3.encoder_interrupt();
-  }
-  void m4WrapperISR(void) {
-  motor4.encoder_interrupt();
-  }
-  //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
-  //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
-*/
 
 // declare encoder interrupt service routines. They must be global.
 void m1_encoder_interrupt(void);
@@ -211,25 +115,6 @@ void setup() {
   //attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
   //attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
   //attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
-
-  /*    attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
-      attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
-
-      attachInterrupt(motor2.encoderPinA, m2WrapperISR, CHANGE);
-      attachInterrupt(motor2.encoderPinB, m2WrapperISR, CHANGE);
-
-      attachInterrupt(motor3.encoderPinA, m3WrapperISR, CHANGE);
-      attachInterrupt(motor3.encoderPinB, m3WrapperISR, CHANGE);
-
-      attachInterrupt(motor4.encoderPinA, m4WrapperISR, CHANGE);
-      attachInterrupt(motor4.encoderPinB, m4WrapperISR, CHANGE);
-  */
-  /*    attachInterrupt(motor5.encoderPinA, m5WrapperISR, CHANGE);
-    attachInterrupt(motor5.encoderPinB, m5WrapperISR, CHANGE);
-
-    attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
-    attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
-  */
 
   { // shaft angle tolerance setters
     //motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
@@ -465,14 +350,6 @@ void loop() {
     }
     // set loop states for appropriate motor
     else if (motorCommand.loopCommand) {
-      /* // doesn't work!!!
-        if (motorCommand.loopState == OPEN_LOOP) {
-        motorArray[motorCommand.whichMotor]->isOpenLoop = true;
-        }
-        else if (motorCommand.loopState == CLOSED_LOOP) {
-        motorArray[motorCommand.whichMotor]->isOpenLoop = false;
-        }
-      */
       if (motorCommand.loopState == OPEN_LOOP) {
         switch (motorCommand.whichMotor) {
           case MOTOR1:
@@ -646,24 +523,6 @@ void printMotorAngles() {
   //Serial.print(motor5.calcCurrentAngle());Serial.print(",");
   //Serial.print(motor6.calcCurrentAngle());Serial.print(",");
 }
-
-/*
-  // for multiple steppers in same timer interrupt (incomplete, complicated to implement)
-  void stepperInterrupt(void) {
-  static int nextInterval = 0;
-  int i = 3;
-  // code to decide which motor to turn goes here, or code just turns all motors
-  if (!stepperArray[i - 1].movementDone) {
-    // code to decide how fast the motor will turn and in which direction
-    int dir = CLOCKWISE;
-    nextInterval = 25000;
-    //set a minimum step period somewhere
-    //nextInterval = stepperArray[i-1].pidController.updatePID(stepperArray[i-1].currentAngle, stepperArray[i-1].desiredAngle);
-    stepperArray[i - 1].singleStep(dir);
-    stepperTimer.update(nextInterval);
-  }
-  }
-*/
 
 void m3StepperInterrupt(void) {
   static int nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
@@ -986,20 +845,3 @@ void parseSerial(void) {
     }
   }
 }
-/*
-  // takes the key (speed, time, etc) and updates?outputs? the next value
-  // this one is for unsigned ints, would need to define separate ones for other data types?
-  parseKey(String key, unsigned int valueOut, String delimeter, unsigned int minVal, unsigned int maxVal) {
-  char *msgElem = strtok_r(NULL, delimeter, &restOfMessage); // find the next message element
-  if (String(msgElem) == key) { // msgElem is a char array so it's safer to convert to string first
-    msgElem = strtok_r(NULL, delimeter, &restOfMessage); // find the next message element (time in seconds)
-    unsigned int tempVar = atoi(msgElem); // converts to int
-    //if (tempTimeVar <= MAX_BUDGE_TIME && tempTimeVar >= MIN_BUDGE_TIME) { // don't allow budge movements to last a long time
-    if (tempVar <= maxVal && tempVar >= minVal) {
-      //motorCommand.whichTime = tempTimeVar;
-      valueOut = tempVar;
-      Serial.print("parsed time interval "); Serial.print(motorCommand.whichTime); Serial.println("ms");
-    }
-  }
-  }
-*/
