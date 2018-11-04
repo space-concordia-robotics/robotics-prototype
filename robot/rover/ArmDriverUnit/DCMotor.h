@@ -18,7 +18,6 @@ class DcMotor : public RobotMotor {
 
     void stopRotation(void);
     void setVelocity(int motorDir, int motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
-    float calcCurrentAngle(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -72,17 +71,6 @@ void DcMotor::setVelocity(int motorDir, int motorSpeed) {
   }
   dutyCycle = motorSpeed * 255 / 100;
   analogWrite(pwmPin, dutyCycle);
-}
-
-float DcMotor::calcCurrentAngle(void) {
-  if (hasEncoder) {
-    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return currentAngle;
-  }
-  else {
-    Serial.println("$E,Error: motor does not have encoder");
-    return 40404040404.0; // wants a return value, at least this value should be invalid
-  }
 }
 
 bool DcMotor::calcTurningDuration(float angle) {

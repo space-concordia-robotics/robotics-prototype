@@ -32,7 +32,6 @@ class StepperMotor : public RobotMotor {
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
 
     void setVelocity(int motorDir, int motorSpeed);
-    float calcCurrentAngle(void); // calculates the joint's angle based on encoderCount
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -84,17 +83,6 @@ void StepperMotor::singleStep(int dir) {
 
 void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
   ;
-}
-
-float StepperMotor::calcCurrentAngle(void) {
-  if (hasEncoder) {
-    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return currentAngle;
-  }
-  else {
-    Serial.println("$E,Error: motor does not have encoder");
-    return 40404040404.0; // wants a return value, at least this value should be invalid
-  }
 }
 
 bool StepperMotor::calcNumSteps(float angle) {

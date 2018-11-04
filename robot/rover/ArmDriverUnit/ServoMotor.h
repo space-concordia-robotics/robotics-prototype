@@ -15,7 +15,6 @@ class ServoMotor : public RobotMotor {
 
     void setVelocity(int motorDir, int motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void stopRotation(void);
-    //float calcCurrentAngle(); // needs encoders first, but then this will just go into RobotMotor
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control

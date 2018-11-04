@@ -492,17 +492,29 @@ void loop() {
       else if (motorCommand.loopState == CLOSED_LOOP) {
         switch (motorCommand.whichMotor) {
           case MOTOR1:
-            motor1.isOpenLoop = false; break;
+            if (motor1.hasEncoder) motor1.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
           case MOTOR2:
-            motor2.isOpenLoop = false; break;
+            if (motor2.hasEncoder) motor2.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
           case MOTOR3:
-            motor3.isOpenLoop = false; break;
+            if (motor3.hasEncoder) motor3.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
           case MOTOR4:
-            motor4.isOpenLoop = false; break;
+            if (motor4.hasEncoder) motor4.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
           case MOTOR5:
-            motor5.isOpenLoop = false; break;
+            if (motor5.hasEncoder)motor5.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
           case MOTOR6:
-            motor6.isOpenLoop = false; break;
+            if (motor6.hasEncoder) motor6.isOpenLoop = false;
+            else Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+            break;
         }
       }
     }
@@ -706,6 +718,8 @@ void m4StepperInterrupt(void) {
 }
 
 void dcInterrupt(void) {
+  // movementDone can be set elsewhere... so are numMillis,
+  // openLoopSpeed and rotationDirection (in open loop control)
   // motor 1
   if (motor1.isOpenLoop) { // open loop control
     if (!motor1.movementDone && motor1.timeCount <= motor1.numMillis) {
@@ -769,11 +783,11 @@ void dcInterrupt(void) {
 }
 
 void servoInterrupt(void) {
-  // movementDone can be set elsewhere... so can numSteps
+  // movementDone can be set elsewhere... so are numMillis,
+  // openLoopSpeed and rotationDirection (in open loop control)numMillis
   // motor 5
   if (motor5.isOpenLoop) { // open loop control
     if (!motor5.movementDone && motor5.timeCount < motor5.numMillis) {
-      //Serial.println("command being processed");
       motor5.setVelocity(motor5.rotationDirection, motor5.openLoopSpeed);
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
@@ -781,8 +795,24 @@ void servoInterrupt(void) {
       motor5.stopRotation();
     }
   }
-  else { // closed loop control
-    ;
+  // the below will only work if the servo has encoders
+  else if (!motor5.isOpenLoop) {
+    if (!motor5.movementDone) {
+      motor5.calcCurrentAngle();
+      motor5.pidController.updatePID(motor5.currentAngle, motor5.desiredAngle);
+      if (motor5.pidController.pidOutput == 0) {
+        motor5.movementDone = true;
+        motor5.stopRotation();
+      }
+      else {
+        int motorSpeed = motor5.pidController.pidOutput * 255 / 100;
+        motor5.calcDirection(motorSpeed); //does this work? it expects an angular error but at the end of the day...
+        motor5.setVelocity(motor5.rotationDirection, motorSpeed);
+      }
+    }
+    else {
+      motor5.stopRotation();
+    }
   }
   // motor 6
   if (motor6.isOpenLoop) { // open loop control
@@ -794,8 +824,24 @@ void servoInterrupt(void) {
       motor6.stopRotation();
     }
   }
-  else { // closed loop control
-    ;
+  // the below will only work if the servo has encoders
+  else if (!motor6.isOpenLoop) {
+    if (!motor6.movementDone) {
+      motor6.calcCurrentAngle();
+      motor6.pidController.updatePID(motor6.currentAngle, motor6.desiredAngle);
+      if (motor6.pidController.pidOutput == 0) {
+        motor6.movementDone = true;
+        motor6.stopRotation();
+      }
+      else {
+        int motorSpeed = motor6.pidController.pidOutput * 255 / 100;
+        motor6.calcDirection(motorSpeed); //does this work? it expects an angular error but at the end of the day...
+        motor6.setVelocity(motor6.rotationDirection, motorSpeed);
+      }
+    }
+    else {
+      motor6.stopRotation();
+    }
   }
 }
 

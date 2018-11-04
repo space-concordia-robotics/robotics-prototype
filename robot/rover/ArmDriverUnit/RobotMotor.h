@@ -36,12 +36,13 @@ class RobotMotor {
     RobotMotor();
     void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
     void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
+    bool hasEncoder;
 
     virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
     //void setMaxSpeed();
     void calcDirection(float error); // updates rotationDirection based on the angular error inputted
     bool setDesiredAngle(float angle); // need to have defined it for servos first
-    //virtual float calcCurrentAngle(void) = 0; // need to have defined it for servos first
+    float calcCurrentAngle(void);
 
   private:
     // doesn't really make sense to have any private variables for this parent class.
@@ -49,9 +50,6 @@ class RobotMotor {
 
   protected:
     // the following variables are specific to encoders
-    //quadrature encoder matrix below corresponds to the correct direction for a specific set of prev and current encoder states
-    //const int dir [16] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
-    bool hasEncoder;
     uint32_t encoderPort; // address of the port connected to a particular encoder pin
     int encoderShift; // how many bits to shift over to find the encoder pin state
     int encoderResolution; // ticks per revolution
@@ -99,6 +97,17 @@ bool RobotMotor::setDesiredAngle(float angle) {
 void RobotMotor::calcDirection(float error) {
   if (error >= 0) rotationDirection = 1;
   else rotationDirection = -1;
+}
+
+float RobotMotor::calcCurrentAngle(void) {
+  if (hasEncoder) {
+    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    return currentAngle;
+  }
+  else {
+    Serial.println("$E,Error: motor does not have encoder");
+    return 40404040404.0; // wants a return value, at least this value should be invalid
+  }
 }
 
 #endif
