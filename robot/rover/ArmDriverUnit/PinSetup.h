@@ -84,7 +84,7 @@
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
 #define M4_MINIMUM_ANGLE   -55.0
-#define M4_MAXIMUM_ANGLE   40.0
+#define M4_MAXIMUM_ANGLE   46.0//40.0
 
 // DC motors
 
@@ -128,7 +128,7 @@
   #define M5_ENCODER_A       33
   #define M5_ENCODER_B       34
 */
-#define M5_GEAR_RATIO      1 // there is a ratio here that I don't know yet
+#define M5_GEAR_RATIO      20.0 // there is a ratio here that I don't know yet
 //#define M5_MINIMUM_ANGLE
 //#define M5_MAXIMUM_ANGLE
 // no angle limits because this one can be used as a screwdriver
@@ -140,9 +140,9 @@
   #define M6_ENCODER_A       37
   #define M6_ENCODER_B       38
 */
-#define M6_GEAR_RATIO      1 // there is a ratio here that I don't know yet
-#define M6_MINIMUM_ANGLE   5.0
-#define M6_MAXIMUM_ANGLE   45.0
+#define M6_GEAR_RATIO      20.0 // there is a ratio here that I don't know yet
+#define M6_MINIMUM_ANGLE   -120.0
+#define M6_MAXIMUM_ANGLE   30.0
 
 void pinSetup(void);
 

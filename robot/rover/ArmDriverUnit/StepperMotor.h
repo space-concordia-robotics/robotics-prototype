@@ -32,6 +32,7 @@ class StepperMotor : public RobotMotor {
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
 
     void setVelocity(int motorDir, int motorSpeed);
+    void stopRotation(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -83,6 +84,11 @@ void StepperMotor::singleStep(int dir) {
 
 void StepperMotor::setVelocity(int motorDir, int motorSpeed) {
   ;
+}
+
+void StepperMotor::stopRotation(void) {
+  disablePower();
+  movementDone = true;
 }
 
 bool StepperMotor::calcNumSteps(float angle) {

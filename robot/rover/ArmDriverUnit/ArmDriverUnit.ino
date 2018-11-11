@@ -49,6 +49,8 @@ struct commandInfo {
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
+  bool stopSingleMotor = false; // for stopping a single motor
+  bool stopAllMotors = false; // for stopping all motors
 } motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 
 //quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -152,8 +154,8 @@ void setup() {
     motor1.openLoopGain = 1.0; // totally random guess, needs to be tested
 
     motor2.isOpenLoop = true; motor2.hasRamping = false;
-    motor2.openLoopSpeed = 50; // 50% speed
-    motor2.openLoopGain = 1.0; // totally random guess, needs to be tested
+    motor2.openLoopSpeed = 25; // 50% speed
+    motor2.openLoopGain = 0.01; // totally random guess, needs to be tested
 
     // open loop gain is only for time-based open loop control
     motor3.isOpenLoop = true; motor3.hasRamping = false;
@@ -195,10 +197,38 @@ void loop() {
     restOfMessage = serialBuffer; // reset pointer
   }
 
-  if (motorCommand.whichMotor > 0) { // 0 means there was an invalid command and therefore motors shouldn't be controlled
+  // emergency stop takes precedence
+  if (motorCommand.stopAllMotors) {
+    motor1.stopRotation();
+    motor2.stopRotation();
+    motor3.stopRotation();
+    motor4.stopRotation();
+    motor5.stopRotation();
+    motor6.stopRotation();
+    Serial.println("all motors stopped because of emergency stop");
+  }
+  else if (motorCommand.whichMotor > 0) { // 0 means there was an invalid command and therefore motors shouldn't be controlled
+    // stopping a single motor takes precedence
+    if (motorCommand.stopSingleMotor) {
+      switch (motorCommand.whichMotor) {
+        case MOTOR1:
+          motor1.stopRotation(); break;
+        case MOTOR2:
+          motor2.stopRotation(); break;
+        case MOTOR3:
+          motor3.stopRotation(); break;
+        case MOTOR4:
+          motor4.stopRotation(); break;
+        case MOTOR5:
+          motor5.stopRotation(); break;
+        case MOTOR6:
+          motor6.stopRotation(); break;
+      }
+      Serial.print("stopped motor "); Serial.println(motorCommand.whichMotor);
+    }
     // make motors move
-    if (motorCommand.angleCommand) {
-      Serial.print("motor "); Serial.print(motorCommand.whichMotor);
+    else if (motorCommand.angleCommand) {
+      Serial.print("motor "); Serial.println(motorCommand.whichMotor);
       Serial.print(" desired angle (degrees) is: "); Serial.println(motorCommand.whichAngle);
       Serial.println("=======================================================");
       switch (motorCommand.whichMotor) { // move a motor based on which one was commanded
@@ -212,6 +242,7 @@ void loop() {
               if (motor1.calcTurningDuration(motor1.openLoopError)) { // returns false if the open loop error is too small
                 motor1.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
                 motor1.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
+                Serial.print(motor1.numMillis); Serial.println(" milliseconds to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -230,6 +261,7 @@ void loop() {
               if (motor2.calcTurningDuration(motor2.openLoopError)) {
                 motor2.timeCount = 0;
                 motor2.movementDone = false;
+                Serial.print(motor2.numMillis); Serial.println(" milliseconds to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -248,6 +280,7 @@ void loop() {
               if (motor3.calcNumSteps(motor3.openLoopError)) { // also returns false if the open loop error is too small
                 motor3.enablePower(); // give power to the stepper finally
                 motor3.movementDone = false;
+                Serial.print(motor3.numSteps); Serial.println(" steps to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -266,6 +299,7 @@ void loop() {
               if (motor4.calcNumSteps(motor4.openLoopError)) {
                 motor4.enablePower();
                 motor4.movementDone = false;
+                Serial.print(motor4.numSteps); Serial.println(" steps to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -285,6 +319,7 @@ void loop() {
               if (motor5.calcTurningDuration(motor5.openLoopError)) {
                 motor5.timeCount = 0;
                 motor5.movementDone = false;
+                Serial.print(motor5.numMillis); Serial.println(" milliseconds to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -302,6 +337,7 @@ void loop() {
               if (motor6.calcTurningDuration(motor6.openLoopError)) {
                 motor6.timeCount = 0;
                 motor6.movementDone = false;
+                Serial.print(motor6.numMillis); Serial.println(" milliseconds to turn");
               }
               else Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
             }
@@ -330,6 +366,7 @@ void loop() {
           case MOTOR6:
             motor6.isOpenLoop = true; break;
         }
+        Serial.print("motor "); Serial.print(motorCommand.whichMotor); Serial.println(" is open loop");
       }
       else if (motorCommand.loopState == CLOSED_LOOP) {
         switch (motorCommand.whichMotor) {
@@ -377,6 +414,7 @@ void loop() {
           case MOTOR6:
             motor6.currentAngle = 0.0; break;
         }
+        Serial.print("reset angle value of motor "); Serial.println(motorCommand.whichMotor);
       }
       else if (motorCommand.resetJointPosition) {
         ; // for later
@@ -384,6 +422,7 @@ void loop() {
     }
     else Serial.println("$E,Error: bad motor command");
   }
+
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
 
 
@@ -507,7 +546,6 @@ void m3StepperInterrupt(void) {
     }
     else { // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor3.stepCount = 0; // reset the counter
-      //motor3.movementDone = true;
       motor3.movementDone = true;
       motor3.disablePower();
       //Serial.println("waiting for command");
@@ -724,9 +762,14 @@ void m4_encoder_interrupt(void) {
 */
 
 void parseSerial(void) {
-  // check for motor command
+  // check for emergency stop has precedence
   char* msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
-  if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
+  if (String(msgElem) == "stop") { // msgElem is a char array so it's safer to convert to string first
+    motorCommand.stopAllMotors = true;
+    Serial.println("parsed emergency command to stop all motors");
+  }
+  // check for motor command
+  else if (String(msgElem) == "motor") { // msgElem is a char array so it's safer to convert to string first
     msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
     int tempMotorVar = atoi(msgElem);
     // currently uses motor1's numMotors variable which is shared by all RoverMotor objects and children. need better implementation
@@ -735,9 +778,14 @@ void parseSerial(void) {
       Serial.print("parsed motor "); Serial.println(motorCommand.whichMotor);
     }
     else Serial.println("motor does not exist");
-    // check for angle command
+    // check for motor stop command has precedence
     msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-    if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
+    if (String(msgElem) == "stop") { // msgElem is a char array so it's safer to convert to string first
+      motorCommand.stopSingleMotor = true;
+      Serial.println("parsed request to stop single motor");
+    }
+    // check for angle command
+    else if (String(msgElem) == "angle") { // msgElem is a char array so it's safer to convert to string first
       motorCommand.angleCommand = true;
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
       float tempAngleVar = atof(msgElem); // converts to float
@@ -809,4 +857,5 @@ void parseSerial(void) {
       }
     }
   }
+  else Serial.println("bad motor command");
 }

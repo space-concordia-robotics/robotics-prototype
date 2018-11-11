@@ -54,6 +54,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
 
 void DcMotor::stopRotation(void) {
   analogWrite(pwmPin, 0);
+  movementDone = true;
 }
 
 void DcMotor::setVelocity(int motorDir, int motorSpeed) {

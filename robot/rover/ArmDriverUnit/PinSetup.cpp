@@ -3,7 +3,7 @@
 
 void pinSetup(void) {
   pinMode(LED_BUILTIN, OUTPUT); // pin 13
-
+  digitalWrite(LED_BUILTIN, HIGH);
   // stepper motor
   /*
     pinMode(M1_ENABLE_PIN, OUTPUT);

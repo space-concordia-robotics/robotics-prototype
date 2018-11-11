@@ -44,6 +44,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
 
 void ServoMotor::stopRotation(void) {
   analogWrite(pwmPin, SERVO_STOP);
+  movementDone = true;
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
