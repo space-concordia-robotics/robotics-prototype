@@ -77,6 +77,11 @@ while True:
         elif command == 'q':
             print("\nTerminating connection.")
             break
+
+		# flush buffer to avoid overflowing it
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
+
     except Exception:
         print("Exception in user code:")
         print("-"*60)
