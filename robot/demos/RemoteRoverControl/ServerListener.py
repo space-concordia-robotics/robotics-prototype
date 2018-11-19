@@ -78,7 +78,7 @@ while True:
             print("\nTerminating connection.")
             break
 
-		# flush buffer to avoid overflowing it
+	# flush buffer to avoid overflowing it
         ser.reset_input_buffer()
         ser.reset_output_buffer()
 
