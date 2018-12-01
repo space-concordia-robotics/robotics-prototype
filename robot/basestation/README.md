@@ -16,3 +16,5 @@ Run the app with `python app.py`
 You will see: `Running on http://127.0.0.1:5000`
 
 Visit this link in your browser to see the GUI.
+
+If the rover machine is running `StreamDispatcher.py`, then you will see a live video stream of the arm camera.
