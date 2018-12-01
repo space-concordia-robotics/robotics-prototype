@@ -7,7 +7,7 @@ import flask
 app = flask.Flask(__name__)
 
 # set the rover's IP
-# rover static ip TBD
+# rover static ip (tenatative): 192.168.1.20
 ROVER_IP = "127.31.43.134"
 
 # Once we launch this, this will route us to the "../" page or index page and

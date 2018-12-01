@@ -1,3 +1,6 @@
+# Rover
+The code that runs on the rover
+
 ## PidController.ino
 NOTE: the Adafruit library most probably won't end up being used since we decided against using adafruit motorshields in the end,
 although this sketch will be either heavily refactored or completely rewritten by operations and power squads for 3 stepper, 1 DC
@@ -11,6 +14,14 @@ Simply searching for 'adafruit' and 'encoder' and choosing the most appropriate 
 This method installs it in your arduino libraries folder.
 
 If you wish to refer the `include` statements to set your relative path to the libraries, you must surround the libary name with double quotes.
+
+## StreamDispatcher.py
+Currently this starts a stream via `start_stream.sh` which uses mjpgstreamer, more details are documented in the bash script itself.
+To start the stream, assuming you already have a usb web camera connected, run `./StreamDispatcher.py`. Use `Ctrl + C` to stop the stream.
+
+Assuming the stream is being dispatched, it can be accessed in any browser by visiting: `server_ip:8090/?action=stream`, where `server_ip` is replaced with the actual ip address.
+If you have started the StreamDispatcher, opening the Arm page will show the live of feed of the camera in the Arm Vision panel.
+The rover ip address in `app.py` will have to be set to the correct value.
 
 Example:
 `#include "libraries/Encoder.h"`

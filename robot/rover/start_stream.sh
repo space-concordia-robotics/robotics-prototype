@@ -12,3 +12,6 @@
 # $ sudo apt-get install cmake libjpeg62-dev
 # $ make
 # $ sudo make install
+
+# NOTE: using mjpeg streams limits us to capturing them using more limited img tags
+# instead of the newer video tags
