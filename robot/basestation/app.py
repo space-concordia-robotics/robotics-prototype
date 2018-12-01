@@ -6,12 +6,15 @@ import flask
 
 app = flask.Flask(__name__)
 
+# set the rover's IP
+# rover static ip TBD
+ROVER_IP = "127.31.43.134"
 
 # Once we launch this, this will route us to the "../" page or index page and
 # automatically render the Rover GUI
 @app.route("/")
 def index():
-    return flask.render_template("AsimovOperation.html")
+    return flask.render_template("AsimovOperation.html", roverIP=ROVER_IP)
 
 
 # Automatic controls
