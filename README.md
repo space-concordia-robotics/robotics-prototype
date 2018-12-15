@@ -140,6 +140,60 @@ See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1
 - Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
 ## ODROID
+### Flashing ubuntuMATE to the odroid (tested on Ubuntu 16.04)
+
+Sometimes things go wrong, like when all of a sudden the odroid won't properly boot up anymore and no one knows why.
+The simplest fix for this usually is reflashing the OS onto your memory card will likely fix the issue.
+When doing this, you are overwriting all previous data on the memory card so make sure that if you _are_ able to access the user space files
+(like the files in your ~/Documents folder) via another computer using an adapter, to back up any critical files if needed.
+
+In terms of options, you are either using a microSD card or an eMMC card for storage. The method described below will work for both (so far tested on eMMC)
+but you should know that you will need some kind of adapter to be able to access the memory cards as storage devices.
+
+#### microSD
+For the microSD card your typicial microSD to SD reader should do the trick. If you don't have a microSD port on your computer you can use this in conjunction with a microSD to USB adapter.
+
+#### eMMC
+For the case of the eMMC card you will need to use an eMMC reader, along with a microSD to SD or USB adapter.[This forum post](https://forum.odroid.com/viewtopic.php?f=53&t=2725) contains a list of verified eMMC readers, microSD/USB adapters.
+
+In my case I used the following eMMC reader to microSD, paired with a Transcend USB adapter.
+
+1. eMMC module reader
+
+![eMMC module reader](docs/media/emmc-module-reader.jpg)
+
+2. eMMC module mounted onto reader
+
+![eMMC module mounted onto reader](docs/media/emmc-reader-mounted.jpg)
+
+3. eMMC module reader mounted onto USB adapter microSD slot
+
+![eMMC module reader mounted onto USB adapter microSD slot](docs/media/emmc-reader-usb-mounted.jpg)
+
+4. Plugged in
+
+![eMMC reader + usb adapter plugged in](docs/media/usb-emmc-live.jpg)
+
+The next step is to download the ubuntuMATE 16.04 image from [here](https://odroid.in/ubuntu_16.04lts/). Choose the proper image depending on the type of odroid you have.
+For the odroid we are using in competition (xu4), for the xu4 I used `ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz`.
+
+If it is not already installed, you will need to install `xz-utils` via `sudo apt-get install xz-utils`.
+
+Now decompress the compressed image with: `unxz ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz` to obtain the img file.
+
+Use the command `lsblk` to identify the block device that is the eMMC/microSD card you are trying to flash.
+To be sure, unplug the the your adapter first and run `lsblk`, then plug in the adapter and run `lsblk` to see the difference.
+In my case it was `/dev/sdb`.
+
+Finally, to flash the image onto the card, you can use the `ddrescue` unix library.
+
+To install it run `sudo apt-get install ddrescue`.
+
+To flash it run `sudo ddrescue -D --force ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz /dev/sdb`, making sure to change `/dev/sdb` for whatever value it is for you.
+
+Now you can sit back and wait for the job to finish. By the time it is done, you will have a fresh install of ubuntuMATE on your card.
+Note that when booting up for the very first time, after the initial bootup (let it do it's thing, feel free to log into the system) you will need to reboot one more time for it to finally work properly.
+
 ### How to upload Arduino scripts from the odroid
 
 1. Make sure the arduino is plugged into the odroid
@@ -162,7 +216,7 @@ This was accomplished by running `syncEmailer.sh` and adding the following line 
 @reboot /home/odroid/emailer/runEmailer.sh
 ```
 
-Let Peter or David know if you want to be added to this mailing list.
+Let Peter know if you want to be added to this mailing list.
 
 ### Remote connect from home
 
