@@ -5,89 +5,139 @@
     since the previous interrupt, the motor's speed can be calculated with
     the angle difference divided by the time difference.
 
-    Please note that the encoder is located on the motor's input shaft,
-    so the speeds measured refer to the input speed of the motor, rather
-    than the output speed, which is what is seen after the motor shaft
-    has gone through the gear reduction.
-
     The angle difference is calculated in degrees and the time difference
     is calculated in microseconds. The motor turns for an amount of time defined
     beforehand, each interrupt placing the time differences in the dt[] array.
-    After the motor has stopped turning, the motor's speed is calculated. The
-    calculation is done afterwards because floating point math takes time and
-    interrupt service routines should occur very quickly.
+    After the motor has stopped turning, the motor's speed is calculated.
 
-    Josh Glazer, November 3 2018
+    The speed calculation is done afterwards because floating point math
+    takes time and interrupt service routines should occur very quickly.
+    Testing can be done to see whether the calculations can be done inside
+    the interrupt instead, since the Teensy especially is fast.
+
+    Measuring longer periods of time results in more accurate speed measurements
+    as measurement error is reduced and the time intervals are already very short.
+    Options are available to change the resolution on the measurements as well as
+    the units of the output speed (rad/s, deg/s, rpm, rev/s).
+
+    Josh Glazer, November 3 2018 - December 18 2018
 */
 
 #define DIR_PIN        5
 #define PWM_PIN        6
-#define ENCODER_A      7
-#define ENCODER_B      8
+#define ENCODER_A_PIN  2
+#define ENCODER_B_PIN  3
 #define PULSES_PER_REV 7
-#define ARRAY_SIZE     1000
+#define GEAR_RATIO     71.16
+#define ARRAY_SIZE     500
 #define RUN_TIME       1000
 
-unsigned int startTime;
-volatile unsigned int interruptCount = 0;
-volatile unsigned int prevTime = micros();
+/* one and only one of the following 4 definitions must be uncommented */
+//#define CHANGE_TWO_ENC 4
+//#define CHANGE_ONE_ENC 2
+//#define FALLING_TWO_ENC 2
+#define FALLING_ONE_ENC 1
 
-volatile unsigned int dt[ARRAY_SIZE];
-float omega[ARRAY_SIZE];
+unsigned long startTime = millis();
+unsigned long currTime = millis();
+volatile unsigned long interruptCount = 0;
+volatile unsigned long prevTime = micros();
+volatile unsigned long dt[ARRAY_SIZE];
+//volatile unsigned long *dt;
 
-float angularResolution = 360 / PULSES_PER_REV; // for only one channel
-//float angularResolution = 360 / (PULSES_PER_REV*2); // for both channels
+float degPerMicros, degPerSec;
+float omegaDeg[ARRAY_SIZE];
+float omegaRad[ARRAY_SIZE];
+float omegaRpm[ARRAY_SIZE];
+
+#if defined(CHANGE_TWO_ENC)
+int multiplier = CHANGE_TWO_ENC;
+#elif defined(CHANGE_ONE_ENC)
+int multiplier = CHANGE_ONE_ENC;
+#elif defined(FALLING_TWO_ENC)
+int multiplier = FALLING_TWO_ENC;
+#elif defined(FALLING_ONE_ENC)
+int multiplier = FALLING_ONE_ENC;
+#endif
+
+float degAngularResolution = 360.0 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier);
+float radAngularResolution = 2*3.141592654 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier);
 
 void encoder_ISR(void);
 
 void setup() {
-  Serial.begin(115200); Serial.setTimeout(50);
-  Serial.println("Starting");
-
   // initialize the pins
-  pinMode(PWM_PIN, OUTPUT);
-  pinMode(DIR_PIN, OUTPUT); // for new driver
-  pinMode(ENCODER_A, INPUT_PULLUP);
-  pinMode(ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(ENCODER_A, encoder_ISR, CHANGE);
-  //attachInterrupt(ENCODER_B, encoder_ISR, CHANGE);
+  pinMode(LED_BUILTIN, OUTPUT); delay(10);
+  pinMode(PWM_PIN, OUTPUT); delay(10);
+  pinMode(DIR_PIN, OUTPUT); delay(10);
 
-  // start the motor
-  digitalWrite(DIR_PIN, 0);
-  analogWrite(PWM_PIN, 256);
+  pinMode(ENCODER_A_PIN, INPUT_PULLUP); delay(10);
+  pinMode(ENCODER_B_PIN, INPUT_PULLUP); delay(10);
 
-  unsigned int startTime = millis();
+#if defined(CHANGE_ONE_ENC)
+  attachInterrupt(ENCODER_A_PIN, encoder_ISR, CHANGE); delay(10);
+#elif defined(CHANGE_TWO_ENC)
+  attachInterrupt(ENCODER_A_PIN, encoder_ISR, CHANGE); delay(10);
+  attachInterrupt(ENCODER_B_PIN, encoder_ISR, CHANGE); delay(10);
+#elif defined(FALLING_ONE_ENC)
+  attachInterrupt(ENCODER_A_PIN, encoder_ISR, FALLING); delay(10);
+#elif defined(FALLING_TWO_ENC)
+  attachInterrupt(ENCODER_A_PIN, encoder_ISR, FALLING); delay(10);
+  attachInterrupt(ENCODER_B_PIN, encoder_ISR, FALLING); delay(10);
+#endif
+
+  Serial.begin(115200); delay(10);
+  Serial.setTimeout(50); delay(100);
+  Serial.println("Serial port connected"); delay(1000);
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  analogWrite(PWM_PIN, 255);
+  startTime = millis();
+  Serial.println("Motor started");
+
 }
 
 void loop() {
-  unsigned int currTime = millis();
-  if ( (currTime - startTime) > RUN_TIME ) {
-    // 2 seconds are up, so the motor has probably stabilized
+  // put your main code here, to run repeatedly:
+  currTime = millis();
+  if ( (currTime - startTime) > RUN_TIME) {
     analogWrite(PWM_PIN, 0);
-
-    int i = 1;
-    while (i < ARRAY_SIZE) {
-      float degPerMicros = angularResolution / dt[i];
-      float degPerSec = degPerMicros * 1000000;
-      omega[i] = 60 * degPerSec / 360; // in rpm
-      // print rpm and dt (microseconds)
-      Serial.print(omega[i], 7); Serial.print(","); Serial.println(dt[i], 7);
-      delay(100);
-      i++;
+    Serial.println("Movement complete");
+    Serial.print(interruptCount); Serial.println(" counts");
+    float angle = degAngularResolution * interruptCount;
+    Serial.print(angle); Serial.println(" degrees");
+    Serial.print(angle / 360); Serial.println(" revolutions");
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+      //omegaDeg[i] = degAngularResolution * 1000 * 1000 / (float)dt[i];
+      //omegaRad[i] = radAngularResolution * 1000 * 1000 / (float)dt[i];
+      float revPerSec = degAngularResolution * 1000 * 1000 / (float)(dt[i]*360);
+      omegaRpm[i] = revPerSec*60.0;
+      //Serial.println(revPerSec);
+      Serial.println(omegaRpm[i]);
+      //Serial.println(omegaRad[i]);
+      //Serial.println(omegaDeg[i]);
+      //Serial.println(dt[i]);
+      delay(50);
+    }
+    while (1) {
+      ;
     }
   }
 }
 
 /*
-    This interrupt service routine is called on every changing edge of an encoder pin.
-    It determines how long it's been (in microseconds) since the previous interrupt.
-    It puts this value in the dt[] array to be used afterwards, which is used later
-    to calculate the speed because the calculation involves floating point math.
-    Floating point math takes time to calculate and should not be done in an ISR.
+  This interrupt service routine is called on every changing edge (or falling edge,
+  depending on the setting defined above) of an encoder pin. It determines how long
+  it's been (in microseconds) since the previous interrupt. It puts this value in
+  the dt[] array to be used afterwards, which is used later to calculate the speed
+  because the calculation involves floating point math. Floating point math takes
+  time to calculate and it may be better to avoid doing it in an ISR.
 */
-void encoder_ISR(void) {
-  interruptCount++;
-  dt[interruptCount] = micros() - prevTime;
-  prevTime = micros();
-}
 
+void encoder_ISR(void) {
+  if (interruptCount < ARRAY_SIZE) {
+    dt[interruptCount] = micros() - prevTime;
+    prevTime = micros();
+  }
+  interruptCount++;
+}
