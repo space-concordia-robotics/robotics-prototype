@@ -104,7 +104,7 @@ void dcInterrupt(void); // manages motors 1&2
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
 void servoInterrupt(void); // manages motors 5&6
-void parseSerial(commandInfo& cmd); // goes through the message and puts relevant data into the motorCommand struct
+void parseSerial(commandInfo & cmd); // goes through the message and puts relevant data into the motorCommand struct
 bool verifSerial(commandInfo cmd); // error checks the parsed command
 void setup()
 {
@@ -962,7 +962,7 @@ oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
 motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 */
-void parseSerial(commandInfo& cmd)
+void parseSerial(commandInfo & cmd)
 {
   // check for emergency stop has precedence
   char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
@@ -972,7 +972,7 @@ void parseSerial(commandInfo& cmd)
     cmd.stopAllMotors = true;
 
 #ifdef DEBUG_PARSING
-    Serial.println("parsed emergency command to stop all motors");
+    Serial.println("$S,Success: parsed emergency command to stop all motors");
 #endif
 
   }
@@ -997,7 +997,7 @@ void parseSerial(commandInfo& cmd)
         cmd.stopSingleMotor = true;
 
 #ifdef DEBUG_PARSING
-        Serial.println("parsed request to stop single motor");
+        Serial.println("$S,Success: parsed request to stop single motor");
 #endif
 
       }
@@ -1011,7 +1011,7 @@ void parseSerial(commandInfo& cmd)
           cmd.whichAngle = atof(msgElem); // converts to float;
 
 #ifdef DEBUG_PARSING
-          Serial.print("parsed desired angle ");
+          Serial.print("$S,Success: parsed desired angle ");
           Serial.println(cmd.whichAngle);
 #endif
 
@@ -1028,8 +1028,9 @@ void parseSerial(commandInfo& cmd)
             cmd.loopState = OPEN_LOOP;
 
 #ifdef DEBUG_PARSING
-            Serial.println("parsed desired loop state ");
-            Serial.println(cmd.loopState);
+            Serial.print("$S,Success: parsed open loop state (");
+            Serial.print(cmd.loopState);
+            Serial.println(") request");
 #endif
 
           }
@@ -1039,11 +1040,20 @@ void parseSerial(commandInfo& cmd)
               cmd.loopState = CLOSED_LOOP;
 
 #ifdef DEBUG_PARSING
-              Serial.println("parsed desired loop state ");
-              Serial.println(cmd.loopState);
+              Serial.print("$S,Success: parsed closed loop state (");
+              Serial.print(cmd.loopState);
+              Serial.println(") request");
 #endif
 
             }
+          else
+          {
+
+#ifdef DEBUG_PARSING
+            Serial.println("$E,Error: unknown loop state");
+#endif
+
+          }
         }
       // check for angle reset command
       else
@@ -1057,7 +1067,7 @@ void parseSerial(commandInfo& cmd)
             cmd.resetAngleValue = true;
 
 #ifdef DEBUG_PARSING
-            Serial.println("parsed request to reset angle value");
+            Serial.println("$S,Success: parsed request to reset angle value");
 #endif
 
           }
@@ -1067,12 +1077,38 @@ void parseSerial(commandInfo& cmd)
               cmd.resetJointPosition = true;
 
 #ifdef DEBUG_PARSING
-              Serial.println("parsed request to reset joint position");
+              Serial.println("$S,Sucess: parsed request to reset joint position");
 #endif
 
             }
+          else
+          {
+
+#ifdef DEBUG_PARSING
+            Serial.println("$E,Error: unknown reset request");
+#endif
+
+          }
         }
+      else
+      {
+
+#ifdef DEBUG_PARSING
+        Serial.print("$E,Error: unknown motor ");
+        Serial.print(cmd.whichMotor);
+        Serial.println(" command");
+#endif
+
+      }
     }
+  else
+  {
+
+#ifdef DEBUG_PARSING
+    Serial.println("$E,Error: unknown motor command");
+#endif
+
+  }
 }
 
 bool verifSerial(commandInfo cmd)
@@ -1187,7 +1223,7 @@ bool verifSerial(commandInfo cmd)
       else
 
 #ifdef DEBUG_VERIFYING
-      Serial.print("$E,Error: command for motor");
+      Serial.print("$E,Error: command for motor ");
       Serial.print(cmd.whichMotor);
       Serial.println(" not recognized");
 #endif
