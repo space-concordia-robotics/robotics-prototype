@@ -3,6 +3,7 @@ Description of code goes here.
 This code began development sometime around July 20 2018 and is still being updated as of December 17 2018.
 */
 #include "PinSetup.h"
+#include "Parser.h"
 #include "Notes.h" // holds todo info
 #include "Ideas.h" // holds bits of code that haven't been implemented
 #include "RobotMotor.h"
@@ -43,13 +44,16 @@ but maybe it should be available just in case...
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* parsing */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-char * restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
+//char *bufferPointer = serialBuffer;
+//char * restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
 String messageBar = "=======================================================";
 /*
 info from parsing functionality is packaged and given to motor control functionality.
 many of these are set to 0 so that the message can reset, thus making sure that
 the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
+
+/*
 struct commandInfo
 {
   int whichMotor = 0; // which motor was requested to do something
@@ -66,8 +70,11 @@ struct commandInfo
   bool stopSingleMotor = false; // for stopping a single motor
   bool stopAllMotors = false; // for stopping all motors
 }
-
 motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
+*/
+commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
+Parser Parser;
+
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 const int encoderStates[16] =
 {
@@ -208,10 +215,13 @@ void loop()
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: ");
     Serial.println(serialBuffer); // send back what was received
-    parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
+    //Parser.parseCommand(motorCommand, bufferPointer);
+    Parser.parseCommand(motorCommand, serialBuffer);
+    //parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
     memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-    restOfMessage = serialBuffer; // reset pointer
-    if (!verifSerial(motorCommand))
+    //restOfMessage = serialBuffer; // reset pointer
+    if ( !Parser.verifCommand(motorCommand) ) 
+    //if (!verifSerial(motorCommand))
     {
       Serial.println("$E, verification failed");
     }
@@ -962,6 +972,8 @@ oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
 motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 */
+
+/*
 void parseSerial(commandInfo & cmd)
 {
   // check for emergency stop has precedence
@@ -1250,3 +1262,4 @@ bool verifSerial(commandInfo cmd)
     return false;
   }
 }
+*/
