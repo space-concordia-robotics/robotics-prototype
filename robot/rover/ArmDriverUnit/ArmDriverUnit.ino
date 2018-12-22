@@ -1,6 +1,6 @@
 /*
 Description of code goes here.
-This code began development sometime around July 20 2018 and is still being updated as of November 4 2018.
+This code began development sometime around July 20 2018 and is still being updated as of December 17 2018.
 */
 #include "PinSetup.h"
 #include "Notes.h" // holds todo info
@@ -14,6 +14,12 @@ This code began development sometime around July 20 2018 and is still being upda
 #define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
 #define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
 #define USER_MODE 4 // sends messages with ROSserial, functionality restricted
+#define DEBUG_PARSING 10 // debug messages during parsing function
+#define DEBUG_VERIFYING 11 // debug messages during verification function
+#define DEBUG_LOOPING 12 // debug messages during main loop
+#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+#define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
+#define DEBUG_TIMERS 15 // debug messages during timer interrupts
 /* there are 2 different potentially conflicting ideas here:
 1) compiling only creates machine code for the type of serial communication that's actually necessary.
 this way extra serial.print statements won't be compiled when it goes on the teensy unless necessary.
@@ -47,7 +53,6 @@ the code later on doesn't inadvertently make a motor move when it wasn't suppose
 struct commandInfo
 {
   int whichMotor = 0; // which motor was requested to do something
-  bool oldCommand = false; // for old open loop control
   int whichDirection = 0; // set the direction
   int whichSpeed = 0; // set the speed
   unsigned int whichTime = 0; // how long to turn for
@@ -99,9 +104,8 @@ void dcInterrupt(void); // manages motors 1&2
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
 void servoInterrupt(void); // manages motors 5&6
-void parseSerial(void); // goes through the message and puts relevant data into the motorCommand struct
+void parseSerial(commandInfo& cmd); // goes through the message and puts relevant data into the motorCommand struct
 bool verifSerial(commandInfo cmd); // error checks the parsed command
-
 void setup()
 {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
@@ -204,7 +208,7 @@ void loop()
     Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     Serial.print("GOT: ");
     Serial.println(serialBuffer); // send back what was received
-    parseSerial(); // goes through the message and puts the appropriate data into motorCommand struct
+    parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
     memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
     restOfMessage = serialBuffer; // reset pointer
     if (!verifSerial(motorCommand))
@@ -958,14 +962,14 @@ oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
 motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 */
-void parseSerial(void)
+void parseSerial(commandInfo& cmd)
 {
   // check for emergency stop has precedence
   char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
   if (String(msgElem) == "stop")
   {
     // msgElem is a char array so it's safer to convert to string first
-    motorCommand.stopAllMotors = true;
+    cmd.stopAllMotors = true;
 
 #ifdef DEBUG_PARSING
     Serial.println("parsed emergency command to stop all motors");
@@ -978,11 +982,11 @@ void parseSerial(void)
     {
       // msgElem is a char array so it's safer to convert to string first
       msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
-      motorCommand.whichMotor = atoi(msgElem);
+      cmd.whichMotor = atoi(msgElem);
 
 #ifdef DEBUG_PARSING
       Serial.print("parsed motor ");
-      Serial.println(motorCommand.whichMotor);
+      Serial.println(cmd.whichMotor);
 #endif
 
       // check for motor stop command has precedence
@@ -990,7 +994,7 @@ void parseSerial(void)
       if (String(msgElem) == "stop")
       {
         // msgElem is a char array so it's safer to convert to string first
-        motorCommand.stopSingleMotor = true;
+        cmd.stopSingleMotor = true;
 
 #ifdef DEBUG_PARSING
         Serial.println("parsed request to stop single motor");
@@ -1002,13 +1006,13 @@ void parseSerial(void)
         if (String(msgElem) == "angle")
         {
           // msgElem is a char array so it's safer to convert to string first
-          motorCommand.angleCommand = true;
+          cmd.angleCommand = true;
           msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-          motorCommand.whichAngle = atof(msgElem); // converts to float;
+          cmd.whichAngle = atof(msgElem); // converts to float;
 
 #ifdef DEBUG_PARSING
           Serial.print("parsed desired angle ");
-          Serial.println(motorCommand.whichAngle);
+          Serial.println(cmd.whichAngle);
 #endif
 
         }
@@ -1017,26 +1021,26 @@ void parseSerial(void)
         if (String(msgElem) == "loop")
         {
           // msgElem is a char array so it's safer to convert to string first
-          motorCommand.loopCommand = true;
+          cmd.loopCommand = true;
           msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
           if (String(msgElem) == "open")
           {
-            motorCommand.loopState = OPEN_LOOP;
+            cmd.loopState = OPEN_LOOP;
 
 #ifdef DEBUG_PARSING
             Serial.println("parsed desired loop state ");
-            Serial.println(motorCommand.loopState);
+            Serial.println(cmd.loopState);
 #endif
 
           }
           else
             if (String(msgElem) == "closed")
             {
-              motorCommand.loopState = CLOSED_LOOP;
+              cmd.loopState = CLOSED_LOOP;
 
 #ifdef DEBUG_PARSING
               Serial.println("parsed desired loop state ");
-              Serial.println(motorCommand.loopState);
+              Serial.println(cmd.loopState);
 #endif
 
             }
@@ -1046,11 +1050,11 @@ void parseSerial(void)
         if (String(msgElem) == "reset")
         {
           // msgElem is a char array so it's safer to convert to string first
-          motorCommand.resetCommand = true;
+          cmd.resetCommand = true;
           msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
           if (String(msgElem) == "angle")
           {
-            motorCommand.resetAngleValue = true;
+            cmd.resetAngleValue = true;
 
 #ifdef DEBUG_PARSING
             Serial.println("parsed request to reset angle value");
@@ -1060,7 +1064,7 @@ void parseSerial(void)
           else
             if (String(msgElem) == "position")
             {
-              motorCommand.resetJointPosition = true;
+              cmd.resetJointPosition = true;
 
 #ifdef DEBUG_PARSING
               Serial.println("parsed request to reset joint position");
@@ -1068,139 +1072,145 @@ void parseSerial(void)
 
             }
         }
-      // check for budge command: direction, speed, time
-      else
-        if (String(msgElem) == "direction")
-        {
-          motorCommand.oldCommand = true;
-          // msgElem is a char array so it's safer to convert to string first
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (direction value)
-          // float tempDirVar = atof(msgElem); // converts to float
-          switch (* msgElem)
-          {
-            // determines motor direction
-            case '1':// arbitrarily (for now) decided 0 is clockwise
-            motorCommand.whichDirection = CLOCKWISE;
-
-#ifdef DEBUG_PARSING
-            Serial.println("parsed direction clockwise");
-#endif
-
-            break;
-            case '2':// arbitrarily (for now) decided 1 is counter-clockwise
-            motorCommand.whichDirection = COUNTER_CLOCKWISE;
-
-#ifdef DEBUG_PARSING
-            Serial.println("parsed direction counter-clockwise");
-#endif
-
-            break;
-          }
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (speed tag)
-          if (String(msgElem) == "speed")
-          {
-            // msgElem is a char array so it's safer to convert to string first
-            msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (integer representing speed level)
-            // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
-            motorCommand.whichSpeed = atoi(msgElem); // set the speed, enum starts with 1
-
-#ifdef DEBUG_PARSING
-            Serial.print("parsed speed level: ");
-            Serial.println(motorCommand.whichSpeed);
-#endif
-
-          }
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (time tag)
-          if (String(msgElem) == "time")
-          {
-            // msgElem is a char array so it's safer to convert to string first
-            msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (time in seconds)
-            // don't allow budge movements to last a long time
-            motorCommand.whichTime = atoi(msgElem); // converts to int
-
-#ifdef DEBUG_PARSING
-            Serial.print("parsed time interval ");
-            Serial.print(motorCommand.whichTime);
-            Serial.println("ms");
-#endif
-
-          }
-        }
     }
 }
 
 bool verifSerial(commandInfo cmd)
 {
   if (cmd.stopAllMotors)
+  {
+
+#ifdef DEBUG_VERIFYING
+    Serial.println("$S,Success: command to stop all motors verified");
+#endif
+
     return true;
+  }
   // 0 means there was an invalid command and therefore motors shouldn't be controlled
   else
-    if
-  (cmd.whichMotor > 0 || cmd.whichMotor <= RobotMotor::numMotors)
-  {
-    if (cmd.stopSingleMotor)
-      return true;
-    else
-      if (cmd.angleCommand)
+    if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors)
+    {
+      if (cmd.stopSingleMotor)
       {
-        if (cmd.whichAngle < -720 || cmd.whichAngle > 720)
-        {
-          return false;
-        }
-        else
-          return true;
-      }
-    else
-      if (cmd.loopCommand)
-      {
-        if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP)
-        {
-          return true;
-        }
-        else
-        {
 
 #ifdef DEBUG_VERIFYING
-          Serial.println("$E,Error: invalid loop state");
+        Serial.print("$S,Success: command to stop motor ");
+        Serial.print(cmd.whichMotor);
+        Serial.println(" verified");
 #endif
 
-          return false;
-        }
+        return true;
       }
-    else
-      if (cmd.resetCommand)
-      {
-        if (cmd.resetAngleValue || cmd.resetJointPosition)
+      else
+        if (cmd.angleCommand)
         {
-          return true;
-        }
-        else
-        {
-
-#ifdef DEBUG_VERIFYING
-          Serial.println("$E,Error: invalid reset request");
-#endif
-
-          return false;
-        }
-      }
-    else
-      if (cmd.oldCommand)
-      {
-        if (cmd.whichDirection == CLOCKWISE || cmd.whichDirection == COUNTER_CLOCKWISE)
-        {
-          if (cmd.whichSpeed >= 1 && cmd.whichSpeed <= MAX_SPEED)
+          if (cmd.whichAngle < -720 || cmd.whichAngle > 720)
           {
-            if (cmd.whichTime <= MAX_BUDGE_TIME && cmd.whichTime >= MIN_BUDGE_TIME)
-            {
-              return true;
-            }
+
+#ifdef DEBUG_VERIFYING
+            Serial.print("$E,Error: angle of ");
+            Serial.print(cmd.whichAngle);
+            Serial.print(" degrees invalid for motor ");
+            Serial.println(cmd.whichMotor);
+#endif
+
+            return false;
+          }
+          else
+          {
+
+#ifdef DEBUG_VERIFYING
+            Serial.print("$S,Success: command to move motor ");
+            Serial.print(cmd.whichMotor);
+            Serial.print(" ");
+            Serial.print(cmd.whichAngle);
+            Serial.println(" degrees verified");
+#endif
+
+            return true;
           }
         }
-      }
-    else
+      else
+        if (cmd.loopCommand)
+        {
+          if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP)
+          {
+
+#ifdef DEBUG_VERIFYING
+            Serial.print("$S,Success: command to set motor ");
+            Serial.print(cmd.whichMotor);
+            if (cmd.loopState == OPEN_LOOP)
+              Serial.println(" to open loop verified");
+            if (cmd.loopState == CLOSED_LOOP)
+              Serial.println(" to closed loop verified");
+#endif
+
+            return true;
+          }
+          else
+          {
+
+#ifdef DEBUG_VERIFYING
+            Serial.println("$E,Error: invalid loop state");
+#endif
+
+            return false;
+          }
+        }
+      else
+        if (cmd.resetCommand)
+        {
+          if (cmd.resetAngleValue || cmd.resetJointPosition)
+          {
+
+#ifdef DEBUG_VERIFYING
+            Serial.print("$S,Success: command to reset motor ");
+            Serial.print(cmd.whichMotor);
+            if (cmd.resetAngleValue)
+              Serial.println(" saved angle value verified");
+            if (cmd.resetJointPosition)
+              Serial.println(" physical joint position verified");
+#endif
+
+            return true;
+          }
+          else
+          {
+
+#ifdef DEBUG_VERIFYING
+            Serial.println("$E,Error: invalid reset request");
+#endif
+
+            return false;
+          }
+        }
+      else
+
+#ifdef DEBUG_VERIFYING
+      Serial.print("$E,Error: command for motor");
+      Serial.print(cmd.whichMotor);
+      Serial.println(" not recognized");
+#endif
+
       return false;
+    }
+  else
+    if
+  (cmd.whichMotor < 0 || cmd.whichMotor >= RobotMotor::numMotors)
+  {
+
+#ifdef DEBUG_VERIFYING
+    Serial.println("$E,Error: requested motor index out of bounds");
+#endif
+
   }
   else
+  {
+
+#ifdef DEBUG_VERIFYING
+    Serial.println("$E,Error: command not recognized");
+#endif
+
     return false;
+  }
 }
