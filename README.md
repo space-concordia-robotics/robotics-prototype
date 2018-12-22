@@ -194,6 +194,32 @@ To flash it run `sudo ddrescue -D --force ubuntu-16.04.2-mate-odroid-xu4-2017051
 Now you can sit back and wait for the job to finish. By the time it is done, you will have a fresh install of ubuntuMATE on your card.
 Note that when booting up for the very first time, after the initial bootup (let it do it's thing, feel free to log into the system) you will need to reboot one more time for it to finally work properly.
 
+Note that the first time you connect your odroid to the internet it will most likely automatically start the job `apt-daily.service` which will temporarily make the `apt-get` command unavailable.
+To confirm this, you can check with `ps aux | grep apt` to get the process id (pid). This process will lock the use of `apt-get`.
+The best thing to do is to just wait until it is done. You can see how long it has been running with `ps -o etime= -p process_id` (replacing "processid" with 
+the corresponding pid of the apt daily update process. My prefered method is to run `watch -n 1 ps -o etime= -p process_id` so that it keeps updating the amount 
+of time the process has been runing for and once it's done you can see no more time values for the output refreshing every second.
+
+### Custom images
+
+These custom images are made by directly setting up the changes on a fresh image, then using `dd` to save the changes to an image file.
+Example: `dd /dev/sdb ubuntuMateDev.img`
+
+#### Dev
+
+For development we customize the ubuntuMATE image to allow us to more easily develop on/with the odroid.
+Any kind of authentication requiring services (such as a connection to a wifi network requiring username/password) will not be included in the images.
+
+To find all the custom images follow [this link](https://drive.google.com/drive/u/1/folders/17An9xUkBo8dGS8PoY54tsNWucJLyBDJC) to the corresponding google drive folder.
+
+Differences between default ubuntuMATE image:
+- [Autologin enabled](https://ubuntu-mate.community/t/auto-login-to-the-desktop/60)
+- Install `curl` and `git` with `apt-get`
+- Clone this `robotics-prototype` repo to `~/Programming` folder
+- Install `nvm v0.33.11`, `node v10.13.0` (LTS) by `wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash` , and `nvm install node v10.13.0`, respectively
+- Setup systemd service called `ip-emailer` to run `runEmailer.sh` ([how to setup a startup service with systemd](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee))
+- Add configuration files `.bash_aliases` and `.nanorc`
+
 ### How to upload Arduino scripts from the odroid
 
 1. Make sure the arduino is plugged into the odroid
