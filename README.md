@@ -201,7 +201,10 @@ To get a running time of elapsed time updated each second you may run `watch -n 
 ### Custom images
 
 These custom images are made by directly setting up the changes on a fresh image, then using `dd` to save the state of the operating system as an image file.
-Example: `dd /dev/sdb ubuntuMateDev.img`
+
+Example: `sudo dd if=/dev/sdb of=ubuntuMateDev.img bs=4M`
+
+For step by step instructions see [here](http://odroid.us/mediawiki/index.php?title=Create_SD_Card_Images).
 
 #### Dev
 
