@@ -53,7 +53,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio): // if no encoder
 }
 
 void DcMotor::stopRotation(void) {
-  analogWrite(pwmPin, 0);
+  analogWrite(pwmPin, 0); // 0 for cytron, different implementation for sabertooth
   movementDone = true;
 }
 
@@ -76,8 +76,8 @@ void DcMotor::setVelocity(int motorDir, int motorSpeed) {
 
 bool DcMotor::calcTurningDuration(float angle) {
   // if the error is big enough to justify movement
-  // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
   if ( fabs(angle) > pidController.jointAngleTolerance) {
+    // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
     numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
     return true;
   }

@@ -2,34 +2,50 @@
 Description of code goes here.
 This code began development sometime around July 20 2018 and is still being updated as of December 17 2018.
 */
-#include "PinSetup.h"
-#include "Parser.h"
-#include "Notes.h" // holds todo info
-#include "Ideas.h" // holds bits of code that haven't been implemented
-#include "RobotMotor.h"
-#include "StepperMotor.h"
-#include "DcMotor.h"
-#include "ServoMotor.h"
 /* still in idea phase */
 #define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
-#define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
-#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
-#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
+//#define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
+//#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
+//#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
+
+// these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
 #define DEBUG_PARSING 10 // debug messages during parsing function
 #define DEBUG_VERIFYING 11 // debug messages during verification function
 #define DEBUG_LOOPING 12 // debug messages during main loop
 #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
-/* there are 2 different potentially conflicting ideas here:
-1) compiling only creates machine code for the type of serial communication that's actually necessary.
-this way extra serial.print statements won't be compiled when it goes on the teensy unless necessary.
-that said, it might be good to leave this option open to make sure that it works even without ROS.
-2) in regular operation, the user shouldn't be able to adjust pid constants or gear ratios and such.
-but they should be allowed to unlock these features if they need to. this only applies to the final stage
-when the rover is out on the field. At this stage it shouldn't be necessary to use regular serial.print?
-but maybe it should be available just in case...
+/*
+choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
+the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
+should work.
 */
+// serial communication over usb with pc, teensy not connected to odroid
+#if defined(DEVEL1_MODE)
+#define UART_PORT Serial
+// serial communication over uart with odroid, teensy plugged into pcb and odroid
+#elif defined(DEVEL2_MODE)
+#define UART_PORT Serial1
+#endif
+/*
+choosing serial1 vs rosserial could be compile-time, since serial1 is only really useful
+for debugging and won't be used when the rover is in action. however, a runtime option
+could be useful as in both cases the teensy is communicating solely with the odroid.
+it might be desirable to switch between modes without recompiling.
+
+finally, unlocking extra options should be runtime as it should be easily accessible.
+*/
+// includes must come after the above UART_PORT definition as it's used in other files.
+// perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
+#include "PinSetup.h"
+#include "Parser.h"
+//#include "Notes.h" // holds todo info
+//#include "Ideas.h" // holds bits of code that haven't been implemented
+#include "RobotMotor.h"
+#include "StepperMotor.h"
+#include "DcMotor.h"
+#include "ServoMotor.h"
+
 #define STEPPER_PID_PERIOD 30 * 1000 // initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
@@ -116,8 +132,8 @@ bool verifSerial(commandInfo cmd); // error checks the parsed command
 void setup()
 {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
-  Serial.begin(BAUD_RATE);
-  Serial.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
+  UART_PORT.begin(BAUD_RATE);
+  UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
   // each motor with an encoder needs to setup that encoder
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
@@ -208,13 +224,13 @@ void setup()
 void loop()
 {
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
-  if (Serial.available())
+  if (UART_PORT.available())
   {
     // if a message was sent to the Teensy
-    Serial.println(messageBar);
-    Serial.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
-    Serial.print("GOT: ");
-    Serial.println(serialBuffer); // send back what was received
+    UART_PORT.println(messageBar);
+    UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
+    UART_PORT.print("GOT: ");
+    UART_PORT.println(serialBuffer); // send back what was received
     //Parser.parseCommand(motorCommand, bufferPointer);
     Parser.parseCommand(motorCommand, serialBuffer);
     //parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
@@ -223,12 +239,12 @@ void loop()
     if ( !Parser.verifCommand(motorCommand) ) 
     //if (!verifSerial(motorCommand))
     {
-      Serial.println("$E, verification failed");
+      UART_PORT.println("$E, verification failed");
     }
     else
     {
-      Serial.println("$S, command verified");
-      Serial.println(messageBar);
+      UART_PORT.println("$S, command verified");
+      UART_PORT.println(messageBar);
       // emergency stop takes precedence
       if (motorCommand.stopAllMotors)
       {
@@ -238,7 +254,7 @@ void loop()
         motor4.stopRotation();
         motor5.stopRotation();
         motor6.stopRotation();
-        Serial.println("all motors stopped because of emergency stop");
+        UART_PORT.println("all motors stopped because of emergency stop");
       }
       else
       {
@@ -266,18 +282,18 @@ void loop()
               motor6.stopRotation();
               break;
           }
-          Serial.print("stopped motor ");
-          Serial.println(motorCommand.whichMotor);
+          UART_PORT.print("stopped motor ");
+          UART_PORT.println(motorCommand.whichMotor);
         }
         // make motors move
         else
           if (motorCommand.angleCommand)
           {
-            Serial.print("motor ");
-            Serial.println(motorCommand.whichMotor);
-            Serial.print(" desired angle (degrees) is: ");
-            Serial.println(motorCommand.whichAngle);
-            Serial.println(messageBar);
+            UART_PORT.print("motor ");
+            UART_PORT.println(motorCommand.whichMotor);
+            UART_PORT.print(" desired angle (degrees) is: ");
+            UART_PORT.println(motorCommand.whichAngle);
+            UART_PORT.println(messageBar);
             switch (motorCommand.whichMotor)
             {
               // move a motor based on which one was commanded
@@ -296,11 +312,11 @@ void loop()
                     // returns false if the open loop error is too small
                     motor1.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
                     motor1.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
-                    Serial.print(motor1.numMillis);
-                    Serial.println(" milliseconds to turn");
+                    UART_PORT.print(motor1.numMillis);
+                    UART_PORT.println(" milliseconds to turn");
                   }
                   else
-                    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                 }
                 else
                   if (!motor1.isOpenLoop)
@@ -310,7 +326,7 @@ void loop()
                   }
               }
               else
-                Serial.println("$E,Alert: requested angle is not within angle limits.");
+                UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
               break;
               case MOTOR2:// dc motor control using helper functions
               if (motor2.setDesiredAngle(motorCommand.whichAngle))
@@ -323,11 +339,11 @@ void loop()
                   {
                     motor2.timeCount = 0;
                     motor2.movementDone = false;
-                    Serial.print(motor2.numMillis);
-                    Serial.println(" milliseconds to turn");
+                    UART_PORT.print(motor2.numMillis);
+                    UART_PORT.println(" milliseconds to turn");
                   }
                   else
-                    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                 }
                 else
                   if (!motor2.isOpenLoop)
@@ -336,7 +352,7 @@ void loop()
                   }
               }
               else
-                Serial.println("$E,Alert: requested angle is not within angle limits.");
+                UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
               break;
               case MOTOR3:// stepper motor control using helper functions
               if (motor3.setDesiredAngle(motorCommand.whichAngle))
@@ -351,11 +367,11 @@ void loop()
                     // also returns false if the open loop error is too small
                     motor3.enablePower(); // give power to the stepper finally
                     motor3.movementDone = false;
-                    Serial.print(motor3.numSteps);
-                    Serial.println(" steps to turn");
+                    UART_PORT.print(motor3.numSteps);
+                    UART_PORT.println(" steps to turn");
                   }
                   else
-                    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                 }
                 else
                   if (!motor3.isOpenLoop)
@@ -365,7 +381,7 @@ void loop()
                   }
               }
               else
-                Serial.println("$E,Alert: requested angle is not within angle limits.");
+                UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
               break;
               case MOTOR4:
                 if (motor4.setDesiredAngle(motorCommand.whichAngle))
@@ -378,11 +394,11 @@ void loop()
                     {
                       motor4.enablePower();
                       motor4.movementDone = false;
-                      Serial.print(motor4.numSteps);
-                      Serial.println(" steps to turn");
+                      UART_PORT.print(motor4.numSteps);
+                      UART_PORT.println(" steps to turn");
                     }
                     else
-                      Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                   }
                   else
                     if (!motor4.isOpenLoop)
@@ -392,7 +408,7 @@ void loop()
                     }
                 }
                 else
-                  Serial.println("$E,Alert: requested angle is not within angle limits.");
+                  UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
                 break;
               case MOTOR5:
               // this motor has no max or min angle because it must be able to spin like a screwdriver
@@ -406,11 +422,11 @@ void loop()
                   {
                     motor5.timeCount = 0;
                     motor5.movementDone = false;
-                    Serial.print(motor5.numMillis);
-                    Serial.println(" milliseconds to turn");
+                    UART_PORT.print(motor5.numMillis);
+                    UART_PORT.println(" milliseconds to turn");
                   }
                   else
-                    Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                 }
                 else
                   if (!motor5.isOpenLoop)
@@ -419,7 +435,7 @@ void loop()
                   }
               }
               else
-                Serial.println("$E,Alert: requested angle is not within angle limits.");
+                UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
               break;
               case MOTOR6:
                 if (motor6.setDesiredAngle(motorCommand.whichAngle))
@@ -432,11 +448,11 @@ void loop()
                     {
                       motor6.timeCount = 0;
                       motor6.movementDone = false;
-                      Serial.print(motor6.numMillis);
-                      Serial.println(" milliseconds to turn");
+                      UART_PORT.print(motor6.numMillis);
+                      UART_PORT.println(" milliseconds to turn");
                     }
                     else
-                      Serial.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
                   }
                   else
                     if (!motor6.isOpenLoop)
@@ -445,7 +461,7 @@ void loop()
                     }
                 }
                 else
-                  Serial.println("$E,Alert: requested angle is not within angle limits.");
+                  UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
                 break;
             }
           }
@@ -476,9 +492,9 @@ void loop()
                   motor6.isOpenLoop = true;
                   break;
               }
-              Serial.print("motor ");
-              Serial.print(motorCommand.whichMotor);
-              Serial.println(" is open loop");
+              UART_PORT.print("motor ");
+              UART_PORT.print(motorCommand.whichMotor);
+              UART_PORT.println(" is open loop");
             }
             else
               if (motorCommand.loopState == CLOSED_LOOP)
@@ -489,37 +505,37 @@ void loop()
                     if (motor1.hasEncoder)
                       motor1.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                   case MOTOR2:
                     if (motor2.hasEncoder)
                       motor2.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                   case MOTOR3:
                     if (motor3.hasEncoder)
                       motor3.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                   case MOTOR4:
                     if (motor4.hasEncoder)
                       motor4.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                   case MOTOR5:
                     if (motor5.hasEncoder)
                       motor5.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                   case MOTOR6:
                     if (motor6.hasEncoder)
                       motor6.isOpenLoop = false;
                     else
-                      Serial.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                     break;
                 }
               }
@@ -551,8 +567,8 @@ void loop()
                   motor6.currentAngle = 0.0;
                   break;
               }
-              Serial.print("reset angle value of motor ");
-              Serial.println(motorCommand.whichMotor);
+              UART_PORT.print("reset angle value of motor ");
+              UART_PORT.println(motorCommand.whichMotor);
             }
             else
               if (motorCommand.resetJointPosition)
@@ -561,7 +577,7 @@ void loop()
               }
           }
         else
-          Serial.println("$E,Error: bad motor command");
+          UART_PORT.println("$E,Error: bad motor command");
       }
     }
   }
@@ -605,32 +621,32 @@ void loop()
     float actualRemainingAngle = motor3.desiredAngle - motor3.calcCurrentAngle(); // how far does it actually need to go
     float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
     */
-    // Serial.print(imaginedAngle); Serial.println(" imagined angle");
-    // Serial.print(actualAngle); Serial.println(" actual angle");
-    // Serial.print(imaginedRemainingAngle); Serial.println(" imagined remaining angle");
-    // Serial.print(actualRemainingAngle); Serial.println(" actual remaining angle");
-    // Serial.print(discrepancy); Serial.println(" degrees behind expected position");
+    // UART_PORT.print(imaginedAngle); UART_PORT.println(" imagined angle");
+    // UART_PORT.print(actualAngle); UART_PORT.println(" actual angle");
+    // UART_PORT.print(imaginedRemainingAngle); UART_PORT.println(" imagined remaining angle");
+    // UART_PORT.print(actualRemainingAngle); UART_PORT.println(" actual remaining angle");
+    // UART_PORT.print(discrepancy); UART_PORT.println(" degrees behind expected position");
     /*
     // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
     // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
     // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
     if (fabs(discrepancy) > motor3.pidController.jointAngleTolerance) {
-    Serial.println("discrepancy is too high and motor is moving, adjusting step number");
+    UART_PORT.println("discrepancy is too high and motor is moving, adjusting step number");
     // it's possible the check happens during movement, but there needs to be ample distance to move
     if (!motor3.movementDone) {
     // if actualRemainingAngle is negative it means the arm moved way further than it should have
     if(actualRemainingAngle<0) motor3.movementDone=true; // abort
     else if(actualRemainingAngle > motor3.pidController.jointAngleTolerance){
-    Serial.println("enough angle between current position and desired position to adjust during movement");
+    UART_PORT.println("enough angle between current position and desired position to adjust during movement");
     // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
     // the motor interrupt assumes the step count and direction are unchanged!!!!
     motor3.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
     //numsteps gets updated but imagined angle doesnt...?
     }
-    else Serial.println("not enough angle between current position and desired position to adjust during movement, waiting for movement to end");
+    else UART_PORT.println("not enough angle between current position and desired position to adjust during movement, waiting for movement to end");
     }
     else { // it's possible the check happens when the motor is at rest
-    Serial.println("discrepancy is too high and motor is done moving, adjusting step number");
+    UART_PORT.println("discrepancy is too high and motor is done moving, adjusting step number");
     // it's possible the angle is too far in either direction, so this makes sure that it goes to the right spot
     if (discrepancy >= 0) motor3.rotationDirection = 1;
     else discrepancy = -1;
@@ -652,16 +668,16 @@ void loop()
 
 void printMotorAngles()
 {
-  Serial.print("Motor Angles: ");
-  Serial.print(motor1.calcCurrentAngle());
-  Serial.print(",");
-  Serial.print(motor2.calcCurrentAngle());
-  Serial.print(",");
-  Serial.print(motor3.calcCurrentAngle());
-  Serial.print(",");
-  Serial.println(motor4.calcCurrentAngle()); // Serial.print(",");
-  // Serial.print(motor5.calcCurrentAngle());Serial.print(",");
-  // Serial.print(motor6.calcCurrentAngle());Serial.print(",");
+  UART_PORT.print("Motor Angles: ");
+  UART_PORT.print(motor1.calcCurrentAngle());
+  UART_PORT.print(",");
+  UART_PORT.print(motor2.calcCurrentAngle());
+  UART_PORT.print(",");
+  UART_PORT.print(motor3.calcCurrentAngle());
+  UART_PORT.print(",");
+  UART_PORT.println(motor4.calcCurrentAngle()); // UART_PORT.print(",");
+  // UART_PORT.print(motor5.calcCurrentAngle());UART_PORT.print(",");
+  // UART_PORT.print(motor6.calcCurrentAngle());UART_PORT.print(",");
 }
 
 void m3StepperInterrupt(void)
@@ -682,9 +698,9 @@ void m3StepperInterrupt(void)
         nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
         m3StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
       }
-      // Serial.print(motor3.rotationDirection); Serial.println(" direction");
-      // Serial.print(motor3.stepCount); Serial.println(" steps taken");
-      // Serial.print(motor3.numSteps); Serial.println(" steps total");
+      // UART_PORT.print(motor3.rotationDirection); UART_PORT.println(" direction");
+      // UART_PORT.print(motor3.stepCount); UART_PORT.println(" steps taken");
+      // UART_PORT.print(motor3.numSteps); UART_PORT.println(" steps total");
     }
     else
     {
@@ -692,7 +708,7 @@ void m3StepperInterrupt(void)
       motor3.stepCount = 0; // reset the counter
       motor3.movementDone = true;
       motor3.disablePower();
-      // Serial.println("waiting for command");
+      // UART_PORT.println("waiting for command");
     }
   }
   else
@@ -912,8 +928,8 @@ void servoInterrupt(void)
 void m1_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  Serial.print("m1 ");
-  Serial.println(motor1.encoderCount);
+  UART_PORT.print("m1 ");
+  UART_PORT.println(motor1.encoderCount);
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
   /*
@@ -930,7 +946,7 @@ void m1_encoder_interrupt(void)
 void m2_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  // Serial.print("m2 "); Serial.println(motor2.encoderCount);
+  // UART_PORT.print("m2 "); UART_PORT.println(motor2.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
   motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
@@ -939,8 +955,8 @@ void m2_encoder_interrupt(void)
 void m3_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  Serial.println("m3 "); // Serial.println(motor3.encoderCount);
-  // Serial.println(M3_ENCODER_PORT,BIN);
+  UART_PORT.println("m3 "); // UART_PORT.println(motor3.encoderCount);
+  // UART_PORT.println(M3_ENCODER_PORT,BIN);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
   motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
@@ -949,8 +965,8 @@ void m3_encoder_interrupt(void)
 void m4_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  Serial.print("m4 ");
-  Serial.println(motor4.encoderCount);
+  UART_PORT.print("m4 ");
+  UART_PORT.println(motor4.encoderCount);
   oldEncoderState <<= 2;
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
   motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
@@ -959,14 +975,14 @@ void m4_encoder_interrupt(void)
 /*
 void m5_encoder_interrupt(void) {
 static unsigned int oldEncoderState = 0;
-Serial.print("m5 "); Serial.println(motor5.encoderCount);
+UART_PORT.print("m5 "); UART_PORT.println(motor5.encoderCount);
 oldEncoderState <<= 2;
 oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
 motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 void m6_encoder_interrupt(void) {
 static unsigned int oldEncoderState = 0;
-Serial.print("m6 "); Serial.println(motor6.encoderCount);
+UART_PORT.print("m6 "); UART_PORT.println(motor6.encoderCount);
 oldEncoderState <<= 2;
 oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
 motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
@@ -984,7 +1000,7 @@ void parseSerial(commandInfo & cmd)
     cmd.stopAllMotors = true;
 
 #ifdef DEBUG_PARSING
-    Serial.println("$S,Success: parsed emergency command to stop all motors");
+    UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
 #endif
 
   }
@@ -997,8 +1013,8 @@ void parseSerial(commandInfo & cmd)
       cmd.whichMotor = atoi(msgElem);
 
 #ifdef DEBUG_PARSING
-      Serial.print("parsed motor ");
-      Serial.println(cmd.whichMotor);
+      UART_PORT.print("parsed motor ");
+      UART_PORT.println(cmd.whichMotor);
 #endif
 
       // check for motor stop command has precedence
@@ -1009,7 +1025,7 @@ void parseSerial(commandInfo & cmd)
         cmd.stopSingleMotor = true;
 
 #ifdef DEBUG_PARSING
-        Serial.println("$S,Success: parsed request to stop single motor");
+        UART_PORT.println("$S,Success: parsed request to stop single motor");
 #endif
 
       }
@@ -1023,8 +1039,8 @@ void parseSerial(commandInfo & cmd)
           cmd.whichAngle = atof(msgElem); // converts to float;
 
 #ifdef DEBUG_PARSING
-          Serial.print("$S,Success: parsed desired angle ");
-          Serial.println(cmd.whichAngle);
+          UART_PORT.print("$S,Success: parsed desired angle ");
+          UART_PORT.println(cmd.whichAngle);
 #endif
 
         }
@@ -1040,9 +1056,9 @@ void parseSerial(commandInfo & cmd)
             cmd.loopState = OPEN_LOOP;
 
 #ifdef DEBUG_PARSING
-            Serial.print("$S,Success: parsed open loop state (");
-            Serial.print(cmd.loopState);
-            Serial.println(") request");
+            UART_PORT.print("$S,Success: parsed open loop state (");
+            UART_PORT.print(cmd.loopState);
+            UART_PORT.println(") request");
 #endif
 
           }
@@ -1052,9 +1068,9 @@ void parseSerial(commandInfo & cmd)
               cmd.loopState = CLOSED_LOOP;
 
 #ifdef DEBUG_PARSING
-              Serial.print("$S,Success: parsed closed loop state (");
-              Serial.print(cmd.loopState);
-              Serial.println(") request");
+              UART_PORT.print("$S,Success: parsed closed loop state (");
+              UART_PORT.print(cmd.loopState);
+              UART_PORT.println(") request");
 #endif
 
             }
@@ -1062,7 +1078,7 @@ void parseSerial(commandInfo & cmd)
           {
 
 #ifdef DEBUG_PARSING
-            Serial.println("$E,Error: unknown loop state");
+            UART_PORT.println("$E,Error: unknown loop state");
 #endif
 
           }
@@ -1079,7 +1095,7 @@ void parseSerial(commandInfo & cmd)
             cmd.resetAngleValue = true;
 
 #ifdef DEBUG_PARSING
-            Serial.println("$S,Success: parsed request to reset angle value");
+            UART_PORT.println("$S,Success: parsed request to reset angle value");
 #endif
 
           }
@@ -1089,7 +1105,7 @@ void parseSerial(commandInfo & cmd)
               cmd.resetJointPosition = true;
 
 #ifdef DEBUG_PARSING
-              Serial.println("$S,Sucess: parsed request to reset joint position");
+              UART_PORT.println("$S,Sucess: parsed request to reset joint position");
 #endif
 
             }
@@ -1097,7 +1113,7 @@ void parseSerial(commandInfo & cmd)
           {
 
 #ifdef DEBUG_PARSING
-            Serial.println("$E,Error: unknown reset request");
+            UART_PORT.println("$E,Error: unknown reset request");
 #endif
 
           }
@@ -1106,9 +1122,9 @@ void parseSerial(commandInfo & cmd)
       {
 
 #ifdef DEBUG_PARSING
-        Serial.print("$E,Error: unknown motor ");
-        Serial.print(cmd.whichMotor);
-        Serial.println(" command");
+        UART_PORT.print("$E,Error: unknown motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.println(" command");
 #endif
 
       }
@@ -1117,7 +1133,7 @@ void parseSerial(commandInfo & cmd)
   {
 
 #ifdef DEBUG_PARSING
-    Serial.println("$E,Error: unknown motor command");
+    UART_PORT.println("$E,Error: unknown motor command");
 #endif
 
   }
@@ -1129,7 +1145,7 @@ bool verifSerial(commandInfo cmd)
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$S,Success: command to stop all motors verified");
+    UART_PORT.println("$S,Success: command to stop all motors verified");
 #endif
 
     return true;
@@ -1142,9 +1158,9 @@ bool verifSerial(commandInfo cmd)
       {
 
 #ifdef DEBUG_VERIFYING
-        Serial.print("$S,Success: command to stop motor ");
-        Serial.print(cmd.whichMotor);
-        Serial.println(" verified");
+        UART_PORT.print("$S,Success: command to stop motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.println(" verified");
 #endif
 
         return true;
@@ -1156,10 +1172,10 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$E,Error: angle of ");
-            Serial.print(cmd.whichAngle);
-            Serial.print(" degrees invalid for motor ");
-            Serial.println(cmd.whichMotor);
+            UART_PORT.print("$E,Error: angle of ");
+            UART_PORT.print(cmd.whichAngle);
+            UART_PORT.print(" degrees invalid for motor ");
+            UART_PORT.println(cmd.whichMotor);
 #endif
 
             return false;
@@ -1168,11 +1184,11 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to move motor ");
-            Serial.print(cmd.whichMotor);
-            Serial.print(" ");
-            Serial.print(cmd.whichAngle);
-            Serial.println(" degrees verified");
+            UART_PORT.print("$S,Success: command to move motor ");
+            UART_PORT.print(cmd.whichMotor);
+            UART_PORT.print(" ");
+            UART_PORT.print(cmd.whichAngle);
+            UART_PORT.println(" degrees verified");
 #endif
 
             return true;
@@ -1185,12 +1201,12 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to set motor ");
-            Serial.print(cmd.whichMotor);
+            UART_PORT.print("$S,Success: command to set motor ");
+            UART_PORT.print(cmd.whichMotor);
             if (cmd.loopState == OPEN_LOOP)
-              Serial.println(" to open loop verified");
+              UART_PORT.println(" to open loop verified");
             if (cmd.loopState == CLOSED_LOOP)
-              Serial.println(" to closed loop verified");
+              UART_PORT.println(" to closed loop verified");
 #endif
 
             return true;
@@ -1199,7 +1215,7 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.println("$E,Error: invalid loop state");
+            UART_PORT.println("$E,Error: invalid loop state");
 #endif
 
             return false;
@@ -1212,12 +1228,12 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to reset motor ");
-            Serial.print(cmd.whichMotor);
+            UART_PORT.print("$S,Success: command to reset motor ");
+            UART_PORT.print(cmd.whichMotor);
             if (cmd.resetAngleValue)
-              Serial.println(" saved angle value verified");
+              UART_PORT.println(" saved angle value verified");
             if (cmd.resetJointPosition)
-              Serial.println(" physical joint position verified");
+              UART_PORT.println(" physical joint position verified");
 #endif
 
             return true;
@@ -1226,7 +1242,7 @@ bool verifSerial(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.println("$E,Error: invalid reset request");
+            UART_PORT.println("$E,Error: invalid reset request");
 #endif
 
             return false;
@@ -1235,9 +1251,9 @@ bool verifSerial(commandInfo cmd)
       else
 
 #ifdef DEBUG_VERIFYING
-      Serial.print("$E,Error: command for motor ");
-      Serial.print(cmd.whichMotor);
-      Serial.println(" not recognized");
+      UART_PORT.print("$E,Error: command for motor ");
+      UART_PORT.print(cmd.whichMotor);
+      UART_PORT.println(" not recognized");
 #endif
 
       return false;
@@ -1248,15 +1264,16 @@ bool verifSerial(commandInfo cmd)
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$E,Error: requested motor index out of bounds");
+    UART_PORT.println("$E,Error: requested motor index out of bounds");
 #endif
 
+    return false;
   }
   else
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$E,Error: command not recognized");
+    UART_PORT.println("$E,Error: command not recognized");
 #endif
 
     return false;

@@ -93,8 +93,8 @@ void StepperMotor::stopRotation(void) {
 
 bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
-  // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
   if ( fabs(angle) > pidController.jointAngleTolerance) {
+    // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
     numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
     return true;
   }

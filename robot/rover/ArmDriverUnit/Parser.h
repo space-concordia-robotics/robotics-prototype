@@ -4,6 +4,11 @@
 #include "PinSetup.h"
 #include "RobotMotor.h"
 
+// this struct is specific to the arm teensy at the moment.
+// it should either be generalized or put in the main code,
+// but it can't be put in the main code because commandInfo
+// needs to be defined where it's used as an input parameter
+
 struct commandInfo
 {
   int whichMotor = 0; // which motor was requested to do something
@@ -46,7 +51,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
     cmd.stopAllMotors = true;
 
 #ifdef DEBUG_PARSING
-    Serial.println("$S,Success: parsed emergency command to stop all motors");
+    UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
 #endif
 
   }
@@ -59,8 +64,8 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
       cmd.whichMotor = atoi(msgElem);
 
 #ifdef DEBUG_PARSING
-      Serial.print("parsed motor ");
-      Serial.println(cmd.whichMotor);
+      UART_PORT.print("parsed motor ");
+      UART_PORT.println(cmd.whichMotor);
 #endif
 
       // check for motor stop command has precedence
@@ -71,7 +76,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
         cmd.stopSingleMotor = true;
 
 #ifdef DEBUG_PARSING
-        Serial.println("$S,Success: parsed request to stop single motor");
+        UART_PORT.println("$S,Success: parsed request to stop single motor");
 #endif
 
       }
@@ -85,8 +90,8 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
           cmd.whichAngle = atof(msgElem); // converts to float;
 
 #ifdef DEBUG_PARSING
-          Serial.print("$S,Success: parsed desired angle ");
-          Serial.println(cmd.whichAngle);
+          UART_PORT.print("$S,Success: parsed desired angle ");
+          UART_PORT.println(cmd.whichAngle);
 #endif
 
         }
@@ -102,9 +107,9 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
             cmd.loopState = OPEN_LOOP;
 
 #ifdef DEBUG_PARSING
-            Serial.print("$S,Success: parsed open loop state (");
-            Serial.print(cmd.loopState);
-            Serial.println(") request");
+            UART_PORT.print("$S,Success: parsed open loop state (");
+            UART_PORT.print(cmd.loopState);
+            UART_PORT.println(") request");
 #endif
 
           }
@@ -114,9 +119,9 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
               cmd.loopState = CLOSED_LOOP;
 
 #ifdef DEBUG_PARSING
-              Serial.print("$S,Success: parsed closed loop state (");
-              Serial.print(cmd.loopState);
-              Serial.println(") request");
+              UART_PORT.print("$S,Success: parsed closed loop state (");
+              UART_PORT.print(cmd.loopState);
+              UART_PORT.println(") request");
 #endif
 
             }
@@ -124,7 +129,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
           {
 
 #ifdef DEBUG_PARSING
-            Serial.println("$E,Error: unknown loop state");
+            UART_PORT.println("$E,Error: unknown loop state");
 #endif
 
           }
@@ -141,7 +146,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
             cmd.resetAngleValue = true;
 
 #ifdef DEBUG_PARSING
-            Serial.println("$S,Success: parsed request to reset angle value");
+            UART_PORT.println("$S,Success: parsed request to reset angle value");
 #endif
 
           }
@@ -151,7 +156,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
               cmd.resetJointPosition = true;
 
 #ifdef DEBUG_PARSING
-              Serial.println("$S,Sucess: parsed request to reset joint position");
+              UART_PORT.println("$S,Sucess: parsed request to reset joint position");
 #endif
 
             }
@@ -159,7 +164,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
           {
 
 #ifdef DEBUG_PARSING
-            Serial.println("$E,Error: unknown reset request");
+            UART_PORT.println("$E,Error: unknown reset request");
 #endif
 
           }
@@ -168,9 +173,9 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
       {
 
 #ifdef DEBUG_PARSING
-        Serial.print("$E,Error: unknown motor ");
-        Serial.print(cmd.whichMotor);
-        Serial.println(" command");
+        UART_PORT.print("$E,Error: unknown motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.println(" command");
 #endif
 
       }
@@ -179,7 +184,7 @@ void Parser::parseCommand(commandInfo& cmd, char *restOfMessage)
   {
 
 #ifdef DEBUG_PARSING
-    Serial.println("$E,Error: unknown motor command");
+    UART_PORT.println("$E,Error: unknown motor command");
 #endif
 
   }
@@ -191,7 +196,7 @@ bool Parser::verifCommand(commandInfo cmd)
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$S,Success: command to stop all motors verified");
+    UART_PORT.println("$S,Success: command to stop all motors verified");
 #endif
 
     return true;
@@ -204,9 +209,9 @@ bool Parser::verifCommand(commandInfo cmd)
       {
 
 #ifdef DEBUG_VERIFYING
-        Serial.print("$S,Success: command to stop motor ");
-        Serial.print(cmd.whichMotor);
-        Serial.println(" verified");
+        UART_PORT.print("$S,Success: command to stop motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.println(" verified");
 #endif
 
         return true;
@@ -218,10 +223,10 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$E,Error: angle of ");
-            Serial.print(cmd.whichAngle);
-            Serial.print(" degrees invalid for motor ");
-            Serial.println(cmd.whichMotor);
+            UART_PORT.print("$E,Error: angle of ");
+            UART_PORT.print(cmd.whichAngle);
+            UART_PORT.print(" degrees invalid for motor ");
+            UART_PORT.println(cmd.whichMotor);
 #endif
 
             return false;
@@ -230,11 +235,11 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to move motor ");
-            Serial.print(cmd.whichMotor);
-            Serial.print(" ");
-            Serial.print(cmd.whichAngle);
-            Serial.println(" degrees verified");
+            UART_PORT.print("$S,Success: command to move motor ");
+            UART_PORT.print(cmd.whichMotor);
+            UART_PORT.print(" ");
+            UART_PORT.print(cmd.whichAngle);
+            UART_PORT.println(" degrees verified");
 #endif
 
             return true;
@@ -247,12 +252,12 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to set motor ");
-            Serial.print(cmd.whichMotor);
+            UART_PORT.print("$S,Success: command to set motor ");
+            UART_PORT.print(cmd.whichMotor);
             if (cmd.loopState == OPEN_LOOP)
-              Serial.println(" to open loop verified");
+              UART_PORT.println(" to open loop verified");
             if (cmd.loopState == CLOSED_LOOP)
-              Serial.println(" to closed loop verified");
+              UART_PORT.println(" to closed loop verified");
 #endif
 
             return true;
@@ -261,7 +266,7 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.println("$E,Error: invalid loop state");
+            UART_PORT.println("$E,Error: invalid loop state");
 #endif
 
             return false;
@@ -274,12 +279,12 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.print("$S,Success: command to reset motor ");
-            Serial.print(cmd.whichMotor);
+            UART_PORT.print("$S,Success: command to reset motor ");
+            UART_PORT.print(cmd.whichMotor);
             if (cmd.resetAngleValue)
-              Serial.println(" saved angle value verified");
+              UART_PORT.println(" saved angle value verified");
             if (cmd.resetJointPosition)
-              Serial.println(" physical joint position verified");
+              UART_PORT.println(" physical joint position verified");
 #endif
 
             return true;
@@ -288,7 +293,7 @@ bool Parser::verifCommand(commandInfo cmd)
           {
 
 #ifdef DEBUG_VERIFYING
-            Serial.println("$E,Error: invalid reset request");
+            UART_PORT.println("$E,Error: invalid reset request");
 #endif
 
             return false;
@@ -297,9 +302,9 @@ bool Parser::verifCommand(commandInfo cmd)
       else
 
 #ifdef DEBUG_VERIFYING
-      Serial.print("$E,Error: command for motor ");
-      Serial.print(cmd.whichMotor);
-      Serial.println(" not recognized");
+      UART_PORT.print("$E,Error: command for motor ");
+      UART_PORT.print(cmd.whichMotor);
+      UART_PORT.println(" not recognized");
 #endif
 
       return false;
@@ -310,15 +315,16 @@ bool Parser::verifCommand(commandInfo cmd)
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$E,Error: requested motor index out of bounds");
+    UART_PORT.println("$E,Error: requested motor index out of bounds");
 #endif
 
+    return false;
   }
   else
   {
 
 #ifdef DEBUG_VERIFYING
-    Serial.println("$E,Error: command not recognized");
+    UART_PORT.println("$E,Error: command not recognized");
 #endif
 
     return false;

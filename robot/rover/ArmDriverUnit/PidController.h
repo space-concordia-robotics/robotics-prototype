@@ -14,7 +14,7 @@ class PidController {
     float pidOutput; // only updated at the end of the calculations
 
     PidController();
-    void updatePID(volatile float& currentAngle, float& desiredAngle);
+    void updatePID(volatile float currentAngle, float desiredAngle);
     void setJointAngleTolerance(float tolerance);
     void setOutputLimits(float minVal, float maxVal);
     void setGainConstants(float kp, float ki, float kd);
@@ -36,23 +36,23 @@ PidController::PidController() {
   maxOutputValue = 50.0;
 }
 
-void PidController::updatePID(volatile float& currentAngle, float& desiredAngle) {
+void PidController::updatePID(volatile float currentAngle, float desiredAngle) {
   error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
   // if the angle is outside the tolerance, move
   if (fabs(error) >= jointAngleTolerance) { //fabs is for floats
 
-    Serial.print("Current angle is: "); Serial.println(currentAngle);
-    Serial.print("Desired angle is: "); Serial.println(desiredAngle);
-    Serial.print("Previous angle error is: "); Serial.println(previousError);
-    Serial.print("Current angle error is: "); Serial.println(error);
+    UART_PORT.print("Current angle is: "); UART_PORT.println(currentAngle);
+    UART_PORT.print("Desired angle is: "); UART_PORT.println(desiredAngle);
+    UART_PORT.print("Previous angle error is: "); UART_PORT.println(previousError);
+    UART_PORT.print("Current angle error is: "); UART_PORT.println(error);
     pTerm = kp * error;
-    Serial.print("P output is: "); Serial.println(pTerm);
+    UART_PORT.print("P output is: "); UART_PORT.println(pTerm);
     iTerm += ki * ((error + previousError) / 2) * dt;
-    Serial.print("I output is: "); Serial.println(iTerm);
+    UART_PORT.print("I output is: "); UART_PORT.println(iTerm);
     dTerm = kd * (error - previousError) / dt;
-    Serial.print("D output is: "); Serial.println(dTerm);
+    UART_PORT.print("D output is: "); UART_PORT.println(dTerm);
     pidSum = pTerm + iTerm + dTerm;
-    Serial.print("PID output is: "); Serial.println(pidSum);
+    UART_PORT.print("PID output is: "); UART_PORT.println(pidSum);
 
     if (pidSum > maxOutputValue) pidOutput = maxOutputValue; // give max output
     if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
