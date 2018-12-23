@@ -16,9 +16,18 @@
    -(done-ish) can determine motor angles for dc and steppers, not servos
    -(issue) not sure if encoder function reads all angles or if gear ratio/line count data is incorrect for PG188
    -(now) deal with overflow of encoderCount
-   -(now) determine whether it's worth it to use the built in quadrature decoders
+   -(later) determine whether it's worth it to use the built in quadrature decoders
 
-  -(next step) timers
+  -(done-ish) simultaneous motor control with timers
+   -(done-ish) software interrupts can take input from open loop control but need to refine everything and finish closed loop control
+   -more comments in next comment block
+
+  -(next step) external interrupts for limit switches
+   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
+   -(waiting for the switches) incorporate limit switches for homing position on all motors
+   -(later) implement homing function on boot
+
+  -(next next step) timers
    -systick is normally a heartbeat type thing
    -lptmr runs even on low power mode, maybe this should be heartbeat instead?
    -pit is used for intervaltimer objects, there are 4 and they work like interrupts
@@ -29,19 +38,10 @@
     -ftm+tpm has quadrature decoder?
     -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
 
-  -(next) simultaneous motor control with timers
-   -(done-ish) software interrupts can take input from open loop control but need to refine everything and finish closed loop control
-   -more comments in next comment block
-
-  -(next next step) external interrupts for limit switches
-   -(now) rewrite all the register bit variables to use teensy registers for limit switch interrupts
-   -(waiting for the switches) incorporate limit switches for homing position on all motors
-   -(later) implement homing function on boot
-
   -even more notes in josh notes.txt and in google drive
 */
 /*
-   perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup as it's also got angle limits and gear ratios
+   perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup or just setup as it's also got angle limits and gear ratios
    technically i can use my motorarray shorthand to shorten the switch/case thing significantly
    gotta figure out the correspondence between direction pin's high/low and motor rotation direction
    set velocity should only set velocity and writing to pins happens outside in interrupt functions? or in dedicated function?
@@ -50,7 +50,6 @@
 */
 /*
   1) motor4 calculates the error by subtracting the desired minus the current angle... but it's open loop? can keep track of imagined current angle and then this calculation actually makes sense though! this means changning what I wrote for motor2&3
-  4) should i change parseSerial to take in a char array?
   6) angleTolerance is motorPID attribute and not motor attribute?
   7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
   8) there's a command to reset a motor position but no implementation
@@ -70,14 +69,10 @@
   22) control code for stepper closed loop isn't implemented even though structure exists
   23) motor angle checks for open loop control remains to be fixed, updated, implemented
   24) resetjointposition remains to be implemented
-  25) commands to stop motors from turning would be nice already
-
-  There should be a switch somewhere to switch between sending readable debugging serial messages and sending ROS messages to be interpreted by the odroid
-
+  
   FIX ALL MOTOR CODE EXCEPT MOTOR2
   DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
 */
-
 /*
   deal with relative vs absolute angle control issues
   make setdesiredangle,getdesiredangle functions
@@ -87,9 +82,11 @@
 
   what happens if a new command tells the motor to turn in opposite direction? abrupt changes are bad. if the stepper is trying to turn but hasn't gotten anywhere there should be a check in the microcontroller that there's an issue (there can also be a check in the gui)
 
-  for encoder interrupt testing set up the arduino with op amp? something? - voltage divider - teensy, send 3.3v to all interrupt pins simultaneously to test thing?
+  for encoder interrupt testing on the teensy, send 3.3v to all interrupt pins simultaneously to test thing?
   floating point math doesn't seem bad, but at worst, convert float to int before motor control and do int math inside interrupts
+  
   we don't want to miss messages, we need to know if messages were missed, for example know starting and ending message characters, we need some kind of confirmation anyway
+  
   quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore
   quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?)
 
@@ -117,16 +114,4 @@
   different types of ramping profiles - trapezoid vs quintic polynomial
   instead of using interrupts to control steppers maybe use pwm?
   this is pretty tricky to do and will sacrifice a bunch of pins that could otherwise use pwm but could be useful
-
-two types of communication:
-regular comms that will print readable messages over serial
-encoded comms using ROSserial for odroid
-
-there can be a definition and ifdef/ifndef statements to choose which way to communicate
-
-on a related note, there could be a debug mode that unlocks features like modifying angle variables or pid constants
-this debug mode would only activate if a special string is sent to the teensy
-
-finally, in order to deal with all those serial messages, that F() thing or whatever it is should be used
-
 */
