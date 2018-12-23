@@ -114,9 +114,7 @@ bool RobotMotor::calcCurrentAngle(void) {
   }
   else {
     Serial.println("$E,Error: motor does not have encoder");
-    // use either max float value or set an actual max angle limit
-    // perhaps use: return std::numeric_limits<float>::max();
-    return false; // wants a return value, at least this value should be invalid
+    return false;
   }
 }
 
@@ -127,4 +125,5 @@ float RobotMotor::getCurrentAngle(void){
 void RobotMotor::setCurrentAngle(float angle){
   currentAngle = angle;
 }
+
 #endif

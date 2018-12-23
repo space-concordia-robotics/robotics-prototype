@@ -1,6 +1,38 @@
 /*
-Description of code goes here.
-This code began development sometime around July 20 2018 and is still being updated as of December 17 2018.
+This is the main sketch which defines the control logic of the robotic arm of
+the Space Concordia Division, which runs on a Teensy 3.6 that will communicate
+with an Odroid XU4.
+The code can be compiled for serial communication over usb (if connected to a
+standard computer), or for serial communication over TX/RX pins (if connected
+to the Odroid). In the latter case, communication can be done either directly
+with Serial1, or with ROSserial, if integration in the ROS network is desired.
+
+Currently, this code is built for the control of six motors: two DC motors,
+two stepper motors, and two continuous rotation servos. Several helper classes
+were written to abstract away the complexities of controlling different types
+of motors and communicating with a master device.
+The code allows position control for all six of the arm's joints. It also
+will have a homing routine which depends on limit switches and sets the
+0 degrees position for each joint. The code also allows to stop motors at
+any point in time. Open loop control can be performed without the use of
+encoders but results in imprecise and jerky control. Use of ramping allows
+for less jerky control. The best control is closed loop control, which uses
+encoders for smooth speed profiles.
+
+The code starts by setting up a variety of events. It sets up the Teensy's
+GPIO pins, initializes the motor objects with the correct parameters (gear
+ratio, angle limits, etc), it starts up the timers and interrupt service
+routines, and it initializes communications with the master device.
+The main loop listens over the serial port for commands, parses them,
+then verifies the commands. Based on the type of command, the microcontroller
+will know how to control the motors.
+Variables changed in the main loop allow the timer interrupts to actually turn
+the motors, either in open loop or closed loop. The main loop can also perform
+periodic checks for motors in open loop, to effectuate small corrections to
+position during movements - if the appropriate motor has an encoder on it.
+
+This code began development sometime around July 20 2018 and is still being
+updated as of December 22 2018.
 */
 /* still in idea phase */
 #define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
