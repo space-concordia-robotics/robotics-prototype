@@ -28,8 +28,8 @@ class RobotMotor {
 
     // these variables change during the main loop
     volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
-    volatile float currentAngle; // can be updated within timer interrupts
-    float desiredAngle;
+    //volatile float currentAngle; // can be updated within timer interrupts
+    //float desiredAngle;
     volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
 
     // setup functions
@@ -41,8 +41,11 @@ class RobotMotor {
     virtual void setVelocity(int motorDir, int motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
     //void setMaxSpeed();
     void calcDirection(float error); // updates rotationDirection based on the angular error inputted
-    bool setDesiredAngle(float angle); // need to have defined it for servos first
-    float calcCurrentAngle(void);
+    bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
+    float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
+    bool calcCurrentAngle(void);
+    float getCurrentAngle(void);
+    void setCurrentAngle(float angle); // for debugging mostly, overwrite current angle value
 
   private:
     // doesn't really make sense to have any private variables for this parent class.
@@ -53,7 +56,9 @@ class RobotMotor {
     uint32_t encoderPort; // address of the port connected to a particular encoder pin
     int encoderShift; // how many bits to shift over to find the encoder pin state
     int encoderResolution; // ticks per revolution
-
+volatile float currentAngle; // can be updated within timer interrupts
+    float desiredAngle;
+    
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
@@ -94,22 +99,32 @@ bool RobotMotor::setDesiredAngle(float angle) {
   }
 }
 
+float RobotMotor::getDesiredAngle(void){
+  return desiredAngle;
+}
 void RobotMotor::calcDirection(float error) {
   if (error >= 0) rotationDirection = 1;
   else rotationDirection = -1;
 }
 
-float RobotMotor::calcCurrentAngle(void) {
+bool RobotMotor::calcCurrentAngle(void) {
   if (hasEncoder) {
     currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return currentAngle;
+    return true;
   }
   else {
     Serial.println("$E,Error: motor does not have encoder");
     // use either max float value or set an actual max angle limit
     // perhaps use: return std::numeric_limits<float>::max();
-    return 40404040404.0; // wants a return value, at least this value should be invalid
+    return false; // wants a return value, at least this value should be invalid
   }
 }
 
+float RobotMotor::getCurrentAngle(void){
+  return currentAngle;
+}
+
+void RobotMotor::setCurrentAngle(float angle){
+  currentAngle = angle;
+}
 #endif

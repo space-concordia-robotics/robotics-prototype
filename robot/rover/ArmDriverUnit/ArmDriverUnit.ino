@@ -4,10 +4,9 @@ This code began development sometime around July 20 2018 and is still being upda
 */
 /* still in idea phase */
 #define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
-//#define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
-//#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
-//#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
-
+// #define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
+// #define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
+// #define USER_MODE 4 // sends messages with ROSserial, functionality restricted
 // these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
 #define DEBUG_PARSING 10 // debug messages during parsing function
 #define DEBUG_VERIFYING 11 // debug messages during verification function
@@ -21,31 +20,31 @@ the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
 should work.
 */
 // serial communication over usb with pc, teensy not connected to odroid
+
 #if defined(DEVEL1_MODE)
 #define UART_PORT Serial
 // serial communication over uart with odroid, teensy plugged into pcb and odroid
 #elif defined(DEVEL2_MODE)
 #define UART_PORT Serial1
 #endif
+
 /*
 choosing serial1 vs rosserial could be compile-time, since serial1 is only really useful
 for debugging and won't be used when the rover is in action. however, a runtime option
 could be useful as in both cases the teensy is communicating solely with the odroid.
 it might be desirable to switch between modes without recompiling.
-
 finally, unlocking extra options should be runtime as it should be easily accessible.
 */
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include "PinSetup.h"
 #include "Parser.h"
-//#include "Notes.h" // holds todo info
-//#include "Ideas.h" // holds bits of code that haven't been implemented
+// #include "Notes.h" // holds todo info
+// #include "Ideas.h" // holds bits of code that haven't been implemented
 #include "RobotMotor.h"
 #include "StepperMotor.h"
 #include "DcMotor.h"
 #include "ServoMotor.h"
-
 #define STEPPER_PID_PERIOD 30 * 1000 // initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
@@ -60,37 +59,35 @@ finally, unlocking extra options should be runtime as it should be easily access
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* parsing */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-//char *bufferPointer = serialBuffer;
-//char * restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
+// char *bufferPointer = serialBuffer;
+// char * restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
 String messageBar = "=======================================================";
 /*
 info from parsing functionality is packaged and given to motor control functionality.
 many of these are set to 0 so that the message can reset, thus making sure that
 the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
-
 /*
 struct commandInfo
 {
-  int whichMotor = 0; // which motor was requested to do something
-  int whichDirection = 0; // set the direction
-  int whichSpeed = 0; // set the speed
-  unsigned int whichTime = 0; // how long to turn for
-  bool angleCommand = false; // for regular operations, indicates that it's to control an angle
-  float whichAngle = 0.0; // for regular operations, which angle to go to
-  bool loopCommand = false; // for choosing between open loop or closed loop control
-  int loopState = 0; // what type of loop state it is
-  bool resetCommand = false; // indicates that something should be reset
-  bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
-  bool resetJointPosition = false; // for moving a joint to its neutral position
-  bool stopSingleMotor = false; // for stopping a single motor
-  bool stopAllMotors = false; // for stopping all motors
+int whichMotor = 0; // which motor was requested to do something
+int whichDirection = 0; // set the direction
+int whichSpeed = 0; // set the speed
+unsigned int whichTime = 0; // how long to turn for
+bool angleCommand = false; // for regular operations, indicates that it's to control an angle
+float whichAngle = 0.0; // for regular operations, which angle to go to
+bool loopCommand = false; // for choosing between open loop or closed loop control
+int loopState = 0; // what type of loop state it is
+bool resetCommand = false; // indicates that something should be reset
+bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
+bool resetJointPosition = false; // for moving a joint to its neutral position
+bool stopSingleMotor = false; // for stopping a single motor
+bool stopAllMotors = false; // for stopping all motors
 }
 motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 */
 commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 Parser Parser;
-
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 const int encoderStates[16] =
 {
@@ -231,13 +228,13 @@ void loop()
     UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     UART_PORT.print("GOT: ");
     UART_PORT.println(serialBuffer); // send back what was received
-    //Parser.parseCommand(motorCommand, bufferPointer);
+    // Parser.parseCommand(motorCommand, bufferPointer);
     Parser.parseCommand(motorCommand, serialBuffer);
-    //parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
+    // parseSerial(motorCommand); // goes through the message and puts the appropriate data into motorCommand struct
     memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-    //restOfMessage = serialBuffer; // reset pointer
-    if ( !Parser.verifCommand(motorCommand) ) 
-    //if (!verifSerial(motorCommand))
+    // restOfMessage = serialBuffer; // reset pointer
+    if (!Parser.verifCommand(motorCommand))
+    // if (!verifSerial(motorCommand))
     {
       UART_PORT.println("$E, verification failed");
     }
@@ -304,7 +301,7 @@ void loop()
                 // this method returns true if the command is within joint angle limits
                 if (motor1.isOpenLoop)
                 {
-                  motor1.openLoopError = motor1.desiredAngle; // - motor1.calcCurrentAngle(); // find the angle difference
+                  motor1.openLoopError = motor1.getDesiredAngle(); // - motor1.calcCurrentAngle(); // find the angle difference
                   motor1.calcDirection(motor1.openLoopError); // determine rotation direction
                   // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
                   if (motor1.calcTurningDuration(motor1.openLoopError))
@@ -333,7 +330,7 @@ void loop()
               {
                 if (motor2.isOpenLoop)
                 {
-                  motor2.openLoopError = motor2.desiredAngle; // - motor2.calcCurrentAngle();
+                  motor2.openLoopError = motor2.getDesiredAngle(); // - motor2.calcCurrentAngle();
                   motor2.calcDirection(motor2.openLoopError);
                   if (motor2.calcTurningDuration(motor2.openLoopError))
                   {
@@ -359,7 +356,7 @@ void loop()
               {
                 if (motor3.isOpenLoop)
                 {
-                  motor3.openLoopError = motor3.desiredAngle; // - motor3.calcCurrentAngle(); // find the angle difference
+                  motor3.openLoopError = motor3.getDesiredAngle(); // - motor3.calcCurrentAngle(); // find the angle difference
                   motor3.calcDirection(motor3.openLoopError);
                   // calculates how many steps to take to get to the desired position, assuming no slipping
                   if (motor3.calcNumSteps(motor3.openLoopError))
@@ -388,7 +385,7 @@ void loop()
                 {
                   if (motor4.isOpenLoop)
                   {
-                    motor4.openLoopError = motor4.desiredAngle; // - motor4.calcCurrentAngle(); // find the angle difference
+                    motor4.openLoopError = motor4.getDesiredAngle(); // - motor4.calcCurrentAngle(); // find the angle difference
                     motor4.calcDirection(motor4.openLoopError);
                     if (motor4.calcNumSteps(motor4.openLoopError))
                     {
@@ -416,7 +413,7 @@ void loop()
               {
                 if (motor5.isOpenLoop)
                 {
-                  motor5.openLoopError = motor5.desiredAngle; // - motor5.calcCurrentAngle(); // find the angle difference
+                  motor5.openLoopError = motor5.getDesiredAngle(); // - motor5.calcCurrentAngle(); // find the angle difference
                   motor5.calcDirection(motor5.openLoopError);
                   if (motor5.calcTurningDuration(motor5.openLoopError))
                   {
@@ -442,7 +439,7 @@ void loop()
                 {
                   if (motor6.isOpenLoop)
                   {
-                    motor6.openLoopError = motor6.desiredAngle; // - motor6.calcCurrentAngle(); // find the angle difference
+                    motor6.openLoopError = motor6.getDesiredAngle(); // - motor6.calcCurrentAngle(); // find the angle difference
                     motor6.calcDirection(motor6.openLoopError);
                     if (motor6.calcTurningDuration(motor6.openLoopError))
                     {
@@ -549,22 +546,22 @@ void loop()
               switch (motorCommand.whichMotor)
               {
                 case MOTOR1:
-                  motor1.currentAngle = 0.0;
+                  motor1.setCurrentAngle(0.0);
                   break;
                 case MOTOR2:
-                  motor2.currentAngle = 0.0;
+                  motor2.setCurrentAngle(0.0);
                   break;
                 case MOTOR3:
-                  motor3.currentAngle = 0.0;
+                  motor3.setCurrentAngle(0.0);
                   break;
                 case MOTOR4:
-                  motor4.currentAngle = 0.0;
+                  motor4.setCurrentAngle(0.0);
                   break;
                 case MOTOR5:
-                  motor5.currentAngle = 0.0;
+                  motor5.setCurrentAngle(0.0);
                   break;
                 case MOTOR6:
-                  motor6.currentAngle = 0.0;
+                  motor6.setCurrentAngle(0.0);
                   break;
               }
               UART_PORT.print("reset angle value of motor ");
@@ -669,15 +666,36 @@ void loop()
 void printMotorAngles()
 {
   UART_PORT.print("Motor Angles: ");
-  UART_PORT.print(motor1.calcCurrentAngle());
-  UART_PORT.print(",");
-  UART_PORT.print(motor2.calcCurrentAngle());
-  UART_PORT.print(",");
-  UART_PORT.print(motor3.calcCurrentAngle());
-  UART_PORT.print(",");
-  UART_PORT.println(motor4.calcCurrentAngle()); // UART_PORT.print(",");
-  // UART_PORT.print(motor5.calcCurrentAngle());UART_PORT.print(",");
-  // UART_PORT.print(motor6.calcCurrentAngle());UART_PORT.print(",");
+  if (motor1.calcCurrentAngle())
+  {
+    UART_PORT.print(motor1.getCurrentAngle());
+  }
+  if (motor2.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor2.getCurrentAngle());
+  }
+  if (motor3.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor3.getCurrentAngle());
+  }
+  if (motor4.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor4.getCurrentAngle());
+  }
+  if (motor5.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor5.getCurrentAngle());
+  }
+  if (motor6.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor6.getCurrentAngle());
+  }
+  UART_PORT.println();
 }
 
 void m3StepperInterrupt(void)
@@ -779,7 +797,7 @@ void dcInterrupt(void)
       if (!motor1.movementDone)
       {
         motor1.calcCurrentAngle();
-        motor1.pidController.updatePID(motor1.currentAngle, motor1.desiredAngle);
+        motor1.pidController.updatePID(motor1.getCurrentAngle(), motor1.getDesiredAngle());
         if (motor1.pidController.pidOutput == 0)
         {
           motor1.movementDone = true;
@@ -819,7 +837,7 @@ void dcInterrupt(void)
       if (!motor2.movementDone)
       {
         motor2.calcCurrentAngle();
-        motor2.pidController.updatePID(motor2.currentAngle, motor2.desiredAngle);
+        motor2.pidController.updatePID(motor2.getCurrentAngle(), motor2.getDesiredAngle());
         if (motor2.pidController.pidOutput == 0)
         {
           motor2.movementDone = true;
@@ -865,7 +883,7 @@ void servoInterrupt(void)
       if (!motor5.movementDone)
       {
         motor5.calcCurrentAngle();
-        motor5.pidController.updatePID(motor5.currentAngle, motor5.desiredAngle);
+        motor5.pidController.updatePID(motor5.getCurrentAngle(), motor5.getDesiredAngle());
         if (motor5.pidController.pidOutput == 0)
         {
           motor5.movementDone = true;
@@ -905,7 +923,7 @@ void servoInterrupt(void)
       if (!motor6.movementDone)
       {
         motor6.calcCurrentAngle();
-        motor6.pidController.updatePID(motor6.currentAngle, motor6.desiredAngle);
+        motor6.pidController.updatePID(motor6.getCurrentAngle(), motor6.getDesiredAngle());
         if (motor6.pidController.pidOutput == 0)
         {
           motor6.movementDone = true;
@@ -988,295 +1006,247 @@ oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
 motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 */
-
 /*
 void parseSerial(commandInfo & cmd)
 {
-  // check for emergency stop has precedence
-  char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
-  if (String(msgElem) == "stop")
-  {
-    // msgElem is a char array so it's safer to convert to string first
-    cmd.stopAllMotors = true;
-
+// check for emergency stop has precedence
+char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
+if (String(msgElem) == "stop")
+{
+// msgElem is a char array so it's safer to convert to string first
+cmd.stopAllMotors = true;
 #ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
+UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
 #endif
-
-  }
-  // check for motor command
-  else
-    if (String(msgElem) == "motor")
-    {
-      // msgElem is a char array so it's safer to convert to string first
-      msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
-      cmd.whichMotor = atoi(msgElem);
-
-#ifdef DEBUG_PARSING
-      UART_PORT.print("parsed motor ");
-      UART_PORT.println(cmd.whichMotor);
-#endif
-
-      // check for motor stop command has precedence
-      msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "stop")
-      {
-        // msgElem is a char array so it's safer to convert to string first
-        cmd.stopSingleMotor = true;
-
-#ifdef DEBUG_PARSING
-        UART_PORT.println("$S,Success: parsed request to stop single motor");
-#endif
-
-      }
-      // check for angle command
-      else
-        if (String(msgElem) == "angle")
-        {
-          // msgElem is a char array so it's safer to convert to string first
-          cmd.angleCommand = true;
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-          cmd.whichAngle = atof(msgElem); // converts to float;
-
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired angle ");
-          UART_PORT.println(cmd.whichAngle);
-#endif
-
-        }
-      // check for loop state command
-      else
-        if (String(msgElem) == "loop")
-        {
-          // msgElem is a char array so it's safer to convert to string first
-          cmd.loopCommand = true;
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-          if (String(msgElem) == "open")
-          {
-            cmd.loopState = OPEN_LOOP;
-
-#ifdef DEBUG_PARSING
-            UART_PORT.print("$S,Success: parsed open loop state (");
-            UART_PORT.print(cmd.loopState);
-            UART_PORT.println(") request");
-#endif
-
-          }
-          else
-            if (String(msgElem) == "closed")
-            {
-              cmd.loopState = CLOSED_LOOP;
-
-#ifdef DEBUG_PARSING
-              UART_PORT.print("$S,Success: parsed closed loop state (");
-              UART_PORT.print(cmd.loopState);
-              UART_PORT.println(") request");
-#endif
-
-            }
-          else
-          {
-
-#ifdef DEBUG_PARSING
-            UART_PORT.println("$E,Error: unknown loop state");
-#endif
-
-          }
-        }
-      // check for angle reset command
-      else
-        if (String(msgElem) == "reset")
-        {
-          // msgElem is a char array so it's safer to convert to string first
-          cmd.resetCommand = true;
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-          if (String(msgElem) == "angle")
-          {
-            cmd.resetAngleValue = true;
-
-#ifdef DEBUG_PARSING
-            UART_PORT.println("$S,Success: parsed request to reset angle value");
-#endif
-
-          }
-          else
-            if (String(msgElem) == "position")
-            {
-              cmd.resetJointPosition = true;
-
-#ifdef DEBUG_PARSING
-              UART_PORT.println("$S,Sucess: parsed request to reset joint position");
-#endif
-
-            }
-          else
-          {
-
-#ifdef DEBUG_PARSING
-            UART_PORT.println("$E,Error: unknown reset request");
-#endif
-
-          }
-        }
-      else
-      {
-
-#ifdef DEBUG_PARSING
-        UART_PORT.print("$E,Error: unknown motor ");
-        UART_PORT.print(cmd.whichMotor);
-        UART_PORT.println(" command");
-#endif
-
-      }
-    }
-  else
-  {
-
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$E,Error: unknown motor command");
-#endif
-
-  }
 }
-
+// check for motor command
+else
+if (String(msgElem) == "motor")
+{
+// msgElem is a char array so it's safer to convert to string first
+msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
+cmd.whichMotor = atoi(msgElem);
+#ifdef DEBUG_PARSING
+UART_PORT.print("parsed motor ");
+UART_PORT.println(cmd.whichMotor);
+#endif
+// check for motor stop command has precedence
+msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (direction tag)
+if (String(msgElem) == "stop")
+{
+// msgElem is a char array so it's safer to convert to string first
+cmd.stopSingleMotor = true;
+#ifdef DEBUG_PARSING
+UART_PORT.println("$S,Success: parsed request to stop single motor");
+#endif
+}
+// check for angle command
+else
+if (String(msgElem) == "angle")
+{
+// msgElem is a char array so it's safer to convert to string first
+cmd.angleCommand = true;
+msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+cmd.whichAngle = atof(msgElem); // converts to float;
+#ifdef DEBUG_PARSING
+UART_PORT.print("$S,Success: parsed desired angle ");
+UART_PORT.println(cmd.whichAngle);
+#endif
+}
+// check for loop state command
+else
+if (String(msgElem) == "loop")
+{
+// msgElem is a char array so it's safer to convert to string first
+cmd.loopCommand = true;
+msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+if (String(msgElem) == "open")
+{
+cmd.loopState = OPEN_LOOP;
+#ifdef DEBUG_PARSING
+UART_PORT.print("$S,Success: parsed open loop state (");
+UART_PORT.print(cmd.loopState);
+UART_PORT.println(") request");
+#endif
+}
+else
+if (String(msgElem) == "closed")
+{
+cmd.loopState = CLOSED_LOOP;
+#ifdef DEBUG_PARSING
+UART_PORT.print("$S,Success: parsed closed loop state (");
+UART_PORT.print(cmd.loopState);
+UART_PORT.println(") request");
+#endif
+}
+else
+{
+#ifdef DEBUG_PARSING
+UART_PORT.println("$E,Error: unknown loop state");
+#endif
+}
+}
+// check for angle reset command
+else
+if (String(msgElem) == "reset")
+{
+// msgElem is a char array so it's safer to convert to string first
+cmd.resetCommand = true;
+msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+if (String(msgElem) == "angle")
+{
+cmd.resetAngleValue = true;
+#ifdef DEBUG_PARSING
+UART_PORT.println("$S,Success: parsed request to reset angle value");
+#endif
+}
+else
+if (String(msgElem) == "position")
+{
+cmd.resetJointPosition = true;
+#ifdef DEBUG_PARSING
+UART_PORT.println("$S,Sucess: parsed request to reset joint position");
+#endif
+}
+else
+{
+#ifdef DEBUG_PARSING
+UART_PORT.println("$E,Error: unknown reset request");
+#endif
+}
+}
+else
+{
+#ifdef DEBUG_PARSING
+UART_PORT.print("$E,Error: unknown motor ");
+UART_PORT.print(cmd.whichMotor);
+UART_PORT.println(" command");
+#endif
+}
+}
+else
+{
+#ifdef DEBUG_PARSING
+UART_PORT.println("$E,Error: unknown motor command");
+#endif
+}
+}
 bool verifSerial(commandInfo cmd)
 {
-  if (cmd.stopAllMotors)
-  {
-
+if (cmd.stopAllMotors)
+{
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: command to stop all motors verified");
+UART_PORT.println("$S,Success: command to stop all motors verified");
 #endif
-
-    return true;
-  }
-  // 0 means there was an invalid command and therefore motors shouldn't be controlled
-  else
-    if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors)
-    {
-      if (cmd.stopSingleMotor)
-      {
-
+return true;
+}
+// 0 means there was an invalid command and therefore motors shouldn't be controlled
+else
+if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors)
+{
+if (cmd.stopSingleMotor)
+{
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: command to stop motor ");
-        UART_PORT.print(cmd.whichMotor);
-        UART_PORT.println(" verified");
+UART_PORT.print("$S,Success: command to stop motor ");
+UART_PORT.print(cmd.whichMotor);
+UART_PORT.println(" verified");
 #endif
-
-        return true;
-      }
-      else
-        if (cmd.angleCommand)
-        {
-          if (cmd.whichAngle < -720 || cmd.whichAngle > 720)
-          {
-
+return true;
+}
+else
+if (cmd.angleCommand)
+{
+if (cmd.whichAngle < -720 || cmd.whichAngle > 720)
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.print("$E,Error: angle of ");
-            UART_PORT.print(cmd.whichAngle);
-            UART_PORT.print(" degrees invalid for motor ");
-            UART_PORT.println(cmd.whichMotor);
+UART_PORT.print("$E,Error: angle of ");
+UART_PORT.print(cmd.whichAngle);
+UART_PORT.print(" degrees invalid for motor ");
+UART_PORT.println(cmd.whichMotor);
 #endif
-
-            return false;
-          }
-          else
-          {
-
+return false;
+}
+else
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.print("$S,Success: command to move motor ");
-            UART_PORT.print(cmd.whichMotor);
-            UART_PORT.print(" ");
-            UART_PORT.print(cmd.whichAngle);
-            UART_PORT.println(" degrees verified");
+UART_PORT.print("$S,Success: command to move motor ");
+UART_PORT.print(cmd.whichMotor);
+UART_PORT.print(" ");
+UART_PORT.print(cmd.whichAngle);
+UART_PORT.println(" degrees verified");
 #endif
-
-            return true;
-          }
-        }
-      else
-        if (cmd.loopCommand)
-        {
-          if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP)
-          {
-
+return true;
+}
+}
+else
+if (cmd.loopCommand)
+{
+if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP)
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.print("$S,Success: command to set motor ");
-            UART_PORT.print(cmd.whichMotor);
-            if (cmd.loopState == OPEN_LOOP)
-              UART_PORT.println(" to open loop verified");
-            if (cmd.loopState == CLOSED_LOOP)
-              UART_PORT.println(" to closed loop verified");
+UART_PORT.print("$S,Success: command to set motor ");
+UART_PORT.print(cmd.whichMotor);
+if (cmd.loopState == OPEN_LOOP)
+UART_PORT.println(" to open loop verified");
+if (cmd.loopState == CLOSED_LOOP)
+UART_PORT.println(" to closed loop verified");
 #endif
-
-            return true;
-          }
-          else
-          {
-
+return true;
+}
+else
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.println("$E,Error: invalid loop state");
+UART_PORT.println("$E,Error: invalid loop state");
 #endif
-
-            return false;
-          }
-        }
-      else
-        if (cmd.resetCommand)
-        {
-          if (cmd.resetAngleValue || cmd.resetJointPosition)
-          {
-
+return false;
+}
+}
+else
+if (cmd.resetCommand)
+{
+if (cmd.resetAngleValue || cmd.resetJointPosition)
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.print("$S,Success: command to reset motor ");
-            UART_PORT.print(cmd.whichMotor);
-            if (cmd.resetAngleValue)
-              UART_PORT.println(" saved angle value verified");
-            if (cmd.resetJointPosition)
-              UART_PORT.println(" physical joint position verified");
+UART_PORT.print("$S,Success: command to reset motor ");
+UART_PORT.print(cmd.whichMotor);
+if (cmd.resetAngleValue)
+UART_PORT.println(" saved angle value verified");
+if (cmd.resetJointPosition)
+UART_PORT.println(" physical joint position verified");
 #endif
-
-            return true;
-          }
-          else
-          {
-
+return true;
+}
+else
+{
 #ifdef DEBUG_VERIFYING
-            UART_PORT.println("$E,Error: invalid reset request");
+UART_PORT.println("$E,Error: invalid reset request");
 #endif
-
-            return false;
-          }
-        }
-      else
-
+return false;
+}
+}
+else
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$E,Error: command for motor ");
-      UART_PORT.print(cmd.whichMotor);
-      UART_PORT.println(" not recognized");
+UART_PORT.print("$E,Error: command for motor ");
+UART_PORT.print(cmd.whichMotor);
+UART_PORT.println(" not recognized");
 #endif
-
-      return false;
-    }
-  else
-    if
-  (cmd.whichMotor < 0 || cmd.whichMotor >= RobotMotor::numMotors)
-  {
-
+return false;
+}
+else
+if
+(cmd.whichMotor < 0 || cmd.whichMotor >= RobotMotor::numMotors)
+{
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$E,Error: requested motor index out of bounds");
+UART_PORT.println("$E,Error: requested motor index out of bounds");
 #endif
-
-    return false;
-  }
-  else
-  {
-
+return false;
+}
+else
+{
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$E,Error: command not recognized");
+UART_PORT.println("$E,Error: command not recognized");
 #endif
-
-    return false;
-  }
+return false;
+}
 }
 */

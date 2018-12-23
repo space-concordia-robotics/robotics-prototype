@@ -60,7 +60,7 @@
   13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
   14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
   15) implement setVelocity() for stepper motors
-  16) calcCurrentAngle() shouldn't just output an absurd value if it didn't work... deal with it
+  16) implement checks for calcCurrentAngle() now that it returns a bool
   17) perhaps the initialization of motor angle parameters should be its own function
   18) perhaps the initialization of the motor's pins should also be its own function
   19) perhaps the constructor should take a series of structs, one for each type
@@ -75,7 +75,6 @@
 */
 /*
   deal with relative vs absolute angle control issues
-  make setdesiredangle,getdesiredangle functions
   what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 
   for steppers the check is more to do with whether the amount of steps has been reached and if not, try to step more... whereas for dc they control voltage so the issue there is whether the pid tries to go to max voltage
