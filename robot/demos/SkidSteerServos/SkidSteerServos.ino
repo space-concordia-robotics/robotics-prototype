@@ -10,12 +10,12 @@ Servo servoMiddleLeft;
 Servo servoBackLeft;
 
 
-int prevThrottle = 49;
-int prevSteering = 49;
-int throttle, steering;
+float prevThrottle = 49;
+float prevSteering = 49;
+float throttle, steering;
 // Initialize Left & Right Velocity variables to Rest
-int velocityRight = 90;
-int velocityLeft = 90;
+float velocityRight = 90;
+float velocityLeft = 90;
 float deg = 0;
 //This value is used to shift the contorollers range to have 0 as a middle rest value. shift value depends on controllers range. 
 int shiftValue = 49
