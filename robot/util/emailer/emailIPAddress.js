@@ -53,7 +53,7 @@ function sendEmail(ip){
 
     var mailOptions = {
         from: '"Mr. odroid sir" <concordiacourseplanner@gmail.com>', // sender address
-        to: 'davidhuculak5@gmail.com, petergranitski@gmail.com, samuel.beaubien@hotmail.com', // list of receivers
+        to: 'davidhuculak5@gmail.com, petergranitski@gmail.com', // list of receivers
         subject: 'The IP Address of the odroid', // Subject line
         html: message // html body
     };

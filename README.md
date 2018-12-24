@@ -140,6 +140,87 @@ See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1
 - Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
 ## ODROID
+### Flashing ubuntuMATE to the odroid (tested on Ubuntu 16.04)
+
+Sometimes things go wrong, like when all of a sudden the odroid won't properly boot up anymore.
+The simplest fix for this usually is reflashing the OS onto your memory card.
+When doing this, you are overwriting all previous data on the memory card so if you want to retain and are able to access your user space data then back it up prior to proceeding.
+If you wanted to back up your Documents folder then use `sudo cp -rp /home/odroid/Documents /media/backup/my_home` with the `-rp` flag if you want to keep owners and permissions of the files intact.
+For storage media types you are either using a microSD or an eMMC card. The method described below will work for both (so far only tested on eMMC) but you should know that you will need some kind of adapter to be able to access the memory cards as storage devices.
+
+#### microSD
+For the microSD card your typicial microSD to SD reader will do. If you don't have a microSD port on your computer you can use a microSD to USB adapter.
+
+#### eMMC
+For the case of the eMMC card you will need to use an eMMC reader, along with a microSD to SD or USB adapter.[This forum post](https://forum.odroid.com/viewtopic.php?f=53&t=2725) contains a list of verified eMMC readers, microSD/USB adapters.
+
+In my case I used the following eMMC reader to microSD, paired with a Transcend USB adapter.
+
+1. eMMC module reader
+
+<img src="docs/media/emmc-module-reader.jpg" height="250" width="250">
+
+2. eMMC module mounted onto reader
+
+<img src="docs/media/emmc-reader-mounted.jpg" height="500" width="500">
+
+3. eMMC module reader mounted onto USB adapter microSD slot
+
+<img src="docs/media/emmc-reader-usb-mounted.jpg" height="500" width="500">
+
+4. Plugged in
+
+<img src="docs/media/usb-emmc-live.jpg" height="500" width="500">
+
+The next step is to download the ubuntuMATE 16.04 image from [here](https://odroid.in/ubuntu_16.04lts/). Choose the proper image depending on the type of odroid you have.
+For the odroid we are using in competition (xu4) I used `ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz`.
+
+If it is not already installed, you will need to install `xz-utils` via `sudo apt-get install xz-utils`.
+
+Now decompress the compressed image with: `unxz ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz` to obtain the img file.
+
+Use the command `lsblk` to identify the block device that is the eMMC/microSD card you are trying to flash.
+To be sure, unplug your adapter first and run `lsblk`, then plug in the adapter and run `lsblk` to see the difference.
+In my case it was `/dev/sdb`.
+
+Finally, to flash the image onto the card, you can use the `ddrescue` unix library.
+
+To install it run `sudo apt-get install ddrescue`.
+
+To flash it run `sudo ddrescue -D --force ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz /dev/sdb`, making sure to replace `/dev/sdb` with your own proper value.
+
+By the time it is done, you will have a fresh install of ubuntuMATE on your card.
+**Note** that when booting up for the very first time after a flash the odroid will boot to login screen, but then suddenly die.
+This is normal,  after the initial bootup you will need to reboot one more time for it to finally work properly.
+
+Note that the first time you connect your odroid to the internet it will most likely automatically start the job `apt-daily.service` which will temporarily make the `apt-get` command unavailable.
+To confirm this, you can check with `ps aux | grep apt` to get the process id (pid). This process will lock the use of `apt-get`.
+The best thing to do is to just wait until it is done. You can see how long it has been running with `ps -o etime= -p process_id` (replacing "processid" with the corresponding pid of the apt daily update process.
+To get a running time of elapsed time updated each second you may run `watch -n 1 ps -o etime= -p process_id`.
+
+### Custom images
+
+These custom images are made by directly setting up the changes on a fresh image, then using `dd` to save the state of the operating system as an image file.
+
+Example: `sudo dd if=/dev/sdb of=ubuntuMateDev.img bs=4M`
+
+For step by step instructions see [here](http://odroid.us/mediawiki/index.php?title=Create_SD_Card_Images).
+
+#### Dev
+
+The ubuntuMATE image is customized as follows to allow us to more easily develop on the odroid.
+
+Differences between default ubuntuMATE image:
+- [Autologin enabled](https://ubuntu-mate.community/t/auto-login-to-the-desktop/60)
+- Install `curl` and `git` with `apt-get`
+- Clone this `robotics-prototype` repo to `~/Programming` folder
+- Install `nvm v0.33.11`, `node v10.13.0` (LTS) by `wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash` , and `nvm install node v10.13.0`, respectively
+- Setup systemd service called `ip-emailer` to run `runEmailer.sh` ([how to setup a startup service with systemd](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee))
+- Add configuration files `.bash_aliases` and `.nanorc`
+
+Any kind of authentication requiring services (such as a connection to a wifi network requiring username/password) will not be included in the images.
+To find all the custom images follow [this link](https://drive.google.com/drive/u/1/folders/17An9xUkBo8dGS8PoY54tsNWucJLyBDJC) to the corresponding google drive folder.
+
 ### How to upload Arduino scripts from the odroid
 
 1. Make sure the arduino is plugged into the odroid
@@ -156,23 +237,21 @@ Note: I didn't look into adding libraries yet but I'm pretty sure you want to pl
 
 The odroid will send an email with its local IP address every time it boots
 
-This was accomplished by running `syncEmailer.sh` and adding the following line to the crontab via `crontab -e`:
+This was accomplished by running `syncEmailer.sh` and adding setting up a systemd startup service to run `runEmailer`.
 
-```
-@reboot /home/odroid/emailer/runEmailer.sh
-```
+[This link](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee) explains how to setup a systemd service in steps.
 
-Let Peter or David know if you want to be added to this mailing list.
+Let Peter know if you want to be added to this mailing list.
 
 ### Remote connect from home
 
 - Open a terminal (I recommend git bash if you're using windows)
-- SSH into Concordia's network with your netname (type the following into the terminal): 
+- SSH into Concordia's network with your netname (type the following into the terminal):
 ```
 ssh net_name@login.encs.concordia.ca
 ```
 - It should ask you for a password, which will your ENCS password
-- Grab the latest IP address of the odroid from your email, then ssh into it: 
+- Grab the latest IP address of the odroid from your email, then ssh into it:
 ```
 ssh odroid@ip_address
 ```
