@@ -18,7 +18,7 @@ float velocityRight = 90;
 float velocityLeft = 90;
 float deg = 0;
 //This value is used to shift the contorollers range to have 0 as a middle rest value. shift value depends on controllers range. 
-int shiftValue = 49
+int shiftValue = 49;
 SoftwareSerial bluetooth(7, 8);
 
 ArduinoBlue phone(bluetooth);
