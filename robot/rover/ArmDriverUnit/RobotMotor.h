@@ -113,7 +113,6 @@ bool RobotMotor::calcCurrentAngle(void) {
     return true;
   }
   else {
-    Serial.println("$E,Error: motor does not have encoder");
     return false;
   }
 }

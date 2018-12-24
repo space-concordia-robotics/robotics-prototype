@@ -91,33 +91,13 @@ finally, unlocking extra options should be runtime as it should be easily access
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* parsing */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-// char *bufferPointer = serialBuffer;
-// char * restOfMessage = serialBuffer; // used in strtok_r, which is the reentrant version of strtok
 String messageBar = "=======================================================";
 /*
 info from parsing functionality is packaged and given to motor control functionality.
 many of these are set to 0 so that the message can reset, thus making sure that
 the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
-/*
-struct commandInfo
-{
-int whichMotor = 0; // which motor was requested to do something
-int whichDirection = 0; // set the direction
-int whichSpeed = 0; // set the speed
-unsigned int whichTime = 0; // how long to turn for
-bool angleCommand = false; // for regular operations, indicates that it's to control an angle
-float whichAngle = 0.0; // for regular operations, which angle to go to
-bool loopCommand = false; // for choosing between open loop or closed loop control
-int loopState = 0; // what type of loop state it is
-bool resetCommand = false; // indicates that something should be reset
-bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
-bool resetJointPosition = false; // for moving a joint to its neutral position
-bool stopSingleMotor = false; // for stopping a single motor
-bool stopAllMotors = false; // for stopping all motors
-}
-motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
-*/
+
 commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 Parser Parser;
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -272,7 +252,7 @@ void loop()
     }
     else
     {
-      UART_PORT.println("$S, command verified");
+      UART_PORT.println("$S,Success: command verified");
       UART_PORT.println(messageBar);
       // emergency stop takes precedence
       if (motorCommand.stopAllMotors)
@@ -727,7 +707,7 @@ void printMotorAngles()
     UART_PORT.print(",");
     UART_PORT.print(motor6.getCurrentAngle());
   }
-  UART_PORT.println();
+  UART_PORT.println("");
 }
 
 void m3StepperInterrupt(void)
@@ -1021,264 +1001,3 @@ void m4_encoder_interrupt(void)
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
   motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
-
-/*
-void m5_encoder_interrupt(void) {
-static unsigned int oldEncoderState = 0;
-UART_PORT.print("m5 "); UART_PORT.println(motor5.encoderCount);
-oldEncoderState <<= 2;
-oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
-motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-}
-void m6_encoder_interrupt(void) {
-static unsigned int oldEncoderState = 0;
-UART_PORT.print("m6 "); UART_PORT.println(motor6.encoderCount);
-oldEncoderState <<= 2;
-oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
-motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-}
-*/
-/*
-void parseSerial(commandInfo & cmd)
-{
-// check for emergency stop has precedence
-char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
-if (String(msgElem) == "stop")
-{
-// msgElem is a char array so it's safer to convert to string first
-cmd.stopAllMotors = true;
-#ifdef DEBUG_PARSING
-UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
-#endif
-}
-// check for motor command
-else
-if (String(msgElem) == "motor")
-{
-// msgElem is a char array so it's safer to convert to string first
-msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
-cmd.whichMotor = atoi(msgElem);
-#ifdef DEBUG_PARSING
-UART_PORT.print("parsed motor ");
-UART_PORT.println(cmd.whichMotor);
-#endif
-// check for motor stop command has precedence
-msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (direction tag)
-if (String(msgElem) == "stop")
-{
-// msgElem is a char array so it's safer to convert to string first
-cmd.stopSingleMotor = true;
-#ifdef DEBUG_PARSING
-UART_PORT.println("$S,Success: parsed request to stop single motor");
-#endif
-}
-// check for angle command
-else
-if (String(msgElem) == "angle")
-{
-// msgElem is a char array so it's safer to convert to string first
-cmd.angleCommand = true;
-msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-cmd.whichAngle = atof(msgElem); // converts to float;
-#ifdef DEBUG_PARSING
-UART_PORT.print("$S,Success: parsed desired angle ");
-UART_PORT.println(cmd.whichAngle);
-#endif
-}
-// check for loop state command
-else
-if (String(msgElem) == "loop")
-{
-// msgElem is a char array so it's safer to convert to string first
-cmd.loopCommand = true;
-msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-if (String(msgElem) == "open")
-{
-cmd.loopState = OPEN_LOOP;
-#ifdef DEBUG_PARSING
-UART_PORT.print("$S,Success: parsed open loop state (");
-UART_PORT.print(cmd.loopState);
-UART_PORT.println(") request");
-#endif
-}
-else
-if (String(msgElem) == "closed")
-{
-cmd.loopState = CLOSED_LOOP;
-#ifdef DEBUG_PARSING
-UART_PORT.print("$S,Success: parsed closed loop state (");
-UART_PORT.print(cmd.loopState);
-UART_PORT.println(") request");
-#endif
-}
-else
-{
-#ifdef DEBUG_PARSING
-UART_PORT.println("$E,Error: unknown loop state");
-#endif
-}
-}
-// check for angle reset command
-else
-if (String(msgElem) == "reset")
-{
-// msgElem is a char array so it's safer to convert to string first
-cmd.resetCommand = true;
-msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
-if (String(msgElem) == "angle")
-{
-cmd.resetAngleValue = true;
-#ifdef DEBUG_PARSING
-UART_PORT.println("$S,Success: parsed request to reset angle value");
-#endif
-}
-else
-if (String(msgElem) == "position")
-{
-cmd.resetJointPosition = true;
-#ifdef DEBUG_PARSING
-UART_PORT.println("$S,Sucess: parsed request to reset joint position");
-#endif
-}
-else
-{
-#ifdef DEBUG_PARSING
-UART_PORT.println("$E,Error: unknown reset request");
-#endif
-}
-}
-else
-{
-#ifdef DEBUG_PARSING
-UART_PORT.print("$E,Error: unknown motor ");
-UART_PORT.print(cmd.whichMotor);
-UART_PORT.println(" command");
-#endif
-}
-}
-else
-{
-#ifdef DEBUG_PARSING
-UART_PORT.println("$E,Error: unknown motor command");
-#endif
-}
-}
-bool verifSerial(commandInfo cmd)
-{
-if (cmd.stopAllMotors)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.println("$S,Success: command to stop all motors verified");
-#endif
-return true;
-}
-// 0 means there was an invalid command and therefore motors shouldn't be controlled
-else
-if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors)
-{
-if (cmd.stopSingleMotor)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$S,Success: command to stop motor ");
-UART_PORT.print(cmd.whichMotor);
-UART_PORT.println(" verified");
-#endif
-return true;
-}
-else
-if (cmd.angleCommand)
-{
-if (cmd.whichAngle < -720 || cmd.whichAngle > 720)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$E,Error: angle of ");
-UART_PORT.print(cmd.whichAngle);
-UART_PORT.print(" degrees invalid for motor ");
-UART_PORT.println(cmd.whichMotor);
-#endif
-return false;
-}
-else
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$S,Success: command to move motor ");
-UART_PORT.print(cmd.whichMotor);
-UART_PORT.print(" ");
-UART_PORT.print(cmd.whichAngle);
-UART_PORT.println(" degrees verified");
-#endif
-return true;
-}
-}
-else
-if (cmd.loopCommand)
-{
-if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$S,Success: command to set motor ");
-UART_PORT.print(cmd.whichMotor);
-if (cmd.loopState == OPEN_LOOP)
-UART_PORT.println(" to open loop verified");
-if (cmd.loopState == CLOSED_LOOP)
-UART_PORT.println(" to closed loop verified");
-#endif
-return true;
-}
-else
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.println("$E,Error: invalid loop state");
-#endif
-return false;
-}
-}
-else
-if (cmd.resetCommand)
-{
-if (cmd.resetAngleValue || cmd.resetJointPosition)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$S,Success: command to reset motor ");
-UART_PORT.print(cmd.whichMotor);
-if (cmd.resetAngleValue)
-UART_PORT.println(" saved angle value verified");
-if (cmd.resetJointPosition)
-UART_PORT.println(" physical joint position verified");
-#endif
-return true;
-}
-else
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.println("$E,Error: invalid reset request");
-#endif
-return false;
-}
-}
-else
-#ifdef DEBUG_VERIFYING
-UART_PORT.print("$E,Error: command for motor ");
-UART_PORT.print(cmd.whichMotor);
-UART_PORT.println(" not recognized");
-#endif
-return false;
-}
-else
-if
-(cmd.whichMotor < 0 || cmd.whichMotor >= RobotMotor::numMotors)
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.println("$E,Error: requested motor index out of bounds");
-#endif
-return false;
-}
-else
-{
-#ifdef DEBUG_VERIFYING
-UART_PORT.println("$E,Error: command not recognized");
-#endif
-return false;
-}
-}
-*/
