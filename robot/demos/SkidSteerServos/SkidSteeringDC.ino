@@ -29,7 +29,7 @@ ArduinoBlue phone(bluetooth);
 
 // This Function is used to Re-maps a number from one range to another. In this program, we use this function to give us a ratio between Left and Right velocities for a desired steering degree.
  float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
-}
+
 
 void velocityHandler(throttle, steering);
 
