@@ -74,7 +74,7 @@ finally, unlocking extra options should be runtime as it should be easily access
 #include "StepperMotor.h"
 #include "DcMotor.h"
 #include "ServoMotor.h"
-#define STEPPER_PID_PERIOD 30 * 1000 // initial value for constant speed, but adjusted in variable speed modes
+#define STEPPER_PID_PERIOD 25 * 1000 // initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define STEPPER_CHECK_INTERVAL 2000 // much longer period, used for testing/debugging
@@ -158,7 +158,6 @@ void setup()
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
-  
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 
 #ifdef M1_ENCODER_PORT
@@ -421,8 +420,8 @@ void loop()
                 else
                   if (!motor3.isOpenLoop)
                   {
-                    ; // commands for closed loop if necessary
-                    // motor4.movementDone = false;
+                    motor3.enablePower();
+                    motor3.movementDone = false;
                   }
               }
               else
@@ -448,8 +447,8 @@ void loop()
                   else
                     if (!motor4.isOpenLoop)
                     {
-                      ; // commands for closed loop if necessary
-                      // motor4.movementDone = false;
+                      motor4.enablePower();
+                      motor4.movementDone = false;
                     }
                 }
                 else
@@ -748,22 +747,22 @@ void printMotorAngles()
 
 void m3StepperInterrupt(void)
 {
-  static int nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
+  motor3.nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
   if (motor3.isOpenLoop)
   {
     // open loop control
     // movementDone can be set elsewhere... so can numSteps
     if (!motor3.movementDone && motor3.stepCount < motor3.numSteps)
     {
-      motor3.singleStep(motor3.rotationDirection); // direction was set beforehand
+      motor3.setVelocity(motor3.rotationDirection, motor3.openLoopSpeed); // direction was set beforehand
       motor3.stepCount++;
       if (motor3.hasRamping)
       {
         // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
-        nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
-        m3StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
+        // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
       }
+      m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
       // UART_PORT.print(motor3.rotationDirection); UART_PORT.println(" direction");
       // UART_PORT.print(motor3.stepCount); UART_PORT.println(" steps taken");
       // UART_PORT.print(motor3.numSteps); UART_PORT.println(" steps total");
@@ -773,42 +772,63 @@ void m3StepperInterrupt(void)
       // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor3.stepCount = 0; // reset the counter
       motor3.movementDone = true;
-      motor3.disablePower();
-      // UART_PORT.println("waiting for command");
+      motor3.stopRotation();
+      motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
     }
   }
   else
     if (!motor3.isOpenLoop)
     {
       // closed loop control
-      ;
+      if (!motor3.movementDone)
+      {
+        motor3.calcCurrentAngle();
+        motor3.pidController.updatePID(motor3.getCurrentAngle(), motor3.getDesiredAngle());
+        if (motor3.pidController.pidOutput == 0)
+        {
+          motor3.movementDone = true;
+          motor3.stopRotation();
+          motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
+        }
+        else
+        {
+          motor3.calcDirection(motor3.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor3.setVelocity(motor3.rotationDirection, motor3.pidController.pidOutput);
+          m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
+        }
+      }
+      else
+      {
+        motor3.stopRotation();
+      }
     }
 }
 
 void m4StepperInterrupt(void)
 {
-  static int nextInterval = STEPPER_PID_PERIOD;
+  motor4.nextInterval = STEPPER_PID_PERIOD;
   if (motor4.isOpenLoop)
   {
     // open loop control
     if (!motor4.movementDone && motor4.stepCount < motor4.numSteps)
     {
-      motor4.singleStep(motor4.rotationDirection); // direction was set beforehand
+      motor4.setVelocity(motor4.rotationDirection, motor4.openLoopSpeed); // direction was set beforehand
       motor4.stepCount++;
       if (motor4.hasRamping)
       {
         // if speed ramping is enabled
         // following code has array index that should be incremented each interrupt
-        nextInterval = stepIntervalArray[1] * 1000; // array is in ms not microseconds
-        m4StepperTimer.update(nextInterval); // need to check if can call this inside the interrupt
+        // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
       }
+      m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
     }
     else
     {
       // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
       motor4.stepCount = 0; // reset the counter
       motor4.movementDone = true;
-      motor4.disablePower();
+      motor4.stopRotation();
+      motor4.nextInterval = STEPPER_PID_PERIOD; // set it back to default
     }
   }
   else
@@ -823,12 +843,13 @@ void m4StepperInterrupt(void)
         {
           motor4.movementDone = true;
           motor4.stopRotation();
+          motor4.nextInterval = STEPPER_PID_PERIOD; // set it back to default
         }
         else
         {
-          int motorSpeed = motor1.pidController.pidOutput * 255 / 100;
-          motor4.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
-          motor4.setVelocity(motor4.rotationDirection, motorSpeed);
+          motor4.calcDirection(motor4.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor4.setVelocity(motor4.rotationDirection, motor4.pidController.pidOutput);
+          m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
         }
       }
       else

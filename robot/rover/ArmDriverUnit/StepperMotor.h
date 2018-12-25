@@ -10,6 +10,8 @@
 #define STEP_INTERVAL2 25
 #define STEP_INTERVAL3 10
 #define STEP_INTERVAL4 3
+#define MIN_STEP_INTERVAL 3000
+#define MAX_STEP_INTERVAL 70000
 
 #define FULL_STEP 1
 #define HALF_STEP 0.5
@@ -39,6 +41,7 @@ class StepperMotor : public RobotMotor {
     int openLoopSpeed; // angular speed (degrees/second)
     int numSteps; // how many steps to take for stepper to reach desired position
     volatile int stepCount; // how many steps the stepper has taken since it started moving
+    volatile int nextInterval;
 
   private:
     int enablePin, directionPin, stepPin;
@@ -83,7 +86,30 @@ void StepperMotor::singleStep(int dir) {
 }
 
 void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
-  ;
+  if (!isOpenLoop)
+    motorSpeed = fabs(motorSpeed);
+  // makes sure the speed is within the limits set in the pid during setup
+  if (motorSpeed * motorDir > pidController.maxOutputValue)
+  {
+    motorSpeed = pidController.maxOutputValue;
+  }
+  if (motorSpeed * motorDir < pidController.minOutputValue)
+  {
+    motorSpeed = pidController.minOutputValue;
+  }
+  switch (motorDir)
+  {
+    case CLOCKWISE:
+      digitalWriteFast(directionPin, LOW);
+      break;
+    case COUNTER_CLOCKWISE:
+      digitalWriteFast(directionPin, HIGH);
+      break;
+  }
+  singleStep(motorDir);
+  // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4
+  // the following equation converts from range 0-100 to range stepinterval1-4
+  nextInterval = motorSpeed * ( (MIN_STEP_INTERVAL - MAX_STEP_INTERVAL) / 100) + MAX_STEP_INTERVAL;
 }
 
 void StepperMotor::stopRotation(void) {
