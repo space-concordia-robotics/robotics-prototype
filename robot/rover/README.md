@@ -26,27 +26,3 @@ The rover ip address in `app.py` will have to be set to the correct value.
 
 Example:
 `#include "libraries/Encoder.h"`
-
-## ROS packages
-
-### ping_acknowledgement
-
-#### Description
-
-The ping_acknowledgement package uses the `PingResponse` service defined in `srv` folder to allow the server to respond to a simple ping from the client. Any string can be sent in order to get a response.
-
-#### Setup
-
-Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`. For help with this see [Creating a ROS Package](http://wiki.ros.org/ROS/Tutorials/CreatingPackage).
-
-After having built the package and generated the all the source code, you may test the service by running the following commands:
-
-- Start ros master with `roscore`
-- Start server node with `rosrun ping_acknowledgment ping_response_server.py`
-- Send a request/obtain response using client node with `rosrun ping_acknowledgment ping_response_client.py "<msg>"`, where you are free to choose whatever message you wish to send.
-
-#### Sources
-
-The following tutorials (and those preceding them) were followed and modified to produce the code:
-- [Creating a ROS msg and src](http://wiki.ros.org/ROS/Tutorials/CreatingMsgAndSrv#Creating_a_srv)
-- [Writing a Simple Service and Client (Python)](http://wiki.ros.org/ROS/Tutorials/WritingServiceClient%28python%29)
