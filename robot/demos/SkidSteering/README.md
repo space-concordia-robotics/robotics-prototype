@@ -7,6 +7,8 @@
 - Second code file is configured for Dc motors
 - Test on Dc Motor is still required for final validation.
 
+## Demo:
+[Link to Video](https://drive.google.com/file/d/1HlJxWRsCw2iZ9lJ-jmKF8sRhvHaXST7C/view?pli=1)
 ## Results
 Test was successful but requires further testing for DC motors. 
 
