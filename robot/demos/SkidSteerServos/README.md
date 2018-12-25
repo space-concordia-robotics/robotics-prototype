@@ -3,7 +3,7 @@
 ## Summary:
 - Proof of concept for Skid steering function.
 - Tested on Continuous rotation servos “Blue Boys”
-- Tested on a small 3D printed prototype consisting of a 3D printed body and wheels, six servos, Bluetooth module, LiPo Batteries and an ArduinoCode Uno, which was controlled by an app named Arduino Blue. Test result were successful.
+- Tested on a small 3D printed prototype consisting of a 3D printed body and wheels, six servos, Bluetooth module, LiPo Batteries and an ArduinoCode Uno, which was controlled by an app named Arduino Blue.
 - Second code file is configured for Dc motors
 - Test on Dc Motor is still required for final validation.
 
@@ -14,7 +14,7 @@ Test was successful but requires further testing for DC motors.
 
 ### Hardware (TEST)
 - 3D printed Body and six Wheels of a Miniature Rover Replica.
-- Six Continuous Servoce model FS90R (BlueBoys).
+- Six Continuous Servos model FS90R (BlueBoys).
 - HM10 bluetooth module (Not authentic version).
 - Two 3.7V 500MAH LiPo Batteries
 - Arduino Uno
@@ -23,7 +23,7 @@ Test was successful but requires further testing for DC motors.
 #### All Servos
 Red | 5V
 ------------ | -------------
-Brown | Ground
+**Brown** | **Ground**
 
 #### Front Right Servo
 Yellow | PIN 9
@@ -53,14 +53,14 @@ Yellow | PIN 6
 #### HM10 bluetooth module
 VCC | 5V
 ------------ | -------------
-GND | Ground
-TXD | PIN 7
-RXD | PIN 8
+**GND** | **Ground**
+**TXD** |**PIN** **7**
+**RXD** | **PIN** **8**
 
 #### Batteries are Connected in Series 
-Positive | Vin
+**Positive** | **Vin**
 ------------ | -------------
-Negative | Ground
+**Negative** | **Ground**
 
 ### Software
 You will need to import the library ArduinoBlue for bluetooth connection with android/iOS. You may use the Arduino IDE library manager: 
