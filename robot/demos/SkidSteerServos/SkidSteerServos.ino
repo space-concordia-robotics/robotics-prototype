@@ -28,6 +28,8 @@ ArduinoBlue phone(bluetooth);
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+void velocityHandler(throttle, steering);
+
 void setup() {
   // Attach Servos to pins:
   // Right side servos
@@ -51,16 +53,31 @@ void setup() {
 }
 
 void loop() {
- // Lead Velocity Value from bluetooth controller. Values range from 0 to 99
-  throttle = phone.getThrottle();
- // Steering Value from bluetooth controller. Values range from 0 to 99
-  steering = phone.getSteering();
  
- // New Rest Value is 0, this step isn't necessary. Its main purpose is to associate positive and negative values with backword and forwad velocity for throttle and left and right directions for steering
+ 
+ unsigned int prevRead = millis();
+  if(millis()-prevRead > 200){
+     // Lead Velocity Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    throttle = phone.getThrottle();
+   // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    steering = phone.getSteering();
+    // Function that updates velocity values based on steering angle.
+    velocityHandler(throttle, steering);
+    prevRead = millis();
+  }
+  
+ }
+
+
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+                                     
+void velocityHandler(throttle, steering){
+  // New Rest Value is 0, this step isn't necessary. Its main purpose is to associate positive and negative values with backword and forwad velocity for throttle and left and right directions for steering
   throttle -= shiftValue;
   steering -= shiftValue;
      
-  delay(200); // add some delay between reads
 
 // If statement for CASE 1: steering toward the RIGHT 
   if (steering <= 0 ) {
@@ -79,7 +96,7 @@ void loop() {
 // Print Velocity Values   
   if (prevThrottle != throttle || prevSteering != steering) {
     Serial.print("Throttle: "); Serial.print(throttle); Serial.print("\tSteering: "); Serial.println(steering);
-    Serial.print(steering);Serial.print(">'"; Serial.print(throttle);Serial.print("o");
+    Serial.print(steering);Serial.print(">"; Serial.print(throttle);Serial.print("o");
     Serial.print("Right Side: "); Serial.print(velocityRight); Serial.print("\tLeft Side: "); Serial.println(velocityLeft);
 //Assign New Previous Values to help detect further changes
     prevThrottle = throttle;
@@ -95,7 +112,5 @@ void loop() {
 // Write velocities for the Wheels on the Left side  
   servoFrontLeft.write(velocityLeft);
   servoMiddleLeft.write(velocityLeft);
-  servoBackLeft.write(velocityLeft);
-
-  delay(100); // add some delay between reads
-  }
+  servoBackLeft.write(velocityLeft); 
+}
