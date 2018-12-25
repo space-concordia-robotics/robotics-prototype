@@ -21,11 +21,53 @@ float maxThrottleController = 0 + throttleShiftValue;
 float minSteeringController = 0 - steeringShiftValue;
 float maxSteeringController = 0 + steeringShiftValue;
 float minDC = 0;
-float maxDC = 2*restVelocity+1;
+float maxDC = 2 * restVelocity + 1;
 
 SoftwareSerial bluetooth(7, 8);
 ArduinoBlue phone(bluetooth);
 
+
+// This Function is used to Re-maps a number from one range to another. In this program, we use this function to give us a ratio between Left and Right velocities for a desired steering degree.
+ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
+}
+
+void velocityHandler(throttle, steering);
+
+void setup() {
+  // Attach Servos to pins:
+  // Right side servos
+  DC_PIN_FRONT_RIGHT = 9;
+  DC_PIN_MIDDLE_RIGHT = 10;
+  DC_PIN_BACK_RIGHT = 11;
+  
+  // Left side DC motors
+  DC_PIN_FRONT_LEFT = 3;
+  DC_PIN_MIDDLE_LEFT = 5;
+  DC_PIN_BACK_LEFT = 6;
+
+  // initialize serial communications at 9600 bps:
+  Serial.begin(9600); 
+  bluetooth.begin(9600);
+
+  //activate pull-up resistor on the push-button pin
+  pinMode(buttonPin, INPUT_PULLUP); 
+  
+  Serial.println("setup complete");
+}
+
+void loop() {
+  unsigned int prevRead = millis();
+  if(millis()-prevRead > 200){
+     // Lead Velocity Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    throttle = phone.getThrottle();
+   // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    steering = phone.getSteering();
+    // Function that updates velocity values based on steering angle.
+    velocityHandler(throttle, steering);
+    prevRead = millis();
+  }
+  
+}
 
 // This Function is used to Re-maps a number from one range to another. In this program, we use this function to give us a ratio between Left and Right velocities for a desired steering degree.
  float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -75,38 +117,4 @@ void velocityHandler(throttle, steering) {
   analogWrite(DC_PIN_BACK_LEFT, velocityLeft);
   
 
-}
-void setup() {
-  // Attach Servos to pins:
-  // Right side servos
-  DC_PIN_FRONT_RIGHT = 9;
-  DC_PIN_MIDDLE_RIGHT = 10;
-  DC_PIN_BACK_RIGHT = 11;
-  
-  // Left side DC motors
-  DC_PIN_FRONT_LEFT = 3;
-  DC_PIN_MIDDLE_LEFT = 5;
-  DC_PIN_BACK_LEFT = 6;
-
-  // initialize serial communications at 9600 bps:
-  Serial.begin(9600); 
-  bluetooth.begin(9600);
-
-  //activate pull-up resistor on the push-button pin
-  pinMode(buttonPin, INPUT_PULLUP); 
-  
-  Serial.println("setup complete");
-}
-
-void loop() {
-  
- // Lead Velocity Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-  throttle = phone.getThrottle();
- // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-  steering = phone.getSteering();
-  // Function that updates velocity values based on steering angle.
-  velocityHandler(throttle, steering);
-
- 
-delay(100); // add some delay between reads
 }
