@@ -12,17 +12,17 @@ def ping_response_client(msg):
         ping_response = rospy.ServiceProxy('ping_response', PingResponse)
         resp1 = ping_response(msg)
         return resp1.response
-    except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+    except rospy.ServiceException as e:
+        print("Service call failed: {:s}".format(e))
 
 def usage():
-    return "%s [msg]"%sys.argv[0]
+    return "{:s} [msg]".format(sys.argv[0])
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
-        print usage()
+        print(usage())
 
     msg = sys.argv[1]
 
-    print "Pinging server"
-    print ping_response_client(msg)
+    print("Pinging server")
+    print(ping_response_client(msg))

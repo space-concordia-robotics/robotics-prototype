@@ -5,14 +5,14 @@ import rospy
 
 #@TODO: test if "handle_" is necessary
 def handle_ping(req):
-    response = "To your '%s', I say 'suh dude'"%(req.ping)
-    print "Returning '" + response + "'"
+    response = "To your '{:s}', I say 'suh dude'".format(req.ping)
+    print("Returning '" + response + "'")
     return response
 
 def ping_response_server():
     rospy.init_node('ping_response_server')
     s = rospy.Service('ping_response', PingResponse, handle_ping)
-    print "Ready to respond to ping"
+    print("Ready to respond to ping")
     rospy.spin()
 
 if __name__ == "__main__":
