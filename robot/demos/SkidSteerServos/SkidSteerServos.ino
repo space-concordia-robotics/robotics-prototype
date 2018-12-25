@@ -86,15 +86,16 @@ void loop() {
     prevSteering = steering;
   }
 
+
 // Write velocities for the Wheels on the RIGHT side
-  myservo.write(velocityRight);              
-  myservo1.write(velocityRight);              
-  myservo2.write(velocityRight);
+  servoMiddleRight.write(velocityRight);              
+  servoBackRight.write(velocityRight);              
+  servoFrontRight.write(velocityRight);
   
 // Write velocities for the Wheels on the Left side  
-  myservo3.write(velocityLeft);
-  myservo4.write(velocityLeft);
-  myservo5.write(velocityLeft);
+  servoFrontLeft.write(velocityLeft);
+  servoMiddleLeft.write(velocityLeft);
+  servoBackLeft.write(velocityLeft);
 
   delay(100); // add some delay between reads
   }
