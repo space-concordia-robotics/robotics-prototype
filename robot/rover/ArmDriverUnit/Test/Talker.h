@@ -24,15 +24,16 @@ struct commandInfo
   bool stopAllMotors = false; // for stopping all motors
 };
 
-class Parser
+class Talker
 {
   public:
+  void printMotorAngles(void);
   bool isValidNumber(String str, char type);
   void parseCommand(commandInfo & cmd, char * restOfMessage);
   bool verifCommand(commandInfo cmd);
 };
 
-bool Parser::isValidNumber(String str, char type){
+bool Talker::isValidNumber(String str, char type){
   if (str.length()==0) return false;
    for(unsigned int i=0;i<str.length();i++)
    {
@@ -46,7 +47,7 @@ bool Parser::isValidNumber(String str, char type){
    return true;
 }
 
-void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
+void Talker::parseCommand(commandInfo & cmd, char * restOfMessage)
 {
   // check for emergency stop has precedence
   char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
@@ -207,7 +208,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
   }
 }
 
-bool Parser::verifCommand(commandInfo cmd)
+bool Talker::verifCommand(commandInfo cmd)
 {
   if (cmd.stopAllMotors)
   {
@@ -346,6 +347,41 @@ bool Parser::verifCommand(commandInfo cmd)
 
     return false;
   }
+}
+
+void Talker::printMotorAngles()
+{
+  UART_PORT.print("Motor Angles: ");
+  if (motor1.calcCurrentAngle())
+  {
+    UART_PORT.print(motor1.getCurrentAngle());
+  }
+  if (motor2.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor2.getCurrentAngle());
+  }
+  if (motor3.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor3.getCurrentAngle());
+  }
+  if (motor4.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor4.getCurrentAngle());
+  }
+  if (motor5.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor5.getCurrentAngle());
+  }
+  if (motor6.calcCurrentAngle())
+  {
+    UART_PORT.print(",");
+    UART_PORT.print(motor6.getCurrentAngle());
+  }
+  UART_PORT.println("");
 }
 
 #endif

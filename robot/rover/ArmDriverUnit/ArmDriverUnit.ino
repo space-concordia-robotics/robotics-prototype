@@ -6,7 +6,6 @@ The code can be compiled for serial communication over usb (if connected to a
 standard computer), or for serial communication over TX/RX pins (if connected
 to the Odroid). In the latter case, communication can be done either directly
 with Serial1, or with ROSserial, if integration in the ROS network is desired.
-
 Currently, this code is built for the control of six motors: two DC motors,
 two stepper motors, and two continuous rotation servos. Several helper classes
 were written to abstract away the complexities of controlling different types
@@ -18,7 +17,6 @@ any point in time. Open loop control can be performed without the use of
 encoders but results in imprecise and jerky control. Use of ramping allows
 for less jerky control. The best control is closed loop control, which uses
 encoders for smooth speed profiles.
-
 The code starts by setting up a variety of events. It sets up the Teensy's
 GPIO pins, initializes the motor objects with the correct parameters (gear
 ratio, angle limits, etc), it starts up the timers and interrupt service
@@ -30,7 +28,6 @@ Variables changed in the main loop allow the timer interrupts to actually turn
 the motors, either in open loop or closed loop. The main loop can also perform
 periodic checks for motors in open loop, to effectuate small corrections to
 position during movements - if the appropriate motor has an encoder on it.
-
 This code began development sometime around July 20 2018 and is still being
 updated as of December 22 2018.
 */
@@ -97,7 +94,6 @@ info from parsing functionality is packaged and given to motor control functiona
 many of these are set to 0 so that the message can reset, thus making sure that
 the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
-
 commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 Parser Parser;
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -124,12 +120,31 @@ elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 void printMotorAngles();
 // declare encoder interrupt service routines. They must be global.
+
+#ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void);
+#endif
+
+#ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void);
+#endif
+
+#ifdef M3_ENCODER_PORT
 void m3_encoder_interrupt(void);
+#endif
+
+#ifdef M4_ENCODER_PORT
 void m4_encoder_interrupt(void);
-// void m5_encoder_interrupt(void);
-// void m6_encoder_interrupt(void);
+#endif
+
+#ifdef M5_ENCODER_PORT
+void m5_encoder_interrupt(void);
+#endif
+
+#ifdef M6_ENCODER_PORT
+void m6_encoder_interrupt(void);
+#endif
+
 // declare timer interrupt service routines, where the motors actually get controlled.
 // stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
 void dcInterrupt(void); // manages motors 1&2
@@ -143,24 +158,45 @@ void setup()
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
-  // each motor with an encoder needs to setup that encoder
+  
+  // each motor with an encoder needs to attach the encoder and 2 interrupts
+
+#ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
-  motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
-  motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
-  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
-  // each motor needs to attach 2 interrupts, which is a lot of lines of code
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+#endif
+
+#ifdef M2_ENCODER_PORT
+  motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
+#endif
+
+#ifdef M3_ENCODER_PORT
+  motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
   attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
+#endif
+
+#ifdef M4_ENCODER_PORT
+  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
-  // attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
-  // attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
-  // attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
-  // attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
+#endif
+
+#ifdef M5_ENCODER_PORT
+  motor5.attachEncoder(M5_ENCODER_A, M5_ENCODER_B, M5_ENCODER_PORT, M5_ENCODER_SHIFT, M5_ENCODER_RESOLUTION);
+  attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
+  attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
+#endif
+
+#ifdef M6_ENCODER_PORT
+  motor6.attachEncoder(M6_ENCODER_A, M6_ENCODER_B, M6_ENCODER_PORT, M6_ENCODER_SHIFT, M6_ENCODER_RESOLUTION);
+  attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
+  attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
+#endif
+
   {
     // shaft angle tolerance setters
     // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
@@ -385,7 +421,7 @@ void loop()
                 else
                   if (!motor3.isOpenLoop)
                   {
-                    ; // commands for open loop if necessary
+                    ; // commands for closed loop if necessary
                     // motor4.movementDone = false;
                   }
               }
@@ -412,7 +448,7 @@ void loop()
                   else
                     if (!motor4.isOpenLoop)
                     {
-                      ; // commands for open loop if necessary
+                      ; // commands for closed loop if necessary
                       // motor4.movementDone = false;
                     }
                 }
@@ -779,7 +815,26 @@ void m4StepperInterrupt(void)
     if (!motor4.isOpenLoop)
     {
       // closed loop control
-      ;
+      if (!motor4.movementDone)
+      {
+        motor4.calcCurrentAngle();
+        motor4.pidController.updatePID(motor4.getCurrentAngle(), motor4.getDesiredAngle());
+        if (motor4.pidController.pidOutput == 0)
+        {
+          motor4.movementDone = true;
+          motor4.stopRotation();
+        }
+        else
+        {
+          int motorSpeed = motor1.pidController.pidOutput * 255 / 100;
+          motor4.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
+          motor4.setVelocity(motor4.rotationDirection, motorSpeed);
+        }
+      }
+      else
+      {
+        motor4.stopRotation();
+      }
     }
 }
 
@@ -817,9 +872,8 @@ void dcInterrupt(void)
         }
         else
         {
-          int motorSpeed = motor1.pidController.pidOutput * 255 / 100;
-          motor1.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
-          motor1.setVelocity(motor1.rotationDirection, motorSpeed);
+          motor1.calcDirection(motor1.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor1.setVelocity(motor1.rotationDirection, motor1.pidController.pidOutput);
         }
       }
       else
@@ -857,9 +911,8 @@ void dcInterrupt(void)
         }
         else
         {
-          int motorSpeed = motor2.pidController.pidOutput * 255 / 100;
-          motor2.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
-          motor2.setVelocity(motor2.rotationDirection, motorSpeed);
+          motor2.calcDirection(motor2.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor2.setVelocity(motor2.rotationDirection, motor2.pidController.pidOutput);
         }
       }
       else
@@ -903,9 +956,8 @@ void servoInterrupt(void)
         }
         else
         {
-          int motorSpeed = motor5.pidController.pidOutput * 255 / 100;
-          motor5.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
-          motor5.setVelocity(motor5.rotationDirection, motorSpeed);
+          motor5.calcDirection(motor5.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor5.setVelocity(motor5.rotationDirection, motor5.pidController.pidOutput);
         }
       }
       else
@@ -943,9 +995,8 @@ void servoInterrupt(void)
         }
         else
         {
-          int motorSpeed = motor6.pidController.pidOutput * 255 / 100;
-          motor6.calcDirection(motorSpeed); // does this work? it expects an angular error but at the end of the day...
-          motor6.setVelocity(motor6.rotationDirection, motorSpeed);
+          motor6.calcDirection(motor6.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
+          motor6.setVelocity(motor6.rotationDirection, motor6.pidController.pidOutput);
         }
       }
       else
@@ -955,11 +1006,16 @@ void servoInterrupt(void)
     }
 }
 
+#ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+
+  #ifdef DEBUG_ENCODERS
   UART_PORT.print("m1 ");
   UART_PORT.println(motor1.encoderCount);
+  #endif
+
   oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
   oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
   /*
@@ -973,31 +1029,90 @@ void m1_encoder_interrupt(void)
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
+#endif
+
+#ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  // UART_PORT.print("m2 "); UART_PORT.println(motor2.encoderCount);
+
+  #ifdef DEBUG_ENCODERS
+  UART_PORT.print("m2 ");
+  UART_PORT.println(motor2.encoderCount);
+  #endif
+
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
   motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
+#endif
+
+#ifdef M3_ENCODER_PORT
 void m3_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
-  UART_PORT.println("m3 "); // UART_PORT.println(motor3.encoderCount);
+
+  #ifdef DEBUG_ENCODERS
+  UART_PORT.println("m3 ");
+  UART_PORT.println(motor3.encoderCount);
   // UART_PORT.println(M3_ENCODER_PORT,BIN);
+  #endif
+
   oldEncoderState <<= 2;
   oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
   motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
+#endif
+
+#ifdef M4_ENCODER_PORT
 void m4_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+
+  #ifdef DEBUG_ENCODERS
   UART_PORT.print("m4 ");
   UART_PORT.println(motor4.encoderCount);
+  #endif
+
   oldEncoderState <<= 2;
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
   motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
+
+#endif
+
+#ifdef M5_ENCODER_PORT
+void m5_encoder_interrupt(void)
+{
+  static unsigned int oldEncoderState = 0;
+
+  #ifdef DEBUG_ENCODERS
+  UART_PORT.print("m5 ");
+  UART_PORT.println(motor5.encoderCount);
+  #endif
+
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
+  motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+}
+
+#endif
+
+#ifdef M6_ENCODER_PORT
+void m6_encoder_interrupt(void)
+{
+  static unsigned int oldEncoderState = 0;
+
+  #ifdef DEBUG_ENCODERS
+  UART_PORT.print("m6 ");
+  UART_PORT.println(motor6.encoderCount);
+  #endif
+
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
+  motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+}
+
+#endif

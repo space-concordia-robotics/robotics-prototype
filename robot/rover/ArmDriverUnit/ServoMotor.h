@@ -13,7 +13,7 @@ class ServoMotor : public RobotMotor {
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
 
-    void setVelocity(int motorDir, int motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
+    void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void stopRotation(void);
 
     // stuff for open loop control
@@ -48,21 +48,17 @@ void ServoMotor::stopRotation(void) {
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
-void ServoMotor::setVelocity(int motorDir, int motorSpeed) {
-  int dutyCycle;
+void ServoMotor::setVelocity(int motorDir, float motorSpeed) {
+  if(!isOpenLoop) motorSpeed = fabs(motorSpeed);
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * rotationDirection > pidController.maxOutputValue) motorSpeed = pidController.maxOutputValue;
-  if (motorSpeed * rotationDirection < pidController.minOutputValue) motorSpeed = pidController.minOutputValue;
-  switch (motorDir) {
-    case CLOCKWISE:
-      dutyCycle = SERVO_STOP + motorSpeed * 128 / 100;
-      break;
-    case COUNTER_CLOCKWISE:
-      dutyCycle = SERVO_STOP - motorSpeed * 128 / 100;
-      break;
-    default:
-      dutyCycle = 0;
+  if (motorSpeed * motorDir > pidController.maxOutputValue) {
+    motorSpeed = pidController.maxOutputValue;
   }
+  if (motorSpeed * motorDir < pidController.minOutputValue) {
+    motorSpeed = pidController.minOutputValue;
+  }
+
+  int dutyCycle = SERVO_STOP + motorSpeed * motorDir * 128 / 100;
   if (dutyCycle > 255) dutyCycle = 255;
   if (dutyCycle < 0) dutyCycle = 0;
 
