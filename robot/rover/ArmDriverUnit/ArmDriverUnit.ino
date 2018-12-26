@@ -40,9 +40,10 @@ updated as of December 22 2018.
 #define DEBUG_PARSING 10 // debug messages during parsing function
 #define DEBUG_VERIFYING 11 // debug messages during verification function
 #define DEBUG_LOOPING 12 // debug messages during main loop
-#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+// #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
+#define DEBUG_PID 16 // debug messages during pid loop calculations
 /*
 choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
 the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -79,7 +80,7 @@ finally, unlocking extra options should be runtime as it should be easily access
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define STEPPER_CHECK_INTERVAL 2000 // much longer period, used for testing/debugging
 // #define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
-#define ENCODER_NVIC_PRIORITY 100 // should be higher priority tan most other things, quick calculations and happens very frequently
+#define ENCODER_NVIC_PRIORITY 100 // should be higher priority than most other things, quick calculations and happens very frequently
 #define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4 // lower priority than motors but still important
 /* serial */
 #define BAUD_RATE 115200 // serial baud rate
@@ -164,36 +165,43 @@ void setup()
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+  // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
+  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
 #ifdef M2_ENCODER_PORT
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
+  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
 #ifdef M3_ENCODER_PORT
   motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
   attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
+  motor3.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
 #ifdef M4_ENCODER_PORT
   motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
   attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+  motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
 #ifdef M5_ENCODER_PORT
   motor5.attachEncoder(M5_ENCODER_A, M5_ENCODER_B, M5_ENCODER_PORT, M5_ENCODER_SHIFT, M5_ENCODER_RESOLUTION);
   attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
   attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
+  motor5.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
 #ifdef M6_ENCODER_PORT
   motor6.attachEncoder(M6_ENCODER_A, M6_ENCODER_B, M6_ENCODER_PORT, M6_ENCODER_SHIFT, M6_ENCODER_RESOLUTION);
   attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
   attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
+  motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
   {
@@ -216,14 +224,15 @@ void setup()
     motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
   }
   {
-    // max (and min) speed setters, I limit it to 50% for safety.
+    // max (and min) closed loop speed setters, I limit it to 50% for safety.
     // Abtin thinks 50% should be a hard limit that can't be modified this easily
-    motor1.pidController.setOutputLimits(-50, 50);
-    motor2.pidController.setOutputLimits(-50, 50);
-    motor3.pidController.setOutputLimits(-50, 50);
-    motor4.pidController.setOutputLimits(-50, 50);
-    motor5.pidController.setOutputLimits(-50, 50);
-    motor6.pidController.setOutputLimits(-50, 50);
+    motor1.pidController.setOutputLimits(-50, 50, 5.0);
+    // motor2.pidController.setOutputLimits(-100, 100, 5.0);
+    motor2.pidController.setOutputLimits(-50, 50, 5.0);
+    motor3.pidController.setOutputLimits(-50, 50, 5.0);
+    motor4.pidController.setOutputLimits(-50, 50, 5.0);
+    motor5.pidController.setOutputLimits(-50, 50, 5.0);
+    motor6.pidController.setOutputLimits(-50, 50, 5.0);
   }
   {
     // open loop setters. By default the motors are open loop, have constant velocity profiles (no ramping),

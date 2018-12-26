@@ -85,6 +85,7 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
   encoderPort = port;
   encoderShift = shift;
   encoderResolution = encRes;
+  encoderResolutionReciprocal = 1 / (float)encRes;
 }
 
 void RobotMotor::setAngleLimits(float minAngle, float maxAngle)

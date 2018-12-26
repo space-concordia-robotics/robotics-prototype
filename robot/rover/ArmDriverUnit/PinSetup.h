@@ -97,8 +97,7 @@
 #define M1_ENCODER_B        8
 #define M1_LIMIT_SW_CW      9
 #define M1_LIMIT_SW_CCW    10
-#define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
-#define M1_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
+#define M1_ENCODER_RESOLUTION 7*2 // temporary, unknown
 #define M1_GEAR_RATIO      40.0 // temporary, unknown
 #define M1_MINIMUM_ANGLE   -175.0
 #define M1_MAXIMUM_ANGLE   175.0

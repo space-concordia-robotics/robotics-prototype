@@ -53,24 +53,19 @@
   6) angleTolerance is motorPID attribute and not motor attribute?
   7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
   8) there's a command to reset a motor position but no implementation
-  9) add command to turn ramping on or off for motor5.hasRamping = false;
   10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
       but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
   11) rename maxangle to maximumJointAngle? maximumShaftAngle? put better names to distinguish the two, especially for stuff like resolution
   13) make sure i did the hasAngleLimits thing right, for now it's only in setDesiredAngle
   14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
-  15) implement setVelocity() for stepper motors
-  16) implement checks for calcCurrentAngle() now that it returns a bool
   17) perhaps the initialization of motor angle parameters should be its own function
   18) perhaps the initialization of the motor's pins should also be its own function
   19) perhaps the constructor should take a series of structs, one for each type
   20) fix that issue with discrepancy that's related to the periodic angle checks
   21) seemed like the pid was running non stop even before requesting an angle?
-  22) control code for stepper closed loop isn't implemented even though structure exists
   23) motor angle checks for open loop control remains to be fixed, updated, implemented
   24) resetjointposition remains to be implemented
   
-  FIX ALL MOTOR CODE EXCEPT MOTOR2
   DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
 */
 /*

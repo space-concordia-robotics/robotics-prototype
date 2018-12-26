@@ -7,16 +7,17 @@ class PidController {
     float jointAngleTolerance;
     float maxOutputValue;
     float minOutputValue;
-    int kp;
-    int ki;
-    int kd;
+    float slowestSpeed;
+    float kp;
+    float ki;
+    float kd;
 
     float pidOutput; // only updated at the end of the calculations
 
     PidController();
     void updatePID(volatile float currentAngle, float desiredAngle);
     void setJointAngleTolerance(float tolerance);
-    void setOutputLimits(float minVal, float maxVal);
+    void setOutputLimits(float minVal, float maxVal, float zeroVal);
     void setGainConstants(float kp, float ki, float kd);
 
   private:
@@ -34,6 +35,7 @@ PidController::PidController() {
   jointAngleTolerance = 1.0;
   minOutputValue = -50.0;
   maxOutputValue = 50.0;
+  slowestSpeed = 3.0;
 }
 
 void PidController::updatePID(volatile float currentAngle, float desiredAngle) {
@@ -41,21 +43,28 @@ void PidController::updatePID(volatile float currentAngle, float desiredAngle) {
   // if the angle is outside the tolerance, move
   if (fabs(error) >= jointAngleTolerance) { //fabs is for floats
 
+    pTerm = kp * error;
+    iTerm += ki * ((error + previousError) / 2) * dt;
+    dTerm = kd * (error - previousError) / dt;
+    pidSum = pTerm + iTerm + dTerm;
+
+    #ifdef DEBUG_PID
+    //UART_PORT.print("P constant is: "); UART_PORT.println(this->kp);
+    //UART_PORT.print("I constant is: "); UART_PORT.println(this->ki);
+    //UART_PORT.print("D constant is: "); UART_PORT.println(this->kd);
     UART_PORT.print("Current angle is: "); UART_PORT.println(currentAngle);
     UART_PORT.print("Desired angle is: "); UART_PORT.println(desiredAngle);
-    UART_PORT.print("Previous angle error is: "); UART_PORT.println(previousError);
+    //UART_PORT.print("Previous angle error is: "); UART_PORT.println(previousError);
     UART_PORT.print("Current angle error is: "); UART_PORT.println(error);
-    pTerm = kp * error;
     UART_PORT.print("P output is: "); UART_PORT.println(pTerm);
-    iTerm += ki * ((error + previousError) / 2) * dt;
     UART_PORT.print("I output is: "); UART_PORT.println(iTerm);
-    dTerm = kd * (error - previousError) / dt;
     UART_PORT.print("D output is: "); UART_PORT.println(dTerm);
-    pidSum = pTerm + iTerm + dTerm;
     UART_PORT.print("PID output is: "); UART_PORT.println(pidSum);
+#endif
 
     if (pidSum > maxOutputValue) pidOutput = maxOutputValue; // give max output
-    if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output // do i need to check for speeds that are too slow? probz
+    if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output
+    if (fabs(pidSum) < slowestSpeed) pidOutput = 0; // check for speeds that are too slow
     else pidOutput = pidSum;
   }
   // if the angle is within the tolerance, don't move
@@ -70,9 +79,10 @@ void PidController::setJointAngleTolerance(float tolerance) {
   jointAngleTolerance = tolerance;
 }
 
-void PidController::setOutputLimits(float minVal, float maxVal) {
+void PidController::setOutputLimits(float minVal, float maxVal, float zeroVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;
+  slowestSpeed = zeroVal;
 }
 
 void PidController::setGainConstants(float kp, float ki, float kd) {
