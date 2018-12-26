@@ -146,12 +146,23 @@ void m5_encoder_interrupt(void);
 void m6_encoder_interrupt(void);
 #endif
 
+// declare limit switch interrupt service routines
+void m1CwISR(void);
+void m1CcwISR(void);
+void m2FlexISR(void);
+void m2ExtendISR(void);
+void m3FlexISR(void);
+void m3ExtendISR(void);
+void m4FlexISR(void);
+void m4ExtendISR(void);
+
 // declare timer interrupt service routines, where the motors actually get controlled.
 // stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
 void dcInterrupt(void); // manages motors 1&2
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
 void servoInterrupt(void); // manages motors 5&6
+
 void parseSerial(commandInfo & cmd); // goes through the message and puts relevant data into the motorCommand struct
 bool verifSerial(commandInfo cmd); // error checks the parsed command
 void setup()
@@ -203,6 +214,27 @@ void setup()
   attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
   motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
+
+// prepare and attach limit switch ISRs
+#if defined(LIM_SWITCH_FALL)
+  #define LIM_SWITCH_DIR FALLING
+#elif defined(LIM_SWITCH_RISE)
+  #define LIM_SWITCH_DIR RISING
+  #endif
+
+motor1.attachLimitSwitches('c',M1_LIMIT_SW_CW,M1_LIMIT_SW_CCW);
+motor2.attachLimitSwitches('f',M2_LIMIT_SW_FLEX,M2_LIMIT_SW_EXTEND);
+motor3.attachLimitSwitches('f',M3_LIMIT_SW_FLEX,M3_LIMIT_SW_EXTEND);
+motor4.attachLimitSwitches('f',M4_LIMIT_SW_FLEX,M4_LIMIT_SW_EXTEND);
+
+attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
+attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
+attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
+attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
+attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
+attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
 
   {
     // shaft angle tolerance setters
@@ -801,7 +833,7 @@ void m3StepperInterrupt(void)
         }
         else
         {
-          int dir = motor3.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          int dir = motor3.calcDirection(output);
           motor3.setVelocity(dir, output);
           m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
         }
@@ -856,7 +888,7 @@ void m4StepperInterrupt(void)
         }
         else
         {
-          int dir = motor4.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          int dir = motor4.calcDirection(output);
           motor4.setVelocity(dir, output);
           m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
         }
@@ -902,7 +934,7 @@ void dcInterrupt(void)
         }
         else
         {
-          int dir = motor1.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          int dir = motor1.calcDirection(output);
           motor1.setVelocity(dir, output);
         }
       }
@@ -941,7 +973,7 @@ void dcInterrupt(void)
         }
         else
         {
-          int dir = motor2.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          int dir = motor2.calcDirection(output);
           motor2.setVelocity(dir, output);
         }
       }
@@ -986,7 +1018,7 @@ void servoInterrupt(void)
         }
         else
         {
-          int dir = motor5.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          int dir = motor5.calcDirection(output);
           motor5.setVelocity(dir, output);
         }
       }
@@ -1146,3 +1178,44 @@ void m6_encoder_interrupt(void)
 }
 
 #endif
+
+void m1CwISR(void){
+  motor1.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m1CcwISR(void){
+  motor1.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m2FlexISR(void){
+  motor2.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m2ExtendISR(void){
+  motor2.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m3FlexISR(void){
+  motor3.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m3ExtendISR(void){
+  motor3.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m4FlexISR(void){
+  motor4.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}
+void m4ExtendISR(void){
+  motor4.stopRotation();
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+}

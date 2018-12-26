@@ -25,6 +25,7 @@ class RobotMotor
   // these variables are set at start and normally don't change during the main loop
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
+  int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
   float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
   float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
@@ -40,9 +41,11 @@ class RobotMotor
   // setup functions
   RobotMotor();
   void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
+  void attachLimitSwitches(char type, int switch1, int switch2);
   void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
   bool hasEncoder;
   virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
+  virtual void stopRotation(void) = 0;
   // void setMaxSpeed();
   int calcDirection(float error); // updates rotationDirection based on the angular error inputted
   bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
@@ -82,7 +85,22 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
   encoderPort = port;
   encoderShift = shift;
   encoderResolution = encRes;
-  encoderResolutionReciprocal = 1 / (float)encRes;
+  encoderResolutionReciprocal = 1 / (float) encRes;
+}
+
+void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2)
+{
+  if (type == 'f')
+  {
+    limSwitchFlex = switch1;
+    limSwitchExtend = switch2;
+  }
+  else
+    if (type == 'c')
+    {
+      limSwitchCw = switch1;
+      limSwitchCcw = switch2;
+    }
 }
 
 void RobotMotor::setAngleLimits(float minAngle, float maxAngle)
@@ -112,10 +130,12 @@ float RobotMotor::getDesiredAngle(void)
 
 int RobotMotor::calcDirection(float error)
 {
-  if (error >= 0){
+  if (error >= 0)
+  {
     rotationDirection = 1;
   }
-  else{
+  else
+  {
     rotationDirection = -1;
   }
   return rotationDirection;

@@ -12,8 +12,8 @@ void pinSetup(void) {
     pinMode(M1_STEP_PIN, OUTPUT);
     pinMode(M1_ENCODER_A, INPUT_PULLUP);
     pinMode(M1_ENCODER_B, INPUT_PULLUP);
-    pinMode(M1_LIMIT_SW_CW, INPUT_PULLUP);
-    pinMode(M1_LIMIT_SW_CCW, INPUT_PULLUP);
+    pinMode(M1_LIMIT_SW_CW, LIM_SWITCH_PULLSTATE);
+    pinMode(M1_LIMIT_SW_CCW, LIM_SWITCH_PULLSTATE);
   */
   pinMode(M3_ENABLE_PIN, OUTPUT);
   digitalWrite(M3_ENABLE_PIN, HIGH); // cut power
@@ -21,8 +21,8 @@ void pinSetup(void) {
   pinMode(M3_STEP_PIN, OUTPUT);
   pinMode(M3_ENCODER_A, INPUT_PULLUP);
   pinMode(M3_ENCODER_B, INPUT_PULLUP);
-  pinMode(M3_LIMIT_SW_FLEX, INPUT_PULLUP);
-  pinMode(M3_LIMIT_SW_EXTEND, INPUT_PULLUP);
+  pinMode(M3_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
+  pinMode(M3_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
   pinMode(M4_ENABLE_PIN, OUTPUT);
   digitalWrite(M4_ENABLE_PIN, HIGH); // cut power
@@ -30,8 +30,8 @@ void pinSetup(void) {
   pinMode(M4_STEP_PIN, OUTPUT);
   pinMode(M4_ENCODER_A, INPUT_PULLUP);
   pinMode(M4_ENCODER_B, INPUT_PULLUP);
-  pinMode(M4_LIMIT_SW_FLEX, INPUT_PULLUP);
-  pinMode(M4_LIMIT_SW_EXTEND, INPUT_PULLUP);
+  pinMode(M4_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
+  pinMode(M4_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
   // DC motor
 
@@ -42,8 +42,8 @@ void pinSetup(void) {
   //pinMode(M1_UART_RX, INPUT); // for sabertooth
   pinMode(M1_ENCODER_A, INPUT_PULLUP);
   pinMode(M1_ENCODER_B, INPUT_PULLUP);
-  pinMode(M1_LIMIT_SW_CW, INPUT_PULLUP);
-  pinMode(M1_LIMIT_SW_CCW, INPUT_PULLUP);
+  pinMode(M1_LIMIT_SW_CW, LIM_SWITCH_PULLSTATE);
+  pinMode(M1_LIMIT_SW_CCW, LIM_SWITCH_PULLSTATE);
 
   pinMode(M2_PWM_PIN, OUTPUT);
   pinMode(M2_DIR_PIN, OUTPUT); // for new driver
@@ -52,23 +52,23 @@ void pinSetup(void) {
   //pinMode(M2_UART_RX, INPUT); // for sabertooth
   pinMode(M2_ENCODER_A, INPUT_PULLUP);
   pinMode(M2_ENCODER_B, INPUT_PULLUP);
-  pinMode(M2_LIMIT_SW_FLEX, INPUT_PULLUP);
-  pinMode(M2_LIMIT_SW_EXTEND, INPUT_PULLUP);
+  pinMode(M2_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
+  pinMode(M2_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
   // servos
 
   pinMode(M5_PWM_PIN, OUTPUT);
   analogWrite(M5_PWM_PIN, SERVO_STOP);
   /*
-    pinMode(M5_ENCODER_A, INPUT_PULLUP);
-    pinMode(M5_ENCODER_B, INPUT_PULLUP);
+    pinMode(M5_ENCODER_A, LIM_SWITCH_PULLSTATE);
+    pinMode(M5_ENCODER_B, LIM_SWITCH_PULLSTATE);
   */
 
   pinMode(M6_PWM_PIN, OUTPUT);
   analogWrite(M6_PWM_PIN, SERVO_STOP);
   /*
-    pinMode(M6_ENCODER_A, INPUT_PULLUP);
-    pinMode(M6_ENCODER_B, INPUT_PULLUP);
+    pinMode(M6_ENCODER_A, LIM_SWITCH_PULLSTATE);
+    pinMode(M6_ENCODER_B, LIM_SWITCH_PULLSTATE);
   */
 
 }

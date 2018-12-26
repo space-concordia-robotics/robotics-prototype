@@ -65,6 +65,12 @@
   DEAL WITH ANGLERESOLUTION VARIABLE IN PIDCONTROLLER
 */
 /*
+todo: add comments everywhere!!!!
+does the limit switch interrupt trigger on falling or on rising?
+maybe we should have some way of covering the limit switches - what if someone accidentally presses one?
+or maybe the code will check to make sure the expected angle is within a certain limit to stop it
+there should also be a check so that if the motor is moving away from the goal position or has been moving for a while without reaching the expected angle, it stops... like a timeout
+
   deal with relative vs absolute angle control issues
   what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 

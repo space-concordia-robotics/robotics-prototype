@@ -17,7 +17,14 @@
 // 8-14 encoder interrupt pins
 // 3 direction pins, 3 step pins
 
-#define NUM_LIM_SW          4
+#define LIM_SWITCH_FALL 1 // triggered by falling edge
+//#define LIM_SWITCH_RISE 2 // triggered by rising edge
+
+#if defined(LIM_SWITCH_FALL)
+#define LIM_SWITCH_PULLSTATE INPUT_PULLUP
+#elif defined(LIM_SWITCH_RISE)
+#define LIM_SWITCH_PULLSTATE INPUT_PULLDOWN
+#endif
 
 #define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
