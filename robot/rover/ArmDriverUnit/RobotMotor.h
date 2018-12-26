@@ -25,10 +25,9 @@ class RobotMotor
   // these variables are set at start and normally don't change during the main loop
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
-  float gearRatio;
-  float gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
+  float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
-  float maximumAngle, minimumAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
+  float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
   bool hasAngleLimits; // a wrist which wants to turn infinitely will be constrained by angle limits
   bool isOpenLoop; // decides whether to use the PID or not
   bool hasRamping; // decides whether to ramp the speed in open loop
@@ -37,8 +36,6 @@ class RobotMotor
   PidController pidController; // used for speed and angle control
   // these variables change during the main loop
   volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
-  // volatile float currentAngle; // can be updated within timer interrupts
-  // float desiredAngle;
   volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
   // setup functions
   RobotMotor();
@@ -47,7 +44,7 @@ class RobotMotor
   bool hasEncoder;
   virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
   // void setMaxSpeed();
-  void calcDirection(float error); // updates rotationDirection based on the angular error inputted
+  int calcDirection(float error); // updates rotationDirection based on the angular error inputted
   bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
   float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
   bool calcCurrentAngle(void);
@@ -90,14 +87,14 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
 
 void RobotMotor::setAngleLimits(float minAngle, float maxAngle)
 {
-  minimumAngle = minAngle;
-  maximumAngle = maxAngle;
+  minJointAngle = minAngle;
+  maxJointAngle = maxAngle;
   hasAngleLimits = true;
 }
 
 bool RobotMotor::setDesiredAngle(float angle)
 {
-  if (!hasAngleLimits || (angle > minimumAngle && angle < maximumAngle))
+  if (!hasAngleLimits || (angle > minJointAngle && angle < maxJointAngle))
   {
     desiredAngle = angle;
     return true;
@@ -113,12 +110,15 @@ float RobotMotor::getDesiredAngle(void)
   return desiredAngle;
 }
 
-void RobotMotor::calcDirection(float error)
+int RobotMotor::calcDirection(float error)
 {
-  if (error >= 0)
+  if (error >= 0){
     rotationDirection = 1;
-  else
+  }
+  else{
     rotationDirection = -1;
+  }
+  return rotationDirection;
 }
 
 bool RobotMotor::calcCurrentAngle(void)

@@ -801,8 +801,8 @@ void m3StepperInterrupt(void)
         }
         else
         {
-          motor3.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor3.setVelocity(motor3.rotationDirection, output);
+          int dir = motor3.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor3.setVelocity(dir, output);
           m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
         }
       }
@@ -856,8 +856,8 @@ void m4StepperInterrupt(void)
         }
         else
         {
-          motor4.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor4.setVelocity(motor4.rotationDirection, output);
+          int dir = motor4.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor4.setVelocity(dir, output);
           m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
         }
       }
@@ -902,8 +902,8 @@ void dcInterrupt(void)
         }
         else
         {
-          motor1.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor1.setVelocity(motor1.rotationDirection, output);
+          int dir = motor1.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor1.setVelocity(dir, output);
         }
       }
       else
@@ -941,8 +941,8 @@ void dcInterrupt(void)
         }
         else
         {
-          motor2.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor2.setVelocity(motor2.rotationDirection, output);
+          int dir = motor2.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor2.setVelocity(dir, output);
         }
       }
       else
@@ -986,8 +986,8 @@ void servoInterrupt(void)
         }
         else
         {
-          motor5.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor5.setVelocity(motor5.rotationDirection, output);
+          int dir = motor5.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor5.setVelocity(dir, output);
         }
       }
       else
@@ -1025,8 +1025,8 @@ void servoInterrupt(void)
         }
         else
         {
-          motor6.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
-          motor6.setVelocity(motor6.rotationDirection, output);
+          int dir = motor6.calcDirection(output);
+          motor6.setVelocity(dir, output);
         }
       }
       else
