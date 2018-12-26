@@ -89,14 +89,15 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
   if (!isOpenLoop)
     motorSpeed = fabs(motorSpeed);
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.maxOutputValue)
+  if (motorSpeed * motorDir > pidController.getMaxOutputValue())
   {
-    motorSpeed = pidController.maxOutputValue;
+    motorSpeed = pidController.getMaxOutputValue();
   }
-  if (motorSpeed * motorDir < pidController.minOutputValue)
+  if (motorSpeed * motorDir < pidController.getMinOutputValue())
   {
-    motorSpeed = pidController.minOutputValue;
+    motorSpeed = pidController.getMinOutputValue();
   }
+
   switch (motorDir)
   {
     case CLOCKWISE:
@@ -119,7 +120,7 @@ void StepperMotor::stopRotation(void) {
 
 bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
-  if ( fabs(angle) > pidController.jointAngleTolerance) {
+  if ( fabs(angle) > pidController.getJointAngleTolerance()) {
     // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
     numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
     return true;

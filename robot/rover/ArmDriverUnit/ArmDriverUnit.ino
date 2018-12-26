@@ -792,8 +792,8 @@ void m3StepperInterrupt(void)
       if (!motor3.movementDone)
       {
         motor3.calcCurrentAngle();
-        motor3.pidController.updatePID(motor3.getCurrentAngle(), motor3.getDesiredAngle());
-        if (motor3.pidController.pidOutput == 0)
+        float output = motor3.pidController.updatePID(motor3.getCurrentAngle(), motor3.getDesiredAngle());
+        if (output == 0)
         {
           motor3.movementDone = true;
           motor3.stopRotation();
@@ -801,8 +801,8 @@ void m3StepperInterrupt(void)
         }
         else
         {
-          motor3.calcDirection(motor3.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor3.setVelocity(motor3.rotationDirection, motor3.pidController.pidOutput);
+          motor3.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor3.setVelocity(motor3.rotationDirection, output);
           m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
         }
       }
@@ -847,8 +847,8 @@ void m4StepperInterrupt(void)
       if (!motor4.movementDone)
       {
         motor4.calcCurrentAngle();
-        motor4.pidController.updatePID(motor4.getCurrentAngle(), motor4.getDesiredAngle());
-        if (motor4.pidController.pidOutput == 0)
+        float output = motor4.pidController.updatePID(motor4.getCurrentAngle(), motor4.getDesiredAngle());
+        if (output == 0)
         {
           motor4.movementDone = true;
           motor4.stopRotation();
@@ -856,8 +856,8 @@ void m4StepperInterrupt(void)
         }
         else
         {
-          motor4.calcDirection(motor4.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor4.setVelocity(motor4.rotationDirection, motor4.pidController.pidOutput);
+          motor4.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor4.setVelocity(motor4.rotationDirection, output);
           m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
         }
       }
@@ -894,16 +894,16 @@ void dcInterrupt(void)
       if (!motor1.movementDone)
       {
         motor1.calcCurrentAngle();
-        motor1.pidController.updatePID(motor1.getCurrentAngle(), motor1.getDesiredAngle());
-        if (motor1.pidController.pidOutput == 0)
+        float output = motor1.pidController.updatePID(motor1.getCurrentAngle(), motor1.getDesiredAngle());
+        if (output == 0)
         {
           motor1.movementDone = true;
           motor1.stopRotation();
         }
         else
         {
-          motor1.calcDirection(motor1.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor1.setVelocity(motor1.rotationDirection, motor1.pidController.pidOutput);
+          motor1.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor1.setVelocity(motor1.rotationDirection, output);
         }
       }
       else
@@ -933,16 +933,16 @@ void dcInterrupt(void)
       if (!motor2.movementDone)
       {
         motor2.calcCurrentAngle();
-        motor2.pidController.updatePID(motor2.getCurrentAngle(), motor2.getDesiredAngle());
-        if (motor2.pidController.pidOutput == 0)
+        float output = motor2.pidController.updatePID(motor2.getCurrentAngle(), motor2.getDesiredAngle());
+        if (output == 0)
         {
           motor2.movementDone = true;
           motor2.stopRotation();
         }
         else
         {
-          motor2.calcDirection(motor2.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor2.setVelocity(motor2.rotationDirection, motor2.pidController.pidOutput);
+          motor2.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor2.setVelocity(motor2.rotationDirection, output);
         }
       }
       else
@@ -978,16 +978,16 @@ void servoInterrupt(void)
       if (!motor5.movementDone)
       {
         motor5.calcCurrentAngle();
-        motor5.pidController.updatePID(motor5.getCurrentAngle(), motor5.getDesiredAngle());
-        if (motor5.pidController.pidOutput == 0)
+        float output = motor5.pidController.updatePID(motor5.getCurrentAngle(), motor5.getDesiredAngle());
+        if (output == 0)
         {
           motor5.movementDone = true;
           motor5.stopRotation();
         }
         else
         {
-          motor5.calcDirection(motor5.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor5.setVelocity(motor5.rotationDirection, motor5.pidController.pidOutput);
+          motor5.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor5.setVelocity(motor5.rotationDirection, output);
         }
       }
       else
@@ -1017,16 +1017,16 @@ void servoInterrupt(void)
       if (!motor6.movementDone)
       {
         motor6.calcCurrentAngle();
-        motor6.pidController.updatePID(motor6.getCurrentAngle(), motor6.getDesiredAngle());
-        if (motor6.pidController.pidOutput == 0)
+        float output = motor6.pidController.updatePID(motor6.getCurrentAngle(), motor6.getDesiredAngle());
+        if (output == 0)
         {
           motor6.movementDone = true;
           motor6.stopRotation();
         }
         else
         {
-          motor6.calcDirection(motor6.pidController.pidOutput); // does this work? it expects an angular error but at the end of the day...
-          motor6.setVelocity(motor6.rotationDirection, motor6.pidController.pidOutput);
+          motor6.calcDirection(output); // does this work? it expects an angular error but at the end of the day...
+          motor6.setVelocity(motor6.rotationDirection, output);
         }
       }
       else

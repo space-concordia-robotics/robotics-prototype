@@ -53,14 +53,15 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed)
   if (!isOpenLoop)
     motorSpeed = fabs(motorSpeed);
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.maxOutputValue)
+  if (motorSpeed * motorDir > pidController.getMaxOutputValue())
   {
-    motorSpeed = pidController.maxOutputValue;
+    motorSpeed = pidController.getMaxOutputValue();
   }
-  if (motorSpeed * motorDir < pidController.minOutputValue)
+  if (motorSpeed * motorDir < pidController.getMinOutputValue())
   {
-    motorSpeed = pidController.minOutputValue;
+    motorSpeed = pidController.getMinOutputValue();
   }
+
   switch (motorDir)
   {
     case CLOCKWISE:
@@ -77,7 +78,7 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed)
 bool DcMotor::calcTurningDuration(float angle)
 {
   // if the error is big enough to justify movement
-  if (fabs(angle) > pidController.jointAngleTolerance)
+  if (fabs(angle) > pidController.getJointAngleTolerance())
   {
     // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
     numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain; // calculate how long to turn for
