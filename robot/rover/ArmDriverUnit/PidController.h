@@ -63,8 +63,8 @@ void PidController::updatePID(volatile float currentAngle, float desiredAngle) {
 #endif
 
     if (pidSum > maxOutputValue) pidOutput = maxOutputValue; // give max output
-    if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output
-    if (fabs(pidSum) < slowestSpeed) pidOutput = 0; // check for speeds that are too slow
+    else if (pidSum < minOutputValue) pidOutput = minOutputValue; // give min output
+    else if (fabs(pidSum) < slowestSpeed) pidOutput = 0; // check for speeds that are too slow
     else pidOutput = pidSum;
   }
   // if the angle is within the tolerance, don't move
