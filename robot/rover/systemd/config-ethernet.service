@@ -1,0 +1,12 @@
+[Unit]
+Description=Configure ethernet connection
+After=generic-board-startup.service network-online.target
+Wants=generic-board-startup.service network-online.target
+#Before=ip-emailer.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/runConfigEthernet.sh
+
+[Install]
+WantedBy=mulit-user.target

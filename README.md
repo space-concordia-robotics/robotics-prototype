@@ -208,7 +208,7 @@ For step by step instructions see [here](http://odroid.us/mediawiki/index.php?ti
 
 #### Dev
 
-The ubuntuMATE image is customized as follows to allow us to more easily develop on the odroid.
+The ubuntuMATE dev-0 image is customized as follows to allow us to more easily develop on the odroid.
 
 Differences between default ubuntuMATE image:
 - [Autologin enabled](https://ubuntu-mate.community/t/auto-login-to-the-desktop/60)
@@ -220,6 +220,9 @@ Differences between default ubuntuMATE image:
 
 Any kind of authentication requiring services (such as a connection to a wifi network requiring username/password) will not be included in the images.
 To find all the custom images follow [this link](https://drive.google.com/drive/u/1/folders/17An9xUkBo8dGS8PoY54tsNWucJLyBDJC) to the corresponding google drive folder.
+
+For further details on these images see the [Custom Odroid Images wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Custom-Odroid-Images).
+The systemd configuration files are versioned in `robot/rover/systemd`.
 
 ### How to upload Arduino scripts from the odroid
 
