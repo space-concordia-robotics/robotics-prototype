@@ -233,19 +233,37 @@ To find all the custom images follow [this link](https://drive.google.com/drive/
 
 Note: I didn't look into adding libraries yet but I'm pretty sure you want to place them in the platformio/lib folder. See [platformio lib help page](http://docs.platformio.org/en/latest/userguide/lib/index.html) to learn more
 
-### IP emailer service
 
-The odroid will send an email with its local IP address every time it boots
 
-This was accomplished by running `syncEmailer.sh` and adding setting up a systemd startup service to run `runEmailer`.
+### Systemd services
 
 [This link](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee) explains how to setup a systemd service in steps.
+
+#### Ethernet config service
+
+The odroid has two ethernet network types:
+
+- `WiredConnection1` for when it is being connected to a regular router
+- `RoverOBC` for when it is being connected to the RocketM900 radio
+
+On bootup, if an ethernet cable is plugged in, the config script will switch to `WiredConnection1` and attemp to ping google server as a test.
+If the test fails, the `RoverOBC` connection type is selected.
+
+This was accomplished by running `syncConfigEthernet.sh` and setting up a systemd startup service to run `runEthernetConfig`.
+
+#### IP emailer service
+
+The odroid will send an email with its local IP address every time it boots, after having run the ethernet config service.
+
+This was accomplished by running `syncEmailer.sh` and adding setting up a systemd startup service to run `runEmailer`.
 
 Let Peter know if you want to be added to this mailing list.
 
 ### Remote connect from home
 
-- Open a terminal (I recommend git bash if you're using windows)
+**NOTE:** This will only work if the odroid is powered up and connected to the internet at Concordia.
+
+- Open a terminal (git bash is recommended if you're using windows)
 - SSH into Concordia's network with your netname (type the following into the terminal):
 ```
 ssh net_name@login.encs.concordia.ca

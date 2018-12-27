@@ -11,3 +11,5 @@
 **/.envrc
 **/stress-test-results_*
 **/node_modules
+**/configEthernet.log
+**/emailer.log
