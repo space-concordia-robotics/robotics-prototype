@@ -10,14 +10,19 @@ t. Any string can be sent in order to get a response.
 ### Setup
 
 Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`.
-Steps:
+
+If you wish to use an already existing catkin workspace, then skip the following steps:
+
 - Go to your home folder: `cd`
-- Create the catkin_ws with a src directory in it: `mkdir -p catkin_ws`
+- Create the catkin_ws with a src directory in it: `mkdir -p catkin_ws/src
 - Go into the src folder: `cd catkin_ws/src`
-- Copy over the package, while preserving permissions: `cp -r ~/path-to-robotics-prototype/robot/rospackages/ping_acknowledgment .`
+
+In the `catkin_ws/src/` folder:
+
+- Copy over the package, while preserving permissions: `cp -pr ~/path-to-robotics-rototype/robot/rospackages/ping_acknowledgment .`
 - Go back to catkin_ws: `cd ..`
 - Build the package: `catkin_make`
-- After succesfull build, for the package to be added to your $ROS_PACKAGE_PATH environment variable: `. devel/setup.bash`. If you want this to happen everytime you open a new terminal, then append this command (use absolute or relative path accordingly) to your `~/.bashrc` file.
+- After a successful build, before you carry on make sure that the current catkin workstation folder is in your `$ROS_PACKAGE_PATH` environemnt variable. Check with `echo $ROS_PACKAGE_PATH`. If it is not there then you should append the a line like `. ~/catkin_ws/` to your `~/.bashrc` file. To use the package in the current terminal run `. ~/.profile` or open a new terminal.
 
 After having built the package and generated the all the source code, you may test the service by running the following commands (each time in a new terminal):
 
