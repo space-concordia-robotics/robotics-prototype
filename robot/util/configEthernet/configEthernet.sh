@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # This script checks if the internet can be reached from a regular ethernet connection type
-# If the regular ethernet configuration cannot ping google severs, the rocket configuration is loaded
+# If the regular ethernet configuration cannot ping google severs, the rocket configuration is chosen
 
 IS_ETHERNET_PLUGGED=(`cat /sys/class/net/eth0/carrier`)
 
@@ -11,8 +11,6 @@ ROCKET_CONNECTION="RoverOBC"
 # For testing if we have an internet connection
 GOOGLE_SERVER="8.8.8.8"
 
-#echo $IS_ETHERNET_PLUGGED
-
 # exit script if ethernet cable not plugged in
 if [ "$IS_ETHERNET_PLUGGED" -eq "0" ]; then
     echo "No ethernet cable plugged, exiting script."
@@ -22,10 +20,11 @@ fi
 # switch to WiredConnection1
 nmcli connection up $ROUTER_CONNECTION
 
-pingResults=(`ping -c 1 $GOOGLE_SERVER`)
-
 # if router connection does not provide internet access, switch to rocket connection
-if [[ $pingResults == *"Network is unreachable"* ]]; then
-    echo "Network is unreachable, selecting Rocket configuration"
+if [[ ping -c 1 -q $GOOGLE_SERVER &>/dev/null ]]; then
+    echo "Network is reachable, regular router configuration selected"
+else
+    echo "Network is unreachable, Rocket configuration selected"
+
     nmcli connection up $ROCKET_CONNECTION
 fi
