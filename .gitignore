@@ -13,3 +13,5 @@
 **/node_modules
 **/configEthernet.log
 **/emailer.log
+**/rosRoverStart.log
+**/status_done

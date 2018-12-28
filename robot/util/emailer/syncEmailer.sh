@@ -6,5 +6,6 @@ fi
 
 cp ./* $EMAILER_DIR
 cd $EMAILER_DIR
-npm install
 
+# install dependencies defined in package.json
+npm install
