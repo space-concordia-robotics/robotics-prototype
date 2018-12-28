@@ -197,10 +197,10 @@ Teensy programming has all of the Arduino functions, as well as extra features d
 
 I (Josh) currently use Sublime Text to write my code, and then compile it using the Arduino IDE and use the Serial Monitor to communicate with the Teensy. The recommended editors are Atom or VS Code as the rest of this project has configuration files for those text editors.
 
-### Arm Driver Unit
+### Arm Driver Unit (ADU)
 #### Code Structure
 
-The Teensy code for the ADU is abstracted into classes to aid in code modularity. Currently there is the RobotMotor class with the DcMotor, StepperMotor and ServoMotor subclasses. There is also the PidController and Parser classes, and pinSetup which is not a class but is separated into its own .cpp and .h files. In the future, these could be turned into Arduino libraries, but at the very least, a similar structure can be used on the rover Teensy.
+The Teensy code for the ADU is abstracted into classes to aid in code modularity. Currently there is the RobotMotor class with the DcMotor, StepperMotor and ServoMotor subclasses. There are also the PidController and Parser classes, and pinSetup which is not a class but is separated into its own .cpp and .h files. In the future, these classes could be turned into Arduino libraries. At the very least, a similar structure can be used on the rover Teensy.
 
 #### Hardware and Wiring
 
@@ -212,7 +212,7 @@ In short, the Teensy is connected to the drivers (and the servos). The drivers (
 
 On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
-### Rover Driver Unit
+### Rover Driver Unit (RDU)
 #### Code Structure
 
 The RDU code structure is to be decided but will probably follow a similar structure to the ADU.
