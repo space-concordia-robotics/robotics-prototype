@@ -15,3 +15,5 @@
 **/emailer.log
 **/rosRoverStart.log
 **/status_done
+**/rospackages/build
+**/rospackages/devel
