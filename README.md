@@ -126,7 +126,7 @@ If you're using atom-editor setting up should be fairly easy.
 However, if you have issues such as `failed to spawn command pylint` or similar complaining about yapf, you may open the package settings and fix the paths yourself. \
 For example, change every `/` to `\`, and change the `venv/bin/whatever` to `venv\Scripts\whatever`.
 Make sure to apply these changes in the _atom package settings_, they will automatically take care of your system `config.cson` and take care of details (such as escaping the `\`s in the actual config file).
- 
+
 - Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
 If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
 If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
@@ -222,7 +222,6 @@ Any kind of authentication requiring services (such as a connection to a wifi ne
 To find all the custom images follow [this link](https://drive.google.com/drive/u/1/folders/17An9xUkBo8dGS8PoY54tsNWucJLyBDJC) to the corresponding google drive folder.
 
 For further details on these images see the [Custom Odroid Images wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Custom-Odroid-Images).
-The systemd configuration files are versioned in `robot/rover/systemd`.
 
 ### How to upload Arduino scripts from the odroid
 
@@ -236,11 +235,11 @@ The systemd configuration files are versioned in `robot/rover/systemd`.
 
 Note: I didn't look into adding libraries yet but I'm pretty sure you want to place them in the platformio/lib folder. See [platformio lib help page](http://docs.platformio.org/en/latest/userguide/lib/index.html) to learn more
 
-
-
 ### Systemd services
 
 [This link](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee) explains how to setup a systemd service in steps.
+
+The systemd service files are versioned under `robot/rover/systemd`.
 
 #### Ethernet config service
 
@@ -258,9 +257,16 @@ This was accomplished by running `syncConfigEthernet.sh` and setting up a system
 
 The odroid will send an email with its local IP address every time it boots, after having run the ethernet config service.
 
-This was accomplished by running `syncEmailer.sh` and adding setting up a systemd startup service to run `runEmailer`.
+This was accomplished by running `syncEmailer.sh` and setting up a systemd startup service to run `runEmailer`.
 
 Let Peter know if you want to be added to this mailing list.
+
+#### Ros Rover Startup service
+
+This service launches a roslaunch file `rover.launch` which will allow developers to easily add nodes to be launched on startup without having to create
+a new systemd service each time. It automatically starts the rosmaster server. It runs after the IP emailer service.
+
+This was accomplished by running `syncRosRoverSync.sh` and setting up a systemd startup service to run `runRosRoverStart.sh`.
 
 ### Remote connect from home
 

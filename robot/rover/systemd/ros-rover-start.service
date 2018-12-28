@@ -1,0 +1,11 @@
+[Unit]
+Description=Launch roscore and startup nodes
+After=ip-emailer.service
+Wants=ip-emailer.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/runRosRoverStart.sh
+
+[Install]
+WantedBy=multi-user.target
