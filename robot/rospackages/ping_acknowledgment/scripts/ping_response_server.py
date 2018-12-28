@@ -3,7 +3,6 @@
 from ping_acknowledgment.srv import *
 import rospy
 
-#@TODO: test if "handle_" is necessary
 def handle_ping(req):
     response = "To your '{:s}', I say 'suh dude'".format(req.ping)
     print("Returning '" + response + "'")

@@ -204,24 +204,10 @@ These custom images are made by directly setting up the changes on a fresh image
 
 Example: `sudo dd if=/dev/sdb of=ubuntuMateDev.img bs=4M`
 
-For step by step instructions see [here](http://odroid.us/mediawiki/index.php?title=Create_SD_Card_Images).
-
-#### Dev
-
-The ubuntuMATE dev-0 image is customized as follows to allow us to more easily develop on the odroid.
-
-Differences between default ubuntuMATE image:
-- [Autologin enabled](https://ubuntu-mate.community/t/auto-login-to-the-desktop/60)
-- Install `curl` and `git` with `apt-get`
-- Clone this `robotics-prototype` repo to `~/Programming` folder
-- Install `nvm v0.33.11`, `node v10.13.0` (LTS) by `wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash` , and `nvm install node v10.13.0`, respectively
-- Setup systemd service called `ip-emailer` to run `runEmailer.sh` ([how to setup a startup service with systemd](https://gist.github.com/pdp7/d4770a6ba17e666848796bf5cfd0caee))
-- Add configuration files `.bash_aliases` and `.nanorc`
-
 Any kind of authentication requiring services (such as a connection to a wifi network requiring username/password) will not be included in the images.
 To find all the custom images follow [this link](https://drive.google.com/drive/u/1/folders/17An9xUkBo8dGS8PoY54tsNWucJLyBDJC) to the corresponding google drive folder.
 
-For further details on these images see the [Custom Odroid Images wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Custom-Odroid-Images).
+For further details on these images please see the [Custom Odroid Images wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Custom-Odroid-Images).
 
 ### How to upload Arduino scripts from the odroid
 
@@ -243,10 +229,10 @@ The systemd service files are versioned under `robot/rover/systemd`.
 
 #### Ethernet config service
 
-The odroid has two ethernet network types:
+The odroid has two ethernet network configurations:
 
-- `WiredConnection1` for when it is being connected to a regular router
-- `RoverOBC` for when it is being connected to the RocketM900 radio
+- `WiredConnection1` for when it is being connected to a regular router, dynamic IP
+- `RoverOBC` for when it is being connected to the RocketM900 radio, static IP
 
 On bootup, if an ethernet cable is plugged in, the config script will switch to `WiredConnection1` and attemp to ping google server as a test.
 If the test fails, the `RoverOBC` connection type is selected.
@@ -255,7 +241,7 @@ This was accomplished by running `syncConfigEthernet.sh` and setting up a system
 
 #### IP emailer service
 
-The odroid will send an email with its local IP address every time it boots, after having run the ethernet config service.
+The odroid will send an email with its local IP address after having run the ethernet config service first, and only if it does not end up selecting the `RoverOBC` configuration.
 
 This was accomplished by running `syncEmailer.sh` and setting up a systemd startup service to run `runEmailer`.
 
@@ -263,8 +249,8 @@ Let Peter know if you want to be added to this mailing list.
 
 #### Ros Rover Startup service
 
-This service launches a roslaunch file `rover.launch` which will allow developers to easily add nodes to be launched on startup without having to create
-a new systemd service each time. It automatically starts the rosmaster server. It runs after the IP emailer service.
+This service follows the IP-emailer service and executes a roslaunch file `rover.launch`, which will allow developers to easily add nodes to be launched on startup without having to create
+a new systemd service each time. It automatically starts the rosmaster on the odroid.
 
 This was accomplished by running `syncRosRoverSync.sh` and setting up a systemd startup service to run `runRosRoverStart.sh`.
 
@@ -283,4 +269,3 @@ ssh net_name@login.encs.concordia.ca
 ssh odroid@ip_address
 ```
 - It should ask you for a password, which will be `odroid`
-
