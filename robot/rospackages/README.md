@@ -10,7 +10,7 @@ The ping_acknowledgement package uses the `PingResponse` service defined in `srv
 
 Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`.
 
-The simplest way to make use of these packages is to run `catkin_make` from the `rospackages` folder and run `export ROS_PACKAGE_PATH="/home/dev/robotics-prototype/src:$ROS_PACKAGE_PATH"`, or you can add this line to your `~/.bashrc` file to have it be run every time you open a new terminal.
+The simplest way to make use of these packages is to run `catkin_make` from the `rospackages` folder and run `. /home/path-to-repo/robot/rospackages/devel/setup.bash`, or you can add this line to your `~/.bashrc` file to have it be run every time you open a new terminal.
 
 After having built the package and generated the all the source code, you may test the service by running the following commands (each time in a new terminal):
 
