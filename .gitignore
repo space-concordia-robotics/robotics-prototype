@@ -11,3 +11,9 @@
 **/.envrc
 **/stress-test-results_*
 **/node_modules
+**/configEthernet.log
+**/emailer.log
+**/rosRoverStart.log
+**/status_done
+**/rospackages/build
+**/rospackages/devel

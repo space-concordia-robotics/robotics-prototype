@@ -26,4 +26,3 @@ The rover ip address in `app.py` will have to be set to the correct value.
 
 Example:
 `#include "libraries/Encoder.h"`
-

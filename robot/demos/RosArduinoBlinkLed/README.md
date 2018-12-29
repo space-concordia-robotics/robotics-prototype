@@ -50,19 +50,39 @@ NOTE: to run this script with no errors, you will most probably have to delete a
 
 I was able to test running on multiple machines over the same network by configuring the machines as such:
 
+For instance, if you have:
+
+- Your laptop hostname and IP: `boop`, `192.168.2.1`
+- Odroid hostname and IP: `odroid`, `192.168.2.2`
+
+then set your variables in your devices respective `~/.bashrc` files:
+
 Laptop (master):
-- ROS_MASTER_URI=http://localhost:11311
-- ROS_HOSTNAME=`hostname`
+- `ROS_MASTER_URI=http://192.168.2.1:11311`
+- `ROS_HOSTNAME=boop`
  
 Odroid (w/ Arduino):
-- ROS_MASTER_URI:http://`<Laptop IP>`
-- ROS_HOSTNAME=`hostname`
+- `ROS_MASTER_URI=http://192.168.2.1:11311`
+- `ROS_HOSTNAME=odroid`
 
 Since I wasn't able to ping `odroid` hostname from my laptop (and vice versa), I had to edit my `/etc/hosts` file for each device
 to make sure the hostnames would resolve to their corresponding IP addresses.
 [This article](https://bencane.com/2013/10/29/managing-dns-locally-with-etchosts/) explains in more detail about managing DNS locally with `/etc/hosts`.
 
+In my case with `sudo nano /etc/hosts` for each device I appended the following lines:
+
+- For odroid:
+
+`127.0.0.1    odroid`
+`192.168.2.1    boop`
+
+- For laptop:
+
+`127.0.0.1    boop`
+`192.168.2.2    odroid`
+
 Assuming you can now ping hostnames of each devices bi-directionally, to run the demo remotely:
+
 - On your machine run `roscore`
 - On the odroid run `rosrun rosserial_python serial_node.py /dev/ttyACM0`
 - On your machine run `rostopic pub toggle_led std_msgs/Empty --once`, or `./blinkLED.py` for a slightly more interactive experience
