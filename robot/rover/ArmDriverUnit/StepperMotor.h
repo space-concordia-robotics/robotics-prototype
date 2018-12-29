@@ -13,6 +13,7 @@
 #define MIN_STEP_INTERVAL 3000
 #define MAX_STEP_INTERVAL 70000
 
+// multipliers for how bit of an angle the stepper moves each step
 #define FULL_STEP 1
 #define HALF_STEP 0.5
 #define QUARTER_STEP 0.25
@@ -41,11 +42,10 @@ class StepperMotor : public RobotMotor {
     int openLoopSpeed; // angular speed (degrees/second)
     int numSteps; // how many steps to take for stepper to reach desired position
     volatile int stepCount; // how many steps the stepper has taken since it started moving
-    volatile int nextInterval;
+    volatile int nextInterval; // how long to wait until the next step
 
   private:
     int enablePin, directionPin, stepPin;
-    unsigned int stepInterval;
     float fullStepResolution, steppingMode;
 };
 
@@ -58,7 +58,7 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
   this->gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
-  hasEncoder = false;
+  hasEncoder = false; // by default the motor has no encoder
   stepResolution = fullStepResolution * steppingMode;
 
   openLoopSpeed = 0; // no speed by default;

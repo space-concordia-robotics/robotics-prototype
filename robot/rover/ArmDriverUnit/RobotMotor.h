@@ -4,10 +4,6 @@
 #include <Arduino.h>
 #include "PinSetup.h"
 #include "PidController.h"
-enum motor_code
-{
-  MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6
-}; // defines 6 motors
 
 enum motor_direction
 {

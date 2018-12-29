@@ -12,10 +12,21 @@
    m6 end effector servo (pinching)
 */
 
+enum motor_code
+{
+  MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6
+}; // defines 6 motors
+
 // 3 pwm pins
 // 4-6 limit switch interrupt pins
 // 8-14 encoder interrupt pins
 // 3 direction pins, 3 step pins
+
+#define STEPPER_PID_PERIOD 25 * 1000 // initial value for constant speed, but adjusted in variable speed modes
+#define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
+#define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
+#define STEPPER_CHECK_INTERVAL 2000 // much longer period, used for testing/debugging
+// #define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
 
 #define LIM_SWITCH_FALL 1 // triggered by falling edge
 //#define LIM_SWITCH_RISE 2 // triggered by rising edge

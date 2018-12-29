@@ -75,35 +75,35 @@ finally, unlocking extra options should be runtime as it should be easily access
 #include "StepperMotor.h"
 #include "DcMotor.h"
 #include "ServoMotor.h"
-#define STEPPER_PID_PERIOD 25 * 1000 // initial value for constant speed, but adjusted in variable speed modes
-#define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
-#define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
-#define STEPPER_CHECK_INTERVAL 2000 // much longer period, used for testing/debugging
-// #define STEPPER_CHECK_INTERVAL 250 // every 250ms check if the stepper is in the right spot
-#define ENCODER_NVIC_PRIORITY 100 // should be higher priority than most other things, quick calculations and happens very frequently
-#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4 // lower priority than motors but still important
+/* interrupt priorities */
+// motor control interrupts main loop, encoders interrupt motor control, limit switches interrupt encoder calculations
+#define LIMIT_SWITCH_NVIC_PRIORITY 100
+#define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4
+#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
 /* serial */
-#define BAUD_RATE 115200 // serial baud rate
+#define BAUD_RATE 115200 // serial bit rate
 #define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* parsing */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-String messageBar = "=======================================================";
+String messageBar = "======================================================="; // for clarity of print statements
+// kinda weird that this comes out of nowhere... maybe should be Parser.commandInfo or something. or define it here instead of parser
 /*
 info from parsing functionality is packaged and given to motor control functionality.
 many of these are set to 0 so that the message can reset, thus making sure that
 the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
 commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
-Parser Parser;
+Parser Parser; // object which parses and verifies commands
+/* motors */
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 const int encoderStates[16] =
 {
   0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0
 };
 
-// instantiate motor objects here. only dcmotor currently supports interrupts
+// instantiate motor objects here:
 // StepperMotor motor1(M1_ENABLE_PIN, M1_DIR_PIN, M1_STEP_PIN, M1_STEP_RESOLUTION, FULL_STEP, M1_GEAR_RATIO);
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
 // DcMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
@@ -112,15 +112,18 @@ StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, 
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
-// timer interrupts
+// instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
 IntervalTimer m3StepperTimer;
 IntervalTimer m4StepperTimer;
 IntervalTimer servoTimer; // motors 5&6
+// these are a nicer way of timing events than using millis()
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
-void printMotorAngles();
-// declare encoder interrupt service routines. They must be global.
+/* function declarations */
+void printMotorAngles(); // sends all motor angles over serial
+// all interrupt service routines (ISRs) must be global functions to work
+// declare encoder interrupt service routines
 
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void);
@@ -155,14 +158,13 @@ void m3FlexISR(void);
 void m3ExtendISR(void);
 void m4FlexISR(void);
 void m4ExtendISR(void);
-// declare timer interrupt service routines, where the motors actually get controlled.
-// stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
+// declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); // manages motors 1&2
+void servoInterrupt(void); // manages motors 5&6
+// stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
-void servoInterrupt(void); // manages motors 5&6
-void parseSerial(commandInfo & cmd); // goes through the message and puts relevant data into the motorCommand struct
-bool verifSerial(commandInfo cmd); // error checks the parsed command
+/* Teensy setup */
 void setup()
 {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
@@ -233,63 +235,56 @@ void setup()
   attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
   attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
   attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
-  {
-    // shaft angle tolerance setters
-    // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
-    motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
-    motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
-    motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
-    motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
-    motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
-    motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
-  }
-  {
-    // motor angle limit setters
-    motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
-    motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
-    motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
-    motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
-    // motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
-    motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
-  }
-  {
-    // max (and min) closed loop speed setters, I limit it to 50% for safety.
-    // Abtin thinks 50% should be a hard limit that can't be modified this easily
-    motor1.pidController.setOutputLimits(-50, 50, 5.0);
-    // motor2.pidController.setOutputLimits(-100, 100, 5.0);
-    motor2.pidController.setOutputLimits(-50, 50, 5.0);
-    motor3.pidController.setOutputLimits(-50, 50, 5.0);
-    motor4.pidController.setOutputLimits(-50, 50, 5.0);
-    motor5.pidController.setOutputLimits(-50, 50, 5.0);
-    motor6.pidController.setOutputLimits(-50, 50, 5.0);
-  }
-  {
-    // open loop setters. By default the motors are open loop, have constant velocity profiles (no ramping),
-    // operate at 50% max speed, and the gains should vary based on which motor it is
-    motor1.isOpenLoop = true;
-    motor1.hasRamping = false;
-    motor1.openLoopSpeed = 50; // 50% speed
-    motor1.openLoopGain = 1.0; // totally random guess, needs to be tested
-    motor2.isOpenLoop = true;
-    motor2.hasRamping = false;
-    motor2.openLoopSpeed = 25; // 50% speed
-    motor2.openLoopGain = 0.01; // totally random guess, needs to be tested
-    // open loop gain is only for time-based open loop control
-    motor3.isOpenLoop = true;
-    motor3.hasRamping = false;
-    motor3.openLoopSpeed = 50; // 50% speed
-    motor4.isOpenLoop = true;
-    motor4.hasRamping = false;
-    motor4.openLoopSpeed = 50; // 50% speed
-    motor5.isOpenLoop = true;
-    motor5.hasRamping = false;
-    motor5.openLoopSpeed = 50; // 50% speed
-    motor5.openLoopGain = 1.0; // totally random guess, needs to be tested
-    motor6.isOpenLoop = true;
-    motor6.hasRamping = false;
-    motor6.openLoopSpeed = 50; // 50% speed
-    motor6.openLoopGain = 1.0; // totally random guess, needs to be tested
-  }
+  // set motor shaft angle tolerances
+  // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
+  motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+  motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
+  motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
+  motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
+  motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+  motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
+  // set motor joint angle limits
+  motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
+  motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
+  motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
+  motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
+  // motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
+  motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
+  // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
+  // Abtin thinks 50% should be a hard limit that can't be modified this easily
+  motor1.pidController.setOutputLimits(-50, 50, 5.0);
+  // motor2.pidController.setOutputLimits(-100, 100, 5.0);
+  motor2.pidController.setOutputLimits(-50, 50, 5.0);
+  motor3.pidController.setOutputLimits(-50, 50, 5.0);
+  motor4.pidController.setOutputLimits(-50, 50, 5.0);
+  motor5.pidController.setOutputLimits(-50, 50, 5.0);
+  motor6.pidController.setOutputLimits(-50, 50, 5.0);
+  // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
+  // operate at 50% max speed, and the gains should vary based on which motor it is
+  motor1.isOpenLoop = true;
+  motor1.hasRamping = false;
+  motor1.openLoopSpeed = 50; // 50% speed
+  motor1.openLoopGain = 1.0; // totally random guess, needs to be tested
+  motor2.isOpenLoop = true;
+  motor2.hasRamping = false;
+  motor2.openLoopSpeed = 25; // 50% speed
+  motor2.openLoopGain = 0.01; // totally random guess, needs to be tested
+  // open loop gain is only for time-based open loop control
+  motor3.isOpenLoop = true;
+  motor3.hasRamping = false;
+  motor3.openLoopSpeed = 50; // 50% speed
+  motor4.isOpenLoop = true;
+  motor4.hasRamping = false;
+  motor4.openLoopSpeed = 50; // 50% speed
+  motor5.isOpenLoop = true;
+  motor5.hasRamping = false;
+  motor5.openLoopSpeed = 50; // 50% speed
+  motor5.openLoopGain = 1.0; // totally random guess, needs to be tested
+  motor6.isOpenLoop = true;
+  motor6.hasRamping = false;
+  motor6.openLoopSpeed = 50; // 50% speed
+  motor6.openLoopGain = 1.0; // totally random guess, needs to be tested
+  // activate the timer interrupts
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
@@ -303,6 +298,7 @@ void setup()
   sinceStepperCheck = 0;
 }
 
+/* main code loop */
 void loop()
 {
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
@@ -387,11 +383,11 @@ void loop()
                 if (motor1.isOpenLoop)
                 {
                   motor1.openLoopError = motor1.getDesiredAngle(); // - motor1.calcCurrentAngle(); // find the angle difference
-                  motor1.calcDirection(motor1.openLoopError); // determine rotation direction
+                  motor1.calcDirection(motor1.openLoopError); // determine rotation direction and save the value
                   // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
                   if (motor1.calcTurningDuration(motor1.openLoopError))
-                  {
                     // returns false if the open loop error is too small
+                  {
                     motor1.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
                     motor1.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
                     UART_PORT.print(motor1.numMillis);
@@ -445,8 +441,8 @@ void loop()
                   motor3.calcDirection(motor3.openLoopError);
                   // calculates how many steps to take to get to the desired position, assuming no slipping
                   if (motor3.calcNumSteps(motor3.openLoopError))
+                    // returns false if the open loop error is too small
                   {
-                    // also returns false if the open loop error is too small
                     motor3.enablePower(); // give power to the stepper finally
                     motor3.movementDone = false;
                     UART_PORT.print(motor3.numSteps);
@@ -658,6 +654,7 @@ void loop()
                 ; // for later
               }
           }
+        // change the direction modifier to swap rotation direction in the case of backwards wiring
         else
           if (motorCommand.switchDir)
           {
@@ -837,7 +834,7 @@ void m3StepperInterrupt(void)
         // following code has array index that should be incremented each interrupt
         // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
       }
-      m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
+      m3StepperTimer.update(motor3.nextInterval); // sets the new period for the timer interrupt
       // UART_PORT.print(motor3.rotationDirection); UART_PORT.println(" direction");
       // UART_PORT.print(motor3.stepCount); UART_PORT.println(" steps taken");
       // UART_PORT.print(motor3.numSteps); UART_PORT.println(" steps total");
@@ -858,6 +855,7 @@ void m3StepperInterrupt(void)
       if (!motor3.movementDone)
       {
         motor3.calcCurrentAngle();
+        // determine the speed of the motor for next motor step
         float output = motor3.pidController.updatePID(motor3.getCurrentAngle(), motor3.getDesiredAngle());
         if (output == 0)
         {
@@ -868,8 +866,9 @@ void m3StepperInterrupt(void)
         else
         {
           int dir = motor3.calcDirection(output);
+          // makes the motor step and calculates how long to wait until the next motor step
           motor3.setVelocity(dir, output);
-          m3StepperTimer.update(motor3.nextInterval); // need to check if can call this inside the interrupt
+          m3StepperTimer.update(motor3.nextInterval); // sets the new period for the timer interrupt
         }
       }
       else
@@ -884,7 +883,6 @@ void m4StepperInterrupt(void)
   motor4.nextInterval = STEPPER_PID_PERIOD;
   if (motor4.isOpenLoop)
   {
-    // open loop control
     if (!motor4.movementDone && motor4.stepCount < motor4.numSteps)
     {
       motor4.setVelocity(motor4.rotationDirection, motor4.openLoopSpeed); // direction was set beforehand
@@ -895,21 +893,19 @@ void m4StepperInterrupt(void)
         // following code has array index that should be incremented each interrupt
         // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
       }
-      m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
+      m4StepperTimer.update(motor4.nextInterval);
     }
     else
     {
-      // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-      motor4.stepCount = 0; // reset the counter
+      motor4.stepCount = 0;
       motor4.movementDone = true;
       motor4.stopRotation();
-      motor4.nextInterval = STEPPER_PID_PERIOD; // set it back to default
+      motor4.nextInterval = STEPPER_PID_PERIOD;
     }
   }
   else
     if (!motor4.isOpenLoop)
     {
-      // closed loop control
       if (!motor4.movementDone)
       {
         motor4.calcCurrentAngle();
@@ -918,13 +914,13 @@ void m4StepperInterrupt(void)
         {
           motor4.movementDone = true;
           motor4.stopRotation();
-          motor4.nextInterval = STEPPER_PID_PERIOD; // set it back to default
+          motor4.nextInterval = STEPPER_PID_PERIOD;
         }
         else
         {
           int dir = motor4.calcDirection(output);
           motor4.setVelocity(dir, output);
-          m4StepperTimer.update(motor4.nextInterval); // need to check if can call this inside the interrupt
+          m4StepperTimer.update(motor4.nextInterval);
         }
       }
       else
@@ -936,14 +932,13 @@ void m4StepperInterrupt(void)
 
 void dcInterrupt(void)
 {
-  // movementDone can be set elsewhere... so are numMillis,
-  // openLoopSpeed and rotationDirection (in open loop control)
-  // motor 1
+  // movementDone can be set elsewhere... so can numMillis, openLoopSpeed and rotationDirection (in open loop control)
   if (motor1.isOpenLoop)
   {
     // open loop control
     if (!motor1.movementDone && motor1.timeCount <= motor1.numMillis)
     {
+      // calculates the pwm to send to the motor and makes it move
       motor1.setVelocity(motor1.rotationDirection, motor1.openLoopSpeed);
     }
     else
@@ -960,6 +955,7 @@ void dcInterrupt(void)
       if (!motor1.movementDone)
       {
         motor1.calcCurrentAngle();
+        // determine the speed of the motor until the next interrupt
         float output = motor1.pidController.updatePID(motor1.getCurrentAngle(), motor1.getDesiredAngle());
         if (output == 0)
         {
@@ -969,6 +965,7 @@ void dcInterrupt(void)
         else
         {
           int dir = motor1.calcDirection(output);
+          // calculates the pwm to send to the motor and makes it move
           motor1.setVelocity(dir, output);
         }
       }
@@ -977,10 +974,8 @@ void dcInterrupt(void)
         motor1.stopRotation();
       }
     }
-  // motor 2
   if (motor2.isOpenLoop)
   {
-    // open loop control
     if (!motor2.movementDone && motor2.timeCount <= motor2.numMillis)
     {
       motor2.setVelocity(motor2.rotationDirection, motor2.openLoopSpeed);
@@ -991,8 +986,6 @@ void dcInterrupt(void)
       motor2.stopRotation();
     }
   }
-  // would be nice to have some kind of check for the above functions so the command only runs if there's been a change
-  // e.g. movementDone changed or the speed or numMillis changed
   else
     if (!motor2.isOpenLoop)
     {
@@ -1037,7 +1030,6 @@ void servoInterrupt(void)
       motor5.stopRotation();
     }
   }
-  // the below will only work if the servo has encoders
   else
     if (!motor5.isOpenLoop)
     {
@@ -1076,7 +1068,6 @@ void servoInterrupt(void)
       motor6.stopRotation();
     }
   }
-  // the below will only work if the servo has encoders
   else
     if (!motor6.isOpenLoop)
     {
@@ -1102,27 +1093,30 @@ void servoInterrupt(void)
     }
 }
 
+/* encoder ISRs */
+
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void)
 {
+  // encoder states are 4 bit values
+  // top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2; // shift current state into previous state
+  // put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
+  // this is done by 1) grabbing the input register of the port,
+  // 2) shifting it until the relevant bits are in the lowest state,
+  // and 3) clearing all the bits higher than the lowest 2
+  // next, place said (current) pin states into the bottom 2 bits of oldEncoderState
+  oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
+  // the dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
+  // the & operation ensures that anything above the lowest 4 bits is cleared before accessing the array
+  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m1 ");
   UART_PORT.println(motor1.encoderCount);
   #endif
 
-  oldEncoderState <<= 2; // move by two bits (previous state in top 2 bits)
-  oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
-  /*
-  encoderPort corresponds to the state of all the pins on the port this encoder is connected to.
-  shift it right by the amount previously determined based on the encoder pin and the corresponding internal GPIO bit
-  now the current state is in the lowest 2 bits, so you clear the higher bits by doing a logical AND with 0x03 (0b00000011)
-  you then logical OR this with the previous state's shifted form to obtain (prevstate 1 prevstate 2 currstate 1 currstate 2)
-  the catch which is accounted for below is that oldEncoderState keeps getting right-shifted so you need to clear the higher bits after this operation too
-  */
-  // clear the higher bits. The dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
-  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
@@ -1131,15 +1125,15 @@ void m1_encoder_interrupt(void)
 void m2_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
+  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m2 ");
   UART_PORT.println(motor2.encoderCount);
   #endif
 
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
-  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
@@ -1148,6 +1142,9 @@ void m2_encoder_interrupt(void)
 void m3_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
+  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.println("m3 ");
@@ -1155,9 +1152,6 @@ void m3_encoder_interrupt(void)
   // UART_PORT.println(M3_ENCODER_PORT,BIN);
   #endif
 
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
-  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
@@ -1166,15 +1160,15 @@ void m3_encoder_interrupt(void)
 void m4_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
+  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m4 ");
   UART_PORT.println(motor4.encoderCount);
   #endif
 
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
-  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
@@ -1183,15 +1177,15 @@ void m4_encoder_interrupt(void)
 void m5_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
+  motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m5 ");
   UART_PORT.println(motor5.encoderCount);
   #endif
 
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
-  motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
@@ -1200,19 +1194,20 @@ void m5_encoder_interrupt(void)
 void m6_encoder_interrupt(void)
 {
   static unsigned int oldEncoderState = 0;
+  oldEncoderState <<= 2;
+  oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
+  motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m6 ");
   UART_PORT.println(motor6.encoderCount);
   #endif
 
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
-  motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 }
 
 #endif
 
+/* limit switch ISRs */
 void m1CwISR(void)
 {
   motor1.stopRotation();
