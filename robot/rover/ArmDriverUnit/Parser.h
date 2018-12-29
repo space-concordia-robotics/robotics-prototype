@@ -22,6 +22,7 @@ struct commandInfo
   bool resetJointPosition = false; // for moving a joint to its neutral position
   bool stopSingleMotor = false; // for stopping a single motor
   bool stopAllMotors = false; // for stopping all motors
+  bool switchDir = false; // for switching the direction logic
 };
 
 class Parser
@@ -186,6 +187,16 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 
           }
         }
+        else
+        if (String(msgElem) == "switch direction")
+        {
+          cmd.switchDir = true;
+
+  #ifdef DEBUG_PARSING
+            UART_PORT.println("$S,Success: parsed request to switch direction logic");
+  #endif
+            
+        }
       else
       {
 
@@ -315,6 +326,14 @@ bool Parser::verifCommand(commandInfo cmd)
 
             return false;
           }
+        }
+        else if (cmd.switchDir){
+  #ifdef DEBUG_PARSING
+            UART_PORT.print("$S,Success: command to switch motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.println(" direction logic verified");
+  #endif
+            return true;
         }
       else
 

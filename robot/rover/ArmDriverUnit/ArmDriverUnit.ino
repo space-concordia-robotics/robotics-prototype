@@ -37,9 +37,9 @@ updated as of December 22 2018.
 // #define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
 // #define USER_MODE 4 // sends messages with ROSserial, functionality restricted
 // these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
-#define DEBUG_PARSING 10 // debug messages during parsing function
-#define DEBUG_VERIFYING 11 // debug messages during verification function
-#define DEBUG_LOOPING 12 // debug messages during main loop
+#define DEBUG_MAIN 10 // debug messages during main loop
+#define DEBUG_PARSING 11 // debug messages during parsing function
+#define DEBUG_VERIFYING 12 // debug messages during verification function
 // #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
@@ -155,14 +155,12 @@ void m3FlexISR(void);
 void m3ExtendISR(void);
 void m4FlexISR(void);
 void m4ExtendISR(void);
-
 // declare timer interrupt service routines, where the motors actually get controlled.
 // stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
 void dcInterrupt(void); // manages motors 1&2
 void m3StepperInterrupt(void);
 void m4StepperInterrupt(void);
 void servoInterrupt(void); // manages motors 5&6
-
 void parseSerial(commandInfo & cmd); // goes through the message and puts relevant data into the motorCommand struct
 bool verifSerial(commandInfo cmd); // error checks the parsed command
 void setup()
@@ -215,27 +213,26 @@ void setup()
   motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 
-// prepare and attach limit switch ISRs
+  // prepare and attach limit switch ISRs
+
 #if defined(LIM_SWITCH_FALL)
   #define LIM_SWITCH_DIR FALLING
 #elif defined(LIM_SWITCH_RISE)
   #define LIM_SWITCH_DIR RISING
-  #endif
+#endif
 
-motor1.attachLimitSwitches('c',M1_LIMIT_SW_CW,M1_LIMIT_SW_CCW);
-motor2.attachLimitSwitches('f',M2_LIMIT_SW_FLEX,M2_LIMIT_SW_EXTEND);
-motor3.attachLimitSwitches('f',M3_LIMIT_SW_FLEX,M3_LIMIT_SW_EXTEND);
-motor4.attachLimitSwitches('f',M4_LIMIT_SW_FLEX,M4_LIMIT_SW_EXTEND);
-
-attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
-attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
-attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
-attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
-attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
-attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
-attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
-attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
-
+  motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
+  motor3.attachLimitSwitches('f', M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
+  motor4.attachLimitSwitches('f', M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
   {
     // shaft angle tolerance setters
     // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
@@ -660,6 +657,43 @@ void loop()
               {
                 ; // for later
               }
+          }
+        else
+          if (motorCommand.switchDir)
+          {
+            switch (motorCommand.whichMotor)
+            {
+              case MOTOR1:
+                motor1.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor1.getDirectionLogic());
+                break;
+              case MOTOR2:
+                motor2.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor2.getDirectionLogic());
+                break;
+              case MOTOR3:
+                motor3.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor3.getDirectionLogic());
+                break;
+              case MOTOR4:
+                motor4.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor4.getDirectionLogic());
+                break;
+              case MOTOR5:
+                motor5.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor5.getDirectionLogic());
+                break;
+              case MOTOR6:
+                motor6.switchDirectionLogic();
+                UART_PORT.print("direction modifier is now ");
+                UART_PORT.println(motor6.getDirectionLogic());
+                break;
+            }
           }
         else
           UART_PORT.println("$E,Error: bad motor command");
@@ -1179,42 +1213,57 @@ void m6_encoder_interrupt(void)
 
 #endif
 
-void m1CwISR(void){
+void m1CwISR(void)
+{
   motor1.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m1CcwISR(void){
+
+void m1CcwISR(void)
+{
   motor1.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m2FlexISR(void){
+
+void m2FlexISR(void)
+{
   motor2.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m2ExtendISR(void){
+
+void m2ExtendISR(void)
+{
   motor2.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m3FlexISR(void){
+
+void m3FlexISR(void)
+{
   motor3.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m3ExtendISR(void){
+
+void m3ExtendISR(void)
+{
   motor3.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m4FlexISR(void){
+
+void m4FlexISR(void)
+{
   motor4.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
-void m4ExtendISR(void){
+
+void m4ExtendISR(void)
+{
   motor4.stopRotation();
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow

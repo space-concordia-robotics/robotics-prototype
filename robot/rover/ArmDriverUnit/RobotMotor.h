@@ -53,6 +53,8 @@ class RobotMotor
   bool calcCurrentAngle(void);
   float getCurrentAngle(void);
   void setCurrentAngle(float angle); // for debugging mostly, overwrite current angle value
+  void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
+  int getDirectionLogic(void); // returns the directionModifier;
   private:
   // doesn't really make sense to have any private variables for this parent class.
   // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -63,6 +65,7 @@ class RobotMotor
   int encoderResolution; // ticks per revolution
   volatile float currentAngle; // can be updated within timer interrupts
   float desiredAngle;
+  int directionModifier;
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
@@ -74,6 +77,7 @@ RobotMotor::RobotMotor()
   isOpenLoop = true; // by default don't use PID
   hasRamping = false; // by default don't ramp the speed
   rotationDirection = 0; // by default invalid value
+  directionModifier = 1; // this flips the direction sign if necessary;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -132,13 +136,21 @@ int RobotMotor::calcDirection(float error)
 {
   if (error >= 0)
   {
-    rotationDirection = 1;
+    rotationDirection = directionModifier * COUNTER_CLOCKWISE;
   }
   else
   {
-    rotationDirection = -1;
+    rotationDirection = directionModifier * CLOCKWISE;
   }
   return rotationDirection;
+}
+
+void RobotMotor::switchDirectionLogic(void){
+  directionModifier = directionModifier * -1;
+}
+
+int RobotMotor::getDirectionLogic(void){
+  return directionModifier;
 }
 
 bool RobotMotor::calcCurrentAngle(void)

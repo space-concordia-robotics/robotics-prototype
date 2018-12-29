@@ -4,7 +4,7 @@
   -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
   -(always) clean up code, comment code
   -(always) make sure variables modded in ISRs and used externally are volatile
-  -(done-ish) PID implemented for DC motor but need to adjust all variables, make setter functions
+  -(done-ish) PID implemented for DC motor but need to adjust all variables
   -(depends on wiring) determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
   -(next) clean up parsing code to make it easier to read and reduce repetition
 
@@ -54,7 +54,6 @@
   8) there's a command to reset a motor position but no implementation
   10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
       but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
-  14) calcDirection() only expects angular error but should probably expect speed values output from the pid too
   17) perhaps the initialization of motor angle parameters should be its own function
   18) perhaps the initialization of the motor's pins should also be its own function
   19) perhaps the constructor should take a series of structs, one for each type
@@ -66,6 +65,7 @@
 */
 /*
 todo: add comments everywhere!!!!
+also set the interrupt priority...
 does the limit switch interrupt trigger on falling or on rising?
 maybe we should have some way of covering the limit switches - what if someone accidentally presses one?
 or maybe the code will check to make sure the expected angle is within a certain limit to stop it
