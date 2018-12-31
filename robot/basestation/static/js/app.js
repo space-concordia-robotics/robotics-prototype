@@ -102,9 +102,7 @@ jQuery(document).ready((s) => {
         $el: $('a#btn_motor1_cw'),
         event: 'mousedown',
         route: '/mousedown_btn_motor1_cw',
-        handler(data) {
-          setInterval(this, 1000);
-        },
+        handler: (data) => { },
       },
       {
         $el: $('a#btn_motor2_ccw'),
