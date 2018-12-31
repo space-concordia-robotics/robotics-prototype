@@ -79,10 +79,10 @@ class Motor:
 
     def write(self, serial_port, angle):
         print('Name' + self.name)
-        print(f'motor {self.name} direction {angle}')
+        print('motor ' + self.name + ' direction ' + angle)
         serial_port.write(
             str.encode(
-                f'motor {self.name} direction {angle} speed 0 time 500'))
+                'motor ' + self.name + ' direction ' + angle + ' speed 0 time 500'))
 
     def read(self, serial_port):
         str1 = serial_port.readline()

@@ -19,5 +19,9 @@ class SerialPort(serial.Serial):
     # TODO: Add `type.hints` to overload without path specified
     def __init__(self, path=None, baudrate=9600, timeout=1):
         if path is None:
-            path = get_open_comports()[0].device
+            try:
+                path = get_open_comports()[0].device
+            except Exception as e:
+                print("Issue in get_open_comports()")
+                print(e)
         super().__init__(path, baudrate, timeout=timeout)
