@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-$(() => {
+jQuery(document).ready((s) => {
   const Site = {
     init() {
       this.bindEventHandlers();
@@ -170,4 +170,4 @@ $(() => {
   };
 
   Site.init();
-})();
+});
