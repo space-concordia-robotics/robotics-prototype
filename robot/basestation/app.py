@@ -3,6 +3,7 @@
 # Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
 
 import flask
+import subprocess
 
 app = flask.Flask(__name__)
 
@@ -16,6 +17,17 @@ ROVER_IP = "127.31.43.134"
 def index():
     return flask.render_template("AsimovOperation.html", roverIP=ROVER_IP)
 
+# Ping Request
+@app.route("/ping_rover")
+def ping_rover():
+    rosPingCommand = "rosrun ping_acknowledgment ping_response_client.py hello"
+
+    process = subprocess.Popen(rosPingCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+    print("Pinging rover")
+
+    return flask.jsonify("ping_rover"), 200
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
