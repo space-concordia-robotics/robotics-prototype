@@ -1,4 +1,13 @@
 class Motor:
+    """
+    NOTE: Pylint falsely warns of a attribute defined outside `__init__`.
+    The issue is reported [here](https://github.com/PyCQA/pylint/issues/409).
+    Until it is fixed, expect warnings everytime the use of a setter is used
+    inside the `__init__` method. Could also not use setter and simply assign the
+    mangled var names, but it's not as clean, nor is using both and setting the
+    mangled one to `None`.
+    """
+
     def __init__(self,
                  name,
                  max_angle=160,
@@ -7,13 +16,29 @@ class Motor:
                  min_current=0,
                  home_angle=0,
                  serial_port=None):
-        self.name = name
+        # Attributes
+        # Use of double underscore to avoid attribute name collisions when subclassed.
+        # Search "Python name mangling" for more info.
         self.__max_angle = max_angle
         self.__min_angle = min_angle
         self.__max_current = max_current
         self.__min_current = min_current
+
+        # Properties
+        self.name = name
         self.angle_position = home_angle
+        self.electric_current = None  # TODO: What should this be?
+        # self.alive depends on currents, no setter
+        self.refresh_rate = None  # TODO: Use default value?
         self.serial_port = serial_port
+
+    @property
+    def name(self):
+        return self.__name
+
+    @name.setter
+    def name(self, name):
+        self.__name = name
 
     @property
     def angle_position(self):
@@ -22,13 +47,13 @@ class Motor:
     # We don't want to intentionally try to set angle positions out of the possible ranges
     @angle_position.setter
     def angle_position(self, angle_position):
-        if angle_position >= self.__min_angle and angle_position <= self.__max_angle:
+        if self.__min_angle <= self.angle_position <= self.__max_angle:
             self.__angle_position = angle_position
             return True
-        else:
-            print("Unable to set angle position to " + str(angle_position) +
-                  " for motor: " + self.name)
-            return False
+
+        print("Unable to set angle position to " + str(angle_position) +
+              " for motor: " + self.name)
+        return False
 
     @property
     def electric_current(self):
@@ -42,10 +67,7 @@ class Motor:
 
     @property
     def alive(self):
-        if self.electric_current > self.__max_current:
-            return False
-        else:
-            return True
+        return self.electric_current <= self.__max_current
 
     # We'll have to callibrate the refresh rates for each motor during testing motors
     @property
@@ -81,8 +103,8 @@ class Motor:
         print('Name' + self.name)
         print('motor ' + self.name + ' direction ' + angle)
         serial_port.write(
-            str.encode(
-                'motor ' + self.name + ' direction ' + angle + ' speed 0 time 500'))
+            str.encode('motor ' + self.name + ' direction ' + angle +
+                       ' speed 0 time 500'))
 
     def read(self, serial_port):
         str1 = serial_port.readline()
