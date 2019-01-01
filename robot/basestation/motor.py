@@ -47,7 +47,7 @@ class Motor:
     # We don't want to intentionally try to set angle positions out of the possible ranges
     @angle_position.setter
     def angle_position(self, angle_position):
-        if self.__min_angle <= self.angle_position <= self.__max_angle:
+        if self.__min_angle <= angle_position <= self.__max_angle:
             self.__angle_position = angle_position
             return True
 
