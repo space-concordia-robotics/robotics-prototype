@@ -5,9 +5,9 @@
     "python.linting.lintOnSave": true,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
-    "markdown.styles": [
-        ".vscode/markdown.css"
-    ],
+    "markdown.styles": [".vscode/markdown.css"],
     "C_Cpp.clang_format_fallbackStyle": "Google",
-    "C_Cpp.intelliSenseEngineFallback": "Enabled"
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "python.linting.pylintCategorySeverity.convention": "Warning",
+    "python.linting.pylintCategorySeverity.refactor": "Warning"
 }
