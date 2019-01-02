@@ -2,15 +2,13 @@
 """This is the controller page of the Flask GUI
 Flask is light-weight and modular so this is actually all we need to set up a simple HTML page"""
 
+import re
+import os
 import subprocess
 import flask
 from flask import jsonify
 
 app = flask.Flask(__name__)
-
-# set the rover's IP
-# rover static ip (tenatative): 192.168.1.20
-ROVER_IP = "127.31.43.134"
 
 def run_bash(cmd):
     """Runs bash command supplied as string,
@@ -25,7 +23,12 @@ def run_bash(cmd):
 # automatically render the Robot GUI
 @app.route("/")
 def index():
-    return flask.render_template("AsimovOperation.html", roverIP=ROVER_IP)
+    """Current Landing page, the arm panel"""
+    # get rover's IP from global bash environment
+    rover_ip = os.environ["ROS_MASTER_URI"]
+    rover_ip = re.findall(r"(.*):\d+", rover_ip)[0]
+
+    return flask.render_template("AsimovOperation.html", roverIP=rover_ip)
 
 # Ping Request
 @app.route("/ping_rover")
