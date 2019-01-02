@@ -79,11 +79,11 @@
                             <a href=# id=click_btn>
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
-                            <a href=# id=click_btn>
+                            <a href="javascript:void(0)" id="clear-log">
                                 <button type="button" class="btn btn-secondary" onclick="cleartext()">Clear Logs</button>
                             </a>
-                            <a href=# id=click_btn>
-                                <button type="button" class="btn btn-secondary" onclick="entertext()">Test</button>
+                            <a href="javascript:void(0)" id="test-log">
+                                <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.')">Test</button>
                             </a>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
                             </button>
                         </div>
                         <div class="col-sm-4" align="center" style="vertical-align:middle; border-style:none">
-                            <button type="button" id="#ping-button" onclick="sendRequest('/ping_rover')" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                            <button type="button" id="ping-button" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
                                 <span style="font-family:'Helvetica Neue', Arial, sans-serif;">Ping</span>
                             </button>
                         </div>

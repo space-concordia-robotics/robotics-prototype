@@ -1,9 +1,11 @@
-function entertext() {
-    document.getElementById('write-to-log').value += "Test log ...\n";
+const logConsole = "#write-to-log";
+
+function appendToConsole(msg) {
+    $(logConsole).append(msg + "\n");
 }
 
 function cleartext() {
-    document.getElementById('write-to-log').value = "";
+    $(logConsole).html("");
 }
 
 function manualControl() {
@@ -20,7 +22,7 @@ function manualControl() {
     }
 }
 
-function sendRequest(message) {
+function sendRequest(msg) {
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -29,6 +31,6 @@ function sendRequest(message) {
             console.log(xhr.responseText);
         }
     };
-    xhr.open('GET', message, true);
+    xhr.open('GET', msg, true);
     xhr.send(null);
 }

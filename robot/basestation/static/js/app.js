@@ -164,6 +164,20 @@ jQuery(document).ready((s) => {
         route: '/mousedown_btn_motor6_cw',
         handler: (data) => { },
       },
+      {
+        $el: $('button#ping-button'),
+        event: 'mousedown',
+        route: '/ping_rover',
+        handler: (data) => {
+            console.log(data.msg);
+            let msg = data.msg.split("\n");
+
+            //console.log("Request: " + msg[0])
+            //console.log("Response: " + msg[1])
+
+            appendToConsole(data.msg);
+        },
+      }
     ],
   };
 
