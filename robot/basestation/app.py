@@ -3,6 +3,7 @@
 # Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
 
 import flask
+from flask import jsonify
 import subprocess
 
 app = flask.Flask(__name__)
@@ -11,8 +12,14 @@ app = flask.Flask(__name__)
 # rover static ip (tenatative): 192.168.1.20
 ROVER_IP = "127.31.43.134"
 
-# Once we launch this, this will route us to the "../" page or index page and
-# automatically render the Rover GUI
+def runBash(cmd):
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+    return output, error
+
+# Once we launch this, this will route us to the "/" page or index page and
+# automatically render the Robot GUI
 @app.route("/")
 def index():
     return flask.render_template("AsimovOperation.html", roverIP=ROVER_IP)
@@ -20,14 +27,15 @@ def index():
 # Ping Request
 @app.route("/ping_rover")
 def ping_rover():
-    rosPingCommand = "rosrun ping_acknowledgment ping_response_client.py hello"
-
-    process = subprocess.Popen(rosPingCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
+    output, error = runBash("rosrun ping_acknowledgment ping_response_client.py hello")
 
     print("Pinging rover")
+    print("Output: " + output.decode())
 
-    return flask.jsonify("ping_rover"), 200
+    if error:
+        print("Error: " + error.decode())
+
+    return jsonify("Pinging rover"), 200
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
