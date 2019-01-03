@@ -52,21 +52,31 @@ def ping_rover():
        Send results to frontend to write to console log."""
 
     ping_output, error = run_bash("ping -c 1 " + rover_ip_raw)
+    ping_output = ping_output.decode()
 
-    print("Output: " + ping_output.decode())
+    print("Output: " + ping_output)
+
+    if "Destination Net Unreachable" in ping_output:
+        error_msg = "Basestation has no connection to network, aborting ROS ping."
+        return jsonify(success=False, ping_msg=ping_output, ros_msg=error_msg)
+
+    if "Destination Host Unreachable" in ping_output:
+        error_msg = "Rover has no connection to network, aborting ROS ping."
+        return jsonify(success=False, ping_msg=ping_output, ros_msg=error_msg)
 
     if error:
         print("Error: " + error.decode())
 
     ros_output, error = run_bash("rosrun ping_acknowledgment ping_response_client.py hello")
+    ros_output = ros_output.decode()
 
     print("Pinging rover")
-    print("Output: " + ros_output.decode())
+    print("Output: " + ros_output)
 
     if error:
         print("Error: " + error.decode())
 
-    return jsonify(success=True, ping_msg=ping_output.decode(), ros_msg=ros_output.decode())
+    return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
