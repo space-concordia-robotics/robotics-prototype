@@ -116,9 +116,9 @@ def mousedown_btn_arm_right():
     return jsonify(success=True, button=btn_id)
 
 
-@app.route("/mousedown_btn_arm_back")
-def mousedown_btn_arm_back():
-    btn_id = "mousedown_btn_arm_back"
+@app.route("/mousedown_btn_arm_backward")
+def mousedown_btn_arm_backward():
+    btn_id = "mousedown_btn_arm_backward"
     print(btn_id)
     return jsonify(success=True, button=btn_id)
 
