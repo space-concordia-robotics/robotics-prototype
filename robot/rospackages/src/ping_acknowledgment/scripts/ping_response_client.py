@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import datetime
 import rospy
 from ping_acknowledgment.srv import *
 
@@ -24,6 +25,18 @@ if __name__ == "__main__":
 
     msg = sys.argv[1]
 
+    rospy.init_node("ping_response_client")
+
+    sent = datetime.datetime.now()
+    sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
     print("Pinging server with ping_acknowledgment service")
-    print("Sending: " + msg)
-    print(ping_response_client(msg))
+    print(sent_ts)
+    print("---")
+
+    print("Response: " + ping_response_client(msg))
+    received = datetime.datetime.now()
+    received_st = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (received.microsecond / 10000))
+    print(received_st)
+
+    diff = received - sent
+    print("Latency: " + str(diff.microseconds) + " ms")
