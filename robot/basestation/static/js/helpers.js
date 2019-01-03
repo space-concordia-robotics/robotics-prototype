@@ -13,6 +13,12 @@ function scrollToBottom() {
     $(logConsole).scrollTop($(logConsole)[0].scrollHeight);
 }
 
+function pingRover(ping_msg, ros_msg) {
+    appendToConsole(ping_msg);
+    appendToConsole(ros_msg);
+    scrollToBottom();
+}
+
 // Manual control
 function manualControl() {
     var a = document.getElementById("ArmcontrolsOFF");

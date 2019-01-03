@@ -170,10 +170,7 @@ jQuery(document).ready((s) => {
         route: '/ping_rover',
         handler: (data) => {
             console.log(data);
-
-            appendToConsole(data.ping_msg);
-            appendToConsole(data.ros_msg);
-            scrollToBottom();
+            pingRover(data.ping_msg, data.ros_msg);
         },
       }
     ],
