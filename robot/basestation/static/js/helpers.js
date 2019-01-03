@@ -13,6 +13,7 @@ function scrollToBottom() {
     $(logConsole).scrollTop($(logConsole)[0].scrollHeight);
 }
 
+// Appends the passed bash and ros ping messages to the console log
 function pingRover(ping_msg, ros_msg) {
     appendToConsole(ping_msg);
     appendToConsole(ros_msg);
@@ -35,6 +36,7 @@ function manualControl() {
 }
 
 // AJAX
+// Sends request to given route, prints the JSON response object
 function sendRequest(msg) {
     var xhr = new XMLHttpRequest();
 

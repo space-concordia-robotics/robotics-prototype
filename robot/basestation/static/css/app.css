@@ -148,3 +148,7 @@ html, body {
     weight:390px;
     height:280px;
 }
+
+#write-to-log {
+    min-width: 100%;
+}
