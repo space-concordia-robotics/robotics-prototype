@@ -169,13 +169,11 @@ jQuery(document).ready((s) => {
         event: 'mousedown',
         route: '/ping_rover',
         handler: (data) => {
-            console.log(data.msg);
-            let msg = data.msg.split("\n");
+            console.log(data);
 
-            //console.log("Request: " + msg[0])
-            //console.log("Response: " + msg[1])
-
-            appendToConsole(data.msg);
+            appendToConsole(data.ping_msg);
+            appendToConsole(data.ros_msg);
+            scrollToBottom();
         },
       }
     ],

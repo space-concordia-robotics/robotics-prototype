@@ -1,13 +1,19 @@
+// Console Log
 const logConsole = "#write-to-log";
 
 function appendToConsole(msg) {
     $(logConsole).append(msg + "\n");
 }
 
-function cleartext() {
+function clearText() {
     $(logConsole).html("");
 }
 
+function scrollToBottom() {
+    $(logConsole).scrollTop($(logConsole)[0].scrollHeight);
+}
+
+// Manual control
 function manualControl() {
     var a = document.getElementById("ArmcontrolsOFF");
     var b = document.getElementById("ArmcontrolsON");
@@ -22,6 +28,7 @@ function manualControl() {
     }
 }
 
+// AJAX
 function sendRequest(msg) {
     var xhr = new XMLHttpRequest();
 

@@ -24,5 +24,6 @@ if __name__ == "__main__":
 
     msg = sys.argv[1]
 
-    print("Pinging server")
+    print("Pinging server with ping_acknowledgment service")
+    print("Sending: " + msg)
     print(ping_response_client(msg))

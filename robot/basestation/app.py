@@ -10,6 +10,13 @@ from flask import jsonify
 
 app = flask.Flask(__name__)
 
+# get rover's IP from global bash environment
+rover_ip = os.environ["ROS_MASTER_URI"]
+rover_ip = re.findall(r"(.*):\d+", rover_ip)[0]
+#print("rover_ip: " + rover_ip)
+
+rover_ip_raw = rover_ip.split("//")[1]
+
 def run_bash(cmd):
     """Runs bash command supplied as string,
     executes it and returns tuple of output and error
@@ -24,25 +31,42 @@ def run_bash(cmd):
 @app.route("/")
 def index():
     """Current Landing page, the arm panel"""
+
+    global rover_ip, rover_ip_raw
+
     # get rover's IP from global bash environment
     rover_ip = os.environ["ROS_MASTER_URI"]
     rover_ip = re.findall(r"(.*):\d+", rover_ip)[0]
+    #print("rover_ip: " + rover_ip)
+
+    rover_ip_raw = rover_ip.split("//")[1]
+    #print("rover_ip_raw: " + rover_ip_raw)
 
     return flask.render_template("AsimovOperation.html", roverIP=rover_ip)
 
 # Ping Request
 @app.route("/ping_rover")
 def ping_rover():
-    """Ping rover and return results to console logs"""
-    output, error = run_bash("rosrun ping_acknowledgment ping_response_client.py hello")
+    """Ping rover first directly with unix ping command,
+       then using ros ping_acknowledgment service.
+       Send results to frontend to write to console log."""
 
-    print("Pinging rover")
-    print("Output: " + output.decode())
+    ping_output, error = run_bash("ping -c 1 " + rover_ip_raw)
+
+    print("Output: " + ping_output.decode())
 
     if error:
         print("Error: " + error.decode())
 
-    return jsonify(success=True, msg=output.decode(), error=error, service="ping_acknowledgment")
+    ros_output, error = run_bash("rosrun ping_acknowledgment ping_response_client.py hello")
+
+    print("Pinging rover")
+    print("Output: " + ros_output.decode())
+
+    if error:
+        print("Error: " + error.decode())
+
+    return jsonify(success=True, ping_msg=ping_output.decode(), ros_msg=ros_output.decode())
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
