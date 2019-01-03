@@ -39,4 +39,4 @@ if __name__ == "__main__":
     print(received_st)
 
     diff = received - sent
-    print("Latency: " + str(diff.microseconds) + " ms")
+    print("Latency: " + str(diff.total_seconds() * 1000) + " ms")
