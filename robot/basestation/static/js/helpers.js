@@ -41,7 +41,7 @@ function sendRequest(msg) {
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             // Typical action to be performed when the document is ready:
-            console.log(xhr.responseText);
+            console.log(JSON.parse(xhr.response));
         }
     };
     xhr.open('GET', msg, true);

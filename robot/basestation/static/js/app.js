@@ -177,4 +177,19 @@ jQuery(document).ready((s) => {
   };
 
   Site.init();
+
+  // keyboard events
+  document.addEventListener("keydown", function (event) {
+    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {
+        $.ajax("/ping_rover", {
+             success: function(data) {
+                 console.log(data);
+                 pingRover(data.ping_msg, data.ros_msg);
+             },
+             error: function() {
+                console.log("An error occured")
+             }
+          });
+    }
+  });
 });
