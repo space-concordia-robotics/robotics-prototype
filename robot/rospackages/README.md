@@ -19,6 +19,16 @@ After having built the package and generated the all the source code, you may te
 - Send a request/obtain response using client node with `rosrun ping_acknowledgment ping_response_client.py "<msg>"`, where you are free to choose what
 ever message you wish to send.
 
+**OR:**
+- Start server launch file with (starts both server node and ROS Master if none detected):
+```
+roslaunch ping_acknowledgment ping_acknowledgment_server.launch
+``` 
+- SStart client launch file with
+```
+roslaunch ping_acknowledgment ping_acknowledgment_client.launch ping_msg:="hello"
+```
+
 ### References
 
 The following tutorials (and those preceding them) were followed and modified to produce the code:

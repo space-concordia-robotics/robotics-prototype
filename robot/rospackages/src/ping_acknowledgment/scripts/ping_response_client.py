@@ -5,6 +5,7 @@ import datetime
 import rospy
 from ping_acknowledgment.srv import *
 
+
 def ping_response_client(msg):
     # convenience function that blocks until 'ping_response' is available
     rospy.wait_for_service('ping_response')
@@ -16,16 +17,22 @@ def ping_response_client(msg):
     except rospy.ServiceException as e:
         print("Service call failed: {:s}".format(e))
 
+
 def usage():
     return "{:s} [msg]".format(sys.argv[0])
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
         print(usage())
 
-    msg = sys.argv[1]
-
     rospy.init_node("ping_response_client")
+
+    # Figure out if being called from roslaunch or roscore/python
+    if "__name:=" in sys.argv[1]:
+        msg = rospy.get_param("~ping_msg")
+    else:
+        msg = sys.argv[1]
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
