@@ -8,7 +8,6 @@
 **/*sh.exe.stackdump
 **/venv
 **/env
-**/.envrc
 **/stress-test-results_*
 **/node_modules
 **/configEthernet.log
