@@ -2,16 +2,16 @@
 This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
 ## Contributing and Development Environment Instructions
-Firstly, this project is built in Python 3.3+. You need to have a version of Python installed that is 3.3+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+Firstly, this project is built in Python 3.6+. You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project. 
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
 ```
-$ virtualenv -p <path/to/python3.x> venv
+$ virtualenv -p <path/to/python3.6.x+> venv
 ```
-Make sure you supply a path to a Python 3.x binary. In my case, I just supplied it like this:
+Make sure you supply a path to a Python 3.6.x+ binary. In my case, I just supplied it like this:
 ```
 $ virtualenv -p `which python3` venv
 ```
@@ -88,7 +88,7 @@ First we have to install `setuptools`, but our `virtualenv` installs this by def
 
 Still in root project directory (which contains `setup.py`):
 ```
-(venv) $ pip install -e .
+(venv) $ python setup.py develop
 ```
 
 You should now be able to execute tests without `ModuleNotFoundError` thrown:
@@ -102,6 +102,30 @@ To remove the package you just installed using:
 ```
 
 **DISCLAIMER:** This issue with module imports via `pytest` was the motivating factor to change the project directory structure. For this technique to work, the 'source' code must live inside (nested) a main directory (usually named the same as project directory name or other suitable representative identifier such as **robot** in this case). The `src` subdirectory was renamed because it made no sense when importing a package module by name like `import src.basestation.Motor`, which has no meaning/place in a module semantic context (`import robot.basestation.Motor` is much more appropriate). Most Python projects do not use a `src` directory unless it's for storing their source code that eventually gets compiled to binary (i.e. such as `.c`, `.h`, etc.. files). Also, `base-station` was renamed to `basestation` because Python no-likey dashes in import statements.
+
+### Setup environment variable loader [[`direnv`](https://github.com/direnv/direnv)]
+This tool will be used to take care of managing loading and unloading of environment variables defined in a `.envrc` file in the root. This avoids polluting the global environment.
+
+See the link in title for instructions on how to install and setup.
+
+### Activate venv script [`activatevenv`]
+This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
+- Checks to make sure the `venv` directory is present and if not tries to install it (i.e. `virtualenv -p $python_exec_path venv`)
+- Activates the virtual environment script (i.e. `source venv/bin/activate`)
+- Installs required python modules specified in `requirements.txt` and `requirements-dev.txt`
+- Loads the environment variables with those defined in `.envrc` using `direnv` tool (i.e. `direnv allow .`)
+
+See `activatevenv` for more details and to see how to pass a custom Python path as an argument.
+
+To use it, in the project root directory, simply source it in your shell as follows:
+```
+source activatevenv
+```
+
+Tip: You can `source activatevenv` whenever you need to:
+- Reinstall modules defined in `requirements-*.txt`
+- Reactivate the `venv` environment
+- Reload newly defined variables in `.envrc` as environment variables
 
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
@@ -117,7 +141,7 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 - Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery). 
 
 #### Atom (tested on ubuntu 16.04, Windows 7)
-If you're using atom-editor setting up should be fairly easy.
+If you're using Atom, setting up should be fairly easy.
 
 ##### Windows
 **NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
