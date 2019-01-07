@@ -4,9 +4,9 @@
 Flask is light-weight and modular so this is actually all we need to set up a simple HTML page.
 """
 
-import re
 import os
 import subprocess
+from urllib.parse import urlparse
 import flask
 from flask import jsonify
 
@@ -14,15 +14,26 @@ app = flask.Flask(__name__)
 
 
 def fetch_ros_master_uri():
-    """Get and parse ros master IP/URI from environment variable."""
+    """Fetch and parse ROS Master URI from environment variable.
 
-    rover_ip = os.environ["ROS_MASTER_URI"]
-    rover_ip = re.findall(r"(.*):\d+", rover_ip)[0]
-    #print("rover_ip: " + rover_ip)
+    The parsed URI is returned as a urllib.parse.ParseResult instance.
 
-    rover_ip_raw = rover_ip.split("//")[1]
+    Returns:
+        urllib.parse.ParseResult: 6-tuple instance with various attributes.
 
-    return rover_ip_raw
+    Attributes (urllib.parse.ParseResult):
+    - hostname -- the ip address or the dns resolvable name
+    - port -- the port number
+    - etc...
+
+    See https://docs.python.org/3/library/urllib.parse.html?highlight=urlparse#urllib.parse.urlparse
+    """
+    return urlparse(os.environ["ROS_MASTER_URI"])
+
+
+def fetch_ros_master_ip():
+    """Fetch only the hostname (host IP) portion of the parse URI."""
+    return fetch_ros_master_uri().hostname
 
 
 def run_shell(cmd):
@@ -41,7 +52,7 @@ def run_shell(cmd):
 @app.route("/")
 def index():
     """Current landing page, the arm panel."""
-    return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_uri())
+    return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/ping_rover")
@@ -56,8 +67,7 @@ def ping_rover():
     ping_msg -- output of Unix ping command
     ros_msg -- output of the ROS ping_acknowledgment service
     """
-
-    ping_output, error = run_shell("ping -c 1 " + fetch_ros_master_uri())
+    ping_output, error = run_shell("ping -c 1 " + fetch_ros_master_ip())
     ping_output = ping_output.decode()
 
     print("Output: " + ping_output)

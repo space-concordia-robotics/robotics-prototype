@@ -52,7 +52,9 @@ for _ in once; do # One pass loop to allow breaking out of script early
 
     # Load the environment variables defined in .envrc using direnv
     if ! [ -x "$(command -v direnv)" ]; then
-        echo "Error: direnv is not installed. Install direnv to enable loading of environment variables defined inside .envrc" >&2
+        echo "Error: direnv is not installed. Install direnv 'sudo apt-get install direnv' to enable loading of environment variables defined inside .envrc" >&2
+        echo "Sourcing environment variables manually into global shell profile. Don't forget to unexport them when finished working on project."
+        source ./.envrc
         break
     else 
         direnv allow .
