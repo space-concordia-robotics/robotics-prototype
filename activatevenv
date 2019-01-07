@@ -56,7 +56,7 @@ for _ in once; do # One pass loop to allow breaking out of script early
         printf "Sourcing environment variables manually into global shell profile. Don't forget to unexport them when finished working on project."
         source ./.envrc
         break
-    else 
+    else
         direnv allow .
     fi
 
@@ -70,17 +70,17 @@ for _ in once; do # One pass loop to allow breaking out of script early
         ros_setup_script_path=$ros_setup_script_path"/setup.sh"
     else
         printf "\nError: Unknown shell environment detected. Manually find your respective setup.* script inside robot/rospackages/devel and activate it by entering 'source robot/rospackages/setup.*'." >&2 
-        printf "ROS source environment not activated. Exiting now..." >&2 
+        printf "ROS source environment not activated. Exiting now...\n" >&2 
         break
     fi
 
     printf "Shell environment found. "
     if [ -f $ros_setup_script_path ]; then # Check if script path exists
-        printf "\nActivating $ros_setup_script_path..."
+        printf "\nActivating $ros_setup_script_path...\n"
         source $ros_setup_script_path
     else
         printf "\nError: ROS setup script path not found, make sure to run 'catkin_make' in robot/rospackages directory to build packages." >&2 
-        printf "ROS source environment not activated. Exiting now..." >&2 
+        printf "ROS source environment not activated. Exiting now...\n" >&2 
         break
     fi
 done

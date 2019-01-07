@@ -106,12 +106,15 @@ To remove the package you just installed using:
 ### Setup environment variable loader [[`direnv`](https://github.com/direnv/direnv)]
 This tool will be used to take care of managing loading and unloading of environment variables defined in a `.envrc` file in the root. This avoids polluting the global environment.
 
-See the link in title for instructions on how to install and setup. 
+If using debian, to install:
 
-To install: 
 ```
 $ sudo apt-get install direnv
 ```
+
+Make sure to then append the following line to your `~/.bashrc`: `eval "$(direnv hook bash)"`
+
+Otherwise, see the link in title for instructions on how to install and setup.
 
 ### Activate venv script [`activatevenv`]
 This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
