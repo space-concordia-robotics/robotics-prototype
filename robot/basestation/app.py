@@ -1,20 +1,98 @@
-#!/usr/bin/env python3
-# This is the controller page of the Flask GUI
-# Flask is light-weight and modular so this is actually all we need to set up a simple HTML page
+#!/usr/bin/env python
+"""Flask server controller.
 
+Flask is light-weight and modular so this is actually all we need to set up a simple HTML page.
+"""
+
+import os
+import subprocess
+from urllib.parse import urlparse
 import flask
+from flask import jsonify
 
 app = flask.Flask(__name__)
 
-# set the rover's IP
-# rover static ip (tenatative): 192.168.1.20
-ROVER_IP = "127.31.43.134"
 
-# Once we launch this, this will route us to the "../" page or index page and
-# automatically render the Rover GUI
+def fetch_ros_master_uri():
+    """Fetch and parse ROS Master URI from environment variable.
+
+    The parsed URI is returned as a urllib.parse.ParseResult instance.
+
+    Returns:
+        urllib.parse.ParseResult: 6-tuple instance with various attributes.
+
+    Attributes (urllib.parse.ParseResult):
+    - hostname -- the ip address or the dns resolvable name
+    - port -- the port number
+    - etc...
+
+    See https://docs.python.org/3/library/urllib.parse.html?highlight=urlparse#urllib.parse.urlparse
+    """
+    return urlparse(os.environ["ROS_MASTER_URI"])
+
+
+def fetch_ros_master_ip():
+    """Fetch only the hostname (host IP) portion of the parse URI."""
+    return fetch_ros_master_uri().hostname
+
+
+def run_shell(cmd):
+    """Run script command supplied as string.
+
+    Returns tuple of output and error.
+    """
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+    return output, error
+
+
+# Once we launch this, this will route us to the "/" page or index page and
+# automatically render the Robot GUI
 @app.route("/")
 def index():
-    return flask.render_template("AsimovOperation.html", roverIP=ROVER_IP)
+    """Current landing page, the arm panel."""
+    return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
+
+
+@app.route("/ping_rover")
+def ping_rover():
+    """Pings ROS_MASTER_URI and return response object with resulting outputs.
+
+    Pings rover first directly with Unix ping command,
+    then using ros ping_acknowledgment service.
+
+    Returns JSON object with the following fields:
+    success -- whether requests was successful
+    ping_msg -- output of Unix ping command
+    ros_msg -- output of the ROS ping_acknowledgment service
+    """
+    ping_output, error = run_shell("ping -c 1 " + fetch_ros_master_ip())
+    ping_output = ping_output.decode()
+
+    print("Output: " + ping_output)
+
+    if "Destination Net Unreachable" in ping_output:
+        error_msg = "Basestation has no connection to network, aborting ROS ping."
+        return jsonify(success=False, ping_msg=ping_output, ros_msg=error_msg)
+
+    if "Destination Host Unreachable" in ping_output:
+        error_msg = "Rover has no connection to network, aborting ROS ping."
+        return jsonify(success=False, ping_msg=ping_output, ros_msg=error_msg)
+
+    if error:
+        print("Error: " + error.decode())
+
+    ros_output, error = run_shell("rosrun ping_acknowledgment ping_response_client.py hello")
+    ros_output = ros_output.decode()
+
+    print("Pinging rover")
+    print("Output: " + ros_output)
+
+    if error:
+        print("Error: " + error.decode())
+
+    return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
 
 # Automatic controls
@@ -163,6 +241,5 @@ def click_btn_motor6_cw():
     return ""
 
 
-app.run(
-    debug=True
-)  # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
+app.run(debug=True)
+# add param `host= '0.0.0.0'` if you want to run on your machine's IP address
