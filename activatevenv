@@ -17,10 +17,10 @@ for _ in once; do # One pass loop to allow breaking out of script early
         elif [[ ! `which python` == *"not found"* ]]; then
             python_exec_path=`which python`
         else
-            echo "Error: Python executable path not found. Exiting now..." >&2
+            echo "\nError: Python executable path not found. Exiting now..." >&2
             break
         fi
-        echo "Python executable path found: $python_exec_path" 
+        echo "\nPython executable path found: $python_exec_path" 
 
         python_exec_ver=`$python_exec_path -c 'import platform; print(platform.python_version())'`
         python_exec_ver_major=`echo $python_exec_ver | cut -d. -f1`
@@ -28,11 +28,11 @@ for _ in once; do # One pass loop to allow breaking out of script early
 
         # Ensure at least Python 3.6
         if [[ ${python_exec_ver_major} -lt 3 ]] || [[ ${python_exec_ver_major} -eq 3 && ${python_exec_ver_minor} -lt 6 ]]; then
-            echo "Python version $python_exec_ver detected."
+            echo "\nPython version $python_exec_ver detected."
             echo "Error: Python 3.6.0 or newer required. Exiting now..." >&2
             break
         else 
-            echo "Python version $python_exec_ver detected."
+            echo "\nPython version $python_exec_ver detected."
         fi
 
         # Install the virtual environment directory using the path found
@@ -42,7 +42,7 @@ for _ in once; do # One pass loop to allow breaking out of script early
     # Activate venv script and ensure it worked by validating environment variable
     source venv/bin/activate
     if [[ "$VIRTUAL_ENV" == "" ]]; then
-        echo "Error: unable to activate venv. Exiting now..." >&2 
+        echo "\nError: unable to activate venv. Exiting now..." >&2 
         break
     fi
     
@@ -52,11 +52,35 @@ for _ in once; do # One pass loop to allow breaking out of script early
 
     # Load the environment variables defined in .envrc using direnv
     if ! [ -x "$(command -v direnv)" ]; then
-        echo "Error: direnv is not installed. Install direnv 'sudo apt-get install direnv' to enable loading of environment variables defined inside .envrc" >&2
+        echo "\nError: direnv is not installed. Install direnv 'sudo apt-get install direnv' to enable loading of environment variables defined inside .envrc" >&2
         echo "Sourcing environment variables manually into global shell profile. Don't forget to unexport them when finished working on project."
         source ./.envrc
         break
     else 
         direnv allow .
+    fi
+
+    which_shell=`ps -p $$ -oargs=` # https://stackoverflow.com/questions/3327013/how-to-determine-the-current-shell-im-working-on
+    ros_setup_script_path="robot/rospackages/devel" # Where all setup.* scripts are located
+    if [[ $which_shell == *"zsh"* ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.zsh"
+    elif [[ $which_shell == *"bash"* ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.bash"
+    elif [[ $which_shell == "sh" ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.sh"
+    else
+        echo "\nError: Unknown shell environment detected. Manually find your respective setup.* script inside robot/rospackages/devel and activate it by entering 'source robot/rospackages/setup.*'." >&2 
+        echo "ROS source environment not activated. Exiting now..." >&2 
+        break
+    fi
+
+    echo "Shell environment found. "
+    if [ -f $ros_setup_script_path ]; then # Check if script path exists
+        echo "\nActivating $ros_setup_script_path..."
+        source $ros_setup_script_path
+    else
+        echo "\nError: ROS setup script path not found, make sure to run 'catkin_make' in robot/rospackages directory to build packages." >&2 
+        echo "ROS source environment not activated. Exiting now..." >&2 
+        break
     fi
 done
