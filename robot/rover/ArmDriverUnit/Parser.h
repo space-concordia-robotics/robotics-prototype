@@ -289,7 +289,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
           }
         }
       else
-        if (String(msgElem) == "switch direction")
+        if (String(msgElem) == "switchdirection")
         {
           cmd.switchDir = true;
 

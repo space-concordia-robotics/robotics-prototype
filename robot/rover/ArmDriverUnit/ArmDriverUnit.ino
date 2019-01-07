@@ -112,6 +112,20 @@ StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, 
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
+// motor array prep work: making pointers to motor objects
+// StepperMotor *m1 = &motor1;
+DcMotor * m1 = & motor1;
+DcMotor * m2 = & motor2;
+StepperMotor * m3 = & motor3;
+StepperMotor * m4 = & motor4;
+ServoMotor * m5 = & motor5;
+ServoMotor * m6 = & motor6;
+// I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
+RobotMotor * motorArray[] =
+{
+  m1, m2, m3, m4, m5, m6
+};
+
 // instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
 IntervalTimer m3StepperTimer;
@@ -326,12 +340,10 @@ void loop()
       // emergency stop takes precedence
       if (motorCommand.stopAllMotors)
       {
-        motor1.stopRotation();
-        motor2.stopRotation();
-        motor3.stopRotation();
-        motor4.stopRotation();
-        motor5.stopRotation();
-        motor6.stopRotation();
+        for (int i = 0; i < NUM_MOTORS; i++)
+        {
+          motorArray[i] -> stopRotation();
+        }
         UART_PORT.println("all motors stopped because of emergency stop");
       }
       else
@@ -339,27 +351,7 @@ void loop()
         // stopping a single motor takes precedence
         if (motorCommand.stopSingleMotor)
         {
-          switch (motorCommand.whichMotor)
-          {
-            case MOTOR1:
-              motor1.stopRotation();
-              break;
-            case MOTOR2:
-              motor2.stopRotation();
-              break;
-            case MOTOR3:
-              motor3.stopRotation();
-              break;
-            case MOTOR4:
-              motor4.stopRotation();
-              break;
-            case MOTOR5:
-              motor5.stopRotation();
-              break;
-            case MOTOR6:
-              motor6.stopRotation();
-              break;
-          }
+          motorArray[motorCommand.whichMotor - 1] -> stopRotation();
           UART_PORT.print("stopped motor ");
           UART_PORT.println(motorCommand.whichMotor);
         }
@@ -440,7 +432,8 @@ void loop()
               UART_PORT.print(1);
               UART_PORT.println(" angle is not within angle limits.");
             }
-            if (!motorsCanMove){
+            if (!motorsCanMove)
+            {
               UART_PORT.println("$E,Error: one or many angles are invalid, arm will not move");
             }
             else
@@ -830,27 +823,7 @@ void loop()
           {
             if (motorCommand.loopState == OPEN_LOOP)
             {
-              switch (motorCommand.whichMotor)
-              {
-                case MOTOR1:
-                  motor1.isOpenLoop = true;
-                  break;
-                case MOTOR2:
-                  motor2.isOpenLoop = true;
-                  break;
-                case MOTOR3:
-                  motor3.isOpenLoop = true;
-                  break;
-                case MOTOR4:
-                  motor4.isOpenLoop = true;
-                  break;
-                case MOTOR5:
-                  motor5.isOpenLoop = true;
-                  break;
-                case MOTOR6:
-                  motor6.isOpenLoop = true;
-                  break;
-              }
+              motorArray[motorCommand.whichMotor - 1] -> isOpenLoop = true;
               UART_PORT.print("motor ");
               UART_PORT.print(motorCommand.whichMotor);
               UART_PORT.println(" is open loop");
@@ -858,44 +831,13 @@ void loop()
             else
               if (motorCommand.loopState == CLOSED_LOOP)
               {
-                switch (motorCommand.whichMotor)
+                if (motorArray[motorCommand.whichMotor - 1] -> hasEncoder)
                 {
-                  case MOTOR1:
-                    if (motor1.hasEncoder)
-                      motor1.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
-                  case MOTOR2:
-                    if (motor2.hasEncoder)
-                      motor2.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
-                  case MOTOR3:
-                    if (motor3.hasEncoder)
-                      motor3.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
-                  case MOTOR4:
-                    if (motor4.hasEncoder)
-                      motor4.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
-                  case MOTOR5:
-                    if (motor5.hasEncoder)
-                      motor5.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
-                  case MOTOR6:
-                    if (motor6.hasEncoder)
-                      motor6.isOpenLoop = false;
-                    else
-                      UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-                    break;
+                  motorArray[motorCommand.whichMotor - 1] -> isOpenLoop = false;
+                }
+                else
+                {
+                  UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
                 }
               }
           }
@@ -905,27 +847,7 @@ void loop()
           {
             if (motorCommand.resetAngleValue)
             {
-              switch (motorCommand.whichMotor)
-              {
-                case MOTOR1:
-                  motor1.setCurrentAngle(0.0);
-                  break;
-                case MOTOR2:
-                  motor2.setCurrentAngle(0.0);
-                  break;
-                case MOTOR3:
-                  motor3.setCurrentAngle(0.0);
-                  break;
-                case MOTOR4:
-                  motor4.setCurrentAngle(0.0);
-                  break;
-                case MOTOR5:
-                  motor5.setCurrentAngle(0.0);
-                  break;
-                case MOTOR6:
-                  motor6.setCurrentAngle(0.0);
-                  break;
-              }
+              motorArray[motorCommand.whichMotor - 1] -> setCurrentAngle(0.0);
               UART_PORT.print("reset angle value of motor ");
               UART_PORT.println(motorCommand.whichMotor);
             }
@@ -939,39 +861,9 @@ void loop()
         else
           if (motorCommand.switchDir)
           {
-            switch (motorCommand.whichMotor)
-            {
-              case MOTOR1:
-                motor1.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor1.getDirectionLogic());
-                break;
-              case MOTOR2:
-                motor2.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor2.getDirectionLogic());
-                break;
-              case MOTOR3:
-                motor3.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor3.getDirectionLogic());
-                break;
-              case MOTOR4:
-                motor4.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor4.getDirectionLogic());
-                break;
-              case MOTOR5:
-                motor5.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor5.getDirectionLogic());
-                break;
-              case MOTOR6:
-                motor6.switchDirectionLogic();
-                UART_PORT.print("direction modifier is now ");
-                UART_PORT.println(motor6.getDirectionLogic());
-                break;
-            }
+            motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
+            UART_PORT.print("direction modifier is now ");
+            UART_PORT.println(motorArray[motorCommand.whichMotor - 1] -> getDirectionLogic());
           }
         else
           UART_PORT.println("$E,Error: bad motor command");
@@ -1066,34 +958,13 @@ void loop()
 void printMotorAngles()
 {
   UART_PORT.print("Motor Angles: ");
-  if (motor1.calcCurrentAngle())
+  for (int i = 0; i < NUM_MOTORS; i++)
   {
-    UART_PORT.print(motor1.getCurrentAngle());
-  }
-  if (motor2.calcCurrentAngle())
-  {
-    UART_PORT.print(",");
-    UART_PORT.print(motor2.getCurrentAngle());
-  }
-  if (motor3.calcCurrentAngle())
-  {
-    UART_PORT.print(",");
-    UART_PORT.print(motor3.getCurrentAngle());
-  }
-  if (motor4.calcCurrentAngle())
-  {
-    UART_PORT.print(",");
-    UART_PORT.print(motor4.getCurrentAngle());
-  }
-  if (motor5.calcCurrentAngle())
-  {
-    UART_PORT.print(",");
-    UART_PORT.print(motor5.getCurrentAngle());
-  }
-  if (motor6.calcCurrentAngle())
-  {
-    UART_PORT.print(",");
-    UART_PORT.print(motor6.getCurrentAngle());
+    if (motorArray[i] -> calcCurrentAngle())
+    {
+      UART_PORT.print(motorArray[i] -> getCurrentAngle());
+      UART_PORT.print(", ");
+    }
   }
   UART_PORT.println("");
 }
