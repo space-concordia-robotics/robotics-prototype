@@ -16,7 +16,7 @@
 #define DC_PIN_MIDDLE_LEFT 5
 #define DC_PIN_BACK_LEFT 6
 
-#define DC_SIGNAL_MIN 127
+#define DC_SIGNAL_MID 127
 #define DC_SIGNAL_MIN 0
 #define DC_SIGNAL_MAX 255
 
@@ -49,8 +49,8 @@ void DcCallback(const geometry_msgs::Twist &twist_msg) {
   float steering = twist_msg.angular.z;
 
   // Initialize Left & Right Velocity variables to Rest
-  float vel_signal_right = DC_MID_SIGNAL;
-  float vel_signal_left = DC_MID_SIGNAL;
+  float vel_signal_right = DC_SIGNAL_MID;
+  float vel_signal_left = DC_SIGNAL_MID;
   float deg = 0;
 
   // If statement for CASE 1: steering toward the RIGHT
