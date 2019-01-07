@@ -317,7 +317,7 @@ void loop()
     if (!Parser.verifCommand(motorCommand))
     // if (!verifSerial(motorCommand))
     {
-      UART_PORT.println("$E, verification failed");
+      UART_PORT.println("$E,Error: verification failed");
     }
     else
     {
@@ -363,7 +363,288 @@ void loop()
           UART_PORT.print("stopped motor ");
           UART_PORT.println(motorCommand.whichMotor);
         }
-        // make motors move
+        // make motors move simultaneously
+        else
+          if (motorCommand.multiMove)
+          {
+            for (int i = 0; i < NUM_MOTORS; i++)
+            {
+              if (motorCommand.motorsToMove[i])
+              {
+                UART_PORT.print("motor ");
+                UART_PORT.print(i + 1);
+                UART_PORT.print(" desired angle (degrees) is: ");
+                UART_PORT.println(motorCommand.anglesToReach[i]);
+              }
+              else
+              {
+                UART_PORT.print("motor ");
+                UART_PORT.print(i + 1);
+                UART_PORT.println(" will not change course");
+              }
+            }
+            UART_PORT.println(messageBar);
+            bool motorsCanMove = false;
+            if (motor1.withinJointAngleLimits(motorCommand.anglesToReach[0]))
+            {
+              if (motor2.withinJointAngleLimits(motorCommand.anglesToReach[1]))
+              {
+                if (motor3.withinJointAngleLimits(motorCommand.anglesToReach[2]))
+                {
+                  if (motor4.withinJointAngleLimits(motorCommand.anglesToReach[3]))
+                  {
+                    if (motor5.withinJointAngleLimits(motorCommand.anglesToReach[4]))
+                    {
+                      if (motor6.withinJointAngleLimits(motorCommand.anglesToReach[5]))
+                      {
+                        motorsCanMove = true;
+                      }
+                      else
+                      {
+                        UART_PORT.print("$E,Alert: requested motor ");
+                        UART_PORT.print(6);
+                        UART_PORT.println(" angle is not within angle limits.");
+                      }
+                    }
+                    else
+                    {
+                      UART_PORT.print("$E,Alert: requested motor ");
+                      UART_PORT.print(5);
+                      UART_PORT.println(" angle is not within angle limits.");
+                    }
+                  }
+                  else
+                  {
+                    UART_PORT.print("$E,Alert: requested motor ");
+                    UART_PORT.print(4);
+                    UART_PORT.println(" angle is not within angle limits.");
+                  }
+                }
+                else
+                {
+                  UART_PORT.print("$E,Alert: requested motor ");
+                  UART_PORT.print(3);
+                  UART_PORT.println(" angle is not within angle limits.");
+                }
+              }
+              else
+              {
+                UART_PORT.print("$E,Alert: requested motor ");
+                UART_PORT.print(2);
+                UART_PORT.println(" angle is not within angle limits.");
+              }
+            }
+            else
+            {
+              UART_PORT.print("$E,Alert: requested motor ");
+              UART_PORT.print(1);
+              UART_PORT.println(" angle is not within angle limits.");
+            }
+            if (!motorsCanMove){
+              UART_PORT.println("$E,Error: one or many angles are invalid, arm will not move");
+            }
+            else
+            {
+              UART_PORT.println("$S,Success: all angles are valid, arm to move");
+              if (motorCommand.motorsToMove[0])
+              {
+                // this motor can swivel but has limits so it doesn't hit anything
+                if (motor1.setDesiredAngle(motorCommand.anglesToReach[0]))
+                {
+                  // this method returns true if the command is within joint angle limits
+                  if (motor1.isOpenLoop)
+                  {
+                    motor1.openLoopError = motor1.getDesiredAngle(); // - motor1.calcCurrentAngle(); // find the angle difference
+                    motor1.calcDirection(motor1.openLoopError); // determine rotation direction and save the value
+                    // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
+                    if (motor1.calcTurningDuration(motor1.openLoopError))
+                    // returns false if the open loop error is too small
+                    {
+                      motor1.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
+                      motor1.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(1);
+                      UART_PORT.print(" to turn for ");
+                      UART_PORT.print(motor1.numMillis);
+                      UART_PORT.println(" milliseconds");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                    if (!motor1.isOpenLoop)
+                    {
+                      // all the heavy lifting for closed loop control is done in the timer interrupt
+                      motor1.movementDone = false;
+                    }
+                }
+              }
+              if (motorCommand.motorsToMove[1])
+              {
+                if (motor2.setDesiredAngle(motorCommand.anglesToReach[1]))
+                {
+                  if (motor2.isOpenLoop)
+                  {
+                    motor2.openLoopError = motor2.getDesiredAngle(); // - motor2.calcCurrentAngle();
+                    motor2.calcDirection(motor2.openLoopError);
+                    if (motor2.calcTurningDuration(motor2.openLoopError))
+                    {
+                      motor2.timeCount = 0;
+                      motor2.movementDone = false;
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(2);
+                      UART_PORT.print(" to turn for ");
+                      UART_PORT.print(motor2.numMillis);
+                      UART_PORT.println(" milliseconds");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                    if (!motor2.isOpenLoop)
+                    {
+                      motor2.movementDone = false;
+                    }
+                }
+                else
+                {
+                  UART_PORT.println("$E,Alert: requested angle is not within angle limits.");
+                }
+              }
+              if (motorCommand.motorsToMove[2])
+              {
+                if (motor3.setDesiredAngle(motorCommand.anglesToReach[2]))
+                {
+                  if (motor3.isOpenLoop)
+                  {
+                    motor3.openLoopError = motor3.getDesiredAngle(); // - motor3.calcCurrentAngle(); // find the angle difference
+                    motor3.calcDirection(motor3.openLoopError);
+                    // calculates how many steps to take to get to the desired position, assuming no slipping
+                    if (motor3.calcNumSteps(motor3.openLoopError))
+                    // returns false if the open loop error is too small
+                    {
+                      motor3.enablePower(); // give power to the stepper finally
+                      motor3.movementDone = false;
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(3);
+                      UART_PORT.print(" to turn ");
+                      UART_PORT.print(motor3.numSteps);
+                      UART_PORT.println(" steps");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                    if (!motor3.isOpenLoop)
+                    {
+                      motor3.enablePower();
+                      motor3.movementDone = false;
+                    }
+                }
+              }
+              if (motorCommand.motorsToMove[3])
+              {
+                if (motor4.setDesiredAngle(motorCommand.anglesToReach[3]))
+                {
+                  if (motor4.isOpenLoop)
+                  {
+                    motor4.openLoopError = motor4.getDesiredAngle(); // - motor4.calcCurrentAngle(); // find the angle difference
+                    motor4.calcDirection(motor4.openLoopError);
+                    if (motor4.calcNumSteps(motor4.openLoopError))
+                    {
+                      motor4.enablePower();
+                      motor4.movementDone = false;
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(4);
+                      UART_PORT.print(" to turn ");
+                      UART_PORT.print(motor4.numSteps);
+                      UART_PORT.println(" steps");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                    if (!motor4.isOpenLoop)
+                    {
+                      motor4.enablePower();
+                      motor4.movementDone = false;
+                    }
+                }
+              }
+              if (motorCommand.motorsToMove[4])
+              {
+                // this motor has no max or min angle because it must be able to spin like a screwdriver
+                if (motor5.setDesiredAngle(motorCommand.anglesToReach[4]))
+                {
+                  if (motor5.isOpenLoop)
+                  {
+                    motor5.openLoopError = motor5.getDesiredAngle(); // - motor5.calcCurrentAngle(); // find the angle difference
+                    motor5.calcDirection(motor5.openLoopError);
+                    if (motor5.calcTurningDuration(motor5.openLoopError))
+                    {
+                      motor5.timeCount = 0;
+                      motor5.movementDone = false;
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(5);
+                      UART_PORT.print(" to turn for ");
+                      UART_PORT.print(motor5.numMillis);
+                      UART_PORT.println(" milliseconds");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                  {
+                    if (!motor5.isOpenLoop)
+                    {
+                      motor5.movementDone = false;
+                    }
+                  }
+                }
+              }
+              if (motorCommand.motorsToMove[5])
+              {
+                if (motor6.setDesiredAngle(motorCommand.anglesToReach[5]))
+                {
+                  if (motor6.isOpenLoop)
+                  {
+                    motor6.openLoopError = motor6.getDesiredAngle(); // - motor6.calcCurrentAngle(); // find the angle difference
+                    motor6.calcDirection(motor6.openLoopError);
+                    if (motor6.calcTurningDuration(motor6.openLoopError))
+                    {
+                      motor6.timeCount = 0;
+                      motor6.movementDone = false;
+                      UART_PORT.print("$S,Success: motor ");
+                      UART_PORT.print(6);
+                      UART_PORT.print(" to turn for ");
+                      UART_PORT.print(motor6.numMillis);
+                      UART_PORT.println(" milliseconds");
+                    }
+                    else
+                    {
+                      UART_PORT.println("$E,Alert: requested angle is too close to current angle. Motor not changing course.");
+                    }
+                  }
+                  else
+                    if (!motor6.isOpenLoop)
+                    {
+                      motor6.movementDone = false;
+                    }
+                }
+              }
+            }
+          }
+        // make single motor move
         else
           if (motorCommand.angleCommand)
           {
@@ -386,7 +667,7 @@ void loop()
                   motor1.calcDirection(motor1.openLoopError); // determine rotation direction and save the value
                   // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
                   if (motor1.calcTurningDuration(motor1.openLoopError))
-                    // returns false if the open loop error is too small
+                  // returns false if the open loop error is too small
                   {
                     motor1.timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
                     motor1.movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
@@ -441,7 +722,7 @@ void loop()
                   motor3.calcDirection(motor3.openLoopError);
                   // calculates how many steps to take to get to the desired position, assuming no slipping
                   if (motor3.calcNumSteps(motor3.openLoopError))
-                    // returns false if the open loop error is too small
+                  // returns false if the open loop error is too small
                   {
                     motor3.enablePower(); // give power to the stepper finally
                     motor3.movementDone = false;

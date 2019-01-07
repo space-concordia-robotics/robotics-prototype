@@ -22,6 +22,9 @@ enum motor_code
 // 8-14 encoder interrupt pins
 // 3 direction pins, 3 step pins
 
+#define NUM_MOTORS 6 // used in parsing for commands for multiple motors
+#define MIN_JOINT_ANGLE -760 // min angle for all motors
+#define MAX_JOINT_ANGLE 760 // max angle for all motors
 #define STEPPER_PID_PERIOD 25 * 1000 // initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods

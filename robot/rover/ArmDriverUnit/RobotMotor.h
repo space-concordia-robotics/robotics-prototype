@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "PinSetup.h"
 #include "PidController.h"
-
 enum motor_direction
 {
   CLOCKWISE = -1, COUNTER_CLOCKWISE = 1
@@ -39,6 +38,7 @@ class RobotMotor
   void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
   void attachLimitSwitches(char type, int switch1, int switch2);
   void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
+  bool withinJointAngleLimits(float angle); // checks if angle is within limits
   bool hasEncoder;
   virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
   virtual void stopRotation(void) = 0;
@@ -110,9 +110,21 @@ void RobotMotor::setAngleLimits(float minAngle, float maxAngle)
   hasAngleLimits = true;
 }
 
-bool RobotMotor::setDesiredAngle(float angle)
+bool RobotMotor::withinJointAngleLimits(float angle)
 {
   if (!hasAngleLimits || (angle > minJointAngle && angle < maxJointAngle))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool RobotMotor::setDesiredAngle(float angle)
+{
+  if (withinJointAngleLimits(angle))
   {
     desiredAngle = angle;
     return true;
@@ -141,11 +153,13 @@ int RobotMotor::calcDirection(float error)
   return rotationDirection;
 }
 
-void RobotMotor::switchDirectionLogic(void){
+void RobotMotor::switchDirectionLogic(void)
+{
   directionModifier = directionModifier * -1;
 }
 
-int RobotMotor::getDirectionLogic(void){
+int RobotMotor::getDirectionLogic(void)
+{
   return directionModifier;
 }
 
