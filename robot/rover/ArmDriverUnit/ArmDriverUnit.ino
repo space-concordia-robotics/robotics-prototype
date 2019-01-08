@@ -376,7 +376,16 @@ void loop()
               }
             }
             UART_PORT.println(messageBar);
-            bool motorsCanMove = false;
+            bool motorsCanMove = true;
+            for(int i=0;i<NUM_MOTORS;i++){
+              if(!(motorArray[i]->withinJointAngleLimits(motorCommand.anglesToReach[i]))){
+                motorsCanMove = false;
+                UART_PORT.print("$E,Alert: requested motor ");
+                        UART_PORT.print(i+1);
+                        UART_PORT.println(" angle is not within angle limits.");
+              }
+            }
+/*
             if (motor1.withinJointAngleLimits(motorCommand.anglesToReach[0]))
             {
               if (motor2.withinJointAngleLimits(motorCommand.anglesToReach[1]))
@@ -432,6 +441,7 @@ void loop()
               UART_PORT.print(1);
               UART_PORT.println(" angle is not within angle limits.");
             }
+            */
             if (!motorsCanMove)
             {
               UART_PORT.println("$E,Error: one or many angles are invalid, arm will not move");
