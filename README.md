@@ -196,27 +196,3 @@ Flashing code to a Teensy is very similar to flashing to Arduino, but the Teensy
 Teensy programming has all of the Arduino functions, as well as extra features described on [the pjrc website](https://www.pjrc.com/teensy/td_libs.html). Currently used features are digitalWriteFast(), IntervalTimer and ellapsedMillis.
 
 I (Josh) currently use Sublime Text to write my code, and then compile it using the Arduino IDE and use the Serial Monitor to communicate with the Teensy. The recommended editors are Atom or VS Code as the rest of this project has configuration files for those text editors.
-
-### Arm Driver Unit (ADU)
-#### Code Structure
-
-The Teensy code for the ADU is abstracted into classes to aid in code modularity. Currently there is the RobotMotor class with the DcMotor, StepperMotor and ServoMotor subclasses. There are also the PidController and Parser classes, and pinSetup which is not a class but is separated into its own .cpp and .h files. In the future, these classes could be turned into Arduino libraries. At the very least, a similar structure can be used on the rover Teensy.
-
-#### Hardware and Wiring
-
-The current iteration of the rover arm has m1 and m2 being DC motors, m3 and m4 being stepper motors, and m5 and m6 being continuous rotation servos. Currently the DC motors are driven with Cytron drivers, the stepper motors with A4988 or DRV8825 drivers, and the servos do not need external drivers.
-
-For prototyping purposes: there is a .docx file in `/robot/rover/ArmDriverUnit` which shows wiring diagrams for the different drivers and steppers. Note that in all cases but the servos, the power supply ground and the logic-level ground are independent. In the case of the servos, the ground will be isolated in the final design, but for testing purposes it can share a common ground. The 8-wire stepper motor coils are in series configuration.
-
-In short, the Teensy is connected to the drivers (and the servos). The drivers (and the servos) are powered by power supplies (7.4V for the servos, 12V for the DC motors and steppers) and connect to the motors (aside from the servos).
-
-On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
-
-### Rover Driver Unit (RDU)
-#### Code Structure
-
-The RDU code structure is to be decided but will probably follow a similar structure to the ADU.
-
-#### Hardware and Wiring
-
-The current iteration of the rover has 6 DC motors, all controlled by Cytron drivers.
