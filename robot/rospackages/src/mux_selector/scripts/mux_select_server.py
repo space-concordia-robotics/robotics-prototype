@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+
+import rospy
+import subprocess
+from mux_selector.srv import *
+
+def handle_mux_select(req):
+    response = "Switched MUX select to device {:s}".format(req.device)
+
+    # call bash function to do the select
+    response += "\n" + select_device(req.device)
+
+    return response
+
+def run_shell(cmd):
+    """Run script command supplied as string.
+
+    Returns tuple of output and error.
+    """
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+    return output, error
+
+def select_device(device):
+    s0_val = 0
+    s1_val = 0
+
+    if not device.isnumeric():
+        print("Device argument must be numeric value")
+        return
+
+    device = int(device)
+
+    if not device in (0, 1, 2, 3):
+        print("Invalid value, must be 0 or 1")
+    else:
+        if device == 0:
+            print("Selecting device 0: Rover")
+            s0_val = 0
+            s1_val = 0
+        elif device == 1:
+            print("Selecting device 1: Arm")
+            s0_val = 0
+            s1_val = 1
+        elif device == 2:
+            print("Selecting device 2: Science Payload")
+            s0_val = 1
+            s1_val = 0
+        elif device == 3:
+            print("Selecting device 3: Lidar")
+            s0_val = 1
+            s1_val = 1
+
+    cmd_s0 = "echo " + str(s0_val) + " > " + "/sys/class/gpio18"
+    cmd_s1 = "echo " + str(s1_val) + " > " + "/sys/class/gpio21"
+    # to be tested on odroid
+    #output0, error0 = run_shell(cmd_s0)
+    #output1, error1 = run_shell(cmd_s1)
+    s0_state = "s0: " + str(s0_val)
+    s1_state = "s1: " + str(s1_val)
+    print(s0_state)
+    print(s1_state)
+
+    return s0_state + "\n" + s1_state
+
+def mux_select_server():
+    rospy.init_node('mux_select_server')
+    s = rospy.Service('mux_select', SelectMux, handle_mux_select)
+    print("Ready to respond to mux select commands")
+    rospy.spin()
+
+if __name__ == "__main__":
+    mux_select_server()
