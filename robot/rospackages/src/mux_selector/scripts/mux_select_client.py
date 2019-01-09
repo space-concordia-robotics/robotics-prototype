@@ -3,7 +3,6 @@
 import sys
 import datetime
 import rospy
-import subprocess
 from mux_selector.srv import *
 
 def mux_select_client(device):
@@ -27,16 +26,6 @@ def is_valid_request(device):
     is_valid = device in (0, 1, 2, 3)
 
     return is_valid
-
-def run_shell(cmd):
-    """Run script command supplied as string.
-
-    Returns tuple of output and error.
-    """
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    return output, error
 
 def usage():
     help_msg = """USAGE:\nrosrun mux_selector mux_select_client.py [device number]

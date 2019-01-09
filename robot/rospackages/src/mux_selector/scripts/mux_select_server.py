@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-import subprocess
 from mux_selector.srv import *
 
 def handle_mux_select(req):
@@ -11,16 +10,6 @@ def handle_mux_select(req):
     response += "\n" + select_device(req.device)
 
     return response
-
-def run_shell(cmd):
-    """Run script command supplied as string.
-
-    Returns tuple of output and error.
-    """
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    return output, error
 
 def select_device(device):
     s0_val = 0
@@ -52,11 +41,14 @@ def select_device(device):
             s0_val = 1
             s1_val = 1
 
-    cmd_s0 = "echo " + str(s0_val) + " > " + "/sys/class/gpio18"
-    cmd_s1 = "echo " + str(s1_val) + " > " + "/sys/class/gpio21"
-    # to be tested on odroid
-    #output0, error0 = run_shell(cmd_s0)
-    #output1, error1 = run_shell(cmd_s1)
+    gpio_dir = "/sys/class/gpio"
+
+    with open(gpio_dir + "/gpio18/value", "w") as f:
+        f.write(str(s0_val))
+
+    with open(gpio_dir + "/gpio21/value", "w") as f:
+        f.write(str(s1_val))
+
     s0_state = "s0: " + str(s0_val)
     s1_state = "s1: " + str(s1_val)
     print(s0_state)
