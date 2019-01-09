@@ -30,13 +30,8 @@
 #define PULSES_PER_REV 7
 #define GEAR_RATIO     71.16
 #define ARRAY_SIZE     500
-#define RUN_TIME       1000
+#define RUN_TIME       2000
 
-/* one and only one of the following 4 definitions must be uncommented */
-//#define CHANGE_TWO_ENC 4
-//#define CHANGE_ONE_ENC 2
-//#define FALLING_TWO_ENC 2
-#define FALLING_ONE_ENC 1
 
 unsigned long startTime = millis();
 unsigned long currTime = millis();
@@ -50,18 +45,22 @@ float omegaDeg[ARRAY_SIZE];
 float omegaRad[ARRAY_SIZE];
 float omegaRpm[ARRAY_SIZE];
 
+/* one and only one of the following 4 definitions must be uncommented */
+//#define CHANGE_TWO_ENC 4
+//#define CHANGE_ONE_ENC 2
+#define FALLING_ONE_ENC 1
+
 #if defined(CHANGE_TWO_ENC)
 int multiplier = CHANGE_TWO_ENC;
 #elif defined(CHANGE_ONE_ENC)
 int multiplier = CHANGE_ONE_ENC;
-#elif defined(FALLING_TWO_ENC)
-int multiplier = FALLING_TWO_ENC;
 #elif defined(FALLING_ONE_ENC)
 int multiplier = FALLING_ONE_ENC;
 #endif
 
-float degAngularResolution = 360.0 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier);
-float radAngularResolution = 2*3.141592654 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier);
+float degAngularResolution = 360.0 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier); //output shaft speed
+//float degAngularResolution = 360.0 / (float)(PULSES_PER_REV*multiplier); //input shaft speed
+float radAngularResolution = 2*3.141592654 / (float)(GEAR_RATIO*PULSES_PER_REV*multiplier); // output shaft speed
 
 void encoder_ISR(void);
 
@@ -81,9 +80,6 @@ void setup() {
   attachInterrupt(ENCODER_B_PIN, encoder_ISR, CHANGE); delay(10);
 #elif defined(FALLING_ONE_ENC)
   attachInterrupt(ENCODER_A_PIN, encoder_ISR, FALLING); delay(10);
-#elif defined(FALLING_TWO_ENC)
-  attachInterrupt(ENCODER_A_PIN, encoder_ISR, FALLING); delay(10);
-  attachInterrupt(ENCODER_B_PIN, encoder_ISR, FALLING); delay(10);
 #endif
 
   Serial.begin(115200); delay(10);
@@ -113,6 +109,8 @@ void loop() {
       float revPerSec = degAngularResolution * 1000 * 1000 / (float)(dt[i]*360);
       omegaRpm[i] = revPerSec*60.0;
       //Serial.println(revPerSec);
+      Serial.print(dt[i]);
+      Serial.print(",");
       Serial.println(omegaRpm[i]);
       //Serial.println(omegaRad[i]);
       //Serial.println(omegaDeg[i]);
