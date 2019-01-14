@@ -38,9 +38,10 @@ updated as of December 22 2018.
 // #define USER_MODE 4 // sends messages with ROSserial, functionality restricted
 // these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
 #define DEBUG_MAIN 10 // debug messages during main loop
-//#define DEBUG_PARSING 11 // debug messages during parsing function
- #define DEBUG_VERIFYING 12 // debug messages during verification function
-// #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+#define DEBUG_PARSING 11 // debug messages during parsing function
+//#define DEBUG_VERIFYING 12 // debug messages during verification function
+//#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+// test comment
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
 #define DEBUG_PID 16 // debug messages during pid loop calculations
@@ -1052,6 +1053,8 @@ void m2_encoder_interrupt(void)
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m2 ");
+  //UART_PORT.println(oldEncoderState,BIN);
+  //UART_PORT.println(" ");
   UART_PORT.println(motor2.encoderCount);
   #endif
 
