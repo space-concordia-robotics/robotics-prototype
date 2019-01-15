@@ -12,6 +12,7 @@ class ServoMotor : public RobotMotor {
     ServoMotor(int pwmPin, float gearRatio);
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
+    bool calcCurrentAngle(void);
 
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void stopRotation(void);
@@ -76,6 +77,32 @@ bool ServoMotor::calcTurningDuration(float angle) {
     return true;
   }
   else {
+    return false;
+  }
+}
+
+bool ServoMotor::calcCurrentAngle(void)
+{
+  if(isOpenLoop){
+    static unsigned int prevTime = 0;
+    if(timeCount < numMillis){
+      // if the motor is moving, calculate the angle based on how long it's been turning for
+      currentAngle += (timeCount-prevTime)*(openLoopSpeed*gearRatioReciprocal)/(1000.0*openLoopGain);
+      prevTime = timeCount;
+    }
+    else {
+      prevTime = 0;
+      // currentAngle hasn't changed since motor hasn't moved and encoder isn't working
+    }
+    return true;
+  }
+  else if (hasEncoder)
+  {
+    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    return true;
+  }
+  else
+  {
     return false;
   }
 }

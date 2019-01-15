@@ -33,7 +33,7 @@ class StepperMotor : public RobotMotor {
     void disablePower(void);
 
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
-
+    bool calcCurrentAngle(void);
     void setVelocity(int motorDir, float motorSpeed);
     void stopRotation(void);
 
@@ -86,8 +86,9 @@ void StepperMotor::singleStep(int dir) {
 }
 
 void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
-  if (!isOpenLoop)
+  if (!isOpenLoop){
     motorSpeed = fabs(motorSpeed);
+  }
   // makes sure the speed is within the limits set in the pid during setup
   if (motorSpeed * motorDir > pidController.getMaxOutputValue())
   {
@@ -126,6 +127,32 @@ bool StepperMotor::calcNumSteps(float angle) {
     return true;
   }
   else {
+    return false;
+  }
+}
+
+bool StepperMotor::calcCurrentAngle(void)
+{
+  if(isOpenLoop){
+    static unsigned int prevSteps = 0;
+    if(stepCount < numSteps){
+      // if the motor is moving, calculate the angle based on how long it's been turning for
+      currentAngle += (stepCount-prevSteps)*gearRatioReciprocal*stepResolution;
+      prevSteps = stepCount;
+    }
+    else {
+      prevSteps = 0;
+      // currentAngle hasn't changed since motor hasn't moved and encoder isn't working
+    }
+    return true;
+  }
+  else if (hasEncoder)
+  {
+    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    return true;
+  }
+  else
+  {
     return false;
   }
 }

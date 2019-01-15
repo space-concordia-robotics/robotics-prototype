@@ -135,7 +135,7 @@ enum motor_code
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
 #define M2_ENCODER_RESOLUTION 7*2 //7*4 //48 // counts per motor shaft revolution
-#define M2_GEAR_RATIO      99.508*20.0 //99.508*33.888 //188 planetary gear chained to worm gear drive
+#define M2_GEAR_RATIO      189.0*20.0 //99.508*20 //188 planetary gear chained to worm gear drive
 #define M2_MINIMUM_ANGLE   -75.0
 #define M2_MAXIMUM_ANGLE   55.0
 

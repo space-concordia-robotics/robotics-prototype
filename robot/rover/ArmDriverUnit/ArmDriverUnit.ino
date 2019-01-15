@@ -39,9 +39,8 @@ updated as of December 22 2018.
 // these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
 #define DEBUG_MAIN 10 // debug messages during main loop
 #define DEBUG_PARSING 11 // debug messages during parsing function
-//#define DEBUG_VERIFYING 12 // debug messages during verification function
+#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
-// test comment
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
 #define DEBUG_PID 16 // debug messages during pid loop calculations
@@ -72,6 +71,7 @@ finally, unlocking extra options should be runtime as it should be easily access
 #include "Parser.h"
 // #include "Notes.h" // holds todo info
 // #include "Ideas.h" // holds bits of code that haven't been implemented
+#include "PidController.h"
 #include "RobotMotor.h"
 #include "StepperMotor.h"
 #include "DcMotor.h"
@@ -397,7 +397,8 @@ void loop()
                   // this method returns true if the command is within joint angle limits
                   if (motor1.isOpenLoop)
                   {
-                    motor1.openLoopError = motor1.getDesiredAngle(); // - motor1.calcCurrentAngle(); // find the angle difference
+                    motor1.calcCurrentAngle();
+                    motor1.openLoopError = motor1.getDesiredAngle() - motor1.getCurrentAngle(); // find the angle difference
                     motor1.calcDirection(motor1.openLoopError); // determine rotation direction and save the value
                     // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
                     if (motor1.calcTurningDuration(motor1.openLoopError))
@@ -430,7 +431,8 @@ void loop()
                 {
                   if (motor2.isOpenLoop)
                   {
-                    motor2.openLoopError = motor2.getDesiredAngle(); // - motor2.calcCurrentAngle();
+                    motor2.calcCurrentAngle();
+                    motor2.openLoopError = motor2.getDesiredAngle() - motor2.getCurrentAngle();
                     motor2.calcDirection(motor2.openLoopError);
                     if (motor2.calcTurningDuration(motor2.openLoopError))
                     {
@@ -464,7 +466,8 @@ void loop()
                 {
                   if (motor3.isOpenLoop)
                   {
-                    motor3.openLoopError = motor3.getDesiredAngle(); // - motor3.calcCurrentAngle(); // find the angle difference
+                    motor3.calcCurrentAngle();
+                    motor3.openLoopError = motor3.getDesiredAngle() - motor3.getCurrentAngle(); // find the angle difference
                     motor3.calcDirection(motor3.openLoopError);
                     // calculates how many steps to take to get to the desired position, assuming no slipping
                     if (motor3.calcNumSteps(motor3.openLoopError))
@@ -497,7 +500,8 @@ void loop()
                 {
                   if (motor4.isOpenLoop)
                   {
-                    motor4.openLoopError = motor4.getDesiredAngle(); // - motor4.calcCurrentAngle(); // find the angle difference
+                    motor4.calcCurrentAngle();
+                    motor4.openLoopError = motor4.getDesiredAngle() - motor4.getCurrentAngle(); // find the angle difference
                     motor4.calcDirection(motor4.openLoopError);
                     if (motor4.calcNumSteps(motor4.openLoopError))
                     {
@@ -529,7 +533,8 @@ void loop()
                 {
                   if (motor5.isOpenLoop)
                   {
-                    motor5.openLoopError = motor5.getDesiredAngle(); // - motor5.calcCurrentAngle(); // find the angle difference
+                    motor5.calcCurrentAngle();
+                    motor5.openLoopError = motor5.getDesiredAngle() - motor5.getCurrentAngle(); // find the angle difference
                     motor5.calcDirection(motor5.openLoopError);
                     if (motor5.calcTurningDuration(motor5.openLoopError))
                     {
@@ -561,7 +566,8 @@ void loop()
                 {
                   if (motor6.isOpenLoop)
                   {
-                    motor6.openLoopError = motor6.getDesiredAngle(); // - motor6.calcCurrentAngle(); // find the angle difference
+                    motor6.calcCurrentAngle()
+;                    motor6.openLoopError = motor6.getDesiredAngle() - motor6.getCurrentAngle(); // find the angle difference
                     motor6.calcDirection(motor6.openLoopError);
                     if (motor6.calcTurningDuration(motor6.openLoopError))
                     {
