@@ -28,8 +28,8 @@ Variables changed in the main loop allow the timer interrupts to actually turn
 the motors, either in open loop or closed loop. The main loop can also perform
 periodic checks for motors in open loop, to effectuate small corrections to
 position during movements - if the appropriate motor has an encoder on it.
-This code began development sometime around July 20 2018 and is still being
-updated as of December 22 2018.
+This code began development sometime in July 2018 and is still being
+updated as of January 15 2019.
 */
 /* still in idea phase */
 #define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
@@ -134,7 +134,7 @@ IntervalTimer servoTimer; // motors 5&6
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 /* function declarations */
-void printMotorAngles(); // sends all motor angles over serial
+void printMotorAngles(void); // sends all motor angles over serial
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
 
@@ -184,7 +184,6 @@ void setup()
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
   // each motor with an encoder needs to attach the encoder and 2 interrupts
-
 #ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
@@ -731,7 +730,7 @@ void loop()
   }
 }
 
-void printMotorAngles()
+void printMotorAngles(void)
 {
   UART_PORT.print("Motor Angles: ");
   for (int i = 0; i < NUM_MOTORS; i++)

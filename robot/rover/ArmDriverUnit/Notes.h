@@ -38,7 +38,7 @@
     -ftm+tpm has quadrature decoder?
     -tpm is 2-8 channel timer with pwm, 16bit counter, 2 channels for pwm
 
-  -even more notes in josh notes.txt and in google drive
+  -even more notes in google drive
 */
 /*
    perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup or just setup as it's also got angle limits and gear ratios
@@ -71,7 +71,6 @@ maybe we should have some way of covering the limit switches - what if someone a
 or maybe the code will check to make sure the expected angle is within a certain limit to stop it
 there should also be a check so that if the motor is moving away from the goal position or has been moving for a while without reaching the expected angle, it stops... like a timeout
 
-  deal with relative vs absolute angle control issues
   what do I do for angles over 360? do i keep counting up? do i keep count of how many rotations I've done?
 
   for steppers the check is more to do with whether the amount of steps has been reached and if not, try to step more... whereas for dc they control voltage so the issue there is whether the pid tries to go to max voltage
@@ -99,7 +98,6 @@ there should also be a check so that if the motor is moving away from the goal p
   try to implement the quadrature encoder later if there's time
   for motor speed, use encoder to calculate speed like i did in MotorCharacterization
   speed should be calculated the way angle is, only when necessary in interrupt loop
-  calculate speed over the whole time since previous pid interrupt? or just since previous encoder interrupt?
   use quadrature for speed calcs? or use lower resolution since not so necessary?
   determine how long it takes to do certain calculations to make sure they don't take too long?
   speed pid takes speed as measurement and compares to desired speed

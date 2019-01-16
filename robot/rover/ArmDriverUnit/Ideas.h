@@ -1,17 +1,3 @@
-/*
-  // motor array prep work: making pointers to motor objects
-  //StepperMotor *m1 = &motor1;
-  DcMotor *m1 = &motor1;
-  DcMotor *m2 = &motor2;
-  StepperMotor *m3 = &motor3;
-  StepperMotor *m4 = &motor4;
-  ServoMotor *m5 = &motor5;
-  ServoMotor *m6 = &motor6;
-
-  // I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
-  RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
-*/
-
 /*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
   void m1WrapperISR(void) {
   motor1.encoder_interrupt();
@@ -48,15 +34,6 @@
 
   attachInterrupt(motor6.encoderPinA, m6WrapperISR, CHANGE);
   attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
-*/
-
-/* // doesn't work!!!
-  if (motorCommand.loopState == OPEN_LOOP) {
-  motorArray[motorCommand.whichMotor]->isOpenLoop = true;
-  }
-  else if (motorCommand.loopState == CLOSED_LOOP) {
-  motorArray[motorCommand.whichMotor]->isOpenLoop = false;
-  }
 */
 
 /*
@@ -144,84 +121,4 @@
   OCR1A = c0;
   TIMER1_INTERRUPTS_ON
   }
-*/
-
-/*
-// this was the old motor command which isn't used anymore
-// the following line goes in the commandInfo struct
-bool oldCommand = false; // for old open loop control
-// the following lines go into the serial parsing function
-// check for budge command: direction, speed, time
-      else
-        if (String(msgElem) == "direction")
-        {
-          motorCommand.oldCommand = true;
-          // msgElem is a char array so it's safer to convert to string first
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (direction value)
-          // float tempDirVar = atof(msgElem); // converts to float
-          switch (* msgElem)
-          {
-            // determines motor direction
-            case '1':// arbitrarily (for now) decided 0 is clockwise
-            motorCommand.whichDirection = CLOCKWISE;
-
-#ifdef DEBUG_PARSING
-            Serial.println("parsed direction clockwise");
-#endif
-
-            break;
-            case '2':// arbitrarily (for now) decided 1 is counter-clockwise
-            motorCommand.whichDirection = COUNTER_CLOCKWISE;
-
-#ifdef DEBUG_PARSING
-            Serial.println("parsed direction counter-clockwise");
-#endif
-
-            break;
-          }
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (speed tag)
-          if (String(msgElem) == "speed")
-          {
-            // msgElem is a char array so it's safer to convert to string first
-            msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (integer representing speed level)
-            // make sure the speed is below 4, change this later to expect values 1-4 instead of 0-3
-            motorCommand.whichSpeed = atoi(msgElem); // set the speed, enum starts with 1
-
-#ifdef DEBUG_PARSING
-            Serial.print("parsed speed level: ");
-            Serial.println(motorCommand.whichSpeed);
-#endif
-
-          }
-          msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (time tag)
-          if (String(msgElem) == "time")
-          {
-            // msgElem is a char array so it's safer to convert to string first
-            msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (time in seconds)
-            // don't allow budge movements to last a long time
-            motorCommand.whichTime = atoi(msgElem); // converts to int
-
-#ifdef DEBUG_PARSING
-            Serial.print("parsed time interval ");
-            Serial.print(motorCommand.whichTime);
-            Serial.println("ms");
-#endif
-
-          }
-        }
-// the following lines go into the serial verification function
-else
-        if (cmd.oldCommand)
-        {
-          if (cmd.whichDirection == CLOCKWISE || cmd.whichDirection == COUNTER_CLOCKWISE)
-          {
-            if (cmd.whichSpeed >= 1 && cmd.whichSpeed <= MAX_SPEED)
-            {
-              if (cmd.whichTime <= MAX_BUDGE_TIME && cmd.whichTime >= MIN_BUDGE_TIME)
-              {
-                return true;
-              }
-            }
-          }
-        }
 */
