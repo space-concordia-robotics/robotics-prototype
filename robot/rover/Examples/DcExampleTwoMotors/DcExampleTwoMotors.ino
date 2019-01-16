@@ -1,16 +1,15 @@
+/*
+This is an example sketch using the unfinished motor libraries. It allows the user
+to control two DC motors in open or closed loop over the serial port. In the future,
+some of the header files used in this code should be turned into libraries.
+*/
+
 /* still in idea phase */
-#define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
-// #define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
-// #define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
-// #define USER_MODE 4 // sends messages with ROSserial, functionality restricted
-// these switch on and off debugging but this should be modded to control serial1 vs 2 vs ROSserial
 #define DEBUG_MAIN 10 // debug messages during main loop
 #define DEBUG_PARSING 11 // debug messages during parsing function
 #define DEBUG_VERIFYING 12 // debug messages during verification function
 // #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
-#define DEBUG_TIMERS 15 // debug messages during timer interrupts
-#define DEBUG_PID 16 // debug messages during pid loop calculations
 /*
 choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
 the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -25,13 +24,6 @@ should work.
 #define UART_PORT Serial1
 #endif
 
-/*
-choosing serial1 vs rosserial could be compile-time, since serial1 is only really useful
-for debugging and won't be used when the rover is in action. however, a runtime option
-could be useful as in both cases the teensy is communicating solely with the odroid.
-it might be desirable to switch between modes without recompiling.
-finally, unlocking extra options should be runtime as it should be easily accessible.
-*/
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include "PinSetup.h"

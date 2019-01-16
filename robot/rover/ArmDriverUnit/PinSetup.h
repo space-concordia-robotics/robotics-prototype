@@ -4,23 +4,18 @@
 // pin constants defined in core_pins.h, pins_teensy.c, pins_arduino.h
 
 /*
-   m1 base stepper (rotation)
+   m1 base dc (rotation/swivel)
    m2 shoulder dc (flexion)
    m3 elbow stepper (flexion)
-   m4 wrist stepper (flexion
-   m5 wrist servo (rotation)
+   m4 wrist stepper (flexion)
+   m5 wrist servo (rotation/twisting)
    m6 end effector servo (pinching)
 */
 
-enum motor_code
-{
-  MOTOR1 = 1, MOTOR2, MOTOR3, MOTOR4, MOTOR5, MOTOR6
-}; // defines 6 motors
-
-// 3 pwm pins
+// 4 pwm pins
 // 4-6 limit switch interrupt pins
-// 8-14 encoder interrupt pins
-// 3 direction pins, 3 step pins
+// 4, 8, or 12 encoder interrupt pins
+// 4 direction pins, 2 step pins
 
 #define NUM_MOTORS 6 // used in parsing for commands for multiple motors
 #define MIN_JOINT_ANGLE -760 // min angle for all motors
@@ -45,15 +40,6 @@ enum motor_code
 //only needed for sabertooth
 //#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
-
-// can go into ArmMotor
-// limits in ms for amount of time the motor can budge
-#define MAX_BUDGE_TIME 3000
-#define MIN_BUDGE_TIME 100
-#define DEFAULT_BUDGE_TIME 500
-#define DEFAULT_SPEED 1
-#define MAX_SPEED 4
-#define MAX_COUNTS 4
 
 // steppers
 

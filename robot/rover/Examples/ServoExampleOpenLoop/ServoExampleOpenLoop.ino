@@ -1,4 +1,12 @@
+/*
+This is an example sketch using the unfinished motor libraries. It allows the user
+to control a single servo in open loop over the serial port. In the future, some
+of the header files used in this code should be turned into libraries.
+*/
 
+#define DEBUG_MAIN 10 // debug messages during main loop
+#define DEBUG_PARSING 11 // debug messages during parsing function
+#define DEBUG_VERIFYING 12 // debug messages during verification function
 
 #include "PinSetup.h"
 #include "Parser.h"

@@ -4,23 +4,16 @@
 #include <Arduino.h>
 #include "PinSetup.h"
 #include "RobotMotor.h"
-// time interval between stepper steps
-#define STEP_INTERVAL1 35
-#define STEP_INTERVAL2 25
-#define STEP_INTERVAL3 10
-#define STEP_INTERVAL4 3
+
 #define MIN_STEP_INTERVAL 3000
 #define MAX_STEP_INTERVAL 70000
+
 // multipliers for how bit of an angle the stepper moves each step
 #define FULL_STEP 1
 #define HALF_STEP 0.5
 #define QUARTER_STEP 0.25
 #define EIGHTH_STEP 0.125
 #define SIXTEENTH_STEP 0.0625
-const int stepIntervalArray[] =
-{
-  STEP_INTERVAL1, STEP_INTERVAL2, STEP_INTERVAL3, STEP_INTERVAL4
-};
 
 class StepperMotor:public RobotMotor
 {

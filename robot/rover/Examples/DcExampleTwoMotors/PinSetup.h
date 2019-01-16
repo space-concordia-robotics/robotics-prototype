@@ -3,11 +3,6 @@
 
 // pin constants defined in core_pins.h, pins_teensy.c, pins_arduino.h
 
-enum motor_code
-{
-  MOTOR1 = 1, MOTOR2
-}; // defines 6 motors
-
 // 1 pwm pin
 // 1 direction pin
 // 2 limit switch interrupt pins
@@ -30,15 +25,6 @@ enum motor_code
 //only needed for sabertooth
 //#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
-
-// can go into ArmMotor
-// limits in ms for amount of time the motor can budge
-#define MAX_BUDGE_TIME 3000
-#define MIN_BUDGE_TIME 100
-#define DEFAULT_BUDGE_TIME 500
-#define DEFAULT_SPEED 1
-#define MAX_SPEED 4
-#define MAX_COUNTS 4
 
 // DC motors
 
