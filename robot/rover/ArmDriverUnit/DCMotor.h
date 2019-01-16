@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "PinSetup.h"
 #include "RobotMotor.h"
-
 class DcMotor:public RobotMotor
 {
   public:
@@ -63,7 +62,6 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed)
   {
     motorSpeed = pidController.getMinOutputValue();
   }
-
   switch (motorDir)
   {
     case CLOCKWISE:
@@ -94,24 +92,29 @@ bool DcMotor::calcTurningDuration(float angle)
 
 bool DcMotor::calcCurrentAngle(void)
 {
-  if(isOpenLoop){
+  if (isOpenLoop)
+  {
     static unsigned int prevTime = 0;
-    if(timeCount < numMillis){
+    if (timeCount < numMillis)
+    {
       // if the motor is moving, calculate the angle based on how long it's been turning for
-      currentAngle += (timeCount-prevTime)*(openLoopSpeed*gearRatioReciprocal)/(1000.0*openLoopGain);
+      imaginedAngle += (timeCount - prevTime) * (openLoopSpeed * gearRatioReciprocal) / (1000.0 * openLoopGain);
       prevTime = timeCount;
     }
-    else {
+    else
+    {
       prevTime = 0;
-      // currentAngle hasn't changed since motor hasn't moved and encoder isn't working
+      // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
     }
     return true;
   }
-  else if (hasEncoder)
-  {
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return true;
-  }
+  else
+    if (hasEncoder)
+    {
+      currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+      imaginedAngle = currentAngle;
+      return true;
+    }
   else
   {
     return false;

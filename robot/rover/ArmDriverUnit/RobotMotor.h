@@ -48,7 +48,8 @@ class RobotMotor
   float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
   virtual bool calcCurrentAngle(void) = 0;
   float getCurrentAngle(void);
-  void setCurrentAngle(float angle); // for debugging mostly, overwrite current angle value
+  float getImaginedAngle(void);
+  void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
   private:
@@ -60,6 +61,7 @@ class RobotMotor
   int encoderShift; // how many bits to shift over to find the encoder pin state
   int encoderResolution; // ticks per revolution
   volatile float currentAngle; // can be updated within timer interrupts
+  volatile float imaginedAngle;
   float desiredAngle;
   int directionModifier;
 };
@@ -72,6 +74,7 @@ RobotMotor::RobotMotor()
   hasAngleLimits = false; // only set to true when setAngleLimits() is called
   isOpenLoop = true; // by default don't use PID
   hasRamping = false; // by default don't ramp the speed
+  imaginedAngle = 0.0;
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
 }
@@ -166,26 +169,30 @@ int RobotMotor::getDirectionLogic(void)
 /*
 bool RobotMotor::calcCurrentAngle(void)
 {
-  if (hasEncoder)
-  {
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+if (hasEncoder)
+{
+currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+return true;
+}
+else
+{
+return false;
+}
 }
 */
-
 float RobotMotor::getCurrentAngle(void)
 {
   return currentAngle;
 }
 
-void RobotMotor::setCurrentAngle(float angle)
+float RobotMotor::getImaginedAngle(void)
 {
-  currentAngle = angle;
+  return imaginedAngle;
+}
+
+void RobotMotor::setImaginedAngle(float angle)
+{
+  imaginedAngle = angle;
 }
 
 #endif

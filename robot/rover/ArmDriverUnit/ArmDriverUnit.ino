@@ -40,7 +40,7 @@ updated as of December 22 2018.
 #define DEBUG_MAIN 10 // debug messages during main loop
 #define DEBUG_PARSING 11 // debug messages during parsing function
 #define DEBUG_VERIFYING 12 // debug messages during verification function
-//#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+// #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 #define DEBUG_SWITCHES 14 // debug messages during limit switch interrupts
 #define DEBUG_TIMERS 15 // debug messages during timer interrupts
 #define DEBUG_PID 16 // debug messages during pid loop calculations
@@ -327,7 +327,7 @@ void loop()
     if (!Parser.verifCommand(motorCommand))
     {
       // do nothing in particular
-      //UART_PORT.println("$E,Error: verification failed");
+      // UART_PORT.println("$E,Error: verification failed");
     }
     else
     {
@@ -566,8 +566,8 @@ void loop()
                 {
                   if (motor6.isOpenLoop)
                   {
-                    motor6.calcCurrentAngle()
-;                    motor6.openLoopError = motor6.getDesiredAngle() - motor6.getCurrentAngle(); // find the angle difference
+                    motor6.calcCurrentAngle();
+                    motor6.openLoopError = motor6.getDesiredAngle() - motor6.getCurrentAngle(); // find the angle difference
                     motor6.calcDirection(motor6.openLoopError);
                     if (motor6.calcTurningDuration(motor6.openLoopError))
                     {
@@ -623,7 +623,7 @@ void loop()
           {
             if (motorCommand.resetAngleValue)
             {
-              motorArray[motorCommand.whichMotor - 1] -> setCurrentAngle(0.0);
+              motorArray[motorCommand.whichMotor - 1] -> setImaginedAngle(0.0);
               UART_PORT.print("reset angle value of motor ");
               UART_PORT.println(motorCommand.whichMotor);
             }
@@ -736,11 +736,16 @@ void printMotorAngles()
   UART_PORT.print("Motor Angles: ");
   for (int i = 0; i < NUM_MOTORS; i++)
   {
-    if (motorArray[i] -> calcCurrentAngle())
-    {
-      UART_PORT.print(motorArray[i] -> getCurrentAngle());
+    motorArray[i] -> calcCurrentAngle();
+      if (motorArray[i] -> isOpenLoop)
+      {
+        UART_PORT.print(motorArray[i] -> getImaginedAngle());
+      }
+      else
+      {
+        UART_PORT.print(motorArray[i] -> getCurrentAngle());
+      }
       UART_PORT.print(", ");
-    }
   }
   UART_PORT.println("");
 }
@@ -1059,8 +1064,8 @@ void m2_encoder_interrupt(void)
 
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("m2 ");
-  //UART_PORT.println(oldEncoderState,BIN);
-  //UART_PORT.println(" ");
+  // UART_PORT.println(oldEncoderState,BIN);
+  // UART_PORT.println(" ");
   UART_PORT.println(motor2.encoderCount);
   #endif
 
