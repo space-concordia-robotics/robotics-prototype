@@ -6,18 +6,37 @@
 int LED_PIN = 2;
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
 
-  // Serial USB
-  Serial.begin(9600);
-  // Serial UART
-  Serial1.begin(9600);
+    // To combat latency, try higher baudrates like
+    // 19200, 38400, 57600, 74880, 115200
+    // Serial USB
+    Serial.begin(9600);
+    // Serial UART
+    Serial1.begin(9600);
 }
 
 void loop() {
     // only respond to UART serial messages (not USB)
     if (Serial1.available()) {
         String cmd = Serial1.readString().trim();
+        Serial.print("cmd: ");
+        Serial.println(cmd);
+
+        if (cmd.equals("1")) {
+            digitalWrite(LED_PIN, HIGH);
+            //Serial1.println("HIGH");
+            Serial.println("HIGH");
+        }
+        else if (cmd.equals("0")) {
+            digitalWrite(LED_PIN, LOW);
+            //Serial1.println("LOW");
+            Serial.println("LOW");
+        }
+    } else if (Serial.available()) {
+        String cmd = Serial.readString().trim();
         Serial.print("cmd: ");
         Serial.println(cmd);
 
