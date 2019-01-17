@@ -98,7 +98,7 @@ bool DcMotor::calcCurrentAngle(void)
     if (timeCount < numMillis)
     {
       // if the motor is moving, calculate the angle based on how long it's been turning for
-      imaginedAngle += (timeCount - prevTime) * (openLoopSpeed * gearRatioReciprocal) / (1000.0 * openLoopGain);
+      imaginedAngle += (float)rotationDirection*(timeCount - prevTime) * (openLoopSpeed * gearRatioReciprocal) / (1000.0 * openLoopGain);
       prevTime = timeCount;
     }
     else

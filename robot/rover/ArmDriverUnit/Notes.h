@@ -95,16 +95,12 @@ there should also be a check so that if the motor is moving away from the goal p
   make sure all the math happens behind the scenes
   make sure the math calculations are written correctly and calculate as quickly as possible
   calcCurrentAngle for example
-  try to implement the quadrature encoder later if there's time
+  
   for motor speed, use encoder to calculate speed like i did in MotorCharacterization
   speed should be calculated the way angle is, only when necessary in interrupt loop
-  use quadrature for speed calcs? or use lower resolution since not so necessary?
-  determine how long it takes to do certain calculations to make sure they don't take too long?
   speed pid takes speed as measurement and compares to desired speed
-  position pid takes position as measurement and compares to desired position
-  but what's the relationship between position and speed that helps design the position pid
-  when the output of the motor is speed but the encoder measures position
-  steppers need to deal with enabling and disabling power which isn't an issue for the other 2 types, so watch out
+  what's the relationship between position and speed that helps design the position pid
+  
   different types of ramping profiles - trapezoid vs quintic polynomial
   instead of using interrupts to control steppers maybe use pwm?
   this is pretty tricky to do and will sacrifice a bunch of pins that could otherwise use pwm but could be useful

@@ -85,9 +85,12 @@ bool ServoMotor::calcCurrentAngle(void)
 {
   if(isOpenLoop){
     static unsigned int prevTime = 0;
+    static float startAngle = 0.0;
+    UART_PORT.println(timeCount);
     if(timeCount < numMillis){
       // if the motor is moving, calculate the angle based on how long it's been turning for
-      currentAngle += (timeCount-prevTime)*(openLoopSpeed*gearRatioReciprocal)/(1000.0*openLoopGain);
+      currentAngle += (float)rotationDirection*(timeCount-prevTime)*(openLoopSpeed*gearRatioReciprocal)/(1000.0*openLoopGain);
+      //currentAngle += (float)rotationDirection*(timeCount-prevTime);
       prevTime = timeCount;
     }
     else {

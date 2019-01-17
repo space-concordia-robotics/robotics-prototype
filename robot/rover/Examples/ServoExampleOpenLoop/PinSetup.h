@@ -14,7 +14,7 @@
 
 // servo
 #define PWM_PIN         35
-#define GEAR_RATIO      20.0 // there is a ratio here that I don't know yet
+#define GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
 #define MINIMUM_ANGLE   -120.0
 #define MAXIMUM_ANGLE   30.0
 

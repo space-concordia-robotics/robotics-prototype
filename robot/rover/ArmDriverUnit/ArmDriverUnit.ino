@@ -291,11 +291,11 @@ void setup()
   motor5.isOpenLoop = true;
   motor5.hasRamping = false;
   motor5.openLoopSpeed = 50; // 50% speed
-  motor5.openLoopGain = 1.0; // totally random guess, needs to be tested
+  motor5.openLoopGain = 0.25; // semi-tested
   motor6.isOpenLoop = true;
   motor6.hasRamping = false;
   motor6.openLoopSpeed = 50; // 50% speed
-  motor6.openLoopGain = 1.0; // totally random guess, needs to be tested
+  motor6.openLoopGain = 0.25; // semi-tested
   // activate the timer interrupts
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);

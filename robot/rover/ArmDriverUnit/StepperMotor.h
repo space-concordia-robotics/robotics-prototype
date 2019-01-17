@@ -136,7 +136,7 @@ bool StepperMotor::calcCurrentAngle(void)
     if (stepCount < numSteps)
     {
       // if the motor is moving, calculate the angle based on how long it's been turning for
-      imaginedAngle += (stepCount - prevSteps) * gearRatioReciprocal * stepResolution;
+      imaginedAngle += (float)rotationDirection*(stepCount - prevSteps) * gearRatioReciprocal * stepResolution;
       prevSteps = stepCount;
     }
     else

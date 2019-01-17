@@ -7,6 +7,7 @@ of the header files used in this code should be turned into libraries.
 #define DEBUG_MAIN 10 // debug messages during main loop
 #define DEBUG_PARSING 11 // debug messages during parsing function
 #define DEBUG_VERIFYING 12 // debug messages during verification function
+#define UART_PORT Serial
 
 #include "PinSetup.h"
 #include "Parser.h"
@@ -19,7 +20,6 @@ of the header files used in this code should be turned into libraries.
 #define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4
 #define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
 /* serial */
-#define UART_PORT Serial
 #define BAUD_RATE 9600 // serial bit rate
 #define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
@@ -62,7 +62,7 @@ void setup()
   gripperMotor.isOpenLoop = true;
   gripperMotor.hasRamping = false;
   gripperMotor.openLoopSpeed = 50; // 50% speed
-  gripperMotor.openLoopGain = 1.0; // totally random guess, needs to be tested
+  gripperMotor.openLoopGain = 0.25; // totally random guess, needs to be tested
 servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
@@ -131,6 +131,11 @@ void loop()
             bool motorsCanMove = true;
             for (int i = 0; i < NUM_MOTORS; i++)
             {
+              // motor1.withinJointAngleLimits(motorCommand.anglesToReach[i])
+              // m1 is a pointer to motor1
+              // if (!(m1 -> withinJointAngleLimits(motorCommand.anglesToReach[i])))
+              // (*m1).withinJointAngleLimits(motorCommand.anglesToReach[i])
+              // m1 -> withinJointAngleLimits(motorCommand.anglesToReach[i])
               if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i])))
               {
                 motorsCanMove = false;
@@ -154,7 +159,8 @@ void loop()
                   // this method returns true if the command is within joint angle limits
                   if (gripperMotor.isOpenLoop)
                   {
-                    gripperMotor.openLoopError = gripperMotor.getDesiredAngle(); // - motor1.calcCurrentAngle(); // find the angle difference
+                    gripperMotor.calcCurrentAngle();
+                    gripperMotor.openLoopError = gripperMotor.getDesiredAngle() - gripperMotor.getCurrentAngle(); // find the angle difference
                     gripperMotor.calcDirection(gripperMotor.openLoopError); // determine rotation direction and save the value
                     // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
                     if (gripperMotor.calcTurningDuration(gripperMotor.openLoopError))

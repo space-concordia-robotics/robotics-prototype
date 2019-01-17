@@ -134,7 +134,7 @@
   #define M5_ENCODER_A       33
   #define M5_ENCODER_B       34
 */
-#define M5_GEAR_RATIO      20.0 // there is a ratio here that I don't know yet
+#define M5_GEAR_RATIO      84.0/12.0 // there is a ratio here that I don't know yet
 //#define M5_MINIMUM_ANGLE
 //#define M5_MAXIMUM_ANGLE
 // no angle limits because this one can be used as a screwdriver
@@ -146,9 +146,9 @@
   #define M6_ENCODER_A       37
   #define M6_ENCODER_B       38
 */
-#define M6_GEAR_RATIO      20.0 // there is a ratio here that I don't know yet
-#define M6_MINIMUM_ANGLE   -120.0
-#define M6_MAXIMUM_ANGLE   30.0
+#define M6_GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
+#define M6_MINIMUM_ANGLE   -150.0 //-120.0
+#define M6_MAXIMUM_ANGLE   150.0 //30.0
 
 void pinSetup(void);
 

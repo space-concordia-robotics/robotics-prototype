@@ -5,6 +5,8 @@ some of the header files used in this code should be turned into libraries.
 */
 
 /* still in idea phase */
+#define DEVEL1_MODE 1 // sends messages with Serial, everything unlocked
+// #define DEVEL2_MODE 2 // sends messages with Serial1, everything unlocked
 #define DEBUG_MAIN 10 // debug messages during main loop
 #define DEBUG_PARSING 11 // debug messages during parsing function
 #define DEBUG_VERIFYING 12 // debug messages during verification function
