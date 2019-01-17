@@ -2,6 +2,7 @@
 #define DCMOTOR_H
 #include <Arduino.h>
 #include "PidController.h"
+
 enum motor_direction
 {
   CW = -1, CCW = 1
@@ -32,14 +33,15 @@ class RobotMotor
   void attachEncoder(int encA, int encB);
   // void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
   bool hasEncoder;
-  virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
-  virtual void stopRotation(void) = 0;
+
   // void setMaxSpeed();
   int calcDirection(float error); // updates rotationDirection based on the angular error inputted
-  bool setDesiredVelocity(float velocity); // if the angle is valid, update desiredAngle and return true. else return false.
+  void setDesiredVelocity(float velocity); // if the angle is valid, update desiredAngle and return true. else return false.
+  void setDesiredDirection(float direction); // Assign a direction.
   float getDesiredVelocity(void); // return copy of the desired angle, not a reference to it
-  bool calcCurrentVelocity(void);
+  void calcCurrentVelocity(void);
   float getCurrentVelocity(void);
+  void setCurrentVelocity(float velocity);
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
   private:
@@ -50,12 +52,14 @@ class RobotMotor
   uint32_t encoderPort; // address of the port connected to a particular encoder pin
   int encoderShift; // how many bits to shift over to find the encoder pin state
   int encoderResolution; // ticks per revolution
-  volatile float currentAngle; // can be updated within timer interrupts
-  float desiredAngle;
+  volatile float currentVelocity; // can be updated within timer interrupts
+  float desiredVelocity;
   int directionModifier;
+  int desiredDirection;
 };
 
-
+RobotMotor::RobotMotor()
+{}
 
 void RobotMotor::attachEncoder(int encA, int encB) // :
 // encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes)
@@ -85,6 +89,11 @@ int RobotMotor::calcDirection(float error)
   }
   return rotationDirection;
 }
+void RobotMotor::setDesiredDirection(float direction)
+{
+    rotationDirection = direction;
+}
+
 void RobotMotor::setDesiredVelocity(float velocity)
 {
     desiredVelocity = velocity;
@@ -95,18 +104,7 @@ float RobotMotor::getDesiredVelocity(void)
   return desiredVelocity;
 }
 
-int RobotMotor::calcDirection(float error)
-{
-  if (error >= 0)
-  {
-    rotationDirection = directionModifier * CCW;
-  }
-  else
-  {
-    rotationDirection = directionModifier * CW;
-  }
-  return rotationDirection;
-}
+
 void RobotMotor::switchDirectionLogic(void)
 {
   directionModifier = directionModifier * -1;
@@ -117,17 +115,11 @@ int RobotMotor::getDirectionLogic(void)
   return directionModifier;
 }
 
-bool RobotMotor::calcCurrentVelocity(void)
+void RobotMotor::calcCurrentVelocity(void)
 {
-  if (hasEncoder)
-  {
+
     currentVelocity = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+
 }
 
 float RobotMotor::getCurrentVelocity(void)
@@ -146,9 +138,9 @@ class DcMotor:public RobotMotor
     static int numDcMotors;
     // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
     // for cytron
-    DcMotor(int dirPin, int pwmPin, float gearRatio, float maxV);
+    DcMotor(int dirPin, int pwmPin, float gearRatio);
     void stopRotation(void);
-    void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
+    void setVelocity(int motorDir, float desiredVelocity, volatile float currentVelocity ); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     // stuff for open loop control
     unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
     elapsedMillis timeCount; // how long has the dc motor been turning for
@@ -156,6 +148,7 @@ class DcMotor:public RobotMotor
     int directionPin; // for new driver
     int pwmPin;
     float maxVelocity;
+
 };
 
 int DcMotor::numDcMotors = 0; // must initialize variable outside of class
@@ -163,8 +156,8 @@ int DcMotor::numDcMotors = 0; // must initialize variable outside of class
 // DcMotor::DcMotor(int pwmPin, int encA, int encB):
 // pwmPin(pwmPin), encA(encA), encB(encB)
 // for new driver
-DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio, float maxV):// if no encoder
-directionPin(dirPin), pwmPin(pwmPin), maxVelocity(maxV)
+DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
+directionPin(dirPin), pwmPin(pwmPin)
 {
   numDcMotors++;
   // variables declared in RobotMotor require the this-> operator
@@ -184,20 +177,21 @@ void DcMotor::stopRotation(void)
   movementDone = true;
 }
 
-void DcMotor::setVelocity(int motorDir, float motorSpeed)
+void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float currentVelocity)
 {
 
-    motorSpeed = fabs(motorSpeed);
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.getMaxOutputValue())
+  if (desiredVelocity * motorDir > pidController.getMaxOutputValue())
   {
-    motorSpeed = pidController.getMaxOutputValue();
+    desiredVelocity = pidController.getMaxOutputValue();
   }
-  if (motorSpeed * motorDir < pidController.getMinOutputValue())
+  else if (desiredVelocity * motorDir < pidController.getMinOutputValue())
   {
-    motorSpeed = pidController.getMinOutputValue();
+    desiredVelocity = pidController.getMinOutputValue();
   }
-
+  else{
+    desiredVelocity = pidController.updatePID(currentVelocity, desiredVelocity);
+  }
   switch (motorDir)
   {
     case CW:
@@ -207,7 +201,7 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed)
       digitalWrite(directionPin, HIGH);
       break;
   }
-  int dutyCycle = motorSpeed * 255 / 100;
+  int dutyCycle = desiredVelocity * 255 / 100;
   analogWrite(pwmPin, dutyCycle);
 }
 
