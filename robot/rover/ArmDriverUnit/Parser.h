@@ -24,14 +24,14 @@ struct commandInfo
   bool stopAllMotors = false; // for stopping all motors
   bool switchDir = false; // for switching the direction logic
   bool multiMove = false; // for controlling multiple motors simultaneously
-  bool motorsToMove[NUM_MOTORS] =
-  {
+  bool motorsToMove[NUM_MOTORS] = {
     false, false, false, false, false, false
   }; // which motor to move
   float anglesToReach[NUM_MOTORS] =
   {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0
   }; // motor angles
+  bool pingCommand = false;
 };
 
 class Parser
@@ -318,6 +318,13 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 
       }
     }
+    else if (String(msgElem) == "ping")
+    {
+      cmd.pingCommand = true;
+      #ifdef DEBUG_PARSING
+        UART_PORT.println("$S,Success: parsed ping command");
+  #endif
+    }
   else
   {
 
@@ -491,6 +498,13 @@ bool Parser::verifCommand(commandInfo cmd)
 
     return false;
   }
+  else if (cmd.pingCommand)
+    {
+      #ifdef DEBUG_VERIFYING
+        UART_PORT.println("$S,Success: verified ping command");
+  #endif
+        return true;
+    }
   else
   {
 

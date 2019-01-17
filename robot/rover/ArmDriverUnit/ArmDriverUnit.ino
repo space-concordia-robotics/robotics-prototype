@@ -331,8 +331,12 @@ void loop()
     else
     {
       UART_PORT.println(messageBar);
+      if (motorCommand.pingCommand){
+        // respond to ping
+        UART_PORT.println("pong");
+      }
       // emergency stop takes precedence
-      if (motorCommand.stopAllMotors)
+      else if (motorCommand.stopAllMotors)
       {
         for (int i = 0; i < NUM_MOTORS; i++)
         {
