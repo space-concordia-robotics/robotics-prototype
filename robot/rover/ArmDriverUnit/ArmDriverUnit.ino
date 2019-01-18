@@ -526,6 +526,7 @@ UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it unti
                     if (motor3.calcNumSteps(motor3.openLoopError))
                     // returns false if the open loop error is too small
                     {
+                      // I don't set stepCount to 0?
                       motor3.enablePower(); // give power to the stepper finally
                       motor3.movementDone = false;
                       UART_PORT.print("$S,Success: motor ");
@@ -558,6 +559,7 @@ UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it unti
                     motor4.calcDirection(motor4.openLoopError);
                     if (motor4.calcNumSteps(motor4.openLoopError))
                     {
+                      // I don't set stepCount to 0?
                       motor4.enablePower();
                       motor4.movementDone = false;
                       UART_PORT.print("$S,Success: motor ");

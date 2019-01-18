@@ -22,6 +22,7 @@ class RobotMotor
 {
   public:
   // these variables are set at start and normally don't change during the main loop
+  int motorType;
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
   int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
@@ -68,7 +69,6 @@ class RobotMotor
   volatile float imaginedAngle;
   float desiredAngle;
   int directionModifier;
-  int motorType;
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class

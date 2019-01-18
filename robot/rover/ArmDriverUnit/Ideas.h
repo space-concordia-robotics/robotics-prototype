@@ -1,3 +1,68 @@
+/* idea to use a loop for motor control. scrapped because was trying to access motor-unique functions */
+/*
+for(int i=0;i<NUM_MOTORS;i++){
+  if (motorCommand.motorsToMove[i]){
+
+    if(motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])){
+      if(motorArray[i]->isOpenLoop){
+        motorArray[i]->calcCurrentAngle(); //does it actually need to do this?
+        motorArray[i]->openLoopError=motorArray[i]->getDesiredAngle()-motorArray[i]->getCurrentAngle();
+        motorArray[i]->calcDirection(motorArray[i]->openLoopError);
+        if(motorArray[i]->motorType==DC_MOTOR){
+          if(motorArray[i]->calcTurningDuration(motorArray[i]->openLoopError)){
+            motorArray[i]->timeCount = 0;
+            motorArray[i]->movementDone = false;
+            UART_PORT.print("$S,Success: motor ");
+                        UART_PORT.print(i+1);
+                        UART_PORT.print(" to turn for ");
+                        UART_PORT.print(motorArray[i]->numMillis);
+                        UART_PORT.println(" milliseconds");
+          }
+          else{
+            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+          }
+        }
+        else if(motorArray[i]->motorType==STEPPER_MOTOR){
+          if(motorArray[i]->calcNumSteps(motorArray[i]->openLoopError)){
+          // I don't set stepCount to 0?
+            motorArray[i]->enablePower();
+            motorArray[i]->movementDone = false;
+            UART_PORT.print("$S,Success: motor ");
+                        UART_PORT.print(i+1);
+                        UART_PORT.print(" to turn ");
+                        UART_PORT.print(motorArray[i]->numSteps);
+                        UART_PORT.println(" steps");
+          }
+          else{
+            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+          }
+        }
+        else if(motorArray[i]->motorType==SERVO_MOTOR){
+          if(motorArray[i]->calcTurningDuration(motorArray[i]->openLoopError)){
+            motorArray[i]->timeCount = 0;
+            motorArray[i]->movementDone = false;
+            UART_PORT.print("$S,Success: motor ");
+                        UART_PORT.print(i+1);
+                        UART_PORT.print(" to turn for ");
+                        UART_PORT.print(motorArray[i]->numMillis);
+                        UART_PORT.println(" milliseconds");
+          }
+          else{
+            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+          }
+        }
+      }
+      else if(!(motorArray[i]->isOpenLoop)){
+        if(motorArray[i]->motorType==STEPPER_MOTOR){
+          motorArray[i]->enablePower();
+        }
+        motorArray[i]->movementDone = false;
+      }
+    }
+  }
+}
+*/
+
 /*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
   void m1WrapperISR(void) {
   motor1.encoder_interrupt();
