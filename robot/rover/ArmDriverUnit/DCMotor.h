@@ -38,6 +38,7 @@ directionPin(dirPin), pwmPin(pwmPin)
   // variables declared in RobotMotor require the this-> operator
   this -> gearRatio = gearRatio;
   this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  this -> motorType = DC_MOTOR;
   hasEncoder = false;
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control

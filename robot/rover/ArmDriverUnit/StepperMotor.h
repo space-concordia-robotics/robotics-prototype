@@ -47,6 +47,7 @@ enablePin(enablePin), directionPin(dirPin), stepPin(stepPin), fullStepResolution
   // variables declared in RobotMotor require the this-> operator
   this -> gearRatio = gearRatio;
   this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  this -> motorType = STEPPER_MOTOR;
   hasEncoder = false; // by default the motor has no encoder
   stepResolution = fullStepResolution * steppingMode;
   openLoopSpeed = 0; // no speed by default;

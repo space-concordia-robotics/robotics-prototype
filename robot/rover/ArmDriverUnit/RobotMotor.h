@@ -14,6 +14,10 @@ enum loop_state
   OPEN_LOOP = 1, CLOSED_LOOP
 }; // defines whether motor control is open loop or closed loop
 
+enum motor_type
+{
+  DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR
+};
 class RobotMotor
 {
   public:
@@ -64,6 +68,7 @@ class RobotMotor
   volatile float imaginedAngle;
   float desiredAngle;
   int directionModifier;
+  int motorType;
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
