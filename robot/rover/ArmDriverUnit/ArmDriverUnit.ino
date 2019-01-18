@@ -39,16 +39,16 @@ updated as of January 15 2019.
 // debug statements shouldn't be sent if ros is working
 
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  #define DEBUG_MAIN 10 // debug messages during main loop
-  #define DEBUG_PARSING 11 // debug messages during parsing function
-  #define DEBUG_VERIFYING 12 // debug messages during verification function
-  // #define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
-  // #define DEBUG_PID 14 // debug messages during pid loop calculations
+  //#define DEBUG_MAIN 10 // debug messages during main loop
+  //#define DEBUG_PARSING 11 // debug messages during parsing function
+  //#define DEBUG_VERIFYING 12 // debug messages during verification function
+  //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
+  //#define DEBUG_PID 14 // debug messages during pid loop calculations
   #define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
-  // #define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
-  // #define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
-  // #define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
-  // #define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
+  #define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
+  #define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
+  #define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
+  #define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
 #endif
 
 /*
@@ -325,10 +325,11 @@ void loop()
   if (UART_PORT.available())
   {
     // if a message was sent to the Teensy
-
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
+    #endif
 #ifdef DEBUG_MAIN
     UART_PORT.println(messageBar);
-    UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
     UART_PORT.print("GOT: ");
     UART_PORT.println(serialBuffer); // send back what was received
 #endif
@@ -338,7 +339,6 @@ void loop()
     if (!Parser.verifCommand(motorCommand))
     {
       // do nothing in particular
-      // UART_PORT.println("$E,Error: verification failed");
     }
     else
     {
@@ -411,7 +411,6 @@ void loop()
 
               }
             }
-            UART_PORT.println(messageBar);
             bool motorsCanMove = true;
             for (int i = 0; i < NUM_MOTORS; i++)
             {
@@ -438,7 +437,8 @@ void loop()
             else
             {
 
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+#ifdef DEBUG_MAIN
+                UART_PORT.println(messageBar);
                 UART_PORT.println("$S,Success: all angles are valid, arm to move");
 #endif
 
@@ -1030,7 +1030,7 @@ void dcInterrupt(void)
           UART_PORT.println("motor 1");
           UART_PORT.print(motor1.rotationDirection);
           UART_PORT.println(" direction");
-          UART_PORT.print(motor1.output);
+          UART_PORT.print(output);
           UART_PORT.println(" next output");
 #endif
 
@@ -1085,7 +1085,7 @@ void dcInterrupt(void)
           UART_PORT.println("motor 2");
           UART_PORT.print(motor2.rotationDirection);
           UART_PORT.println(" direction");
-          UART_PORT.print(motor2.output);
+          UART_PORT.print(output);
           UART_PORT.println(" next output");
 #endif
 
@@ -1149,7 +1149,7 @@ void servoInterrupt(void)
           UART_PORT.println("motor 5");
           UART_PORT.print(motor5.rotationDirection);
           UART_PORT.println(" direction");
-          UART_PORT.print(motor5.output);
+          UART_PORT.print(output);
           UART_PORT.println(" next output");
 #endif
 
@@ -1207,7 +1207,7 @@ void servoInterrupt(void)
           UART_PORT.println("motor 6");
           UART_PORT.print(motor6.rotationDirection);
           UART_PORT.println(" direction");
-          UART_PORT.print(motor6.output);
+          UART_PORT.print(output);
           UART_PORT.println(" next output");
 #endif
 

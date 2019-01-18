@@ -66,7 +66,14 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 {
   // check for emergency stop has precedence
   char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
-  if (String(msgElem) == "stop")
+  if (String(msgElem) == "ping")
+    {
+      cmd.pingCommand = true;
+      #ifdef DEBUG_PARSING
+        UART_PORT.println("$S,Success: parsed ping command");
+  #endif
+    }
+  else if (String(msgElem) == "stop")
   {
     // msgElem is a char array so it's safer to convert to string first
     cmd.stopAllMotors = true;
@@ -318,13 +325,6 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 
       }
     }
-    else if (String(msgElem) == "ping")
-    {
-      cmd.pingCommand = true;
-      #ifdef DEBUG_PARSING
-        UART_PORT.println("$S,Success: parsed ping command");
-  #endif
-    }
   else
   {
 
@@ -337,7 +337,14 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 
 bool Parser::verifCommand(commandInfo cmd)
 {
-  if (cmd.stopAllMotors)
+  if (cmd.pingCommand)
+    {
+      #ifdef DEBUG_VERIFYING
+        UART_PORT.println("$S,Success: verified ping command");
+  #endif
+        return true;
+    }
+  else if (cmd.stopAllMotors)
   {
 
   #ifdef DEBUG_VERIFYING
@@ -498,13 +505,6 @@ bool Parser::verifCommand(commandInfo cmd)
 
     return false;
   }
-  else if (cmd.pingCommand)
-    {
-      #ifdef DEBUG_VERIFYING
-        UART_PORT.println("$S,Success: verified ping command");
-  #endif
-        return true;
-    }
   else
   {
 
