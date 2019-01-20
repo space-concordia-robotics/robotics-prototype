@@ -77,16 +77,16 @@
 #define M3_MINIMUM_ANGLE   -115.0
 #define M3_MAXIMUM_ANGLE   35.0
 
-#define M4_ENABLE_PIN      24
+#define M4_ENABLE_PIN      16
 #define M4_STEP_PIN        14
-#define M4_DIR_PIN         25
+#define M4_DIR_PIN         15
 // 11&12 are on port C with bits 6&7 respectively
 #define M4_ENCODER_PORT    GPIOC_PDIR
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT
 #define M4_ENCODER_A       11
 #define M4_ENCODER_B       12
-#define M4_LIMIT_SW_FLEX   15
-#define M4_LIMIT_SW_EXTEND 16
+#define M4_LIMIT_SW_FLEX   25
+#define M4_LIMIT_SW_EXTEND 24
 #define M4_ENCODER_RESOLUTION 2000
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
