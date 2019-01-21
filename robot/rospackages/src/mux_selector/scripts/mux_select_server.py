@@ -22,9 +22,9 @@ def select_device(device):
     device = int(device)
 
     # s1 most significant bit, s0 least significant bit
-    # s1 --> gpio 18 (physical 15), s0 --> gpio 21 (physical 13)
+    # s0 --> gpio 18 (physical 15), s1 --> gpio 21 (physical 13)
     # NOTE: on the final PCB the select logic will be inverted
-    # this is why selecting device 0 is mapped to (1, 1) --> (0, 0) 
+    # this is why selecting device 0 is mapped to (1, 1) --> (0, 0)
     if not device in (0, 1, 2, 3):
         print("Invalid value, must be 0 or 1")
     else:
