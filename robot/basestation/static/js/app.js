@@ -166,17 +166,69 @@ jQuery(document).ready((s) => {
       },
       {
         $el: $('button#ping-button'),
-        event: 'mousedown',
+        event: 'mouseup',
         route: '/ping_rover',
         handler: (data) => {
             console.log(data);
             pingRover(data.ping_msg, data.ros_msg);
         },
-      }
+    }
     ],
   };
 
   Site.init();
+
+$("#mux-0").mouseup(function() {
+    $.ajax({
+        url: '/select_mux',
+        type: 'POST',
+        data: "0",
+        success: function(response){
+            $("button#mux").text("Device 0: Rover");
+            appendToConsole(response.output);
+            scrollToBottom();
+        }
+    })
+})
+
+$("#mux-1").mouseup(function() {
+    $.ajax({
+        url: '/select_mux',
+        type: 'POST',
+        data: "1",
+        success: function(response){
+            $("button#mux").text("Device 1: Arm");
+            appendToConsole(response.output);
+            scrollToBottom();
+        }
+    })
+})
+
+$("#mux-2").mouseup(function() {
+    $.ajax({
+        url: '/select_mux',
+        type: 'POST',
+        data: "2",
+        success: function(response){
+            $("button#mux").text("Device 2: Science");
+            appendToConsole(response.output);
+            scrollToBottom();
+        }
+    })
+})
+
+$("#mux-3").mouseup(function() {
+    $.ajax({
+        url: '/select_mux',
+        type: 'POST',
+        data: "3",
+        success: function(response){
+            $("button#mux").text("Device 3: Lidar");
+            appendToConsole(response.output);
+            scrollToBottom();
+        }
+    })
+})
 
   // keyboard events
   document.addEventListener("keydown", function (event) {

@@ -37,17 +37,17 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">Settings</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="#">Key board key mapping</a>
-                    <a class="dropdown-item" href="#">Change camera stream FPS</a>
-                    <a class="dropdown-item" href="#">...</a>
-                </div>
-                </li>
-            </ul>
+
+        <div class="dropdown">
+          <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Select Device Channel
+          </button>
+          <div class="dropdown-menu">
+            <a id="mux-0" class="dropdown-item" href="javascript:void(0);">0: Rover</a>
+            <a id="mux-1" class="dropdown-item" href="javascript:void(0);">1: Arm</a>
+            <a id="mux-2" class="dropdown-item" href="javascript:void(0);">2: Science</a>
+            <a id="mux-3" class="dropdown-item" href="javascript:void(0);">3: Lidar</a>
+          </div>
         </div>
     </nav>
     <br>

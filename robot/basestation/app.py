@@ -8,7 +8,7 @@ import os
 import subprocess
 from urllib.parse import urlparse
 import flask
-from flask import jsonify
+from flask import jsonify, request
 
 app = flask.Flask(__name__)
 
@@ -94,6 +94,17 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
+@app.route("/select_mux", methods=["POST", "GET"])
+def select_mux():
+    print("select_mux")
+    dev = str(request.get_data(), "utf-8")
+
+    output, error = run_shell("rosrun mux_selector mux_select_client.py " + dev)
+    output = str(output, "utf-8")
+    print("output: " + output)
+
+    print("dev : " + dev)
+    return jsonify(success=True, dev=dev, output=output)
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
