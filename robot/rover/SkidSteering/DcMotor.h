@@ -22,20 +22,21 @@ class RobotMotor
   float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
   bool isOpenLoop; // decides whether to use the PID or not
-  volatile int rotationDirection;
+  volatile int rotationDirection = CCW;
   // int maxSpeed;
   PidController pidController; // used for speed and angle control
   // these variables change during the main loop
-  volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
+  volatile long encoderCount =0; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
   volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
   // setup functions
   RobotMotor();
-  void attachEncoder(int encA, int encB);
+  void attachEncoder(int encA, int encB, int encRes);
   // void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
   bool hasEncoder;
 
   // void setMaxSpeed();
   int calcDirection(float error); // updates rotationDirection based on the angular error inputted
+  int getDirection(void); // updates rotationDirection based on the angular error inputted
   void setDesiredVelocity(float velocity); // if the angle is valid, update desiredAngle and return true. else return false.
   void setDesiredDirection(float direction); // Assign a direction.
   float getDesiredVelocity(void); // return copy of the desired angle, not a reference to it
@@ -61,7 +62,7 @@ class RobotMotor
 RobotMotor::RobotMotor()
 {}
 
-void RobotMotor::attachEncoder(int encA, int encB) // :
+void RobotMotor::attachEncoder(int encA, int encB, int encRes) // :
 // encoderPinA(encA), encoderPinB(encB), encoderPort(port), encoderShift(shift), encoderResolution(encRes)
 {
 
@@ -70,10 +71,9 @@ void RobotMotor::attachEncoder(int encA, int encB) // :
   encoderPinB = encB;
   // encoderPort = port;
   // encoderShift = shift;
-  // encoderResolution = encRes;
-  // encoderResolutionReciprocal = 1 / (float) encRes;
-  pinMode(encoderPinA, INPUT_PULLUP);
-  pinMode(encoderPinB, INPUT_PULLUP);
+  encoderResolution = encRes;
+  encoderResolutionReciprocal = 1 / (float) encRes;
+
 }
 
 
@@ -94,6 +94,10 @@ void RobotMotor::setDesiredDirection(float direction)
     rotationDirection = direction;
 }
 
+int RobotMotor::getDirection(void)
+{
+    return rotationDirection;
+}
 void RobotMotor::setDesiredVelocity(float velocity)
 {
     desiredVelocity = velocity;
@@ -119,7 +123,6 @@ void RobotMotor::calcCurrentVelocity(void)
 {
 
     currentVelocity = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-
 }
 
 float RobotMotor::getCurrentVelocity(void)
@@ -140,16 +143,20 @@ class DcMotor:public RobotMotor
     // for cytron
     DcMotor(int dirPin, int pwmPin, float gearRatio);
     void stopRotation(void);
+    int getPwmPin(void);
     void setVelocity(int motorDir, float desiredVelocity, volatile float currentVelocity ); // currently this actually activates the dc motor and makes it turn at a set speed/direction
+    void setVelocityNoPID(int motorDir, float desiredVelocity); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     // stuff for open loop control
+    int directionPin; // for new driver
+
     unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
     elapsedMillis timeCount; // how long has the dc motor been turning for
   private:
-    int directionPin; // for new driver
     int pwmPin;
     float maxVelocity;
 
 };
+
 
 int DcMotor::numDcMotors = 0; // must initialize variable outside of class
 // for sabertooth
@@ -166,11 +173,15 @@ directionPin(dirPin), pwmPin(pwmPin)
   // hasEncoder = false;
   // openLoopSpeed = 0; // no speed by default;
   // openLoopGain = 1.0; // temp open loop control
-  pinMode(directionPin, OUTPUT);
-  pinMode(pwmPin, OUTPUT);
+
+
 
 }
 
+int DcMotor::getPwmPin(void)
+{
+  return pwmPin;
+}
 void DcMotor::stopRotation(void)
 {
   analogWrite(pwmPin, 0); // 0 for cytron, different implementation for sabertooth
@@ -179,6 +190,7 @@ void DcMotor::stopRotation(void)
 
 void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float currentVelocity)
 {
+  analogWrite(pwmPin, desiredVelocity);
 
   // makes sure the speed is within the limits set in the pid during setup
   if (desiredVelocity * motorDir > pidController.getMaxOutputValue())
@@ -192,19 +204,34 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
   else{
     desiredVelocity = pidController.updatePID(currentVelocity, desiredVelocity);
   }
+
+        Serial.print("\tPID Velocity"); Serial.println(desiredVelocity);
+
   switch (motorDir)
   {
     case CW:
       digitalWrite(directionPin, LOW);
+//      Serial.print(/"\tDegital"); Serial.println("LOW");
+
       break;
     case CCW:
       digitalWrite(directionPin, HIGH);
+//            Serial.print("\tDegital")/; Serial.println("HIGH");
+
       break;
   }
+
   int dutyCycle = desiredVelocity * 255 / 100;
-  analogWrite(pwmPin, dutyCycle);
+
+
+  analogWrite(22, dutyCycle);
+
 }
 
+void DcMotor::setVelocityNoPID(int motorDir, float desiredVelocity)
+{
+  analogWrite(pwmPin, desiredVelocity);
 
+}
 
 #endif
