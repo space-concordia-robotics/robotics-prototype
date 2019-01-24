@@ -1,5 +1,9 @@
 #!/bin/bash
-
+#If there is already a commit message this hook is disabled
+if [[ "$2" = "commit" ]]; then
+    #statements
+    exit 0
+fi
 # Include any branches for which you wish to disable this script
   BRANCHES_TO_SKIP=(master develop staging test)
 
