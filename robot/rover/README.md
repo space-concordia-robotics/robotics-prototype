@@ -16,6 +16,11 @@ In short, the Teensy is connected to the drivers (and the servos). The drivers (
 
 On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
+## Examples
+This folder contains example sketches for using the classes built in ArmDriverUnit. In the future, once the classes are turned into actual libraries, these sketches will come with the library.
+
+Since the classes are still in development, the code structure gets changed quite frequently, necessitating updates to these example files too. It is likely that they are not as up to date as ArmDriverUnit.
+
 ## RoverDriverUnit (RDU)
 ### Code Structure
 
@@ -54,3 +59,5 @@ If you wish to refer the `include` statements to set your relative path to the l
 Example:
 `#include "libraries/Encoder.h"`
 
+## TestCode
+This directory contains test code which may or may not go into ArmDriverUnit.
