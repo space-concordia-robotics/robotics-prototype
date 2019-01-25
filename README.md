@@ -201,14 +201,18 @@ I (Josh) currently use Sublime Text to write my code, and then compile it using 
 
 The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular are missing a conditional in one of the header files. According to [this link](https://github.com/ros-drivers/rosserial/issues/259) and [this link](https://forum.pjrc.com/threads/40418-rosserial_arduino-for-Teensy), `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` has to be added to line 44 of ArduinoHardware.h BUT I found that the correct file is actually ArduinoIncludes.h. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src`.
 
-This was found to be insufficient. In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, the following two lines must be commented out:
-```#include <usb_serial.h>  // Teensy 3.0 and 3.1
-#define SERIAL_CLASS usb_serial_class```
-  and the following lines must be added:
-```#ifdef USE_TEENSY_HW_SERIAL
+This was found to be insufficient. In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, in the same file, the following two lines must be commented out:
+```
+#include <usb_serial.h>  // Teensy 3.0 and 3.1
+#define SERIAL_CLASS usb_serial_class
+```
+and the following lines must be added:
+```
+#ifdef USE_TEENSY_HW_SERIAL
   #include <HardwareSerial.h>
   #define SERIAL_CLASS HardwareSerial
 #else
   #include <usb_serial.h>
   #define SERIAL_CLASS usb_serial_class
-#endif```
+#endif
+```
