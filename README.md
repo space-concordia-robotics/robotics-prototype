@@ -196,3 +196,7 @@ Flashing code to a Teensy is very similar to flashing to Arduino, but the Teensy
 Teensy programming has all of the Arduino functions, as well as extra features described on [the pjrc website](https://www.pjrc.com/teensy/td_libs.html). Currently used features are digitalWriteFast(), IntervalTimer and ellapsedMillis.
 
 I (Josh) currently use Sublime Text to write my code, and then compile it using the Arduino IDE and use the Serial Monitor to communicate with the Teensy. The recommended editors are Atom or VS Code as the rest of this project has configuration files for those text editors.
+
+### A note on ROS for Teensy 3.5/3.6
+
+The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular are missing a conditional in one of the header files. According to [this link](https://github.com/ros-drivers/rosserial/issues/259) and [this link](https://forum.pjrc.com/threads/40418-rosserial_arduino-for-Teensy), `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` has to be added to line 44 of ArduinoHardware.h BUT I found that the correct file is actually ArduinoIncludes.h. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src`.

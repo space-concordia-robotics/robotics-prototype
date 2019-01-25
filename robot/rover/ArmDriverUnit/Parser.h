@@ -39,6 +39,7 @@ class Parser
   public:
     bool isValidNumber(String str, char type);
     void parseCommand(commandInfo & cmd, char * restOfMessage);
+    //void parseRosCommand(commandInfo & cmd, String message);
     bool verifCommand(commandInfo cmd);
 };
 
@@ -334,7 +335,280 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage)
 
   }
 }
+/*
+void Parser::parseRosCommand(commandInfo & cmd, String message)
+{
+  // check for emergency stop has precedence
+  char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
+  if (String(msgElem) == "ping")
+    {
+      cmd.pingCommand = true;
+      #ifdef DEBUG_PARSING
+        UART_PORT.println("$S,Success: parsed ping command");
+  #endif
+    }
+  else if (String(msgElem) == "stop")
+  {
+    // msgElem is a char array so it's safer to convert to string first
+    cmd.stopAllMotors = true;
 
+  #ifdef DEBUG_PARSING
+    UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
+  #endif
+
+  }
+  // check for simultaneous motor control
+  else
+    if (String(msgElem) == "move")
+    {
+      // msgElem is a char array so it's safer to convert to string first
+      bool isValidCommand = true;
+      int i = 0;
+      do
+      {
+        msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor 1 angle)
+        if (isValidNumber(String(msgElem), 'f'))
+        {
+          cmd.anglesToReach[i] = atof(msgElem); // update value in motor angles array
+          cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed angle of ");
+          UART_PORT.print(cmd.anglesToReach[i]);
+          UART_PORT.print(" degrees for motor ");
+          UART_PORT.println(i + 1);
+  #endif
+
+        }
+        else
+          if (String(msgElem) == MOTOR_NOT_COMMANDED)
+          {
+            // don't do anything to move motors bool array
+
+  #ifdef DEBUG_PARSING
+            UART_PORT.print("$S,Success: parsed motor ");
+            UART_PORT.print(i + 1);
+            UART_PORT.println(" to maintain old desired position");
+  #endif
+
+          }
+        else
+        {
+          isValidCommand = false;
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.print("$E,Error: parsed invalid angle of ");
+          UART_PORT.print(msgElem);
+          UART_PORT.print(" degrees for motor ");
+          UART_PORT.println(i + 1);
+  #endif
+
+        }
+        i++;
+      }
+      while (i < NUM_MOTORS); // this skips everything after the 6th val but i want it to not skip but i can't get it to work
+      if (isValidCommand && i == NUM_MOTORS)
+      {
+        cmd.multiMove = true;
+      }
+      else
+        if (i < NUM_MOTORS)
+        {
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed insufficient input arguments for simultaneous motor control");
+  #endif
+
+        }
+      else
+        if (i > NUM_MOTORS)
+        // this doesn't actually get checked right now
+        {
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed too many input arguments for simultaneous motor control");
+  #endif
+
+        }
+      else
+        if (!isValidCommand)
+        {
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed invalid simultaneous motor control command");
+  #endif
+
+        }
+    }
+  // check for motor command
+  else
+    if (String(msgElem) == "motor")
+    {
+      // msgElem is a char array so it's safer to convert to string first
+      msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
+      // if ( isValidNumber(String(msgElem),'d') )
+      cmd.whichMotor = atoi(msgElem);
+      if (cmd.whichMotor > 0 && cmd.whichMotor <= NUM_MOTORS)
+      {
+
+  #ifdef DEBUG_PARSING
+        UART_PORT.print("$S,Success: parsed motor ");
+        UART_PORT.println(cmd.whichMotor);
+  #endif
+
+        // check for motor stop command has precedence
+        msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (direction tag)
+        if (String(msgElem) == "stop")
+        {
+          // msgElem is a char array so it's safer to convert to string first
+          cmd.stopSingleMotor = true;
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.println("$S,Success: parsed request to stop single motor");
+  #endif
+
+        }
+        // check for angle command
+        else
+          if (String(msgElem) == "angle")
+          {
+            // msgElem is a char array so it's safer to convert to string first
+            msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+            if (isValidNumber(String(msgElem), 'f'))
+            {
+              cmd.motorsToMove[cmd.whichMotor - 1] = true;
+              cmd.anglesToReach[cmd.whichMotor - 1] = atof(msgElem);
+              cmd.multiMove = true;
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.print("$S,Success: parsed desired angle ");
+              UART_PORT.println(cmd.anglesToReach[cmd.whichMotor - 1]);
+  #endif
+
+            }
+            else
+            {
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.println("$E,Error: parsed desired angle is not a number");
+  #endif
+
+            }
+          }
+        // check for loop state command
+        else
+          if (String(msgElem) == "loop")
+          {
+            // msgElem is a char array so it's safer to convert to string first
+            cmd.loopCommand = true;
+            msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+            if (String(msgElem) == "open")
+            {
+              cmd.loopState = OPEN_LOOP;
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.print("$S,Success: parsed open loop state (");
+              UART_PORT.print(cmd.loopState);
+              UART_PORT.println(") request");
+  #endif
+
+            }
+            else
+              if (String(msgElem) == "closed")
+              {
+                cmd.loopState = CLOSED_LOOP;
+
+  #ifdef DEBUG_PARSING
+                UART_PORT.print("$S,Success: parsed closed loop state (");
+                UART_PORT.print(cmd.loopState);
+                UART_PORT.println(") request");
+  #endif
+
+              }
+            else
+            {
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.println("$E,Error: parsed unknown loop state");
+  #endif
+
+            }
+          }
+        // check for angle reset command
+        else
+          if (String(msgElem) == "reset")
+          {
+            // msgElem is a char array so it's safer to convert to string first
+            cmd.resetCommand = true;
+            msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+            if (String(msgElem) == "angle")
+            {
+              cmd.resetAngleValue = true;
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.println("$S,Success: parsed request to reset angle value");
+  #endif
+
+            }
+            else
+              if (String(msgElem) == "position")
+              {
+                cmd.resetJointPosition = true;
+
+  #ifdef DEBUG_PARSING
+                UART_PORT.println("$S,Sucess: parsed request to reset joint position");
+  #endif
+
+              }
+            else
+            {
+
+  #ifdef DEBUG_PARSING
+              UART_PORT.println("$E,Error: parsed unknown reset request");
+  #endif
+
+            }
+          }
+        else
+          if (String(msgElem) == "switchdirection")
+          {
+            cmd.switchDir = true;
+
+  #ifdef DEBUG_PARSING
+            UART_PORT.println("$S,Success: parsed request to switch direction logic");
+  #endif
+
+          }
+        else
+        {
+
+  #ifdef DEBUG_PARSING
+          UART_PORT.print("$E,Error: parsed unknown motor ");
+          UART_PORT.print(cmd.whichMotor);
+          UART_PORT.println(" command");
+  #endif
+
+        }
+      }
+      else
+      {
+
+  #ifdef DEBUG_PARSING
+        UART_PORT.println("$E,Error: parsed invalid motor number");
+  #endif
+
+      }
+    }
+  else
+  {
+
+  #ifdef DEBUG_PARSING
+    UART_PORT.println("$E,Error: parsed unknown motor command");
+  #endif
+
+  }
+}
+*/
 bool Parser::verifCommand(commandInfo cmd)
 {
   if (cmd.pingCommand)

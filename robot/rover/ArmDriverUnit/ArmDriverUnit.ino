@@ -74,6 +74,9 @@ finally, unlocking extra options should be runtime as it should be easily access
 */
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
+#include <ros.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/JointState.h>
 #include "PinSetup.h"
 #include "Parser.h"
 // #include "Notes.h" // holds todo info
@@ -93,7 +96,7 @@ finally, unlocking extra options should be runtime as it should be easily access
 #define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
-/* parsing */
+/* comms */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
 String messageBar = "======================================================="; // for clarity of print statements
 // kinda weird that this comes out of nowhere... maybe should be Parser.commandInfo or something. or define it here instead of parser
@@ -104,12 +107,29 @@ the code later on doesn't inadvertently make a motor move when it wasn't suppose
 */
 commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
 Parser Parser; // object which parses and verifies commands
+
+bool msgReceived = false;
+bool msgIsValid = false;
+
+ros::NodeHandle nh;
+
+void messageCallback(const std_msgs::String& cmd_message){
+  msgReceived = true;
+  int i=0;
+  while(cmd_message.data[i]!='\0'){
+    serialBuffer[i] = cmd_message.data[i];
+  }
+  Parser.parseCommand(motorCommand, serialBuffer);
+  if (Parser.verifCommand(motorCommand)){
+    msgIsValid = true;
+  }
+  memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
+}
+
+ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
 /* motors */
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
-const int encoderStates[16] =
-{
-  0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0
-};
+const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 };
 
 // instantiate motor objects here:
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
@@ -190,6 +210,9 @@ void setup()
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
+  
+  nh.initNode();
+  nh.subscribe(cmdSubscriber);
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 
 #ifdef M1_ENCODER_PORT
@@ -322,6 +345,20 @@ void setup()
 void loop()
 {
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
+  msgReceived = false;
+  msgIsValid = false;
+  nh.spinOnce();
+  if(msgReceived){
+    if(msgIsValid){
+    //do the usual stuff
+    }
+    else{
+      //message not valid, alert ros
+    }
+  }
+  else{
+    //message not received, do nothing
+  }
   if (UART_PORT.available())
   {
     // if a message was sent to the Teensy
