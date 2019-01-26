@@ -5,17 +5,17 @@
 #include "DcMotor.h"
 
 #define mode_0 //sabertooth drivers for initiation testing
-#define mode_1 //Cytron drivers
+//#define mode_1 //Cytron drivers
 
-#define TEST
+#define TESTs
 
 #define NO_PID // PidController not active
 
 #define PULSES_PER_REV      7
-#define GEAR_RATIO         71.16
+//#define GEAR_RATIO         71.16
 #define maxVelocity         75
 #define minVelocity         -75
-//#define GEAR_RATIO         188.61
+#define GEAR_RATIO         188.61
 float prevCurrent = 0;
 //
 //-Gear Ratio
@@ -130,7 +130,7 @@ float vy = 0;
 float d = 0.33; //distance between left and right wheels
 float vx, vth, vr, vl;
 
-#ifdef TEST
+#ifdef mode_0
 #define MAX_PWM 255
 #define MIN_PWM 0
 #endif
@@ -206,16 +206,12 @@ void setup() {
 
     pinMode(LF_DIR, OUTPUT);
     pinMode(LF_PWM, OUTPUT);
-    pinMode(LM_DIR, OUTPUT);void rf_encoder_interrupt(void) {
-    rf.encoderCount++;
-    dt = micros() - prevTime;
-    prevTime = micros();
-}
+    pinMode(LM_DIR, OUTPUT);    
     pinMode(LM_PWM, OUTPUT);
     pinMode(LB_DIR, OUTPUT);
     pinMode(LB_PWM, OUTPUT);
 
-    rf
+    
     RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
     pinMode(RF.encoderPinB, INPUT_PULLUP);
     pinMode(RF.encoderPinA, INPUT_PULLUP);
@@ -227,7 +223,7 @@ void setup() {
 
     RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
     pinMode(RM.encoderPinB, INPUT_PULLUP);
-    pinMode(RM.encoderPinA, INPUT_PULLUP);rf
+    pinMode(RM.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, RISING);
     // attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, RISING);
     RM.pidController.setGainConstants(1.0, 0.0, 0.0);
@@ -245,13 +241,12 @@ void setup() {
 
 
     LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
-    pinMode(LF.encoderPinB, INPUT_PULLUP);    pinMode(LB_DIR, OUTPUT);
-    pinMode(LB_PWM, OUTPUT);
+    pinMode(LF.encoderPinB, INPUT_PULLUP);    
     pinMode(LF.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, RISING);
     // attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, RISING);
     LF.pidController.setGainConstants(1.0, 0.0, 0.0);
-rf
+
 
 
 
@@ -265,8 +260,7 @@ rf
 
 
     LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
-    pinMode(LB.encoderPinB, INPUT_PULLUP);    pinMode(LB_DIR, OUTPUT);
-    pinMode(LB_PWM, OUTPUT);
+    pinMode(LB.encoderPinB, INPUT_PULLUP);    
     pinMode(LB.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, RISING);
     // attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, RISING);
@@ -277,25 +271,19 @@ rf
 
     RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
     RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-    RB.pidController.setJoinvoid rf_encoder_interrupt(void) {
-    rf.encoderCount++;
-    dt = micros() - prevTime;
-    prevTime = micros();
-}tVelocityTolerance(2.0 * RB.gearRatioReciprocal);
+    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
 
 
 
-    LF.pidController0 = .setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
+    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
     LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
     LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
 
-        pinMode(LB_DIR, OUTPUT);
-    pinMode(LB_PWM, OUTPUT);
     RF.pidController.setOutputLimits(-50, 50, 5.0);
     RM.pidController.setOutputLimits(-50, 50, 5.0);
     RB.pidController.setOutputLimits(-50, 50, 5.0);
 
-    LF.pidController.setOutpu analogWrit/e(TEST_PWM, throttle );tLimits(-50, 50, 5.0);
+    LF.pidController.setOutputLimits(-50, 50, 5.0);
     LM.pidController.setOutputLimits(-50, 50, 5.0);
     LB.pidController.setOutputLimits(-50, 50, 5.0);
 
@@ -479,15 +467,15 @@ void loop() {
         #ifdef TEST
 
         #else
-            Rf.calcCurrentVelocity();
+            RF.calcCurrentVelocity();
             RM.calcCurrentVelocity();
             RB.calcCurrentVelocity();
             LF.calcCurrentVelocity();
             LM.calcCurrentVelocity();
             LB.calcCurrentVelocity();
 
-            vr = RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()
-            vl = LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()
+            vr = RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity();
+            vl = LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity();
 
             vx = (vr + vl) / 6;
             vth = (vl - vr) / d;
