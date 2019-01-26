@@ -1,12 +1,17 @@
 // Console Log
 const logConsole = "#write-to-log";
+const serialCmd = "#serial-cmd-input";
 
 function appendToConsole(msg) {
     $(logConsole).append(msg + "\n");
 }
 
-function clearText() {
+function clearLogConsole() {
     $(logConsole).html("");
+}
+
+function clearSerialCmd() {
+    $(serialCmd).val("");
 }
 
 function scrollToBottom() {

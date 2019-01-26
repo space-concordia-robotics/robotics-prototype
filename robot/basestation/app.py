@@ -36,12 +36,14 @@ def fetch_ros_master_ip():
     return fetch_ros_master_uri().hostname
 
 
-def run_shell(cmd):
+def run_shell(cmd, arg=""):
     """Run script command supplied as string.
 
     Returns tuple of output and error.
     """
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    cmd_list = cmd.split()
+    cmd_list.append(str(arg))
+    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     output, error = process.communicate()
 
     return output, error
@@ -98,13 +100,41 @@ def ping_rover():
 def select_mux():
     print("select_mux")
     dev = str(request.get_data(), "utf-8")
+    print("dev : " + dev)
 
     output, error = run_shell("rosrun mux_selector mux_select_client.py " + dev)
     output = str(output, "utf-8")
     print("output: " + output)
 
-    print("dev : " + dev)
     return jsonify(success=True, dev=dev, output=output)
+
+@app.route("/serial_cmd", methods=["POST", "GET"])
+def serial_cmd():
+    print("serial_cmd")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # clean up garbage
+        print("cmd0: " + cmd)
+        cmd = cmd.replace("+", " ")
+        print("cmd1: " + cmd)
+        cmd = cmd.replace("%2B", "+")
+        print("cmd2: " + cmd)
+
+    print("cmd: " + cmd)
+
+    ros_cmd = "rosrun serial_cmd serial_cmd_client.py '" + cmd + "'"
+    print("ros_cmd: " + ros_cmd)
+
+    output, error = run_shell("rosrun serial_cmd serial_cmd_client.py", cmd)
+    output = str(output, "utf-8")
+
+    print("output: " + output)
+
+    return jsonify(success=True, cmd=cmd, output=output)
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")

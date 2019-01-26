@@ -5,7 +5,7 @@ import rospy
 from serial_cmd.srv import *
 
 def handle_serial_cmd(req):
-    response = "Forwarding serial cmd {:s}".format(req.msg)
+    response = "Forwarding serial cmd '{:s}'".format(req.msg)
 
     uart_tx(req.msg)
 
@@ -21,14 +21,16 @@ def uart_tx(msg):
     ser.baudrate = 9600
     ser.open()
 
-    print("Sending serial message: " + msg)
+    print("Sending serial message: '" + msg + "'")
     ser.write(b_msg)
+    # Instead of expecting an "immediate" reply, use a separate listener
+    # process for publishing most recent odroid Rx data
     #sleep(0.5)
     #print(ser.readline())
 
     ser.close()
 
-    return "Message sent: " + msg + "\n"
+    return "Message sent: '" + msg + "'\n"
 
 def serial_cmd_server():
     rospy.init_node('serial_cmd_server')

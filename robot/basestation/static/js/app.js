@@ -230,6 +230,43 @@ $("#mux-3").mouseup(function() {
     })
 })
 
+$("#send-serial-btn").mouseup(function() {
+    let cmd = $("#serial-cmd-input").val();
+
+    $.ajax({
+        url: '/serial_cmd',
+        type: 'POST',
+        data: {
+            'cmd': cmd
+        },
+        success: function(response){
+            clearSerialCmd();
+            appendToConsole(response.output);
+            scrollToBottom();
+        }
+    })
+})
+
+$("#serial-cmd-input").on('keyup', function (e) {
+    if (e.keyCode == 13) {
+        let cmd = $("#serial-cmd-input").val();
+
+        $.ajax({
+            url: '/serial_cmd',
+            type: 'POST',
+            data: {
+                'cmd': cmd
+            },
+            success: function(response){
+                clearSerialCmd();
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    }
+});
+
+
   // keyboard events
   document.addEventListener("keydown", function (event) {
     if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {

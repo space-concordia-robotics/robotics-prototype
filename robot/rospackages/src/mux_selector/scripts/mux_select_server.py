@@ -48,6 +48,7 @@ def select_device(device):
     gpio_dir = "/sys/class/gpio"
 
 # consider removing following lines to make given "test" argument flag present
+# or better: user ros params as per tatums suggestion
     with open(gpio_dir + "/gpio18/value", "w") as f:
         f.write(str(s0_val))
 

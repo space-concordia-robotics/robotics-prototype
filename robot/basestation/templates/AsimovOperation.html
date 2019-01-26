@@ -37,7 +37,6 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-
         <div class="dropdown">
           <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
             Select Device Channel
@@ -49,7 +48,15 @@
             <a id="mux-3" class="dropdown-item" href="javascript:void(0);">3: Lidar</a>
           </div>
         </div>
+
+        <div>
+            <input type="text" size="60" id="serial-cmd-input">
+        </div>
+        <div>
+            <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
+        </div>
     </nav>
+
     <br>
     <br>
     <div style="margin-bottom:10px"></div>
@@ -76,11 +83,11 @@
                         <br>
                         <!--log console buttons-->
                         <div class="btn-group" role="group" id="logs-btn">
-                            <a href=# id=click_btn>
+                            <a href=javascript:void(0) id="click_btn">
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="clear-log">
-                                <button type="button" class="btn btn-secondary" onclick="clearText()">Clear Logs</button>
+                                <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="test-log">
                                 <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>

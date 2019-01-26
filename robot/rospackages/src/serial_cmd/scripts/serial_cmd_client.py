@@ -17,11 +17,11 @@ def serial_cmd_client(device):
         print("Service call failed: {:s}".format(e))
 
 def usage():
-    help_msg = "USAGE:\nrosrun mux_selector mux_serial_client.py [message]"
+    help_msg = "USAGE:\nrosrun serial_cmd serial_cmd_client.py [message]"
     return help_msg
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2 or len(sys.argv) < 2:
+    if len(sys.argv) != 2:
         print(usage())
         sys.exit(1)
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
-    print("Sending serial command " + str(msg))
+    print("Sending serial command '" + str(msg) + "'")
     print(sent_ts)
     print("---")
 
