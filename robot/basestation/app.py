@@ -118,11 +118,15 @@ def serial_cmd():
     if cmd:
         cmd = cmd.split("=")[1]
         # clean up garbage
-        print("cmd0: " + cmd)
-        cmd = cmd.replace("+", " ")
-        print("cmd1: " + cmd)
-        cmd = cmd.replace("%2B", "+")
-        print("cmd2: " + cmd)
+
+        if "+" in cmd:
+            cmd = cmd.replace("+", " ")
+
+        if "%2B" in cmd:
+            cmd = cmd.replace("%2B", "+")
+
+        if "%22" in cmd:
+            cmd = cmd.replace("%22", "\"")
 
     print("cmd: " + cmd)
 
