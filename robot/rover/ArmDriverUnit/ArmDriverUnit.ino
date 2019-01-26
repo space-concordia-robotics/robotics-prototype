@@ -399,11 +399,9 @@ void loop() {
 #if defined(DEBUG_MODE) || defined(USER_MODE)
   nh.spinOnce();
   if (msgReceived) {
+    nh.logdebug(serialBuffer);
     if (msgIsValid) {
       // send the usual confirmations, control code happens below
-    }
-    else {
-      // message not valid, alert ros
     }
   }
   else {
@@ -424,13 +422,17 @@ void loop() {
   }
 #endif
   if (msgIsValid) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #ifdef DEBUG_MAIN
     UART_PORT.println(messageBar);
+#endif
 #endif
     if (motorCommand.pingCommand) {
       // respond to ping
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
       UART_PORT.println("pong");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+      nh.loginfo("pong");
 #endif
     }
     // emergency stop takes precedence
@@ -440,6 +442,8 @@ void loop() {
       }
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
       UART_PORT.println("all motors stopped because of emergency stop");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+      nh.loginfo("all motors stopped because of emergency stop");
 #endif
     }
     else {
@@ -449,6 +453,14 @@ void loop() {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.print("stopped motor ");
         UART_PORT.println(motorCommand.whichMotor);
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        // this is SUPER DUPER GROSS
+        String infoMessage = "stopped motor " + motorCommand.whichMotor;
+        char actualMessage[15];
+        for (unsigned int i = 0; i < infoMessage.length(); i++) {
+          actualMessage[i] = infoMessage[i];
+        }
+        nh.loginfo(actualMessage);
 #endif
       }
       // make motors move simultaneously
@@ -460,6 +472,17 @@ void loop() {
             UART_PORT.print(i + 1);
             UART_PORT.print(" desired angle (degrees) is: ");
             UART_PORT.println(motorCommand.anglesToReach[i]);
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+            // this is SUPER DUPER GROSS
+            int tempVal = i + 1;
+            String infoMessage = "motor " + tempVal;
+            infoMessage += " desired angle (degrees) is: ";
+            infoMessage += motorCommand.anglesToReach[i];
+            char actualMessage[45];
+            for (unsigned int i = 0; i < infoMessage.length(); i++) {
+              actualMessage[i] = infoMessage[i];
+            }
+            nh.loginfo(actualMessage);
 #endif
           }
           else {
@@ -467,6 +490,16 @@ void loop() {
             UART_PORT.print("motor ");
             UART_PORT.print(i + 1);
             UART_PORT.println(" will not change course");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+            // this is SUPER DUPER GROSS
+            int tempVal = i + 1;
+            String infoMessage = "motor " + tempVal;
+            infoMessage += " will not change course";
+            char actualMessage[30];
+            for (unsigned int i = 0; i < infoMessage.length(); i++) {
+              actualMessage[i] = infoMessage[i];
+            }
+            nh.loginfo(actualMessage);
 #endif
           }
         }
@@ -725,6 +758,8 @@ void loop() {
   else {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
     UART_PORT.println("$E,Error: bad motor command");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+    nh.logerror("error: bad motor command");
 #endif
   }
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) {
@@ -844,7 +879,7 @@ void printMotorAngles(void) {
   pub_m4.publish(&m4_angle_msg);
   pub_m5.publish(&m5_angle_msg);
   pub_m6.publish(&m6_angle_msg);
-  nh.spinOnce();
+  nh.spinOnce(); // does it cause problems if i spin twice in loop()
 #endif
 }
 
