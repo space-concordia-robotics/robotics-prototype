@@ -135,6 +135,11 @@ ros::Publisher pub_m1("m1_joint_state", &m1_angle_msg); ros::Publisher pub_m2("m
 ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg); ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
 ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg); ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
 
+// or just make one message for all the angles
+//std_msgs::String joint_angles_msg;
+// and just publish a String and parse it on the odroid
+//ros::Publisher joint_angles_publisher("arm_joint_angles", &joint_angles_msg)
+
 // these are a nicer way of timing events than using millis()
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 /* function declarations */
@@ -157,6 +162,7 @@ void setup() {
   m1_angle_msg.header.frame_id = m1FrameId;  m2_angle_msg.header.frame_id = m2FrameId;
   m3_angle_msg.header.frame_id = m3FrameId;  m4_angle_msg.header.frame_id = m4FrameId;
   m5_angle_msg.header.frame_id = m5FrameId;  m6_angle_msg.header.frame_id = m6FrameId;
+  // do I need to set up a header for joint_angles_msg with "arm_joint_angles" topic?
 #endif
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
@@ -292,6 +298,9 @@ void printMotorAngles(void) {
   // publish the angle values
   pub_m1.publish(&m1_angle_msg);  pub_m2.publish(&m2_angle_msg);  pub_m3.publish(&m3_angle_msg);
   pub_m4.publish(&m4_angle_msg);  pub_m5.publish(&m5_angle_msg);  pub_m6.publish(&m6_angle_msg);
+  // or if I'm publishing the String
+  //joint_angles_publisher.publish(&joint_angles_msg);
+
   // does it cause problems if i spin twice in loop()?
   nh.spinOnce(); // this actually sends the message
 #endif
