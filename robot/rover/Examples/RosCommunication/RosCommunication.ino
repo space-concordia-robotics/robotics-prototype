@@ -58,8 +58,11 @@ the "pong" response is logged as info.
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
 // homemade includes
-#include "PinSetup.h"
 #include "Parser.h"
+
+// normally this goes in pinSetup.h but the rest of that stuff isn't useful so i got rid of it
+#define NUM_MOTORS 6 // used in parsing for commands for multiple motors
+
 /* comms */
 #define BAUD_RATE 115200 // bit rate over serial communications (currently not for ROS)
 #define SERIAL_PRINT_INTERVAL 1000 // how often should the teensy send angle data
