@@ -216,3 +216,14 @@ and the following lines must be added:
   #define SERIAL_CLASS usb_serial_class
 #endif
 ```
+If you want to choose a different hardware Serial port, the following block of code presented [here](https://answers.ros.org/question/198247/how-to-change-the-serial-port-in-the-rosserial-lib-for-the-arduino-side/#post-id-295159) should do the trick, though it hasn't been tested yet:
+```
+class NewHardware : public ArduinoHardware
+{
+  public:
+  NewHardware():ArduinoHardware(&Serial1, 57600){};
+};
+
+ros::NodeHandle_<NewHardware>  nh;
+```
+Where Serial1 can be anything from Serial1 to Serial6.
