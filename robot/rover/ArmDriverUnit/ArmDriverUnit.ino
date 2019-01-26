@@ -143,8 +143,27 @@ void messageCallback(const std_msgs::String& cmd_message) {
   }
   memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
 }
-
 ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
+
+char m1FrameId[] = "/m1_angle";
+char m2FrameId[] = "/m2_angle";
+char m3FrameId[] = "/m3_angle";
+char m4FrameId[] = "/m4_angle";
+char m5FrameId[] = "/m5_angle";
+char m6FrameId[] = "/m6_angle";
+sensor_msgs::JointState m1_angle_msg;
+sensor_msgs::JointState m2_angle_msg;
+sensor_msgs::JointState m3_angle_msg;
+sensor_msgs::JointState m4_angle_msg;
+sensor_msgs::JointState m5_angle_msg;
+sensor_msgs::JointState m6_angle_msg;
+sensor_msgs::JointState angleMessages[NUM_MOTORS] = {m1_angle_msg, m2_angle_msg, m3_angle_msg, m4_angle_msg, m5_angle_msg, m6_angle_msg};
+ros::Publisher pub_m1("m1_joint_state", &m1_angle_msg);
+ros::Publisher pub_m2("m2_joint_state", &m2_angle_msg);
+ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg);
+ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
+ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg);
+ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
 
 /* motors */
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -229,6 +248,20 @@ void setup() {
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
   nh.initNode();
   nh.subscribe(cmdSubscriber);
+  nh.advertise(pub_m1);
+  nh.advertise(pub_m2);
+  nh.advertise(pub_m3);
+  nh.advertise(pub_m4);
+  nh.advertise(pub_m5);
+  nh.advertise(pub_m6);
+
+  m1_angle_msg.header.frame_id = m1FrameId;
+  m2_angle_msg.header.frame_id = m2FrameId;
+  m3_angle_msg.header.frame_id = m3FrameId;
+  m4_angle_msg.header.frame_id = m4FrameId;
+  m5_angle_msg.header.frame_id = m5FrameId;
+  m6_angle_msg.header.frame_id = m6FrameId;
+
 #endif
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 
@@ -791,6 +824,27 @@ void printMotorAngles(void) {
     UART_PORT.print(", ");
   }
   UART_PORT.println("");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+  float angles[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    if (motorArray[i] -> isOpenLoop) {
+      angles[i] = motorArray[i] -> getImaginedAngle();
+      angleMessages[i].position = &(angles[i]);
+      //*(angleMessages[i].position) = motorArray[i] -> getImaginedAngle();
+    }
+    else {
+      angles[i] = motorArray[i] -> getCurrentAngle();
+      angleMessages[i].position = &(angles[i]);
+      //*(angleMessages[i].position) = motorArray[i] -> getCurrentAngle();
+    }
+  }
+  pub_m1.publish(&m1_angle_msg);
+  pub_m2.publish(&m2_angle_msg);
+  pub_m3.publish(&m3_angle_msg);
+  pub_m4.publish(&m4_angle_msg);
+  pub_m5.publish(&m5_angle_msg);
+  pub_m6.publish(&m6_angle_msg);
+  nh.spinOnce();
 #endif
 }
 
