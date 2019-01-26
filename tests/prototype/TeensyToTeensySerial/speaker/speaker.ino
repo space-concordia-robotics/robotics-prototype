@@ -25,8 +25,8 @@ void setup() {
 void loop() {
   if (dt > 2000) {
     dt = 0;
-    Serial.println("beep");
-    Serial1.print(cmds[i++]);
+    Serial.println(cmds[i]);
+    Serial1.println(cmds[i++]);
     //Serial1.write(cmds[i++]);
     //Serial1.flush();
     if (i == 4) {
