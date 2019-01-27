@@ -6,7 +6,8 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 
 import os
 import subprocess
-from urllib.parse import urlparse
+import urllib
+from urllib.parse import urlparse, unquote
 import flask
 from flask import jsonify, request
 
@@ -100,7 +101,7 @@ def select_mux():
     dev = str(request.get_data(), "utf-8")
     print("dev : " + dev)
 
-    output, error = run_shell("rosrun mux_selector mux_select_client.py " + dev)
+    output, error = run_shell("rosrun mux_selector mux_select_client.py", dev)
     output = str(output, "utf-8")
     print("output: " + output)
 
@@ -115,16 +116,8 @@ def serial_cmd():
     # remove fluff, only command remains
     if cmd:
         cmd = cmd.split("=")[1]
-        # clean up garbage
-
-        if "+" in cmd:
-            cmd = cmd.replace("+", " ")
-
-        if "%2B" in cmd:
-            cmd = cmd.replace("%2B", "+")
-
-        if "%22" in cmd:
-            cmd = cmd.replace("%22", "\"")
+        # decode URI
+        cmd = unquote(cmd)
 
     print("cmd: " + cmd)
 
