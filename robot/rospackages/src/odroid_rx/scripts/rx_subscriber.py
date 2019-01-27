@@ -1,20 +1,26 @@
 #!/usr/bin/env python
-## Simple talker demo that listens to std_msgs/Strings published 
-## to the 'odroid_rx' topic
-
+import os
 import rospy
 from std_msgs.msg import String
 
 def callback(data):
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    log_file = script_dir + "/odroid_rx.txt"
+
     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
 
-def rx_subscriber():
+    file = open(log_file, 'w')
+    file.write(data.data)
+    file.close()
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
+def rx_subscriber():
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    log_file = script_dir + "/odroid_rx.txt"
+
+    # create file if doesn't exist
+    file = open(log_file, 'w+')
+    file.close()
+
     rospy.init_node('rx_subscriber', anonymous=True)
 
     rospy.Subscriber('odroid_rx', String, callback)

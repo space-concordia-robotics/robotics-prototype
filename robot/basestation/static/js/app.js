@@ -266,6 +266,9 @@ $("#serial-cmd-input").on('keyup', function (e) {
     }
 });
 
+// update odroid rx data every second
+setInterval(updateOdroidRx, 1000);
+
 
   // keyboard events
   document.addEventListener("keydown", function (event) {

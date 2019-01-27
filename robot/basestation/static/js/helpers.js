@@ -25,6 +25,22 @@ function pingRover(ping_msg, ros_msg) {
     scrollToBottom();
 }
 
+function updateOdroidRx() {
+    $.ajax({
+        url: '/odroid_rx',
+        type: 'POST',
+        success: function(response){
+            let newData = response.odroid_rx;
+
+            if (newData != $("#last-odroid-rx").val()) {
+                appendToConsole("Odroid RX: " + response.odroid_rx);
+                scrollToBottom();
+            }
+
+            $("#last-odroid-rx").val(response.odroid_rx);
+        }
+    })
+}
 // Manual control
 function manualControl() {
     var a = document.getElementById("ArmcontrolsOFF");

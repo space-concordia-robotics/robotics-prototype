@@ -12,7 +12,6 @@ from flask import jsonify, request
 
 app = flask.Flask(__name__)
 
-
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
 
@@ -47,7 +46,6 @@ def run_shell(cmd, arg=""):
     output, error = process.communicate()
 
     return output, error
-
 
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
@@ -139,6 +137,20 @@ def serial_cmd():
     print("output: " + output)
 
     return jsonify(success=True, cmd=cmd, output=output)
+
+@app.route("/odroid_rx", methods=["POST"])
+def odroid_rx():
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    log_file = script_dir + "/../rospackages/src/odroid_rx/scripts/odroid_rx.txt"
+    print("odroid_rx")
+
+    # query the topic exactly once
+    output, error = run_shell("cat", log_file)
+    output = str(output, "utf-8")
+
+    print("output: " + output)
+
+    return jsonify(success=True, odroid_rx=output)
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")
