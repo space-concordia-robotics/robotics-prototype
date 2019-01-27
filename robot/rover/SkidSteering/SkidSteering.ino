@@ -130,13 +130,13 @@ float vy = 0;
 float d = 0.33; //distance between left and right wheels
 float vx, vth, vr, vl;
 
-#ifdef mode_0
 #define MAX_PWM 255
 #define MIN_PWM 0
-#endif
+
+
 String rotation;
 
-SoftwareSerial bluetooth(7, 8);
+SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
 
 
