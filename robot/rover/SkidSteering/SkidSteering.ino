@@ -130,8 +130,9 @@ float vy = 0;
 float d = 0.33; //distance between left and right wheels
 float vx, vth, vr, vl;
 
-#define MAX_PWM 255
-#define MIN_PWM 0
+#define range 127
+#define MAX_PWM 128 + range
+#define MIN_PWM 127 - range
 
 
 String rotation;
