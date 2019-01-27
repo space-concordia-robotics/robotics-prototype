@@ -14,9 +14,11 @@ def mux_select_client(device):
         resp1 = mux_select(device)
         return resp1.response
     except rospy.ServiceException as e:
-        print("Service call failed: {:s}".format(e))
+        print("Service call failed: {:s}".format(str(e)))
 
 def is_valid_request(device):
+
+    device = str(device)
 
     if device.isnumeric():
         device = int(device)
@@ -53,7 +55,7 @@ if __name__ == "__main__":
     print(sent_ts)
     print("---")
 
-    print("Response: " + mux_select_client(dev))
+    print("Response: " + str(mux_select_client(dev)))
     received = datetime.datetime.now()
     received_st = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (received.microsecond / 10000))
     print(received_st)

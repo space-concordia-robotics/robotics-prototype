@@ -15,7 +15,7 @@ def select_device(device):
     s0_val = 0
     s1_val = 0
 
-    if not device.isnumeric():
+    if not device.isdecimal():
         print("Device argument must be numeric value")
         return
 
