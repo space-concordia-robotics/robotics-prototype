@@ -160,6 +160,7 @@ IntervalTimer dcTimer;
 void setup() {
     // initialize serial communications at 9600 bps:
     Serial.begin(9600);
+    Serial1.being(9600);
     bluetooth.begin(9600);
 
     //  pinMode(DC_PIN_FRONT_RIGHT, OUTPUT);
@@ -480,6 +481,19 @@ void loop() {
             vx = (vr + vl) / 6;
             vth = (vl - vr) / d;
         #endif
+        
+        // respond to UART cmds
+        if (Serial1.available()) {
+            String cmd = Serial1.readString().trim();
+            
+            if (cmd.equals("ping")) {
+                Serial1.println("The response");
+                Serial1.print("\tVelocity Right Side"); Serial1.println(vr);
+                Serial1.print("\tVelocity Left Side"); Serial1.println(vl);
+                Serial1.print("\tAverage Velocity"); Serial1.println(vx);
+                Serial1.print("\tAngular Velocity"); Serial1.println(vth);
+            }
+        }
 
         prevRead = millis();
     }
