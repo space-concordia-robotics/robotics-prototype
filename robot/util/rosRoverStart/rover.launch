@@ -1,3 +1,6 @@
 <launch>
     <node pkg="ping_acknowledgment" type="ping_response_server.py" name="ping_response_server" output="screen"/>
+    <node pkg="mux_selector" type="mux_select_server.py" name="mux_select_server" output="screen"/>
+    <node pkg="serial_cmd" type="serial_cmd_server.py" name="serial_cmd_server" output="screen"/>
+    <node pkg="odroid_rx" type="rx_publisher.py" name="rx_publisher" output="screen"/>
 </launch>
