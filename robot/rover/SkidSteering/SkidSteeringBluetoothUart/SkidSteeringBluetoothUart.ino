@@ -130,9 +130,8 @@ float vy = 0;
 float d = 0.33; //distance between left and right wheels
 float vx, vth, vr, vl;
 
-#define range 127
-#define MAX_PWM 128 + range
-#define MIN_PWM 127 - range
+#define MAX_PWM 255
+#define MIN_PWM 0
 
 
 String rotation;
@@ -161,11 +160,8 @@ IntervalTimer dcTimer;
 void setup() {
     // initialize serial communications at 9600 bps:
     Serial.begin(9600);
-    Serial1.begin(9600);
+    Serial1.being(9600);
     bluetooth.begin(9600);
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
 
     //  pinMode(DC_PIN_FRONT_RIGHT, OUTPUT);
     //   // Write velocities for the Wheels on the RIGHT side
