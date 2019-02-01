@@ -36,57 +36,60 @@ void loop() {
         Serial.println(cmd);
 
         if (cmd.equals("1")) {
-            digitalWrite(LED_PIN, HIGH);
+            digitalWrite(LED_DEV_0, HIGH);
             //Serial1.println("HIGH");
             Serial.println("HIGH");
         }
         else if (cmd.equals("0")) {
-            digitalWrite(LED_PIN, LOW);
+            digitalWrite(LED_DEV_0, LOW);
             //Serial1.println("LOW");
             Serial.println("LOW");
         }
+    }
     if (Serial2.available()) {
         String cmd = Serial1.readString().trim();
         Serial.print("cmd: ");
         Serial.println(cmd);
 
         if (cmd.equals("1")) {
-            digitalWrite(LED_PIN, HIGH);
+            digitalWrite(LED_DEV_1, HIGH);
             //Serial1.println("HIGH");
             Serial.println("HIGH");
         }
         else if (cmd.equals("0")) {
-            digitalWrite(LED_PIN, LOW);
+            digitalWrite(LED_DEV_1, LOW);
             //Serial1.println("LOW");
             Serial.println("LOW");
         }
+    }
     if (Serial3.available()) {
         String cmd = Serial1.readString().trim();
         Serial.print("cmd: ");
         Serial.println(cmd);
 
         if (cmd.equals("1")) {
-            digitalWrite(LED_PIN, HIGH);
+            digitalWrite(LED_DEV_2, HIGH);
             //Serial1.println("HIGH");
             Serial.println("HIGH");
         }
         else if (cmd.equals("0")) {
-            digitalWrite(LED_PIN, LOW);
+            digitalWrite(LED_DEV_2, LOW);
             //Serial1.println("LOW");
             Serial.println("LOW");
         }
+    }
     if (Serial4.available()) {
         String cmd = Serial1.readString().trim();
         Serial.print("cmd: ");
         Serial.println(cmd);
 
         if (cmd.equals("1")) {
-            digitalWrite(LED_PIN, HIGH);
+            digitalWrite(LED_DEV_3, HIGH);
             //Serial1.println("HIGH");
             Serial.println("HIGH");
         }
         else if (cmd.equals("0")) {
-            digitalWrite(LED_PIN, LOW);
+            digitalWrite(LED_DEV_3, LOW);
             //Serial1.println("LOW");
             Serial.println("LOW");
         }
@@ -96,12 +99,12 @@ void loop() {
         Serial.println(cmd);
 
         if (cmd.equals("1")) {
-            digitalWrite(LED_PIN, HIGH);
+            digitalWrite(LED_BUILTIN, HIGH);
             //Serial1.println("HIGH");
             Serial.println("HIGH");
         }
         else if (cmd.equals("0")) {
-            digitalWrite(LED_PIN, LOW);
+            digitalWrite(LED_BUILTIN, LOW);
             //Serial1.println("LOW");
             Serial.println("LOW");
         }
