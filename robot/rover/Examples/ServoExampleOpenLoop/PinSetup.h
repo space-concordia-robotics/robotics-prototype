@@ -9,8 +9,8 @@
 #define MAX_JOINT_ANGLE 760 // max angle for all motors
 #define SERVO_PID_PERIOD 20000 // 20ms, because typical pwm signals have 20ms periods
 
-#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
-//#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
+#define SERVO_STOP 1500 // millisecond count which actually stops servo as expected
+//#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 
 // servo
 #define PWM_PIN         35

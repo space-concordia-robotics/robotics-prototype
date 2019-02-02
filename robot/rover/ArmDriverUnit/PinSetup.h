@@ -35,7 +35,8 @@
 #define LIM_SWITCH_PULLSTATE INPUT_PULLDOWN
 #endif
 
-#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
+#define SERVO_STOP 1500 // millisecond count which actually stops servo as expected
+//#define SERVO_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
 //#define SERVO_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255)
 //only needed for sabertooth
 //#define DC_STOP 189 // 3.3v // motor is supposed to stop at 50% duty cycle (127/255)
@@ -147,8 +148,8 @@
   #define M6_ENCODER_B       38
 */
 #define M6_GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
-#define M6_MINIMUM_ANGLE   -150.0 //-120.0
-#define M6_MAXIMUM_ANGLE   150.0 //30.0
+#define M6_MINIMUM_ANGLE   -75.0 //-120.0
+#define M6_MAXIMUM_ANGLE   75.0 // 150.0 //30.0
 
 void pinSetup(void);
 

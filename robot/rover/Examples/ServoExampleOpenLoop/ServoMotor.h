@@ -2,6 +2,7 @@
 #define SERVOMOTOR_H
 
 #include <Arduino.h>
+#include <Servo.h>
 #include "PinSetup.h"
 #include "RobotMotor.h"
 
@@ -13,7 +14,6 @@ class ServoMotor : public RobotMotor {
 
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
-
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void stopRotation(void);
 
@@ -26,6 +26,7 @@ class ServoMotor : public RobotMotor {
 
   private:
     int pwmPin;
+    Servo servo;
 };
 
 int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
@@ -33,6 +34,7 @@ int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
 ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   pwmPin(pwmPin)
 {
+  servo.attach(pwmPin);
   numServoMotors++;
   // variables declared in RobotMotor require the this-> operator
   this->gearRatio = gearRatio;
@@ -44,7 +46,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
 }
 
 void ServoMotor::stopRotation(void) {
-  analogWrite(pwmPin, SERVO_STOP);
+  servo.writeMicroseconds(SERVO_STOP);
   movementDone = true;
 }
 
@@ -61,11 +63,11 @@ void ServoMotor::setVelocity(int motorDir, float motorSpeed) {
     motorSpeed = pidController.getMinOutputValue();
   }
 
-  int dutyCycle = SERVO_STOP + motorSpeed * motorDir * 128 / 100;
-  if (dutyCycle > 255) dutyCycle = 255;
-  if (dutyCycle < 0) dutyCycle = 0;
+  int pulseTime = SERVO_STOP + motorSpeed * motorDir * 1000 / 100;
+  if (pulseTime > 2000) pulseTime = 2000;
+  if (pulseTime < 1000) pulseTime = 1000;
 
-  analogWrite(pwmPin, dutyCycle);
+  servo.writeMicroseconds(pulseTime);
 }
 
 bool ServoMotor::calcTurningDuration(float angle) {
@@ -81,12 +83,11 @@ bool ServoMotor::calcTurningDuration(float angle) {
   }
 }
 
-bool ServoMotor::calcCurrentAngle(void)
-{
-  if(isOpenLoop){
+bool ServoMotor::calcCurrentAngle(void) {
+  if(isOpenLoop) {
     static unsigned int prevTime = 0;
     static float startAngle = 0.0;
-    UART_PORT.println(timeCount);
+    //UART_PORT.println(timeCount);
     if(timeCount < numMillis){
       // if the motor is moving, calculate the angle based on how long it's been turning for
       currentAngle += (float)rotationDirection*(timeCount-prevTime)*(openLoopSpeed*gearRatioReciprocal)/(1000.0*openLoopGain);
@@ -99,13 +100,11 @@ bool ServoMotor::calcCurrentAngle(void)
     }
     return true;
   }
-  else if (hasEncoder)
-  {
+  else if (hasEncoder) {
     currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     return true;
   }
-  else
-  {
+  else {
     return false;
   }
 }

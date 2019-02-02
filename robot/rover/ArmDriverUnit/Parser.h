@@ -10,19 +10,19 @@
 // needs to be defined where it's used as an input parameter
 struct commandInfo
 {
-  int whichMotor = 0; // which motor was requested to do something
-  int whichDirection = 0; // set the direction
-  int whichSpeed = 0; // set the speed
-  unsigned int whichTime = 0; // how long to turn for
-  float whichAngle = 0.0; // for regular operations, which angle to go to
+  bool pingCommand = false;
+  bool stopAllMotors = false; // for stopping all motors
+  
+  bool stopSingleMotor = false; // for stopping a single motor
+  bool switchDir = false; // for switching the direction logic
+  
   bool loopCommand = false; // for choosing between open loop or closed loop control
   int loopState = 0; // what type of loop state it is
+  
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
-  bool stopSingleMotor = false; // for stopping a single motor
-  bool stopAllMotors = false; // for stopping all motors
-  bool switchDir = false; // for switching the direction logic
+  
   bool multiMove = false; // for controlling multiple motors simultaneously
   bool motorsToMove[NUM_MOTORS] = {
     false, false, false, false, false, false
@@ -31,7 +31,12 @@ struct commandInfo
   {
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0
   }; // motor angles
-  bool pingCommand = false;
+  
+  int whichMotor = 0; // which motor was requested to do something, still used
+  //int whichDirection = 0; // set the direction
+  //int whichSpeed = 0; // set the speed
+  //unsigned int whichTime = 0; // how long to turn for
+  //float whichAngle = 0.0; // for regular operations, which angle to go to
 };
 
 class Parser

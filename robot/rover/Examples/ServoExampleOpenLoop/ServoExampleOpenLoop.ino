@@ -9,6 +9,7 @@ of the header files used in this code should be turned into libraries.
 #define DEBUG_VERIFYING 12 // debug messages during verification function
 #define UART_PORT Serial
 
+#include <Servo.h>
 #include "PinSetup.h"
 #include "Parser.h"
 #include "PidController.h"
