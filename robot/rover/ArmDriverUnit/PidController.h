@@ -2,19 +2,18 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
 
-class PidController
-{
+class PidController {
   public:
-  // motor-dependent constants... currently arbitrary values. to be set in setup() probably
-  PidController();
-  float updatePID(volatile float currentAngle, float desiredAngle);
-  void setJointAngleTolerance(float tolerance);
-  void setOutputLimits(float minVal, float maxVal, float zeroVal);
-  void setGainConstants(float kp, float ki, float kd);
-  float getMaxOutputValue(void);
-  float getMinOutputValue(void);
-  float getJointAngleTolerance(void);
-  void printPidParameters(void);
+    // motor-dependent constants... currently arbitrary values. to be set in setup() probably
+    PidController();
+    float updatePID(volatile float currentAngle, float desiredAngle);
+    void setJointAngleTolerance(float tolerance);
+    void setOutputLimits(float minVal, float maxVal, float zeroVal);
+    void setGainConstants(float kp, float ki, float kd);
+    float getMaxOutputValue(void);
+    float getMinOutputValue(void);
+    float getJointAngleTolerance(void);
+    void printPidParameters(void);
   private:
     float kp, ki, kd;
     float jointAngleTolerance;
@@ -26,8 +25,7 @@ class PidController
     float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
 
-PidController::PidController()
-{
+PidController::PidController() {
   // default values
   kp = 1.0;
   ki = 0.0;
@@ -38,20 +36,17 @@ PidController::PidController()
   slowestSpeed = 3.0;
 }
 
-float PidController::updatePID(volatile float currentAngle, float desiredAngle)
-{
+float PidController::updatePID(volatile float currentAngle, float desiredAngle) {
   float pidOutput;
   error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
   // if the angle is outside the tolerance, move
-  if (fabs(error) >= jointAngleTolerance)
-  {
+  if (fabs(error) >= jointAngleTolerance)  {
     // fabs is for floats
     pTerm = kp * error;
     iTerm += ki * ((error + previousError) / 2) * dt;
     dTerm = kd * (error - previousError) / dt;
     pidSum = pTerm + iTerm + dTerm;
-
-  #ifdef DEBUG_PID
+#ifdef DEBUG_PID
     // UART_PORT.print("P constant is: "); UART_PORT.println(this->kp);
     // UART_PORT.print("I constant is: "); UART_PORT.println(this->ki);
     // UART_PORT.print("D constant is: "); UART_PORT.println(this->kd);
@@ -70,30 +65,23 @@ float PidController::updatePID(volatile float currentAngle, float desiredAngle)
     UART_PORT.println(dTerm);
     UART_PORT.print("PID output is: ");
     UART_PORT.println(pidSum);
-  #endif
+#endif
 
-    if (pidSum > maxOutputValue)
-    {
+    if (pidSum > maxOutputValue)    {
       pidOutput = maxOutputValue; // give max output
     }
-    else
-      if (pidSum < minOutputValue)
-      {
-        pidOutput = minOutputValue; // give min output
-      }
-    else
-      if (fabs(pidSum) < slowestSpeed)
-      {
-        pidOutput = 0; // check for speeds that are too slow
-      }
-    else
-    {
+    else if (pidSum < minOutputValue)    {
+      pidOutput = minOutputValue; // give min output
+    }
+    else if (fabs(pidSum) < slowestSpeed)    {
+      pidOutput = 0; // check for speeds that are too slow
+    }
+    else    {
       pidOutput = pidSum;
     }
   }
   // if the angle is within the tolerance, don't move
-  else
-  {
+  else  {
     pidOutput = 0; // speed is 0
   }
   return pidOutput;
@@ -102,44 +90,36 @@ float PidController::updatePID(volatile float currentAngle, float desiredAngle)
   dt = 0; // Reset timer
 }
 
-void PidController::setJointAngleTolerance(float tolerance)
-{
+void PidController::setJointAngleTolerance(float tolerance) {
   jointAngleTolerance = tolerance;
 }
 
-void PidController::setOutputLimits(float minVal, float maxVal, float zeroVal)
-{
+void PidController::setOutputLimits(float minVal, float maxVal, float zeroVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;
   slowestSpeed = zeroVal;
 }
 
-float PidController::getMaxOutputValue(void)
-{
+float PidController::getMaxOutputValue(void) {
   return maxOutputValue;
 }
 
-float PidController::getMinOutputValue(void)
-{
+float PidController::getMinOutputValue(void) {
   return minOutputValue;
 }
 
-float PidController::getJointAngleTolerance(void)
-{
+float PidController::getJointAngleTolerance(void) {
   return jointAngleTolerance;
 }
 
-void PidController::setGainConstants(float kp, float ki, float kd)
-{
+void PidController::setGainConstants(float kp, float ki, float kd) {
   this -> kp = kp;
   this -> ki = ki;
   this -> kd = kd;
 }
 
-void PidController::printPidParameters(void)
-{
-
-  #ifdef DEBUG_PID
+void PidController::printPidParameters(void) {
+#ifdef DEBUG_PID
   UART_PORT.print("P constant is: ");
   UART_PORT.println(kp);
   UART_PORT.print("I constant is: ");
@@ -154,8 +134,7 @@ void PidController::printPidParameters(void)
   UART_PORT.println(slowestSpeed);
   UART_PORT.print("Joint angle tolerance is: ");
   UART_PORT.println(jointAngleTolerance);
-  #endif
-
+#endif
 }
 
 #endif

@@ -1,25 +1,14 @@
-
 #ifndef ROBOTMOTOR_H
 #define ROBOTMOTOR_H
 #include <Arduino.h>
 #include "PinSetup.h"
 #include "PidController.h"
-enum motor_direction
-{
-  CLOCKWISE = -1, COUNTER_CLOCKWISE = 1
-}; // defines motor directions
 
-enum loop_state
-{
-  OPEN_LOOP = 1, CLOSED_LOOP
-}; // defines whether motor control is open loop or closed loop
+enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
+enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
+enum motor_type {DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR};
 
-enum motor_type
-{
-  DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR
-};
-class RobotMotor
-{
+class RobotMotor {
   public:
   // these variables are set at start and normally don't change during the main loop
   int motorType;
@@ -72,8 +61,8 @@ class RobotMotor
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
-RobotMotor::RobotMotor()
-{
+
+RobotMotor::RobotMotor() {
   numMotors++;
   movementDone = true; // by default the movement has finished so the motors don't need to move
   hasAngleLimits = false; // only set to true when setAngleLimits() is called
