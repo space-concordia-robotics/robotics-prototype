@@ -45,10 +45,10 @@
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
 #define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
-#define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
-#define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
-#define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
-#define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
+//#define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
+//#define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
+//#define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
+//#define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
 #endif
 
 /*
@@ -263,6 +263,7 @@ void setup() {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 #ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
+  // comment out the encoder pin which doesn't work, this is for testing purposes tho as the final one should have both channels working
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
   // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
@@ -1210,6 +1211,7 @@ void servoInterrupt(void) {
 /* encoder ISRs */
 
 #ifdef M1_ENCODER_PORT
+/*
 void m1_encoder_interrupt(void) {
   // encoder states are 4 bit values
   // top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states
@@ -1224,6 +1226,15 @@ void m1_encoder_interrupt(void) {
   // the dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
   // the & operation ensures that anything above the lowest 4 bits is cleared before accessing the array
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+#ifdef DEBUG_ENCODERS
+  UART_PORT.print("motor 1 ");
+  UART_PORT.println(motor1.encoderCount);
+#endif
+}
+*/
+void m1_encoder_interrupt(void) {
+  // if only one channel is working, the same interrupt means more angle attained
+  motor1.encoderCount += motor1.rotationDirection * 2;
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 ");
   UART_PORT.println(motor1.encoderCount);
