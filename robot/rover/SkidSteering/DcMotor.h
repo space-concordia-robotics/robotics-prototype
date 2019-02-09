@@ -19,6 +19,8 @@ class RobotMotor
   // these variables are set at start and normally don't change during the main loop
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
+  volatile unsigned long  dt;
+  volatile unsigned long prevTime;
   float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
   bool isOpenLoop; // decides whether to use the PID or not
@@ -40,7 +42,7 @@ class RobotMotor
   void setDesiredVelocity(float velocity); // if the angle is valid, update desiredAngle and return true. else return false.
   void setDesiredDirection(float direction); // Assign a direction.
   float getDesiredVelocity(void); // return copy of the desired angle, not a reference to it
-  void calcCurrentVelocity(void);
+  void calcCurrentVelocity();
   float getCurrentVelocity(void);
   void setCurrentVelocity(float velocity);
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
@@ -119,10 +121,11 @@ int RobotMotor::getDirectionLogic(void)
   return directionModifier;
 }
 
-void RobotMotor::calcCurrentVelocity(void)
+void RobotMotor::calcCurrentVelocity()
 {
-
-    currentVelocity = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    Serial.println(dt);
+    currentVelocity = 60000000 * gearRatioReciprocal * encoderResolutionReciprocal / (float) dt;
+    
 }
 
 float RobotMotor::getCurrentVelocity(void)
@@ -230,6 +233,21 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
 
 void DcMotor::setVelocityNoPID(int motorDir, float desiredVelocity)
 {
+   switch (motorDir)
+  {
+    case CW:
+      digitalWrite(directionPin, LOW);
+//      Serial.print(/"\tDegital"); Serial.println("LOW");
+
+      break;
+    case CCW:
+      digitalWrite(directionPin, HIGH);
+//            Serial.print("\tDegital")/; Serial.println("HIGH");
+
+      break;
+  }
+
+
   analogWrite(pwmPin, desiredVelocity);
 
 }

@@ -4,10 +4,9 @@
 #include <elapsedMillis.h>
 #include "DcMotor.h"
 
-#define mode_0 //sabertooth drivers for initiation testing
-//#define mode_1 //Cytron drivers
 
-#define TESTs
+
+//#define TEST
 
 #define NO_PID // PidController not active
 
@@ -17,7 +16,12 @@
 #define minVelocity         -75
 #define GEAR_RATIO         188.61
 float prevCurrent = 0;
-//
+
+
+
+SoftwareSerial bluetooth(9, 10);
+
+ArduinoBlue phone(bluetooth);
 //-Gear Ratio
 //-Encod pin a
 //-Encod pin b
@@ -44,14 +48,49 @@ float prevCurrent = 0;
 #define TEST_EB   3
 
 #endif
+// Bluetooth connection TX of bluetooth goes to pin 9 and TX of bluetooth goes to pin 10
+//#define RF_DIR   14
+//#define RM_DIR   15
+//#define RB_DIR   29
+//
+//#define LF_DIR   11
+//#define LM_DIR   24
+//#define LB_DIR   12
+//
+//#define RF_PWM   4
+//#define RM_PWM   5
+//#define RB_PWM   6
+//
+//#define LF_PWM   7
+//#define LM_PWM   8
+//#define LB_PWM   30
+//
+//#define RF_EA    25
+//#define RF_EB    26
+//
+//#define RM_EA    27
+//#define RM_EB    28
+//
+//#define RB_EA    29
+//#define RB_EB    30
+//
+//#define LF_EA    31
+//#define LF_EB    32
+//
+//#define LM_EA    33
+//#define LM_EB    34
+//
+//#define LB_EA    35
+//#define LB_EB    36
+
 
 #define RF_DIR   11
 #define RM_DIR   12
 #define RB_DIR   24
 
 #define LF_DIR   8
-#define LM_DIR   9
-#define LB_DIR   10
+#define LM_DIR   16
+#define LB_DIR   15
 
 #define RF_PWM   2
 #define RM_PWM   3
@@ -79,9 +118,6 @@ float prevCurrent = 0;
 #define LB_EA    35
 #define LB_EB    36
 
-#define DC_SIGNAL_MIN 0
-#define DC_SIGNAL_MAX 255
-
 #ifdef TEST
 
 DcMotor test(TEST_DIR, TEST_PWM, GEAR_RATIO);
@@ -97,18 +133,23 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO);
 
 #endif
 // This portion shall be removed once ROSyfied
-int steeringShiftValue = 49;
-int throttleShiftValue = 49;
+int steeringShiftValue = 99;
+int throttleShiftValue = 99;
 
-float minThrottleController = 0 - throttleShiftValue;
+float minThrottleController = 0;
 float maxThrottleController = 0 + throttleShiftValue;
-float minSteeringController = 0 - steeringShiftValue;
+float minSteeringController = 0;
 float maxSteeringController = 0 + steeringShiftValue;
 
 int throttle, steering;
 
 float deg = 0;
 float rpm =0;
+      int maxS= 49;
+        int minS= -49;
+        int leftMotorDirection;
+        int rightMotorDirection;
+        float v;
 
 unsigned long startTime = millis();
 unsigned long currTime = millis();
@@ -130,15 +171,14 @@ float vy = 0;
 float d = 0.33; //distance between left and right wheels
 float vx, vth, vr, vl;
 
-#define range 127
-#define MAX_PWM 128 + range
-#define MIN_PWM 127 - range
+#define RANGE 255
+#define REST  0
+#define MAX_PWM REST + RANGE 
+#define MIN_PWM REST - RANGE
 
 
 String rotation;
 
-SoftwareSerial bluetooth(9, 10);
-ArduinoBlue phone(bluetooth);
 
 
 void velocityHandler(float throttle);
@@ -161,11 +201,12 @@ IntervalTimer dcTimer;
 void setup() {
     // initialize serial communications at 9600 bps:
     Serial.begin(9600);
-    Serial1.begin(9600);
+//    Serial1.begin(9600);
     bluetooth.begin(9600);
-
+    delay(1000);  // do not print too fast!
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
+    Serial.println("setup complete");
 
     //  pinMode(DC_PIN_FRONT_RIGHT, OUTPUT);
     //   // Write velocities for the Wheels on the RIGHT side
@@ -194,13 +235,13 @@ void setup() {
 
     //  test.pidController.setJointVelocityTolerance(2.0 * test.gearRatioRecipr/ocal);
     #else
-    DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO);
-    DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO);
-    DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO);
-
-    DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO);
-    DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO);
-    DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO);
+//    DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO);
+//    DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO);
+//    DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO);
+//
+//    DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO);
+//    DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO);
+//    DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO);
 
     pinMode(RF_DIR, OUTPUT);
     pinMode(RF_PWM, OUTPUT);
@@ -216,12 +257,14 @@ void setup() {
     pinMode(LB_DIR, OUTPUT);
     pinMode(LB_PWM, OUTPUT);
 
-    
+//    analogWrite(RF.getPwmPin(), 127);
+//    Serial.println(RF.getPwmPin());
+//    
     RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
     pinMode(RF.encoderPinB, INPUT_PULLUP);
     pinMode(RF.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, RISING);
+ //    attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, RISING);
     RF.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -230,7 +273,7 @@ void setup() {
     pinMode(RM.encoderPinB, INPUT_PULLUP);
     pinMode(RM.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, RISING);
+ //    attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, RISING);
     RM.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -239,7 +282,7 @@ void setup() {
     pinMode(RB.encoderPinB, INPUT_PULLUP);
     pinMode(RB.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, RISING);
+  //  attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, RISING);
     RB.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -249,7 +292,7 @@ void setup() {
     pinMode(LF.encoderPinB, INPUT_PULLUP);    
     pinMode(LF.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, RISING);
+ //    attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, RISING);
     LF.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -259,7 +302,7 @@ void setup() {
     pinMode(LM.encoderPinB, INPUT_PULLUP);
     pinMode(LM.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, RISING);
+  //   attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, RISING);
     LM.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -268,7 +311,7 @@ void setup() {
     pinMode(LB.encoderPinB, INPUT_PULLUP);    
     pinMode(LB.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, RISING);
-    // attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, RISING);
+ //    attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, RISING);
     LB.pidController.setGainConstants(1.0, 0.0, 0.0);
 
 
@@ -295,209 +338,82 @@ void setup() {
     #endif
 
     dcTimer.begin(dcInterrupt, 20000);
+    
+
 
 }
 
 void loop() {
     if (millis() - prevRead > 1000)
     {
+
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
         throttle = phone.getThrottle();
         steering = phone.getSteering();
 
-        // Function that updates velocity values based on steering angle.
+        throttle -= 49.5;
+        steering -= 49.5;
 
-        throttle -= throttleShiftValue;
-        steering -= steeringShiftValue;
-
-        #ifdef mode_0
-
-
-            // If statement for CASE 1: steering toward the RIGHT
-            if (steering < 0 ) {
-                deg = mapFloat(steering, minSteeringController, 0, -1, 1);
-                desiredVelocityRight = map(throttle * deg, minThrottleController, maxThrottleController, MIN_PWM, MAX_PWM);
-                desiredVelocityLeft = map((-1) * throttle, minThrottleController, maxThrottleController,  MIN_PWM, MAX_PWM);
-            }
-
-            // If statement for CASE 2: steering toward the LEFT
-            if (steering >= 0 ) {
-                deg = mapFloat(steering, 0, maxSteeringController, 1, -1);
-                desiredVelocityRight = map(throttle, minThrottleController, maxThrottleController, MIN_PWM, MAX_PWM);
-                desiredVelocityLeft = map((-1) * throttle * deg, minThrottleController, maxThrottleController, MIN_PWM, MAX_PWM);
-
-            }
-
-            #ifdef TEST
-                analogWrite(test.getPwmPin(), desiredVelocityRight);
-
-            #else
-
-                analogWrite(RF.getPwmPin(), desiredVelocityRight);
-                analogWrite(RM.getPwmPin(), desiredVelocityRight);
-                analogWrite(RB.getPwmPin(), desiredVelocityRight);
-
-
-                analogWrite(LF.getPwmPin(), desiredVelocityLeft);
-                analogWrite(LM.getPwmPin(), desiredVelocityLeft);
-                analogWrite(LB.getPwmPin(), desiredVelocityRight);
-
-            #endif
-
-        #elif mode_1        //   Code Not complete yet
-
-
-
-            // If statement for CASE 1: steering toward the RIGHT
-            if (steering < 0 )
-            {
-                deg = mapFloat(steering, minSteeringController, 0, -1, 1);
-                desiredVelocityRight = mapFloat(throttle * deg, 0, maxThrottleController, 0, maxVelocity);
-                desiredVelocityLeft = mapFloat((-1) * throttle, 0, maxThrottleController,  0, maxVelocity);
-                rf
-                rotation = "CW";
-                //    if moving forwad we have CCW rotation so dir is HIGH
-
-            }
-
-            // If statement for CASE 2: steering toward the LEFT
-            if (steering >= 0 )
-            {
-                deg = mapFloat(steering, 0, maxSteeringController, 1, -1);
-                desiredVelocityRight = mapFloat(throttle, 0, maxThrottleController, 0, maxVelocity);
-                desiredVelocityLeft = mapFloat( (-1) * throttle * deg, 0, maxThrottleController, 0, maxVelocity);
-                rotation = "CCW";
-
-            }rf
-
-
-
-            #ifdef TEST
-
-                if ( desiredVelocityRight >= 0 )
-                {
-                    test.setDesiredDirection(CCW);
-                }
-                else
-                {
-                    test.setDesiredDirection(CW);
-
-                }
-                test.setDesiredVelocity(desiredVelocityRight);
-                test.calcCurrentVelocity();
-                float output = test.pidController.updatePID(test.getDesiredVelocity(), test.getCurrentVelocity());
-                #ifdef NO_PID
-                    test.setVelocity(test.rotationDirection, test.getDesiredVelocity(), test.getCurrentVelocity());
-                #else
-                    test.setVelocityNoPID(test.rotationDirection, test.getDesiredVelocity());
-                #endif
-
-
-                rpm = degAngularResolution * 1000 * 1000 * 60 / (float)(dt);
-                test.setCurrentVelocity(rpm);
-                //      L/F.setDesiredVelocity(desiredVelocityLeft);
-                if (prevCurrent != steering ) {
-                    Serial.print("\tCount: "); Serial.println(test.encoderCount);
-
-                    Serial.print("\tDesired Velocity"); Serial.println(test.getDesiredVelocity());
-                    Serial.print("\tDesired Rotation"); Serial.println(test.rotationDirection);
-                    Serial.print("\tPID"); Serial.println(output);
-                    Serial.print("\tActual Velocity"); Serial.println(test.getCurrentVelocity());
-                    Serial.print("\tPWM Pin "); Serial.println(test.getPwmPin());
-                    //       Serial.print("\tdutyCycle "); Serial.print/ln(dutyCycle);
-                    prevCurrent = steering;
-                }
-
-            #else
-                if ( desiredVelocityRight >= 0 )
-                {
-                    RF.setDesiredDirection(CCW);
-                    RM.setDesiredDirection(CCW);
-                    RB.setDesiredDirection(CCW);
-                }
-                else
-                {
-                    RF.setDesiredDirection(CW);
-                    RM.setDesiredDirection(CW);
-                    RB.setDesiredDirection(CW);
-
-                }
-
-                 if ( desiredVelocityLeft >= 0 ) {
-                     LF.setDesiredDirection(CW);
-                     LM.setDesiredDirection(CW);
-                     LB.setDesiredDirection(CW);
-                 }
-                 else
-                 {
-                     LF.setDesiredDirection(CCW);
-                     LM.setDesiredDirection(CCW);
-                     LB.setDesiredDirection(CCW);
-                   }
-
-                RF.setDesiredVelocity(desiredVelocityRight);
-                RM.setDesiredVelocity(desiredVelocityRight);
-                RB.setDesiredVelocity(desiredVelocityRight);
-                LF.setDesiredVelocity(desiredVelocityLeft);
-                LM.setDesiredVelocity(desiredVelocityLeft);
-                LB.setDesiredVelocity(desiredVelocityLeft);
-
-
-
-
-                #ifdef NO_PID
-
-
-                    RF.setVelocityNoPID(RF.rotationDirection, RF.getDesiredVelocity());
-                    RM.setVelocityNoPID(RM.rotationDirection, RM.getDesiredVelocity());
-                    RB.setVelocityNoPID(RB.rotationDirection, RB.getDesiredVelocity());
-
-                    LF.setVelocityNoPID(LF.rotationDirection, LF.getDesiredVelocity());
-                    LM.setVelocityNoPID(LM.rotationDirection, LM.getDesiredVelocity());
-                    LB.setVelocityNoPID(LB.rotationDirection, LB.getDesiredVelocity());
-
-
-
-
-                    //      L/F.setDesiredVelocity(desiredVelocityLeft);
-
-
-                #else // No finished yet
-
-
-                #endif
-
-            #endif
-        #endif
-        #ifdef TEST
-
-        #else
-            RF.calcCurrentVelocity();
-            RM.calcCurrentVelocity();
-            RB.calcCurrentVelocity();
-            LF.calcCurrentVelocity();
-            LM.calcCurrentVelocity();
-            LB.calcCurrentVelocity();
-
-            vr = RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity();
-            vl = LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity();
-
-            vx = (vr + vl) / 6;
-            vth = (vl - vr) / d;
-        #endif
-        
-        // respond to UART cmds
-        if (Serial1.available()) {
-            String cmd = Serial1.readString().trim();
-            
-            if (cmd.equals("ping")) {
-                Serial1.println("The response");
-                Serial1.print("\tVelocity Right Side"); Serial1.println(vr);
-                Serial1.print("\tVelocity Left Side"); Serial1.println(vl);
-                Serial1.print("\tAverage Velocity"); Serial1.println(vx);
-                Serial1.print("\tAngular Velocity"); Serial1.println(vth);
-            }
+  
+         // If statement for CASE 1: steering toward the RIGHT
+        if (steering > 0 ) {
+            deg = mapFloat(steering, 0, maxS, 1, -1);
+            desiredVelocityRight = map(throttle * deg, minS, maxS, -255, 255);
+            desiredVelocityLeft = map((-1) * throttle, minS, maxS,  -255, 255);
+            rotation = "CW";
         }
+ 
+
+          // If statement for CASE 2: steering toward the LEFT
+        if (steering <= 0 ) {
+            deg = mapFloat(steering, minS, 0, -1, 1);
+            desiredVelocityRight = map(throttle, minS, maxS, -255, 255);
+            desiredVelocityLeft = map((-1) * throttle * deg, minS, maxS, -255, 255);
+            rotation = "CCW";
+
+        } 
+        if (desiredVelocityLeft < 0 ){
+          leftMotorDirection = 1;
+}
+        else {
+          leftMotorDirection = -1;
+        }
+        if (desiredVelocityRight < 0 ){
+          rightMotorDirection = -1;
+
+        }
+        else {
+          rightMotorDirection = 1;
+
+        }
+
+        RF.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
+        RM.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
+        RB.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
+        
+        LF.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
+        LM.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
+        LB.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
+        
+        
+        RF.calcCurrentVelocity();
+        RM.calcCurrentVelocity();
+        RB.calcCurrentVelocity();
+        LF.calcCurrentVelocity();
+        LM.calcCurrentVelocity();
+        LB.calcCurrentVelocity();
+
+        vr = RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity();
+        vl = LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity();
+
+        vx = (vr + vl) / 6;
+        vth = (vl - vr) / d;
+
+        Serial.print(desiredVelocityLeft);  Serial.print("_________"); Serial.println(desiredVelocityRight);
+        Serial.print(rightMotorDirection); Serial.print(rotation); Serial.print("_____");Serial.print(deg);Serial.print("_____"); Serial.println(steering);
+        Serial.print("Velocity:"); Serial.println(v);
+        
+        
 
         prevRead = millis();
     }
@@ -508,36 +424,6 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-//void velocityHandler(float throttle, float steering) {
-//
-//
-//
-//
-//
-//  // Print Velocity Values
-//  if (prevThrottle != throttle || prevSteering != steering) {
-//    float rpm = degAngularResolution * 1000 * 1000 * 60 / (float)(dt);
-//
-//    Serial.print("\tThrottle: "); Serial.print(throttle);
-//    Serial.print("\tSteering: "); Serial.println(steering);
-//    Serial.print("\tRotation: "); Serial.println(rotation);
-//    Serial.print("\tRight Side: "); Serial.println(velocityRight);
-//    Serial.print("\tLeft Side: "); Serial.println(velocityLeft);
-//
-//
-//     Serial.print("\tCount: "); Serial.println(interruptCount);
-//
-//      Serial.print("\tRPM: "); Serial.println(rpm,5);
-//     Serial.print("\tPrev: "); Serial.println(prevTime);
-//     Serial.print("\tDt: "); Serial.println(dt);
-//
-//    prevThrottle = throttle;
-//    prevSteering = steering;
-//  }
-
-
-// /
-///}
 
 void dcInterrupt(void) {
 
@@ -547,48 +433,48 @@ void dcInterrupt(void) {
 
 void test_encoder_interrupt(void) {
     test.encoderCount++;
-    dt = micros() - prevTime;
+   // dt = micros() - prevTime;
 
-    prevTime = micros();
+  //  prevTime = micros();
 
 }
 
 #else
 
     void rf_encoder_interrupt(void) {
-        RF.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+        
+        RF.dt = micros() - prevTime;
+        RF.prevTime = micros();
     }
 
     void rm_encoder_interrupt(void) {
-        RM.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+         RM.dt = micros() - prevTime;
+        RM.prevTime = micros();
     }
+    
     void rb_encoder_interrupt(void) {
-        RB.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+        RB.dt = micros() - prevTime;
+        RB.prevTime = micros();
     }
+    
 
     void lf_encoder_interrupt(void) {
-        LF.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+        LF.dt = micros() - prevTime;
+        LF.prevTime = micros();
     }
+    
 
     void lm_encoder_interrupt(void) {
-        LM.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+         LM.dt = micros() - prevTime;
+        LM.prevTime = micros();
     }
+    
 
     void lb_encoder_interrupt(void) {
-        LB.encoderCount++;
-        dt = micros() - prevTime;
-        prevTime = micros();
+        LB.dt = micros() - prevTime;
+        LB.prevTime = micros();
     }
+    
     #endif
 void encoder_ISR(void) {
 
