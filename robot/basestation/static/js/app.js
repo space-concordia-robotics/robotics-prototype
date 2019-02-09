@@ -11,11 +11,11 @@ $(document).ready(() => {
       let intervalId;
       const timeoutMs = 100;
       const $callEndpointOnEvent = () => $.getJSON(e.route, e.handler);
-      const loopCallEndpointUntilEventDone = () => { 
+      const loopCallEndpointUntilEventDone = () => {
         // Call once immediately as event gets fired.
-        $callEndpointOnEvent(); 
+        $callEndpointOnEvent();
         // Call starts after timeoutMs and loops until event no longer triggered.
-        intervalId = setInterval($callEndpointOnEvent, timeoutMs);  
+        intervalId = setInterval($callEndpointOnEvent, timeoutMs);
       };
       const stopCallEndpointWhenEventDone = () => { clearInterval(intervalId); };
 
@@ -164,13 +164,30 @@ $(document).ready(() => {
         handler: (data) => { console.log(data); },
       },
       {
-        $el: $('#btn_motor6_cw'),
+        $el: $('button#ping-button'),
         event: 'mousedown',
-        route: '/mousedown_btn_motor6_cw',
-        handler: (data) => { console.log(data); },
-      },
+        route: '/ping_rover',
+        handler: (data) => {
+            console.log(data);
+            pingRover(data.ping_msg, data.ros_msg);
+        },
+      }
     ],
   };
 
   Site.init();
+  // keyboard events
+  document.addEventListener("keydown", function (event) {
+    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {
+        $.ajax("/ping_rover", {
+             success: function(data) {
+                 console.log(data);
+                 pingRover(data.ping_msg, data.ros_msg);
+             },
+             error: function() {
+                console.log("An error occured")
+             }
+          });
+    }
+  });
 });

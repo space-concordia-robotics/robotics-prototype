@@ -136,3 +136,19 @@ html, body {
     background-color: #4a0000;
     border: ridge 2px #434586;
 }
+
+.center {
+  margin: auto;
+  width: 50%;
+  border: 3px solid green;
+  padding: 10px;
+}
+
+#arm-position {
+    weight:390px;
+    height:280px;
+}
+
+#write-to-log {
+    min-width: 100%;
+}

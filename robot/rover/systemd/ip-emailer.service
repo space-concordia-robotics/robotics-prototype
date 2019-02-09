@@ -1,0 +1,11 @@
+[Unit]
+Description=Email IP address
+After=config-ethernet.service
+Wants=config-ethernet.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/runEmailer.sh
+
+[Install]
+WantedBy=multi-user.target

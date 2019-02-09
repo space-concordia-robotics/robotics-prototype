@@ -1,4 +1,4 @@
-# unit tests
+# Unit tests
 Testing an individual unit, such as a method (function) in a class, with all dependencies mocked up.
 
 ## Sample tests:

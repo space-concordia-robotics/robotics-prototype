@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="ping_acknowledgment" type="ping_response_server.py" name="ping_response_server" output="screen"/>
+</launch>

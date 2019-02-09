@@ -8,5 +8,16 @@
 **/*sh.exe.stackdump
 **/venv
 **/env
+<<<<<<< HEAD
 **/.envrc
 **/node_modules
+=======
+**/stress-test-results_*
+**/node_modules
+**/configEthernet.log
+**/emailer.log
+**/rosRoverStart.log
+**/status_done
+**/rospackages/build
+**/rospackages/devel
+>>>>>>> master
