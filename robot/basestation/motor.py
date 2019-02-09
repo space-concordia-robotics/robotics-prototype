@@ -86,6 +86,7 @@ class Motor:
     def serial_port(self, serial_port):
         self.__serial_port = serial_port
 
+#@TODO: add error handling so that can be tested independent of serial port available or not?
     def rotate(self, angle, direction=None):
         if angle < 0 and direction is None:
             direction = 'ccw'
@@ -97,6 +98,8 @@ class Motor:
             raise ValueError('`angle` cannot be negative and direction `cw`')
 
         self.angle_position = self.angle_position + angle
+        # this is the line that hangs if the teensy that is being tested with is not configured
+        # i.e. testing without trying to make motors move, comment the following line for quick fix
         self.serial_port.write(str.encode(str(self.angle_position) + '\n'))
 
     def write(self, serial_port, angle):
