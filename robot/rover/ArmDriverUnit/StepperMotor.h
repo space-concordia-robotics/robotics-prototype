@@ -104,6 +104,7 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
 void StepperMotor::stopRotation(void) {
   disablePower();
   movementDone = true;
+  isBudging = false;
 }
 
 bool StepperMotor::calcNumSteps(float angle) {
@@ -119,7 +120,12 @@ bool StepperMotor::calcNumSteps(float angle) {
 }
 
 bool StepperMotor::calcCurrentAngle(void) {
-  if (isOpenLoop) {
+  if (isBudging) {
+    Serial.println(stepCount);
+    imaginedAngle = startAngle + (float)rotationDirection * (float)stepCount * stepResolution * gearRatioReciprocal;
+    return true;
+  }
+  else if (isOpenLoop) {
     if (movementDone) {
       // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
     }

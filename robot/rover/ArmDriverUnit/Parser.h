@@ -26,6 +26,8 @@ struct commandInfo {
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
 
+  bool budgeCommand = false; // for turning without angle requests
+  int directionsToMove[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; // direction of budge control
   bool multiMove = false; // for controlling multiple motors simultaneously
   bool motorsToMove[NUM_MOTORS] = {false, false, false, false, false, false}; // which motor to move
   float anglesToReach[NUM_MOTORS] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // motor angles
@@ -76,13 +78,38 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
 #endif
   }
   // check for simultaneous motor control
-  else if (String(msgElem) == "move") {
+  else if (String(msgElem) == "move" || String(msgElem) == "budge") {
     // msgElem is a char array so it's safer to convert to string first
     bool isValidCommand = true;
+    bool isValidBudge = false;
     int i = 0;
+    if (String(msgElem) == "budge") {
+      isValidBudge = true;
+    }
     do {
       msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor 1 angle)
-      if (isValidNumber(String(msgElem), 'f')) {
+      if (isValidBudge) {
+        if (String(msgElem) == "fwd") {
+          cmd.directionsToMove[i] = COUNTER_CLOCKWISE;
+          cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
+        }
+        else if (String(msgElem) == "back") {
+          cmd.directionsToMove[i] = CLOCKWISE;
+          cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
+        }
+        else if (String(msgElem) == MOTOR_NOT_COMMANDED) {
+          // don't do anything to move motors bool array
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed motor ");
+          UART_PORT.print(i + 1);
+          UART_PORT.println(" to maintain old desired position");
+#endif
+        }
+        else {
+          isValidBudge = false;
+        }
+      }
+      else if (isValidNumber(String(msgElem), 'f')) {
         cmd.anglesToReach[i] = atof(msgElem); // update value in motor angles array
         cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
 #ifdef DEBUG_PARSING
@@ -113,7 +140,12 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
     }
     while (i < NUM_MOTORS) ; // this skips everything after the 6th val but i want it to not skip but i can't get it to work
     if (isValidCommand && i == NUM_MOTORS) {
-      cmd.multiMove = true;
+      if (isValidBudge) {
+        cmd.budgeCommand = true;
+      }
+      else {
+        cmd.multiMove = true;
+      }
     }
     else if (i < NUM_MOTORS) {
 #ifdef DEBUG_PARSING
@@ -259,6 +291,29 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.stopAllMotors) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.println("$S,Success: verified command to stop all motors");
+#endif
+    return true;
+  }
+  else if (cmd.budgeCommand) {
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      if (cmd.motorsToMove[i]) {
+        if (cmd.directionsToMove[i] == 0) {
+          return false;
+        }
+      }
+    }
+#ifdef DEBUG_VERIFYING
+    UART_PORT.println("$S,Success: verified command to budge all motors for directions: ");
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      if (cmd.motorsToMove[i]) {
+        UART_PORT.print(cmd.directionsToMove[i]);
+      }
+      else {
+        UART_PORT.print(MOTOR_NOT_COMMANDED);
+      }
+      UART_PORT.print(" ");
+    }
+    UART_PORT.println("");
 #endif
     return true;
   }

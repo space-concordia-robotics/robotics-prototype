@@ -4,6 +4,8 @@
 #include "PinSetup.h"
 #include "PidController.h"
 
+#define BUDGE_TIMEOUT 200 // if command hasn't been received in this amount of ms, stop turning
+
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
 enum motor_type {DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR};
@@ -27,6 +29,8 @@ class RobotMotor {
   // these variables change during the main loop
   volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
   volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
+  elapsedMillis sinceBudgeCommand; // timeout for budge commands, elapsedMillis can't be volatile
+  volatile bool isBudging;
   // setup functions
   RobotMotor();
   void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
@@ -71,6 +75,7 @@ RobotMotor::RobotMotor() {
   imaginedAngle = 0.0;
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
+  isBudging = false;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :

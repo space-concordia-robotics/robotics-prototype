@@ -50,6 +50,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
 void ServoMotor::stopRotation(void) {
   servo.writeMicroseconds(SERVO_STOP);
   movementDone = true;
+  isBudging = false;
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
@@ -88,7 +89,12 @@ bool ServoMotor::calcTurningDuration(float angle) {
 }
 
 bool ServoMotor::calcCurrentAngle(void) {
-  if (isOpenLoop) {
+  if (isBudging) {
+    Serial.println(sinceBudgeCommand);
+    imaginedAngle = startAngle + (float)rotationDirection * (float)sinceBudgeCommand * openLoopSpeed * gearRatioReciprocal / (1000.0 * openLoopGain);
+    return true;
+  }
+  else if (isOpenLoop) {
     if (movementDone) {
       // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
     }

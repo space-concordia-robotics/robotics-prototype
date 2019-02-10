@@ -50,6 +50,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
 void DcMotor::stopRotation(void) {
   analogWrite(pwmPin, 0); // 0 for cytron, different implementation for sabertooth
   movementDone = true;
+  isBudging = false;
 }
 
 void DcMotor::setVelocity(int motorDir, float motorSpeed) {
@@ -87,7 +88,11 @@ bool DcMotor::calcTurningDuration(float angle) {
 }
 
 bool DcMotor::calcCurrentAngle(void) {
-  if (isOpenLoop) {
+  if (isBudging) {
+    imaginedAngle = startAngle + (float)rotationDirection * (float)sinceBudgeCommand * openLoopSpeed * gearRatioReciprocal / (1000.0 * openLoopGain);
+    return true;
+  }
+  else if (isOpenLoop) {
     if (movementDone) {
       // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
     }
