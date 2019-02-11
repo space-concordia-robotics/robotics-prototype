@@ -20,7 +20,7 @@ cp commit-message-hook.sh .git/hooks/prepare-commit-msg
 
 ### Using the commit hook prepender
 
-Now, when ever you using ```git commit-m``` the hook will prepend the issue number to your message. This will show up in the repo as [#<issue number>], so there is no longer a need to add this to your commit message. This will work as long as your branches are named using our branch naming standards defind in our wiki, otherwise the commit will be aborted.
+Now, when ever you using ```git commit -m``` the hook will prepend the issue number to your message. This will show up in the repo as [#\<issue number\>], so there is no longer a need to add this to your commit message. This will work as long as your branches are named using our branch naming standards defind in our wiki, otherwise the commit will be aborted.
 
 In order to write a long commit message using ```git commit -m```, write a concise title and then press enter twice. Then, type as long a message as is appropriate and close the quation mark. This ensures it will be formatted nicely on github.
 
