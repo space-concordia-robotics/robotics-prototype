@@ -40,8 +40,8 @@
 
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #define DEBUG_MAIN 10 // debug messages during main loop
-#define DEBUG_PARSING 11 // debug messages during parsing function
-#define DEBUG_VERIFYING 12 // debug messages during verification function
+//#define DEBUG_PARSING 11 // debug messages during parsing function
+//#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
 #define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
@@ -514,23 +514,6 @@ void loop() {
               nh.loginfo(actualMessage);
 #endif
             }
-            else {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor ");
-              UART_PORT.print(i + 1);
-              UART_PORT.println(" will not change course");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " will not change course";
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
-#endif
-            }
           }
         }
         else if (motorCommand.multiMove) { // make motors move simultaneously
@@ -585,8 +568,10 @@ void loop() {
             else if ( !(motorArray[i] -> isOpenLoop) ) {
               ang = motorArray[i] -> getCurrentAngle();
             }
-            if ( ( (dir > 0) && (ang > motorArray[i] -> maxJointAngle) ) || ( (dir < 0) && (ang < motorArray[i] -> minJointAngle) ) ) {
-              motorsCanMove = false;
+            if (motorArray[i] -> hasAngleLimits) {
+              if ( ( (dir > 0) && (ang > motorArray[i] -> maxJointAngle) ) || ( (dir < 0) && (ang < motorArray[i] -> minJointAngle) ) ) {
+                motorsCanMove = false;
+              }
             }
           }
           else if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
@@ -626,7 +611,12 @@ void loop() {
               motor1.isBudging = true;
               motor1.movementDone = false;
               motor1.sinceBudgeCommand = 0;
-              motor1.startAngle = motor1.getCurrentAngle();
+              if (motor1.isOpenLoop) {
+                motor1.startAngle = motor1.getImaginedAngle();
+              }
+              else if (!motor1.isOpenLoop) {
+                motor1.startAngle = motor1.getCurrentAngle();
+              }
             }
             else if (motor1.setDesiredAngle(motorCommand.anglesToReach[0])) { // this method returns true if the command is within joint angle limits
               if (motor1.isOpenLoop) {
@@ -664,7 +654,12 @@ void loop() {
               motor2.isBudging = true;
               motor2.movementDone = false;
               motor2.sinceBudgeCommand = 0;
-              motor2.startAngle = motor2.getCurrentAngle();
+              if (motor2.isOpenLoop) {
+                motor2.startAngle = motor2.getImaginedAngle();
+              }
+              else if (!motor2.isOpenLoop) {
+                motor2.startAngle = motor2.getCurrentAngle();
+              }
             }
             else if (motor2.setDesiredAngle(motorCommand.anglesToReach[1])) {
               if (motor2.isOpenLoop) {
@@ -706,7 +701,12 @@ void loop() {
               motor3.movementDone = false;
               motor3.stepCount = 0;
               motor3.sinceBudgeCommand = 0;
-              motor3.startAngle = motor3.getCurrentAngle();
+              if (motor3.isOpenLoop) {
+                motor3.startAngle = motor3.getImaginedAngle();
+              }
+              else if (!motor3.isOpenLoop) {
+                motor3.startAngle = motor3.getCurrentAngle();
+              }
             }
             else if (motor3.setDesiredAngle(motorCommand.anglesToReach[2])) {
               if (motor3.isOpenLoop) {
@@ -746,7 +746,12 @@ void loop() {
               motor4.movementDone = false;
               motor4.stepCount = 0;
               motor4.sinceBudgeCommand = 0;
-              motor4.startAngle = motor4.getCurrentAngle();
+              if (motor4.isOpenLoop) {
+                motor4.startAngle = motor4.getImaginedAngle();
+              }
+              else if (!motor4.isOpenLoop) {
+                motor4.startAngle = motor4.getCurrentAngle();
+              }
             }
             else if (motor4.setDesiredAngle(motorCommand.anglesToReach[3])) {
               if (motor4.isOpenLoop) {
@@ -785,7 +790,12 @@ void loop() {
               motor5.isBudging = true;
               motor5.movementDone = false;
               motor5.sinceBudgeCommand = 0;
-              motor5.startAngle = motor5.getCurrentAngle();
+              if (motor5.isOpenLoop) {
+                motor5.startAngle = motor5.getImaginedAngle();
+              }
+              else if (!motor5.isOpenLoop) {
+                motor5.startAngle = motor5.getCurrentAngle();
+              }
             }
             else if (motor5.setDesiredAngle(motorCommand.anglesToReach[4])) {
               if (motor5.isOpenLoop) {
@@ -823,7 +833,12 @@ void loop() {
               motor6.isBudging = true;
               motor6.movementDone = false;
               motor6.sinceBudgeCommand = 0;
-              motor6.startAngle = motor6.getCurrentAngle();
+              if (motor6.isOpenLoop) {
+                motor6.startAngle = motor6.getImaginedAngle();
+              }
+              else if (!motor6.isOpenLoop) {
+                motor6.startAngle = motor6.getCurrentAngle();
+              }
             }
             else if (motor6.setDesiredAngle(motorCommand.anglesToReach[5])) {
               if (motor6.isOpenLoop) {
