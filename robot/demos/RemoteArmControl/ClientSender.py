@@ -3,12 +3,12 @@
 # make sure that you start ServerListener.py process on odroid first before running this script!
 
 import sys
-import click
 from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
 import time
 import os
 import subprocess
 import re
+import click
 
 # returns current time in milliseconds
 currentMillis = lambda: int(round(time.time() * 1000))
@@ -50,13 +50,15 @@ def getMyIP():
 
     for line in lines:
         testLine = line.lower()
-        if ("inet addr" in testLine and "bcast" in testLine) or ("inet" in testLine and "broadcast" in testLine) and not "127.0.0.1" in testLine:
+        if ("inet addr" in testLine and "bcast" in testLine)\
+        or ("inet" in testLine and "broadcast" in testLine) and not "127.0.0.1" in testLine:
             print("line: " + line)
             myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
 
     return myIpAddress
 
-PORT_NUMBER = 5000
+CLIENT_PORT = 5000
+SERVER_PORT = 5001
 SIZE = 1024
 
 if len(sys.argv) < 2:  # first one is the name of the file
@@ -67,7 +69,7 @@ if len(sys.argv) < 2:  # first one is the name of the file
     sys.exit(1)
 
 if len(sys.argv) == 3:
-    PORT_NUMBER = int(sys.argv[2])
+    CLIENT_PORT = int(sys.argv[2])
 elif len(sys.argv) > 3:
     print("too many args")
     sys.exit(1)
@@ -76,7 +78,7 @@ SERVER_IP = sys.argv[1]
 
 print(
     "Base station client sending command packets ('w' or 's') to IP {}, via port {}\nPress q to terminate connection.".
-    format(SERVER_IP, PORT_NUMBER))
+    format(SERVER_IP, CLIENT_PORT))
 
 # use xset to set refresh/delay rates of keyboard input to something reasonable
 TARGET_DELAY = 100
@@ -93,41 +95,49 @@ hostName = gethostbyname('0.0.0.0')
 # UDP socket for sending drive cmds
 mySocket = socket(AF_INET, SOCK_DGRAM)
 # make socket reachable by any address (rather than only visible to same machine that it's running on)
-mySocket.bind((hostName, PORT_NUMBER))
+mySocket.bind((hostName, CLIENT_PORT))
 
 # for controlling command throughput
 lastCmdSent = 0
 THROTTLE_TIME = 100
+ACK_TIMEOUT = 2000
+RESPONSE_TIMEOUT = 1000
 
 # for sending IP/receiving acknowledgment
 handshake = ""
 IP_KNOWN = "ip_known" # acknowledgment message
 clientIP = "ip:" + getMyIP() # format -> ip:192.168.2.13
 
-# send client IP address over to server for feedback
-while True:
+ send client IP address over to server for feedback
+print("Attempting to send: \"" + clientIP + "\" ...")
+mySocket.sendto(str.encode(clientIP), (SERVER_IP, SERVER_PORT))
+print("IP address sent\n")
+#time.sleep(1)
+
+print("Listening for acknowledgement from server ...")
+# listen (right away) for incoming acknowledgement
+acknowledgeTime = currentMillis()
+handShakeSuccess = False
+while currentMillis() - acknowledgeTime < ACK_TIMEOUT:
     try:
-        print("Attempting to send: \"" + clientIP + "\" ...")
-        mySocket.sendto(str.encode(clientIP), (SERVER_IP, PORT_NUMBER))
-        print("IP address sent\n")
-        #time.sleep(1)
-
-        print("Listening for acknowledgement from server ...")
-
-        # listen (right away) for incoming acknowledgement
         (handshake, addr) = mySocket.recvfrom(SIZE)
         handshake = handshake.decode()
         print("Acknowledgment received: " + str(handshake) + "\n")
-
         if handshake == IP_KNOWN:
+            handShakeSuccess = True
             break
-
     except:
-        setX(originalDelay, originalRefresh)
-        break
+        continue
+
+if not handShakeSuccess:
+    print("Reached acknowledgment timeout, closing.\n")
+    setX(originalDelay, originalRefresh)
+    sys.exit
 
 setX(TARGET_DELAY, TARGET_REFRESH)
 print("Ready for sending drive commands!\n")
+
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p']
 
 while True:
     try:
@@ -136,28 +146,54 @@ while True:
         if currentMillis() - lastCmdSent > THROTTLE_TIME:
             # for debugging
             #print("waited {} milliseconds to move".format(currentMillis() - lastCmdSent))
-            if key == 'w':
-                print("Sending key: " + key)
-                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
+
+            if key in keyList:
+                if key == 'q':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nTerminating connection.\n")
+                    #print("Resetting delay rate back to {} and refresh rate back to {}".format(originalDelay, originalRefresh))
+                    setX(originalDelay, originalRefresh)
+                    break
+                elif key == 'a':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nDisplaying latest Teensy messages.\n")
+                    lastCmdSent = currentMillis()
+                elif key == 'p':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nPinging Teensy.\n")
+                    lastCmdSent = currentMillis()
+                    # # wait till receive a response
+                    # try:
+                    #     checkResponse = currentMillis()
+                    #     while checkResponse < 500:
+                    #         (feedback, addr) = mySocket.recvfrom(SIZE)
+                    #     if feedback:
+                    #         print('feedback: ' + feedback.decode() + "\n")
+                    #
+                    # except:
+                    #     continue
+                else:
+                    print("Sending key: " + key + "\n")
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("key sent\n")
+                    lastCmdSent = currentMillis()
+            else:
+                print("\nInvalid key, ignoring.\n")
+                # need to send something to the server listener because this code expects feedback
+                mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
                 lastCmdSent = currentMillis()
-            elif key == 's':
-                print("Sending key: " + key)
-                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
-                lastCmdSent = currentMillis()
-            elif key == 'q':
-                mySocket.sendto(str.encode(key), (SERVER_IP, PORT_NUMBER))
-                print("\nTerminating connection.")
-                #print("Resetting delay rate back to {} and refresh rate back to {}".format(originalDelay, originalRefresh))
-                setX(originalDelay, originalRefresh)
-                break
 
             # wait till receive a response
-            (feedback, addr) = mySocket.recvfrom(SIZE)
+            try:
+                checkResponse = currentMillis()
+                while checkResponse < RESPONSE_TIMEOUT:
+                    (feedback, addr) = mySocket.recvfrom(SIZE)
+                if feedback:
+                    print('feedback: ' + feedback.decode() + "\n")
 
-            if feedback:
-                print(feedback.decode())
+            except:
+                continue
 
     except:
         setX(originalDelay, originalRefresh)
         break
-

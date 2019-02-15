@@ -3,12 +3,12 @@
 # make sure that you start ServerListener.py process on odroid first before running this script!
 
 import sys
-import click
 from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
 import time
 import os
 import subprocess
 import re
+import click
 
 # returns current time in milliseconds
 currentMillis = lambda: int(round(time.time() * 1000))
@@ -50,7 +50,8 @@ def getMyIP():
 
     for line in lines:
         testLine = line.lower()
-        if ("inet addr" in testLine and "bcast" in testLine) or ("inet" in testLine and "broadcast" in testLine) and not "127.0.0.1" in testLine:
+        if ("inet addr" in testLine and "bcast" in testLine) \
+        or ("inet" in testLine and "broadcast" in testLine) and not "127.0.0.1" in testLine:
             print("line: " + line)
             myIpAddress = re.findall(r'\d+\.\d+\.\d+\.\d+', line)[0]
 
