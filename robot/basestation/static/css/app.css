@@ -70,8 +70,25 @@ html, body {
 }
 
 .control-btn2 {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 40px;
+    background-color: #4a0000;
+    border: ridge 2px #434586;
+    color: white;
+}
+
+.control-btn3 {
+    width: 120px;
+    height: 30px;
+    background-color: #4a0000;
+    border: ridge 2px #434586;
+    margin: 2px;
+    color: white;
+}
+
+.control-btn4 {
+    width: 60px;
+    height: 60px;
     background-color: #4a0000;
     border: ridge 2px #434586;
     color: white;
@@ -138,17 +155,27 @@ html, body {
 }
 
 .center {
-  margin: auto;
-  width: 50%;
-  border: 3px solid green;
-  padding: 10px;
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
 }
 
 #arm-position {
-    weight:390px;
-    height:280px;
+    width: 390px;
+    height: 280px;
 }
 
 #write-to-log {
     min-width: 100%;
+}
+
+.btn-circle {
+    width: 15px;
+    height: 8px;
+    padding: 6px 0px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
 }

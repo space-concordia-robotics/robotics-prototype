@@ -55,6 +55,12 @@ def index():
     return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
 
 
+@app.route("/rover")
+def rover():
+    """Rover control panel."""
+    return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
+
+
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
