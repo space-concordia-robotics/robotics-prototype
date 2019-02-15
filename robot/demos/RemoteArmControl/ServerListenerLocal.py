@@ -8,10 +8,14 @@
 
 from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import sys, traceback
+import time
 import serial
 import serial.tools.list_ports
 import time
 import re
+
+# returns current time in milliseconds
+currentMillis = lambda: int(round(time.time() * 1000))
 
 CLIENT_PORT = 5000
 SERVER_PORT = 5001
@@ -63,7 +67,8 @@ except:
 print("Ready for incoming drive cmds!\n")
 
 RESPONSE_TIMEOUT = 75
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q']
+PING_TIMEOUT = 1000
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p']
 
 while True:
     while ser.in_waiting:
@@ -152,6 +157,15 @@ while True:
             elif command == 'a':
                 while ser.in_waiting:
                     print(ser.readline().decode())
+            elif command == 'p':
+                print("cmd: p --> ping")
+                command = "ping"
+                ser.write(str.encode(command))
+                pingTime = currentMillis()
+                while currentMillis() - pingTime < PING_TIMEOUT:
+                    response = ser.readline().decode()
+                    mySocket.sendto(str.encode(response), (clientIP, CLIENT_PORT))
+                    print(response)
 
     except Exception:
         print("Exception in user code:")

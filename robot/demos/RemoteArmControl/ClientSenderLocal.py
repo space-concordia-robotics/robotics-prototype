@@ -136,7 +136,7 @@ if not handShakeSuccess:
 setX(TARGET_DELAY, TARGET_REFRESH)
 print("Ready for sending drive commands!\n")
 
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a']
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p']
 
 while True:
     try:
@@ -157,6 +157,20 @@ while True:
                     mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
                     print("\nDisplaying latest Teensy messages.\n")
                     lastCmdSent = currentMillis()
+                elif key == 'p':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nPinging Teensy.\n")
+                    lastCmdSent = currentMillis()
+                    # # wait till receive a response
+                    # try:
+                    #     checkResponse = currentMillis()
+                    #     while checkResponse < 500:
+                    #         (feedback, addr) = mySocket.recvfrom(SIZE)
+                    #     if feedback:
+                    #         print('feedback: ' + feedback.decode() + "\n")
+                    #
+                    # except:
+                    #     continue
                 else:
                     print("Sending key: " + key + "\n")
                     mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
