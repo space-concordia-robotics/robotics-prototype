@@ -56,6 +56,12 @@ function manualControl() {
     }
 }
 
+function toggleToManual() {
+    if (!$("#manual-control-btn")[0].checked) {
+        $("#manual-control-btn").click();
+    }
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest(msg) {

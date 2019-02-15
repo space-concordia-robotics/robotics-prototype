@@ -270,7 +270,8 @@ $("#serial-cmd-input").on('keyup', function (e) {
 setInterval(updateOdroidRx, 1000);
 
 
-  // keyboard events
+  // KEYBOARD EVENTS
+  // rover ping
   document.addEventListener("keydown", function (event) {
     if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {
         $.ajax("/ping_rover", {
@@ -282,6 +283,152 @@ setInterval(updateOdroidRx, 1000);
                 console.log("An error occured")
              }
           });
+    }
+  });
+
+  // manual controls
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyW") {
+        toggleToManual();
+        $("#click_btn_motor1_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyW") {
+        $("#click_btn_motor1_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyE") {
+        toggleToManual();
+        $("#click_btn_motor2_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyE") {
+        $("#click_btn_motor2_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyR") {
+        toggleToManual();
+        $("#click_btn_motor3_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyR") {
+        $("#click_btn_motor3_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyT") {
+        toggleToManual();
+        $("#click_btn_motor4_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyT") {
+        $("#click_btn_motor4_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyY") {
+        toggleToManual();
+        $("#click_btn_motor5_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyY") {
+        $("#click_btn_motor5_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyU") {
+        toggleToManual();
+        $("#click_btn_motor6_ccw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyU") {
+        $("#click_btn_motor6_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  // automatic controls
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyS") {
+        toggleToManual();
+        $("#click_btn_motor1_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyS") {
+        $("#click_btn_motor1_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyD") {
+        toggleToManual();
+        $("#click_btn_motor2_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyD") {
+        $("#click_btn_motor2_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyF") {
+        toggleToManual();
+        $("#click_btn_motor3_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyF") {
+        $("#click_btn_motor3_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyG") {
+        toggleToManual();
+        $("#click_btn_motor4_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyG") {
+        $("#click_btn_motor4_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyH") {
+        toggleToManual();
+        $("#click_btn_motor5_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyH") {
+        $("#click_btn_motor5_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.code === "KeyJ") {
+        toggleToManual();
+        $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+    }
+  });
+  document.addEventListener("keyup", function (event) {
+    if (event.code === "KeyJ") {
+        $("#click_btn_motor6_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 });
