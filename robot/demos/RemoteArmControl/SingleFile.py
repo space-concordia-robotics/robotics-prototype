@@ -2,13 +2,11 @@
 
 # make sure that you start ServerListener.py process on odroid first before running this script!
 
-import click
-from socket import socket, AF_INET, SOCK_DGRAM, gethostbyname # add SOCK_STREAM here for TCP
 import time
 import os
 import subprocess
 import re
-import sys, traceback
+import click
 import serial
 import serial.tools.list_ports
 

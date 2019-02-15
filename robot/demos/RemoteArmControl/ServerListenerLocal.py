@@ -7,12 +7,12 @@
 # along with acknowledgment message per drive command received
 
 from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
-import sys, traceback
-import time
-import serial
-import serial.tools.list_ports
+import sys
+import traceback
 import time
 import re
+import serial
+import serial.tools.list_ports
 
 # returns current time in milliseconds
 currentMillis = lambda: int(round(time.time() * 1000))
