@@ -585,4 +585,9 @@ jQuery(document).ready((s) => {
             $m6BtnCw.css("background-color", "rgb(74, 0, 0)");
         }
     });
+
+    // update console log
+    if (mockArmTable) {
+        setInterval(mockArmTableLog, 1000);
+    }
 });

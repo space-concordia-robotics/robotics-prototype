@@ -2,6 +2,7 @@
 const logConsole = "#write-to-log";
 const serialCmd = "#serial-cmd-input";
 
+// Console Log
 function appendToConsole(msg) {
     $(logConsole).append(msg + "\n");
 }
@@ -17,6 +18,21 @@ function clearSerialCmd() {
 function scrollToBottom() {
     $(logConsole).scrollTop($(logConsole)[0].scrollHeight);
 }
+
+// Mocking data
+function mockArmTableLog() {
+    let m1 = "m1: " + $("#m1-angle").text();
+    let m2 = "m2: " + $("#m2-angle").text();
+    let m3 = "m3: " + $("#m3-angle").text();
+    let m4 = "m4: " + $("#m4-angle").text();
+    let m5 = "m5: " + $("#m5-angle").text();
+    let m6 = "m6: " + $("#m6-angle").text();
+    let motorAngleMsg = ["Motor angles:", m1, m2, m3, m4, m5, m6];
+
+    appendToConsole(motorAngleMsg.join("\n") + "\n");
+    scrollToBottom();
+}
+
 
 // Appends the passed bash and ros ping messages to the console log
 function pingRover(ping_msg, ros_msg) {
