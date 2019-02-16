@@ -1,11 +1,17 @@
 // Console Log
 const logConsole = "#write-to-log";
 const serialCmd = "#serial-cmd-input";
-const roverLogConsole = "#rover-log";
 
 // Console Log
 function appendToConsole(msg) {
     $(logConsole).append(msg + "\n");
+}
+
+// Rover log
+// logs to console and scrolls to bottom
+function appendToRoverLog(msg) {
+    $("#rover-log").append(msg);
+    $("#rover-log").scrollTop($("#rover-log")[0].scrollHeight);
 }
 
 function clearLogConsole() {
@@ -34,6 +40,17 @@ function mockArmTableLog() {
     scrollToBottom();
 }
 
+function mockRoverTableLog() {
+    let m1 = "Left-Front RPM:  " + $("#left-front-rpm").text();
+    let m2 = "Left-Mid RPM:    " + $("#left-mid-rpm").text();
+    let m3 = "Left-Rear RPM:   " + $("#left-rear-rpm").text();
+    let m4 = "Right-Front RPM: " + $("#right-front-rpm").text();
+    let m5 = "Right-Mid RPM:   " + $("#right-mid-rpm").text();
+    let m6 = "Right-Rear RPM:  " + $("#right-rear-rpm").text();
+    let motorRpmMsg = ["Motor RPM:", m1, m2, m3, m4, m5, m6];
+
+    appendToRoverLog(motorRpmMsg.join("\n") + "\n\n");
+}
 
 // Appends the passed bash and ros ping messages to the console log
 function pingRover(ping_msg, ros_msg) {
