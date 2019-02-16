@@ -12,6 +12,7 @@ struct commandInfo {
   // commands that apply to the teensy in general
   bool pingCommand = false; // for ping command
   bool stopAllMotors = false; // for stopping all motors
+  bool resetAllMotors = false; // for resetting all angle values
 
   // commands that apply to a specific motor
   int whichMotor = 0; // which motor was requested to do something
@@ -75,6 +76,13 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
     cmd.stopAllMotors = true;
 #ifdef DEBUG_PARSING
     UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
+#endif
+  }
+  else if (String(msgElem) == "reset") {
+    // msgElem is a char array so it's safer to convert to string first
+    cmd.resetAllMotors = true;
+#ifdef DEBUG_PARSING
+    UART_PORT.println("$S,Success: parsed command to reset all motor angle values");
 #endif
   }
   // check for simultaneous motor control
@@ -291,6 +299,12 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.stopAllMotors) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.println("$S,Success: verified command to stop all motors");
+#endif
+    return true;
+  }
+  else if (cmd.resetAllMotors) {
+#ifdef DEBUG_VERIFYING
+    UART_PORT.println("$S,Success: verified command to reset all motor angle values");
 #endif
     return true;
   }

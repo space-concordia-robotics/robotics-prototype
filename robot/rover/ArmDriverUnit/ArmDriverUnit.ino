@@ -433,6 +433,16 @@ void loop() {
         nh.loginfo("all motors stopped because of emergency stop");
 #endif
       }
+      else if (motorCommand.resetAllMotors) { // emergency stop takes precedence
+        for (int i = 0; i < NUM_MOTORS; i++) {
+          motorArray[i] -> setImaginedAngle(0.0);
+        }
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("all motor angle values reset");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("all motor angle values reset");
+#endif
+      }
       else { // following cases are for commands to specific motors
         if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
           motorArray[motorCommand.whichMotor - 1] -> stopRotation();
