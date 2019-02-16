@@ -287,147 +287,148 @@ setInterval(updateOdroidRx, 1000);
   });
 
   // manual controls
+  let $serialCmdInput = $("#serial-cmd-input");
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyW") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyW") {
         toggleToManual();
         $("#click_btn_motor1_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyW") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyW") {
         $("#click_btn_motor1_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyE") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyE") {
         toggleToManual();
         $("#click_btn_motor2_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyE") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyE") {
         $("#click_btn_motor2_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyR") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyR") {
         toggleToManual();
         $("#click_btn_motor3_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyR") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyR") {
         $("#click_btn_motor3_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyT") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyT") {
         toggleToManual();
         $("#click_btn_motor4_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyT") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyT") {
         $("#click_btn_motor4_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyY") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyY") {
         toggleToManual();
         $("#click_btn_motor5_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyY") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyY") {
         $("#click_btn_motor5_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyU") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyU") {
         toggleToManual();
         $("#click_btn_motor6_ccw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyU") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyU") {
         $("#click_btn_motor6_ccw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   // automatic controls
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyS") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyS") {
         toggleToManual();
         $("#click_btn_motor1_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyS") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyS") {
         $("#click_btn_motor1_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyD") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyD") {
         toggleToManual();
         $("#click_btn_motor2_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyD") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyD") {
         $("#click_btn_motor2_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyF") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyF") {
         toggleToManual();
         $("#click_btn_motor3_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyF") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyF") {
         $("#click_btn_motor3_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyG") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyG") {
         toggleToManual();
         $("#click_btn_motor4_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyG") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyG") {
         $("#click_btn_motor4_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyH") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyH") {
         toggleToManual();
         $("#click_btn_motor5_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyH") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyH") {
         $("#click_btn_motor5_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.code === "KeyJ") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
         toggleToManual();
         $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
     }
   });
   document.addEventListener("keyup", function (event) {
-    if (event.code === "KeyJ") {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
         $("#click_btn_motor6_cw > button").css("background-color", "rgb(74, 0, 0)");
     }
   });
