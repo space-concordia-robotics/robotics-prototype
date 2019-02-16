@@ -131,6 +131,8 @@ def serial_cmd():
 
     return jsonify(success=True, cmd=cmd, output=output)
 
+# only to be used when hacky implementation is fixed
+# see odroid_rx package for details
 @app.route("/odroid_rx", methods=["POST"])
 def odroid_rx():
     script_dir = os.path.dirname(os.path.realpath(__file__))

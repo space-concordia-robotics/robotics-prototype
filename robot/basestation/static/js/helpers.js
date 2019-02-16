@@ -25,6 +25,7 @@ function pingRover(ping_msg, ros_msg) {
     scrollToBottom();
 }
 
+// Updates the console log with odroid rx data
 function updateOdroidRx() {
     $.ajax({
         url: '/odroid_rx',

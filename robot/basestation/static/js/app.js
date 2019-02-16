@@ -266,8 +266,10 @@ $("#serial-cmd-input").on('keyup', function (e) {
     }
 });
 
+//@TODO: fix implementation of odroid rx pub/sub to work on event triggers
+// rather than through polling
 // update odroid rx data every second
-setInterval(updateOdroidRx, 1000);
+//setInterval(updateOdroidRx, 1000);
 
 
   // KEYBOARD EVENTS

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# NOTE: the str(output, "utf-8") only works if we run this with python2
+
 import signal
 import atexit
 import sys
