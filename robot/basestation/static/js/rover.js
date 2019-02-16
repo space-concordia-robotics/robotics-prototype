@@ -1,6 +1,14 @@
 //@TODO: implement game loop for keyboard events:
 // https://stackoverflow.com/questions/12273451/how-to-fix-delay-in-javascript-keydown
 
+let mockRoverLog = true;
+
+// Rover log
+function appendMockToRoverLog() {
+    $("#rover-log").append("All motors alive.\n");
+    $("#rover-log").scrollTop($("rover-log")[0].scrollHeight);
+}
+
 // rover drive keyboard events
 $(document).keydown(function(e) {
   switch(e.which) {
@@ -47,3 +55,7 @@ $(document).keyup(function(e) {
   }
   e.preventDefault(); // prevent the default action (scroll / move caret)
 });
+
+if (mockRoverLog) {
+    setInterval(appendMockToRoverLog, 1000);
+}

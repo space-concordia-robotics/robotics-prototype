@@ -1,6 +1,7 @@
 // Console Log
 const logConsole = "#write-to-log";
 const serialCmd = "#serial-cmd-input";
+const roverLogConsole = "#rover-log";
 
 // Console Log
 function appendToConsole(msg) {

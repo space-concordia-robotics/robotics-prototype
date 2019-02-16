@@ -185,3 +185,8 @@ input#serial-cmd-input {
     font-size: 12px;
     line-height: 1.42857;
 }
+
+textarea#rover-log {
+    min-width: 100%;
+    min-height: 450px;
+}
