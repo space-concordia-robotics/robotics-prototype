@@ -1,12 +1,17 @@
 // Console Log
 const logConsole = "#write-to-log";
+const serialCmd = "#serial-cmd-input";
 
 function appendToConsole(msg) {
     $(logConsole).append(msg + "\n");
 }
 
-function clearText() {
+function clearLogConsole() {
     $(logConsole).html("");
+}
+
+function clearSerialCmd() {
+    $(serialCmd).val("");
 }
 
 function scrollToBottom() {
@@ -20,6 +25,23 @@ function pingRover(ping_msg, ros_msg) {
     scrollToBottom();
 }
 
+// Updates the console log with odroid rx data
+function updateOdroidRx() {
+    $.ajax({
+        url: '/odroid_rx',
+        type: 'POST',
+        success: function(response){
+            let newData = response.odroid_rx;
+
+            if (newData != $("#last-odroid-rx").val()) {
+                appendToConsole("Odroid RX: " + response.odroid_rx);
+                scrollToBottom();
+            }
+
+            $("#last-odroid-rx").val(response.odroid_rx);
+        }
+    })
+}
 // Manual control
 function manualControl() {
     var a = document.getElementById("ArmcontrolsOFF");
@@ -32,6 +54,12 @@ function manualControl() {
         a.style.display = "none";
         b.style.display = "block";
         b.style.borderRadius = "0";
+    }
+}
+
+function toggleToManual() {
+    if (!$("#manual-control-btn")[0].checked) {
+        $("#manual-control-btn").click();
     }
 }
 
