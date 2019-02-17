@@ -89,10 +89,12 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
   }
   switch (motorDir) {
     case CLOCKWISE:
-      digitalWriteFast(directionPin, LOW);
+      //digitalWriteFast(directionPin, LOW);
+      digitalWrite(directionPin, LOW);
       break;
     case COUNTER_CLOCKWISE:
-      digitalWriteFast(directionPin, HIGH);
+      //digitalWriteFast(directionPin, HIGH);
+      digitalWrite(directionPin, HIGH);
       break;
   }
   singleStep(motorDir);

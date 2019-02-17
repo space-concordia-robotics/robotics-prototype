@@ -65,10 +65,10 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
   }
   switch (motorDir)  {
     case CLOCKWISE:
-      digitalWriteFast(directionPin, LOW);
+      digitalWrite(directionPin, LOW);
       break;
     case COUNTER_CLOCKWISE:
-      digitalWriteFast(directionPin, HIGH);
+      digitalWrite(directionPin, HIGH);
       break;
   }
   int dutyCycle = motorSpeed * 255 / 100;
