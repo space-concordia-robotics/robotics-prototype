@@ -39,11 +39,12 @@ ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName)
 ser = serial.Serial('/dev/' + firstPortName, 9600)
-clientIP = ""
+clientIP = "192.168.1.20"
 IP_KNOWN = "ip_known"
 
 print("Rover server listening on port {} \n".format(SERVER_PORT))
 
+'''
 try:
     (data, addr) = mySocket.recvfrom(SIZE)
     clientIpMsg = data.decode()
@@ -63,16 +64,19 @@ except:
     print("-"*60)
     traceback.print_exc(file=sys.stdout)
     print("-"*60)
+'''
+
 
 print("Ready for incoming drive cmds!\n")
 
 RESPONSE_TIMEOUT = 75
 PING_TIMEOUT = 1000
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p']
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o']
 
 while True:
     while ser.in_waiting:
         print(ser.readline().decode())
+
     try:
         (data, addr) = mySocket.recvfrom(SIZE)
         command = data.decode()
@@ -151,6 +155,16 @@ while True:
                 mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
                 command = "budge ~ ~ ~ ~ ~ back"
                 ser.write(str.encode(command))
+            elif command == 'z':
+                print("cmd: z --> stop all motors")
+                mySocket.sendto(str.encode("stop"), (clientIP, CLIENT_PORT))
+                command = "stop"
+                ser.write(str.encode(command))
+            elif command == 'o':
+                print("cmd: o --> reset angle values")
+                mySocket.sendto(str.encode("reset"), (clientIP, CLIENT_PORT))
+                command = "reset"
+                ser.write(str.encode(command))
             elif command == 'q':
                 print("\nTerminating connection.")
                 break
@@ -173,3 +187,4 @@ while True:
         traceback.print_exc(file=sys.stdout)
         print("-"*60)
         break
+

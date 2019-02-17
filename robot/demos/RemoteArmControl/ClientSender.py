@@ -108,7 +108,8 @@ handshake = ""
 IP_KNOWN = "ip_known" # acknowledgment message
 clientIP = "ip:" + getMyIP() # format -> ip:192.168.2.13
 
- send client IP address over to server for feedback
+'''
+# send client IP address over to server for feedback
 print("Attempting to send: \"" + clientIP + "\" ...")
 mySocket.sendto(str.encode(clientIP), (SERVER_IP, SERVER_PORT))
 print("IP address sent\n")
@@ -133,11 +134,12 @@ if not handShakeSuccess:
     print("Reached acknowledgment timeout, closing.\n")
     setX(originalDelay, originalRefresh)
     sys.exit
+'''
 
 setX(TARGET_DELAY, TARGET_REFRESH)
 print("Ready for sending drive commands!\n")
 
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p']
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o']
 
 while True:
     try:
@@ -157,6 +159,14 @@ while True:
                 elif key == 'a':
                     mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
                     print("\nDisplaying latest Teensy messages.\n")
+                    lastCmdSent = currentMillis()
+                elif key == 'z':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nStopping all motors.\n")
+                    lastCmdSent = currentMillis()
+                elif key == 'o':
+                    mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
+                    print("\nResetting angle values.\n")
                     lastCmdSent = currentMillis()
                 elif key == 'p':
                     mySocket.sendto(str.encode(key), (SERVER_IP, SERVER_PORT))
