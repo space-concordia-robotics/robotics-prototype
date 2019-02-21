@@ -21,7 +21,8 @@ GOOGLE_SERVER="8.8.8.8"
 # exit script if ethernet cable not plugged in
 if [ "$IS_ETHERNET_PLUGGED" -eq "0" ]; then
     echo "No ethernet cable plugged, exiting script."
-    exit 1
+    echo 1 > $STATUS_FILE
+    exit 0
 fi
 
 # switch to WiredConnection1
