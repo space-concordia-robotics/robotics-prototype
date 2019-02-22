@@ -6,7 +6,7 @@
 #include "RobotMotor.h"
 
 #define MIN_STEP_INTERVAL 3000
-#define MAX_STEP_INTERVAL 70000
+#define MAX_STEP_INTERVAL 50000
 
 // multipliers for how bit of an angle the stepper moves each step
 #define FULL_STEP 1

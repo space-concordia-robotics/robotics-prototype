@@ -357,6 +357,7 @@ void setup() {
   motor3.isOpenLoop = true;
   motor3.hasRamping = false;
   motor3.openLoopSpeed = 50; // 50% speed
+  motor3.switchDirectionLogic(); // motor is wired backwards
   motor4.isOpenLoop = true;
   motor4.hasRamping = false;
   motor4.openLoopSpeed = 50; // 50% speed
@@ -364,6 +365,7 @@ void setup() {
   motor5.hasRamping = false;
   motor5.openLoopSpeed = 50; // 50% speed
   motor5.openLoopGain = 0.32; // for 5V
+  motor5.switchDirectionLogic();
   motor6.isOpenLoop = true;
   motor6.hasRamping = false;
   motor6.openLoopSpeed = 50; // 50% speed

@@ -74,7 +74,7 @@
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
 #define M4_MINIMUM_ANGLE   -55.0
-#define M4_MAXIMUM_ANGLE   46.0//40.0
+#define M4_MAXIMUM_ANGLE   46. //40.0
 
 // DC motors
 
