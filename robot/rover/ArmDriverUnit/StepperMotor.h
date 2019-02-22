@@ -20,7 +20,7 @@ class StepperMotor: public RobotMotor {
     static int numStepperMotors;
     float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
-    void singleStep(int dir);
+    void singleStep();
     void enablePower(void);
     void disablePower(void);
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
@@ -63,7 +63,7 @@ void StepperMotor::disablePower(void) {
   digitalWriteFast(enablePin, HIGH);
 }
 
-void StepperMotor::singleStep(int dir) {
+void StepperMotor::singleStep() {
   digitalWriteFast(stepPin, HIGH);
   digitalWriteFast(stepPin, LOW);
 }
@@ -91,7 +91,7 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
     }
     //oldDir = motorDir;
   //}
-  singleStep(motorDir);
+  singleStep();
   // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4
   // the following equation converts from range 0-100 to range stepinterval1-4
   nextInterval = motorSpeed * ((MIN_STEP_INTERVAL - MAX_STEP_INTERVAL) / 100) + MAX_STEP_INTERVAL;
@@ -117,7 +117,6 @@ bool StepperMotor::calcNumSteps(float angle) {
 
 bool StepperMotor::calcCurrentAngle(void) {
   if (isBudging) {
-    Serial.println(stepCount);
     imaginedAngle = startAngle + (float)rotationDirection * (float)stepCount * stepResolution * gearRatioReciprocal;
     return true;
   }

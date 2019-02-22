@@ -1017,6 +1017,7 @@ void m3StepperInterrupt(void) {
       motor3.calcCurrentAngle();
       motor3.setVelocity(motor3.rotationDirection, motor3.openLoopSpeed);
       motor3.stepCount++;
+      m3StepperTimer.update(motor3.nextInterval);
     }
     else {
       motor3.isBudging = false;
@@ -1092,6 +1093,7 @@ void m4StepperInterrupt(void) {
       motor4.calcCurrentAngle();
       motor4.setVelocity(motor4.rotationDirection, motor4.openLoopSpeed);
       motor4.stepCount++;
+      m4StepperTimer.update(motor4.nextInterval);
     }
     else {
       motor4.isBudging = false;

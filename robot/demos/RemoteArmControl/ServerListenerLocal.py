@@ -37,11 +37,12 @@ mySocket.bind((hostName, SERVER_PORT))
 #TcpSocket = socket(AF_INET, SOCK_STREAM)
 
 # set up connection to arduino
-'''
+
 ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName + "\n")
 ser = serial.Serial('/dev/' + firstPortName, 115200)
+
 '''
 device_re = re.compile("Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)$", re.I)
 df = subprocess.check_output("lsusb")
@@ -54,7 +55,7 @@ for i in df.split('\n'):
             dinfo['device'] = '/dev/bus/usb/%s/%s' % (dinfo.pop('bus'), dinfo.pop('device'))
             devices.append(dinfo)
 print devices
-
+'''
 '''
 should look like:
 [
@@ -65,12 +66,13 @@ should look like:
 ]
 so the following should work:
 '''
+'''
 for device in devices:
 	if 'Teensyduino' in device['tag']:
 		print(device['device'])
 		ser = serial.Serial(device['device'], 115200)
 		break
-
+'''
 clientIP = ""
 IP_KNOWN = "ip_known"
 
