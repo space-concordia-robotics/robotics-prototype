@@ -14,6 +14,8 @@ import re
 import serial
 import serial.tools.list_ports
 
+import subprocess
+
 # returns current time in milliseconds
 currentMillis = lambda: int(round(time.time() * 1000))
 
@@ -35,10 +37,40 @@ mySocket.bind((hostName, SERVER_PORT))
 #TcpSocket = socket(AF_INET, SOCK_STREAM)
 
 # set up connection to arduino
+'''
 ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName + "\n")
 ser = serial.Serial('/dev/' + firstPortName, 115200)
+'''
+device_re = re.compile("Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)$", re.I)
+df = subprocess.check_output("lsusb")
+devices = []
+for i in df.split('\n'):
+    if i:
+        info = device_re.match(i)
+        if info:
+            dinfo = info.groupdict()
+            dinfo['device'] = '/dev/bus/usb/%s/%s' % (dinfo.pop('bus'), dinfo.pop('device'))
+            devices.append(dinfo)
+print devices
+
+'''
+should look like:
+[
+{'device': '/dev/bus/usb/001/009', 'tag': 'Apple, Inc. Optical USB Mouse [Mitsumi]', 'id': '05ac:0304'},
+{'device': '/dev/bus/usb/001/001', 'tag': 'Linux Foundation 2.0 root hub', 'id': '1d6b:0002'},
+{'device': '/dev/bus/usb/001/002', 'tag': 'Intel Corp. Integrated Rate Matching Hub', 'id': '8087:0020'},
+{'device': '/dev/bus/usb/001/004', 'tag': 'Microdia ', 'id': '0c45:641d'}
+]
+so the following should work:
+'''
+for device in devices:
+	if 'Teensyduino' in device['tag']:
+		print(device['device'])
+		ser = serial.Serial(device['device'], 115200)
+		break
+
 clientIP = ""
 IP_KNOWN = "ip_known"
 
