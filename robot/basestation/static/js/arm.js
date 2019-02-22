@@ -54,16 +54,6 @@ if (mockArmTable) {
         }
     });
 
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyW") {
-            $("#click_btn_motor1_ccw > button").css("background-color", "rgb(74, 0, 0)");
-
-            if (mockArmTable) {
-                $("#m1-current").text("0.2");
-            }
-        }
-    });
-
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyS") {
             toggleToManual();
@@ -78,13 +68,6 @@ if (mockArmTable) {
                     $("#m1-current").text("3.5");
                 }
             }
-        }
-    });
-
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyS") {
-            $("#click_btn_motor1_cw > button").css("background-color", "rgb(74, 0, 0)");
-            $("#m1-current").text("0.2");
         }
     });
 
@@ -106,13 +89,6 @@ if (mockArmTable) {
         }
     });
 
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyE") {
-            $("#click_btn_motor2_ccw > button").css("background-color", "rgb(74, 0, 0)");
-            $("#m2-current").text("0.2");
-        }
-    });
-
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyD") {
             toggleToManual();
@@ -127,13 +103,6 @@ if (mockArmTable) {
                     $("#m2-current").text("3.5");
                 }
             }
-        }
-    });
-
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyD") {
-            $("#click_btn_motor2_cw > button").css("background-color", "rgb(74, 0, 0)");
-            $("#m2-current").text("0");
         }
     });
 
@@ -152,11 +121,6 @@ if (mockArmTable) {
             }
         }
     });
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyR") {
-            $("#click_btn_motor3_ccw > button").css("background-color", "rgb(74, 0, 0)");
-        }
-    });
 
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyF") {
@@ -170,12 +134,6 @@ if (mockArmTable) {
                     $("#m3-angle").text(parseFloat(currentAngle) + 1);
                 }
             }
-        }
-    });
-
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyF") {
-            $("#click_btn_motor3_cw > button").css("background-color", "rgb(74, 0, 0)");
         }
     });
 
@@ -195,12 +153,6 @@ if (mockArmTable) {
         }
     });
 
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyT") {
-            $("#click_btn_motor4_ccw > button").css("background-color", "rgb(74, 0, 0)");
-        }
-    });
-
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyG") {
             toggleToManual();
@@ -214,12 +166,6 @@ if (mockArmTable) {
                     $("#m4-angle").text(parseFloat(currentAngle) + 1);
                 }
             }
-        }
-    });
-
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyG") {
-            $("#click_btn_motor4_cw > button").css("background-color", "rgb(74, 0, 0)");
         }
     });
 
@@ -237,12 +183,6 @@ if (mockArmTable) {
         }
     });
 
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyY") {
-            $("#click_btn_motor5_ccw > button").css("background-color", "rgb(74, 0, 0)");
-        }
-    });
-
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyH") {
             toggleToManual();
@@ -253,11 +193,6 @@ if (mockArmTable) {
                 let currentAngle = $("#m5-angle").text();
                 $("#m5-angle").text(parseFloat(currentAngle) + 1);
             }
-        }
-    });
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyH") {
-            $("#click_btn_motor5_cw > button").css("background-color", "rgb(74, 0, 0)");
         }
     });
 
@@ -277,12 +212,6 @@ if (mockArmTable) {
         }
     });
 
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyU") {
-            $("#click_btn_motor6_ccw > button").css("background-color", "rgb(74, 0, 0)");
-        }
-    });
-
     document.addEventListener("keydown", function (event) {
         if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
             toggleToManual();
@@ -297,11 +226,7 @@ if (mockArmTable) {
             }
         }
     });
-    document.addEventListener("keyup", function (event) {
-        if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
-            $("#click_btn_motor6_cw > button").css("background-color", "rgb(74, 0, 0)");
-        }
-    });
+
 } else {
     // Implement game loop
     var keyState = {};
@@ -316,7 +241,10 @@ if (mockArmTable) {
         let $serialCmdInput = $("#serial-cmd-input");
 
         // 'w' --> m1 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[87]){
+        if (!$serialCmdInput.is(":focus") && keyState[87]) {
+            toggleToManual();
+            $("#click_btn_motor1_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -330,7 +258,10 @@ if (mockArmTable) {
             })
         }
         // 's' --> m1 cw
-        if (!$serialCmdInput.is(":focus") && keyState[83]){
+        if (!$serialCmdInput.is(":focus") && keyState[83]) {
+            toggleToManual();
+            $("#click_btn_motor1_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -344,7 +275,10 @@ if (mockArmTable) {
             })
         }
         // 'e' --> m2 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[69]){
+        if (!$serialCmdInput.is(":focus") && keyState[69]) {
+            toggleToManual();
+            $("#click_btn_motor2_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -358,7 +292,10 @@ if (mockArmTable) {
             })
         }
         // 'd' --> m2 cw
-        if (!$serialCmdInput.is(":focus") && keyState[68]){
+        if (!$serialCmdInput.is(":focus") && keyState[68]) {
+            toggleToManual();
+            $("#click_btn_motor2_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -372,7 +309,10 @@ if (mockArmTable) {
             })
         }
         // 'r' --> m3 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[82]){
+        if (!$serialCmdInput.is(":focus") && keyState[82]) {
+            toggleToManual();
+            $("#click_btn_motor3_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -386,7 +326,10 @@ if (mockArmTable) {
             })
         }
         // 'f' --> m3 cw
-        if (!$serialCmdInput.is(":focus") && keyState[70]){
+        if (!$serialCmdInput.is(":focus") && keyState[70]) {
+            toggleToManual();
+            $("#click_btn_motor3_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -400,7 +343,10 @@ if (mockArmTable) {
             })
         }
         // 't' --> m4 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[84]){
+        if (!$serialCmdInput.is(":focus") && keyState[84]) {
+            toggleToManual();
+            $("#click_btn_motor4_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -414,7 +360,10 @@ if (mockArmTable) {
             })
         }
         // 'g' --> m4 cw
-        if (!$serialCmdInput.is(":focus") && keyState[71]){
+        if (!$serialCmdInput.is(":focus") && keyState[71]) {
+            toggleToManual();
+            $("#click_btn_motor4_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -428,7 +377,10 @@ if (mockArmTable) {
             })
         }
         // 'y' --> m5 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[89]){
+        if (!$serialCmdInput.is(":focus") && keyState[89]) {
+            toggleToManual();
+            $("#click_btn_motor5_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -442,7 +394,10 @@ if (mockArmTable) {
             })
         }
         // 'h' --> m5 cw
-        if (!$serialCmdInput.is(":focus") && keyState[72]){
+        if (!$serialCmdInput.is(":focus") && keyState[72]) {
+            toggleToManual();
+            $("#click_btn_motor5_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -456,7 +411,10 @@ if (mockArmTable) {
             })
         }
         // 'u' --> m6 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[85]){
+        if (!$serialCmdInput.is(":focus") && keyState[85]) {
+            toggleToManual();
+            $("#click_btn_motor6_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -470,7 +428,10 @@ if (mockArmTable) {
             })
         }
         // 'j' --> m6 cw
-        if (!$serialCmdInput.is(":focus") && keyState[74]){
+        if (!$serialCmdInput.is(":focus") && keyState[74]) {
+            toggleToManual();
+            $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
             $.ajax({
                 url: '/manual_control',
                 type: 'POST',
@@ -491,3 +452,85 @@ if (mockArmTable) {
     }
     gameLoop();
 }
+
+// In any case
+let $serialCmdInput = $("#serial-cmd-input");
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyW") {
+        $("#click_btn_motor1_ccw > button").css("background-color", "rgb(74, 0, 0)");
+
+        if (mockArmTable) {
+            $("#m1-current").text("0.2");
+        }
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyS") {
+        $("#click_btn_motor1_cw > button").css("background-color", "rgb(74, 0, 0)");
+        $("#m1-current").text("0.2");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyE") {
+        $("#click_btn_motor2_ccw > button").css("background-color", "rgb(74, 0, 0)");
+        $("#m2-current").text("0.2");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyD") {
+        $("#click_btn_motor2_cw > button").css("background-color", "rgb(74, 0, 0)");
+        $("#m2-current").text("0.2");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyR") {
+        $("#click_btn_motor3_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyF") {
+        $("#click_btn_motor3_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyT") {
+        $("#click_btn_motor4_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyG") {
+        $("#click_btn_motor4_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyY") {
+        $("#click_btn_motor5_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyH") {
+        $("#click_btn_motor5_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyU") {
+        $("#click_btn_motor6_ccw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
+        $("#click_btn_motor6_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
