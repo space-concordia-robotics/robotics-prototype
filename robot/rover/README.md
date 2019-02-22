@@ -26,3 +26,13 @@ The rover ip address in `app.py` will have to be set to the correct value.
 
 Example:
 `#include "libraries/Encoder.h"`
+
+### Capturing the stream to mp4
+
+```
+sudo apt install ffmpeg
+ffmpeg -i "http://127.0.0.1:8090/?action=stream" -c:v libx264 -preset veryslow -crf 18 output.mp4
+```
+
+- `-crf 18` --> 6000 kb / s bitrate, excellent quality
+- `-crf 30` --> 500 kb / s bitrate, medium quality
