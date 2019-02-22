@@ -44,24 +44,6 @@
 
 // steppers
 
-/*
-  #define M1_ENABLE_PIN       2
-  #define M1_DIR_PIN          5
-  #define M1_STEP_PIN         6
-  // 7&8 are on port D with bits 2&3 respectively
-  #define M1_ENCODER_PORT    GPIOD_PDIR
-  #define M1_ENCODER_SHIFT   CORE_PIN7_BIT
-  #define M1_ENCODER_A        7
-  #define M1_ENCODER_B        8
-  #define M1_LIMIT_SW_CW      9
-  #define M1_LIMIT_SW_CCW    10
-  #define M1_ENCODER_RESOLUTION 2000 // temporary, unknown
-  #define M1_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
-  #define M1_GEAR_RATIO      40.0 // temporary, unknown
-  #define M1_MINIMUM_ANGLE   -175.0
-  #define M1_MAXIMUM_ANGLE   175.0
-*/
-
 #define M3_ENABLE_PIN      17
 #define M3_STEP_PIN        21
 #define M3_DIR_PIN         20

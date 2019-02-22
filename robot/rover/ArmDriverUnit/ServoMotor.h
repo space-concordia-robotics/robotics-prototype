@@ -56,22 +56,25 @@ void ServoMotor::stopRotation(void) {
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, float motorSpeed)
 {
-  if (!isOpenLoop)
+  if (!isOpenLoop) {
     motorSpeed = fabs(motorSpeed);
+  }
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.getMaxOutputValue())
-  {
+  if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
     motorSpeed = pidController.getMaxOutputValue();
   }
-  if (motorSpeed * motorDir < pidController.getMinOutputValue())
-  {
+  if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
     motorSpeed = pidController.getMinOutputValue();
   }
 
   // pulse time varies from 1000 to 2000, 1500 being the midpoint, so 500 is the offset from 1500
   int pulseTime = SERVO_STOP + (motorSpeed * motorDir * 500 / 100);
-  if (pulseTime > 2000) pulseTime = 2000;
-  if (pulseTime < 1000) pulseTime = 1000;
+  if (pulseTime > 2000) {
+    pulseTime = 2000;
+  }
+  if (pulseTime < 1000) {
+    pulseTime = 1000;
+  }
   servo.writeMicroseconds(pulseTime);
 }
 

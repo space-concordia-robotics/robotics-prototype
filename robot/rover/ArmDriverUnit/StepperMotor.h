@@ -64,19 +64,12 @@ void StepperMotor::disablePower(void) {
 }
 
 void StepperMotor::singleStep(int dir) {
-  switch (dir) {
-    case CLOCKWISE:
-      digitalWriteFast(directionPin, HIGH);
-      break;
-    case COUNTER_CLOCKWISE:
-      digitalWriteFast(directionPin, LOW);
-      break;
-  }
   digitalWriteFast(stepPin, HIGH);
   digitalWriteFast(stepPin, LOW);
 }
 
 void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
+  //static int oldDir = CLOCKWISE;
   if (!isOpenLoop) {
     motorSpeed = fabs(motorSpeed);
   }
@@ -87,16 +80,17 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
   if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
     motorSpeed = pidController.getMinOutputValue();
   }
-  switch (motorDir) {
-    case CLOCKWISE:
-      //digitalWriteFast(directionPin, LOW);
-      digitalWrite(directionPin, LOW);
-      break;
-    case COUNTER_CLOCKWISE:
-      //digitalWriteFast(directionPin, HIGH);
-      digitalWrite(directionPin, HIGH);
-      break;
-  }
+  //if (motorDir != oldDir) {
+    switch (motorDir) {
+      case CLOCKWISE:
+        digitalWriteFast(directionPin, LOW);
+        break;
+      case COUNTER_CLOCKWISE:
+        digitalWriteFast(directionPin, HIGH);
+        break;
+    }
+    //oldDir = motorDir;
+  //}
   singleStep(motorDir);
   // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4
   // the following equation converts from range 0-100 to range stepinterval1-4

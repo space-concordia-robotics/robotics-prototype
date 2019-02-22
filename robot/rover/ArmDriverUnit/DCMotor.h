@@ -54,23 +54,28 @@ void DcMotor::stopRotation(void) {
 }
 
 void DcMotor::setVelocity(int motorDir, float motorSpeed) {
-  if (!isOpenLoop)
+  //static int oldDir = CLOCKWISE;
+  if (!isOpenLoop) {
     motorSpeed = fabs(motorSpeed);
+  }
   // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.getMaxOutputValue())  {
+  if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
     motorSpeed = pidController.getMaxOutputValue();
   }
-  if (motorSpeed * motorDir < pidController.getMinOutputValue())  {
+  if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
     motorSpeed = pidController.getMinOutputValue();
   }
-  switch (motorDir)  {
-    case CLOCKWISE:
-      digitalWrite(directionPin, LOW);
-      break;
-    case COUNTER_CLOCKWISE:
-      digitalWrite(directionPin, HIGH);
-      break;
-  }
+  //if (motorDir != oldDir) {
+    switch (motorDir) {
+      case CLOCKWISE:
+        digitalWriteFast(directionPin, LOW);
+        break;
+      case COUNTER_CLOCKWISE:
+        digitalWriteFast(directionPin, HIGH);
+        break;
+    }
+    //oldDir = motorDir;
+  //}
   int dutyCycle = motorSpeed * 255 / 100;
   analogWrite(pwmPin, dutyCycle);
 }
