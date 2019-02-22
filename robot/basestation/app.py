@@ -227,76 +227,21 @@ def click_btn_arm_forward():
 
 
 # Manual controls
-@app.route("/click_btn_motor1_ccw")
+@app.route("/manual_control", methods=["POST"])
 def click_btn_motor1_ccw():
-    print("click_btn_motor1_ccw")
-    return ""
+    print("manual_control")
 
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
 
-@app.route("/click_btn_motor1_cw")
-def click_btn_motor1_cw():
-    print("click_btn_motor1_cw")
-    return ""
+    print("cmd: " + cmd)
 
-
-@app.route("/click_btn_motor2_ccw")
-def click_btn_motor2_ccw():
-    print("click_btn_motor2_ccw")
-    return ""
-
-
-@app.route("/click_btn_motor2_cw")
-def click_btn_motor2_cw():
-    print("click_btn_motor2_cw")
-    return ""
-
-
-@app.route("/click_btn_motor3_ccw")
-def click_btn_motor3_ccw():
-    print("click_btn_motor3_ccw")
-    return ""
-
-
-@app.route("/click_btn_motor3_cw")
-def click_btn_motor3_cw():
-    print("click_btn_motor3_cw")
-    return ""
-
-
-@app.route("/click_btn_motor4_ccw")
-def click_btn_motor4_ccw():
-    print("click_btn_motor4_ccw")
-    return ""
-
-
-@app.route("/click_btn_motor4_cw")
-def click_btn_motor4_cw():
-    print("click_btn_motor4_cw")
-    return ""
-
-
-@app.route("/click_btn_motor5_ccw")
-def click_btn_motor5_ccw():
-    print("click_btn_motor5_ccw")
-    return ""
-
-
-@app.route("/click_btn_motor5_cw")
-def click_btn_motor5_cw():
-    print("click_btn_motor5_cw")
-    return ""
-
-
-@app.route("/click_btn_motor6_ccw")
-def click_btn_motor6_ccw():
-    print("click_btn_motor6_ccw")
-    return ""
-
-
-@app.route("/click_btn_motor6_cw")
-def click_btn_motor6_cw():
-    print("click_btn_motor6_cw")
-    return ""
+    return jsonify(success=True, cmd=cmd)
 
 
 app.run(debug=True)
