@@ -11,10 +11,11 @@
     <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
     <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
     <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
-    <link href="../static/css/app.css" rel="stylesheet">
+    <link href="../static/css/arm.css" rel="stylesheet">
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/helpers.js"></script>
     <script src="../static/js/app.js"></script>
+    <script src="../static/js/arm.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
@@ -365,50 +366,50 @@
                                 <th scope="row">Stepper
                                     <br>Motor 1
                                 </th>
-                                <!-- add backend code to update status/motor position/motor current-->
+                                <!-- @TODO: add backend code to update status/motor position/motor current-->
                                 <td>ALIVE</td>
-                                <td>23</td>
-                                <td>2.50</td>
+                                <td id="m1-angle">0</td>
+                                <td id="m1-current">0.2</td>
                             </tr>
                             <tr>
                                 <th scope="row">DC
                                     <br>Motor 2
                                 </th>
                                 <td>ALIVE</td>
-                                <td>12</td>
-                                <td>11.00</td>
+                                <td id="m2-angle">0</td>
+                                <td id="m2-current">0.2</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
                                     <br>Motor 3
                                 </th>
-                                <td>DEAD</td>
-                                <td>84</td>
-                                <td>7.45</td>
+                                <td>ALIVE</td>
+                                <td id="m3-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
                                     <br>Motor 4
                                 </th>
-                                <td>DEAD</td>
-                                <td>88</td>
-                                <td></td>
+                                <td>ALIVE</td>
+                                <td id="m4-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th scope="row">Arm Servo
                                     <br>Motor 1
                                 </th>
                                 <td>ALIVE</td>
-                                <td>20</td>
-                                <td>5.60</td>
+                                <td id="m5-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th>Arm Servo
                                     <br>Motor 2
                                 </th>
                                 <td>ALIVE</td>
-                                <td>67</td>
-                                <td>12.34</td>
+                                <td id="m6-angle">0</td>
+                                <td>-</td>
                             </tr>
                         </tbody>
                     </table>
