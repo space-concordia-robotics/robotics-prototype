@@ -93,7 +93,6 @@ bool ServoMotor::calcTurningDuration(float angle) {
 
 bool ServoMotor::calcCurrentAngle(void) {
   if (isBudging) {
-    Serial.println(sinceBudgeCommand);
     imaginedAngle = startAngle + (float)rotationDirection * (float)sinceBudgeCommand * openLoopSpeed * gearRatioReciprocal / (1000.0 * openLoopGain);
     return true;
   }

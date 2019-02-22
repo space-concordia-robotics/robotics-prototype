@@ -713,6 +713,7 @@ void loop() {
               motor3.movementDone = false;
               motor3.stepCount = 0;
               motor3.sinceBudgeCommand = 0;
+              motor3.enablePower(); // give power to the stepper finally
               if (motor3.isOpenLoop) {
                 motor3.startAngle = motor3.getImaginedAngle();
               }
@@ -728,7 +729,7 @@ void loop() {
                 motor3.calcDirection(motor3.openLoopError);
                 // calculates how many steps to take to get to the desired position, assuming no slipping
                 if (motor3.calcNumSteps(motor3.openLoopError)) { // returns false if the open loop error is too small
-                  // I don't set stepCount to 0?
+                  motor3.stepCount = 0;
                   motor3.enablePower(); // give power to the stepper finally
                   motor3.movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -758,6 +759,7 @@ void loop() {
               motor4.movementDone = false;
               motor4.stepCount = 0;
               motor4.sinceBudgeCommand = 0;
+              motor4.enablePower();
               if (motor4.isOpenLoop) {
                 motor4.startAngle = motor4.getImaginedAngle();
               }
@@ -1020,9 +1022,11 @@ void m3StepperInterrupt(void) {
       m3StepperTimer.update(motor3.nextInterval);
     }
     else {
+      motor3.stepCount = 0; // reset the counter
       motor3.isBudging = false;
       motor3.movementDone = true;
       motor3.stopRotation();
+      motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
     }
   }
   else if (motor3.isOpenLoop) { // open loop control
