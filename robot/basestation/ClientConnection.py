@@ -52,22 +52,23 @@ class ClientConnection:
     # the ping test method is to check if a connection can be returned from to rover
     def ping_test(self):
         """
-        This is a test implementation of the ping_test method with the socket module
-        after some quick research it was observed that the socket manual is what needs
-        to be used for tcp/ip network communication
-        :return: status
+        Sends one ping request to given IP address
+
+        :return: boolean for ping success status
         """
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP/IP socket
-        server_ip = raw_input("Enter serverIP: ")
-        rep = os.system("ping " + server_ip)
+        server_ip = input("Enter server IP: ")
+        rep = os.system("ping " + server_ip + " -c 1")
         if rep == 0:
             # the server is up so return true
             self.status = True
+            print("connection established")
             return self.status
         else:
             # the server is down so return false
             self.status = False
+            print("no response from server")
             return self.status
 
     def send_drive_cmd(self):
