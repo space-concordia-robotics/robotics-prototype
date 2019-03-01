@@ -1,11 +1,10 @@
-# this class will be used to test if client can connect to the raover
 import os
 import socket
 
 
 class ClientConnection:
 
-    def __init__(self, status, base_ip, base_port, rover_ip, rover_port, serial_port):
+    def __init__(self, base_ip, base_port, rover_ip, rover_port, serial_port, status=False):
         self.status = status
         self.base_ip = base_ip
         self.base_port = base_port
@@ -31,7 +30,8 @@ class ClientConnection:
     def get_base_port(self):
         return self.base_port
 
-    def validateIP(self, ip: str) -> bool:
+    @classmethod
+    def validate_ip(cls, rover_ip: str) -> bool:
         """
         Validate for correct IPv4 format
 
@@ -41,7 +41,7 @@ class ClientConnection:
         """
         try:
             # legal
-            socket.inet_aton(ip)
+            socket.inet_aton(rover_ip)
             return True
         except socket.error:
             # illegal
@@ -51,7 +51,7 @@ class ClientConnection:
     def set_rover_ip(self, rover_ip):
         rover_ip = str(rover_ip)
 
-        if self.validateIP(rover_ip):
+        if self.validate_ip(rover_ip):
             self.rover_ip = rover_ip
 
     def get_rover_ip(self):
@@ -74,6 +74,7 @@ class ClientConnection:
         Sends one ping request to given IP address
 
         @param test: if set to true, method will ask user to input IP to ping
+        and the status attribute will not be modified
 
         :return: boolean for ping success status
         """
@@ -91,11 +92,13 @@ class ClientConnection:
 
         if response == 0:
             # the server is up so return true
-            self.status = True
+            if not test:
+                self.status = True
             print("connection established")
             return self.status
         # the server is down so return false
-        self.status = False
+        if not test:
+            self.status = False
         print("no response from server")
         return self.status
 
