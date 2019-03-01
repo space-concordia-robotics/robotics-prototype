@@ -9,7 +9,7 @@ class ClientConnection:
         self.status = status
         self.base_ip = base_ip
         self.base_port = base_port
-        self.rover_ip = rover_ip
+        self.set_rover_ip(rover_ip)
         self.rover_port = rover_port
         self.serial_port = serial_port
 
@@ -31,8 +31,28 @@ class ClientConnection:
     def get_base_port(self):
         return self.base_port
 
+    def validateIP(self, ip: str) -> bool:
+        """
+        Validate for correct IPv4 format
+
+        @param ip: IP address
+
+        :returns: True if valid IP address format
+        """
+        try:
+            # legal
+            socket.inet_aton(ip)
+            return True
+        except socket.error:
+            # illegal
+            print("Invalid IP format")
+            return False
+
     def set_rover_ip(self, rover_ip):
-        self.rover_ip = rover_ip
+        rover_ip = str(rover_ip)
+
+        if self.validateIP(rover_ip):
+            self.rover_ip = rover_ip
 
     def get_rover_ip(self):
         return self.rover_ip
@@ -49,27 +69,35 @@ class ClientConnection:
     def get_serial_port(self):
         return self.serial_port
 
-    # the ping test method is to check if a connection can be returned from to rover
-    def ping_test(self):
+    def ping_test(self, test=False) -> bool:
         """
         Sends one ping request to given IP address
+
+        @param test: if set to true, method will ask user to input IP to ping
 
         :return: boolean for ping success status
         """
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP/IP socket
-        server_ip = input("Enter server IP: ")
-        rep = os.system("ping " + server_ip + " -c 1")
-        if rep == 0:
+        if test:
+            server_ip = input("Enter server IP: ")
+            response = os.system("ping " + server_ip + " -c 1")
+
+        else:
+            try:
+                response = os.system("ping " + self.rover_ip + " -c 1")
+            except AttributeError:
+                print("Rover IP not initialized yet")
+                return False
+
+        if response == 0:
             # the server is up so return true
             self.status = True
             print("connection established")
             return self.status
-        else:
-            # the server is down so return false
-            self.status = False
-            print("no response from server")
-            return self.status
+        # the server is down so return false
+        self.status = False
+        print("no response from server")
+        return self.status
 
     def send_drive_cmd(self):
         """
