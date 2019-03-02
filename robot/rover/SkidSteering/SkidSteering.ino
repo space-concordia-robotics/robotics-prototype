@@ -48,22 +48,60 @@ ArduinoBlue phone(bluetooth);
 #define TEST_EB   3
 
 #endif
-// Bluetooth connection TX of bluetooth goes to pin 9 and TX of bluetooth goes to pin 10
-//#define RF_DIR   14
-//#define RM_DIR   15
-//#define RB_DIR   29
+// Bluetooth connection TX of bluetooth goes to pin 9 and RX of bluetooth goes to pin 10
+#define RF_DIR   14
+#define RM_DIR   15
+#define RB_DIR   16 // M4_A
+
+#define LF_DIR   11
+#define LM_DIR   24
+#define LB_DIR   12
+
+#define RF_PWM   2
+#define RM_PWM   5
+#define RB_PWM   6
+
+#define LF_PWM   7
+#define LM_PWM   8
+#define LB_PWM   17 //M4_B
+
+#define RF_EA    22
+#define RF_EB    23
+
+#define RM_EA    20
+#define RM_EB    21
+
+#define RB_EA    19
+#define RB_EB    18
+
+#define LF_EA    0
+#define LF_EB    1
+
+#define LM_EA    26
+#define LM_EB    27
+
+#define LB_EA    33
+#define LB_EB    34
+
+
+
 //
-//#define LF_DIR   11
-//#define LM_DIR   24
-//#define LB_DIR   12
+//  
+//#define RF_DIR   11
+//#define RM_DIR   12
+//#define RB_DIR   24
 //
-//#define RF_PWM   4
-//#define RM_PWM   5
-//#define RB_PWM   6
+//#define LF_DIR   8
+//#define LM_DIR   16
+//#define LB_DIR   15
 //
-//#define LF_PWM   7
-//#define LM_PWM   8
-//#define LB_PWM   30
+//#define RF_PWM   2
+//#define RM_PWM   3
+//#define RB_PWM   4
+//
+//#define LF_PWM   5
+//#define LM_PWM   6
+//#define LB_PWM   7
 //
 //#define RF_EA    25
 //#define RF_EB    26
@@ -82,41 +120,6 @@ ArduinoBlue phone(bluetooth);
 //
 //#define LB_EA    35
 //#define LB_EB    36
-
-
-#define RF_DIR   11
-#define RM_DIR   12
-#define RB_DIR   24
-
-#define LF_DIR   8
-#define LM_DIR   16
-#define LB_DIR   15
-
-#define RF_PWM   2
-#define RM_PWM   3
-#define RB_PWM   4
-
-#define LF_PWM   5
-#define LM_PWM   6
-#define LB_PWM   7
-
-#define RF_EA    25
-#define RF_EB    26
-
-#define RM_EA    27
-#define RM_EB    28
-
-#define RB_EA    29
-#define RB_EB    30
-
-#define LF_EA    31
-#define LF_EB    32
-
-#define LM_EA    33
-#define LM_EB    34
-
-#define LB_EA    35
-#define LB_EB    36
 
 #ifdef TEST
 
