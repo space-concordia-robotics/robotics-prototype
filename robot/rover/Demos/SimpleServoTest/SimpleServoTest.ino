@@ -20,8 +20,9 @@ void loop() {
   if (Serial.available()) {
     int data = (Serial.readString()).toInt();
     Serial.println(data);
-    if (data >= 0 && data <= 255) {
-      servo1.write(data);
+    //if (data >= 0 && data <= 255) {
+    if (data >= minDuration && data <= maxDuration){
+      //servo1.write(data);
       servo1.writeMicroseconds(data);
       //analogWrite(servoPin, data);
     }

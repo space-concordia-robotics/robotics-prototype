@@ -16,10 +16,19 @@ In short, the Teensy is connected to the drivers (and the servos). The drivers (
 
 On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
-## Examples
+### Examples
 This folder contains example sketches for using the classes built in ArmDriverUnit. In the future, once the classes are turned into actual libraries, these sketches will come with the library.
 
 Since the classes are still in development, the code structure gets changed quite frequently, necessitating updates to these example files too. It is likely that they are not as up to date as ArmDriverUnit.
+
+#### ServoExampleOpenLoop
+This example demonstrates open loop control of a single servo. It's a good introduction into the structure and logic of the code, but is lacking many features.
+
+#### DcExampleTwoMotors
+This example demonstrates open or closed loop of two DC motors. It's the next step in understanding how multiple motors are manipulated simultaneously. Once this can be understood, you can probably figure out how to code it for all 3 types of motors running at once.
+
+#### RosCommunication
+This example demonstrates how the Teensy can communicate with ROS over the serial port. It hasn't been tested yet but you should be able to choose either USB serial or hardware serial. Please note that you will need to modify one of the rosserial header files to make it work. Instructions are in `robotics-prototype/README.md`.
 
 ## RoverDriverUnit (RDU)
 ### Code Structure
@@ -30,15 +39,36 @@ The RDU code structure is to be decided but will probably follow a similar struc
 
 The current iteration of the rover has 6 DC motors, all controlled by Cytron drivers.
 
-## EncoderTest
+## Demos
+This folder contains short demo sketches to test simple Arduino/Teensy features.
+
+### EncoderTest
 This is a very simple Teensy 3.6 sketch which prints "beep" and "boop" depending on which encoder channel triggers an interrupt on the microcontroller. It is used simply to demonstrate that the interrupt code works before moving to more advanced code.
 
-## MotorCharacterization
+### RoverControlDemo
+This Teensy 3.6 sketch listens for 'w' and 's' over the Serial port and responds by controlling the speed of two motors.
+
+### SimpleServoTest
+This Teensy 3.6 sketch was created after the discovery that attempting to stop a continuous servo using analogWrite with a PWM signal of 127 did not work but 189 did. After testing it was discovered that using the Servo library and the time in microseconds, the servo can be controlled as expected. 1500 for stopping the servo and 1000 or 2000 for max speed in either direction.
+
+## Utilities
+This folder contains sketches used for testing or measuring data. Due to their nature, some may use older code and may require refactoring in the future.
+
+### Servo_Temp_Test
+This example makes one or two servos turn at max speed in a certain direction. This allows someone to test how hot they get when they run continuously for several minutes.
+
+### Stepper_Temp_Test
+This example makes one or two steppers hold their position or turn in a certain direction. This allows someone to test how hot they get when they are drawing current continuously for several minutes.
+
+### MotorCharacterization
 This is a Teensy 3.6 sketch which prints the step response of a DC motor over the serial port.
 
 It expects a step input and uses encoder interrupts to fill in an array of durations representing the time between each interrupt. After the motor has reached steady state (currently the user has to guess how long this will take), the duration array is used to calculate an array of speeds in the units desired by the user and prints the values over the serial port.
 
 The result can be used to develop a model for the motor and then to design a PID for it.
+
+## TestCode
+This directory contains test code which may or may not go into the main code being developed.
 
 ## PidController
 This is an older project that is currently going unused.
@@ -67,6 +97,3 @@ The rover ip address in `app.py` will have to be set to the correct value.
 
 Example:
 `#include "libraries/Encoder.h"`
-
-## TestCode
-This directory contains test code which may or may not go into ArmDriverUnit.
