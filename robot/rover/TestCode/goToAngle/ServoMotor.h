@@ -11,12 +11,14 @@ class ServoMotor: public RobotMotor {
     static int numServoMotors;
 
     ServoMotor(int pwmPin, float gearRatio);
-
+    /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
+    /* movement functions */
+    void stopRotation(void);
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
-    void stopRotation(void);
+    void budge(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -106,6 +108,18 @@ void ServoMotor::goToCommandedAngle(void) {
     if (!isOpenLoop) {
       movementDone = false;
     }
+  }
+}
+
+void ServoMotor::budge(void) {
+  isBudging = true;
+  movementDone = false;
+  sinceBudgeCommand = 0;
+  if (isOpenLoop) {
+    startAngle = getImaginedAngle();
+  }
+  else if (!isOpenLoop) {
+    startAngle = getCurrentAngle();
   }
 }
 

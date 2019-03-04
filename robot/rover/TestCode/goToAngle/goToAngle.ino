@@ -584,111 +584,16 @@ void loop() {
           UART_PORT.println(messageBar);
           UART_PORT.println("$S,Success: all angles are valid, arm to move");
 #endif
-          if (motorCommand.motorsToMove[0]) { // this motor can swivel but has limits so it doesn't hit anything
-            if (motorCommand.budgeCommand) {
-              motor1.calcDirection(motorCommand.directionsToMove[0]); // yes, this works
-              motor1.isBudging = true;
-              motor1.movementDone = false;
-              motor1.sinceBudgeCommand = 0;
-              if (motor1.isOpenLoop) {
-                motor1.startAngle = motor1.getImaginedAngle();
+          // here's where the commands to make the arm move are actually activated
+          for (int i = 0; i < NUM_MOTORS; i++) {
+            if (motorCommand.motorsToMove[i]) { // this motor can swivel but has limits so it doesn't hit anything
+              if (motorCommand.budgeCommand) {
+                motorArray[i]->calcDirection(motorCommand.directionsToMove[i]); // yes, this works
+                motorArray[i]->budge();
               }
-              else if (!motor1.isOpenLoop) {
-                motor1.startAngle = motor1.getCurrentAngle();
+              else if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
+                motorArray[i]->goToCommandedAngle();
               }
-            }
-            else if (motor1.setDesiredAngle(motorCommand.anglesToReach[0])) { // this method returns true if the command is within joint angle limits
-              motor1.goToCommandedAngle();
-            }
-          }
-          if (motorCommand.motorsToMove[1]) {
-            if (motorCommand.budgeCommand) {
-              motor2.calcDirection(motorCommand.directionsToMove[1]); // yes, this works
-              motor2.isBudging = true;
-              motor2.movementDone = false;
-              motor2.sinceBudgeCommand = 0;
-              if (motor2.isOpenLoop) {
-                motor2.startAngle = motor2.getImaginedAngle();
-              }
-              else if (!motor2.isOpenLoop) {
-                motor2.startAngle = motor2.getCurrentAngle();
-              }
-            }
-            else if (motor2.setDesiredAngle(motorCommand.anglesToReach[1])) {
-              motor2.goToCommandedAngle();
-            }
-          }
-          if (motorCommand.motorsToMove[2]) {
-            if (motorCommand.budgeCommand) {
-              motor3.calcDirection(motorCommand.directionsToMove[2]); // yes, this works
-              motor3.isBudging = true;
-              motor3.movementDone = false;
-              motor3.stepCount = 0;
-              motor3.sinceBudgeCommand = 0;
-              motor3.enablePower(); // give power to the stepper finally
-              if (motor3.isOpenLoop) {
-                motor3.startAngle = motor3.getImaginedAngle();
-              }
-              else if (!motor3.isOpenLoop) {
-                motor3.startAngle = motor3.getCurrentAngle();
-              }
-            }
-            else if (motor3.setDesiredAngle(motorCommand.anglesToReach[2])) {
-              motor3.goToCommandedAngle();
-            }
-          }
-          if (motorCommand.motorsToMove[3]) {
-            if (motorCommand.budgeCommand) {
-              motor4.calcDirection(motorCommand.directionsToMove[3]); // yes, this works
-              motor4.isBudging = true;
-              motor4.movementDone = false;
-              motor4.stepCount = 0;
-              motor4.sinceBudgeCommand = 0;
-              motor4.enablePower();
-              if (motor4.isOpenLoop) {
-                motor4.startAngle = motor4.getImaginedAngle();
-              }
-              else if (!motor4.isOpenLoop) {
-                motor4.startAngle = motor4.getCurrentAngle();
-              }
-            }
-            else if (motor4.setDesiredAngle(motorCommand.anglesToReach[3])) {
-              motor4.goToCommandedAngle();
-            }
-          }
-          if (motorCommand.motorsToMove[4]) {
-            // this motor has no max or min angle because it must be able to spin like a screwdriver
-            if (motorCommand.budgeCommand) {
-              motor5.calcDirection(motorCommand.directionsToMove[4]); // yes, this works
-              motor5.isBudging = true;
-              motor5.movementDone = false;
-              motor5.sinceBudgeCommand = 0;
-              if (motor5.isOpenLoop) {
-                motor5.startAngle = motor5.getImaginedAngle();
-              }
-              else if (!motor5.isOpenLoop) {
-                motor5.startAngle = motor5.getCurrentAngle();
-              }
-            }
-            else if (motor5.setDesiredAngle(motorCommand.anglesToReach[4])) {
-              motor5.goToCommandedAngle();
-            }
-          }
-          if (motorCommand.motorsToMove[5]) {
-            if (motorCommand.budgeCommand) {
-              motor6.calcDirection(motorCommand.directionsToMove[5]); // yes, this works
-              motor6.isBudging = true;
-              motor6.movementDone = false;
-              motor6.sinceBudgeCommand = 0;
-              if (motor6.isOpenLoop) {
-                motor6.startAngle = motor6.getImaginedAngle();
-              }
-              else if (!motor6.isOpenLoop) {
-                motor6.startAngle = motor6.getCurrentAngle();
-              }
-            }
-            else if (motor6.setDesiredAngle(motorCommand.anglesToReach[5])) {
-              motor6.goToCommandedAngle();
             }
           }
         }

@@ -19,15 +19,19 @@ class StepperMotor: public RobotMotor {
   public:
     static int numStepperMotors;
     float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
+
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
-    void singleStep();
-    void enablePower(void);
-    void disablePower(void);
+    /* movement helper functions */
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     bool calcCurrentAngle(void);
+    void enablePower(void);
+    void disablePower(void);
+    /* movement functions */
+    void stopRotation(void);
+    void singleStep();
     void setVelocity(int motorDir, float motorSpeed);
     void goToCommandedAngle(void);
-    void stopRotation(void);
+    void budge(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -67,6 +71,12 @@ void StepperMotor::disablePower(void) {
 void StepperMotor::singleStep() {
   digitalWriteFast(stepPin, HIGH);
   digitalWriteFast(stepPin, LOW);
+}
+
+void StepperMotor::stopRotation(void) {
+  disablePower();
+  movementDone = true;
+  isBudging = false;
 }
 
 void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
@@ -130,10 +140,18 @@ void StepperMotor::goToCommandedAngle() {
   }
 }
 
-void StepperMotor::stopRotation(void) {
-  disablePower();
-  movementDone = true;
-  isBudging = false;
+void StepperMotor::budge(void) {
+  isBudging = true;
+  movementDone = false;
+  stepCount = 0;
+  sinceBudgeCommand = 0;
+  enablePower(); // give power to the stepper finally
+  if (isOpenLoop) {
+    startAngle = getImaginedAngle();
+  }
+  else if (!isOpenLoop) {
+    startAngle = getCurrentAngle();
+  }
 }
 
 bool StepperMotor::calcNumSteps(float angle) {

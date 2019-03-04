@@ -8,14 +8,18 @@
 class DcMotor: public RobotMotor {
   public:
     static int numDcMotors;
+
     // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
-    // for cytron
-    DcMotor(int dirPin, int pwmPin, float gearRatio);
+    DcMotor(int dirPin, int pwmPin, float gearRatio); // for cytron
+    /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
+    /* movement functions */
     void stopRotation(void);
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
+    void budge(void);
+
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
@@ -78,6 +82,18 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
   //}
   int dutyCycle = motorSpeed * 255 / 100;
   analogWrite(pwmPin, dutyCycle);
+}
+
+void DcMotor::budge(void) {
+  isBudging = true;
+  movementDone = false;
+  sinceBudgeCommand = 0;
+  if (isOpenLoop) {
+    startAngle = getImaginedAngle();
+  }
+  else if (!isOpenLoop) {
+    startAngle = getCurrentAngle();
+  }
 }
 
 void DcMotor::goToCommandedAngle(void) {

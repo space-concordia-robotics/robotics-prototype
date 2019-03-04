@@ -41,6 +41,7 @@ class RobotMotor {
   virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
   virtual void stopRotation(void) = 0;
   virtual void goToCommandedAngle(void) = 0;
+  virtual void budge(void) = 0;
   // void setMaxSpeed();
   int calcDirection(float error); // updates rotationDirection based on the angular error inputted
   bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
