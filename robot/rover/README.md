@@ -16,6 +16,9 @@ In short, the Teensy is connected to the drivers (and the servos). The drivers (
 
 On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
+### Odroid
+This folder contains preliminary code to be run on the Odroid which will communicate with the arm Teensy.
+
 ### Examples
 This folder contains example sketches for using the classes built in ArmDriverUnit. In the future, once the classes are turned into actual libraries, these sketches will come with the library.
 
