@@ -12,10 +12,14 @@ class ServoMotor: public RobotMotor {
 
     ServoMotor(int pwmPin, float gearRatio);
 
+    /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
-    void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
+    /* movement functions */
     void stopRotation(void);
+    void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
+    void goToCommandedAngle(void);
+    void budge(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -45,37 +49,6 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
 
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
-}
-
-void ServoMotor::stopRotation(void) {
-  servo.writeMicroseconds(SERVO_STOP);
-  movementDone = true;
-  isBudging = false;
-}
-
-// takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
-void ServoMotor::setVelocity(int motorDir, float motorSpeed)
-{
-  if (!isOpenLoop) {
-    motorSpeed = fabs(motorSpeed);
-  }
-  // makes sure the speed is within the limits set in the pid during setup
-  if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
-    motorSpeed = pidController.getMaxOutputValue();
-  }
-  if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
-    motorSpeed = pidController.getMinOutputValue();
-  }
-
-  // pulse time varies from 1000 to 2000, 1500 being the midpoint, so 500 is the offset from 1500
-  int pulseTime = SERVO_STOP + (motorSpeed * motorDir * 500 / 100);
-  if (pulseTime > 2000) {
-    pulseTime = 2000;
-  }
-  if (pulseTime < 1000) {
-    pulseTime = 1000;
-  }
-  servo.writeMicroseconds(pulseTime);
 }
 
 bool ServoMotor::calcTurningDuration(float angle) {
@@ -113,6 +86,79 @@ bool ServoMotor::calcCurrentAngle(void) {
   }
   else {
     return false;
+  }
+}
+
+void ServoMotor::stopRotation(void) {
+  servo.writeMicroseconds(SERVO_STOP);
+  movementDone = true;
+  isBudging = false;
+}
+
+// takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
+void ServoMotor::setVelocity(int motorDir, float motorSpeed)
+{
+  if (!isOpenLoop) {
+    motorSpeed = fabs(motorSpeed);
+  }
+  // makes sure the speed is within the limits set in the pid during setup
+  if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
+    motorSpeed = pidController.getMaxOutputValue();
+  }
+  if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
+    motorSpeed = pidController.getMinOutputValue();
+  }
+
+  // pulse time varies from 1000 to 2000, 1500 being the midpoint, so 500 is the offset from 1500
+  int pulseTime = SERVO_STOP + (motorSpeed * motorDir * 500 / 100);
+  if (pulseTime > 2000) {
+    pulseTime = 2000;
+  }
+  if (pulseTime < 1000) {
+    pulseTime = 1000;
+  }
+  servo.writeMicroseconds(pulseTime);
+}
+
+void ServoMotor::goToCommandedAngle(void) {
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    if (calcTurningDuration(openLoopError)) {
+      timeCount = 0;
+      movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+      UART_PORT.print("$S,Success: motor ");
+      //UART_PORT.print(5);
+      UART_PORT.print(" to turn for ");
+      UART_PORT.print(numMillis);
+      UART_PORT.println(" milliseconds");
+#endif
+    }
+    else {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+      UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+#endif
+    }
+  }
+  else {
+    if (!isOpenLoop) {
+      movementDone = false;
+    }
+  }
+}
+
+void ServoMotor::budge(void) {
+  isBudging = true;
+  movementDone = false;
+  sinceBudgeCommand = 0;
+  if (isOpenLoop) {
+    startAngle = getImaginedAngle();
+  }
+  else if (!isOpenLoop) {
+    startAngle = getCurrentAngle();
   }
 }
 

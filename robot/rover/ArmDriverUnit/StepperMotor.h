@@ -19,14 +19,20 @@ class StepperMotor: public RobotMotor {
   public:
     static int numStepperMotors;
     float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
+    
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
-    void singleStep();
-    void enablePower(void);
-    void disablePower(void);
+    
+    /* movement helper functions */
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     bool calcCurrentAngle(void);
-    void setVelocity(int motorDir, float motorSpeed);
+    void enablePower(void);
+    void disablePower(void);
+    /* movement functions */
     void stopRotation(void);
+    void singleStep();
+    void setVelocity(int motorDir, float motorSpeed);
+    void goToCommandedAngle(void);
+    void budge(void);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -55,12 +61,55 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   openLoopSpeed = 0; // no speed by default;
 }
 
+bool StepperMotor::calcNumSteps(float angle) {
+  // if the error is big enough to justify movement
+  if (fabs(angle) > pidController.getJointAngleTolerance()) {
+    // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
+    numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool StepperMotor::calcCurrentAngle(void) {
+  if (isBudging) {
+    imaginedAngle = startAngle + (float)rotationDirection * (float)stepCount * stepResolution * gearRatioReciprocal;
+    return true;
+  }
+  else if (isOpenLoop) {
+    if (movementDone) {
+      // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
+    }
+    else if (stepCount < numSteps) {
+      // if the motor is moving, calculate the angle based on how long it's been turning for
+      imaginedAngle = startAngle + (desiredAngle - startAngle) * ((float)stepCount / (float)numSteps);
+    }
+    return true;
+  }
+  else if (hasEncoder) {
+    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    imaginedAngle = currentAngle;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void StepperMotor::enablePower(void) {
   digitalWriteFast(enablePin, LOW);
 }
 
 void StepperMotor::disablePower(void) {
   digitalWriteFast(enablePin, HIGH);
+}
+
+void StepperMotor::stopRotation(void) {
+  disablePower();
+  movementDone = true;
+  isBudging = false;
 }
 
 void StepperMotor::singleStep() {
@@ -98,46 +147,48 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
   nextInterval = motorSpeed * ((MIN_STEP_INTERVAL - MAX_STEP_INTERVAL) / 100) + MAX_STEP_INTERVAL;
 }
 
-void StepperMotor::stopRotation(void) {
-  disablePower();
-  movementDone = true;
-  isBudging = false;
+void StepperMotor::goToCommandedAngle() {
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    // calculates how many steps to take to get to the desired position, assuming no slipping
+    if (calcNumSteps(openLoopError)) { // returns false if the open loop error is too small
+      stepCount = 0;
+      enablePower(); // give power to the stepper finally
+      movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+      UART_PORT.print("$S,Success: motor ");
+      //UART_PORT.print(3);
+      UART_PORT.print(" to turn ");
+      UART_PORT.print(numSteps);
+      UART_PORT.println(" steps");
+#endif
+    }
+    else {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+      UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+#endif
+    }
+  }
+  else if (!isOpenLoop) {
+    enablePower();
+    movementDone = false;
+  }
 }
 
-bool StepperMotor::calcNumSteps(float angle) {
-  // if the error is big enough to justify movement
-  if (fabs(angle) > pidController.getJointAngleTolerance()) {
-    // here we have to multiply by the gear ratio to find the angle actually traversed by the motor shaft
-    numSteps = fabs(angle) * gearRatio / stepResolution; // calculate the number of steps to take
-    return true;
+void StepperMotor::budge(void) {
+  isBudging = true;
+  movementDone = false;
+  stepCount = 0;
+  sinceBudgeCommand = 0;
+  enablePower(); // give power to the stepper finally
+  if (isOpenLoop) {
+    startAngle = getImaginedAngle();
   }
-  else {
-    return false;
-  }
-}
-
-bool StepperMotor::calcCurrentAngle(void) {
-  if (isBudging) {
-    imaginedAngle = startAngle + (float)rotationDirection * (float)stepCount * stepResolution * gearRatioReciprocal;
-    return true;
-  }
-  else if (isOpenLoop) {
-    if (movementDone) {
-      // imaginedAngle hasn't changed since motor hasn't moved and encoder isn't working
-    }
-    else if (stepCount < numSteps) {
-      // if the motor is moving, calculate the angle based on how long it's been turning for
-      imaginedAngle = startAngle + (desiredAngle - startAngle) * ((float)stepCount / (float)numSteps);
-    }
-    return true;
-  }
-  else if (hasEncoder) {
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-    imaginedAngle = currentAngle;
-    return true;
-  }
-  else {
-    return false;
+  else if (!isOpenLoop) {
+    startAngle = getCurrentAngle();
   }
 }
 

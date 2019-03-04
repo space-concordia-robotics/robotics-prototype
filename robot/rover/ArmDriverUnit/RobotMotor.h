@@ -38,9 +38,8 @@ class RobotMotor {
   void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
   bool withinJointAngleLimits(float angle); // checks if angle is within limits
   bool hasEncoder;
-  virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
-  virtual void stopRotation(void) = 0;
   // void setMaxSpeed();
+  /* movement helper functions */
   int calcDirection(float error); // updates rotationDirection based on the angular error inputted
   bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
   float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
@@ -50,6 +49,12 @@ class RobotMotor {
   void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
+  /* movement functions */
+  virtual void stopRotation(void) = 0;
+  virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
+  virtual void goToCommandedAngle(void) = 0;
+  virtual void budge(void) = 0;
+  
   private:
   // doesn't really make sense to have any private variables for this parent class.
   // note that virtual functions must be public in order for them to be accessible from motorArray[]
