@@ -1,6 +1,84 @@
+/* idea for stepper checks in open loop */
+/*
+  if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) { // for open loop quasi closed loop control
+    // this code could (should?) also disable power
+  // if (motor1.movementDone) motor1.disablePower();
+  // if (motor3.movementDone) motor3.disablePower();
+  // if (motor4.movementDone) motor4.disablePower();
+   this code could (should?) determine when servo/dc motor movement is done
+
+  if ( fabs(motor2.desiredAngle - motor2.calcCurrentAngle() ) < motor2.pidController.jointAngleTolerance) {
+  motor2.movementDone = true;
+  }
+
+
+  if ( fabs(motor5.desiredAngle - motor5.calcCurrentAngle() ) < motor5.pidController.jointAngleTolerance) {
+  motor5.movementDone = true;
+  }
+  if ( fabs(motor6.desiredAngle - motor6.calcCurrentAngle() ) < motor6.pidController.jointAngleTolerance) {
+  motor6.movementDone = true;
+  }
+
+  // all of this code should probably go into a function called "calculate motor steps" or something...
+  // this code is very similar to what happens above when it decides which motor should turn after receiving a command
+  // this code also assumes that the correct amount of steps will take it to the right spot
+  // this means that it doesn't account for faulty angle calculations from the encoder or the motor resolution...
+
+  //motor4
+  int m4remainingSteps = motor4.numSteps - motor4.stepCount;
+  //float m4imaginedAngle = motor4.stepCount * motor4.stepResolution * motor4.gearRatioReciprocal;
+  //float m4actualAngle = motor4.calcCurrentAngle();
+  float m4imaginedRemainingAngle = m4remainingSteps * motor4.stepResolution * motor4.gearRatioReciprocal; // how far does the motor think it needs to go
+  float m4actualRemainingAngle = motor4.desiredAngle - motor4.calcCurrentAngle(); // how far does it actually need to go
+  float m4discrepancy = m4actualRemainingAngle - m4imaginedRemainingAngle ;
+  //motor3
+  int remainingSteps = motor3.numSteps - motor3.stepCount;
+  //float imaginedAngle = motor3.stepCount * motor3.stepResolution * motor3.gearRatioReciprocal;
+  //float actualAngle = motor3.calcCurrentAngle();
+  float imaginedRemainingAngle = remainingSteps * motor3.stepResolution * motor3.gearRatioReciprocal; // how far does the motor think it needs to go
+  float actualRemainingAngle = motor3.desiredAngle - motor3.calcCurrentAngle(); // how far does it actually need to go
+  float discrepancy = actualRemainingAngle - imaginedRemainingAngle ;
+
+  // UART_PORT.print(imaginedAngle); UART_PORT.println(" imagined angle");
+  // UART_PORT.print(actualAngle); UART_PORT.println(" actual angle");
+  // UART_PORT.print(imaginedRemainingAngle); UART_PORT.println(" imagined remaining angle");
+  // UART_PORT.print(actualRemainingAngle); UART_PORT.println(" actual remaining angle");
+  // UART_PORT.print(discrepancy); UART_PORT.println(" degrees behind expected position");
+
+  // the stepper interrupt could occur during this calculation, so maybe there should be a different angle tolerance here
+  // that said at the moment it's 2 degrees which is bigger than the max step angle of the motor
+  // keep in mind that 2 degrees for the joint is different from 2 degrees for the motor shaft
+  if (fabs(discrepancy) > motor3.pidController.jointAngleTolerance) {
+  UART_PORT.println("discrepancy is too high and motor is moving, adjusting step number");
+  // it's possible the check happens during movement, but there needs to be ample distance to move
+  if (!motor3.movementDone) {
+    // if actualRemainingAngle is negative it means the arm moved way further than it should have
+    if (actualRemainingAngle < 0) motor3.movementDone = true; // abort
+    else if (actualRemainingAngle > motor3.pidController.jointAngleTolerance) {
+      UART_PORT.println("enough angle between current position and desired position to adjust during movement");
+      // the adjustment is simple if the motor is already moving in the right direction but what happens when a direction change needs to occur?
+      // the motor interrupt assumes the step count and direction are unchanged!!!!
+      motor3.numSteps += discrepancy * motor3.gearRatio / motor3.stepResolution; // add the number of steps required to catch up or skip
+      //numsteps gets updated but imagined angle doesnt...?
+    }
+    else UART_PORT.println("not enough angle between current position and desired position to adjust during movement, waiting for movement to end");
+  }
+  else { // it's possible the check happens when the motor is at rest
+    UART_PORT.println("discrepancy is too high and motor is done moving, adjusting step number");
+    // it's possible the angle is too far in either direction, so this makes sure that it goes to the right spot
+    if (discrepancy >= 0) motor3.rotationDirection = 1;
+    else discrepancy = -1;
+    motor3.enablePower();
+    motor3.numSteps = fabs(discrepancy) * motor3.gearRatio / motor3.stepResolution; // calculate the number of steps to take
+    motor3.movementDone = false;
+  }
+  }
+  sinceStepperCheck = 0;
+  }
+*/
 /* idea to use a loop for motor control. scrapped because was trying to access motor-unique functions */
 /*
-for(int i=0;i<NUM_MOTORS;i++){
+  for(int i=0;i<NUM_MOTORS;i++){
   if (motorCommand.motorsToMove[i]){
 
     if(motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])){
@@ -60,7 +138,7 @@ for(int i=0;i<NUM_MOTORS;i++){
       }
     }
   }
-}
+  }
 */
 
 /*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
