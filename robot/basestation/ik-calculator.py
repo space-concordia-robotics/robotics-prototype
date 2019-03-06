@@ -7,97 +7,95 @@
 #be constant. In fact, the properties of the base are not taken into
 #account in this code but are simply added to the final figure.
 #For this reason, each angle has a higher coefficient than its
-#corresponding link. E.g. link 1 corresponds to angle a2a.
+#corresponding link. E.g. link 1 corresponds to angle computed_proximal_angle.
 
 #This code uses a closed form solution to determine the orientation of the
 #joints of a planar RRR arm for its end effector to reach a given point.For
 #more information about workings of the code, contact Maxim Kaller.
 
 import math
-#import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import Axes3D
-#MANIPULATOR PHYSICAL PARAMETERS
-
-base_length = 0.1 #Length of base
-proximal_length = 0.5 #length of proximal link
-distal_length = 0.5 #length of distal link
-wrist_length = 0.2 #length of wrist link (until tip of fingers)
-
-amax2 = math.pi #amaxi = maximum angle link i + 1 can reach
-amin2 = 0 #amini = minimum angle link i + 1 can reach
-amax3 = math.pi
-amin3 = -math.pi
-amax4 = math.pi
-amin = -math.pi
 
 
-#DESIRED COORDINATE point
-X = 1
-Y = 2
-Z = 3
+############MANIPULATOR PHYSICAL PARAMETERS############
 
 
-beta = math.atan2(Y - base_length , X) #Calculates beta, which is the sum of the angles of all links
-xn = X - wrist_length * math.cos(beta) #Calculates xn, which is the x coordinate of the wrist
-yn = (Y - base_length) - wrist_length * math.sin(beta) #Calculates yn, which is the y coordinate of the wrist
+#LENGTHS:
+rover_height = 0.366 #m
+base_length = 0.103 #m
+proximal_length = 0.413 #m
+distal_length = 0.406 #m
+wrist_length = 0.072 + 0.143 #m (until tip of fingers)
 
-if math.sqrt(pow(xn,2) + pow(yn,2)) > proximal_length + distal_length: #Check to see if point is too far
-    print('Error! Cannot reach point!')
-
-else:
-    a3 = (pow(xn,2) + pow(yn,2) - pow(proximal_length,2) - pow(distal_length,2))/(2 * proximal_length * distal_length) #Calculates the cosine of the angle of link 2
-    a3a = math.acos(a3) #Proper angle is reached. NOTE: Depending on speed of function acos()
-                    #an approximation or different calculation method should be
-                    #used to speed computation time
-
-if a3a > amax3 or a3a < amin3: #Check to see if third angle is within bounds
-    disp('Error! Angle 3 is not within bounds')
+#ANGLES (IN RADIANS):
+proximal_max_angle = math.pi 
+proximal_min_angle = -math.pi
+distal_max_angle = math.pi
+distal_min_angle = -math.pi
+wrist_max_angle = math.pi
+wrist_min_angle = -math.pi
 
 
-aphi = (pow(xn,2) + pow(yn,2) + pow(proximal_length,2) - pow(distal_length,2))/(2 * math.sqrt(pow(xn,2) + pow(yn,2)) * proximal_length) #Determine cos of phi
-phi = math.acos(aphi) #Phi is the angle between the first link and the straight line
-              #from the base to the end effector
 
-#Depending on the configuration of the arm, phi and beta can be used to
-#find the second angle
+#######################FUNCTIONS#######################
 
-if a3a <= 0:
-    a2a = beta + phi
 
-if a3a > 0:
-    a2a = beta - phi
+def ComputeWorkspace():
+	#INSERT SOME CLEVER CODE HERE
+	return 1
 
-#If a2a is too small, calculations will restart with a3a being negative
-if a2a > amax2 or a2a < amin2:
-    #disp(a2a)
-    a3a = -a3a
 
-if a3a < 0:
-    a2a = beta + phi
 
-if a3a > 0:
-    a2a = beta - phi
 
-#Check to see if second angle is within bounds
-if a2a > amax2 or a2a < amin2:
-    print('Error! Angle 2 is not within bounds')
+def ComputeIK(X,Y,Z):
+	beta = math.atan2(Y - base_length , X) #Calculates beta, which is the sum of the angles of all links
+	Wrist_X = X - wrist_length * math.cos(beta) #Calculates wrist X coordinate
+	Wrist_Y = (Y - base_length) - wrist_length * math.sin(beta) #Calculates wrist Y coordinate
 
-#Knowing the sum of all angles (beta) and two of the three angles,
-#the final angle (angle four) can be found:
+	if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > proximal_length + distal_length: #Check to see if point is too far
+		print('Error! Cannot reach point!')
+		return 0
 
-a4a = beta - (a2a + a3a)
+	else:
+		cosine_distal_angle = (pow(Wrist_X,2) + pow(Wrist_Y,2) - pow(proximal_length,2) - pow(distal_length,2))/(2 * proximal_length * distal_length) #Calculates the cosine of the angle of link 2
+		computed_distal_angle = math.acos(cosine_distal_angle) #Proper angle is reached. NOTE: Depending on speed of function acos()
+						#an approximation or different calculation method should be
+						#used to speed computation time
 
-#The following line creates a circle around the specified point. This point
-#is used to confirm that the end effector is well positioned:
-#scatter(X,Y, 200, 'LineWidth' , 2.5)
+	if computed_distal_angle > distal_max_angle or computed_distal_angle < distal_min_angle: #Check to see if third angle is within bounds
+		disp('Error! Angle 3 is not within bounds')
 
-#The following code generates a graphical representation of the arm:
-#plot( [0 0] , [0 d1] , 'k' , 'LineWidth' , 75)
-#plot( [0 l1 * cos(a2a)] , [ d1 d1 + l1 * sin(a2a)], 'k' , 'LineWidth' , 3)
-#plot( [l1 * cos(a2a) l1 * cos(a2a) + l2 * cos(a2a + a3a)] , [d1 + l1 * sin(a2a) d1 + l1 * sin(a2a) + l2 * sin(a2a + a3a)], 'k', 'LineWidth' , 3)
-#plot( [ l1 * cos(a2a) + l2 * cos(a2a + a3a) l1 * cos(a2a) + l2 * cos(a2a + a3a) + l3 * cos(a2a + a3a + a4a)] , [ d1 + l1 * sin(a2a) + l2 * sin(a2a + a3a) d1 + l1 * sin(a2a) + l2 * sin(a2a + a3a) + l3 * sin(a2a + a3a + a4a) ] , 'k' , 'LineWidth' , 3)
 
-#axis equal #To avoid weird graphs. NOTE: X axis and Y axis may still be of different lengths.
-        #This will make links seem smaller/bigger than they actually
-        #are. Fear not. As long as the end effector touches the circle
-        #it is all good.
+	aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(proximal_length,2) - pow(distal_length,2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * proximal_length) #Determine cos of phi
+	phi = math.acos(aphi) #Phi is the angle between the first link and the straight line
+				  #from the base to the end effector
+
+	#Depending on the configuration of the arm, phi and beta can be used to
+	#find the second angle
+
+	if computed_distal_angle <= 0:
+		computed_proximal_angle = beta + phi
+
+	if computed_distal_angle > 0:
+		computed_proximal_angle = beta - phi
+
+	#If computed_proximal_angle is too small, calculations will restart with computed_distal_angle being negative
+	if computed_proximal_angle > proximal_max_angle or computed_proximal_angle < proximal_min_angle:
+		#disp(computed_proximal_angle)
+		computed_distal_angle = -computed_distal_angle
+
+	if computed_distal_angle < 0:
+		computed_proximal_angle = beta + phi
+
+	if computed_distal_angle > 0:
+		computed_proximal_angle = beta - phi
+
+	#Check to see if second angle is within bounds
+	if computed_proximal_angle > proximal_max_angle or computed_proximal_angle < proximal_min_angle:
+		print('Error! Angle 2 is not within bounds')
+
+	#Knowing the sum of all angles (beta) and two of the three angles,
+	#the final angle (angle four) can be found:
+
+	computed_wrist_angle = beta - (computed_proximal_angle + computed_distal_angle)
+
+	return 1
