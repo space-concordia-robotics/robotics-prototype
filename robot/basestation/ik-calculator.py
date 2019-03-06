@@ -14,6 +14,7 @@
 #more information about workings of the code, contact Maxim Kaller.
 
 import math
+import pygame
 
 
 ############MANIPULATOR PHYSICAL PARAMETERS############
@@ -34,6 +35,39 @@ distal_min_angle = -math.pi
 wrist_max_angle = math.pi
 wrist_min_angle = -math.pi
 
+#INITIALIZE GLOBAL VARIABLES
+computed_proximal_angle = proximal_min_angle
+computed_distal_angle = distal_min_angle
+computed_wrist_angle = wrist_min_angle
+
+base_start_point = [0,0]
+base_end_point = [0,base_length]
+proximal_start_point = base_end_point
+proximal_end_point = proximal_start_point + [proximal_length * math.cos(computed_proximal_angle),proximal_length * math.sin(computed_proximal_angle)]
+distal_start_point = proximal_end_point
+distal_end_point = distal_start_point + [distal_length * math.cos(computed_distal_angle),distal_length * math.sin(computed_distal_angle)]
+wrist_start_point = distal_end_point
+wrist_end_point = wrist_start_point + [wrist_length * math.cos(computed_wrist_angle),wrist_length * math.sin(computed_wrist_angle)]
+
+
+###################PYGAME PARAMETERS###################
+VOLUME_COL = [210,255,210]
+
+###############PYGAME FUNCTIONS###############
+def draw(self):
+	pygame.draw.line(self.surf, self.color, base_start_point, base_end_point, self.width)
+	pygame.draw.line(self.surf, self.color, proximal_start_point, proximal_end_point, self.width)
+	pygame.draw.line(self.surf, self.color, distal_start_point, distal_end_point, self.wideth)
+	pygame.draw.line(self.surf, self.color, wrist_start_point, wrist_end_point, self.width)
+
+
+################PYGAME CLASSES################
+class ProjectionView:
+	def __init__(self, color, X, Y, width = 6):
+		self.color = color
+		self.line_width = width
+		self.positioning = positioning
+
 
 
 #######################FUNCTIONS#######################
@@ -45,8 +79,7 @@ def ComputeWorkspace():
 
 
 
-
-def ComputeIK(X,Y,Z):
+def ComputeIK(X, Y, Z):
 	beta = math.atan2(Y - base_length , X) #Calculates beta, which is the sum of the angles of all links
 	Wrist_X = X - wrist_length * math.cos(beta) #Calculates wrist X coordinate
 	Wrist_Y = (Y - base_length) - wrist_length * math.sin(beta) #Calculates wrist Y coordinate
@@ -99,3 +132,28 @@ def ComputeIK(X,Y,Z):
 	computed_wrist_angle = beta - (computed_proximal_angle + computed_distal_angle)
 
 	return 1
+
+
+def UpdateArmSetValues():
+	base_start_point = [0,0]
+	base_end_point = [0,base_length]
+	proximal_start_point = base_end_point
+	proximal_end_point = proximal_start_point + [proximal_length * math.cos(computed_proximal_angle),proximal_length * math.sin(computed_proximal_angle)]
+	distal_start_point = proximal_end_point
+	distal_end_point = distal_start_point + [distal_length * math.cos(computed_distal_angle),distal_length * math.sin(computed_distal_angle)]
+	wrist_start_point = distal_end_point
+	wrist_end_point = wrist_start_point + [wrist_length * math.cos(computed_wrist_angle),wrist_length * math.sin(computed_wrist_angle)]
+	return 1
+	
+	
+	
+#########################BODY#########################
+pygame.init()
+pygame.font.init()
+screen = pygame.display.set_mode((640,480))
+
+
+Sideview = ProjectionView(OLUME_COL, 300, 500)
+ComputeIK(0.1,0.2,0.3)
+UpdateArmSetValues()
+draw(Sideview)
