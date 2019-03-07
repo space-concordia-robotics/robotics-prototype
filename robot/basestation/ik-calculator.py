@@ -26,6 +26,7 @@ base_length = 0.103 #m
 proximal_length = 0.413 #m
 distal_length = 0.406 #m
 wrist_length = 0.072 + 0.143 #m (until tip of fingers)
+length_array = [proximal_length, distal_length, wrist_length]
 
 #ANGLES (IN RADIANS):
 proximal_max_angle = math.pi
@@ -34,21 +35,23 @@ distal_max_angle = math.pi
 distal_min_angle = -math.pi
 wrist_max_angle = math.pi
 wrist_min_angle = -math.pi
+minmax = [[proximal_min_angle,proximal_max_angle], [distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle]]
 
 #INITIALIZE GLOBAL VARIABLES
 computed_proximal_angle = proximal_min_angle
 computed_distal_angle = distal_min_angle
 computed_wrist_angle = wrist_min_angle
+sample_size = 50
 
-base_start_point = [0,0]
-base_end_point = [0,base_length]
-proximal_start_point = base_end_point
-proximal_end_point = [proximal_length * math.cos(computed_proximal_angle),base_length + proximal_length * math.sin(computed_proximal_angle)]
-distal_start_point = proximal_end_point
-distal_end_point = [distal_start_point[0] + distal_length * math.cos(computed_distal_angle), distal_start_point[1] + distal_length * math.sin(computed_distal_angle)]
-wrist_start_point = distal_end_point
-wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle),wrist_start_point[1] + wrist_length * math.sin(computed_wrist_angle)]
 
+#base_start_point = [0,0]
+#base_end_point = [0,base_length]
+#proximal_start_point = base_end_point
+#proximal_end_point = [proximal_length * math.cos(computed_proximal_angle),base_length + proximal_length * math.sin(computed_proximal_angle)]
+#distal_start_point = proximal_end_point
+#distal_end_point = [distal_start_point[0] + distal_length * math.cos(computed_distal_angle), distal_start_point[1] + distal_length * math.sin(computed_distal_angle)]
+#wrist_start_point = distal_end_point
+#wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle),wrist_start_point[1] + wrist_length * math.sin(computed_wrist_angle)]
 
 ###################PYGAME PARAMETERS###################
 Window_X = 640
@@ -61,12 +64,29 @@ GREEN = (  0, 255,   0)
 RED =   (255,   0,   0)
 
 ###############PYGAME FUNCTIONS###############
-def draw(self, surf):
-	pygame.draw.line(surf, self.color, base_start_point, base_end_point, self.width)
-	pygame.draw.line(surf, self.color, base_end_point, proximal_end_point, self.width)
-	pygame.draw.line(surf, self.color, distal_start_point, distal_end_point, self.width)
-	pygame.draw.line(surf, self.color, wrist_start_point, wrist_end_point, self.width)
+def draw(self, surf, array):
+	pygame.draw.line(surf, self.color, array[0][0], array[0][1], self.width)
+	pygame.draw.line(surf, self.color, array[1][0], array[1][1], self.width)
+	pygame.draw.line(surf, self.color, array[2][0], array[2][1], self.width)
+	pygame.draw.line(surf, self.color, array[3][0], array[3][1], self.width)
 
+
+def OffsetPoint(Point):
+	return [Point[0] + Window_X/2, Point[1] + Window_Y/2]
+	
+def ResizePoint(Point):
+	return [Point[0] * Window_X/2, Point[1] * Window_Y/2]
+
+def GenerateRepresentativeCoordinates(PointArray, size = 3):
+	Scale_Factor = 0.5
+	
+	for i in range(0,size):
+		resized_array[i][0] *= Window_X * Scale_Factor
+		resized_array[i][0] += Window_X/2
+		resized_array[i][1] *= Window_Y * Scale_Factor
+		resized_array[i][0] -= Window_Y/2
+	
+	return resized_array
 
 
 ################PYGAME CLASSES################
@@ -83,9 +103,17 @@ class ProjectionView:
 #######################FUNCTIONS#######################
 
 
-def ComputeWorkspace():
-	#INSERT SOME CLEVER CODE HERE
-	return 1
+def ComputeWorkspace(joint_array, joint_num,minmax_array, length_array):
+	global sample_size
+	
+	for j1 in range(minmax_array[0][0],minmax_array[0][1], (minmax_array[0][1] - minmax_array[0][0])/sample_size):
+		for j2 in range(minmax_array[1][0],minmax_array[1][1], (minmax_array[1][1] - minmax_array[1][0])/sample_size):
+			for j3 in range(minmax_array[2][0],minmax_array[2][1], (minmax_array[2][1] - minmax_array[2][0])/sample_size):
+				pt[ 50 * 50 * j1 + 50 * j2 + j3][0] = length_array[0] * math.cos(j1) + length_array[1] * math.cos(j2) + length_array[2] * math.cos(j3)
+				pt[ 50 * 50 * j1 + 50 * j2 + j3][1] = length_array[0] * math.sin(j1) + length_array[1] * math.sin(j2) + length_array[2] * math.sin(j3)
+	return pt
+
+
 
 
 
@@ -149,57 +177,74 @@ def ComputeIK(X, Y, Z):
 
 
 def UpdateArmSetValues():
-	global base_start_point
-	global base_end_point
-	global proximal_start_point
-	global proximal_end_point
-	global distal_start_point
-	global distal_end_point
-	global wrist_start_point
-	global wrist_end_point
 
-	base_start_point = [Window_X/2,Window_Y/2]
-	base_end_point = [Window_X/2, base_start_point[1] - base_length*Window_Y/2]
+	base_start_point = [0,0]
+	base_end_point = [base_start_point[0], base_start_point[1] - base_length]
 	proximal_start_point = base_end_point
-	proximal_end_point =  [proximal_start_point[0] + proximal_length * math.cos(computed_proximal_angle) * Window_X/2 , proximal_start_point[1] - proximal_length * math.sin(computed_proximal_angle) * Window_Y/2]
+	proximal_end_point =  [proximal_start_point[0] + proximal_length * math.cos(computed_proximal_angle) , proximal_start_point[1] - proximal_length * math.sin(computed_proximal_angle)]
 	distal_start_point = proximal_end_point
-	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(computed_distal_angle) * Window_X/2 , distal_start_point[1] - distal_length * math.sin(computed_distal_angle) * Window_Y/2]
+	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(computed_distal_angle) , distal_start_point[1] - distal_length * math.sin(computed_distal_angle)]
 	wrist_start_point = distal_end_point
-	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle) * Window_X/2 , wrist_start_point[1] - wrist_length * math.sin(computed_wrist_angle) * Window_Y/2]
-	return 1
+	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle) , wrist_start_point[1] - wrist_length * math.sin(computed_wrist_angle)]
+	
+	return [ [base_start_point, base_end_point], [proximal_start_point, proximal_end_point], [distal_start_point, distal_end_point] , [wrist_start_point, wrist_end_point] ]
 
 
 
-#########################BODY#########################
+
+
+
+#########################MAIN#########################
+
+
+#################PYGAME INIT#################
 pygame.init()
 pygame.font.init()
 Sideview = ProjectionView(RED, Window_X/2, Window_Y/2)
 screen = pygame.display.set_mode((Window_X,Window_Y))
 pygame.display.set_caption("Inverse Kinematics Module")
+mode = 1
 
 done = False
 clock = pygame.time.Clock()
 
 
-
+#################PYGAME LOOP#################
 while not done:
 
-    clock.tick(10)
 
-    #print("Running event checker")
+	#Check if user closed window
+    clock.tick(10)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done=True
 
-    error = ComputeIK(0.4,0.8,0.3)
-    #print(computed_proximal_angle *180 / math.pi)
-    #print(computed_distal_angle *180 / math.pi)
-    #print(computed_wrist_angle *180 / math.pi)
-    UpdateArmSetValues()
+    
+	#Update arm view
     screen.fill(WHITE)
-    draw(Sideview, screen)
-    pygame.draw.circle(screen, BLUE, [500,124], 15, 6)
+	
+	#INVERSE KINEMATICS MODE
+	if mode is 1:
+		set_point = [0.4,0.8,0.3]
+	
+		error = ComputeIK(set_point[0], set_point[1], set_point[2])
+		Arm_Actual_Position = UpdateArmSetValues()
+		Arm_Representative_Position = GenerateRepresentativeCoordinates(Arm_Actual_Position)
+		
+		#Draw the arm
+		draw(Sideview, screen, Arm_Representative_Position)
+		
+		#Draw a circle around target point
+		desired_point = GenerateRepresentativeCoordinates(set_point , 0)
+		pygame.draw.circle(screen, BLUE, desired_point , 15, 6)
+		
+	#WORKSPACE MODE
+	if mode is 0:
+		for i in range(0, math.pow(sample_size,3) ):
+			pygame.draw.circle(screen, BLUE, desired_point , 1)
+	
+	
+	#This is required to update the display
     pygame.display.flip()
-
 
 pygame.quit()
