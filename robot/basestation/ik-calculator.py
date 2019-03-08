@@ -70,22 +70,29 @@ def draw(self, surf, array):
 	pygame.draw.line(surf, self.color, array[2][0], array[2][1], self.width)
 	pygame.draw.line(surf, self.color, array[3][0], array[3][1], self.width)
 
-
 def OffsetPoint(Point):
 	return [Point[0] + Window_X/2, Point[1] + Window_Y/2]
-	
+
 def ResizePoint(Point):
 	return [Point[0] * Window_X/2, Point[1] * Window_Y/2]
 
-def GenerateRepresentativeCoordinates(PointArray, size = 3):
+def GenerateRepresentativeCoordinates(PointArray, size = 4):
 	Scale_Factor = 0.5
-	
-	for i in range(0,size):
-		resized_array[i][0] *= Window_X * Scale_Factor
-		resized_array[i][0] += Window_X/2
-		resized_array[i][1] *= Window_Y * Scale_Factor
-		resized_array[i][0] -= Window_Y/2
-	
+
+	if size is 0:
+		resized_array = [0,0]
+		resized_array[0] = int(PointArray[0] * Window_X * Scale_Factor + Window_X/2)
+		resized_array[1] = int(- PointArray[1] * Window_Y * Scale_Factor + Window_Y/2)
+
+	else:
+		resized_array = [ [[0,0],[0,0]] for x in range(size)]
+		for i in range(0,size):
+			for j in range(0,1):
+				resized_array[i][0][0] = PointArray[i][0][0] * Window_X * Scale_Factor + Window_X/2
+				resized_array[i][1][0] = PointArray[i][1][0] * Window_X * Scale_Factor + Window_X/2
+				resized_array[i][0][1] = PointArray[i][0][1] * Window_Y * Scale_Factor + Window_Y/2
+				resized_array[i][1][1] = PointArray[i][1][1] * Window_Y * Scale_Factor + Window_Y/2
+
 	return resized_array
 
 
@@ -105,7 +112,7 @@ class ProjectionView:
 
 def ComputeWorkspace(joint_array, joint_num,minmax_array, length_array):
 	global sample_size
-	
+
 	for j1 in range(minmax_array[0][0],minmax_array[0][1], (minmax_array[0][1] - minmax_array[0][0])/sample_size):
 		for j2 in range(minmax_array[1][0],minmax_array[1][1], (minmax_array[1][1] - minmax_array[1][0])/sample_size):
 			for j3 in range(minmax_array[2][0],minmax_array[2][1], (minmax_array[2][1] - minmax_array[2][0])/sample_size):
@@ -186,7 +193,7 @@ def UpdateArmSetValues():
 	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(computed_distal_angle) , distal_start_point[1] - distal_length * math.sin(computed_distal_angle)]
 	wrist_start_point = distal_end_point
 	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle) , wrist_start_point[1] - wrist_length * math.sin(computed_wrist_angle)]
-	
+
 	return [ [base_start_point, base_end_point], [proximal_start_point, proximal_end_point], [distal_start_point, distal_end_point] , [wrist_start_point, wrist_end_point] ]
 
 
@@ -219,31 +226,34 @@ while not done:
         if event.type == pygame.QUIT:
             done=True
 
-    
+
 	#Update arm view
     screen.fill(WHITE)
-	
+
 	#INVERSE KINEMATICS MODE
-	if mode is 1:
-		set_point = [0.4,0.8,0.3]
-	
-		error = ComputeIK(set_point[0], set_point[1], set_point[2])
-		Arm_Actual_Position = UpdateArmSetValues()
-		Arm_Representative_Position = GenerateRepresentativeCoordinates(Arm_Actual_Position)
-		
+    if mode is 1:
+    	set_point = [0.4,0.9,0.3]
+    	set_point_2D = [set_point[0], set_point[1]]
+    	error = ComputeIK(set_point[0], set_point[1], set_point[2])
+    	Arm_Actual_Position = UpdateArmSetValues()
+    	Arm_Representative_Position = GenerateRepresentativeCoordinates(Arm_Actual_Position)
+
 		#Draw the arm
-		draw(Sideview, screen, Arm_Representative_Position)
-		
+    	#print(Arm_Actual_Position)
+    	#print(Arm_Representative_Position)
+    	draw(Sideview, screen, Arm_Representative_Position)
+
 		#Draw a circle around target point
-		desired_point = GenerateRepresentativeCoordinates(set_point , 0)
-		pygame.draw.circle(screen, BLUE, desired_point , 15, 6)
-		
+    	desired_point = GenerateRepresentativeCoordinates(set_point_2D , 0)
+    	#print(desired_point)
+    	pygame.draw.circle(screen, BLUE, desired_point , 15, 3)
+
 	#WORKSPACE MODE
-	if mode is 0:
-		for i in range(0, math.pow(sample_size,3) ):
-			pygame.draw.circle(screen, BLUE, desired_point , 1)
-	
-	
+    if mode is 0:
+    	for i in range(0, math.pow(sample_size,3) ):
+    		pygame.draw.circle(screen, BLUE, desired_point , 1)
+
+
 	#This is required to update the display
     pygame.display.flip()
 
