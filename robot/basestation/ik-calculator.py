@@ -29,16 +29,17 @@ wrist_length = 0.072 + 0.143 #m (until tip of fingers)
 length_array = [proximal_length, distal_length, wrist_length]
 
 #ANGLES (IN RADIANS):
-#proximal_max_angle = math.pi
-#proximal_min_angle = -math.pi
-#distal_max_angle = math.pi
-#distal_min_angle = -math.pi
-#wrist_max_angle = math.pi
-#wrist_min_angle = -math.pi
+proximal_max_angle = math.pi
+proximal_min_angle = -math.pi
+distal_max_angle = math.pi
+distal_min_angle = -math.pi
+wrist_max_angle = math.pi
+wrist_min_angle = -math.pi
 minmax = [[proximal_min_angle,proximal_max_angle], [distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle]]
 
 #INITIALIZE GLOBAL VARIABLES
 computed_angles = [proximal_min_angle, distal_min_angle, wrist_min_angle]
+print(computed_angles)
 sample_size = 50
 
 ###################PYGAME PARAMETERS###################
@@ -112,28 +113,30 @@ def ComputeWorkspace(joint_array, joint_num,minmax_array, length_array):
 
 def ComputeIK(X, Y, Z):
 
+	global computed_angles
 	solution_angles = [[0,0,0], [0,0,0]]
 	solution_usable = [True, True]
-	
+
 	#Check to see if point is too far
 	#REPLACE LATER WITH FANCIER SHIT
-	if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > proximal_length + distal_length: 
-		print('ERROR: SET POINT BEYOND ARM WORKSPACE')
-		return 0
 
-	
 	beta = math.atan2(Y - base_length , X) #Calculates beta, which is the sum of the angles of all links
 	Wrist_X = X - wrist_length * math.cos(beta) #Calculates wrist X coordinate
 	Wrist_Y = (Y - base_length) - wrist_length * math.sin(beta) #Calculates wrist Y coordinate
 
+	if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > proximal_length + distal_length:
+		print('ERROR: SET POINT BEYOND ARM WORKSPACE')
+		return 0
+
+
 	cosine_distal_angle = (pow(Wrist_X,2) + pow(Wrist_Y,2) - pow(proximal_length,2) - pow(distal_length,2))/(2 * proximal_length * distal_length)
 	solution_angles[0][1] = math.acos(cosine_distal_angle)
 	solution_angles[1][1] = -solution_angles[0][1]
-	
+
 
 	#Calculate phi: Angle between tangent line and proximal link
 	aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(proximal_length,2) - pow(distal_length,2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * proximal_length)
-	phi = math.acos(aphi) 
+	phi = math.acos(aphi)
 
 	#Depending on the configuration of the arm, phi and beta can be used to
 	#find the second angle
@@ -156,20 +159,30 @@ def ComputeIK(X, Y, Z):
 		if solution_angles[0][i] > minmax[i][1] or solution_angles[0][1] < minmax[i][0]:
 			solution_usable[0] = False
 			solution = 1
+			print('One Solution is not possible')
 		if solution_angles[1][i] > minmax[i][1] or solution_angles[1][1] < minmax[i][0]:
 			solution_usable[1] = False
 			solution = 0
-	
+			print('One Solution is not possible')
+
 	if (solution_usable[0] is False) and (solution_usable[1] is False):
 		print('Error: No arm configuration available for specified set point')
 		return 0
-	
+
 	elif (solution_usable[0] is True) and (solution_usable[1] is True):
-		if ( pow(solution_angles[0][0],2) + pow(solution_angles[0][1],2) + pow(solution_angles[0][2],2) ) > ( pow(solution_angles[1][0],2) + pow(solution_angles[1][1],2) + pow(solution_angles[1][2],2) ):
+		error0 = pow(solution_angles[0][0] - computed_angles[0],2) + pow(solution_angles[0][1] - computed_angles[1],2) + pow(solution_angles[0][2] - computed_angles[2],2)
+		error1 = pow(solution_angles[1][0] - computed_angles[0],2) + pow(solution_angles[1][1] - computed_angles[1],2) + pow(solution_angles[1][2] - computed_angles[2],2)
+		print(solution_angles[0])
+		print(solution_angles[1])
+		print(error0)
+		print(error1)
+		if error0 > error1:
 			solution = 1
-		
+			print('Solution 1 chosen')
+
 		else:
 			solution = 0
+			print('Solution 0 chosen')
 
 	return solution_angles[solution]
 
@@ -191,7 +204,7 @@ def UpdateArmSetValues(angles):
 #########################MAIN#########################
 
 #################ARM HOME INIT#################
-Arm_Actual_Position = UpdateArmSetValues()
+Arm_Actual_Position = UpdateArmSetValues(computed_angles)
 Arm_Representative_Position = GenerateRepresentativeCoordinates(Arm_Actual_Position)
 
 #################PYGAME INIT#################
@@ -222,9 +235,9 @@ while not done:
 
 	#INVERSE KINEMATICS MODE
     if mode is 1:
-    	set_point = [0.4,0.9,0.3]
+    	set_point = [0.4,-0.5,0.3]
     	set_point_2D = [set_point[0], set_point[1]]
-    	error = ComputeIK(set_point[0], set_point[1], set_point[2])
+    	computed_angles = ComputeIK(set_point[0], set_point[1], set_point[2])
     	Arm_Actual_Position = UpdateArmSetValues(computed_angles)
     	Arm_Representative_Position = GenerateRepresentativeCoordinates(Arm_Actual_Position)
 
