@@ -190,12 +190,11 @@ def UpdateArmSetValues():
 	proximal_start_point = base_end_point
 	proximal_end_point =  [proximal_start_point[0] + proximal_length * math.cos(computed_proximal_angle) , proximal_start_point[1] - proximal_length * math.sin(computed_proximal_angle)]
 	distal_start_point = proximal_end_point
-	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(computed_distal_angle) , distal_start_point[1] - distal_length * math.sin(computed_distal_angle)]
+	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(computed_distal_angle + computed_proximal_angle) , distal_start_point[1] - distal_length * math.sin(computed_distal_angle + computed_proximal_angle)]
 	wrist_start_point = distal_end_point
-	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle) , wrist_start_point[1] - wrist_length * math.sin(computed_wrist_angle)]
+	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(computed_wrist_angle + computed_distal_angle + computed_proximal_angle) , wrist_start_point[1] - wrist_length * math.sin(computed_wrist_angle + computed_distal_angle + computed_proximal_angle)]
 
 	return [ [base_start_point, base_end_point], [proximal_start_point, proximal_end_point], [distal_start_point, distal_end_point] , [wrist_start_point, wrist_end_point] ]
-
 
 
 
