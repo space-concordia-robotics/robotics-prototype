@@ -1,15 +1,22 @@
 #include <Arduino.h>
+#include <Servo.h>
 
 #define COUNTER_CLOCKWISE  1
 #define CLOCKWISE         -1
-#define M1_LIM_PLUS       26
-#define M1_LIM_MINUS      27
+#define M2_LIM_PLUS       26
+#define M2_LIM_MINUS      27
+#define M5_SERVO_PWM      35
+#define SERVO_STOP        1500
+#define TURN_CCW          1200
+#define TURN_CW           1800
+#define TRIGGER_DELAY     10
 
 volatile bool triggered = false;
 bool actualPress = false;
 volatile int triggerState = 0;
 int limitSwitchState = 0;
 elapsedMillis sinceTrigger;
+Servo servo;
 
 void limSwitchPlus(void) {
   // the trigger occurs upon the first contact before the bouncing and starts counting until the time limit
@@ -51,10 +58,12 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT); // pin 13
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(115200); Serial.setTimeout(10);
-  pinMode(M1_LIM_PLUS, INPUT_PULLUP);
-  pinMode(M1_LIM_MINUS, INPUT_PULLUP);
-  attachInterrupt(M1_LIM_PLUS, limSwitchPlus, CHANGE);
-  attachInterrupt(M1_LIM_MINUS, limSwitchMinus, CHANGE);
+  pinMode(M2_LIM_PLUS, INPUT_PULLUP);
+  pinMode(M2_LIM_MINUS, INPUT_PULLUP);
+  attachInterrupt(M2_LIM_PLUS, limSwitchPlus, CHANGE);
+  attachInterrupt(M2_LIM_MINUS, limSwitchMinus, CHANGE);
+  servo.attach(M5_SERVO_PWM);
+  servo.writeMicroseconds(SERVO_STOP);
 }
 
 void loop() {
@@ -84,17 +93,22 @@ void loop() {
     //Serial.println(limitSwitchState);
     if (limitSwitchState == COUNTER_CLOCKWISE) {
       Serial.println("ccw");
-      // blocking loop is fine for testing
-      delay(10);
+      servo.writeMicroseconds(TURN_CCW);
+      while (timer < 1000) {
+        ;
+      }
     }
     if (limitSwitchState == CLOCKWISE) {
       Serial.println("cw");
-      // blocking loop is fine for testing
-      delay(10);
+      servo.writeMicroseconds(TURN_CW);
+      while (timer < 1000) {
+        ;
+      }
     }
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
     actualPress = false;
     limitSwitchState = 0;
     digitalWrite(LED_BUILTIN, HIGH);
+    servo.writeMicroseconds(SERVO_STOP);
   }
 }
