@@ -2,8 +2,8 @@
 
 #define COUNTER_CLOCKWISE  1
 #define CLOCKWISE         -1
-#define M1_LIM_PLUS       31
-#define M1_LIM_MINUS      32
+#define M1_LIM_PLUS       26
+#define M1_LIM_MINUS      27
 
 volatile bool triggered = false;
 bool actualPress = false;
@@ -14,7 +14,7 @@ elapsedMillis sinceTrigger;
 void limSwitchPlus(void) {
   // the trigger occurs upon the first contact before the bouncing and starts counting until the time limit
   // at which point the trigger is reset in the main loop
-  
+
   // but it only gets triggered on a rising edge, so triggerState should be 0 before the trigger
   // if triggerState was not 0 it means that it's a falling edge
   if (!triggered && triggerState == 0) {
@@ -25,6 +25,7 @@ void limSwitchPlus(void) {
   // 0 to ccw or ccw to 0 in this ISR
   if (triggerState == 0) {
     triggerState = COUNTER_CLOCKWISE;
+    Serial.println("plu");
   }
   else {
     triggerState = 0;
@@ -38,6 +39,7 @@ void limSwitchMinus(void) {
   }
   if (triggerState == 0) {
     triggerState = CLOCKWISE;
+    Serial.println("min");
   }
   else {
     triggerState = 0;
@@ -59,7 +61,7 @@ void loop() {
   // this works but doesn't consider the possibility of both switches
   // being triggered at the same time which shouldn't ever actually happen
   if (triggered) {
-    if (sinceTrigger >= 15) {
+    if (sinceTrigger >= 7) {
       // if the last interrupt was a press (meaning it's stabilized and in contact)
       // then there's a real press
       if (triggerState != 0) {
@@ -79,24 +81,20 @@ void loop() {
   if (actualPress) {
     digitalWrite(LED_BUILTIN, LOW);
     elapsedMillis timer;
-    if (limitSwitchState = COUNTER_CLOCKWISE) {
+    //Serial.println(limitSwitchState);
+    if (limitSwitchState == COUNTER_CLOCKWISE) {
+      Serial.println("ccw");
       // blocking loop is fine for testing
-      while (timer < 1000) {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(200);
-        digitalWrite(LED_BUILTIN, LOW);
-      }
+      delay(10);
     }
     if (limitSwitchState == CLOCKWISE) {
+      Serial.println("cw");
       // blocking loop is fine for testing
-      while (timer < 2000) {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(400);
-        digitalWrite(LED_BUILTIN, LOW);
-      }
+      delay(10);
     }
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
     actualPress = false;
     limitSwitchState = 0;
+    digitalWrite(LED_BUILTIN, HIGH);
   }
 }
