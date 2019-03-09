@@ -115,8 +115,11 @@ def ComputeIK(X, Y, Z):
 	solution_usable = [True, True]
 
 	#Base rotation CALCULATION
-	solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X )
+	solution_angles[0][0] = solution_angles[1][0] = math.atan2( Z,X)
 	R = math.sqrt( pow(X,2) + pow(Z,2) )
+	if (X <= 0 and Z <= 0):
+		R *= -1
+		solution_angles[0][0] += math.pi
 
 	#Check to see if point is too far
 	#REPLACE LATER WITH FANCIER SHIT
@@ -216,6 +219,8 @@ Topview = ProjectionView(RED, 3*Window_X/4, Window_Y/4, screen)
 done = False
 clock = pygame.time.Clock()
 
+
+set_point = [0.4,0.3,0.2]
 #################PYGAME LOOP#################
 while not done:
 
@@ -224,14 +229,24 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done=True
+        if event.type == pygame.KEYDOWN:
+            	if event.key == pygame.K_UP:
+            		set_point[1] += 0.02
+            	if event.key == pygame.K_DOWN:
+            		set_point[1] -= 0.02
+            	if event.key == pygame.K_RIGHT:
+            		set_point[0] += 0.02
+            	if event.key == pygame.K_LEFT:
+            		set_point[0] -= 0.02
 
 	#Update arm view
     screen.fill(WHITE)
 
 	#INVERSE KINEMATICS MODE
     if mode is 1:
-    	set_point = [0.3,0.7,0.4]
     	set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
+    	if (set_point[0] <= 0 and set_point[2] <= 0):
+    		set_point_2D[0] *= -1
     	top_point = [set_point[0], set_point[2]]
     	computed_angles = ComputeIK(set_point[0], set_point[1], set_point[2])
 
