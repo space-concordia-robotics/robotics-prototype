@@ -401,7 +401,13 @@ void loop() {
         UART_PORT.println(" ccw");
 #endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->maxHardAngle);
-        //motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
+        motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
+        /*
+        motor5.timeCount=0;
+        motor5.numMillis=1000;
+        motor5.rotationDirection=COUNTER_CLOCKWISE;
+        motor5.movementDone = false;
+        */
       }
       if (motorArray[i]->limitSwitchState == CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
@@ -410,7 +416,13 @@ void loop() {
         UART_PORT.println(" cw");
 #endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->minHardAngle);
-        //motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
+        motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
+        /*
+        motor5.timeCount=0;
+        motor5.numMillis=1000;
+        motor5.rotationDirection=CLOCKWISE;
+        motor5.movementDone = false;
+        */
       }
     }
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed

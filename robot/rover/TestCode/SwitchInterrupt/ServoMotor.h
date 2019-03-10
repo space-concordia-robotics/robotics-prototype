@@ -15,6 +15,7 @@ class ServoMotor: public RobotMotor {
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
+    void goToAngle(float angle);
     void stopRotation(void);
 
     // stuff for open loop control
@@ -51,6 +52,7 @@ void ServoMotor::stopRotation(void) {
   servo.writeMicroseconds(SERVO_STOP);
   movementDone = true;
   isBudging = false;
+  //Serial.println("boo");
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
@@ -76,6 +78,29 @@ void ServoMotor::setVelocity(int motorDir, float motorSpeed)
     pulseTime = 1000;
   }
   servo.writeMicroseconds(pulseTime);
+  //Serial.println(pulseTime);
+}
+
+void ServoMotor::goToAngle(float angle) {
+  desiredAngle = angle;
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    // calculates how many steps to take to get to the desired position, assuming no slipping
+    numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
+    timeCount = 0;
+    movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+    UART_PORT.print("$A,Alert: motor ");
+    //UART_PORT.print(3);
+    UART_PORT.println(" to move back into software angle range");
+#endif
+  }
+  else if (!isOpenLoop) {
+    movementDone = false;
+  }
 }
 
 bool ServoMotor::calcTurningDuration(float angle) {

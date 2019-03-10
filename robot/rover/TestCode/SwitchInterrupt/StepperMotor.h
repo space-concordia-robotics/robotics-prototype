@@ -26,6 +26,7 @@ class StepperMotor: public RobotMotor {
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     bool calcCurrentAngle(void);
     void setVelocity(int motorDir, float motorSpeed);
+    void goToAngle(float angle);
     void stopRotation(void);
 
     // stuff for open loop control
@@ -81,21 +82,47 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
     motorSpeed = pidController.getMinOutputValue();
   }
   if (motorDir != oldDir) {
-  switch (motorDir) {
-    case CLOCKWISE:
-      digitalWriteFast(directionPin, LOW);
-      break;
-    case COUNTER_CLOCKWISE:
-      digitalWriteFast(directionPin, HIGH);
-      break;
-  }
-  oldDir = motorDir;
-  //Serial.println("dir change");
+    switch (motorDir) {
+      case CLOCKWISE:
+        digitalWriteFast(directionPin, LOW);
+        break;
+      case COUNTER_CLOCKWISE:
+        digitalWriteFast(directionPin, HIGH);
+        break;
+    }
+    oldDir = motorDir;
+    //Serial.println("dir change");
   }
   singleStep();
   // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4
   // the following equation converts from range 0-100 to range stepinterval1-4
   nextInterval = motorSpeed * ((MIN_STEP_INTERVAL - MAX_STEP_INTERVAL) / 100) + MAX_STEP_INTERVAL;
+}
+
+void StepperMotor::goToAngle(float angle) {
+  // this function does not check angle limits as it operates beyond them
+  // perhaps a better way is to have a variable that ignores angle limits in my other code!!
+  desiredAngle = angle;
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    // calculates how many steps to take to get to the desired position, assuming no slipping
+    numSteps = fabs(angle) * gearRatio / stepResolution;
+    stepCount = 0;
+    enablePower(); // give power to the stepper finally
+    movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+    UART_PORT.print("$A,Alert: motor ");
+    //UART_PORT.print(3);
+    UART_PORT.println(" to move back into software angle range");
+#endif
+  }
+  else if (!isOpenLoop) {
+    enablePower();
+    movementDone = false;
+  }
 }
 
 void StepperMotor::stopRotation(void) {
