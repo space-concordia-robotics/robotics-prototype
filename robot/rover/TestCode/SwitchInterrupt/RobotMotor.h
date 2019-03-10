@@ -16,9 +16,14 @@ class RobotMotor {
   int motorType;
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
+  // for limit switch interrupts
   int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
-  volatile int triggerState, limitSwitchState;
+  volatile bool triggered;
+  bool actualPress;
+  volatile int triggerState;
+  int limitSwitchState;
   elapsedMillis sinceTrigger;
+  // other stuff
   float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
   float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
@@ -81,6 +86,8 @@ RobotMotor::RobotMotor() {
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
   isBudging = false;
+  triggered = false;
+  actualPress = false;
   triggerState = 0;
   limitSwitchState = 0;
 }

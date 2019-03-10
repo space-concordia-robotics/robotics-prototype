@@ -35,6 +35,7 @@
 #define LIM_SWITCH_PULLSTATE INPUT_PULLDOWN
 #endif
 
+#define TRIGGER_DELAY 10 // how long to wait to make sure a limit switch was pressed and ignore bouncing
 #define SERVO_STOP 1500 // millisecond count which actually stops servo as expected
 //only needed for sabertooth
 //#define DC_STOP 127 // 5v // motor is supposed to stop at 50% duty cycle (127/255) but maybe the 1500 version is required for sabertooth
@@ -49,8 +50,12 @@
 #define M3_ENCODER_SHIFT   CORE_PIN19_BIT
 #define M3_ENCODER_A       19
 #define M3_ENCODER_B       18
-#define M3_LIMIT_SW_FLEX   22
-#define M3_LIMIT_SW_EXTEND 23
+#define M3_LIMIT_SW_FLEX_PORT     GPIOC_PDIR
+#define M3_LIMIT_SW_EXTEND_PORT   GPIOC_PDIR
+#define M3_LIMIT_SW_FLEX_SHIFT    CORE_PIN22_BIT
+#define M3_LIMIT_SW_EXTEND_SHIFT  CORE_PIN23_BIT
+#define M3_LIMIT_SW_FLEX          22
+#define M3_LIMIT_SW_EXTEND        23
 #define M3_ENCODER_RESOLUTION 2000
 #define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
@@ -67,6 +72,10 @@
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT
 #define M4_ENCODER_A       11
 #define M4_ENCODER_B       12
+#define M4_LIMIT_SW_FLEX_PORT    GPIOA_PDIR
+#define M4_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR
+#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN25_BIT
+#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT
 #define M4_LIMIT_SW_FLEX   25
 #define M4_LIMIT_SW_EXTEND 24
 #define M4_ENCODER_RESOLUTION 2000
@@ -86,8 +95,12 @@
 #define M1_ENCODER_SHIFT   CORE_PIN7_BIT
 #define M1_ENCODER_A        7
 #define M1_ENCODER_B        8
-#define M1_LIMIT_SW_CW      9
-#define M1_LIMIT_SW_CCW    10
+#define M1_LIMIT_SW_CW_PORT   GPIOC_PDIR
+#define M1_LIMIT_SW_CCW_PORT  GPIOC_PDIR
+#define M1_LIMIT_SW_CW_SHIFT  CORE_PIN9_BIT
+#define M1_LIMIT_SW_CCW_SHIFT CORE_PIN10_BIT
+#define M1_LIMIT_SW_CW        9
+#define M1_LIMIT_SW_CCW       10
 #define M1_ENCODER_RESOLUTION 7*2 // temporary, unknown
 #define M1_GEAR_RATIO      40.0 // temporary, unknown
 #define M1_MIN_HARD_ANGLE   -175.0
@@ -104,6 +117,10 @@
 #define M2_ENCODER_SHIFT   CORE_PIN26_BIT
 #define M2_ENCODER_A       26
 #define M2_ENCODER_B       27
+#define M2_LIMIT_SW_FLEX_PORT    GPIOA_PDIR
+#define M2_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR
+#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN28_BIT
+#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN29_BIT
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
 #define M2_ENCODER_RESOLUTION 7*2 //7*4 //48 // counts per motor shaft revolution
@@ -132,6 +149,8 @@
   #define M6_ENCODER_A       37
   #define M6_ENCODER_B       38
 */
+#define M6_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT // i need to pick a pin
 #define M6_LIMIT_SW_EXTEND 99 // i need to pick a pin
 #define M6_GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
 #define M6_MIN_HARD_ANGLE   -75.0 //-120.0

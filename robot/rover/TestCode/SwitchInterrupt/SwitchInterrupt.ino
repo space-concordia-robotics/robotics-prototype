@@ -271,11 +271,14 @@ void setup() {
 #endif
 
   // prepare and attach limit switch ISRs
-#if defined(LIM_SWITCH_FALL)
-#define LIM_SWITCH_DIR FALLING
-#elif defined(LIM_SWITCH_RISE)
-#define LIM_SWITCH_DIR RISING
-#endif
+  /*
+    #if defined(LIM_SWITCH_FALL)
+    #define LIM_SWITCH_DIR FALLING
+    #elif defined(LIM_SWITCH_RISE)
+    #define LIM_SWITCH_DIR RISING
+    #endif
+  */
+#define LIM_SWITCH_DIR CHANGE
 
   motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
@@ -362,30 +365,58 @@ void setup() {
 
 /* main code loop */
 void loop() {
-  
+
   // first check to see if limit switch interrupts have occurred, only then can i check if a message came in
-  for (int i=0;i<NUM_MOTORS;i++){
-    if (motorArray[i]->triggerState != 0){
-      if (motorArray[i]->sinceTrigger >= 15){
-        motorArray[i]->limitSwitchState = motorArray[i]->triggerState;
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    if (motorArray[i]->triggered) {
+      if (motorArray[i]->sinceTrigger >= TRIGGER_DELAY) {
+        // if the last interrupt was a press (meaning it's stabilized and in contact)
+        // then there's a real press
+        if (motorArray[i]->triggerState != 0) {
+          motorArray[i]->actualPress = true;
+          motorArray[i]->limitSwitchState = motorArray[i]->triggerState;
+        }
+        // otherwise it's not a real press
+        // so the limit switch state should stay whatever it used to be
+        // and so should actualPress
+        else {
+          ;
+        }
+        // either way, we should reset the triggered bool in wait for the next trigger
+        motorArray[i]->triggered = false;
       }
     }
-    if (motorArray[i]->limitSwitchState != 0){
+    if (motorArray[i]->actualPress) {
+#ifdef DEBUG_SWITCHES
+      UART_PORT.print("motor ");
+      UART_PORT.print(i+1);
+      UART_PORT.print(" limit switch state ");
+      UART_PORT.println(motorArray[i]->limitSwitchState);
+#endif
       motorArray[i]->stopRotation();
-      // now I need to define setJointAngle
-      // and also find where the angle limits are
-      // and also make the distinction between physical limits and software limits
-      if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE){
+      if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+        UART_PORT.print("motor ");
+        UART_PORT.print(i+1);
+        UART_PORT.println(" ccw");
+#endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->maxHardAngle);
         //motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
       }
-      if (motorArray[i]->limitSwitchState == CLOCKWISE){
+      if (motorArray[i]->limitSwitchState == CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+        UART_PORT.print("motor ");
+        UART_PORT.print(i+1);
+        UART_PORT.println(" cw");
+#endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->minHardAngle);
         //motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
       }
     }
+    // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
+    motorArray[i]->actualPress = false;
+    motorArray[i]->limitSwitchState = 0;
   }
-  
 
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
@@ -1424,52 +1455,146 @@ void m6_encoder_interrupt(void) {
 
 /* limit switch ISRs */
 void m1CwISR(void) {
-  motor1.triggerState = CLOCKWISE;
-  motor1.sinceTrigger = 0;
+  if (!(motor1.triggered) && motor1.triggerState == 0) {
+    motor1.triggered = true;
+    motor1.sinceTrigger = 0;
+  }
+  int pinState = (M1_LIMIT_SW_CW_PORT >> M1_LIMIT_SW_CW_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor1.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor1.triggerState = 0;
+  }
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
 void m1CcwISR(void) {
-  motor1.triggerState = COUNTER_CLOCKWISE;
-  motor1.sinceTrigger = 0;
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor1.triggered) && motor1.triggerState == 0) {
+    motor1.triggered = true;
+    motor1.sinceTrigger = 0;
+  }
+  int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor1.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor1.triggerState = 0;
+  }
 }
 void m2FlexISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor2.triggered) && motor2.triggerState == 0) {
+    motor2.triggered = true;
+    motor2.sinceTrigger = 0;
+  }
+  int pinState = (M2_LIMIT_SW_FLEX_PORT >> M2_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor2.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor2.triggerState = 0;
+  }
 }
 void m2ExtendISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor2.triggered) && motor2.triggerState == 0) {
+    motor2.triggered = true;
+    motor2.sinceTrigger = 0;
+  }
+  int pinState = (M2_LIMIT_SW_EXTEND_PORT >> M2_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor2.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor2.triggerState = 0;
+  }
 }
 void m3FlexISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor3.triggered) && motor3.triggerState == 0) {
+    motor3.triggered = true;
+    motor3.sinceTrigger = 0;
+  }
+  int pinState = (M3_LIMIT_SW_FLEX_PORT >> M3_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor3.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor3.triggerState = 0;
+  }
 }
 void m3ExtendISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor3.triggered) && motor3.triggerState == 0) {
+    motor3.triggered = true;
+    motor3.sinceTrigger = 0;
+  }
+  int pinState = (M3_LIMIT_SW_EXTEND_PORT >> M3_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor3.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor3.triggerState = 0;
+  }
 }
 void m4FlexISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor4.triggered) && motor4.triggerState == 0) {
+    motor4.triggered = true;
+    motor4.sinceTrigger = 0;
+  }
+  int pinState = (M4_LIMIT_SW_FLEX_PORT >> M4_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor4.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor4.triggerState = 0;
+  }
 }
 void m4ExtendISR(void) {
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor4.triggered) && motor4.triggerState == 0) {
+    motor4.triggered = true;
+    motor4.sinceTrigger = 0;
+  }
+  int pinState = (M4_LIMIT_SW_EXTEND_PORT >> M4_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor4.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor4.triggerState = 0;
+  }
 }
 /*
-void m5CcwISR(void) {
+  void m5CcwISR(void) {
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
-}
-void m5FlexISR(void) {
+  }
+  void m5FlexISR(void) {
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
-}
-void m6ExtendISR(void) {
+  }
+  void m6ExtendISR(void) {
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
-}
+  }
 */
