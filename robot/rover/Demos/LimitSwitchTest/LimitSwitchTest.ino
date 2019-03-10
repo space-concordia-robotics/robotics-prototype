@@ -4,7 +4,11 @@
 #define COUNTER_CLOCKWISE  1
 #define CLOCKWISE         -1
 #define M2_LIM_PLUS       26
+#define M2_LIM_PLUS_SHIFT  CORE_PIN26_BIT
+#define M2_LIM_PLUS_PORT  GPIOA_PDIR
 #define M2_LIM_MINUS      27
+#define M2_LIM_MINUS_SHIFT  CORE_PIN27_BIT
+#define M2_LIM_MINUS_PORT GPIOA_PDIR
 #define M5_SERVO_PWM      35
 #define SERVO_STOP        1500
 #define TURN_CCW          1200
@@ -28,11 +32,10 @@ void limSwitchPlus(void) {
     triggered = true;
     sinceTrigger = 0;
   }
-  // regardless of whether it's triggered, the triggerState will change from
-  // 0 to ccw or ccw to 0 in this ISR
-  if (triggerState == 0) {
+  int pinState = (M2_LIM_PLUS_PORT >> M2_LIM_PLUS_SHIFT ) & 1;
+  if (pinState == 0) {
     triggerState = COUNTER_CLOCKWISE;
-    Serial.println("plu");
+    //Serial.println("plus");
   }
   else {
     triggerState = 0;
@@ -44,9 +47,10 @@ void limSwitchMinus(void) {
     triggered = true;
     sinceTrigger = 0;
   }
-  if (triggerState == 0) {
+  int pinState = (M2_LIM_MINUS_PORT >> M2_LIM_MINUS_SHIFT ) & 1;
+  if (pinState == 0) {
     triggerState = CLOCKWISE;
-    Serial.println("min");
+    //Serial.println("minus");
   }
   else {
     triggerState = 0;
@@ -70,7 +74,7 @@ void loop() {
   // this works but doesn't consider the possibility of both switches
   // being triggered at the same time which shouldn't ever actually happen
   if (triggered) {
-    if (sinceTrigger >= 7) {
+    if (sinceTrigger >= TRIGGER_DELAY) {
       // if the last interrupt was a press (meaning it's stabilized and in contact)
       // then there's a real press
       if (triggerState != 0) {
@@ -92,14 +96,14 @@ void loop() {
     elapsedMillis timer;
     //Serial.println(limitSwitchState);
     if (limitSwitchState == COUNTER_CLOCKWISE) {
-      Serial.println("ccw");
+      //Serial.println("ccw");
       servo.writeMicroseconds(TURN_CCW);
       while (timer < 1000) {
         ;
       }
     }
     if (limitSwitchState == CLOCKWISE) {
-      Serial.println("cw");
+      //Serial.println("cw");
       servo.writeMicroseconds(TURN_CW);
       while (timer < 1000) {
         ;
