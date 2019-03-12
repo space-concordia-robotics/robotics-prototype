@@ -8,7 +8,7 @@
 class DcMotor: public RobotMotor {
   public:
     static int numDcMotors;
-    
+
     // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
     DcMotor(int dirPin, int pwmPin, float gearRatio); // for cytron
     /* movement helper functions */
@@ -18,8 +18,9 @@ class DcMotor: public RobotMotor {
     void stopRotation(void);
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
+    void goToAngle(float angle);
     void budge(void);
-    
+
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
@@ -109,15 +110,15 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
     motorSpeed = pidController.getMinOutputValue();
   }
   //if (motorDir != oldDir) {
-    switch (motorDir) {
-      case CLOCKWISE:
-        digitalWriteFast(directionPin, LOW);
-        break;
-      case COUNTER_CLOCKWISE:
-        digitalWriteFast(directionPin, HIGH);
-        break;
-    }
-    //oldDir = motorDir;
+  switch (motorDir) {
+    case CLOCKWISE:
+      digitalWriteFast(directionPin, LOW);
+      break;
+    case COUNTER_CLOCKWISE:
+      digitalWriteFast(directionPin, HIGH);
+      break;
+  }
+  //oldDir = motorDir;
   //}
   int dutyCycle = motorSpeed * 255 / 100;
   analogWrite(pwmPin, dutyCycle);
@@ -153,6 +154,28 @@ void DcMotor::goToCommandedAngle(void) {
   }
 }
 
+void DcMotor::goToAngle(float angle) {
+  desiredAngle = angle;
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    // calculates how many steps to take to get to the desired position, assuming no slipping
+    numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
+    timeCount = 0;
+    movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+    UART_PORT.print("$A,Alert: motor ");
+    //UART_PORT.print(3);
+    UART_PORT.println(" to move back into software angle range");
+#endif
+  }
+  else if (!isOpenLoop) {
+    movementDone = false;
+  }
+}
+
 void DcMotor::budge(void) {
   isBudging = true;
   movementDone = false;
@@ -164,7 +187,5 @@ void DcMotor::budge(void) {
     startAngle = getCurrentAngle();
   }
 }
-
-
 
 #endif

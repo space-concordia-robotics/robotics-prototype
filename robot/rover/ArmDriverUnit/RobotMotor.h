@@ -16,10 +16,18 @@ class RobotMotor {
   int motorType;
   static int numMotors; // keeps track of how many motors there are
   int encoderPinA, encoderPinB;
+  // for limit switch interrupts
   int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
+  volatile bool triggered;
+  bool actualPress;
+  volatile int triggerState;
+  int limitSwitchState;
+  elapsedMillis sinceTrigger;
+  // other stuff
   float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
   float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
   float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
+  float minHardAngle, maxHardAngle, minSoftAngle, maxSoftAngle;
   bool hasAngleLimits; // a wrist which wants to turn infinitely will be constrained by angle limits
   bool isOpenLoop; // decides whether to use the PID or not
   bool hasRamping; // decides whether to ramp the speed in open loop
@@ -35,7 +43,7 @@ class RobotMotor {
   RobotMotor();
   void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
   void attachLimitSwitches(char type, int switch1, int switch2);
-  void setAngleLimits(float minAngle, float maxAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
+  void setAngleLimits(float minHardAngle, float maxHardAngle, float minSoftAngle, float maxSoftAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
   bool withinJointAngleLimits(float angle); // checks if angle is within limits
   bool hasEncoder;
   // void setMaxSpeed();
@@ -47,12 +55,14 @@ class RobotMotor {
   float getCurrentAngle(void);
   float getImaginedAngle(void);
   void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
+  void setSoftwareAngle(float angle);
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
   /* movement functions */
   virtual void stopRotation(void) = 0;
   virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
   virtual void goToCommandedAngle(void) = 0;
+  virtual void goToAngle(float angle) = 0;
   virtual void budge(void) = 0;
   
   private:
@@ -110,10 +120,13 @@ void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2)
     }
 }
 
-void RobotMotor::setAngleLimits(float minAngle, float maxAngle)
-{
-  minJointAngle = minAngle;
-  maxJointAngle = maxAngle;
+void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS){
+  minJointAngle = minS;
+  maxJointAngle = maxS;
+  minHardAngle = minH;
+  maxHardAngle = maxH;
+  minSoftAngle = minS;
+  maxSoftAngle = maxS;
   hasAngleLimits = true;
 }
 
@@ -199,4 +212,15 @@ void RobotMotor::setImaginedAngle(float angle)
   imaginedAngle = angle;
 }
 
+void RobotMotor::setSoftwareAngle(float angle)
+{
+  if (isOpenLoop){
+    imaginedAngle = angle;
+  }
+  else {
+    // needs to be tested to make sure that a call to calcCurrentAngle will return the same thing as getCurrentAngle
+    currentAngle = angle;
+    encoderCount = angle * gearRatio * encoderResolution / 360.0;
+  }
+}
 #endif

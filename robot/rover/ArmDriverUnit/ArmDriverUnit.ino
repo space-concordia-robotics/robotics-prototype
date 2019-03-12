@@ -36,8 +36,9 @@
 //#define DEVEL_MODE_2 2 // sends messages with Serial1, everything unlocked
 //#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
 //#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
-// debug statements shouldn't be sent if ros is working
+//#define ENABLE_ROS 5 // turning this off will stop errors from rosserial not being installed
 
+// debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #define DEBUG_MAIN 10 // debug messages during main loop
 //#define DEBUG_PARSING 11 // debug messages during parsing function
@@ -77,9 +78,11 @@
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include <Servo.h>
+#ifdef ENABLE_ROS
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
+#endif
 #include "PinSetup.h"
 #include "Parser.h"
 // #include "Notes.h" // holds todo info
@@ -131,7 +134,7 @@ bool msgIsValid = false;
 // otherwise just use this
 ros::NodeHandle nh;
 #endif
-
+#ifdef ENABLE_ROS
 void messageCallback(const std_msgs::String& cmd_message) {
   msgReceived = true;
   int i = 0;
@@ -165,6 +168,7 @@ ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg);
 ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
 ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg);
 ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
+#endif
 
 /* motors */
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -229,6 +233,9 @@ void m3FlexISR(void);
 void m3ExtendISR(void);
 void m4FlexISR(void);
 void m4ExtendISR(void);
+//void m5CwISR(void);
+//void m5CcwISR(void);
+//void m6ExtendISR(void);
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); // manages motors 1&2
 void servoInterrupt(void); // manages motors 5&6
@@ -301,17 +308,21 @@ void setup() {
 #endif
 
   // prepare and attach limit switch ISRs
-#if defined(LIM_SWITCH_FALL)
-#define LIM_SWITCH_DIR FALLING
-#elif defined(LIM_SWITCH_RISE)
-#define LIM_SWITCH_DIR RISING
-#endif
+  /*
+    #if defined(LIM_SWITCH_FALL)
+    #define LIM_SWITCH_DIR FALLING
+    #elif defined(LIM_SWITCH_RISE)
+    #define LIM_SWITCH_DIR RISING
+    #endif
+  */
+#define LIM_SWITCH_DIR CHANGE
 
-  // limit switch setup
   motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
   motor3.attachLimitSwitches('f', M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches('f', M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+  //motor5.attachLimitSwitches('c', M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
+  //motor6.attachLimitSwitches('g', 0, M6_LIMIT_SW_EXTEND);
   attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
@@ -320,7 +331,10 @@ void setup() {
   attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
   attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
   attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
-  
+  //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
+
   // set motor shaft angle tolerances
   // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
   motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
@@ -329,15 +343,15 @@ void setup() {
   motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
   motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
   motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
-  
+
   // set motor joint angle limits
-  motor1.setAngleLimits(M1_MINIMUM_ANGLE, M1_MAXIMUM_ANGLE);
-  motor2.setAngleLimits(M2_MINIMUM_ANGLE, M2_MAXIMUM_ANGLE);
-  motor3.setAngleLimits(M3_MINIMUM_ANGLE, M3_MAXIMUM_ANGLE);
-  motor4.setAngleLimits(M4_MINIMUM_ANGLE, M4_MAXIMUM_ANGLE);
-  // motor5.setAngleLimits(M5_MINIMUM_ANGLE, M5_MAXIMUM_ANGLE); // this joint should be able to spin freely
-  motor6.setAngleLimits(M6_MINIMUM_ANGLE, M6_MAXIMUM_ANGLE);
-  
+  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
+  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
+  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
+  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
+  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
+  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
+
   // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
   motor1.pidController.setOutputLimits(-50, 50, 5.0);
@@ -347,7 +361,7 @@ void setup() {
   motor4.pidController.setOutputLimits(-50, 50, 5.0);
   motor5.pidController.setOutputLimits(-50, 50, 5.0);
   motor6.pidController.setOutputLimits(-50, 50, 5.0);
-  
+
   // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
   // operate at 50% max speed, and the gains should vary based on which motor it is
   motor1.isOpenLoop = true;
@@ -376,7 +390,7 @@ void setup() {
   motor6.openLoopSpeed = 50; // 50% speed
   motor6.openLoopGain = 0.35; // for 5V
   motor6.switchDirectionLogic(); // positive angles now mean opening
-  
+
   // activate the timer interrupts
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
@@ -386,7 +400,7 @@ void setup() {
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
-  
+
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -394,6 +408,63 @@ void setup() {
 
 /* main code loop */
 void loop() {
+  // first check to see if limit switch interrupts have occurred, only then can i check if a message came in
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    if (motorArray[i]->triggered) {
+      if (motorArray[i]->sinceTrigger >= TRIGGER_DELAY) {
+        // if the last interrupt was a press (meaning it's stabilized and in contact)
+        // then there's a real press
+        if (motorArray[i]->triggerState != 0) {
+          motorArray[i]->actualPress = true;
+          motorArray[i]->limitSwitchState = motorArray[i]->triggerState;
+        }
+        // otherwise it's not a real press
+        // so the limit switch state should stay whatever it used to be
+        // and so should actualPress
+        else {
+          ;
+        }
+        // either way, we should reset the triggered bool in wait for the next trigger
+        motorArray[i]->triggered = false;
+      }
+    }
+    if (motorArray[i]->actualPress) {
+#ifdef DEBUG_SWITCHES
+      UART_PORT.print("motor ");
+      UART_PORT.print(i + 1);
+      UART_PORT.print(" limit switch state ");
+      UART_PORT.println(motorArray[i]->limitSwitchState);
+#endif
+      //motorArray[4]->stopRotation();
+      motorArray[i]->stopRotation();
+      if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+        UART_PORT.print(" and is at hard angle ");
+        UART_PORT.print(motorArray[i]->maxHardAngle);
+        UART_PORT.println("and turning ccw to soft angle");
+#endif
+        //motorArray[4]->setSoftwareAngle(motorArray[i]->maxHardAngle);
+        //motorArray[4]->goToAngle(motorArray[i]->maxSoftAngle);
+        motorArray[i]->setSoftwareAngle(motorArray[i]->maxHardAngle);
+        motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
+      }
+      if (motorArray[i]->limitSwitchState == CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+        UART_PORT.print(" and is at hard angle ");
+        UART_PORT.print(motorArray[i]->minHardAngle);
+        UART_PORT.println("and turning cw to soft angle");
+#endif
+        //motorArray[4]->setSoftwareAngle(motorArray[i]->minHardAngle);
+        //motorArray[4]->goToAngle(motorArray[i]->minSoftAngle);
+        motorArray[i]->setSoftwareAngle(motorArray[i]->minHardAngle);
+        motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
+      }
+    }
+    // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
+    motorArray[i]->actualPress = false;
+    motorArray[i]->limitSwitchState = 0;
+  }
+
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
   msgIsValid = false;
@@ -1082,8 +1153,7 @@ void servoInterrupt(void) {
 /* encoder ISRs */
 
 #ifdef M1_ENCODER_PORT
-/*
-  void m1_encoder_interrupt(void) {
+void m1_encoder_interrupt(void) {
   // encoder states are 4 bit values
   // top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states
   static unsigned int oldEncoderState = 0;
@@ -1097,20 +1167,21 @@ void servoInterrupt(void) {
   // the dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
   // the & operation ensures that anything above the lowest 4 bits is cleared before accessing the array
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+#ifdef DEBUG_ENCODERS
+  UART_PORT.print("motor 1 ");
+  UART_PORT.println(motor1.encoderCount);
+#endif
+}
+/*
+  void m1_encoder_interrupt(void) {
+  // if only one channel is working, the same interrupt means more angle attained
+  motor1.encoderCount += motor1.rotationDirection * 2;
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 ");
   UART_PORT.println(motor1.encoderCount);
   #endif
   }
 */
-void m1_encoder_interrupt(void) {
-  // if only one channel is working, the same interrupt means more angle attained
-  motor1.encoderCount += motor1.rotationDirection * 2;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("motor 1 ");
-  UART_PORT.println(motor1.encoderCount);
-#endif
-}
 #endif
 #ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void) {
@@ -1178,42 +1249,146 @@ void m6_encoder_interrupt(void) {
 
 /* limit switch ISRs */
 void m1CwISR(void) {
-  motor1.stopRotation();
+  if (!(motor1.triggered) && motor1.triggerState == 0) {
+    motor1.triggered = true;
+    motor1.sinceTrigger = 0;
+  }
+  int pinState = (M1_LIMIT_SW_CW_PORT >> M1_LIMIT_SW_CW_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor1.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor1.triggerState = 0;
+  }
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
 }
 void m1CcwISR(void) {
-  motor1.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor1.triggered) && motor1.triggerState == 0) {
+    motor1.triggered = true;
+    motor1.sinceTrigger = 0;
+  }
+  int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor1.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor1.triggerState = 0;
+  }
 }
 void m2FlexISR(void) {
-  motor2.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor2.triggered) && motor2.triggerState == 0) {
+    motor2.triggered = true;
+    motor2.sinceTrigger = 0;
+  }
+  int pinState = (M2_LIMIT_SW_FLEX_PORT >> M2_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor2.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor2.triggerState = 0;
+  }
 }
 void m2ExtendISR(void) {
-  motor2.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor2.triggered) && motor2.triggerState == 0) {
+    motor2.triggered = true;
+    motor2.sinceTrigger = 0;
+  }
+  int pinState = (M2_LIMIT_SW_EXTEND_PORT >> M2_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor2.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor2.triggerState = 0;
+  }
 }
 void m3FlexISR(void) {
-  motor3.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor3.triggered) && motor3.triggerState == 0) {
+    motor3.triggered = true;
+    motor3.sinceTrigger = 0;
+  }
+  int pinState = (M3_LIMIT_SW_FLEX_PORT >> M3_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor3.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor3.triggerState = 0;
+  }
 }
 void m3ExtendISR(void) {
-  motor3.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor3.triggered) && motor3.triggerState == 0) {
+    motor3.triggered = true;
+    motor3.sinceTrigger = 0;
+  }
+  int pinState = (M3_LIMIT_SW_EXTEND_PORT >> M3_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor3.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor3.triggerState = 0;
+  }
 }
 void m4FlexISR(void) {
-  motor4.stopRotation();
-  // should also alert the user somehow
-  // should also perform some checks or update an angle somehow
+  if (!(motor4.triggered) && motor4.triggerState == 0) {
+    motor4.triggered = true;
+    motor4.sinceTrigger = 0;
+  }
+  int pinState = (M4_LIMIT_SW_FLEX_PORT >> M4_LIMIT_SW_FLEX_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor4.triggerState = CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("clockwise");
+#endif
+  }
+  else {
+    motor4.triggerState = 0;
+  }
 }
 void m4ExtendISR(void) {
-  motor4.stopRotation();
+  if (!(motor4.triggered) && motor4.triggerState == 0) {
+    motor4.triggered = true;
+    motor4.sinceTrigger = 0;
+  }
+  int pinState = (M4_LIMIT_SW_EXTEND_PORT >> M4_LIMIT_SW_EXTEND_SHIFT ) & 1;
+  if (pinState == 0) {
+    motor4.triggerState = COUNTER_CLOCKWISE;
+#ifdef DEBUG_SWITCHES
+    UART_PORT.println("counter-clockwise");
+#endif
+  }
+  else {
+    motor4.triggerState = 0;
+  }
+}
+/*
+  void m5CcwISR(void) {
   // should also alert the user somehow
   // should also perform some checks or update an angle somehow
-}
+  }
+  void m5FlexISR(void) {
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+  }
+  void m6ExtendISR(void) {
+  // should also alert the user somehow
+  // should also perform some checks or update an angle somehow
+  }
+*/

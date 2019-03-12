@@ -32,6 +32,7 @@ class StepperMotor: public RobotMotor {
     void singleStep();
     void setVelocity(int motorDir, float motorSpeed);
     void goToCommandedAngle(void);
+    void goToAngle(float angle);
     void budge(void);
 
     // stuff for open loop control
@@ -171,6 +172,32 @@ void StepperMotor::goToCommandedAngle() {
       UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
 #endif
     }
+  }
+  else if (!isOpenLoop) {
+    enablePower();
+    movementDone = false;
+  }
+}
+
+void StepperMotor::goToAngle(float angle) {
+  // this function does not check angle limits as it operates beyond them
+  // perhaps a better way is to have a variable that ignores angle limits in my other code!!
+  desiredAngle = angle;
+  if (isOpenLoop) {
+    calcCurrentAngle();
+    startAngle = getImaginedAngle();
+    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    calcDirection(openLoopError);
+    // calculates how many steps to take to get to the desired position, assuming no slipping
+    numSteps = fabs(openLoopError) * gearRatio / stepResolution;
+    stepCount = 0;
+    enablePower(); // give power to the stepper finally
+    movementDone = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+    UART_PORT.print("$A,Alert: motor ");
+    //UART_PORT.print(3);
+    UART_PORT.println(" to move back into software angle range");
+#endif
   }
   else if (!isOpenLoop) {
     enablePower();
