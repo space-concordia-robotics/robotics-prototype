@@ -59,10 +59,10 @@
 #define M3_ENCODER_RESOLUTION 2000
 #define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
-#define M3_MIN_HARD_ANGLE   -115.0
-#define M3_MAX_HARD_ANGLE   35.0
-#define M3_MIN_SOFT_ANGLE   -115.0
-#define M3_MAX_SOFT_ANGLE   35.0
+#define M3_MIN_HARD_ANGLE   -145.0
+#define M3_MAX_HARD_ANGLE   65.0
+#define M3_MIN_SOFT_ANGLE   -135.0
+#define M3_MAX_SOFT_ANGLE   55.0
 
 #define M4_ENABLE_PIN      16
 #define M4_STEP_PIN        14
@@ -81,10 +81,10 @@
 #define M4_ENCODER_RESOLUTION 2000
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 #define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
-#define M4_MIN_HARD_ANGLE   -55.0
-#define M4_MAX_HARD_ANGLE   46. //40.0
-#define M4_MIN_SOFT_ANGLE   -55.0
-#define M4_MAX_SOFT_ANGLE   46. //40.0
+#define M4_MIN_HARD_ANGLE   -90.0
+#define M4_MAX_HARD_ANGLE   75. //40.0
+#define M4_MIN_SOFT_ANGLE   -80.0
+#define M4_MAX_SOFT_ANGLE   65. //40.0
 
 // DC motors
 
@@ -103,10 +103,10 @@
 #define M1_LIMIT_SW_CCW       10
 #define M1_ENCODER_RESOLUTION 7*2 // temporary, unknown
 #define M1_GEAR_RATIO      40.0 // temporary, unknown
-#define M1_MIN_HARD_ANGLE   -175.0
-#define M1_MAX_HARD_ANGLE   175.0
-#define M1_MIN_SOFT_ANGLE   -175.0
-#define M1_MAX_SOFT_ANGLE   175.0
+#define M1_MIN_HARD_ANGLE   -350.0
+#define M1_MAX_HARD_ANGLE   350.0
+#define M1_MIN_SOFT_ANGLE   -325.0
+#define M1_MAX_SOFT_ANGLE   325.0
 
 #define M2_PWM_PIN         30
 #define M2_DIR_PIN         31 // for new driver
@@ -125,10 +125,10 @@
 #define M2_LIMIT_SW_EXTEND 29
 #define M2_ENCODER_RESOLUTION 7*2 //7*4 //48 // counts per motor shaft revolution
 #define M2_GEAR_RATIO      189.0*20.0 //99.508*20 //188 planetary gear chained to worm gear drive
-#define M2_MIN_HARD_ANGLE   -75.0
-#define M2_MAX_HARD_ANGLE   55.0
-#define M2_MIN_SOFT_ANGLE   -75.0
-#define M2_MAX_SOFT_ANGLE   55.0
+#define M2_MIN_HARD_ANGLE   -65.0
+#define M2_MAX_HARD_ANGLE   50.0
+#define M2_MIN_SOFT_ANGLE   -55.0
+#define M2_MAX_SOFT_ANGLE   40.0
 
 // servos
 
@@ -155,8 +155,8 @@
 #define M6_GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
 #define M6_MIN_HARD_ANGLE   -75.0 //-120.0
 #define M6_MAX_HARD_ANGLE   75.0 // 150.0 //30.0
-#define M6_MIN_SOFT_ANGLE   -75.0 //-120.0
-#define M6_MAX_SOFT_ANGLE   75.0 // 150.0 //30.0
+#define M6_MIN_SOFT_ANGLE   -65.0 //-120.0
+#define M6_MAX_SOFT_ANGLE   65.0 // 150.0 //30.0
 
 void pinSetup(void);
 

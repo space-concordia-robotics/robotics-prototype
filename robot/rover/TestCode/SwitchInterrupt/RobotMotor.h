@@ -57,7 +57,7 @@ class RobotMotor {
   float getImaginedAngle(void);
   void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
   void setSoftwareAngle(float angle);
-  void goToAngle(float angle) = 0;
+  virtual void goToAngle(float angle) = 0;
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
   private:

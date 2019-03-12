@@ -109,7 +109,7 @@ void StepperMotor::goToAngle(float angle) {
     openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
-    numSteps = fabs(angle) * gearRatio / stepResolution;
+    numSteps = fabs(openLoopError) * gearRatio / stepResolution;
     stepCount = 0;
     enablePower(); // give power to the stepper finally
     movementDone = false;

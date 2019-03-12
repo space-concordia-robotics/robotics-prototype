@@ -89,7 +89,7 @@ void DcMotor::goToAngle(float angle) {
     openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
-    numMillis = (fabs(angle) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
+    numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
     timeCount = 0;
     movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)

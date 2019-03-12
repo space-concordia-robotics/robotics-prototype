@@ -44,9 +44,6 @@
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include <Servo.h>
-#include <ros.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/JointState.h>
 #include "PinSetup.h"
 #include "Parser.h"
 // #include "Notes.h" // holds todo info
@@ -63,7 +60,7 @@
 #define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
 /* serial */
 #define BAUD_RATE 115200 // serial bit rate
-#define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
+#define SERIAL_PRINT_INTERVAL 100 // how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* comms */
@@ -80,58 +77,6 @@ Parser Parser; // object which parses and verifies commands
 
 bool msgReceived = false;
 bool msgIsValid = false;
-
-// develmode1 actually isn't for ros... i will have to change things if i want ros over usb
-#ifdef DEVEL_MODE_1 // using the USB port
-//ros::NodeHandle nh;
-#elif defined(DEBUG_MODE) || defined(USER_MODE) // using hardware serial (Serial1 in this case)
-// the following commented block allows you to choose the hardware serial port
-/*
-  class NewHardware : public ArduinoHardware {
-  public:
-  long baud = 57600;
-  NewHardware():ArduinoHardware(&Serial1, baud){}; // place the serial port of your choosing (1 to 6)
-  };
-
-  ros::NodeHandle_<NewHardware> nh;
-*/
-// otherwise just use this
-ros::NodeHandle nh;
-#endif
-
-void messageCallback(const std_msgs::String& cmd_message) {
-  msgReceived = true;
-  int i = 0;
-  while (cmd_message.data[i] != '\0') {
-    serialBuffer[i] = cmd_message.data[i];
-  }
-  Parser.parseCommand(motorCommand, serialBuffer);
-  if (Parser.verifCommand(motorCommand)) {
-    msgIsValid = true;
-  }
-  memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-}
-ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
-
-char m1FrameId[] = "/m1_angle";
-char m2FrameId[] = "/m2_angle";
-char m3FrameId[] = "/m3_angle";
-char m4FrameId[] = "/m4_angle";
-char m5FrameId[] = "/m5_angle";
-char m6FrameId[] = "/m6_angle";
-sensor_msgs::JointState m1_angle_msg;
-sensor_msgs::JointState m2_angle_msg;
-sensor_msgs::JointState m3_angle_msg;
-sensor_msgs::JointState m4_angle_msg;
-sensor_msgs::JointState m5_angle_msg;
-sensor_msgs::JointState m6_angle_msg;
-sensor_msgs::JointState angleMessages[NUM_MOTORS] = {m1_angle_msg, m2_angle_msg, m3_angle_msg, m4_angle_msg, m5_angle_msg, m6_angle_msg};
-ros::Publisher pub_m1("m1_joint_state", &m1_angle_msg);
-ros::Publisher pub_m2("m2_joint_state", &m2_angle_msg);
-ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg);
-ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
-ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg);
-ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
 
 /* motors */
 // quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -212,22 +157,6 @@ void setup() {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.initNode();
-  nh.subscribe(cmdSubscriber);
-  nh.advertise(pub_m1);
-  nh.advertise(pub_m2);
-  nh.advertise(pub_m3);
-  nh.advertise(pub_m4);
-  nh.advertise(pub_m5);
-  nh.advertise(pub_m6);
-
-  m1_angle_msg.header.frame_id = m1FrameId;
-  m2_angle_msg.header.frame_id = m2FrameId;
-  m3_angle_msg.header.frame_id = m3FrameId;
-  m4_angle_msg.header.frame_id = m4FrameId;
-  m5_angle_msg.header.frame_id = m5FrameId;
-  m6_angle_msg.header.frame_id = m6FrameId;
 #endif
 
   // each motor with an encoder needs to attach the encoder and 2 interrupts
@@ -389,40 +318,28 @@ void loop() {
     if (motorArray[i]->actualPress) {
 #ifdef DEBUG_SWITCHES
       UART_PORT.print("motor ");
-      UART_PORT.print(i+1);
+      UART_PORT.print(i + 1);
       UART_PORT.print(" limit switch state ");
       UART_PORT.println(motorArray[i]->limitSwitchState);
 #endif
       motorArray[i]->stopRotation();
       if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
-        UART_PORT.print("motor ");
-        UART_PORT.print(i+1);
-        UART_PORT.println(" ccw");
+        UART_PORT.print(" and is at hard angle ");
+        UART_PORT.print(motorArray[i]->maxHardAngle);
+        UART_PORT.println("and turning ccw to soft angle");
 #endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->maxHardAngle);
         motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
-        /*
-        motor5.timeCount=0;
-        motor5.numMillis=1000;
-        motor5.rotationDirection=COUNTER_CLOCKWISE;
-        motor5.movementDone = false;
-        */
       }
       if (motorArray[i]->limitSwitchState == CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
-        UART_PORT.print("motor ");
-        UART_PORT.print(i+1);
-        UART_PORT.println(" cw");
+        UART_PORT.print(" and is at hard angle ");
+        UART_PORT.print(motorArray[i]->minHardAngle);
+        UART_PORT.println("and turning cw to soft angle");
 #endif
         motorArray[i]->setSoftwareAngle(motorArray[i]->minHardAngle);
         motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
-        /*
-        motor5.timeCount=0;
-        motor5.numMillis=1000;
-        motor5.rotationDirection=CLOCKWISE;
-        motor5.movementDone = false;
-        */
       }
     }
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
@@ -433,12 +350,7 @@ void loop() {
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
   msgIsValid = false;
-#if defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.spinOnce();
-  if (msgReceived) {
-    nh.logdebug(serialBuffer);
-  }
-#elif defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   if (UART_PORT.available()) {
     // if a message was sent to the Teensy
     msgReceived = true;
@@ -464,8 +376,6 @@ void loop() {
         // respond to ping
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("pong");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("pong");
 #endif
       }
       else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
@@ -579,17 +489,6 @@ void loop() {
               UART_PORT.print(i + 1);
               UART_PORT.print(" desired angle (degrees) is: ");
               UART_PORT.println(motorCommand.anglesToReach[i]);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " desired angle (degrees) is: ";
-              infoMessage += motorCommand.anglesToReach[i];
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
 #endif
             }
             else {
@@ -597,16 +496,6 @@ void loop() {
               UART_PORT.print("motor ");
               UART_PORT.print(i + 1);
               UART_PORT.println(" will not change course");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " will not change course";
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
 #endif
             }
           }
@@ -955,27 +844,6 @@ void printMotorAngles(void) {
     UART_PORT.print(", ");
   }
   UART_PORT.println("");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  float angles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    if (motorArray[i] -> isOpenLoop) {
-      angles[i] = motorArray[i] -> getImaginedAngle();
-      angleMessages[i].position = &(angles[i]);
-      //*(angleMessages[i].position) = motorArray[i] -> getImaginedAngle();
-    }
-    else {
-      angles[i] = motorArray[i] -> getCurrentAngle();
-      angleMessages[i].position = &(angles[i]);
-      //*(angleMessages[i].position) = motorArray[i] -> getCurrentAngle();
-    }
-  }
-  pub_m1.publish(&m1_angle_msg);
-  pub_m2.publish(&m2_angle_msg);
-  pub_m3.publish(&m3_angle_msg);
-  pub_m4.publish(&m4_angle_msg);
-  pub_m5.publish(&m5_angle_msg);
-  pub_m6.publish(&m6_angle_msg);
-  nh.spinOnce(); // does it cause problems if i spin twice in loop()
 #endif
 }
 
@@ -1371,8 +1239,7 @@ void servoInterrupt(void) {
 /* encoder ISRs */
 
 #ifdef M1_ENCODER_PORT
-/*
-  void m1_encoder_interrupt(void) {
+void m1_encoder_interrupt(void) {
   // encoder states are 4 bit values
   // top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states
   static unsigned int oldEncoderState = 0;
@@ -1386,20 +1253,21 @@ void servoInterrupt(void) {
   // the dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
   // the & operation ensures that anything above the lowest 4 bits is cleared before accessing the array
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+#ifdef DEBUG_ENCODERS
+  UART_PORT.print("motor 1 ");
+  UART_PORT.println(motor1.encoderCount);
+#endif
+}
+/*
+  void m1_encoder_interrupt(void) {
+  // if only one channel is working, the same interrupt means more angle attained
+  motor1.encoderCount += motor1.rotationDirection * 2;
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 ");
   UART_PORT.println(motor1.encoderCount);
   #endif
   }
 */
-void m1_encoder_interrupt(void) {
-  // if only one channel is working, the same interrupt means more angle attained
-  motor1.encoderCount += motor1.rotationDirection * 2;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("motor 1 ");
-  UART_PORT.println(motor1.encoderCount);
-#endif
-}
 #endif
 #ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void) {
