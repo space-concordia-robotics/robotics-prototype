@@ -29,14 +29,14 @@
   periodic checks for motors in open loop, to effectuate small corrections to
   position during movements - if the appropriate motor has an encoder on it.
   This code began development sometime in July 2018 and is still being
-  updated as of January 15 2019.
+  updated as of March 11 2019.
 */
 /* still in idea phase */
 #define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
 //#define DEVEL_MODE_2 2 // sends messages with Serial1, everything unlocked
 //#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
 //#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
-//#define ENABLE_ROS 5 // turning this off will stop errors from rosserial not being installed
+//#define ENABLE_ROS 5 // turning this off will stop errors from rosserial not being installed.. as long as you don't want to be using it
 
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -45,7 +45,7 @@
 //#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
-#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
+//#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
 //#define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
 //#define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
@@ -60,8 +60,8 @@
 // serial communication over usb with pc, teensy not connected to odroid
 
 #if defined(DEVEL_MODE_1)
-#define UART_PORT Serial
 // serial communication over uart with odroid, teensy plugged into pcb and odroid
+#define UART_PORT Serial
 #elif defined(DEVEL_MODE_2)
 #define UART_PORT Serial1
 #endif
@@ -149,6 +149,7 @@ void messageCallback(const std_msgs::String& cmd_message) {
 }
 ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
 
+// these hold information that is sent from the teensy to ros
 char m1FrameId[] = "/m1_angle";
 char m2FrameId[] = "/m2_angle";
 char m3FrameId[] = "/m3_angle";
@@ -176,12 +177,12 @@ const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 
 // instantiate motor objects here:
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
-// DcMotor motor2(M2_PWM_PIN, M2_ENCODER_A, M2_ENCODER_B); // sabertooth
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for cytron
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
+
 // motor array prep work: making pointers to motor objects
 DcMotor * m1 = & motor1;
 DcMotor * m2 = & motor2;
@@ -197,14 +198,16 @@ IntervalTimer dcTimer; // motors 1&2
 IntervalTimer m3StepperTimer;
 IntervalTimer m4StepperTimer;
 IntervalTimer servoTimer; // motors 5&6
+
 // these are a nicer way of timing events than using millis()
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
+
 /* function declarations */
 void printMotorAngles(void); // sends all motor angles over serial
+
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
-
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void);
 #endif
@@ -236,6 +239,7 @@ void m4ExtendISR(void);
 //void m5CwISR(void);
 //void m5CcwISR(void);
 //void m6ExtendISR(void);
+
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); // manages motors 1&2
 void servoInterrupt(void); // manages motors 5&6
@@ -270,7 +274,6 @@ void setup() {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 #ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
-  // comment out the encoder pin which doesn't work, this is for testing purposes tho as the final one should have both channels working
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
   // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
@@ -308,6 +311,7 @@ void setup() {
 #endif
 
   // prepare and attach limit switch ISRs
+  // the following works if the switches are debounced by the hardware
   /*
     #if defined(LIM_SWITCH_FALL)
     #define LIM_SWITCH_DIR FALLING
@@ -315,8 +319,10 @@ void setup() {
     #define LIM_SWITCH_DIR RISING
     #endif
   */
+  // the following is used because the software debounces the limit switches
 #define LIM_SWITCH_DIR CHANGE
 
+  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
   motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
   motor3.attachLimitSwitches('f', M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
@@ -408,8 +414,9 @@ void setup() {
 
 /* main code loop */
 void loop() {
-  // first check to see if limit switch interrupts have occurred, only then can i check if a message came in
+  /* limit switch checks occur before listening for commands */
   for (int i = 0; i < NUM_MOTORS; i++) {
+    // check if the switch was hit
     if (motorArray[i]->triggered) {
       if (motorArray[i]->sinceTrigger >= TRIGGER_DELAY) {
         // if the last interrupt was a press (meaning it's stabilized and in contact)
@@ -428,6 +435,7 @@ void loop() {
         motorArray[i]->triggered = false;
       }
     }
+    // the switch was debounced and now we can react
     if (motorArray[i]->actualPress) {
 #ifdef DEBUG_SWITCHES
       UART_PORT.print("motor ");
