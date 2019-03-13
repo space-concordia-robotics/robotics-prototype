@@ -52,9 +52,6 @@ class RobotMotor {
   bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
   float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
   virtual bool calcCurrentAngle(void) = 0;
-  float getCurrentAngle(void);
-  float getImaginedAngle(void);
-  void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
   void setSoftwareAngle(float angle);
   float getSoftwareAngle(void);
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
@@ -166,19 +163,6 @@ void RobotMotor::switchDirectionLogic(void) {
 
 int RobotMotor::getDirectionLogic(void) {
   return directionModifier;
-}
-
-
-float RobotMotor::getCurrentAngle(void) {
-  return currentAngle;
-}
-
-float RobotMotor::getImaginedAngle(void) {
-  return imaginedAngle;
-}
-
-void RobotMotor::setImaginedAngle(float angle) {
-  imaginedAngle = angle;
 }
 
 void RobotMotor::setSoftwareAngle(float angle) {

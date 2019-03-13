@@ -127,8 +127,8 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
 void DcMotor::goToCommandedAngle(void) {
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError); // determine rotation direction and save the value
     // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     if (calcTurningDuration(openLoopError)) { // returns false if the open loop error is too small
@@ -158,8 +158,8 @@ void DcMotor::goToAngle(float angle) {
   desiredAngle = angle;
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
     numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
@@ -180,12 +180,7 @@ void DcMotor::budge(void) {
   isBudging = true;
   movementDone = false;
   sinceBudgeCommand = 0;
-  if (isOpenLoop) {
-    startAngle = getImaginedAngle();
-  }
-  else if (!isOpenLoop) {
-    startAngle = getCurrentAngle();
-  }
+  startAngle = getSoftwareAngle();
 }
 
 #endif

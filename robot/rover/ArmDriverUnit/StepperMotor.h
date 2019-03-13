@@ -151,8 +151,8 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
 void StepperMotor::goToCommandedAngle() {
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
     if (calcNumSteps(openLoopError)) { // returns false if the open loop error is too small
@@ -185,8 +185,8 @@ void StepperMotor::goToAngle(float angle) {
   desiredAngle = angle;
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
     numSteps = fabs(openLoopError) * gearRatio / stepResolution;
@@ -211,12 +211,7 @@ void StepperMotor::budge(void) {
   stepCount = 0;
   sinceBudgeCommand = 0;
   enablePower(); // give power to the stepper finally
-  if (isOpenLoop) {
-    startAngle = getImaginedAngle();
-  }
-  else if (!isOpenLoop) {
-    startAngle = getCurrentAngle();
-  }
+  startAngle = getSoftwareAngle();
 }
 
 #endif

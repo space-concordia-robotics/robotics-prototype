@@ -124,8 +124,8 @@ void ServoMotor::setVelocity(int motorDir, float motorSpeed)
 void ServoMotor::goToCommandedAngle(void) {
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
     if (calcTurningDuration(openLoopError)) {
       timeCount = 0;
@@ -155,8 +155,8 @@ void ServoMotor::goToAngle(float angle) {
   desiredAngle = angle;
   if (isOpenLoop) {
     calcCurrentAngle();
-    startAngle = getImaginedAngle();
-    openLoopError = getDesiredAngle() - getImaginedAngle(); // find the angle difference
+    startAngle = getSoftwareAngle();
+    openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
     // calculates how many steps to take to get to the desired position, assuming no slipping
     numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
@@ -177,12 +177,7 @@ void ServoMotor::budge(void) {
   isBudging = true;
   movementDone = false;
   sinceBudgeCommand = 0;
-  if (isOpenLoop) {
-    startAngle = getImaginedAngle();
-  }
-  else if (!isOpenLoop) {
-    startAngle = getCurrentAngle();
-  }
+  startAngle = getSoftwareAngle();
 }
 
 #endif
