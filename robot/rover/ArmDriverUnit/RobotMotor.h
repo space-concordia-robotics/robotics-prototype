@@ -56,6 +56,7 @@ class RobotMotor {
   float getImaginedAngle(void);
   void setImaginedAngle(float angle); // for debugging mostly, overwrite current angle value
   void setSoftwareAngle(float angle);
+  float getSoftwareAngle(void);
   void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
   int getDirectionLogic(void); // returns the directionModifier;
   /* movement functions */
@@ -105,22 +106,18 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
   encoderResolutionReciprocal = 1 / (float) encRes;
 }
 
-void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2)
-{
-  if (type == 'f')
-  {
+void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2) {
+  if (type == 'f') {
     limSwitchFlex = switch1;
     limSwitchExtend = switch2;
   }
-  else
-    if (type == 'c')
-    {
+  else if (type == 'c') {
       limSwitchCw = switch1;
       limSwitchCcw = switch2;
     }
 }
 
-void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS){
+void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS) {
   minJointAngle = minS;
   maxJointAngle = maxS;
   minHardAngle = minH;
@@ -130,91 +127,62 @@ void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS){
   hasAngleLimits = true;
 }
 
-bool RobotMotor::withinJointAngleLimits(float angle)
-{
-  if (!hasAngleLimits || (angle > minJointAngle && angle < maxJointAngle))
-  {
+bool RobotMotor::withinJointAngleLimits(float angle) {
+  if (!hasAngleLimits || (angle > minJointAngle && angle < maxJointAngle)) {
     return true;
   }
-  else
-  {
+  else {
     return false;
   }
 }
 
-bool RobotMotor::setDesiredAngle(float angle)
-{
-  if (withinJointAngleLimits(angle))
-  {
+bool RobotMotor::setDesiredAngle(float angle) {
+  if (withinJointAngleLimits(angle)) {
     desiredAngle = angle;
     return true;
   }
-  else
-  {
+  else {
     return false;
   }
 }
 
-float RobotMotor::getDesiredAngle(void)
-{
+float RobotMotor::getDesiredAngle(void) {
   return desiredAngle;
 }
 
-int RobotMotor::calcDirection(float error)
-{
-  if (error >= 0)
-  {
+int RobotMotor::calcDirection(float error) {
+  if (error >= 0) {
     rotationDirection = directionModifier * COUNTER_CLOCKWISE;
   }
-  else
-  {
+  else {
     rotationDirection = directionModifier * CLOCKWISE;
   }
   return rotationDirection;
 }
 
-void RobotMotor::switchDirectionLogic(void)
-{
+void RobotMotor::switchDirectionLogic(void) {
   directionModifier = directionModifier * -1;
 }
 
-int RobotMotor::getDirectionLogic(void)
-{
+int RobotMotor::getDirectionLogic(void) {
   return directionModifier;
 }
 
-/*
-bool RobotMotor::calcCurrentAngle(void)
-{
-if (hasEncoder)
-{
-currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
-return true;
-}
-else
-{
-return false;
-}
-}
-*/
-float RobotMotor::getCurrentAngle(void)
-{
+
+float RobotMotor::getCurrentAngle(void) {
   return currentAngle;
 }
 
-float RobotMotor::getImaginedAngle(void)
-{
+float RobotMotor::getImaginedAngle(void) {
   return imaginedAngle;
 }
 
-void RobotMotor::setImaginedAngle(float angle)
-{
+void RobotMotor::setImaginedAngle(float angle) {
   imaginedAngle = angle;
 }
 
-void RobotMotor::setSoftwareAngle(float angle)
-{
-  if (isOpenLoop){
+void RobotMotor::setSoftwareAngle(float angle) {
+  if (isOpenLoop) {
     imaginedAngle = angle;
   }
   else {
@@ -223,4 +191,14 @@ void RobotMotor::setSoftwareAngle(float angle)
     encoderCount = angle * gearRatio * encoderResolution / 360.0;
   }
 }
+
+float RobotMotor::getSoftwareAngle(void) {
+  if (isOpenLoop) {
+    return imaginedAngle;
+  }
+  else {
+    return currentAngle;
+  }
+}
+
 #endif

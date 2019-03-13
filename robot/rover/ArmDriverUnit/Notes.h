@@ -51,7 +51,6 @@
 
   6) angleTolerance is motorPID attribute and not motor attribute?
   7) openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?
-  8) there's a command to reset a motor position but no implementation
   10) should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
       but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
   17) perhaps the initialization of motor angle parameters should be its own function
