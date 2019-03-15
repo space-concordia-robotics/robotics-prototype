@@ -12,7 +12,8 @@ class ServoMotor: public RobotMotor {
 
     ServoMotor(int pwmPin, float gearRatio);
 
-    /* movement helper functions */
+    void motorTimerInterrupt(void);
+	/* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
     /* movement functions */
@@ -50,6 +51,63 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
 
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
+}
+
+void ServoMotor::motorTimerInterrupt(void){
+	if (isBudging) {
+    if (sinceBudgeCommand < BUDGE_TIMEOUT) {
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed);
+    }
+    else {
+      isBudging = false;
+      movementDone = true;
+      stopRotation();
+    }
+  }
+  else if (isOpenLoop) {
+    // open loop control
+    if (!movementDone && timeCount < numMillis) {
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed);
+#ifdef DEBUG_SERVO_TIMER
+      UART_PORT.println("motor");
+      UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print(timeCount); UART_PORT.print("\t / ");
+      UART_PORT.print(numMillis); UART_PORT.println(" ms");
+      UART_PORT.print(getSoftwareAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(getDesiredAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(startAngle); UART_PORT.println(" degrees");
+#endif
+    }
+    else {
+      // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      movementDone = true;
+      stopRotation();
+    }
+  }
+  else if (!isOpenLoop) {
+    if (!movementDone) {
+      calcCurrentAngle();
+      float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
+      if (output == 0) {
+        movementDone = true;
+        stopRotation();
+      }
+      else {
+        int dir = calcDirection(output);
+        setVelocity(dir, output);
+#ifdef DEBUG_DC_TIMER
+        UART_PORT.println("motor");
+        UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+        UART_PORT.print(output); UART_PORT.println(" next output");
+#endif
+      }
+    }
+    else {
+      stopRotation();
+    }
+  }
 }
 
 bool ServoMotor::calcTurningDuration(float angle) {

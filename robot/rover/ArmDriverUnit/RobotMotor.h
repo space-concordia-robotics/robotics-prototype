@@ -41,6 +41,7 @@ class RobotMotor {
   volatile bool isBudging;
   // setup functions
   RobotMotor();
+  //virtual void motorTimerInterrupt(void) = 0;
   void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
   void attachLimitSwitches(char type, int switch1, int switch2);
   void setAngleLimits(float minHardAngle, float maxHardAngle, float minSoftAngle, float maxSoftAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles

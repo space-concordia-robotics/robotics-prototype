@@ -11,6 +11,7 @@ class DcMotor: public RobotMotor {
 
     // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
     DcMotor(int dirPin, int pwmPin, float gearRatio); // for cytron
+	void motorTimerInterrupt(void);
     /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
@@ -52,6 +53,67 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
   hasEncoder = false;
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
+}
+
+void DcMotor::motorTimerInterrupt(void){
+	if (isBudging) {
+    if (sinceBudgeCommand < BUDGE_TIMEOUT) {
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed);
+    }
+    else {
+      isBudging = false;
+      movementDone = true;
+      stopRotation();
+    }
+  }
+  // movementDone can be set elsewhere... so can numMillis, openLoopSpeed and rotationDirection (in open loop control)
+  else if (isOpenLoop) { // open loop control
+    if (!movementDone && timeCount <= numMillis) {
+      // calculates the pwm to send to the motor and makes it move
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed);
+#ifdef DEBUG_DC_TIMER
+      UART_PORT.println("motor");
+      UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print(timeCount); UART_PORT.print("\t / ");
+      UART_PORT.print(numMillis); UART_PORT.println(" ms");
+      UART_PORT.print(getSoftwareAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(getDesiredAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(startAngle); UART_PORT.println(" degrees");
+#endif
+    }
+    else {
+      movementDone = true;
+      stopRotation();
+    }
+  }
+  // would be nice to have some kind of check for the above functions so the command only runs if there's been a change
+  // e.g. movementDone changed or the speed or numMillis changed
+  else if (!isOpenLoop) {
+    if (!movementDone) {
+      calcCurrentAngle();
+      // determine the speed of the motor until the next interrupt
+      float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
+      if (output == 0) {
+        movementDone = true;
+        stopRotation();
+      }
+      else {
+        int dir = calcDirection(output);
+        // calculates the pwm to send to the motor and makes it move
+        setVelocity(dir, output);
+#ifdef DEBUG_DC_TIMER
+        UART_PORT.println("motor");
+        UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+        UART_PORT.print(output); UART_PORT.println(" next output");
+#endif
+      }
+    }
+    else {
+      stopRotation();
+    }
+  }
 }
 
 bool DcMotor::calcTurningDuration(float angle) {

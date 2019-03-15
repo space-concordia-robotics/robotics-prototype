@@ -21,7 +21,7 @@ class StepperMotor: public RobotMotor {
     float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
     
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
-    
+    //void motorTimerInterrupt(void);
     /* movement helper functions */
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     bool calcCurrentAngle(void);
@@ -61,6 +61,12 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   stepResolution = fullStepResolution * steppingMode;
   openLoopSpeed = 0; // no speed by default;
 }
+
+/*
+void StepperMotor::motorTimerInterrupt(void){
+	;
+}
+*/
 
 bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
