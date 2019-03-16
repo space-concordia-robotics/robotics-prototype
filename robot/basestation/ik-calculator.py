@@ -19,7 +19,7 @@ base_length = 0.103 #m
 proximal_length = 0.413 #m
 distal_length = 0.406 #m
 wrist_length = 0.072 + 0.143 #m (until tip of fingers)
-length_array = [proximal_length, distal_length, wrist_length]
+length_array = [base_length, proximal_length, distal_length, wrist_length]
 
 #ANGLES (IN RADIANS):
 proximal_max_angle = math.pi
@@ -32,7 +32,7 @@ minmax = [[0,0], [proximal_min_angle,proximal_max_angle], [distal_min_angle, dis
 
 #INITIALIZE GLOBAL VARIABLES
 computed_angles = [0, proximal_min_angle, distal_min_angle, wrist_min_angle]
-sample_size = 50
+sample_size = 10
 workspace_rep = [[0,0] for x in range(pow(sample_size,3))]
 
 ###################PYGAME PARAMETERS###################
@@ -97,14 +97,14 @@ def ComputeWorkspace(joint_num,minmax_array, length_array):
 	incremented_angle = [0,0,0]
 
 	for j1 in range(sample_size):
-		incremented_angle[0] = minmax_array[0][0] + (minmax_array[0][1] - minmax_array[0][0])/(j1+1)
+		incremented_angle[0] = minmax_array[1][0] + j1*(minmax_array[1][1] - minmax_array[1][0])/(sample_size - 1)
 		for j2 in range(sample_size):
-			incremented_angle[1] = minmax_array[1][0] + (minmax_array[1][1] - minmax_array[1][0])/(j2+1)
+			incremented_angle[1] = minmax_array[2][0] + j2*(minmax_array[2][1] - minmax_array[2][0])/(sample_size - 1)
 			for j3 in range(sample_size):
-					incremented_angle[2] = minmax_array[2][0] + (minmax_array[2][1] - minmax_array[2][0])/(j3+1)
+					incremented_angle[2] = minmax_array[3][0] + j3*(minmax_array[3][1] - minmax_array[3][0])/(sample_size - 1)
 
-					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][0] = length_array[0] * math.cos(incremented_angle[0]) + length_array[1] * math.cos(incremented_angle[1] + incremented_angle[0]) + length_array[2] * math.cos(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
-					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][1] = length_array[0] * math.sin(incremented_angle[0]) - length_array[1] * math.sin(incremented_angle[1] + incremented_angle[0]) - length_array[2] * math.sin(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
+					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][0] = length_array[1] * math.cos(incremented_angle[0]) + length_array[2] * math.cos(incremented_angle[1] + incremented_angle[0]) + length_array[3] * math.cos(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
+					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][1] = length_array[0]-length_array[0] - length_array[1] * math.sin(-math.pi + incremented_angle[0]) - length_array[2] * math.sin(incremented_angle[1] + incremented_angle[0]) - length_array[3] * math.sin(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
 	return pt
 
 
@@ -222,12 +222,14 @@ Topview = ProjectionView(RED, 3*Window_X/4, 3*Window_Y/8, screen)
 done = False
 clock = pygame.time.Clock()
 
-set_point = [0.3, 0.6, 0.5]
+set_point = [0.5, 0.6, 0.5]
 wrist_angle = 0
 
-workspace_enable = False
+workspace_enable = True
 if workspace_enable:
 	workspace = ComputeWorkspace(4,minmax, length_array)
+	for i in range(0, int(math.pow(sample_size,3))):
+	    workspace_rep[i] = GenerateRepresentativeCoordinates(workspace[i] , Sideview.X, Sideview.Y, 0)
 #################PYGAME LOOP#################
 while not done:
 
@@ -287,8 +289,7 @@ while not done:
 	#WORKSPACE MODE
     	if workspace_enable is True:
     		for i in range(0, int(math.pow(sample_size,3))):
-    			workspace_rep[i] = GenerateRepresentativeCoordinates(workspace[i] , Sideview.X, Sideview.Y, 0)
-    			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 4)
+    			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
 
 
 	#This is required to update the display
