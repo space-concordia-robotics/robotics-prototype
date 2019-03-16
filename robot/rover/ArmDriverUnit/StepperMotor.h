@@ -19,9 +19,9 @@ class StepperMotor: public RobotMotor {
   public:
     static int numStepperMotors;
     float stepResolution; // the smallest angle increment attainable by the shaft once the stepping mode is known
-    
+
     StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes, float stepMode, float gearRatio);
-    //void motorTimerInterrupt(void);
+    void motorTimerInterrupt(IntervalTimer & timer);
     /* movement helper functions */
     bool calcNumSteps(float angle); // calculates how many steps to take to get to the desired position, assuming no slipping
     bool calcCurrentAngle(void);
@@ -62,11 +62,81 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   openLoopSpeed = 0; // no speed by default;
 }
 
-/*
-void StepperMotor::motorTimerInterrupt(void){
-	;
+void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
+  nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
+  if (isBudging) {
+    if (sinceBudgeCommand < BUDGE_TIMEOUT) {
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed);
+      stepCount++;
+      timer.update(nextInterval);
+    }
+    else {
+      stepCount = 0; // reset the counter
+      isBudging = false;
+      movementDone = true;
+      stopRotation();
+      nextInterval = STEPPER_PID_PERIOD; // set it back to default
+    }
+  }
+  else if (isOpenLoop) { // open loop control
+    // movementDone can be set elsewhere... so can numSteps
+    if (!movementDone && stepCount < numSteps) {
+      calcCurrentAngle();
+      setVelocity(rotationDirection, openLoopSpeed); // direction was set beforehand
+      stepCount++;
+      if (hasRamping) {
+        // if speed ramping is enabled
+        // following code has array index that should be incremented each interrupt
+        // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
+      }
+      timer.update(nextInterval); // sets the new period for the timer interrupt
+#ifdef DEBUG_STEPPER_3_TIMER
+      UART_PORT.println("motor");
+      UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print(stepCount); UART_PORT.print("\t / ");
+      UART_PORT.print(numSteps); UART_PORT.println(" steps");
+      UART_PORT.print(getSoftwareAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(getDesiredAngle()); UART_PORT.print("\t / ");
+      UART_PORT.print(startAngle); UART_PORT.println(" degrees");
+#endif
+    }
+    else {
+      // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      stepCount = 0; // reset the counter
+      movementDone = true;
+      stopRotation();
+      nextInterval = STEPPER_PID_PERIOD; // set it back to default
+    }
+  }
+  else if (!isOpenLoop) { // closed loop control
+    if (!movementDone) {
+      calcCurrentAngle();
+      // determine the speed of the motor for next motor step
+      float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
+      if (output == 0) {
+        movementDone = true;
+        stopRotation();
+        nextInterval = STEPPER_PID_PERIOD; // set it back to default
+      }
+      else {
+        int dir = calcDirection(output);
+        // makes the motor step and calculates how long to wait until the next motor step
+        setVelocity(dir, output);
+        timer.update(nextInterval); // sets the new period for the timer interrupt
+      }
+#ifdef DEBUG_STEPPER_3_TIMER
+      UART_PORT.println("motor");
+      UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print(nextInterval); UART_PORT.println(" next interval");
+#endif
+    }
+    else {
+      stopRotation();
+    }
+  }
 }
-*/
+
 
 bool StepperMotor::calcNumSteps(float angle) {
   // if the error is big enough to justify movement
@@ -137,16 +207,16 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
     motorSpeed = pidController.getMinOutputValue();
   }
   if (motorDir != oldDir) {
-  switch (motorDir) {
-    case CLOCKWISE:
-      digitalWriteFast(directionPin, LOW);
-      break;
-    case COUNTER_CLOCKWISE:
-      digitalWriteFast(directionPin, HIGH);
-      break;
-  }
-  oldDir = motorDir;
-  //Serial.println("dir change");
+    switch (motorDir) {
+      case CLOCKWISE:
+        digitalWriteFast(directionPin, LOW);
+        break;
+      case COUNTER_CLOCKWISE:
+        digitalWriteFast(directionPin, HIGH);
+        break;
+    }
+    oldDir = motorDir;
+    //Serial.println("dir change");
   }
   singleStep();
   // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4

@@ -11,7 +11,7 @@ class DcMotor: public RobotMotor {
 
     // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
     DcMotor(int dirPin, int pwmPin, float gearRatio); // for cytron
-	void motorTimerInterrupt(void);
+    void motorTimerInterrupt(void);
     /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
@@ -55,8 +55,8 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
   openLoopGain = 1.0; // temp open loop control
 }
 
-void DcMotor::motorTimerInterrupt(void){
-	if (isBudging) {
+void DcMotor::motorTimerInterrupt(void) {
+  if (isBudging) {
     if (sinceBudgeCommand < BUDGE_TIMEOUT) {
       calcCurrentAngle();
       setVelocity(rotationDirection, openLoopSpeed);

@@ -12,70 +12,69 @@ enum motor_type {DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR};
 
 class RobotMotor {
   public:
-  // these variables are set at start and normally don't change during the main loop
-  int motorType;
-  static int numMotors; // keeps track of how many motors there are
-  int encoderPinA, encoderPinB;
-  // for limit switch interrupts
-  int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
-  volatile bool triggered;
-  bool actualPress;
-  volatile int triggerState;
-  int limitSwitchState;
-  elapsedMillis sinceTrigger;
-  // other stuff
-  float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
-  float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
-  float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
-  float minHardAngle, maxHardAngle, minSoftAngle, maxSoftAngle;
-  bool hasAngleLimits; // a wrist which wants to turn infinitely will be constrained by angle limits
-  bool isOpenLoop; // decides whether to use the PID or not
-  bool hasRamping; // decides whether to ramp the speed in open loop
-  volatile int rotationDirection;
-  // int maxSpeed;
-  PidController pidController; // used for speed and angle control
-  // these variables change during the main loop
-  volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
-  volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
-  elapsedMillis sinceBudgeCommand; // timeout for budge commands, elapsedMillis can't be volatile
-  volatile bool isBudging;
-  // setup functions
-  RobotMotor();
-  //virtual void motorTimerInterrupt(void) = 0;
-  void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
-  void attachLimitSwitches(char type, int switch1, int switch2);
-  void setAngleLimits(float minHardAngle, float maxHardAngle, float minSoftAngle, float maxSoftAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
-  bool withinJointAngleLimits(float angle); // checks if angle is within limits
-  bool hasEncoder;
-  // void setMaxSpeed();
-  /* movement helper functions */
-  int calcDirection(float error); // updates rotationDirection based on the angular error inputted
-  bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
-  float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
-  virtual bool calcCurrentAngle(void) = 0;
-  void setSoftwareAngle(float angle);
-  float getSoftwareAngle(void);
-  void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
-  int getDirectionLogic(void); // returns the directionModifier;
-  /* movement functions */
-  virtual void stopRotation(void) = 0;
-  virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
-  virtual void goToCommandedAngle(void) = 0;
-  virtual void goToAngle(float angle) = 0;
-  virtual void budge(void) = 0;
-  
+    // these variables are set at start and normally don't change during the main loop
+    int motorType;
+    static int numMotors; // keeps track of how many motors there are
+    int encoderPinA, encoderPinB;
+    // for limit switch interrupts
+    int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
+    volatile bool triggered;
+    bool actualPress;
+    volatile int triggerState;
+    int limitSwitchState;
+    elapsedMillis sinceTrigger;
+    // other stuff
+    float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
+    float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
+    float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
+    float minHardAngle, maxHardAngle, minSoftAngle, maxSoftAngle;
+    bool hasAngleLimits; // a wrist which wants to turn infinitely will be constrained by angle limits
+    bool isOpenLoop; // decides whether to use the PID or not
+    bool hasRamping; // decides whether to ramp the speed in open loop
+    volatile int rotationDirection;
+    // int maxSpeed;
+    PidController pidController; // used for speed and angle control
+    // these variables change during the main loop
+    volatile long encoderCount; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
+    volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
+    elapsedMillis sinceBudgeCommand; // timeout for budge commands, elapsedMillis can't be volatile
+    volatile bool isBudging;
+    // setup functions
+    RobotMotor();
+    void attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes);
+    void attachLimitSwitches(char type, int switch1, int switch2);
+    void setAngleLimits(float minHardAngle, float maxHardAngle, float minSoftAngle, float maxSoftAngle); // sets joint limits so the arm doesn't break from trying to reach physically impossible angles
+    bool withinJointAngleLimits(float angle); // checks if angle is within limits
+    bool hasEncoder;
+    // void setMaxSpeed();
+    /* movement helper functions */
+    int calcDirection(float error); // updates rotationDirection based on the angular error inputted
+    bool setDesiredAngle(float angle); // if the angle is valid, update desiredAngle and return true. else return false.
+    float getDesiredAngle(void); // return copy of the desired angle, not a reference to it
+    virtual bool calcCurrentAngle(void) = 0;
+    void setSoftwareAngle(float angle);
+    float getSoftwareAngle(void);
+    void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
+    int getDirectionLogic(void); // returns the directionModifier;
+    /* movement functions */
+    virtual void stopRotation(void) = 0;
+    virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
+    virtual void goToCommandedAngle(void) = 0;
+    virtual void goToAngle(float angle) = 0;
+    virtual void budge(void) = 0;
+
   private:
-  // doesn't really make sense to have any private variables for this parent class.
-  // note that virtual functions must be public in order for them to be accessible from motorArray[]
+    // doesn't really make sense to have any private variables for this parent class.
+    // note that virtual functions must be public in order for them to be accessible from motorArray[]
   protected:
-  // the following variables are specific to encoders
-  uint32_t encoderPort; // address of the port connected to a particular encoder pin
-  int encoderShift; // how many bits to shift over to find the encoder pin state
-  int encoderResolution; // ticks per revolution
-  volatile float currentAngle; // can be updated within timer interrupts
-  volatile float imaginedAngle;
-  float desiredAngle;
-  int directionModifier;
+    // the following variables are specific to encoders
+    uint32_t encoderPort; // address of the port connected to a particular encoder pin
+    int encoderShift; // how many bits to shift over to find the encoder pin state
+    int encoderResolution; // ticks per revolution
+    volatile float currentAngle; // can be updated within timer interrupts
+    volatile float imaginedAngle;
+    float desiredAngle;
+    int directionModifier;
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
@@ -110,9 +109,9 @@ void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2) {
     limSwitchExtend = switch2;
   }
   else if (type == 'c') {
-      limSwitchCw = switch1;
-      limSwitchCcw = switch2;
-    }
+    limSwitchCw = switch1;
+    limSwitchCcw = switch2;
+  }
 }
 
 void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS) {

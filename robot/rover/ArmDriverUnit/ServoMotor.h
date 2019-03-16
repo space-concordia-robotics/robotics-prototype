@@ -11,9 +11,8 @@ class ServoMotor: public RobotMotor {
     static int numServoMotors;
 
     ServoMotor(int pwmPin, float gearRatio);
-
     void motorTimerInterrupt(void);
-	/* movement helper functions */
+    /* movement helper functions */
     bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
     /* movement functions */
@@ -53,8 +52,8 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   openLoopGain = 1.0; // temp open loop control
 }
 
-void ServoMotor::motorTimerInterrupt(void){
-	if (isBudging) {
+void ServoMotor::motorTimerInterrupt(void) {
+  if (isBudging) {
     if (sinceBudgeCommand < BUDGE_TIMEOUT) {
       calcCurrentAngle();
       setVelocity(rotationDirection, openLoopSpeed);

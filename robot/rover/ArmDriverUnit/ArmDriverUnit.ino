@@ -78,11 +78,13 @@
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include <Servo.h>
+
 #ifdef ENABLE_ROS
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
 #endif
+
 #include "PinSetup.h"
 #include "Parser.h"
 // #include "Notes.h" // holds todo info
@@ -745,147 +747,11 @@ void printMotorAngles(void) {
 
 // I can refactor the stuff below by placing it into functions
 void m3StepperInterrupt(void) {
-  motor3.nextInterval = STEPPER_PID_PERIOD; // how long until the next step is taken? indirectly controls speed
-  if (motor3.isBudging) {
-    if (motor3.sinceBudgeCommand < BUDGE_TIMEOUT) {
-      motor3.calcCurrentAngle();
-      motor3.setVelocity(motor3.rotationDirection, motor3.openLoopSpeed);
-      motor3.stepCount++;
-      m3StepperTimer.update(motor3.nextInterval);
-    }
-    else {
-      motor3.stepCount = 0; // reset the counter
-      motor3.isBudging = false;
-      motor3.movementDone = true;
-      motor3.stopRotation();
-      motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
-    }
-  }
-  else if (motor3.isOpenLoop) { // open loop control
-    // movementDone can be set elsewhere... so can numSteps
-    if (!motor3.movementDone && motor3.stepCount < motor3.numSteps) {
-      motor3.calcCurrentAngle();
-      motor3.setVelocity(motor3.rotationDirection, motor3.openLoopSpeed); // direction was set beforehand
-      motor3.stepCount++;
-      if (motor3.hasRamping) {
-        // if speed ramping is enabled
-        // following code has array index that should be incremented each interrupt
-        // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
-      }
-      m3StepperTimer.update(motor3.nextInterval); // sets the new period for the timer interrupt
-#ifdef DEBUG_STEPPER_3_TIMER
-      UART_PORT.println("motor 3");
-      UART_PORT.print(motor3.rotationDirection); UART_PORT.println(" direction");
-      UART_PORT.print(motor3.stepCount); UART_PORT.print("\t / ");
-      UART_PORT.print(motor3.numSteps); UART_PORT.println(" steps");
-      UART_PORT.print(motor3.getSoftwareAngle()); UART_PORT.print("\t / ");
-      UART_PORT.print(motor3.getDesiredAngle()); UART_PORT.print("\t / ");
-      UART_PORT.print(motor3.startAngle); UART_PORT.println(" degrees");
-#endif
-    }
-    else {
-      // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
-      motor3.stepCount = 0; // reset the counter
-      motor3.movementDone = true;
-      motor3.stopRotation();
-      motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
-    }
-  }
-  else if (!motor3.isOpenLoop) { // closed loop control
-    if (!motor3.movementDone) {
-      motor3.calcCurrentAngle();
-      // determine the speed of the motor for next motor step
-      float output = motor3.pidController.updatePID(motor3.getSoftwareAngle(), motor3.getDesiredAngle());
-      if (output == 0) {
-        motor3.movementDone = true;
-        motor3.stopRotation();
-        motor3.nextInterval = STEPPER_PID_PERIOD; // set it back to default
-      }
-      else {
-        int dir = motor3.calcDirection(output);
-        // makes the motor step and calculates how long to wait until the next motor step
-        motor3.setVelocity(dir, output);
-        m3StepperTimer.update(motor3.nextInterval); // sets the new period for the timer interrupt
-      }
-#ifdef DEBUG_STEPPER_3_TIMER
-      UART_PORT.println("motor 3");
-      UART_PORT.print(motor3.rotationDirection); UART_PORT.println(" direction");
-      UART_PORT.print(motor3.nextInterval); UART_PORT.println(" next interval");
-#endif
-    }
-    else {
-      motor3.stopRotation();
-    }
-  }
+  motor3.motorTimerInterrupt(m3StepperTimer);
 }
 
 void m4StepperInterrupt(void) {
-  motor4.nextInterval = STEPPER_PID_PERIOD;
-  if (motor4.isBudging) {
-    if (motor4.sinceBudgeCommand < BUDGE_TIMEOUT) {
-      motor4.calcCurrentAngle();
-      motor4.setVelocity(motor4.rotationDirection, motor4.openLoopSpeed);
-      motor4.stepCount++;
-      m4StepperTimer.update(motor4.nextInterval);
-    }
-    else {
-      motor4.isBudging = false;
-      motor4.movementDone = true;
-      motor4.stopRotation();
-    }
-  }
-  else if (motor4.isOpenLoop) {
-    if (!motor4.movementDone && motor4.stepCount < motor4.numSteps) {
-      motor4.calcCurrentAngle();
-      motor4.setVelocity(motor4.rotationDirection, motor4.openLoopSpeed); // direction was set beforehand
-      motor4.stepCount++;
-      if (motor4.hasRamping) {
-        // if speed ramping is enabled
-        // following code has array index that should be incremented each interrupt
-        // nextInterval = STEPPER_PID_PERIOD; // replace with accessing a motor-specific array
-      }
-      m4StepperTimer.update(motor4.nextInterval);
-#ifdef DEBUG_STEPPER_4_TIMER
-      UART_PORT.println("motor 4");
-      UART_PORT.print(motor4.rotationDirection); UART_PORT.println(" direction");
-      UART_PORT.print(motor4.stepCount); UART_PORT.print("\t / ");
-      UART_PORT.print(motor4.numSteps); UART_PORT.println(" steps");
-      UART_PORT.print(motor4.getSoftwareAngle()); UART_PORT.print("\t / ");
-      UART_PORT.print(motor4.getDesiredAngle()); UART_PORT.print("\t / ");
-      UART_PORT.print(motor4.startAngle); UART_PORT.println(" degrees");
-#endif
-    }
-    else {
-      motor4.stepCount = 0;
-      motor4.movementDone = true;
-      motor4.stopRotation();
-      motor4.nextInterval = STEPPER_PID_PERIOD;
-    }
-  }
-  else if (!motor4.isOpenLoop) {
-    if (!motor4.movementDone) {
-      motor4.calcCurrentAngle();
-      float output = motor4.pidController.updatePID(motor4.getSoftwareAngle(), motor4.getDesiredAngle());
-      if (output == 0) {
-        motor4.movementDone = true;
-        motor4.stopRotation();
-        motor4.nextInterval = STEPPER_PID_PERIOD;
-      }
-      else {
-        int dir = motor4.calcDirection(output);
-        motor4.setVelocity(dir, output);
-        m4StepperTimer.update(motor4.nextInterval);
-      }
-#ifdef DEBUG_STEPPER_4_TIMER
-      UART_PORT.println("motor 4");
-      UART_PORT.print(motor4.rotationDirection); UART_PORT.println(" direction");
-      UART_PORT.print(motor4.nextInterval); UART_PORT.println(" next interval");
-#endif
-    }
-    else {
-      motor4.stopRotation();
-    }
-  }
+  motor4.motorTimerInterrupt(m4StepperTimer);
 }
 
 void dcInterrupt(void) {
