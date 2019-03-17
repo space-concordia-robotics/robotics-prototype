@@ -347,7 +347,7 @@ void setup() {
 }
 
 void loop() {
-    if (millis() - prevRead > 1000)
+    if (millis() - prevRead > 100)
     {
 
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
