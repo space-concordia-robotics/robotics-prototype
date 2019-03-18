@@ -106,7 +106,6 @@
 #define BUFFER_SIZE 100 // size of the buffer for the serial commands
 /* comms */
 char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
-String messageBar = "======================================================="; // for clarity of print statements
 // kinda weird that this comes out of nowhere... maybe should be Parser.commandInfo or something. or define it here instead of parser
 /*
   info from parsing functionality is packaged and given to motor control functionality.
@@ -252,6 +251,7 @@ void m4StepperInterrupt(void);
 /* Teensy setup */
 void setup() {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
+  // set up comms
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
@@ -605,6 +605,19 @@ void loop() {
               }
               nh.loginfo(actualMessage);
 #endif
+              motorArray[i]->calcCurrentAngle();
+              int dir = motorCommand.directionsToMove[i];
+              float ang = motorArray[i]->getSoftwareAngle();
+			  bool canMove = true;
+              if (motorArray[i] -> hasAngleLimits) {
+                if ( ( (dir > 0) && (ang > motorArray[i]->maxJointAngle) ) || ( (dir < 0) && (ang < motorArray[i]->minJointAngle) ) ) {
+                  canMove = false;
+                }
+              }
+			  if (canMove) {
+				motorArray[i]->calcDirection(motorCommand.directionsToMove[i]);
+                motorArray[i]->budge();
+			  }
             }
           }
         }
@@ -625,77 +638,27 @@ void loop() {
               }
               nh.loginfo(actualMessage);
 #endif
-            }
-            else {
+              if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.println(" will not change course");
+                UART_PORT.print("$E,Error: requested motor ");
+                UART_PORT.print(i + 1);
+                UART_PORT.println(" angle is not within angle limits.");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " will not change course";
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
+                // this is SUPER DUPER GROSS
+                int tempVal = i + 1;
+                String infoMessage = "motor " + tempVal;
+                infoMessage += " angle is not within angle limits";
+                char actualMessage[50];
+                for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                  actualMessage[i] = infoMessage[i];
+                }
+                nh.logerror(actualMessage);
+#endif
               }
-              nh.loginfo(actualMessage);
-#endif
-            }
-          }
-        }
-        // I should refactor the following stuff to be integrated in the parts above
-        // for the sake of readability
-        bool motorsCanMove = true;
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          if (motorCommand.budgeCommand) {
-            motorArray[i] -> calcCurrentAngle();
-            int dir = motorCommand.directionsToMove[i];
-            float ang = motorArray[i] -> getSoftwareAngle();
-            if (motorArray[i] -> hasAngleLimits) {
-              if ( ( (dir > 0) && (ang > motorArray[i] -> maxJointAngle) ) || ( (dir < 0) && (ang < motorArray[i] -> minJointAngle) ) ) {
-                motorsCanMove = false;
-              }
-            }
-          }
-          else if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
-            motorsCanMove = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("$E,Error: requested motor ");
-            UART_PORT.print(i + 1);
-            UART_PORT.println(" angle is not within angle limits.");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-            // this is SUPER DUPER GROSS
-            int tempVal = i + 1;
-            String infoMessage = "motor " + tempVal;
-            infoMessage += " angle is not within angle limits";
-            char actualMessage[50];
-            for (unsigned int i = 0; i < infoMessage.length(); i++) {
-              actualMessage[i] = infoMessage[i];
-            }
-            nh.logerror(actualMessage);
-#endif
-          }
-        }
-        if (!motorsCanMove) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.println("$E,Error: one or many angles are invalid, arm will not move");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-          nh.logerror("one or many angles are invalid, arm will not move");
-#endif
-        }
-        else { // start moving things
-#ifdef DEBUG_MAIN
-          UART_PORT.println("$S,Success: all angles are valid, arm to move");
-#endif
-          // here's where the commands are actually transferred to the timer interrupts
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorCommand.motorsToMove[i]) { // this motor can swivel but has limits so it doesn't hit anything
-              if (motorCommand.budgeCommand) {
-                motorArray[i]->calcDirection(motorCommand.directionsToMove[i]); // yes, this works
-                motorArray[i]->budge();
-              }
-              else if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
-                motorArray[i]->goToCommandedAngle();
+              else {
+                if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
+                  motorArray[i]->goToCommandedAngle();
+                }
               }
             }
           }
@@ -745,20 +708,16 @@ void printMotorAngles(void) {
 #endif
 }
 
-// I can refactor the stuff below by placing it into functions
 void m3StepperInterrupt(void) {
   motor3.motorTimerInterrupt(m3StepperTimer);
 }
-
 void m4StepperInterrupt(void) {
   motor4.motorTimerInterrupt(m4StepperTimer);
 }
-
 void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
 }
-
 void servoInterrupt(void) {
   motor5.motorTimerInterrupt();
   motor6.motorTimerInterrupt();
@@ -990,6 +949,7 @@ void m4ExtendISR(void) {
     ;
   }
   void m5CcwISR(void) {
+	  ;
   }
   void m6ExtendISR(void) {
     ;
