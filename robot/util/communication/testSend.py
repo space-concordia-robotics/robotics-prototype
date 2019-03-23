@@ -1,5 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from connection import Connection
 
-c1 = Connection("c1", "127.0.0.1", 5005)
-c1.send("127.0.0.1", 5005)
+rover_ip = "192.168.129.139"
+
+c1 = Connection("c1", rover_ip, 5005)
+c1.send(rover_ip, 5005)
