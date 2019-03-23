@@ -61,7 +61,7 @@ class RobotMotor {
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
     virtual void goToCommandedAngle(void) = 0;
     virtual void goToAngle(float angle) = 0;
-    virtual void budge(void) = 0;
+    virtual void budge(int dir) = 0;
 
   private:
     // doesn't really make sense to have any private variables for this parent class.

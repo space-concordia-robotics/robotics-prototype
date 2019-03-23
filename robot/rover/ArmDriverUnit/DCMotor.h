@@ -20,7 +20,7 @@ class DcMotor: public RobotMotor {
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
     void goToAngle(float angle);
-    void budge(void);
+    void budge(int dir);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -238,11 +238,22 @@ void DcMotor::goToAngle(float angle) {
   }
 }
 
-void DcMotor::budge(void) {
-  isBudging = true;
+void DcMotor::budge(int dir) {
+	calcCurrentAngle();
+              float ang = getSoftwareAngle();
+			  bool canMove = true;
+              if (hasAngleLimits) {
+                if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+                  canMove = false;
+                }
+              }
+			  if (canMove) {
+				calcDirection(dir);
+                isBudging = true;
   movementDone = false;
   sinceBudgeCommand = 0;
   startAngle = getSoftwareAngle();
+			  }
 }
 
 #endif

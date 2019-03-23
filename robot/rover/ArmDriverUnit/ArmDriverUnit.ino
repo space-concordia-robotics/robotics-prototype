@@ -605,19 +605,7 @@ void loop() {
               }
               nh.loginfo(actualMessage);
 #endif
-              motorArray[i]->calcCurrentAngle();
-              int dir = motorCommand.directionsToMove[i];
-              float ang = motorArray[i]->getSoftwareAngle();
-			  bool canMove = true;
-              if (motorArray[i] -> hasAngleLimits) {
-                if ( ( (dir > 0) && (ang > motorArray[i]->maxJointAngle) ) || ( (dir < 0) && (ang < motorArray[i]->minJointAngle) ) ) {
-                  canMove = false;
-                }
-              }
-			  if (canMove) {
-				motorArray[i]->calcDirection(motorCommand.directionsToMove[i]);
-                motorArray[i]->budge();
-			  }
+              motorArray[i]->budge(motorCommand.directionsToMove[i]);
             }
           }
         }

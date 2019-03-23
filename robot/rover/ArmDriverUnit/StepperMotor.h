@@ -33,7 +33,7 @@ class StepperMotor: public RobotMotor {
     void setVelocity(int motorDir, float motorSpeed);
     void goToCommandedAngle(void);
     void goToAngle(float angle);
-    void budge(void);
+    void budge(int dir);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -281,13 +281,24 @@ void StepperMotor::goToAngle(float angle) {
   }
 }
 
-void StepperMotor::budge(void) {
-  isBudging = true;
-  movementDone = false;
-  stepCount = 0;
-  sinceBudgeCommand = 0;
-  enablePower(); // give power to the stepper finally
-  startAngle = getSoftwareAngle();
+void StepperMotor::budge(int dir) {
+	calcCurrentAngle();
+	float ang = getSoftwareAngle();
+	bool canMove = true;
+	if (hasAngleLimits) {
+		if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+			canMove = false;
+		}
+	}
+	if (canMove) {
+		calcDirection(dir);
+		isBudging = true;
+		movementDone = false;
+		stepCount = 0;
+		sinceBudgeCommand = 0;
+		enablePower(); // give power to the stepper finally
+		startAngle = getSoftwareAngle();
+	}
 }
 
 #endif

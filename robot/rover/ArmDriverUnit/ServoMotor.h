@@ -20,7 +20,7 @@ class ServoMotor: public RobotMotor {
     void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the servo and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
     void goToAngle(float angle);
-    void budge(void);
+    void budge(int dir);
 
     // stuff for open loop control
     float openLoopError; // public variable for open loop control
@@ -154,8 +154,7 @@ void ServoMotor::stopRotation(void) {
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
-void ServoMotor::setVelocity(int motorDir, float motorSpeed)
-{
+void ServoMotor::setVelocity(int motorDir, float motorSpeed) {
   if (!isOpenLoop) {
     motorSpeed = fabs(motorSpeed);
   }
@@ -230,11 +229,22 @@ void ServoMotor::goToAngle(float angle) {
   }
 }
 
-void ServoMotor::budge(void) {
-  isBudging = true;
-  movementDone = false;
-  sinceBudgeCommand = 0;
-  startAngle = getSoftwareAngle();
+void ServoMotor::budge(int dir) {
+	calcCurrentAngle();
+    float ang = getSoftwareAngle();
+	bool canMove = true;
+    if (hasAngleLimits) {
+		if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+			canMove = false;
+		}
+	}
+	if (canMove) {
+		calcDirection(dir);
+		isBudging = true;
+		movementDone = false;
+		sinceBudgeCommand = 0;
+		startAngle = getSoftwareAngle();
+	}
 }
 
 #endif
