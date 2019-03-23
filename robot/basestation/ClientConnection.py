@@ -3,14 +3,12 @@ import socket
 
 
 class ClientConnection:
+    com_port = 5000
 
-    def __init__(self, base_ip, base_port, rover_ip, rover_port, serial_port, status=False):
+    def __init__(self, base_port, rover_ip, rover_port, status=False):
         self.status = status
-        self.base_ip = base_ip
-        self.base_port = base_port
+        self.base_ip = self.get_base_ip()
         self.set_rover_ip(rover_ip)
-        self.rover_port = rover_port
-        self.serial_port = serial_port
 
     def set_status(self, status):
         self.status = status
@@ -22,7 +20,13 @@ class ClientConnection:
         self.base_ip = base_ip
 
     def get_base_ip(self):
-        return self.base_ip
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        base_ip = s.getsockname()[0]
+        print("base_ip: " + base_ip)
+        s.close()
+
+        return base_ip
 
     def set_base_port(self, base_port):
         self.base_port = base_port
