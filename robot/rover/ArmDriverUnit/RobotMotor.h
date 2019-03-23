@@ -63,6 +63,9 @@ class RobotMotor {
     virtual void goToAngle(float angle) = 0;
     virtual void budge(int dir) = 0;
 
+    void checkForActualPress(void);
+    void goToSafeAngle(void);
+
   private:
     // doesn't really make sense to have any private variables for this parent class.
     // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -89,6 +92,8 @@ RobotMotor::RobotMotor() {
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
   isBudging = false;
+  isOpenLoop = true;
+  hasRamping = false;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -183,6 +188,58 @@ float RobotMotor::getSoftwareAngle(void) {
   else {
     return currentAngle;
   }
+}
+
+void RobotMotor::checkForActualPress(void) {
+  if (sinceTrigger >= TRIGGER_DELAY) {
+    // if the last interrupt was a press (meaning it's stabilized and in contact)
+    // then there's a real press
+    if (triggerState != 0) {
+      actualPress = true;
+      limitSwitchState = triggerState;
+    }
+    // otherwise it's not a real press
+    // so the limit switch state should stay whatever it used to be
+    // and so should actualPress
+    else {
+      ;
+    }
+    // either way, we should reset the triggered bool in wait for the next trigger
+    triggered = false;
+  }
+}
+
+void RobotMotor::goToSafeAngle(void) {
+#ifdef DEBUG_SWITCHES
+  UART_PORT.print("motor");
+  UART_PORT.print(" limit switch state ");
+  UART_PORT.println(limitSwitchState);
+#endif
+  stopRotation(); // stop turning of course
+  // check which switch was hit, update the current angle as the max/min hardware angle,
+  // then move the angle back to the max/min software angle
+  if (limitSwitchState == COUNTER_CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+    UART_PORT.print("motor is at hard angle ");
+    UART_PORT.print(maxHardAngle);
+    UART_PORT.println("and turning ccw to soft angle");
+#endif
+    setSoftwareAngle(maxHardAngle);
+    goToAngle(maxSoftAngle);
+  }
+  if (limitSwitchState == CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+    UART_PORT.print("motor is at hard angle ");
+    UART_PORT.print(minHardAngle);
+    UART_PORT.println("and turning cw to soft angle");
+#endif
+    setSoftwareAngle(minHardAngle);
+    goToAngle(minSoftAngle);
+  }
+  // now that the behaviour is complete we can reset these,
+  // in wait for the next trigger to be confirmed
+  actualPress = false;
+  limitSwitchState = 0;
 }
 
 #endif

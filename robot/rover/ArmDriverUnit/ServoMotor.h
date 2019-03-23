@@ -187,11 +187,12 @@ void ServoMotor::goToCommandedAngle(void) {
       timeCount = 0;
       movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.print("$S,Success: motor ");
-      //UART_PORT.print(5);
+#ifdef DEBUG_MAIN
+      UART_PORT.print("$S,Success: motor");
       UART_PORT.print(" to turn for ");
       UART_PORT.print(numMillis);
       UART_PORT.println(" milliseconds");
+#endif
 #endif
     }
     else {
@@ -219,9 +220,10 @@ void ServoMotor::goToAngle(float angle) {
     timeCount = 0;
     movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-    UART_PORT.print("$A,Alert: motor ");
-    //UART_PORT.print(3);
+#ifdef DEBUG_MAIN
+    UART_PORT.print("$A,Alert: motor");
     UART_PORT.println(" to move back into software angle range");
+#endif
 #endif
   }
   else if (!isOpenLoop) {
@@ -230,21 +232,21 @@ void ServoMotor::goToAngle(float angle) {
 }
 
 void ServoMotor::budge(int dir) {
-	calcCurrentAngle();
-    float ang = getSoftwareAngle();
-	bool canMove = true;
-    if (hasAngleLimits) {
-		if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
-			canMove = false;
-		}
-	}
-	if (canMove) {
-		calcDirection(dir);
-		isBudging = true;
-		movementDone = false;
-		sinceBudgeCommand = 0;
-		startAngle = getSoftwareAngle();
-	}
+  calcCurrentAngle();
+  float ang = getSoftwareAngle();
+  bool canMove = true;
+  if (hasAngleLimits) {
+    if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+      canMove = false;
+    }
+  }
+  if (canMove) {
+    calcDirection(dir);
+    isBudging = true;
+    movementDone = false;
+    sinceBudgeCommand = 0;
+    startAngle = getSoftwareAngle();
+  }
 }
 
 #endif

@@ -236,11 +236,12 @@ void StepperMotor::goToCommandedAngle() {
       enablePower(); // give power to the stepper finally
       movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.print("$S,Success: motor ");
-      //UART_PORT.print(3);
+#ifdef DEBUG_MAIN
+      UART_PORT.print("$S,Success: motor");
       UART_PORT.print(" to turn ");
       UART_PORT.print(numSteps);
       UART_PORT.println(" steps");
+#endif
 #endif
     }
     else {
@@ -270,9 +271,10 @@ void StepperMotor::goToAngle(float angle) {
     enablePower(); // give power to the stepper finally
     movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-    UART_PORT.print("$A,Alert: motor ");
-    //UART_PORT.print(3);
+#ifdef DEBUG_MAIN
+    UART_PORT.print("$A,Alert: motor");
     UART_PORT.println(" to move back into software angle range");
+#endif
 #endif
   }
   else if (!isOpenLoop) {
@@ -282,23 +284,23 @@ void StepperMotor::goToAngle(float angle) {
 }
 
 void StepperMotor::budge(int dir) {
-	calcCurrentAngle();
-	float ang = getSoftwareAngle();
-	bool canMove = true;
-	if (hasAngleLimits) {
-		if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
-			canMove = false;
-		}
-	}
-	if (canMove) {
-		calcDirection(dir);
-		isBudging = true;
-		movementDone = false;
-		stepCount = 0;
-		sinceBudgeCommand = 0;
-		enablePower(); // give power to the stepper finally
-		startAngle = getSoftwareAngle();
-	}
+  calcCurrentAngle();
+  float ang = getSoftwareAngle();
+  bool canMove = true;
+  if (hasAngleLimits) {
+    if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+      canMove = false;
+    }
+  }
+  if (canMove) {
+    calcDirection(dir);
+    isBudging = true;
+    movementDone = false;
+    stepCount = 0;
+    sinceBudgeCommand = 0;
+    enablePower(); // give power to the stepper finally
+    startAngle = getSoftwareAngle();
+  }
 }
 
 #endif

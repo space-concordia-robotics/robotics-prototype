@@ -197,11 +197,12 @@ void DcMotor::goToCommandedAngle(void) {
       timeCount = 0; // this elapsedMillis counts how long the motor has been turning for and is therefore reset right before it starts moving
       movementDone = false; // this flag being false lets the motor be controlled inside the timer interrupt
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.print("$S,Success: motor ");
-      //UART_PORT.print(1);
+#ifdef DEBUG_MAIN
+      UART_PORT.print("$S,Success: motor");
       UART_PORT.print(" to turn for ");
       UART_PORT.print(numMillis);
       UART_PORT.println(" milliseconds");
+#endif
 #endif
     }
     else {
@@ -228,9 +229,10 @@ void DcMotor::goToAngle(float angle) {
     timeCount = 0;
     movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-    UART_PORT.print("$A,Alert: motor ");
-    //UART_PORT.print(3);
+#ifdef DEBUG_MAIN
+    UART_PORT.print("$A,Alert: motor");
     UART_PORT.println(" to move back into software angle range");
+#endif
 #endif
   }
   else if (!isOpenLoop) {
@@ -239,21 +241,21 @@ void DcMotor::goToAngle(float angle) {
 }
 
 void DcMotor::budge(int dir) {
-	calcCurrentAngle();
-              float ang = getSoftwareAngle();
-			  bool canMove = true;
-              if (hasAngleLimits) {
-                if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
-                  canMove = false;
-                }
-              }
-			  if (canMove) {
-				calcDirection(dir);
-                isBudging = true;
-  movementDone = false;
-  sinceBudgeCommand = 0;
-  startAngle = getSoftwareAngle();
-			  }
+  calcCurrentAngle();
+  float ang = getSoftwareAngle();
+  bool canMove = true;
+  if (hasAngleLimits) {
+    if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+      canMove = false;
+    }
+  }
+  if (canMove) {
+    calcDirection(dir);
+    isBudging = true;
+    movementDone = false;
+    sinceBudgeCommand = 0;
+    startAngle = getSoftwareAngle();
+  }
 }
 
 #endif

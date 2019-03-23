@@ -40,7 +40,7 @@
 
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#define DEBUG_MAIN 10 // debug messages during main loop
+//#define DEBUG_MAIN 10 // debug messages during main loop
 //#define DEBUG_PARSING 11 // debug messages during parsing function
 //#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
@@ -185,19 +185,15 @@ ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
-DcMotor * m1 = & motor1;
-DcMotor * m2 = & motor2;
-StepperMotor * m3 = & motor3;
-StepperMotor * m4 = & motor4;
-ServoMotor * m5 = & motor5;
-ServoMotor * m6 = & motor6;
+DcMotor * m1 = & motor1; DcMotor * m2 = & motor2;
+StepperMotor * m3 = & motor3; StepperMotor * m4 = & motor4;
+ServoMotor * m5 = & motor5; ServoMotor * m6 = & motor6;
 // I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
 RobotMotor * motorArray[] = { m1, m2, m3, m4, m5, m6 };
 
 // instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
-IntervalTimer m3StepperTimer;
-IntervalTimer m4StepperTimer;
+IntervalTimer m3StepperTimer, m4StepperTimer;
 IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
@@ -209,24 +205,12 @@ void printMotorAngles(void); // sends all motor angles over serial
 
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
-#ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void);
-#endif
-#ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void);
-#endif
-#ifdef M3_ENCODER_PORT
 void m3_encoder_interrupt(void);
-#endif
-#ifdef M4_ENCODER_PORT
 void m4_encoder_interrupt(void);
-#endif
-#ifdef M5_ENCODER_PORT
 void m5_encoder_interrupt(void);
-#endif
-#ifdef M6_ENCODER_PORT
 void m6_encoder_interrupt(void);
-#endif
 
 // declare limit switch interrupt service routines
 void m1CwISR(void);
@@ -372,30 +356,20 @@ void setup() {
 
   // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
   // operate at 50% max speed, and the gains should vary based on which motor it is
-  motor1.isOpenLoop = true;
-  motor1.hasRamping = false;
+  //motor1.isOpenLoop = true;
+  //motor1.hasRamping = false;
   motor1.openLoopSpeed = 50; // 50% speed
-  motor1.openLoopGain = 1.0; // totally random guess, needs to be tested
-  motor2.isOpenLoop = true;
-  motor2.hasRamping = false;
-  motor2.openLoopSpeed = 25; // 50% speed
-  motor2.openLoopGain = 0.01; // totally random guess, needs to be tested
-  // open loop gain is only for time-based open loop control
-  motor3.isOpenLoop = true;
-  motor3.hasRamping = false;
+  motor2.openLoopSpeed = 50; // 50% speed
   motor3.openLoopSpeed = 50; // 50% speed
-  motor3.switchDirectionLogic(); // motor is wired backwards
-  motor4.isOpenLoop = true;
-  motor4.hasRamping = false;
   motor4.openLoopSpeed = 50; // 50% speed
-  motor5.isOpenLoop = true;
-  motor5.hasRamping = false;
   motor5.openLoopSpeed = 50; // 50% speed
+  motor6.openLoopSpeed = 50; // 50% speed
+  motor1.openLoopGain = 0.75; // needs to be tested
+  motor2.openLoopGain = 0.0025; // needs to be tested
+  // open loop gain is only for time-based open loop control
+  motor3.switchDirectionLogic(); // motor is wired backwards
   motor5.openLoopGain = 0.32; // for 5V
   motor5.switchDirectionLogic();
-  motor6.isOpenLoop = true;
-  motor6.hasRamping = false;
-  motor6.openLoopSpeed = 50; // 50% speed
   motor6.openLoopGain = 0.35; // for 5V
   motor6.switchDirectionLogic(); // positive angles now mean opening
 
@@ -421,65 +395,16 @@ void loop() {
   for (int i = 0; i < NUM_MOTORS; i++) {
     // check if the switch was hit
     if (motorArray[i]->triggered) {
-      if (motorArray[i]->sinceTrigger >= TRIGGER_DELAY) {
-        // if the last interrupt was a press (meaning it's stabilized and in contact)
-        // then there's a real press
-        if (motorArray[i]->triggerState != 0) {
-          motorArray[i]->actualPress = true;
-          motorArray[i]->limitSwitchState = motorArray[i]->triggerState;
-        }
-        // otherwise it's not a real press
-        // so the limit switch state should stay whatever it used to be
-        // and so should actualPress
-        else {
-          ;
-        }
-        // either way, we should reset the triggered bool in wait for the next trigger
-        motorArray[i]->triggered = false;
-      }
+      motorArray[i]->checkForActualPress();
     }
     // the switch was debounced and now we can react
     if (motorArray[i]->actualPress) {
-#ifdef DEBUG_SWITCHES
-      UART_PORT.print("motor ");
-      UART_PORT.print(i + 1);
-      UART_PORT.print(" limit switch state ");
-      UART_PORT.println(motorArray[i]->limitSwitchState);
-#endif
-      //motorArray[4]->stopRotation(); // for debugging with a servo
-      motorArray[i]->stopRotation(); // stop turning of course
-      // check which switch was hit, update the current angle as the max/min hardware angle,
-      // then move the angle back to the max/min software angle
-      if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
-#ifdef DEBUG_SWITCHES
-        UART_PORT.print("motor is at hard angle ");
-        UART_PORT.print(motorArray[i]->maxHardAngle);
-        UART_PORT.println("and turning ccw to soft angle");
-#endif
-        //motorArray[4]->setSoftwareAngle(motorArray[i]->maxHardAngle); // for debugging with a servo
-        //motorArray[4]->goToAngle(motorArray[i]->maxSoftAngle); // for debugging with a servo
-        motorArray[i]->setSoftwareAngle(motorArray[i]->maxHardAngle);
-        motorArray[i]->goToAngle(motorArray[i]->maxSoftAngle);
-      }
-      if (motorArray[i]->limitSwitchState == CLOCKWISE) {
-#ifdef DEBUG_SWITCHES
-        UART_PORT.print("motor is at hard angle ");
-        UART_PORT.print(motorArray[i]->minHardAngle);
-        UART_PORT.println("and turning cw to soft angle");
-#endif
-        //motorArray[4]->setSoftwareAngle(motorArray[i]->minHardAngle); // for debugging with a servo
-        //motorArray[4]->goToAngle(motorArray[i]->minSoftAngle); // for debugging with a servo
-        motorArray[i]->setSoftwareAngle(motorArray[i]->minHardAngle);
-        motorArray[i]->goToAngle(motorArray[i]->minSoftAngle);
-      }
-      // now that the behaviour is complete we can reset these,
-      // in wait for the next trigger to be confirmed
-      motorArray[i]->actualPress = false;
-      motorArray[i]->limitSwitchState = 0;
+      motorArray[i]->goToSafeAngle();
     }
     // put code here to check if the motor should be at the end of its path but isn't?
     // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
   }
+
 
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
@@ -613,7 +538,9 @@ void loop() {
           for (int i = 0; i < NUM_MOTORS; i++) {
             if (motorCommand.motorsToMove[i]) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+#ifdef DEBUG_MAIN
               UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
+#endif
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
               // this is SUPER DUPER GROSS
               int tempVal = i + 1;
@@ -797,7 +724,6 @@ void m6_encoder_interrupt(void) {
 #endif
 }
 #endif
-
 /* limit switch ISRs */
 void m1CwISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
