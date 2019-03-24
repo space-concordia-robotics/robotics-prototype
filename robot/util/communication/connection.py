@@ -3,6 +3,7 @@ import socket
 class Connection:
     __active_ctr = 0
 
+    # during intialization, pass only the rover IP and common communication port
     def __init__(self, name, ip, port):
         type(self).__active_ctr += 1
         self.name = name
@@ -15,20 +16,19 @@ class Connection:
     def get_total_active(self):
         return type(self).__active_ctr
 
-    def send(self, target_ip, target_port):
-        msg = self.name
-        print("UDP target IP:", target_ip)
-        print("UDP target port:", target_port)
+    def send(self, msg):
+        print("UDP target IP:", self.ip)
+        print("UDP target port:", self.port)
         print("message:", msg)
 
         # Internet --> AF_INET, UDP --> SOCK_DGRAM
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(str.encode(msg), (target_ip, target_port))
+        sock.sendto(str.encode(msg), (self.ip, self.port))
 
-    def receive(self, source_ip, source_port):
+    def receive(self):
         # Internet --> AF_INET, UDP --> SOCK_DGRAM
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((source_ip, source_port))
+        sock.bind((self.ip, self.port))
 
         while True:
             data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
