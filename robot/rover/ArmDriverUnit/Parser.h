@@ -4,6 +4,8 @@
 #include "PinSetup.h"
 #include "RobotMotor.h"
 #define MOTOR_NOT_COMMANDED "~" // this character means a motor is not to be moved
+#define SINGLE_ENDED_HOMING 1 // only home towards inside angles
+#define DOUBLE_ENDED_HOMING 2 // home towards both directions
 // this struct is specific to the arm teensy at the moment.
 // it should either be generalized or put in the main code,
 // but it can't be put in the main code because commandInfo
@@ -13,6 +15,8 @@ struct commandInfo {
   bool pingCommand = false; // for ping command
   bool stopAllMotors = false; // for stopping all motors
   bool resetAllMotors = false; // for resetting all angle values
+  bool homeAllMotors = false; // to search for limit switches and obtain absolute position
+  int homingStyle = SINGLE_ENDED_HOMING; // by default only home to one limit switch
 
   // commands that apply to a specific motor
   int whichMotor = 0; // which motor was requested to do something
@@ -42,8 +46,7 @@ class Parser {
     bool verifCommand(commandInfo cmd);
 };
 
-bool Parser::isValidNumber(String str, char type)
-{
+bool Parser::isValidNumber(String str, char type) {
   if (str.length() == 0) {
     return false;
   }
@@ -76,6 +79,18 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
     cmd.stopAllMotors = true;
 #ifdef DEBUG_PARSING
     UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
+#endif
+  }
+  else if (String(msgElem) == "home") {
+    // msgElem is a char array so it's safer to convert to string first
+    msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (both limits or just 1?)
+    if (String(msgElem) == "double") {
+      cmd.homingStyle = DOUBLE_ENDED_HOMING;
+    }
+    cmd.homeAllMotors = true; // regardless, home the motor if "home"
+#ifdef DEBUG_PARSING
+    UART_PORT.println("$S,Success: parsed command to home all motor joints in mode ");
+    UART_PORT.println(cmd.homingStyle);
 #endif
   }
   else if (String(msgElem) == "reset") {
@@ -299,6 +314,13 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.stopAllMotors) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.println("$S,Success: verified command to stop all motors");
+#endif
+    return true;
+  }
+  else if (cmd.homeAllMotors) {
+#ifdef DEBUG_VERIFYING
+    UART_PORT.print("$S,Success: verified command to home all motor joints in mode ");
+    UART_PORT.println(cmd.homingStyle);
 #endif
     return true;
   }
