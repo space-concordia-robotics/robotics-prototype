@@ -117,6 +117,7 @@ Parser Parser; // object which parses and verifies commands
 
 bool msgReceived = false;
 bool msgIsValid = false;
+bool isHoming = false;
 
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
@@ -405,6 +406,15 @@ void loop() {
     // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
   }
 
+  if (isHoming) {
+    // do a bunch of stuff here
+    // home motors one at a time somehow, probably nested loops waiting for the previous motor to finish
+    // needs to know how to skip motors like the ones without encoders, this info probably comes...
+    // ...from inside the message parsing if statements stuff below
+    // once the stuff is done, isHoming must be set to false
+    // how will this interact with the limit switch code above?
+    // should i ignore it and implement a new thing for homing? or just add if statements in it?
+  }
 
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
@@ -446,138 +456,160 @@ void loop() {
         nh.loginfo("all motors stopped because of emergency stop");
 #endif
       }
-      else if (motorCommand.resetAllMotors) { // emergency stop takes precedence
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          motorArray[i]->setSoftwareAngle(0.0);
-        }
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("all motor angle values reset");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("all motor angle values reset");
-#endif
-      }
-      else { // following cases are for commands to specific motors
-        if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
-          motorArray[motorCommand.whichMotor - 1]->stopRotation();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.print("stopped motor "); UART_PORT.println(motorCommand.whichMotor);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-          // this is SUPER DUPER GROSS
-          String infoMessage = "stopped motor " + motorCommand.whichMotor;
-          char actualMessage[50];
-          for (unsigned int i = 0; i < infoMessage.length(); i++) {
-            actualMessage[i] = infoMessage[i];
-          }
-          nh.loginfo(actualMessage);
-#endif
-        }
-        else if (motorCommand.loopCommand) { // set loop states for appropriate motor
-          if (motorCommand.loopState == OPEN_LOOP) {
-            motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in open loop");
-#endif
-          }
-          else if (motorCommand.loopState == CLOSED_LOOP) {
-            if (motorArray[motorCommand.whichMotor - 1]->hasEncoder) {
-              motorArray[motorCommand.whichMotor - 1]->isOpenLoop = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in closed loop");
-#endif
-            }
-            else {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-#endif
-            }
-          }
-        }
-        else if (motorCommand.resetCommand) { // reset the motor angle's variable or actually control the motor to reset it to neutral position
-          if (motorCommand.resetAngleValue) {
-            motorArray[motorCommand.whichMotor - 1]->setSoftwareAngle(0.0);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("reset angle value of motor "); UART_PORT.println(motorCommand.whichMotor);
-#endif
-          }
-          else if (motorCommand.resetJointPosition) {
-            motorArray[motorCommand.whichMotor - 1]->goToAngle(0.0);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
-#endif
-          }
-        }
-        else if (motorCommand.switchDir) { // change the direction modifier to swap rotation direction in the case of backwards wiring
-          motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          int dir = motorArray[motorCommand.whichMotor - 1]->getDirectionLogic();
-          UART_PORT.print("direction modifier is now "); UART_PORT.println(dir);
-#endif
-        }
-        else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
+      else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
+        if (motorCommand.homeAllMotors) { // initialize homing procedure
           for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorCommand.motorsToMove[i]) {
+            // this should set up the homing procedure, maybe decide which motors need to be homed
+            // but where does the code decide when to move one motor then the next?
+            // probably outside this loop somewhere like the limit switch interrupts
+          }
+          isHoming = true;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired direction is: "); UART_PORT.println(motorCommand.directionsToMove[i]);
+          UART_PORT.println("initializing homing command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " desired direction is: ";
-              infoMessage += motorCommand.directionsToMove[i];
-              char actualMessage[60];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
+          nh.loginfo("initializing homing command");
 #endif
-              motorArray[i]->budge(motorCommand.directionsToMove[i]);
+        }
+        else if (motorCommand.resetAllMotors) { // emergency stop takes precedence
+          for (int i = 0; i < NUM_MOTORS; i++) {
+            motorArray[i]->setSoftwareAngle(0.0);
+          }
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+          UART_PORT.println("all motor angle values reset");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+          nh.loginfo("all motor angle values reset");
+#endif
+        }
+        else { // following cases are for commands to specific motors
+          if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
+            motorArray[motorCommand.whichMotor - 1]->stopRotation();
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("stopped motor "); UART_PORT.println(motorCommand.whichMotor);
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+            // this is SUPER DUPER GROSS
+            String infoMessage = "stopped motor " + motorCommand.whichMotor;
+            char actualMessage[50];
+            for (unsigned int i = 0; i < infoMessage.length(); i++) {
+              actualMessage[i] = infoMessage[i];
+            }
+            nh.loginfo(actualMessage);
+#endif
+          }
+          else if (motorCommand.loopCommand) { // set loop states for appropriate motor
+            if (motorCommand.loopState == OPEN_LOOP) {
+              motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+              UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in open loop");
+#endif
+            }
+            else if (motorCommand.loopState == CLOSED_LOOP) {
+              if (motorArray[motorCommand.whichMotor - 1]->hasEncoder) {
+                motorArray[motorCommand.whichMotor - 1]->isOpenLoop = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in closed loop");
+#endif
+              }
+              else {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+#endif
+              }
             }
           }
-        }
-        else if (motorCommand.multiMove) { // make motors move simultaneously
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorCommand.motorsToMove[i]) {
+          else if (motorCommand.resetCommand) { // reset the motor angle's variable or actually control the motor to reset it to neutral position
+            if (motorCommand.resetAngleValue) {
+              motorArray[motorCommand.whichMotor - 1]->setSoftwareAngle(0.0);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-              UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
+              UART_PORT.print("reset angle value of motor "); UART_PORT.println(motorCommand.whichMotor);
 #endif
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " desired angle (degrees) is: ";
-              infoMessage += motorCommand.anglesToReach[i];
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
-#endif
-              if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
+            }
+            else if (motorCommand.resetJointPosition) {
+              motorArray[motorCommand.whichMotor - 1]->goToAngle(0.0);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                UART_PORT.print("$E,Error: requested motor ");
-                UART_PORT.print(i + 1);
-                UART_PORT.println(" angle is not within angle limits.");
+              UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
+#endif
+            }
+          }
+          else if (motorCommand.switchDir) { // change the direction modifier to swap rotation direction in the case of backwards wiring
+            motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            int dir = motorArray[motorCommand.whichMotor - 1]->getDirectionLogic();
+            UART_PORT.print("direction modifier is now "); UART_PORT.println(dir);
+#endif
+          }
+          else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorCommand.motorsToMove[i]) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired direction is: "); UART_PORT.println(motorCommand.directionsToMove[i]);
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
                 // this is SUPER DUPER GROSS
                 int tempVal = i + 1;
                 String infoMessage = "motor " + tempVal;
-                infoMessage += " angle is not within angle limits";
+                infoMessage += " desired direction is: ";
+                infoMessage += motorCommand.directionsToMove[i];
+                char actualMessage[60];
+                for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                  actualMessage[i] = infoMessage[i];
+                }
+                nh.loginfo(actualMessage);
+#endif
+                motorArray[i]->budge(motorCommand.directionsToMove[i]);
+              }
+            }
+          }
+          else if (motorCommand.multiMove) { // make motors move simultaneously
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorCommand.motorsToMove[i]) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+#ifdef DEBUG_MAIN
+                UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
+#endif
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+                // this is SUPER DUPER GROSS
+                int tempVal = i + 1;
+                String infoMessage = "motor " + tempVal;
+                infoMessage += " desired angle (degrees) is: ";
+                infoMessage += motorCommand.anglesToReach[i];
                 char actualMessage[50];
                 for (unsigned int i = 0; i < infoMessage.length(); i++) {
                   actualMessage[i] = infoMessage[i];
                 }
-                nh.logerror(actualMessage);
+                nh.loginfo(actualMessage);
 #endif
-              }
-              else {
-                if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
-                  motorArray[i]->goToCommandedAngle();
+                if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                  UART_PORT.print("$E,Error: requested motor ");
+                  UART_PORT.print(i + 1);
+                  UART_PORT.println(" angle is not within angle limits.");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+                  // this is SUPER DUPER GROSS
+                  int tempVal = i + 1;
+                  String infoMessage = "motor " + tempVal;
+                  infoMessage += " angle is not within angle limits";
+                  char actualMessage[50];
+                  for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                    actualMessage[i] = infoMessage[i];
+                  }
+                  nh.logerror(actualMessage);
+#endif
+                }
+                else {
+                  if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
+                    motorArray[i]->goToCommandedAngle();
+                  }
                 }
               }
             }
           }
         }
+      }
+      else { // alert the user that the arm is homing so ignoring certain commands
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("arm is homing! ignoring all commands besides ping or stop");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("arm is homing! ignoring all commands besides ping or stop");
+#endif
       }
     }
     else { // bad command
