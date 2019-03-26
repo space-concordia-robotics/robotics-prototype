@@ -5,6 +5,9 @@
 #include "PidController.h"
 
 #define BUDGE_TIMEOUT 200 // if command hasn't been received in this amount of ms, stop turning
+#define FLEXION_SWITCH 'f'
+#define REVOLUTE_SWITCH 'r'
+#define GRIPPER_SWITCH 'g'
 
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
@@ -17,7 +20,9 @@ class RobotMotor {
     static int numMotors; // keeps track of how many motors there are
     int encoderPinA, encoderPinB;
     // for limit switch interrupts
-    int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
+    int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend, limSwitchOpen;
+    bool hasLimitSwitches;
+    char limitSwitchType;
     volatile bool triggered;
     bool actualPress;
     volatile int triggerState;
@@ -109,13 +114,18 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
 }
 
 void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2) {
-  if (type == 'f') {
+  hasLimitSwitches = true;
+  limitSwitchType = type;
+  if (type == FLEXION_SWITCH) {
     limSwitchFlex = switch1;
     limSwitchExtend = switch2;
   }
-  else if (type == 'c') {
+  else if (type == REVOLUTE_SWITCH) {
     limSwitchCw = switch1;
     limSwitchCcw = switch2;
+  }
+  else if (type == GRIPPER_SWITCH) {
+    limSwitchOpen = switch1;
   }
 }
 

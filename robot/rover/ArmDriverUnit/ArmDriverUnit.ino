@@ -224,7 +224,7 @@ void m4FlexISR(void);
 void m4ExtendISR(void);
 //void m5CwISR(void);
 //void m5CcwISR(void);
-//void m6ExtendISR(void);
+//void m6OpenISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); // manages motors 1&2
@@ -310,12 +310,12 @@ void setup() {
 #define LIM_SWITCH_DIR CHANGE
 
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
-  motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
-  motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
-  motor3.attachLimitSwitches('f', M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
-  motor4.attachLimitSwitches('f', M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
-  //motor5.attachLimitSwitches('c', M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  //motor6.attachLimitSwitches('g', 0, M6_LIMIT_SW_EXTEND);
+  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
+  motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
+  motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+  //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
+  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND);
   attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
@@ -326,7 +326,7 @@ void setup() {
   attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor6.limSwitchOpen, m6OpenISR, LIM_SWITCH_DIR);
 
   // set motor shaft angle tolerances
   // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
@@ -392,20 +392,18 @@ void setup() {
 /* main code loop */
 void loop() {
   /* limit switch checks occur before listening for commands */
-  // I should pack the following into functions, maybe make a debouncer class.. well I already started it
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    // check if the switch was hit
-    if (motorArray[i]->triggered) {
+  for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
+    if (motorArray[i]->triggered) { // check if the switch was hit
       motorArray[i]->checkForActualPress();
     }
-    // the switch was debounced and now we can react
-    if (motorArray[i]->actualPress) {
+    if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
       motorArray[i]->goToSafeAngle();
     }
     // put code here to check if the motor should be at the end of its path but isn't?
     // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
   }
 
+  /* Homing functionality ignores most message types */
   if (isHoming) {
     // do a bunch of stuff here
     // home motors one at a time somehow, probably nested loops waiting for the previous motor to finish
@@ -612,7 +610,7 @@ void loop() {
 #endif
       }
     }
-    else { // bad command
+    else { // alert the user that it's a bad command
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
       UART_PORT.println("$E,Error: bad motor command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
@@ -897,7 +895,7 @@ void m4ExtendISR(void) {
   void m5CcwISR(void) {
 	  ;
   }
-  void m6ExtendISR(void) {
+  void m6OpenISR(void) {
     ;
   }
 */
