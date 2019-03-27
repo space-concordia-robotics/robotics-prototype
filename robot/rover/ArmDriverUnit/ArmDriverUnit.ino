@@ -201,6 +201,8 @@ IntervalTimer servoTimer; // motors 5&6
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
+int homingMotor = 6; // initialize to a value that's invalid so it'll be ignored
+
 /* function declarations */
 void printMotorAngles(void); // sends all motor angles over serial
 
@@ -315,7 +317,7 @@ void setup() {
   motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
   //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND);
+  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
   attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
@@ -405,13 +407,24 @@ void loop() {
 
   /* Homing functionality ignores most message types */
   if (isHoming) {
-    // do a bunch of stuff here
-    // home motors one at a time somehow, probably nested loops waiting for the previous motor to finish
-    // needs to know how to skip motors like the ones without encoders, this info probably comes...
-    // ...from inside the message parsing if statements stuff below
-    // once the stuff is done, isHoming must be set to false
-    // how will this interact with the limit switch code above?
-    // should i ignore it and implement a new thing for homing? or just add if statements in it?
+    if (homingMotor < NUM_MOTORS) {
+      if ( !(motorArray[homingMotor]->homingDone) ) {
+        //motorArray[homingMotor]->homeMotor();
+        // this still needs to be interacting with the motor timers
+        // I want it to tell the first motor to move until it hits the limit switch
+        // this means I need to ignore the angle limits for this command
+        // then either it hits the other switch or just goes to 0 degrees
+        // inside homeMotor it will know whether to go to only one end or both
+      }
+      else {
+        homingMotor++;
+      }
+      // how will this interact with the limit switch code above?
+      // should i ignore it and implement a new thing for homing? or just add if statements in it?
+    }
+    else {
+      isHoming = false;
+    }
   }
 
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
@@ -457,11 +470,12 @@ void loop() {
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors) { // initialize homing procedure
           for (int i = 0; i < NUM_MOTORS; i++) {
-            // this should set up the homing procedure, maybe decide which motors need to be homed
-            // but where does the code decide when to move one motor then the next?
-            // probably outside this loop somewhere like the limit switch interrupts
+            if (motorArray[i]->hasLimitSwitches) {
+              motorArray[i]->homingDone = false;
+            }
           }
           isHoming = true;
+          homingMotor = 0;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
           UART_PORT.println("initializing homing command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)

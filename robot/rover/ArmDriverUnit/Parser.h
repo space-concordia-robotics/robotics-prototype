@@ -4,8 +4,6 @@
 #include "PinSetup.h"
 #include "RobotMotor.h"
 #define MOTOR_NOT_COMMANDED "~" // this character means a motor is not to be moved
-#define SINGLE_ENDED_HOMING 1 // only home towards inside angles
-#define DOUBLE_ENDED_HOMING 2 // home towards both directions
 // this struct is specific to the arm teensy at the moment.
 // it should either be generalized or put in the main code,
 // but it can't be put in the main code because commandInfo

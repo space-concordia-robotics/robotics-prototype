@@ -8,6 +8,8 @@
 #define FLEXION_SWITCH 'f'
 #define REVOLUTE_SWITCH 'r'
 #define GRIPPER_SWITCH 'g'
+#define SINGLE_ENDED_HOMING 1 // only home towards inside angles
+#define DOUBLE_ENDED_HOMING 2 // home towards both directions
 
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
@@ -23,6 +25,8 @@ class RobotMotor {
     int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend, limSwitchOpen;
     bool hasLimitSwitches;
     char limitSwitchType;
+    int homingType;
+    bool homingDone;
     volatile bool triggered;
     bool actualPress;
     volatile int triggerState;
@@ -99,6 +103,9 @@ RobotMotor::RobotMotor() {
   isBudging = false;
   isOpenLoop = true;
   hasRamping = false;
+  hasLimitSwitches = false;
+  homingType = SINGLE_ENDED_HOMING;
+  homingDone = true;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
