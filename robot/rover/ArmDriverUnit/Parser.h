@@ -25,6 +25,9 @@ struct commandInfo {
   bool loopCommand = false; // for choosing between open loop or closed loop control
   int loopState = 0; // what type of loop state it is
 
+  bool gearCommand = false; // to change parameters
+  float gearRatioVal = 0.0;
+
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
@@ -39,7 +42,7 @@ struct commandInfo {
 class Parser {
   public:
     bool isValidNumber(String str, char type);
-    void parseCommand(commandInfo & cmd, char * restOfMessage);
+    void parseCommand(commandInfo & cmd, char *restOfMessage);
     //void parseRosCommand(commandInfo & cmd, String message);
     bool verifCommand(commandInfo cmd);
 };
@@ -63,9 +66,9 @@ bool Parser::isValidNumber(String str, char type) {
   return true;
 }
 
-void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
+void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   // check for emergency stop has precedence
-  char * msgElem = strtok_r(restOfMessage, " ", & restOfMessage); // look for first element (first tag)
+  char *msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
   if (String(msgElem) == "ping") {
     cmd.pingCommand = true;
 #ifdef DEBUG_PARSING
@@ -81,7 +84,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
   }
   else if (String(msgElem) == "home") {
     // msgElem is a char array so it's safer to convert to string first
-    msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (both limits or just 1?)
+    msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (both limits or just 1?)
     if (String(msgElem) == "double") {
       cmd.homingStyle = DOUBLE_ENDED_HOMING;
     }
@@ -108,7 +111,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
       isValidBudge = true;
     }
     do {
-      msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor 1 angle)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor 1 angle)
       if (isValidBudge) {
         if (String(msgElem) == "fwd") {
           cmd.directionsToMove[i] = COUNTER_CLOCKWISE;
@@ -187,7 +190,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
   // check for motor command
   else if (String(msgElem) == "motor") {
     // msgElem is a char array so it's safer to convert to string first
-    msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (motor number)
+    msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
     // if ( isValidNumber(String(msgElem),'d') )
     cmd.whichMotor = atoi(msgElem);
     if (cmd.whichMotor > 0 && cmd.whichMotor <= NUM_MOTORS) {
@@ -196,7 +199,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
       UART_PORT.println(cmd.whichMotor);
 #endif
       // check for motor stop command has precedence
-      msgElem = strtok_r(NULL, " ", & restOfMessage); // find the next message element (direction tag)
+      msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
       if (String(msgElem) == "stop") {
         // msgElem is a char array so it's safer to convert to string first
         cmd.stopSingleMotor = true;
@@ -207,7 +210,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
       // check for angle command
       else if (String(msgElem) == "angle") {
         // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
         if (isValidNumber(String(msgElem), 'f')) {
           cmd.motorsToMove[cmd.whichMotor - 1] = true;
           cmd.anglesToReach[cmd.whichMotor - 1] = atof(msgElem);
@@ -223,11 +226,23 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
 #endif
         }
       }
+      else if (String(msgElem) == "gear") {
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
+        // the following has no bad value error checking!!!!
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.gearRatioVal = atof(msgElem);
+          cmd.gearCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired gear ratio ");
+          UART_PORT.println(cmd.gearRatioVal);
+#endif
+        }
+      }
       // check for loop state command
       else if (String(msgElem) == "loop") {
         // msgElem is a char array so it's safer to convert to string first
         cmd.loopCommand = true;
-        msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
         if (String(msgElem) == "open") {
           cmd.loopState = OPEN_LOOP;
 #ifdef DEBUG_PARSING
@@ -254,7 +269,7 @@ void Parser::parseCommand(commandInfo & cmd, char * restOfMessage) {
       else if (String(msgElem) == "reset") {
         // msgElem is a char array so it's safer to convert to string first
         cmd.resetCommand = true;
-        msgElem = strtok_r(NULL, " ", & restOfMessage); // go to next msg element (desired angle value)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
         if (String(msgElem) == "angle") {
           cmd.resetAngleValue = true;
 
@@ -394,6 +409,13 @@ bool Parser::verifCommand(commandInfo cmd) {
 #ifdef DEBUG_VERIFYING
       UART_PORT.print("$S,Success: verified command to stop motor ");
       UART_PORT.println(cmd.whichMotor);
+#endif
+      return true;
+    }
+    else if (cmd.gearCommand) {
+      #ifdef DEBUG_VERIFYING
+        UART_PORT.print("$S,Success: verified command to set gear ratio to ");
+        UART_PORT.println(cmd.gearRatioVal);
 #endif
       return true;
     }

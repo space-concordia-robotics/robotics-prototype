@@ -186,11 +186,11 @@ ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
-DcMotor * m1 = & motor1; DcMotor * m2 = & motor2;
-StepperMotor * m3 = & motor3; StepperMotor * m4 = & motor4;
-ServoMotor * m5 = & motor5; ServoMotor * m6 = & motor6;
+DcMotor *m1 = &motor1; DcMotor *m2 = &motor2;
+StepperMotor *m3 = &motor3; StepperMotor *m4 = &motor4;
+ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
 // I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
-RobotMotor * motorArray[] = { m1, m2, m3, m4, m5, m6 };
+RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
 
 // instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
@@ -202,6 +202,7 @@ elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
 int homingMotor = 6; // initialize to a value that's invalid so it'll be ignored
+bool motorsToHome[] = {false, false, false, false, false, false};
 
 /* function declarations */
 void printMotorAngles(void); // sends all motor angles over serial
@@ -408,25 +409,26 @@ void loop() {
   /* Homing functionality ignores most message types */
   if (isHoming) {
     if (homingMotor < NUM_MOTORS) {
-      if ( !(motorArray[homingMotor]->homingDone) ) {
-        //motorArray[homingMotor]->homeMotor();
-        // this still needs to be interacting with the motor timers
-        // I want it to tell the first motor to move until it hits the limit switch
-        // this means I need to ignore the angle limits for this command
-        // then either it hits the other switch or just goes to 0 degrees
-        // inside homeMotor it will know whether to go to only one end or both
+      if (motorsToHome[homingMotor]) { // set things up for homing to occur in timer interrupts
+        //motorArray[homingMotor]->homeMotor(); // initialize the homing params for this motor
+        // place motorArray[i]->homingDone = false; inside homeMotor()
+        // I want it to tell the first motor to move until it hits the limit switch, ignoring angle limits
+        // then either if it's homing both switches it hits the other switch
+        // then it goes to 0 degrees? or the home position?
+        // how will this interact with the limit switch code above and in interrupts?
+        // should i ignore it and implement a new thing for homing? or just add if statements in it?
+        motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
-      else {
+      if (motorArray[homingMotor]->homingDone) {
         homingMotor++;
       }
-      // how will this interact with the limit switch code above?
-      // should i ignore it and implement a new thing for homing? or just add if statements in it?
     }
     else {
       isHoming = false;
     }
   }
 
+  /* message parsing functionality */
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
   msgReceived = false;
   msgIsValid = false;
@@ -471,7 +473,7 @@ void loop() {
         if (motorCommand.homeAllMotors) { // initialize homing procedure
           for (int i = 0; i < NUM_MOTORS; i++) {
             if (motorArray[i]->hasLimitSwitches) {
-              motorArray[i]->homingDone = false;
+              motorsToHome[i] = true;
             }
           }
           isHoming = true;
@@ -505,6 +507,13 @@ void loop() {
               actualMessage[i] = infoMessage[i];
             }
             nh.loginfo(actualMessage);
+#endif
+          }
+          else if (motorCommand.gearCommand) { // set gear ratio for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has a new gear ratio of "); UART_PORT.print(motorCommand.gearRatioVal);
 #endif
           }
           else if (motorCommand.loopCommand) { // set loop states for appropriate motor
