@@ -10,6 +10,7 @@ import urllib
 from urllib.parse import urlparse, unquote
 import flask
 from flask import jsonify, request
+from robot.comms.connection import Connection
 
 app = flask.Flask(__name__)
 
@@ -239,7 +240,13 @@ def click_btn_motor1_ccw():
         # decode URI
         cmd = unquote(cmd)
 
+    rover_ip = "127.0.0.1"
+    base_ip = rover_ip
+
     print("cmd: " + cmd)
+    c = Connection("c1", "127.0.0.1", 5005)
+    c.send(cmd)
+
 
     return jsonify(success=True, cmd=cmd)
 
