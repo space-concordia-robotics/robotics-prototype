@@ -23,10 +23,6 @@ class ServoMotor: public RobotMotor {
     void budge(int dir);
 
     // stuff for open loop control
-    float openLoopError; // public variable for open loop control
-    int openLoopSpeed; // angular speed (degrees/second)
-    float openLoopGain; // speed correction factor
-    float startAngle; // used in angle esimation
     unsigned int numMillis; // how many milliseconds for servo to reach desired position
     elapsedMillis timeCount; // how long has the servo been turning for
 

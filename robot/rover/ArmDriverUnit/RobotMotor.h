@@ -66,13 +66,19 @@ class RobotMotor {
     void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
     int getDirectionLogic(void); // returns the directionModifier;
     void setGearRatio(float ratio);
+    void setOpenLoopGain(float loopGain);
     /* movement functions */
     virtual void stopRotation(void) = 0;
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
     virtual void goToCommandedAngle(void) = 0;
     virtual void goToAngle(float angle) = 0;
     virtual void budge(int dir) = 0;
-
+    // for open loop control
+    float openLoopError; // public variable for open loop control
+    int openLoopSpeed; // angular speed (degrees/second)
+    float openLoopGain; // speed correction factor
+    float startAngle; // used in angle esimation
+    
     void checkForActualPress(void);
     void goToSafeAngle(void);
 
@@ -191,6 +197,10 @@ int RobotMotor::getDirectionLogic(void) {
 void RobotMotor::setGearRatio(float ratio){
   gearRatio = ratio;
   gearRatioReciprocal = 1/ratio;
+}
+
+void RobotMotor::setOpenLoopGain(float loopGain){
+  openLoopGain = loopGain;
 }
 
 void RobotMotor::setSoftwareAngle(float angle) {

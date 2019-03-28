@@ -36,9 +36,6 @@ class StepperMotor: public RobotMotor {
     void budge(int dir);
 
     // stuff for open loop control
-    float openLoopError; // public variable for open loop control
-    int openLoopSpeed; // angular speed (degrees/second)
-    float startAngle; // used in angle esimation
     int numSteps; // how many steps to take for stepper to reach desired position
     volatile int stepCount; // how many steps the stepper has taken since it started moving
     volatile int nextInterval; // how long to wait until the next step

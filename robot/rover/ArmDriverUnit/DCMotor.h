@@ -23,10 +23,6 @@ class DcMotor: public RobotMotor {
     void budge(int dir);
 
     // stuff for open loop control
-    float openLoopError; // public variable for open loop control
-    int openLoopSpeed; // angular speed (degrees/second)
-    float openLoopGain; // speed correction factor
-    float startAngle; // used in angle esimation
     unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
     elapsedMillis timeCount; // how long has the dc motor been turning for
 

@@ -516,6 +516,13 @@ void loop() {
             UART_PORT.print(" has a new gear ratio of "); UART_PORT.print(motorCommand.gearRatioVal);
 #endif
           }
+          else if (motorCommand.openLoopGainCommand) { // set gear ratio for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->setOpenLoopGain(motorCommand.openLoopGain);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has a new open loop gain of "); UART_PORT.print(motorCommand.openLoopGain);
+#endif
+          }
           else if (motorCommand.loopCommand) { // set loop states for appropriate motor
             if (motorCommand.loopState == OPEN_LOOP) {
               motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;

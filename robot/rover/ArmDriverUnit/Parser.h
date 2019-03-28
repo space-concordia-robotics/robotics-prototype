@@ -25,8 +25,10 @@ struct commandInfo {
   bool loopCommand = false; // for choosing between open loop or closed loop control
   int loopState = 0; // what type of loop state it is
 
-  bool gearCommand = false; // to change parameters
+  bool gearCommand = false; // to change gear ratio
   float gearRatioVal = 0.0;
+  bool openLoopGainCommand = false; // to change open loop gain
+  float openLoopGain = 0.0;
 
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
@@ -187,8 +189,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
     }
   }
-  // check for motor command
-  else if (String(msgElem) == "motor") {
+  else if (String(msgElem) == "motor") { // check for motor command
     // msgElem is a char array so it's safer to convert to string first
     msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor number)
     // if ( isValidNumber(String(msgElem),'d') )
@@ -207,8 +208,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         UART_PORT.println("$S,Success: parsed request to stop single motor");
 #endif
       }
-      // check for angle command
-      else if (String(msgElem) == "angle") {
+      else if (String(msgElem) == "angle") { // check for angle command
         // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
         if (isValidNumber(String(msgElem), 'f')) {
@@ -226,7 +226,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      else if (String(msgElem) == "gear") {
+      else if (String(msgElem) == "gear") { // check for gear ratio change command
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
         // the following has no bad value error checking!!!!
         if (isValidNumber(String(msgElem), 'f')) {
@@ -238,8 +238,19 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      // check for loop state command
-      else if (String(msgElem) == "loop") {
+      else if (String(msgElem) == "opengain") { // check for gear ratio change command
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
+        // the following has no bad value error checking!!!!
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.openLoopGain = atof(msgElem);
+          cmd.openLoopGainCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired open loop gain ");
+          UART_PORT.println(cmd.openLoopGain);
+#endif
+        }
+      }
+      else if (String(msgElem) == "loop") { // check for loop state command
         // msgElem is a char array so it's safer to convert to string first
         cmd.loopCommand = true;
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
@@ -413,9 +424,16 @@ bool Parser::verifCommand(commandInfo cmd) {
       return true;
     }
     else if (cmd.gearCommand) {
-      #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to set gear ratio to ");
-        UART_PORT.println(cmd.gearRatioVal);
+#ifdef DEBUG_VERIFYING
+      UART_PORT.print("$S,Success: verified command to set gear ratio to ");
+      UART_PORT.println(cmd.gearRatioVal);
+#endif
+      return true;
+    }
+    else if (cmd.openLoopGainCommand) {
+#ifdef DEBUG_VERIFYING
+      UART_PORT.print("$S,Success: verified command to set open loop gain to ");
+      UART_PORT.println(cmd.openLoopGain);
 #endif
       return true;
     }
