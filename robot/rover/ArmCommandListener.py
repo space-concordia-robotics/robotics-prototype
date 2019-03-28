@@ -32,7 +32,8 @@ ports = list(serial.tools.list_ports.comports())
 firstPortName = ports[0].name
 print("Connecting to port: " + firstPortName)
 ser = serial.Serial('/dev/' + firstPortName, 9600)
-rover_ip = "172.16.1.30"
+#rover_ip = "172.16.1.30"
+rover_ip = "127.0.0.1"
 
 c = Connection("c1", rover_ip, SERVER_PORT)
 
@@ -57,72 +58,72 @@ while True:
                 #returnMsg = "cmd: w --> m1: Forward"
                 print("cmd: w --> m1: Forward\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge fwd ~ ~ ~ ~ ~"
+                command = "budge fwd ~ ~ ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 's':
                 print("cmd: s --> m1: Back\n")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge back ~ ~ ~ ~ ~"
+                command = "budge back ~ ~ ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'e':
                 print("cmd: e --> m2: Forward\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge ~ fwd ~ ~ ~ ~"
+                command = "budge ~ fwd ~ ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'd':
                 print("cmd: d --> m2: Back")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge ~ back ~ ~ ~ ~"
+                command = "budge ~ back ~ ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'r':
                 print("cmd: r --> m3: Forward")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ fwd ~ ~ ~"
+                command = "budge ~ ~ fwd ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'f':
                 print("cmd: f --> m3: Back")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ back ~ ~ ~"
+                command = "budge ~ ~ back ~ ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 't':
                 print("cmd: t --> m4: Forward")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ fwd ~ ~"
+                command = "budge ~ ~ ~ fwd ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'g':
                 print("cmd: g --> m4: Back")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ back ~ ~"
+                command = "budge ~ ~ ~ back ~ ~\n"
                 ser.write(str.encode(command))
             elif command == 'y':
                 print("cmd: y --> m5: Forward")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ ~ fwd ~"
+                command = "budge ~ ~ ~ ~ fwd ~\n"
                 ser.write(str.encode(command))
             elif command == 'h':
                 print("cmd: h --> m5: Back")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ ~ back ~"
+                command = "budge ~ ~ ~ ~ back ~\n"
                 ser.write(str.encode(command))
             elif command == 'u':
                 print("cmd: u --> m6: Forward")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ ~ ~ fwd"
+                command = "budge ~ ~ ~ ~ ~ fwd\n"
                 ser.write(str.encode(command))
             elif command == 'j':
                 print("cmd: j --> m6: Back")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = "budge ~ ~ ~ ~ ~ back"
+                command = "budge ~ ~ ~ ~ ~ back\n"
                 ser.write(str.encode(command))
             elif command == 'z':
                 print("cmd: z --> stop all motors")
                 #mySocket.sendto(str.encode("stop"), (clientIP, CLIENT_PORT))
-                command = "stop"
+                command = "stop\n"
                 ser.write(str.encode(command))
             elif command == 'o':
                 print("cmd: o --> reset angle values")
                 #mySocket.sendto(str.encode("reset"), (clientIP, CLIENT_PORT))
-                command = "reset"
+                command = "reset\n"
                 ser.write(str.encode(command))
             elif command == 'q':
                 print("\nTerminating connection.")
@@ -132,7 +133,7 @@ while True:
                     print(ser.readline().decode())
             elif command == 'p':
                 print("cmd: p --> ping")
-                command = "ping"
+                command = "ping\n"
                 ser.write(str.encode(command))
                 pingTime = currentMillis()
 
@@ -142,6 +143,7 @@ while True:
                     print(response)
 
     except Exception:
+        ser.close()
         print("Exception in user code:")
         print("-"*60)
         traceback.print_exc(file=sys.stdout)
