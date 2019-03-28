@@ -31,7 +31,7 @@ struct commandInfo {
   float openLoopGain = 0.0;
   bool speedCommand = false;
   float motorSpeed = 0.0;
-  
+
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
@@ -108,11 +108,15 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   // check for simultaneous motor control
   else if (String(msgElem) == "move" || String(msgElem) == "budge") {
     // msgElem is a char array so it's safer to convert to string first
-    bool isValidCommand = true;
-    bool isValidBudge = false;
+    bool isValidCommand = false; bool isValidBudge = false; bool isValidMove = false;
     int i = 0;
     if (String(msgElem) == "budge") {
       isValidBudge = true;
+      isValidCommand = true;
+    }
+    else {
+      isValidMove = true;
+      isValidCommand = true;
     }
     do {
       msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (motor 1 angle)
@@ -135,45 +139,54 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         }
         else {
           isValidBudge = false;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$E,Error: parsed invalid budge for  motor ");
+          UART_PORT.println(i + 1);
+#endif
+          break;
         }
       }
-      else if (isValidNumber(String(msgElem), 'f')) {
-        cmd.anglesToReach[i] = atof(msgElem); // update value in motor angles array
-        cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
+      else if (isValidMove) {
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.anglesToReach[i] = atof(msgElem); // update value in motor angles array
+          cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
 #ifdef DEBUG_PARSING
-        UART_PORT.print("$S,Success: parsed angle of ");
-        UART_PORT.print(cmd.anglesToReach[i]);
-        UART_PORT.print(" degrees for motor ");
-        UART_PORT.println(i + 1);
+          UART_PORT.print("$S,Success: parsed angle of ");
+          UART_PORT.print(cmd.anglesToReach[i]);
+          UART_PORT.print(" degrees for motor ");
+          UART_PORT.println(i + 1);
 #endif
-      }
-      else if (String(msgElem) == MOTOR_NOT_COMMANDED) {
-        // don't do anything to move motors bool array
+        }
+        else if (String(msgElem) == MOTOR_NOT_COMMANDED) {
+          // don't do anything to move motors bool array
 #ifdef DEBUG_PARSING
-        UART_PORT.print("$S,Success: parsed motor ");
-        UART_PORT.print(i + 1);
-        UART_PORT.println(" to maintain old desired position");
+          UART_PORT.print("$S,Success: parsed motor ");
+          UART_PORT.print(i + 1);
+          UART_PORT.println(" to maintain old desired position");
 #endif
-      }
-      else {
-        isValidCommand = false;
+        }
+        else {
+          isValidMove = false;
 #ifdef DEBUG_PARSING
-        UART_PORT.print("$E,Error: parsed invalid angle of ");
-        UART_PORT.print(msgElem);
-        UART_PORT.print(" degrees for motor ");
-        UART_PORT.println(i + 1);
+          UART_PORT.print("$E,Error: parsed invalid angle of ");
+          UART_PORT.print(msgElem);
+          UART_PORT.print(" degrees for motor ");
+          UART_PORT.println(i + 1);
 #endif
+          break;
+        }
       }
       i++;
     }
-    while (i < NUM_MOTORS) ; // this skips everything after the 6th val but i want it to not skip but i can't get it to work
-    if (isValidCommand && i == NUM_MOTORS) {
+    while (i < NUM_MOTORS); // this skips everything after the 6th val but i want it to not skip but i can't get it to work
+    if (i == NUM_MOTORS) {
       if (isValidBudge) {
         cmd.budgeCommand = true;
       }
-      else {
+      else if (isValidMove) {
         cmd.multiMove = true;
       }
+      else isValidCommand = false;
     }
     else if (i < NUM_MOTORS) {
 #ifdef DEBUG_PARSING

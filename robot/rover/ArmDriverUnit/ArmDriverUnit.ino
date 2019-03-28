@@ -513,21 +513,21 @@ void loop() {
             motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new gear ratio of "); UART_PORT.print(motorCommand.gearRatioVal);
+            UART_PORT.print(" has a new gear ratio of "); UART_PORT.println(motorCommand.gearRatioVal);
 #endif
           }
           else if (motorCommand.openLoopGainCommand) { // set open loop gain for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setOpenLoopGain(motorCommand.openLoopGain);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new open loop gain of "); UART_PORT.print(motorCommand.openLoopGain);
+            UART_PORT.print(" has a new open loop gain of "); UART_PORT.println(motorCommand.openLoopGain);
 #endif
           }
           else if (motorCommand.speedCommand) { // set speed for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new speed of "); UART_PORT.print(motorCommand.motorSpeed);
+            UART_PORT.print(" has a new speed of "); UART_PORT.println(motorCommand.motorSpeed);
 #endif
           }
           else if (motorCommand.loopCommand) { // set loop states for appropriate motor
