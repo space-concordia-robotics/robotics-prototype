@@ -29,7 +29,7 @@
   periodic checks for motors in open loop, to effectuate small corrections to
   position during movements - if the appropriate motor has an encoder on it.
   This code began development sometime in July 2018 and is still being
-  updated as of March 11 2019.
+  updated as of March 27 2019.
 */
 /* still in idea phase */
 #define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
@@ -516,14 +516,14 @@ void loop() {
             UART_PORT.print(" has a new gear ratio of "); UART_PORT.print(motorCommand.gearRatioVal);
 #endif
           }
-          else if (motorCommand.openLoopGainCommand) { // set gear ratio for appropriate motor
+          else if (motorCommand.openLoopGainCommand) { // set open loop gain for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setOpenLoopGain(motorCommand.openLoopGain);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
             UART_PORT.print(" has a new open loop gain of "); UART_PORT.print(motorCommand.openLoopGain);
 #endif
           }
-          else if (motorCommand.speedCommand) { // set gear ratio for appropriate motor
+          else if (motorCommand.speedCommand) { // set speed for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
