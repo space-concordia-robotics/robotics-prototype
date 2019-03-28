@@ -445,6 +445,96 @@ if (mockArmTable) {
             })
         }
 
+        // 'z' --> stop all motors
+        if (!$serialCmdInput.is(":focus") && keyState[90]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'z'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
+        // 'o' --> reset angle values
+        if (!$serialCmdInput.is(":focus") && keyState[79]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'o'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
+        // 'q' --> terminate server listener
+        if (!$serialCmdInput.is(":focus") && keyState[81]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'q'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
+        // 'a' --> debug msg
+        if (!$serialCmdInput.is(":focus") && keyState[65]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'a'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
+        // 'p' --> ping
+        if (!$serialCmdInput.is(":focus") && keyState[80]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'p'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
         // redraw/reposition your object here
         // also redraw/animate any objects not controlled by the user
 
