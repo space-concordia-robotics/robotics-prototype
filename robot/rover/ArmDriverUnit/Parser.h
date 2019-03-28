@@ -29,7 +29,9 @@ struct commandInfo {
   float gearRatioVal = 0.0;
   bool openLoopGainCommand = false; // to change open loop gain
   float openLoopGain = 0.0;
-
+  bool speedCommand = false;
+  float motorSpeed = 0.0;
+  
   bool resetCommand = false; // indicates that something should be reset
   bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
   bool resetJointPosition = false; // for moving a joint to its neutral position
@@ -239,7 +241,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         }
       }
       else if (String(msgElem) == "opengain") { // check for gear ratio change command
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired open loop gain)
         // the following has no bad value error checking!!!!
         if (isValidNumber(String(msgElem), 'f')) {
           cmd.openLoopGain = atof(msgElem);
@@ -247,6 +249,18 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #ifdef DEBUG_PARSING
           UART_PORT.print("$S,Success: parsed desired open loop gain ");
           UART_PORT.println(cmd.openLoopGain);
+#endif
+        }
+      }
+      else if (String(msgElem) == "speed") { // check for gear ratio change command
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired speed)
+        // the following has no bad value error checking!!!!
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.motorSpeed = atof(msgElem);
+          cmd.speedCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired speed ");
+          UART_PORT.println(cmd.motorSpeed);
 #endif
         }
       }
@@ -434,6 +448,13 @@ bool Parser::verifCommand(commandInfo cmd) {
 #ifdef DEBUG_VERIFYING
       UART_PORT.print("$S,Success: verified command to set open loop gain to ");
       UART_PORT.println(cmd.openLoopGain);
+#endif
+      return true;
+    }
+    else if (cmd.speedCommand) {
+#ifdef DEBUG_VERIFYING
+      UART_PORT.print("$S,Success: verified command to set speed to ");
+      UART_PORT.println(cmd.motorSpeed);
 #endif
       return true;
     }

@@ -43,9 +43,6 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   this -> motorType = CONTINUOUS_SERVO;
   hasEncoder = false;
-
-  openLoopSpeed = 0; // no speed by default;
-  openLoopGain = 1.0; // temp open loop control
 }
 
 void ServoMotor::motorTimerInterrupt(void) {

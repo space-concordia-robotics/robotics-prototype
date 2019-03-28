@@ -1,5 +1,11 @@
 /*
   TODO:
+
+open loop speed and closed loop max speed are different????
+-this is because closed loop has a max val whereas open loop has a fixed one, but these could maybe be the same???
+stepper doesn't have speed the way servos and dcs do??????
+-this is because stepper calculates speed using durations, but this means openloopgain and openloopspeed mean nothing for it???
+  
   -suggestion 1 pinmode input, 2 is micros pwm instead of analogwrite (timer is bad?)
   -(always) implement error checking, remove parts later on if it's too slow (tatum doubts)
   -(always) clean up code, comment code

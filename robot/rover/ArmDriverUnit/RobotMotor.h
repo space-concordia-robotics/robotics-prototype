@@ -67,6 +67,7 @@ class RobotMotor {
     int getDirectionLogic(void); // returns the directionModifier;
     void setGearRatio(float ratio);
     void setOpenLoopGain(float loopGain);
+    void setMotorSpeed(float motorSpeed);
     /* movement functions */
     virtual void stopRotation(void) = 0;
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
@@ -113,6 +114,8 @@ RobotMotor::RobotMotor() {
   hasLimitSwitches = false;
   homingType = SINGLE_ENDED_HOMING;
   homingDone = true;
+  openLoopSpeed = 0; // no speed by default;
+  openLoopGain = 1.0; // temp open loop control
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -201,6 +204,11 @@ void RobotMotor::setGearRatio(float ratio){
 
 void RobotMotor::setOpenLoopGain(float loopGain){
   openLoopGain = loopGain;
+}
+
+void RobotMotor::setMotorSpeed(float motorSpeed){
+  openLoopSpeed = motorSpeed;
+  pidController.setOutputLimits(-motorSpeed, motorSpeed);
 }
 
 void RobotMotor::setSoftwareAngle(float angle) {

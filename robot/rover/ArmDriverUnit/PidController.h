@@ -8,6 +8,7 @@ class PidController {
     PidController();
     float updatePID(volatile float currentAngle, float desiredAngle);
     void setJointAngleTolerance(float tolerance);
+    void setOutputLimits(float minVal, float maxVal);
     void setOutputLimits(float minVal, float maxVal, float zeroVal);
     void setGainConstants(float kp, float ki, float kd);
     float getMaxOutputValue(void);
@@ -94,6 +95,10 @@ void PidController::setJointAngleTolerance(float tolerance) {
   jointAngleTolerance = tolerance;
 }
 
+void PidController::setOutputLimits(float minVal, float maxVal) {
+  maxOutputValue = maxVal;
+  minOutputValue = minVal;
+}
 void PidController::setOutputLimits(float minVal, float maxVal, float zeroVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;

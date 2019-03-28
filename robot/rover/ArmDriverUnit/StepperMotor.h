@@ -56,7 +56,6 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
   this -> motorType = STEPPER_MOTOR;
   hasEncoder = false; // by default the motor has no encoder
   stepResolution = fullStepResolution * steppingMode;
-  openLoopSpeed = 0; // no speed by default;
 }
 
 void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
