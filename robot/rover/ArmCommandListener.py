@@ -12,6 +12,18 @@ import time
 import re
 import serial
 import serial.tools.list_ports
+from netifaces import AF_INET, AF_INET6, AF_LINK, AF_PACKET, AF_BRIDGE
+import netifaces as ni
+
+# feature toggles
+usb = False
+uart = False
+
+# if all the following are False then exit right away
+local = False
+competition = False
+dynamic = True
+
 # note: since this program is in /usr/bin/ on the OBC
 # it was necessary to also add the connection.py
 # class in /usr/bin and change the following line to
@@ -20,15 +32,14 @@ import serial.tools.list_ports
 from robot.comms.connection import Connection
 
 def print_commands_list():
-    print("""Ready for incoming drive cmds!\n
-    'q': quit\n
-    'p': ping\n
-    'z': emergency stop all motors\n
-    'o': reset memorized angle values\n
-    'l': view key commands\n
-    'a': post buffered messages from Teensy\n
-    Keys 'w' to 'u': move motors 1-6 forwards\n
-    Keys 's' to 'j': move motors 1-6 backwards\n\n""")
+    print("""'q': quit\n
+'p': ping\n
+'z': emergency stop all motors\n
+'o': reset memorized angle values\n
+'l': view key commands\n
+'a': post buffered messages from Teensy\n
+Keys 'w' to 'u': move motors 1-6 forwards\n
+Keys 's' to 'j': move motors 1-6 backwards\n\n""")
 
 # returns current time in milliseconds
 current_millis = lambda: int(round(time.time() * 1000))
@@ -43,19 +54,41 @@ elif len(sys.argv) >= 3:
     )
     print("example usage: python ServerListener.py <port>")
 
-# set up connection to arduino
-ports = list(serial.tools.list_ports.comports())
-first_port = ports[0].name
-print("Connecting to port: " + first_port)
-ser = serial.Serial('/dev/' + first_port, 9600)
-#ROVER_IP = "172.16.1.30" # competition
-ROVER_IP = "127.0.0.1" # local testing
+
+if not local and not competition and not dynamic:
+    print("""local, competition and dynamic flags set to false, exiting""")
+    sys.exit(0)
+
+if usb:
+    # set up connection to arduino
+    ports = list(serial.tools.list_ports.comports())
+    first_port = ports[0].name
+    print("Connecting to port: " + first_port)
+    ser = serial.Serial('/dev/' + first_port, 9600)
+else:
+    print("USB flag set to false, exiting")
+    sys.exit(0)
+
+
+# for local testing
+if local:
+    ROVER_IP = "127.0.0.1" # local testing
+# for competition
+elif competition:
+    ROVER_IP = "172.16.1.30" # competition ip
+# physicial ip, does not need connection to internet to work
+elif dynamic:
+    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
+
+print("ROVER_IP: " + ROVER_IP)
 
 c = Connection("c1", ROVER_IP, SERVER_PORT)
 
 print("Rover server listening on port {} \n".format(SERVER_PORT))
 
 print("Ready for incoming drive cmds!\n")
+
+print_commands_list()
 
 RESPONSE_TIMEOUT = 75
 PING_TIMEOUT = 1000
