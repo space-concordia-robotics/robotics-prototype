@@ -12,6 +12,11 @@ import time
 import re
 import serial
 import serial.tools.list_ports
+# note: since this program is in /usr/bin/ on the OBC
+# it was necessary to also add the connection.py
+# class in /usr/bin and change the following line to
+# from connection import Connection
+# for the startup service to work properly
 from robot.comms.connection import Connection
 
 def printCommandsList():

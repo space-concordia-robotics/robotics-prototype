@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch /dev/ttyACM0 and activate arm-command-listener.service
+
+[Path]
+DirectoryNotEmpty=/dev/ttyACM0
+
+[Install]
+WantedBy=multi-user.target
+
