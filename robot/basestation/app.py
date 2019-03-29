@@ -240,11 +240,12 @@ def click_btn_motor1_ccw():
         # decode URI
         cmd = unquote(cmd)
 
-    rover_ip = "127.0.0.1"
+    #rover_ip = "127.0.0.1" # for local testing
+    rover_ip = "172.16.1.30" # for local testing
     base_ip = rover_ip
 
     print("cmd: " + cmd)
-    c = Connection("c1", "127.0.0.1", 5005)
+    c = Connection("c1", rover_ip, 5005)
     c.send(cmd)
 
 
