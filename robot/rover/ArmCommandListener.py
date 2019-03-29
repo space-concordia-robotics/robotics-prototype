@@ -19,21 +19,21 @@ import serial.tools.list_ports
 # for the startup service to work properly
 from robot.comms.connection import Connection
 
-def printCommandsList():
-    print("Ready for incoming drive cmds!\n")
-    print("'q': quit\n")
-    print("'p': ping\n")
-    print("'z': emergency stop all motors\n")
-    print("'o': reset memorized angle values\n")
-    print("'l': view key commands\n")
-    print("'a': post buffered messages from Teensy\n")
-    print("Keys 'w' to 'u': move motors 1-6 forwards\n")
-    print("Keys 's' to 'j': move motors 1-6 backwards\n")
-
-SERVER_PORT = 5005
+def print_commands_list():
+    print("""Ready for incoming drive cmds!\n
+    'q': quit\n
+    'p': ping\n
+    'z': emergency stop all motors\n
+    'o': reset memorized angle values\n
+    'l': view key commands\n
+    'a': post buffered messages from Teensy\n
+    Keys 'w' to 'u': move motors 1-6 forwards\n
+    Keys 's' to 'j': move motors 1-6 backwards\n\n""")
 
 # returns current time in milliseconds
-currentMillis = lambda: int(round(time.time() * 1000))
+current_millis = lambda: int(round(time.time() * 1000))
+# pre-determined port for the ArmCommandListener
+SERVER_PORT = 5005
 
 if len(sys.argv) == 2:
     SERVER_PORT = int(sys.argv[1])
@@ -45,13 +45,13 @@ elif len(sys.argv) >= 3:
 
 # set up connection to arduino
 ports = list(serial.tools.list_ports.comports())
-firstPortName = ports[0].name
-print("Connecting to port: " + firstPortName)
-ser = serial.Serial('/dev/' + firstPortName, 9600)
-#rover_ip = "172.16.1.30"
-rover_ip = "127.0.0.1"
+first_port = ports[0].name
+print("Connecting to port: " + first_port)
+ser = serial.Serial('/dev/' + first_port, 9600)
+#ROVER_IP = "172.16.1.30" # competition
+ROVER_IP = "127.0.0.1" # local testing
 
-c = Connection("c1", rover_ip, SERVER_PORT)
+c = Connection("c1", ROVER_IP, SERVER_PORT)
 
 print("Rover server listening on port {} \n".format(SERVER_PORT))
 
@@ -59,7 +59,7 @@ print("Ready for incoming drive cmds!\n")
 
 RESPONSE_TIMEOUT = 75
 PING_TIMEOUT = 1000
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o', 'l']
+key_list = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o', 'l']
 
 while True:
     while ser.in_waiting:
@@ -69,9 +69,8 @@ while True:
         command = c.receive()
         print("command: " + command + "\n")
 
-        if command in keyList:
+        if command in key_list:
             if command == 'w':
-                #returnMsg = "cmd: w --> m1: Forward"
                 print("cmd: w --> m1: Forward\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
                 command = "budge fwd ~ ~ ~ ~ ~\n"
@@ -145,7 +144,7 @@ while True:
                 print("\nTerminating connection.")
                 break
             elif command == 'l':
-                printCommandsList()
+                print_commands_list()
             elif command == 'a':
                 while ser.in_waiting:
                     print(ser.readline().decode())
@@ -153,9 +152,9 @@ while True:
                 print("cmd: p --> ping")
                 command = "ping\n"
                 ser.write(str.encode(command))
-                pingTime = currentMillis()
+                ping_time = current_millis()
 
-                while currentMillis() - pingTime < PING_TIMEOUT:
+                while current_millis() - ping_time < PING_TIMEOUT:
                     response = ser.readline().decode()
                     #mySocket.sendto(str.encode(response), (clientIP, CLIENT_PORT))
                     print(response)
