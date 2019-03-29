@@ -535,6 +535,24 @@ if (mockArmTable) {
             })
         }
 
+        // 'l' --> list commands
+        if (!$serialCmdInput.is(":focus") && keyState[76]) {
+            //toggleToManual();
+            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+            $.ajax({
+                url: '/manual_control',
+                type: 'POST',
+                data: {
+                    cmd: 'l'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+        }
+
         // redraw/reposition your object here
         // also redraw/animate any objects not controlled by the user
 

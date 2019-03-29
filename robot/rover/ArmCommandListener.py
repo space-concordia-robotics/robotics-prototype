@@ -14,6 +14,17 @@ import serial
 import serial.tools.list_ports
 from robot.comms.connection import Connection
 
+def printCommandsList():
+    print("Ready for incoming drive cmds!\n")
+    print("'q': quit\n")
+    print("'p': ping\n")
+    print("'z': emergency stop all motors\n")
+    print("'o': reset memorized angle values\n")
+    print("'l': view key commands\n")
+    print("'a': post buffered messages from Teensy\n")
+    print("Keys 'w' to 'u': move motors 1-6 forwards\n")
+    print("Keys 's' to 'j': move motors 1-6 backwards\n")
+
 SERVER_PORT = 5005
 
 # returns current time in milliseconds
@@ -43,7 +54,7 @@ print("Ready for incoming drive cmds!\n")
 
 RESPONSE_TIMEOUT = 75
 PING_TIMEOUT = 1000
-keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o']
+keyList = ['w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u', 'j', 'q', 'a', 'p', 'z', 'o', 'l']
 
 while True:
     while ser.in_waiting:
@@ -128,6 +139,8 @@ while True:
             elif command == 'q':
                 print("\nTerminating connection.")
                 break
+            elif command == 'l':
+                printCommandsList()
             elif command == 'a':
                 while ser.in_waiting:
                     print(ser.readline().decode())
