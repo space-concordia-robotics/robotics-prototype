@@ -8,44 +8,50 @@
     <title>SC Robotics GUI</title>
     <link rel="shortcut icon" href="static/img/sclogo_header.ico">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
+    <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
     <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
-    <link href="../static/css/app.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link href="../static/css/arm.css" rel="stylesheet">
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/helpers.js"></script>
     <script src="../static/js/app.js"></script>
+    <script src="../static/js/arm.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" async></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" async></script>
+    <script src="../static/js/popper-1.14.3.min.js"></script>
+    <script src="../static/js/bootstrap-4.1.2.min.js"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-        <a class="navbar-brand" href="#">
-            <img src="static/img/sclogo_header.png">
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
-            aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="col-md-1">
+            <a class="navbar-brand" href="#">
+                <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
+            </a>
+        </div>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">Settings</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="#">Key board key mapping</a>
-                    <a class="dropdown-item" href="#">Change camera stream FPS</a>
-                    <a class="dropdown-item" href="#">...</a>
-                </div>
-                </li>
-            </ul>
+        <div class="dropdown col-md-2">
+          <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Select Device Channel
+          </button>
+          <div class="dropdown-menu">
+            <a id="mux-0" class="dropdown-item" href="javascript:void(0);">0: Rover</a>
+            <a id="mux-1" class="dropdown-item" href="javascript:void(0);">1: Arm</a>
+            <a id="mux-2" class="dropdown-item" href="javascript:void(0);">2: Science</a>
+            <a id="mux-3" class="dropdown-item" href="javascript:void(0);">3: Lidar</a>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+            <input type="text" id="serial-cmd-input">
+        </div>
+        <div class="col-md-1">
+            <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
         </div>
     </nav>
+
     <br>
     <br>
     <div style="margin-bottom:10px"></div>
@@ -70,14 +76,15 @@
                     <h5 class="container-header">Log Console</h5>
                     <div class="form-group">
                         <textarea id="write-to-log" rows="8" readonly></textarea>
+                        <p hidden id="last-odroid-rx"></p>
                         <br>
                         <!--log console buttons-->
                         <div class="btn-group" role="group" id="logs-btn">
-                            <a href=# id=click_btn>
+                            <a href=javascript:void(0) id="click_btn">
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="clear-log">
-                                <button type="button" class="btn btn-secondary" onclick="clearText()">Clear Logs</button>
+                                <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="test-log">
                                 <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>
@@ -105,7 +112,7 @@
                             </span>
                             <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
                                 <label>
-                                    <input type="checkbox" onchange="manualControl()">
+                                    <input id="manual-control-btn" type="checkbox" onchange="manualControl()">
                                     <span> </span>
                                 </label>
                             </div>
@@ -313,50 +320,50 @@
                                 <th scope="row">Stepper
                                     <br>Motor 1
                                 </th>
-                                <!-- add backend code to update status/motor position/motor current-->
+                                <!-- @TODO: add backend code to update status/motor position/motor current-->
                                 <td>ALIVE</td>
-                                <td>23</td>
-                                <td>2.50</td>
+                                <td id="m1-angle">0</td>
+                                <td id="m1-current">0.2</td>
                             </tr>
                             <tr>
                                 <th scope="row">DC
                                     <br>Motor 2
                                 </th>
                                 <td>ALIVE</td>
-                                <td>12</td>
-                                <td>11.00</td>
+                                <td id="m2-angle">0</td>
+                                <td id="m2-current">0.2</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
                                     <br>Motor 3
                                 </th>
-                                <td>DEAD</td>
-                                <td>84</td>
-                                <td>7.45</td>
+                                <td>ALIVE</td>
+                                <td id="m3-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th scope="row">Stepper
                                     <br>Motor 4
                                 </th>
-                                <td>DEAD</td>
-                                <td>88</td>
-                                <td></td>
+                                <td>ALIVE</td>
+                                <td id="m4-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th scope="row">Arm Servo
                                     <br>Motor 1
                                 </th>
                                 <td>ALIVE</td>
-                                <td>20</td>
-                                <td>5.60</td>
+                                <td id="m5-angle">0</td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <th>Arm Servo
                                     <br>Motor 2
                                 </th>
                                 <td>ALIVE</td>
-                                <td>67</td>
-                                <td>12.34</td>
+                                <td id="m6-angle">0</td>
+                                <td>-</td>
                             </tr>
                         </tbody>
                     </table>

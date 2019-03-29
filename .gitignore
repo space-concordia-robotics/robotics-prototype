@@ -8,10 +8,7 @@
 **/*sh.exe.stackdump
 **/venv
 **/env
-<<<<<<< HEAD
 **/.envrc
-**/node_modules
-=======
 **/stress-test-results_*
 **/node_modules
 **/configEthernet.log
@@ -20,4 +17,4 @@
 **/status_done
 **/rospackages/build
 **/rospackages/devel
->>>>>>> master
+**/odroid_rx.txt
