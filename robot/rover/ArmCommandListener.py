@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-# make sure to run this script before ClientSender.py !
-# This will listen on any incoming messages on the same network
-# and display them as they get received,
-# as well as send corresponding commands over serial to a usb connected arduino,
-# along with acknowledgment message per drive command received
-
 import sys
 import traceback
 import time
 import re
 import serial
 import serial.tools.list_ports
-from netifaces import AF_INET, AF_INET6, AF_LINK, AF_PACKET, AF_BRIDGE
-import netifaces as ni
+#from netifaces import AF_INET, AF_INET6, AF_LINK, AF_PACKET, AF_BRIDGE
+#import netifaces as ni
 
 # feature toggles
 usb = False
@@ -21,8 +15,8 @@ uart = False
 
 # if all the following are False then exit right away
 local = False
-competition = False
-dynamic = True
+competition = True
+#dynamic = True
 
 # note: since this program is in /usr/bin/ on the OBC
 # it was necessary to also add the connection.py
