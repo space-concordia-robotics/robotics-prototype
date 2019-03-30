@@ -289,13 +289,11 @@ void RobotMotor::goToSafeAngle(void) {
 void RobotMotor::homeMotor(char homingDir) {
   homingPass++;
   if (homingDir == 'i'){
-    // do i use gotoangle? or do i just keep turning forever?
-    // somewhere I need to check for limit switch press to stop
-
+    UART_PORT.println("homeMotor inwards");
     // set homing direction inwards
   }
   else if (homingDir == 'o'){
-    
+    UART_PORT.println("homeMotor outwards");
   }
   homingDone = false;
   // at the end of the routine it goes to 0 degrees? or the home position?

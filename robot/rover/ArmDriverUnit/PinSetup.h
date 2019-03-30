@@ -62,7 +62,7 @@
 #define M3_LIMIT_SW_EXTEND        23
 #define M3_ENCODER_RESOLUTION 2000
 #define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
-#define M3_GEAR_RATIO      36.0 // belt reduction chained to worm gear drive
+#define M3_GEAR_RATIO      (40.0/14.0)*18.0 // belt reduction chained to worm gear drive
 #define M3_MIN_HARD_ANGLE   -145.0
 #define M3_MAX_HARD_ANGLE   65.0
 #define M3_MIN_SOFT_ANGLE   -135.0
@@ -85,7 +85,7 @@
 #define M4_LIMIT_SW_EXTEND 24
 #define M4_ENCODER_RESOLUTION 2000
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
-#define M4_GEAR_RATIO      35.55555555 // belt reduction chained to worm gear drive
+#define M4_GEAR_RATIO      (30.0/18.0)*20.0 // belt reduction chained to worm gear drive
 #define M4_MIN_HARD_ANGLE   -90.0
 #define M4_MAX_HARD_ANGLE   75.0
 #define M4_MIN_SOFT_ANGLE   -80.0
@@ -107,7 +107,7 @@
 #define M1_LIMIT_SW_CW        9
 #define M1_LIMIT_SW_CCW       10
 #define M1_ENCODER_RESOLUTION 7*2 // temporary, unknown
-#define M1_GEAR_RATIO      40.0 // temporary, unknown
+#define M1_GEAR_RATIO      40.0
 #define M1_MIN_HARD_ANGLE   -350.0
 #define M1_MAX_HARD_ANGLE   350.0
 #define M1_MIN_SOFT_ANGLE   -325.0

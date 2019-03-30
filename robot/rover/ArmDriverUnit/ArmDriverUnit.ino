@@ -46,10 +46,11 @@
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
 //#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
-//#define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
-//#define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
-//#define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
-//#define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
+#define DEBUG_HOMING 16 // debug messages during homing sequence
+//#define DEBUG_DC_TIMER 17 // debug messages during dc timer interrupts
+//#define DEBUG_SERVO_TIMER 18 // debug messages during servo timer interrupts
+//#define DEBUG_STEPPER_3_TIMER 19 // debug messages during stepper 3 timer interrupts
+//#define DEBUG_STEPPER_4_TIMER 20 // debug messages during stepper 3 timer interrupts
 #endif
 
 /*
@@ -206,6 +207,11 @@ bool motorsToHome[] = {false, false, false, false, false, false};
 
 /* function declarations */
 void printMotorAngles(void); // sends all motor angles over serial
+void initComms(void); // start up serial or whatever comms
+void initEncoders(void); // attach encoder interrupts
+void initLimitSwitches(void); // setup angle limits and attach limit switch interrupts
+void initSpeedParams(void); // setup open and closed loop speed
+void initMotorTimers(void); // start timers
 
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
@@ -240,65 +246,8 @@ void m4StepperInterrupt(void);
 void setup() {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   // set up comms
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.begin(BAUD_RATE);
-  UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.initNode();
-  nh.subscribe(cmdSubscriber);
-  nh.advertise(pub_m1);
-  nh.advertise(pub_m2);
-  nh.advertise(pub_m3);
-  nh.advertise(pub_m4);
-  nh.advertise(pub_m5);
-  nh.advertise(pub_m6);
-
-  m1_angle_msg.header.frame_id = m1FrameId;
-  m2_angle_msg.header.frame_id = m2FrameId;
-  m3_angle_msg.header.frame_id = m3FrameId;
-  m4_angle_msg.header.frame_id = m4FrameId;
-  m5_angle_msg.header.frame_id = m5FrameId;
-  m6_angle_msg.header.frame_id = m6FrameId;
-#endif
-
-  // each motor with an encoder needs to attach the encoder and 2 interrupts
-#ifdef M1_ENCODER_PORT
-  motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
-  attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
-  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
-  // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
-  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M2_ENCODER_PORT
-  motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
-  attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
-  attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
-  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M3_ENCODER_PORT
-  motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
-  attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
-  attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
-  motor3.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M4_ENCODER_PORT
-  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
-  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
-  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
-  motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M5_ENCODER_PORT
-  motor5.attachEncoder(M5_ENCODER_A, M5_ENCODER_B, M5_ENCODER_PORT, M5_ENCODER_SHIFT, M5_ENCODER_RESOLUTION);
-  attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
-  attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
-  motor5.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M6_ENCODER_PORT
-  motor6.attachEncoder(M6_ENCODER_A, M6_ENCODER_B, M6_ENCODER_PORT, M6_ENCODER_SHIFT, M6_ENCODER_RESOLUTION);
-  attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
-  attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
-  motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
+  initComms();
+  initEncoders();
 
   // prepare and attach limit switch ISRs
   // the following works if the switches are debounced by the hardware
@@ -311,82 +260,13 @@ void setup() {
   */
   // the following is used because the software debounces the limit switches
 #define LIM_SWITCH_DIR CHANGE
-
-  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
-  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
-  motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
-  motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
-  motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
-  //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
-  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor6.limSwitchOpen, m6OpenISR, LIM_SWITCH_DIR);
-
-  // set motor shaft angle tolerances
-  // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
-  motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
-  motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
-  motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
-  motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
-  motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
-  motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
-
-  // set motor joint angle limits
-  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
-  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
-  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
-  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
-  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
-  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
-
-  // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
-  // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.pidController.setOutputLimits(-50, 50, 5.0);
-  // motor2.pidController.setOutputLimits(-100, 100, 5.0);
-  motor2.pidController.setOutputLimits(-50, 50, 5.0);
-  motor3.pidController.setOutputLimits(-50, 50, 5.0);
-  motor4.pidController.setOutputLimits(-50, 50, 5.0);
-  motor5.pidController.setOutputLimits(-50, 50, 5.0);
-  motor6.pidController.setOutputLimits(-50, 50, 5.0);
-
-  // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
-  // operate at 50% max speed, and the gains should vary based on which motor it is
-  //motor1.isOpenLoop = true;
-  //motor1.hasRamping = false;
-  motor1.openLoopSpeed = 50; // 50% speed
-  motor2.openLoopSpeed = 50; // 50% speed
-  motor3.openLoopSpeed = 50; // 50% speed
-  motor4.openLoopSpeed = 50; // 50% speed
-  motor5.openLoopSpeed = 50; // 50% speed
-  motor6.openLoopSpeed = 50; // 50% speed
-  motor1.openLoopGain = 0.75; // needs to be tested
-  motor2.openLoopGain = 0.0025; // needs to be tested
-  // open loop gain is only for time-based open loop control
-  motor3.switchDirectionLogic(); // motor is wired backwards
-  motor5.openLoopGain = 0.32; // for 5V
+  initLimitSwitches(); // setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
+  initSpeedParams();
+  motor3.switchDirectionLogic(); // motor is wired backwards?
   motor5.switchDirectionLogic();
-  motor6.openLoopGain = 0.35; // for 5V
   motor6.switchDirectionLogic(); // positive angles now mean opening
-
-  // activate the timer interrupts
-  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-  m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-  dcTimer.priority(MOTOR_NVIC_PRIORITY);
-  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-  servoTimer.priority(MOTOR_NVIC_PRIORITY);
-
+  initMotorTimers(); // activate the timer interrupts
+  
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -402,8 +282,10 @@ void loop() {
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
       if (isHoming) {
         motorArray[homingMotor]->homingDone = true;
+#ifdef DEBUG_HOMING
         UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
         UART_PORT.println(" hit limit switch");
+#endif
       }
       else {
         motorArray[i]->goToSafeAngle();
@@ -414,27 +296,37 @@ void loop() {
   }
 
   /* Homing functionality ignores most message types */
+  // do i need to modify my code so that hwen it receives a stop command it resets the homing variables?
+  // this includes reenabling all the motor timers!!!
   if (isHoming) { // not done homing the motors
     if (homingMotor < NUM_MOTORS) {
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
         // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+#ifdef DEBUG_HOMING
         UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
         UART_PORT.println(" inwards");
+#endif
         motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
         motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+#ifdef DEBUG_HOMING
         UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
         UART_PORT.println(" homing 1 done");
+#endif
         // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
         if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
+#ifdef DEBUG_HOMING
           UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
           UART_PORT.println(" outwards");
+#endif
           motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
         }
         else { // done homing this motor
+#ifdef DEBUG_HOMING
           UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
           UART_PORT.println(" homing complete. now to move to angle");
+#endif
           // what angle does it go to? configure somehow?
           // should it move to the home position? or should it depend on another input? separate command to move to home?
           // before the code moves on to the next motor it should move the motor into some nice range over here
@@ -447,18 +339,10 @@ void loop() {
       }
     }
     else { // done homing all the motors
+#ifdef DEBUG_HOMING
       UART_PORT.println("all motors done homing, reinitializing motor timers");
+#endif
       isHoming = false;
-      // todo: replace STEPPER_PID_PERIOD with the period previously defined in the interrupt
-      m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-      m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-      // todo: replace STEPPER_PID_PERIOD with the period previously defined in the interrupt
-      m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-      m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-      dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-      dcTimer.priority(MOTOR_NVIC_PRIORITY);
-      servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-      servoTimer.priority(MOTOR_NVIC_PRIORITY);
     }
   }
 
@@ -505,12 +389,6 @@ void loop() {
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors) { // initialize homing procedure
-          UART_PORT.println("homing procedure initialized. deactivating motor timer interrupts and homing");
-          // stop all the timers because homing works without motor timer interrupts
-          dcTimer.end();
-          servoTimer.end();
-          m3StepperTimer.end();
-          m4StepperTimer.end();
           for (int i = 0; i < NUM_MOTORS; i++) {
             if (motorArray[i]->hasLimitSwitches) {
               motorsToHome[i] = true;
@@ -730,6 +608,145 @@ void printMotorAngles(void) {
 #endif
 }
 
+void initComms(void) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+  UART_PORT.begin(BAUD_RATE);
+  UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+  nh.initNode();
+  nh.subscribe(cmdSubscriber);
+  nh.advertise(pub_m1);
+  nh.advertise(pub_m2);
+  nh.advertise(pub_m3);
+  nh.advertise(pub_m4);
+  nh.advertise(pub_m5);
+  nh.advertise(pub_m6);
+
+  m1_angle_msg.header.frame_id = m1FrameId;
+  m2_angle_msg.header.frame_id = m2FrameId;
+  m3_angle_msg.header.frame_id = m3FrameId;
+  m4_angle_msg.header.frame_id = m4FrameId;
+  m5_angle_msg.header.frame_id = m5FrameId;
+  m6_angle_msg.header.frame_id = m6FrameId;
+#endif
+}
+
+void initEncoders(void) {
+  // each motor with an encoder needs to attach the encoder and 2 interrupts
+#ifdef M1_ENCODER_PORT
+  motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
+  attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
+  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+  // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
+  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+#ifdef M2_ENCODER_PORT
+  motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
+  attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
+  attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
+  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+#ifdef M3_ENCODER_PORT
+  motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
+  attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
+  attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
+  motor3.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+#ifdef M4_ENCODER_PORT
+  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
+  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
+  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+  motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+#ifdef M5_ENCODER_PORT
+  motor5.attachEncoder(M5_ENCODER_A, M5_ENCODER_B, M5_ENCODER_PORT, M5_ENCODER_SHIFT, M5_ENCODER_RESOLUTION);
+  attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
+  attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
+  motor5.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+#ifdef M6_ENCODER_PORT
+  motor6.attachEncoder(M6_ENCODER_A, M6_ENCODER_B, M6_ENCODER_PORT, M6_ENCODER_SHIFT, M6_ENCODER_RESOLUTION);
+  attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
+  attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
+  motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
+#endif
+}
+
+void initLimitSwitches(void) {
+  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
+  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
+  motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
+  motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+  //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
+  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
+  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor6.limSwitchOpen, m6OpenISR, LIM_SWITCH_DIR);
+
+  // set motor joint angle limits
+  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
+  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
+  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
+  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
+  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
+  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
+
+  // set motor shaft angle tolerances
+  // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
+  motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+  motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
+  motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
+  motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
+  motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+  motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
+
+}
+
+void initSpeedParams(void) {
+  // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
+  // Abtin thinks 50% should be a hard limit that can't be modified this easily
+  motor1.pidController.setOutputLimits(-50, 50, 5.0);
+  motor2.pidController.setOutputLimits(-50, 50, 5.0);
+  motor3.pidController.setOutputLimits(-50, 50, 5.0);
+  motor4.pidController.setOutputLimits(-50, 50, 5.0);
+  motor5.pidController.setOutputLimits(-50, 50, 5.0);
+  motor6.pidController.setOutputLimits(-50, 50, 5.0);
+
+  // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
+  // operate at 50% max speed, and the gains should vary based on which motor it is
+  motor1.openLoopSpeed = 50; // 50% speed
+  motor2.openLoopSpeed = 50; // 50% speed
+  motor3.openLoopSpeed = 50; // 50% speed
+  motor4.openLoopSpeed = 50; // 50% speed
+  motor5.openLoopSpeed = 50; // 50% speed
+  motor6.openLoopSpeed = 50; // 50% speed
+  // open loop gain is only for time-based open loop control
+  motor1.openLoopGain = 0.75; // needs to be tested
+  motor2.openLoopGain = 0.0025; // needs to be tested
+  motor5.openLoopGain = 0.32; // for 5V
+  motor6.openLoopGain = 0.35; // for 5V
+}
+
+void initMotorTimers(void) {
+  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+  m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
+  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
+  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+  dcTimer.priority(MOTOR_NVIC_PRIORITY);
+  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+  servoTimer.priority(MOTOR_NVIC_PRIORITY);
+}
+
 void m3StepperInterrupt(void) {
   motor3.motorTimerInterrupt(m3StepperTimer);
 }
@@ -744,8 +761,6 @@ void servoInterrupt(void) {
   motor5.motorTimerInterrupt();
   motor6.motorTimerInterrupt();
 }
-
-/* encoder ISRs */
 
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
@@ -831,7 +846,7 @@ void m6_encoder_interrupt(void) {
 #endif
 }
 #endif
-/* limit switch ISRs */
+
 void m1CwISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
   if (!(motor1.triggered) && motor1.triggerState == 0) {
