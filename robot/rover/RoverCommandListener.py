@@ -3,7 +3,6 @@
 import sys
 import traceback
 import time
-import re
 import serial
 import serial.tools.list_ports
 
@@ -72,8 +71,8 @@ if local:
 elif competition:
     ROVER_IP = "172.16.1.30" # competition ip
 # physicial ip, does not need connection to internet to work
-elif dynamic:
-    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
+#elif dynamic:
+#    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
 
 print("ROVER_IP: " + ROVER_IP)
 
@@ -85,14 +84,14 @@ print("Ready for incoming drive cmds!\n")
 
 print_commands_list()
 
-key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k']
+key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'q']
 REST = 45.5
-throttle_speed = 5
-steering_speed = 5
+throttle_speed = 0
+steering_speed = 0
 
 while True:
-    while ser.in_waiting:
-        print(ser.readline().decode())
+    #while ser.in_waiting:
+    #    print(ser.readline().decode())
 
     try:
         command = c.receive()
@@ -125,6 +124,7 @@ while True:
 
                 if throttle_speed < 45.5:
                     throttle_speed += 0.5
+                    print("throttle speed: " + str(throttle_speed))
                 else:
                     print("throttle speed upper limit reached")
 
@@ -133,24 +133,27 @@ while True:
 
                 if throttle_speed > 0:
                     throttle_speed -= 0.5
+                    print("throttle speed: " + str(throttle_speed))
                 else:
                     print("throttle speed lower limit reached")
 
             elif command == 'o':
-                print("cmd: o --> Increment throttle speed")
+                print("cmd: o --> Increment steering speed")
 
                 if steering_speed < 45.5:
                     steering_speed += 0.5
+                    print("steering speed: " + str(steering_speed))
                 else:
-                    print("throttle speed upper limit reached")
+                    print("steering speed upper limit reached")
 
             elif command == 'k':
-                print("cmd: k --> Decrement throttle speed")
+                print("cmd: k --> Decrement steering speed")
 
                 if steering_speed > 0:
                     steering_speed -= 0.5
+                    print("steering speed: " + str(steering_speed))
                 else:
-                    print("throttle speed lower limit reached")
+                    print("steering speed lower limit reached")
 
 
             elif command == 'q':
@@ -166,4 +169,3 @@ while True:
         traceback.print_exc(file=sys.stdout)
         print("-"*60)
         break
-

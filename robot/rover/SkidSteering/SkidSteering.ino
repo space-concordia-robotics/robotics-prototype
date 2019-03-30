@@ -367,11 +367,9 @@ void loop() {
         // this represents the speed for throttle;steering
         // as well as direction by the positive/negative sign
         String cmd = "";
-        //Serial.println("ayyyyyyyyLmao");
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
         if (UART_PORT.available()) {
             // parse command
-            Serial.println("yoooooooooo");
             cmd = UART_PORT.readString();
             throttle = getValue(cmd, ':', 0).toInt();
             steering = getValue(cmd, ':', 1).toInt();
@@ -425,16 +423,16 @@ void loop() {
         RB.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
         UART_PORT.print("rightMotorDirection: ");
         UART_PORT.println(abs(rightMotorDirection));
-        UART_PORT.print("desiredVelocityRight");
-        UART_PORT.print(abs(desiredVelocityRight));
+        UART_PORT.print("desiredVelocityRight: ");
+        UART_PORT.println(abs(desiredVelocityRight));
         
         LF.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
         LM.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
         LB.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
         UART_PORT.print("leftMotorDirection: ");
         UART_PORT.println(abs(leftMotorDirection));
-        UART_PORT.print("desiredVelocityLeft");
-        UART_PORT.print(abs(desiredVelocityLeft));
+        UART_PORT.print("desiredVelocityLeft: ");
+        UART_PORT.println(abs(desiredVelocityLeft));
         
         
         RF.calcCurrentVelocity();
