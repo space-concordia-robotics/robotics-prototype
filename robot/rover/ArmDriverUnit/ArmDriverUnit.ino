@@ -402,6 +402,8 @@ void loop() {
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
       if (isHoming) {
         motorArray[homingMotor]->homingDone = true;
+        UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+        UART_PORT.println(" hit limit switch");
       }
       else {
         motorArray[i]->goToSafeAngle();
@@ -416,20 +418,28 @@ void loop() {
     if (homingMotor < NUM_MOTORS) {
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
         // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+        UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+        UART_PORT.println(" inwards");
         motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
         motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-        if ( motorArray[homingMotor]->movementDone ) { // wait til done moving to safe spot, set by limit switch stuff above
-          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
-            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
-          }
-          else { // done homing this motor
-            // before the code moves on to the next motor it should move the motor into some nice range over here
-            motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
-            homingMotor++; // move on to the next motor
-          }
+        UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+        UART_PORT.println(" homing 1 done");
+        // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+        if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
+          UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+          UART_PORT.println(" outwards");
+          motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+        }
+        else { // done homing this motor
+          UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+          UART_PORT.println(" homing complete. now to move to angle");
+          // what angle does it go to? configure somehow?
+          // should it move to the home position? or should it depend on another input? separate command to move to home?
+          // before the code moves on to the next motor it should move the motor into some nice range over here
+          motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
+          homingMotor++; // move on to the next motor
         }
       }
       else { // not done homing the motor, will not do anything special
@@ -437,6 +447,7 @@ void loop() {
       }
     }
     else { // done homing all the motors
+      UART_PORT.println("all motors done homing, reinitializing motor timers");
       isHoming = false;
       // todo: replace STEPPER_PID_PERIOD with the period previously defined in the interrupt
       m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
@@ -494,6 +505,7 @@ void loop() {
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors) { // initialize homing procedure
+          UART_PORT.println("homing procedure initialized. deactivating motor timer interrupts and homing");
           // stop all the timers because homing works without motor timer interrupts
           dcTimer.end();
           servoTimer.end();
