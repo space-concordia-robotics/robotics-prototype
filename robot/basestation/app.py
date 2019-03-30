@@ -229,7 +229,7 @@ def click_btn_arm_forward():
 
 # Manual controls
 @app.route("/manual_control", methods=["POST"])
-def click_btn_motor1_ccw():
+def manual_control():
     print("manual_control")
 
     cmd = str(request.get_data('cmd'), "utf-8")
@@ -241,13 +241,34 @@ def click_btn_motor1_ccw():
         cmd = unquote(cmd)
 
     #rover_ip = "127.0.0.1" # for local testing
-    rover_ip = "172.16.1.30" # for local testing
-    base_ip = rover_ip
+    rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
-    c = Connection("c1", rover_ip, 5005)
+    c = Connection("manual_control", rover_ip, 5005)
     c.send(cmd)
 
+
+    return jsonify(success=True, cmd=cmd)
+
+# Manual controls
+@app.route("/rover_drive", methods=["POST"])
+def rover_drive():
+    print("rover_drive")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
+
+    rover_ip = "127.0.0.1" # for local testing
+    #rover_ip = "172.16.1.30" # for testing with radios
+
+    print("cmd: " + cmd)
+    c = Connection("rover_drive", rover_ip, 5010)
+    c.send(cmd)
 
     return jsonify(success=True, cmd=cmd)
 

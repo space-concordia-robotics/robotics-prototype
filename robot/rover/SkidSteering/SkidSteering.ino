@@ -240,7 +240,7 @@ void setup() {
     digitalWrite(LED_BUILTIN, LOW);
     delay(1000);
     digitalWrite(LED_BUILTIN, HIGH);
-    UART_PORT.println("setup complete");
+    Serial.println("setup complete");
 
     //  pinMode(DC_PIN_FRONT_RIGHT, OUTPUT);
     //   // Write velocities for the Wheels on the RIGHT side
@@ -290,7 +290,7 @@ void setup() {
     pinMode(LB_PWM, OUTPUT);
 
 //    analogWrite(RF.getPwmPin(), 127);
-//    UART_PORT.println(RF.getPwmPin());
+//    Serial.println(RF.getPwmPin());
 //    
     RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
     pinMode(RF.encoderPinB, INPUT_PULLUP);
@@ -367,11 +367,11 @@ void loop() {
         // this represents the speed for throttle;steering
         // as well as direction by the positive/negative sign
         String cmd = "";
-        //UART_PORT.println("ayyyyyyyyLmao");
+        //Serial.println("ayyyyyyyyLmao");
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
         if (UART_PORT.available()) {
             // parse command
-            UART_PORT.println("yoooooooooo");
+            Serial.println("yoooooooooo");
             cmd = UART_PORT.readString();
             throttle = getValue(cmd, ':', 0).toInt();
             steering = getValue(cmd, ':', 1).toInt();
@@ -423,10 +423,18 @@ void loop() {
         RF.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
         RM.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
         RB.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
+        UART_PORT.print("rightMotorDirection: ");
+        UART_PORT.println(abs(rightMotorDirection));
+        UART_PORT.print("desiredVelocityRight");
+        UART_PORT.print(abs(desiredVelocityRight));
         
         LF.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
         LM.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
         LB.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
+        UART_PORT.print("leftMotorDirection: ");
+        UART_PORT.println(abs(leftMotorDirection));
+        UART_PORT.print("desiredVelocityLeft");
+        UART_PORT.print(abs(desiredVelocityLeft));
         
         
         RF.calcCurrentVelocity();
@@ -442,9 +450,9 @@ void loop() {
         vx = (vr + vl) / 6;
         vth = (vl - vr) / d;
 
-        //UART_PORT.print(desiredVelocityLeft);  UART_PORT.print("_________"); UART_PORT.println(desiredVelocityRight);
-        //UART_PORT.print(rightMotorDirection); UART_PORT.print(rotation); UART_PORT.print("_____");UART_PORT.print(deg);UART_PORT.print("_____"); UART_PORT.println(steering);
-        //UART_PORT.print("Velocity:"); UART_PORT.println(v);
+        //Serial.print(desiredVelocityLeft);  Serial.print("_________"); Serial.println(desiredVelocityRight);
+        //Serial.print(rightMotorDirection); Serial.print(rotation); Serial.print("_____");Serial.print(deg);Serial.print("_____"); Serial.println(steering);
+        //Serial.print("Velocity:"); Serial.println(v);
         
         
 

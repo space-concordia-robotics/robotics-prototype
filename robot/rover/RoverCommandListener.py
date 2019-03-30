@@ -54,6 +54,7 @@ if not local and not competition and not dynamic:
     print("""local, competition and dynamic flags set to false, exiting""")
     sys.exit(0)
 
+"""
 if usb:
     # set up connection to arduino
     ports = list(serial.tools.list_ports.comports())
@@ -63,7 +64,7 @@ if usb:
 else:
     print("USB flag set to false, exiting")
     sys.exit(0)
-
+"""
 
 # for local testing
 if local:
@@ -91,8 +92,8 @@ throttle_speed = 0
 steering_speed = 0
 
 while True:
-    while ser.in_waiting:
-        print(ser.readline().decode())
+    #while ser.in_waiting:
+    #    print(ser.readline().decode())
 
     try:
         command = c.receive()
@@ -100,25 +101,25 @@ while True:
 
         if command in key_list:
             if command == 'w':
-                print("cmd: w --> m1: Forward\n")
+                print("cmd: w --> Forward\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
                 command = str(REST + throttle_speed) + ":" + str(REST)
-                ser.write(str.encode(command))
+                #ser.write(str.encode(command))
             elif command == 'a':
-                print("cmd: a --> m1: Back\n")
+                print("cmd: a --> Left\n")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
                 command = str(REST + throttle_speed*-1) + ":" + str(REST)
-                ser.write(str.encode(command))
+                #ser.write(str.encode(command))
             elif command == 's':
-                print("cmd: s --> m2: Forward\n")
+                print("cmd: s --> Back\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
                 command = str(REST) + ":" + str(REST + steering_speed)
-                ser.write(str.encode(command))
+                #ser.write(str.encode(command))
             elif command == 'd':
-                print("cmd: d --> m2: Back")
+                print("cmd: d --> Right")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
                 command = str(REST) + ":" + str(REST + steering_speed*-1)
-                ser.write(str.encode(command))
+                #ser.write(str.encode(command))
 
             elif command == 'i':
                 print("cmd: i --> Increment throttle speed")
@@ -160,7 +161,7 @@ while True:
                 print_commands_list()
 
     except Exception:
-        ser.close()
+        #ser.close()
         print("Exception in user code:")
         print("-"*60)
         traceback.print_exc(file=sys.stdout)
