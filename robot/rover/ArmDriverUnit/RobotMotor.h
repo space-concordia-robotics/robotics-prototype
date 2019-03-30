@@ -290,6 +290,10 @@ void RobotMotor::goToSafeAngle(void) {
 
 void RobotMotor::homeMotor(char homingDir) {
   homingPass++;
+  #ifdef DEBUG_HOMING
+    UART_PORT.print("homeMotor pass ");
+    UART_PORT.println(homingPass);
+#endif
   if (homingDir == 'i') { //(neg, cw)
 #ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor inwards");

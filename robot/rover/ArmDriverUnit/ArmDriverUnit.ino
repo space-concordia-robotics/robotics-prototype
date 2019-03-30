@@ -45,7 +45,7 @@
 //#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
-//#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
+#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
 #define DEBUG_HOMING 16 // debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 // debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 18 // debug messages during servo timer interrupts
@@ -180,14 +180,17 @@ const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 
 // instantiate motor objects here:
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
+//ServoMotor motor1(M5_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for cytron
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
+//ServoMotor motor5(M1_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
 DcMotor *m1 = &motor1; DcMotor *m2 = &motor2;
+//ServoMotor *m1 = &motor1; DcMotor *m2 = &motor2; // for testing homing with wrist servo
 StepperMotor *m3 = &motor3; StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
 // I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
@@ -296,7 +299,6 @@ void loop() {
 
   /* Homing functionality ignores most message types */
   // do i need to modify my code so that hwen it receives a stop command it resets the homing variables?
-  // this includes reenabling all the motor timers!!!
   if (isHoming) { // not done homing the motors
     if (homingMotor < NUM_MOTORS) {
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
@@ -310,12 +312,14 @@ void loop() {
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
         if (motorArray[homingMotor]->atSafeAngle) {
+          if(motorArray[homingMotor]->homingPass == 0){
 #ifdef DEBUG_HOMING
           UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
           UART_PORT.println(" homing 1 done and at safe angle");
 #endif
+          }
           // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
+          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
 #ifdef DEBUG_HOMING
             UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
             UART_PORT.println(" outwards");
@@ -395,6 +399,12 @@ void loop() {
               motorsToHome[i] = true;
             }
           }
+          /*
+          // for testing homing with wrist servo
+          motorsToHome[0]=true;
+          motor1.homingType=2;
+          Serial.println(motor1.homingType);
+          */
           isHoming = true;
           homingMotor = 0;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
