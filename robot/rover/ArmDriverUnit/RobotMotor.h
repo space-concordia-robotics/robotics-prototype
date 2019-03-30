@@ -65,23 +65,25 @@ class RobotMotor {
     float getSoftwareAngle(void);
     void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
     int getDirectionLogic(void); // returns the directionModifier;
-    void setGearRatio(float ratio);
-    void setOpenLoopGain(float loopGain);
-    void setMotorSpeed(float motorSpeed);
+    void setGearRatio(float ratio); // sets the gear ratio for the motor joint
+    void setOpenLoopGain(float loopGain); // set gain which adjusts open loop speed for open loop angle control
+    void setMotorSpeed(float motorSpeed); // set open loop speed and max speed of pid output
     /* movement functions */
-    virtual void stopRotation(void) = 0;
+    virtual void stopRotation(void) = 0; // stop turning the motor
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
-    virtual void goToCommandedAngle(void) = 0;
-    virtual void goToAngle(float angle) = 0;
-    virtual void budge(int dir) = 0;
+    virtual void goToCommandedAngle(void) = 0; // once an angle is set it will go to the angle and won't ignore limits
+    virtual void goToAngle(float angle) = 0; // goes to angle ignoring limits
+    virtual void budge(int dir) = 0; // moves a motor as long as a new budge commmand comes in within 200ms
     // for open loop control
     float openLoopError; // public variable for open loop control
     int openLoopSpeed; // angular speed (degrees/second)
     float openLoopGain; // speed correction factor
     float startAngle; // used in angle esimation
-    
+
     void checkForActualPress(void);
     void goToSafeAngle(void);
+    int homingPass;
+    void homeMotor(char homingDir);
 
   private:
     // doesn't really make sense to have any private variables for this parent class.
@@ -116,6 +118,7 @@ RobotMotor::RobotMotor() {
   homingDone = true;
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
+  homingPass = 0;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -197,16 +200,16 @@ int RobotMotor::getDirectionLogic(void) {
   return directionModifier;
 }
 
-void RobotMotor::setGearRatio(float ratio){
+void RobotMotor::setGearRatio(float ratio) {
   gearRatio = ratio;
-  gearRatioReciprocal = 1/ratio;
+  gearRatioReciprocal = 1 / ratio;
 }
 
-void RobotMotor::setOpenLoopGain(float loopGain){
+void RobotMotor::setOpenLoopGain(float loopGain) {
   openLoopGain = loopGain;
 }
 
-void RobotMotor::setMotorSpeed(float motorSpeed){
+void RobotMotor::setMotorSpeed(float motorSpeed) {
   openLoopSpeed = motorSpeed;
   pidController.setOutputLimits(-motorSpeed, motorSpeed);
 }
@@ -281,6 +284,24 @@ void RobotMotor::goToSafeAngle(void) {
   // in wait for the next trigger to be confirmed
   actualPress = false;
   limitSwitchState = 0;
+}
+
+void RobotMotor::homeMotor(char homingDir) {
+  homingPass++;
+  if (homingDir == 'i'){
+    // do i use gotoangle? or do i just keep turning forever?
+    // somewhere I need to check for limit switch press to stop
+
+    // set homing direction inwards
+  }
+  else if (homingDir == 'o'){
+    
+  }
+  homingDone = false;
+  // at the end of the routine it goes to 0 degrees? or the home position?
+  // how will this interact with the limit switch code above and in interrupts?
+  // should i ignore it and implement a new thing for homing? or just add if statements in it?
+  // i think this needs to set homingDone when it's finished? actually the timer interrupt needs to i think
 }
 
 #endif

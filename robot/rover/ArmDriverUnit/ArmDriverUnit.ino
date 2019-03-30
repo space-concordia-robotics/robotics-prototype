@@ -400,31 +400,54 @@ void loop() {
       motorArray[i]->checkForActualPress();
     }
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-      motorArray[i]->goToSafeAngle();
+      if (isHoming) {
+        motorArray[homingMotor]->homingDone = true;
+      }
+      else {
+        motorArray[i]->goToSafeAngle();
+      }
     }
     // put code here to check if the motor should be at the end of its path but isn't?
     // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
   }
 
   /* Homing functionality ignores most message types */
-  if (isHoming) {
+  if (isHoming) { // not done homing the motors
     if (homingMotor < NUM_MOTORS) {
-      if (motorsToHome[homingMotor]) { // set things up for homing to occur in timer interrupts
-        //motorArray[homingMotor]->homeMotor(); // initialize the homing params for this motor
-        // place motorArray[i]->homingDone = false; inside homeMotor()
-        // I want it to tell the first motor to move until it hits the limit switch, ignoring angle limits
-        // then either if it's homing both switches it hits the other switch
-        // then it goes to 0 degrees? or the home position?
-        // how will this interact with the limit switch code above and in interrupts?
-        // should i ignore it and implement a new thing for homing? or just add if statements in it?
+      if (motorsToHome[homingMotor]) { // is this motor supposed to home?
+        // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+        motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
         motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
-      if (motorArray[homingMotor]->homingDone) {
-        homingMotor++;
+      if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+        if ( motorArray[homingMotor]->movementDone ) { // wait til done moving to safe spot, set by limit switch stuff above
+          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
+            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+          }
+          else { // done homing this motor
+            // before the code moves on to the next motor it should move the motor into some nice range over here
+            motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
+            homingMotor++; // move on to the next motor
+          }
+        }
+      }
+      else { // not done homing the motor, will not do anything special
+        ;
       }
     }
-    else {
+    else { // done homing all the motors
       isHoming = false;
+      // todo: replace STEPPER_PID_PERIOD with the period previously defined in the interrupt
+      m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+      m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
+      // todo: replace STEPPER_PID_PERIOD with the period previously defined in the interrupt
+      m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+      m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
+      dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+      dcTimer.priority(MOTOR_NVIC_PRIORITY);
+      servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+      servoTimer.priority(MOTOR_NVIC_PRIORITY);
     }
   }
 
@@ -471,6 +494,11 @@ void loop() {
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors) { // initialize homing procedure
+          // stop all the timers because homing works without motor timer interrupts
+          dcTimer.end();
+          servoTimer.end();
+          m3StepperTimer.end();
+          m4StepperTimer.end();
           for (int i = 0; i < NUM_MOTORS; i++) {
             if (motorArray[i]->hasLimitSwitches) {
               motorsToHome[i] = true;
