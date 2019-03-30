@@ -1,6 +1,6 @@
-const int dirpin = 33;
-const int steppin = 34;
-const int enablepin = 35;
+const int dirpin = 20;
+const int steppin = 21;
+const int enablepin = 17;
 
 bool isTurning = false;
 elapsedMicros stepTimer;
@@ -52,6 +52,14 @@ void loop() {
       digitalWrite(enablepin, HIGH); // enable it
       Serial.println("stepper power is disabled");
     }
+    else if (String(msgElem) == "up") {
+      digitalWrite(dirpin, LOW); // enable it
+      Serial.println("stepper going up");
+    }
+    else if (String(msgElem) == "down") {
+      digitalWrite(dirpin, HIGH); // enable it
+      Serial.println("stepper going down");
+    }
     else if (String(msgElem) == "turn") {
       isTurning = true;
       Serial.print("stepper is stepping every ");
@@ -94,7 +102,7 @@ void loop() {
     if (stepTimer > stepInterval) {
       digitalWrite(steppin, HIGH);
       digitalWrite(steppin, LOW);
-      stepInterval = 0;
+      stepTimer = 0;
     }
   }
 }
