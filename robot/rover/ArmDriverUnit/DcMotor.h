@@ -57,6 +57,9 @@ void DcMotor::motorTimerInterrupt(void) {
     }
     else {
       isBudging = false;
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -78,6 +81,9 @@ void DcMotor::motorTimerInterrupt(void) {
 #endif
     }
     else {
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -90,6 +96,9 @@ void DcMotor::motorTimerInterrupt(void) {
       // determine the speed of the motor until the next interrupt
       float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
       if (output == 0) {
+        if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
         movementDone = true;
         stopRotation();
       }

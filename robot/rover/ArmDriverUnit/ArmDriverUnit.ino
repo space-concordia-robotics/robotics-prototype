@@ -266,7 +266,7 @@ void setup() {
   motor5.switchDirectionLogic();
   motor6.switchDirectionLogic(); // positive angles now mean opening
   initMotorTimers(); // activate the timer interrupts
-  
+
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
@@ -280,16 +280,15 @@ void loop() {
       motorArray[i]->checkForActualPress();
     }
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-      if (isHoming) {
-        motorArray[homingMotor]->homingDone = true;
 #ifdef DEBUG_HOMING
-        UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-        UART_PORT.println(" hit limit switch");
+      UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+      UART_PORT.println(" hit limit switch");
 #endif
+      motorArray[i]->atSafeAngle = false;
+      if (isHoming) {
+        motorArray[i]->homingDone = true;
       }
-      else {
-        motorArray[i]->goToSafeAngle();
-      }
+      motorArray[i]->goToSafeAngle();
     }
     // put code here to check if the motor should be at the end of its path but isn't?
     // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
@@ -310,28 +309,30 @@ void loop() {
         motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-#ifdef DEBUG_HOMING
-        UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-        UART_PORT.println(" homing 1 done");
-#endif
-        // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-        if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
-#ifdef DEBUG_HOMING
-          UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
-          UART_PORT.println(" outwards");
-#endif
-          motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
-        }
-        else { // done homing this motor
+        if (motorArray[homingMotor]->atSafeAngle) {
 #ifdef DEBUG_HOMING
           UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-          UART_PORT.println(" homing complete. now to move to angle");
+          UART_PORT.println(" homing 1 done and at safe angle");
 #endif
-          // what angle does it go to? configure somehow?
-          // should it move to the home position? or should it depend on another input? separate command to move to home?
-          // before the code moves on to the next motor it should move the motor into some nice range over here
-          motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
-          homingMotor++; // move on to the next motor
+          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 2) ) {
+#ifdef DEBUG_HOMING
+            UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" outwards");
+#endif
+            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+          }
+          else { // done finding angle limits, moving to home position and then next motor time
+#ifdef DEBUG_HOMING
+            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" homing complete. now to move to angle");
+#endif
+            // dunno if i need to use gotoangle anymore
+            // move to home should be a separate command to remove my headache
+            //motorArray[homingMotor]->goToAngle(motorArray[homingMotor]->neutralAngle);
+            motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
+            homingMotor++; // move on to the next motor
+          }
         }
       }
       else { // not done homing the motor, will not do anything special

@@ -53,6 +53,9 @@ void ServoMotor::motorTimerInterrupt(void) {
     }
     else {
       isBudging = false;
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -74,6 +77,9 @@ void ServoMotor::motorTimerInterrupt(void) {
     }
     else {
       // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -83,6 +89,9 @@ void ServoMotor::motorTimerInterrupt(void) {
       calcCurrentAngle();
       float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
       if (output == 0) {
+        if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
         movementDone = true;
         stopRotation();
       }

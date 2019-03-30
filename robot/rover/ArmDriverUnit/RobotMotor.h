@@ -81,6 +81,7 @@ class RobotMotor {
     float startAngle; // used in angle esimation
 
     void checkForActualPress(void);
+    bool atSafeAngle; // for homing
     void goToSafeAngle(void);
     int homingPass;
     void homeMotor(char homingDir);
@@ -119,6 +120,7 @@ RobotMotor::RobotMotor() {
   openLoopSpeed = 0; // no speed by default;
   openLoopGain = 1.0; // temp open loop control
   homingPass = 0;
+  atSafeAngle = true;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -288,18 +290,20 @@ void RobotMotor::goToSafeAngle(void) {
 
 void RobotMotor::homeMotor(char homingDir) {
   homingPass++;
-  if (homingDir == 'i'){
+  if (homingDir == 'i') { //(neg, cw)
+#ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor inwards");
+#endif
     // set homing direction inwards
+    goToAngle(2*minHardAngle);
   }
-  else if (homingDir == 'o'){
+  else if (homingDir == 'o') { //(pos, ccw)
+#ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor outwards");
+#endif
+    goToAngle(2*maxHardAngle);
   }
   homingDone = false;
-  // at the end of the routine it goes to 0 degrees? or the home position?
-  // how will this interact with the limit switch code above and in interrupts?
-  // should i ignore it and implement a new thing for homing? or just add if statements in it?
-  // i think this needs to set homingDone when it's finished? actually the timer interrupt needs to i think
 }
 
 #endif
