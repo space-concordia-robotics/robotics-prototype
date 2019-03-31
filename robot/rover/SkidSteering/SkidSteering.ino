@@ -212,6 +212,13 @@ void lb_encoder_interrupt(void);
 
 IntervalTimer dcTimer;
 
+void ser_flush(void) {
+    while (Serial.available()) {
+        Serial.read();
+    }
+}
+
+
 String getValue(String data, char separator, int index)
 {
   int found = 0;
@@ -289,6 +296,8 @@ void setup() {
     pinMode(LB_DIR, OUTPUT);
     pinMode(LB_PWM, OUTPUT);
 
+    ser_flush();
+
 //    analogWrite(RF.getPwmPin(), 127);
 //    Serial.println(RF.getPwmPin());
 //    
@@ -360,62 +369,69 @@ void setup() {
 }
 
 void loop() {
-    if (millis() - prevRead > 100)
+    if (millis() - prevRead > 20)
     {
-
-        // incoming format example: "5;7"
+        // incoming format example: "5:7"
         // this represents the speed for throttle;steering
         // as well as direction by the positive/negative sign
         String cmd = "";
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
         if (UART_PORT.available()) {
+            Serial.println("yooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
             // parse command
             cmd = UART_PORT.readString();
             throttle = getValue(cmd, ':', 0).toInt();
             steering = getValue(cmd, ':', 1).toInt();
-            UART_PORT.print("throttle: ");
+            UART_PORT.print("TEENSY throttle: ");
             UART_PORT.println(throttle);
-            UART_PORT.print("steering: ");
+            UART_PORT.print("TEENSY steering: ");
             UART_PORT.println(steering);
+
+            throttle -= 49.5;
+            steering -= 49.5;
+        } else {
+            throttle = 0;
+            steering = 0;
         }
         
         //throttle = phone.getThrottle();
         //steering = phone.getSteering();
 
-        //throttle -= 49.5;
-        //steering -= 49.5;
+        UART_PORT.print("throttle: ");
+        UART_PORT.println(throttle);
+        UART_PORT.print("steering: ");
+        UART_PORT.println(steering);
 
   
          // If statement for CASE 1: steering toward the RIGHT
         if (steering > 0 ) {
             deg = mapFloat(steering, 0, maxS, 1, -1);
             desiredVelocityRight = map(throttle * deg, minS, maxS, -255, 255);
-            desiredVelocityLeft = map((-1) * throttle, minS, maxS,  -255, 255);
+            desiredVelocityLeft = map(throttle, minS, maxS,  -255, 255);
             rotation = "CW";
         }
  
 
-          // If statement for CASE 2: steering toward the LEFT
+          // If statement for CASE 2: steering toward the LEFT or not steering
         if (steering <= 0 ) {
             deg = mapFloat(steering, minS, 0, -1, 1);
             desiredVelocityRight = map(throttle, minS, maxS, -255, 255);
-            desiredVelocityLeft = map((-1) * throttle * deg, minS, maxS, -255, 255);
+            desiredVelocityLeft = map(throttle * deg, minS, maxS, -255, 255);
             rotation = "CCW";
 
         } 
         if (desiredVelocityLeft < 0 ){
           leftMotorDirection = 1;
-}
+        }
         else {
           leftMotorDirection = -1;
         }
+        
         if (desiredVelocityRight < 0 ){
           rightMotorDirection = -1;
-
         }
         else {
           rightMotorDirection = 1;
-
         }
 
         RF.setVelocityNoPID(rightMotorDirection, abs(desiredVelocityRight));
@@ -455,6 +471,7 @@ void loop() {
         
 
         prevRead = millis();
+        ser_flush();
     }
 
 }

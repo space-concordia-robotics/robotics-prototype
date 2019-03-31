@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import socket
+
 class Connection:
     __active_ctr = 0
 

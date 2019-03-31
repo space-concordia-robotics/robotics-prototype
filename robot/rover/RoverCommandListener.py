@@ -84,10 +84,15 @@ print("Ready for incoming drive cmds!\n")
 
 print_commands_list()
 
-key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'q']
-REST = 45.5
+key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 't', 'q']
+REST = 49.5
 throttle_speed = 0
 steering_speed = 0
+MIN_THROTTLE_SPEED = 0
+MAX_THROTTLE_SPEED = 25
+MIN_STEERING_SPEED = 0
+MAX_STEERING_SPEED = 39
+
 
 while True:
     #while ser.in_waiting:
@@ -95,34 +100,45 @@ while True:
 
     try:
         command = c.receive()
-        print("command: " + command + "\n")
+        print("OPERATOR command: " + command + "\n")
 
+        # for throttle speed, no backwards
         if command in key_list:
             if command == 'w':
                 print("cmd: w --> Forward\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = str(REST + throttle_speed) + ":" + str(REST)
+                command = str(REST + throttle_speed) + ":" + str(REST) + "\n"
+                print("command: " + str(command))
                 ser.write(str.encode(command))
             elif command == 'a':
                 print("cmd: a --> Left\n")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = str(REST + throttle_speed*-1) + ":" + str(REST)
+                command = str(REST + throttle_speed) + ":" + str(REST - steering_speed) + "\n"
+                print("command: " + str(command))
                 ser.write(str.encode(command))
             elif command == 's':
                 print("cmd: s --> Back\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = str(REST) + ":" + str(REST + steering_speed)
+                command = str(REST - throttle_speed) + ":" + str(REST) + "\n"
+                print("command: " + str(command))
                 ser.write(str.encode(command))
             elif command == 'd':
                 print("cmd: d --> Right")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = str(REST) + ":" + str(REST + steering_speed*-1)
+                command = str(REST + throttle_speed) + ":" + str(REST + steering_speed) + "\n"
+                print("command: " + str(command))
                 ser.write(str.encode(command))
 
+            # 't' --> reset to 0 on release key, otherwise motor keeps spinning
+            # 45.5:45.5
+            elif command == 't':
+                print("cmd: t --> stop moving")
+                command = str(REST) + ":" + str(REST) + "\n"
+                ser.write(str.encode(command))
             elif command == 'i':
                 print("cmd: i --> Increment throttle speed")
 
-                if throttle_speed < 45.5:
+                if throttle_speed < MAX_THROTTLE_SPEED:
                     throttle_speed += 0.5
                     print("throttle speed: " + str(throttle_speed))
                 else:
@@ -131,7 +147,7 @@ while True:
             elif command == 'j':
                 print("cmd: j --> Decrement throttle speed")
 
-                if throttle_speed > 0:
+                if throttle_speed > MIN_THROTTLE_SPEED:
                     throttle_speed -= 0.5
                     print("throttle speed: " + str(throttle_speed))
                 else:
@@ -140,7 +156,7 @@ while True:
             elif command == 'o':
                 print("cmd: o --> Increment steering speed")
 
-                if steering_speed < 45.5:
+                if steering_speed < MAX_STEERING_SPEED:
                     steering_speed += 0.5
                     print("steering speed: " + str(steering_speed))
                 else:
@@ -149,18 +165,24 @@ while True:
             elif command == 'k':
                 print("cmd: k --> Decrement steering speed")
 
-                if steering_speed > 0:
+                if steering_speed > MIN_STEERING_SPEED:
                     steering_speed -= 0.5
                     print("steering speed: " + str(steering_speed))
                 else:
                     print("steering speed lower limit reached")
-
 
             elif command == 'q':
                 print("\nTerminating connection.")
                 break
             elif command == 'l':
                 print_commands_list()
+            elif command == 'b':
+                while ser.in_waiting:
+                    print(ser.readline().decode())
+
+            # flush buffer to avoid overflowing it
+            ser.reset_input_buffer()
+            ser.reset_output_buffer()
 
     except Exception:
         ser.close()

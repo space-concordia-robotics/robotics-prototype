@@ -250,7 +250,7 @@ def manual_control():
 
     return jsonify(success=True, cmd=cmd)
 
-# Manual controls
+# Rover controls
 @app.route("/rover_drive", methods=["POST"])
 def rover_drive():
     print("rover_drive")
@@ -271,7 +271,6 @@ def rover_drive():
     c.send(cmd)
 
     return jsonify(success=True, cmd=cmd)
-
 
 app.run(debug=True)
 # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
