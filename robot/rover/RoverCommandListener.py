@@ -22,6 +22,7 @@ dynamic = False
 # from connection import Connection
 # for the startup service to work properly
 from robot.comms.connection import Connection
+from robot.comms.uart import Uart
 
 def print_commands_list():
     print("""'q': quit\n
@@ -60,9 +61,8 @@ if usb:
     first_port = ports[0].name
     print("Connecting to port: " + first_port)
     ser = serial.Serial('/dev/' + first_port, 9600)
-else:
-    print("USB flag set to false, exiting")
-    sys.exit(0)
+elif uart:
+    u = Uart("/dev/ttySAC0", 9600)
 
 # for local testing
 if local:
@@ -109,32 +109,56 @@ while True:
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
                 command = str(REST + throttle_speed) + ":" + str(REST) + "\n"
                 print("command: " + str(command))
-                ser.write(str.encode(command))
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
+
             elif command == 'a':
                 print("cmd: a --> Left\n")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
                 command = str(REST + throttle_speed) + ":" + str(REST - steering_speed) + "\n"
                 print("command: " + str(command))
-                ser.write(str.encode(command))
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
+
             elif command == 's':
                 print("cmd: s --> Back\n")
                 #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
                 command = str(REST - throttle_speed) + ":" + str(REST) + "\n"
                 print("command: " + str(command))
-                ser.write(str.encode(command))
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
+
             elif command == 'd':
                 print("cmd: d --> Right")
                 #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
                 command = str(REST + throttle_speed) + ":" + str(REST + steering_speed) + "\n"
                 print("command: " + str(command))
-                ser.write(str.encode(command))
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
 
             # 't' --> reset to 0 on release key, otherwise motor keeps spinning
             # 45.5:45.5
             elif command == 't':
                 print("cmd: t --> stop moving")
                 command = str(REST) + ":" + str(REST) + "\n"
-                ser.write(str.encode(command))
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
+
             elif command == 'i':
                 print("cmd: i --> Increment throttle speed")
 
@@ -177,15 +201,20 @@ while True:
             elif command == 'l':
                 print_commands_list()
             elif command == 'b':
-                while ser.in_waiting:
-                    print(ser.readline().decode())
+                if usb:
+                    while ser.in_waiting:
+                        print(ser.readline().decode())
+                else:
+                    print("UART RX not supported (yet)")
 
-            # flush buffer to avoid overflowing it
-            ser.reset_input_buffer()
-            ser.reset_output_buffer()
+            if usb:
+                # flush buffer to avoid overflowing it
+                ser.reset_input_buffer()
+                ser.reset_output_buffer()
 
     except Exception:
-        ser.close()
+        if usb:
+            ser.close()
         print("Exception in user code:")
         print("-"*60)
         traceback.print_exc(file=sys.stdout)
