@@ -118,7 +118,6 @@ Parser Parser; // object which parses and verifies commands
 
 bool msgReceived = false;
 bool msgIsValid = false;
-bool isHoming = false;
 
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
@@ -205,7 +204,9 @@ IntervalTimer servoTimer; // motors 5&6
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
-int homingMotor = 6; // initialize to a value that's invalid so it'll be ignored
+// homing variables
+bool isHoming = false;
+int homingMotor = NUM_MOTORS; // initialize to a value that's invalid so it'll be ignored
 bool motorsToHome[] = {false, false, false, false, false, false};
 
 /* function declarations */
@@ -266,7 +267,6 @@ void setup() {
   initLimitSwitches(); // setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
   motor3.switchDirectionLogic(); // motor is wired backwards?
-  motor5.switchDirectionLogic();
   motor6.switchDirectionLogic(); // positive angles now mean opening
   initMotorTimers(); // activate the timer interrupts
 
@@ -312,10 +312,10 @@ void loop() {
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
         if (motorArray[homingMotor]->atSafeAngle) {
-          if(motorArray[homingMotor]->homingPass == 0){
+          if (motorArray[homingMotor]->homingPass == 0) {
 #ifdef DEBUG_HOMING
-          UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-          UART_PORT.println(" homing 1 done and at safe angle");
+            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" homing 1 done and at safe angle");
 #endif
           }
           // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
@@ -385,6 +385,12 @@ void loop() {
       else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
         for (int i = 0; i < NUM_MOTORS; i++) {
           motorArray[i]->stopRotation();
+          motorArray[i]->stopHoming();
+        }
+        isHoming = false;
+        homingMotor = NUM_MOTORS;
+        for (int i = 0; i < NUM_MOTORS; i++) {
+          motorsToHome[i] = false;
         }
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("all motors stopped because of emergency stop");
@@ -393,17 +399,26 @@ void loop() {
 #endif
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
-        if (motorCommand.homeAllMotors) { // initialize homing procedure
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorArray[i]->hasLimitSwitches) {
-              motorsToHome[i] = true;
+        if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
+          if (motorCommand.homeAllMotors) {
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorArray[i]->hasLimitSwitches) {
+                motorsToHome[i] = true;
+              }
             }
           }
+          else if (motorCommand.homeCommand) {
+            if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
+              motorsToHome[motorCommand.whichMotor] = true;
+            }
+          }
+          // motor 3 homed to -80.5 and then didnt jump out of homing sequence??
+          // maybe because it was supposed to be more like -79.5 since the soft angle is -80?
           /*
-          // for testing homing with wrist servo
-          motorsToHome[0]=true;
-          motor1.homingType=2;
-          Serial.println(motor1.homingType);
+            // for testing homing with wrist servo
+            motorsToHome[0]=true;
+            motor1.homingType=2;
+            Serial.println(motor1.homingType);
           */
           isHoming = true;
           homingMotor = 0;
@@ -734,15 +749,15 @@ void initSpeedParams(void) {
 
   // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
   // operate at 50% max speed, and the gains should vary based on which motor it is
-  motor1.openLoopSpeed = 50; // 50% speed
-  motor2.openLoopSpeed = 50; // 50% speed
+  motor1.openLoopSpeed = 25; // 50% speed
+  motor2.openLoopSpeed = 25; // 50% speed
   motor3.openLoopSpeed = 50; // 50% speed
-  motor4.openLoopSpeed = 50; // 50% speed
+  motor4.openLoopSpeed = 90; // 50% speed
   motor5.openLoopSpeed = 50; // 50% speed
   motor6.openLoopSpeed = 50; // 50% speed
   // open loop gain is only for time-based open loop control
   motor1.openLoopGain = 0.75; // needs to be tested
-  motor2.openLoopGain = 0.0025; // needs to be tested
+  motor2.openLoopGain = 0.0015; // needs to be tested
   motor5.openLoopGain = 0.32; // for 5V
   motor6.openLoopGain = 0.35; // for 5V
 }

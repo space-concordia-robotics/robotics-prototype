@@ -22,6 +22,7 @@ struct commandInfo {
   bool stopSingleMotor = false; // for stopping a single motor
   bool switchDir = false; // for switching the direction logic
 
+  bool homeCommand = false; // for homing a single motor
   bool loopCommand = false; // for choosing between open loop or closed loop control
   int loopState = 0; // what type of loop state it is
 
@@ -223,6 +224,20 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         UART_PORT.println("$S,Success: parsed request to stop single motor");
 #endif
       }
+      else if (String(msgElem) == "home") {
+        // msgElem is a char array so it's safer to convert to string first
+        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (both limits or just 1?)
+        if (String(msgElem) == "double") {
+          cmd.homingStyle = DOUBLE_ENDED_HOMING;
+        }
+        cmd.homeCommand = true; // regardless, home the motor if "home"
+#ifdef DEBUG_PARSING
+        UART_PORT.print("$S,Success: parsed command to home motor ");
+        UART_PORT.print(cmd.whichMotor);
+        UART_PORT.print(" joint in mode ");
+        UART_PORT.println(cmd.homingStyle);
+#endif
+      }
       else if (String(msgElem) == "angle") { // check for angle command
         // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
@@ -371,6 +386,15 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.homeAllMotors) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.print("$S,Success: verified command to home all motor joints in mode ");
+    UART_PORT.println(cmd.homingStyle);
+#endif
+    return true;
+  }
+  else if (cmd.homeCommand) {
+#ifdef DEBUG_VERIFYING
+    UART_PORT.print("$S,Success: verified command to home motor joint");
+    UART_PORT.print(cmd.whichMotor);
+    UART_PORT.print(" in mode ");
     UART_PORT.println(cmd.homingStyle);
 #endif
     return true;

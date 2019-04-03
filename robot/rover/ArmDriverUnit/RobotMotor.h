@@ -21,18 +21,24 @@ class RobotMotor {
     int motorType;
     static int numMotors; // keeps track of how many motors there are
     int encoderPinA, encoderPinB;
-    // for limit switch interrupts
+    // for limit switch interrupts and homing
     int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend, limSwitchOpen;
     bool hasLimitSwitches;
     char limitSwitchType;
-    int homingType;
-    bool homingDone;
     volatile bool triggered;
     bool actualPress;
     volatile int triggerState;
     int limitSwitchState;
     elapsedMillis sinceTrigger;
-    // other stuff
+    int homingType;
+    bool homingDone;
+    bool atSafeAngle; // for homing
+    int homingPass;
+    void checkForActualPress(void);
+    void goToSafeAngle(void);
+    void homeMotor(char homingDir);
+    void stopHoming(void);
+// other stuff
     float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
     float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
     float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
@@ -80,12 +86,7 @@ class RobotMotor {
     float openLoopGain; // speed correction factor
     float startAngle; // used in angle esimation
 
-    void checkForActualPress(void);
-    bool atSafeAngle; // for homing
-    void goToSafeAngle(void);
-    int homingPass;
-    void homeMotor(char homingDir);
-
+    
   private:
     // doesn't really make sense to have any private variables for this parent class.
     // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -290,24 +291,30 @@ void RobotMotor::goToSafeAngle(void) {
 
 void RobotMotor::homeMotor(char homingDir) {
   homingPass++;
-  #ifdef DEBUG_HOMING
-    UART_PORT.print("homeMotor pass ");
-    UART_PORT.println(homingPass);
+#ifdef DEBUG_HOMING
+  UART_PORT.print("homeMotor pass ");
+  UART_PORT.println(homingPass);
 #endif
   if (homingDir == 'i') { //(neg, cw)
 #ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor inwards");
 #endif
     // set homing direction inwards
-    goToAngle(2*minHardAngle);
+    goToAngle(2 * minHardAngle);
   }
   else if (homingDir == 'o') { //(pos, ccw)
 #ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor outwards");
 #endif
-    goToAngle(2*maxHardAngle);
+    goToAngle(2 * maxHardAngle);
   }
   homingDone = false;
+}
+
+void RobotMotor::stopHoming(void) {
+  homingDone = true;
+  homingPass = 0;
+  atSafeAngle = true;
 }
 
 #endif

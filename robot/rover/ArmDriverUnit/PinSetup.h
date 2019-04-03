@@ -85,7 +85,8 @@
 #define M4_LIMIT_SW_EXTEND 24
 #define M4_ENCODER_RESOLUTION 2000
 #define M4_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
-#define M4_GEAR_RATIO      (30.0/18.0)*20.0 // belt reduction chained to worm gear drive
+// the 1.3846 is a value i calculated based on the discrepancy between expected and actual angles
+#define M4_GEAR_RATIO      (30.0/18.0)*20.0/1.3846 //(30.0/18.0)*20.0 // belt reduction chained to worm gear drive
 #define M4_MIN_HARD_ANGLE   -90.0
 #define M4_MAX_HARD_ANGLE   75.0
 #define M4_MIN_SOFT_ANGLE   -80.0
