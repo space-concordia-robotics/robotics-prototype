@@ -23,10 +23,6 @@ class DcMotor: public RobotMotor {
     void budge(int dir);
 
     // stuff for open loop control
-    float openLoopError; // public variable for open loop control
-    int openLoopSpeed; // angular speed (degrees/second)
-    float openLoopGain; // speed correction factor
-    float startAngle; // used in angle esimation
     unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
     elapsedMillis timeCount; // how long has the dc motor been turning for
 
@@ -51,8 +47,6 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
   this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   this -> motorType = DC_MOTOR;
   hasEncoder = false;
-  openLoopSpeed = 0; // no speed by default;
-  openLoopGain = 1.0; // temp open loop control
 }
 
 void DcMotor::motorTimerInterrupt(void) {
@@ -63,6 +57,9 @@ void DcMotor::motorTimerInterrupt(void) {
     }
     else {
       isBudging = false;
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -84,6 +81,9 @@ void DcMotor::motorTimerInterrupt(void) {
 #endif
     }
     else {
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -96,6 +96,9 @@ void DcMotor::motorTimerInterrupt(void) {
       // determine the speed of the motor until the next interrupt
       float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
       if (output == 0) {
+        if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
         movementDone = true;
         stopRotation();
       }
@@ -144,7 +147,7 @@ bool DcMotor::calcCurrentAngle(void) {
     return true;
   }
   else if (hasEncoder) { // closed loop and has encoder
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     imaginedAngle = currentAngle;
     return true;
   }

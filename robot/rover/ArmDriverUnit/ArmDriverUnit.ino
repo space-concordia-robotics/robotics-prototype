@@ -29,7 +29,7 @@
   periodic checks for motors in open loop, to effectuate small corrections to
   position during movements - if the appropriate motor has an encoder on it.
   This code began development sometime in July 2018 and is still being
-  updated as of March 11 2019.
+  updated as of March 27 2019.
 */
 /* still in idea phase */
 #define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
@@ -45,11 +45,12 @@
 //#define DEBUG_VERIFYING 12 // debug messages during verification function
 //#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
 //#define DEBUG_PID 14 // debug messages during pid loop calculations
-//#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
-//#define DEBUG_DC_TIMER 16 // debug messages during dc timer interrupts
-//#define DEBUG_SERVO_TIMER 17 // debug messages during servo timer interrupts
-//#define DEBUG_STEPPER_3_TIMER 18 // debug messages during stepper 3 timer interrupts
-//#define DEBUG_STEPPER_4_TIMER 19 // debug messages during stepper 3 timer interrupts
+#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
+#define DEBUG_HOMING 16 // debug messages during homing sequence
+//#define DEBUG_DC_TIMER 17 // debug messages during dc timer interrupts
+//#define DEBUG_SERVO_TIMER 18 // debug messages during servo timer interrupts
+//#define DEBUG_STEPPER_3_TIMER 19 // debug messages during stepper 3 timer interrupts
+//#define DEBUG_STEPPER_4_TIMER 20 // debug messages during stepper 3 timer interrupts
 #endif
 
 /*
@@ -178,18 +179,21 @@ const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 
 // instantiate motor objects here:
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
+//ServoMotor motor1(M5_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for cytron
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
+//ServoMotor motor5(M1_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
-DcMotor * m1 = & motor1; DcMotor * m2 = & motor2;
-StepperMotor * m3 = & motor3; StepperMotor * m4 = & motor4;
-ServoMotor * m5 = & motor5; ServoMotor * m6 = & motor6;
+DcMotor *m1 = &motor1; DcMotor *m2 = &motor2;
+//ServoMotor *m1 = &motor1; DcMotor *m2 = &motor2; // for testing homing with wrist servo
+StepperMotor *m3 = &motor3; StepperMotor *m4 = &motor4;
+ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
 // I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
-RobotMotor * motorArray[] = { m1, m2, m3, m4, m5, m6 };
+RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
 
 // instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
@@ -200,8 +204,18 @@ IntervalTimer servoTimer; // motors 5&6
 elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
 elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
 
+// homing variables
+bool isHoming = false;
+int homingMotor = NUM_MOTORS; // initialize to a value that's invalid so it'll be ignored
+bool motorsToHome[] = {false, false, false, false, false, false};
+
 /* function declarations */
 void printMotorAngles(void); // sends all motor angles over serial
+void initComms(void); // start up serial or whatever comms
+void initEncoders(void); // attach encoder interrupts
+void initLimitSwitches(void); // setup angle limits and attach limit switch interrupts
+void initSpeedParams(void); // setup open and closed loop speed
+void initMotorTimers(void); // start timers
 
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
@@ -223,7 +237,7 @@ void m4FlexISR(void);
 void m4ExtendISR(void);
 //void m5CwISR(void);
 //void m5CcwISR(void);
-//void m6ExtendISR(void);
+//void m6OpenISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); // manages motors 1&2
@@ -236,6 +250,405 @@ void m4StepperInterrupt(void);
 void setup() {
   pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
   // set up comms
+  initComms();
+  initEncoders();
+
+  // prepare and attach limit switch ISRs
+  // the following works if the switches are debounced by the hardware
+  /*
+    #if defined(LIM_SWITCH_FALL)
+    #define LIM_SWITCH_DIR FALLING
+    #elif defined(LIM_SWITCH_RISE)
+    #define LIM_SWITCH_DIR RISING
+    #endif
+  */
+  // the following is used because the software debounces the limit switches
+#define LIM_SWITCH_DIR CHANGE
+  initLimitSwitches(); // setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
+  initSpeedParams();
+  motor3.switchDirectionLogic(); // motor is wired backwards?
+  motor6.switchDirectionLogic(); // positive angles now mean opening
+  initMotorTimers(); // activate the timer interrupts
+
+  // reset the elapsedMillis variables so that they're fresh upon entering the loop()
+  sinceAnglePrint = 0;
+  sinceStepperCheck = 0;
+}
+
+/* main code loop */
+void loop() {
+  /* limit switch checks occur before listening for commands */
+  for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
+    if (motorArray[i]->triggered) { // check if the switch was hit
+      motorArray[i]->checkForActualPress();
+    }
+    if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
+#ifdef DEBUG_HOMING
+      UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+      UART_PORT.println(" hit limit switch");
+#endif
+      motorArray[i]->atSafeAngle = false;
+      if (isHoming) {
+        motorArray[i]->homingDone = true;
+      }
+      motorArray[i]->goToSafeAngle();
+    }
+    // put code here to check if the motor should be at the end of its path but isn't?
+    // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+  }
+
+  /* Homing functionality ignores most message types */
+  // do i need to modify my code so that hwen it receives a stop command it resets the homing variables?
+  if (isHoming) { // not done homing the motors
+    if (homingMotor < NUM_MOTORS) {
+      if (motorsToHome[homingMotor]) { // is this motor supposed to home?
+        // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+#ifdef DEBUG_HOMING
+        UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+        UART_PORT.println(" inwards");
+#endif
+        motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
+        motorsToHome[homingMotor] = false; // set this to false so it only happens once
+      }
+      if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+        if (motorArray[homingMotor]->atSafeAngle) {
+          if (motorArray[homingMotor]->homingPass == 0) {
+#ifdef DEBUG_HOMING
+            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" homing 1 done and at safe angle");
+#endif
+          }
+          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
+#ifdef DEBUG_HOMING
+            UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" outwards");
+#endif
+            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+          }
+          else { // done finding angle limits, moving to home position and then next motor time
+#ifdef DEBUG_HOMING
+            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" homing complete. now to move to angle");
+#endif
+            // dunno if i need to use gotoangle anymore
+            // move to home should be a separate command to remove my headache
+            //motorArray[homingMotor]->goToAngle(motorArray[homingMotor]->neutralAngle);
+            motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
+            homingMotor++; // move on to the next motor
+          }
+        }
+      }
+      else { // not done homing the motor, will not do anything special
+        ;
+      }
+    }
+    else { // done homing all the motors
+#ifdef DEBUG_HOMING
+      UART_PORT.println("all motors done homing, reinitializing motor timers");
+#endif
+      isHoming = false;
+    }
+  }
+
+  /* message parsing functionality */
+  motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
+  msgReceived = false;
+  msgIsValid = false;
+#if defined(DEBUG_MODE) || defined(USER_MODE)
+  nh.spinOnce();
+  if (msgReceived) {
+    nh.logdebug(serialBuffer);
+  }
+#elif defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+  if (UART_PORT.available()) {
+    // if a message was sent to the Teensy
+    msgReceived = true;
+    UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
+#ifdef DEBUG_MAIN
+    UART_PORT.print("GOT: "); UART_PORT.println(serialBuffer); // send back what was received
+#endif
+    Parser.parseCommand(motorCommand, serialBuffer); // read serialBuffer and stuff the data into motorCommand
+    memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
+    msgIsValid = Parser.verifCommand(motorCommand); // verify the data to make sure it's valid
+  }
+#endif
+  if (msgReceived) {
+    if (msgIsValid) {
+      if (motorCommand.pingCommand) { // respond to ping
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("pong");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("pong");
+#endif
+      }
+      else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
+        for (int i = 0; i < NUM_MOTORS; i++) {
+          motorArray[i]->stopRotation();
+          motorArray[i]->stopHoming();
+        }
+        isHoming = false;
+        homingMotor = NUM_MOTORS;
+        for (int i = 0; i < NUM_MOTORS; i++) {
+          motorsToHome[i] = false;
+        }
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("all motors stopped because of emergency stop");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("all motors stopped because of emergency stop");
+#endif
+      }
+      else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
+        if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
+          if (motorCommand.homeAllMotors) {
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorArray[i]->hasLimitSwitches) {
+                motorsToHome[i] = true;
+              }
+            }
+          }
+          else if (motorCommand.homeCommand) {
+            if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
+              motorsToHome[motorCommand.whichMotor] = true;
+            }
+          }
+          // motor 3 homed to -80.5 and then didnt jump out of homing sequence??
+          // maybe because it was supposed to be more like -79.5 since the soft angle is -80?
+          /*
+            // for testing homing with wrist servo
+            motorsToHome[0]=true;
+            motor1.homingType=2;
+            Serial.println(motor1.homingType);
+          */
+          isHoming = true;
+          homingMotor = 0;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+          UART_PORT.println("initializing homing command");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+          nh.loginfo("initializing homing command");
+#endif
+        }
+        else if (motorCommand.resetAllMotors) { // emergency stop takes precedence
+          for (int i = 0; i < NUM_MOTORS; i++) {
+            motorArray[i]->setSoftwareAngle(0.0);
+          }
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+          UART_PORT.println("all motor angle values reset");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+          nh.loginfo("all motor angle values reset");
+#endif
+        }
+        else { // following cases are for commands to specific motors
+          if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
+            motorArray[motorCommand.whichMotor - 1]->stopRotation();
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("stopped motor "); UART_PORT.println(motorCommand.whichMotor);
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+            // this is SUPER DUPER GROSS
+            String infoMessage = "stopped motor " + motorCommand.whichMotor;
+            char actualMessage[50];
+            for (unsigned int i = 0; i < infoMessage.length(); i++) {
+              actualMessage[i] = infoMessage[i];
+            }
+            nh.loginfo(actualMessage);
+#endif
+          }
+          else if (motorCommand.gearCommand) { // set gear ratio for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has a new gear ratio of "); UART_PORT.println(motorCommand.gearRatioVal);
+#endif
+          }
+          else if (motorCommand.openLoopGainCommand) { // set open loop gain for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->setOpenLoopGain(motorCommand.openLoopGain);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has a new open loop gain of "); UART_PORT.println(motorCommand.openLoopGain);
+#endif
+          }
+          else if (motorCommand.speedCommand) { // set speed for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has a new speed of "); UART_PORT.println(motorCommand.motorSpeed);
+#endif
+          }
+          else if (motorCommand.loopCommand) { // set loop states for appropriate motor
+            if (motorCommand.loopState == OPEN_LOOP) {
+              motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+              UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in open loop");
+#endif
+            }
+            else if (motorCommand.loopState == CLOSED_LOOP) {
+              if (motorArray[motorCommand.whichMotor - 1]->hasEncoder) {
+                motorArray[motorCommand.whichMotor - 1]->isOpenLoop = false;
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in closed loop");
+#endif
+              }
+              else {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
+#endif
+              }
+            }
+          }
+          else if (motorCommand.resetCommand) { // reset the motor angle's variable or actually control the motor to reset it to neutral position
+            if (motorCommand.resetAngleValue) {
+              motorArray[motorCommand.whichMotor - 1]->setSoftwareAngle(0.0);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+              UART_PORT.print("reset angle value of motor "); UART_PORT.println(motorCommand.whichMotor);
+#endif
+            }
+            else if (motorCommand.resetJointPosition) {
+              motorArray[motorCommand.whichMotor - 1]->goToAngle(0.0);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+              UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
+#endif
+            }
+          }
+          else if (motorCommand.switchDir) { // change the direction modifier to swap rotation direction in the case of backwards wiring
+            motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            int dir = motorArray[motorCommand.whichMotor - 1]->getDirectionLogic();
+            UART_PORT.print("direction modifier is now "); UART_PORT.println(dir);
+#endif
+          }
+          else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorCommand.motorsToMove[i]) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired direction is: "); UART_PORT.println(motorCommand.directionsToMove[i]);
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+                // this is SUPER DUPER GROSS
+                int tempVal = i + 1;
+                String infoMessage = "motor " + tempVal;
+                infoMessage += " desired direction is: ";
+                infoMessage += motorCommand.directionsToMove[i];
+                char actualMessage[60];
+                for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                  actualMessage[i] = infoMessage[i];
+                }
+                nh.loginfo(actualMessage);
+#endif
+                motorArray[i]->budge(motorCommand.directionsToMove[i]);
+              }
+            }
+          }
+          else if (motorCommand.multiMove) { // make motors move simultaneously
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              if (motorCommand.motorsToMove[i]) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+#ifdef DEBUG_MAIN
+                UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
+#endif
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+                // this is SUPER DUPER GROSS
+                int tempVal = i + 1;
+                String infoMessage = "motor " + tempVal;
+                infoMessage += " desired angle (degrees) is: ";
+                infoMessage += motorCommand.anglesToReach[i];
+                char actualMessage[50];
+                for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                  actualMessage[i] = infoMessage[i];
+                }
+                nh.loginfo(actualMessage);
+#endif
+                if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+                  UART_PORT.print("$E,Error: requested motor ");
+                  UART_PORT.print(i + 1);
+                  UART_PORT.println(" angle is not within angle limits.");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+                  // this is SUPER DUPER GROSS
+                  int tempVal = i + 1;
+                  String infoMessage = "motor " + tempVal;
+                  infoMessage += " angle is not within angle limits";
+                  char actualMessage[50];
+                  for (unsigned int i = 0; i < infoMessage.length(); i++) {
+                    actualMessage[i] = infoMessage[i];
+                  }
+                  nh.logerror(actualMessage);
+#endif
+                }
+                else {
+                  if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
+                    motorArray[i]->goToCommandedAngle();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      else { // alert the user that the arm is homing so ignoring certain commands
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("arm is homing! ignoring all commands besides ping or stop");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("arm is homing! ignoring all commands besides ping or stop");
+#endif
+      }
+    }
+    else { // alert the user that it's a bad command
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+      UART_PORT.println("$E,Error: bad motor command");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+      nh.logerror("error: bad motor command");
+#endif
+    }
+  }
+  if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
+    printMotorAngles();
+    sinceAnglePrint = 0; // reset the timer
+  }
+  /* heartbeat code */
+  /*
+  if(msgReceived){
+    if(valid){
+      goodblink();
+    }
+    else {
+      badblink();
+    }
+  }
+  else {
+    heartbeat();
+  }
+  */
+}
+
+void printMotorAngles(void) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+  UART_PORT.print("Motor Angles: ");
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    UART_PORT.print(motorArray[i]->getSoftwareAngle());
+    if (i < NUM_MOTORS - 1) {
+      UART_PORT.print(", ");
+    }
+    else {
+      UART_PORT.println("");
+    }
+  }
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+  float angles[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    angles[i] = motorArray[i]->getSoftwareAngle();
+    angleMessages[i].position = &(angles[i]);
+    //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle();
+  }
+  pub_m1.publish(&m1_angle_msg);
+  pub_m2.publish(&m2_angle_msg);
+  pub_m3.publish(&m3_angle_msg);
+  pub_m4.publish(&m4_angle_msg);
+  pub_m5.publish(&m5_angle_msg);
+  pub_m6.publish(&m6_angle_msg);
+  nh.spinOnce(); // does it cause problems if i spin twice in loop()
+#endif
+}
+
+void initComms(void) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
@@ -256,7 +669,9 @@ void setup() {
   m5_angle_msg.header.frame_id = m5FrameId;
   m6_angle_msg.header.frame_id = m6FrameId;
 #endif
+}
 
+void initEncoders(void) {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
 #ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
@@ -295,26 +710,16 @@ void setup() {
   attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
   motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
+}
 
-  // prepare and attach limit switch ISRs
-  // the following works if the switches are debounced by the hardware
-  /*
-    #if defined(LIM_SWITCH_FALL)
-    #define LIM_SWITCH_DIR FALLING
-    #elif defined(LIM_SWITCH_RISE)
-    #define LIM_SWITCH_DIR RISING
-    #endif
-  */
-  // the following is used because the software debounces the limit switches
-#define LIM_SWITCH_DIR CHANGE
-
+void initLimitSwitches(void) {
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
-  motor1.attachLimitSwitches('c', M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
-  motor2.attachLimitSwitches('f', M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
-  motor3.attachLimitSwitches('f', M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
-  motor4.attachLimitSwitches('f', M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
-  //motor5.attachLimitSwitches('c', M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  //motor6.attachLimitSwitches('g', 0, M6_LIMIT_SW_EXTEND);
+  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
+  motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
+  motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+  //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
+  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
   attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
@@ -325,7 +730,15 @@ void setup() {
   attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor6.limSwitchOpen, m6OpenISR, LIM_SWITCH_DIR);
+
+  // set motor joint angle limits
+  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
+  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
+  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
+  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
+  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
+  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
 
   // set motor shaft angle tolerances
   // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
@@ -336,18 +749,12 @@ void setup() {
   motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
   motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
 
-  // set motor joint angle limits
-  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
-  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
-  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
-  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
-  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
-  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
+}
 
+void initSpeedParams(void) {
   // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
   motor1.pidController.setOutputLimits(-50, 50, 5.0);
-  // motor2.pidController.setOutputLimits(-100, 100, 5.0);
   motor2.pidController.setOutputLimits(-50, 50, 5.0);
   motor3.pidController.setOutputLimits(-50, 50, 5.0);
   motor4.pidController.setOutputLimits(-50, 50, 5.0);
@@ -356,24 +763,20 @@ void setup() {
 
   // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
   // operate at 50% max speed, and the gains should vary based on which motor it is
-  //motor1.isOpenLoop = true;
-  //motor1.hasRamping = false;
-  motor1.openLoopSpeed = 50; // 50% speed
-  motor2.openLoopSpeed = 50; // 50% speed
+  motor1.openLoopSpeed = 25; // 50% speed
+  motor2.openLoopSpeed = 25; // 50% speed
   motor3.openLoopSpeed = 50; // 50% speed
-  motor4.openLoopSpeed = 50; // 50% speed
+  motor4.openLoopSpeed = 90; // 50% speed
   motor5.openLoopSpeed = 50; // 50% speed
   motor6.openLoopSpeed = 50; // 50% speed
-  motor1.openLoopGain = 0.75; // needs to be tested
-  motor2.openLoopGain = 0.0025; // needs to be tested
   // open loop gain is only for time-based open loop control
-  motor3.switchDirectionLogic(); // motor is wired backwards
+  motor1.openLoopGain = 0.75; // needs to be tested
+  motor2.openLoopGain = 0.0015; // needs to be tested
   motor5.openLoopGain = 0.32; // for 5V
-  motor5.switchDirectionLogic();
   motor6.openLoopGain = 0.35; // for 5V
-  motor6.switchDirectionLogic(); // positive angles now mean opening
+}
 
-  // activate the timer interrupts
+void initMotorTimers(void) {
   m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
   m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
@@ -382,245 +785,6 @@ void setup() {
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
-
-  // reset the elapsedMillis variables so that they're fresh upon entering the loop()
-  sinceAnglePrint = 0;
-  sinceStepperCheck = 0;
-}
-
-/* main code loop */
-void loop() {
-  /* limit switch checks occur before listening for commands */
-  // I should pack the following into functions, maybe make a debouncer class.. well I already started it
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    // check if the switch was hit
-    if (motorArray[i]->triggered) {
-      motorArray[i]->checkForActualPress();
-    }
-    // the switch was debounced and now we can react
-    if (motorArray[i]->actualPress) {
-      motorArray[i]->goToSafeAngle();
-    }
-    // put code here to check if the motor should be at the end of its path but isn't?
-    // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
-  }
-
-
-  motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
-  msgReceived = false;
-  msgIsValid = false;
-#if defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.spinOnce();
-  if (msgReceived) {
-    nh.logdebug(serialBuffer);
-  }
-#elif defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  if (UART_PORT.available()) {
-    // if a message was sent to the Teensy
-    msgReceived = true;
-    UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
-#ifdef DEBUG_MAIN
-    UART_PORT.print("GOT: "); UART_PORT.println(serialBuffer); // send back what was received
-#endif
-    Parser.parseCommand(motorCommand, serialBuffer); // read serialBuffer and stuff the data into motorCommand
-    memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-    msgIsValid = Parser.verifCommand(motorCommand); // verify the data to make sure it's valid
-  }
-#endif
-  if (msgReceived) {
-    if (msgIsValid) {
-      if (motorCommand.pingCommand) { // respond to ping
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("pong");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("pong");
-#endif
-      }
-      else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          motorArray[i]->stopRotation();
-        }
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("all motors stopped because of emergency stop");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("all motors stopped because of emergency stop");
-#endif
-      }
-      else if (motorCommand.resetAllMotors) { // emergency stop takes precedence
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          motorArray[i]->setSoftwareAngle(0.0);
-        }
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("all motor angle values reset");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("all motor angle values reset");
-#endif
-      }
-      else { // following cases are for commands to specific motors
-        if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
-          motorArray[motorCommand.whichMotor - 1]->stopRotation();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.print("stopped motor "); UART_PORT.println(motorCommand.whichMotor);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-          // this is SUPER DUPER GROSS
-          String infoMessage = "stopped motor " + motorCommand.whichMotor;
-          char actualMessage[50];
-          for (unsigned int i = 0; i < infoMessage.length(); i++) {
-            actualMessage[i] = infoMessage[i];
-          }
-          nh.loginfo(actualMessage);
-#endif
-        }
-        else if (motorCommand.loopCommand) { // set loop states for appropriate motor
-          if (motorCommand.loopState == OPEN_LOOP) {
-            motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in open loop");
-#endif
-          }
-          else if (motorCommand.loopState == CLOSED_LOOP) {
-            if (motorArray[motorCommand.whichMotor - 1]->hasEncoder) {
-              motorArray[motorCommand.whichMotor - 1]->isOpenLoop = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in closed loop");
-#endif
-            }
-            else {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.println("$E,Alert: cannot use closed loop if motor has no encoder.");
-#endif
-            }
-          }
-        }
-        else if (motorCommand.resetCommand) { // reset the motor angle's variable or actually control the motor to reset it to neutral position
-          if (motorCommand.resetAngleValue) {
-            motorArray[motorCommand.whichMotor - 1]->setSoftwareAngle(0.0);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("reset angle value of motor "); UART_PORT.println(motorCommand.whichMotor);
-#endif
-          }
-          else if (motorCommand.resetJointPosition) {
-            motorArray[motorCommand.whichMotor - 1]->goToAngle(0.0);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
-#endif
-          }
-        }
-        else if (motorCommand.switchDir) { // change the direction modifier to swap rotation direction in the case of backwards wiring
-          motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          int dir = motorArray[motorCommand.whichMotor - 1]->getDirectionLogic();
-          UART_PORT.print("direction modifier is now "); UART_PORT.println(dir);
-#endif
-        }
-        else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorCommand.motorsToMove[i]) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired direction is: "); UART_PORT.println(motorCommand.directionsToMove[i]);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " desired direction is: ";
-              infoMessage += motorCommand.directionsToMove[i];
-              char actualMessage[60];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
-#endif
-              motorArray[i]->budge(motorCommand.directionsToMove[i]);
-            }
-          }
-        }
-        else if (motorCommand.multiMove) { // make motors move simultaneously
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            if (motorCommand.motorsToMove[i]) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-              UART_PORT.print("motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
-#endif
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-              // this is SUPER DUPER GROSS
-              int tempVal = i + 1;
-              String infoMessage = "motor " + tempVal;
-              infoMessage += " desired angle (degrees) is: ";
-              infoMessage += motorCommand.anglesToReach[i];
-              char actualMessage[50];
-              for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                actualMessage[i] = infoMessage[i];
-              }
-              nh.loginfo(actualMessage);
-#endif
-              if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                UART_PORT.print("$E,Error: requested motor ");
-                UART_PORT.print(i + 1);
-                UART_PORT.println(" angle is not within angle limits.");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-                // this is SUPER DUPER GROSS
-                int tempVal = i + 1;
-                String infoMessage = "motor " + tempVal;
-                infoMessage += " angle is not within angle limits";
-                char actualMessage[50];
-                for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                  actualMessage[i] = infoMessage[i];
-                }
-                nh.logerror(actualMessage);
-#endif
-              }
-              else {
-                if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
-                  motorArray[i]->goToCommandedAngle();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    else { // bad command
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.println("$E,Error: bad motor command");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-      nh.logerror("error: bad motor command");
-#endif
-    }
-  }
-  if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
-    printMotorAngles();
-    sinceAnglePrint = 0; // reset the timer
-  }
-}
-
-void printMotorAngles(void) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.print("Motor Angles: ");
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    UART_PORT.print(motorArray[i]->getSoftwareAngle());
-    if (i < NUM_MOTORS - 1) {
-      UART_PORT.print(", ");
-    }
-    else {
-      UART_PORT.println("");
-    }
-  }
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  float angles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    angles[i] = motorArray[i]->getSoftwareAngle();
-    angleMessages[i].position = &(angles[i]);
-    //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle();
-  }
-  pub_m1.publish(&m1_angle_msg);
-  pub_m2.publish(&m2_angle_msg);
-  pub_m3.publish(&m3_angle_msg);
-  pub_m4.publish(&m4_angle_msg);
-  pub_m5.publish(&m5_angle_msg);
-  pub_m6.publish(&m6_angle_msg);
-  nh.spinOnce(); // does it cause problems if i spin twice in loop()
-#endif
 }
 
 void m3StepperInterrupt(void) {
@@ -637,8 +801,6 @@ void servoInterrupt(void) {
   motor5.motorTimerInterrupt();
   motor6.motorTimerInterrupt();
 }
-
-/* encoder ISRs */
 
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
@@ -724,7 +886,7 @@ void m6_encoder_interrupt(void) {
 #endif
 }
 #endif
-/* limit switch ISRs */
+
 void m1CwISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
   if (!(motor1.triggered) && motor1.triggerState == 0) {
@@ -865,7 +1027,7 @@ void m4ExtendISR(void) {
   void m5CcwISR(void) {
 	  ;
   }
-  void m6ExtendISR(void) {
+  void m6OpenISR(void) {
     ;
   }
 */

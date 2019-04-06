@@ -5,6 +5,11 @@
 #include "PidController.h"
 
 #define BUDGE_TIMEOUT 200 // if command hasn't been received in this amount of ms, stop turning
+#define FLEXION_SWITCH 'f'
+#define REVOLUTE_SWITCH 'r'
+#define GRIPPER_SWITCH 'g'
+#define SINGLE_ENDED_HOMING 1 // only home towards inside angles
+#define DOUBLE_ENDED_HOMING 2 // home towards both directions
 
 enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor directions
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
@@ -16,14 +21,24 @@ class RobotMotor {
     int motorType;
     static int numMotors; // keeps track of how many motors there are
     int encoderPinA, encoderPinB;
-    // for limit switch interrupts
-    int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend;
+    // for limit switch interrupts and homing
+    int limSwitchCw, limSwitchCcw, limSwitchFlex, limSwitchExtend, limSwitchOpen;
+    bool hasLimitSwitches;
+    char limitSwitchType;
     volatile bool triggered;
     bool actualPress;
     volatile int triggerState;
     int limitSwitchState;
     elapsedMillis sinceTrigger;
-    // other stuff
+    int homingType;
+    bool homingDone;
+    bool atSafeAngle; // for homing
+    int homingPass;
+    void checkForActualPress(void);
+    void goToSafeAngle(void);
+    void homeMotor(char homingDir);
+    void stopHoming(void);
+// other stuff
     float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
     float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
     float maxJointAngle, minJointAngle; // joint angle limits, used to make sure the arm doesn't bend too far and break itself
@@ -56,16 +71,22 @@ class RobotMotor {
     float getSoftwareAngle(void);
     void switchDirectionLogic(void); // tells the motor to reverse the direction for a motor's control... does this need to be virtual?
     int getDirectionLogic(void); // returns the directionModifier;
+    void setGearRatio(float ratio); // sets the gear ratio for the motor joint
+    void setOpenLoopGain(float loopGain); // set gain which adjusts open loop speed for open loop angle control
+    void setMotorSpeed(float motorSpeed); // set open loop speed and max speed of pid output
     /* movement functions */
-    virtual void stopRotation(void) = 0;
+    virtual void stopRotation(void) = 0; // stop turning the motor
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; // sets motor speed and direction until next timer interrupt
-    virtual void goToCommandedAngle(void) = 0;
-    virtual void goToAngle(float angle) = 0;
-    virtual void budge(int dir) = 0;
+    virtual void goToCommandedAngle(void) = 0; // once an angle is set it will go to the angle and won't ignore limits
+    virtual void goToAngle(float angle) = 0; // goes to angle ignoring limits
+    virtual void budge(int dir) = 0; // moves a motor as long as a new budge commmand comes in within 200ms
+    // for open loop control
+    float openLoopError; // public variable for open loop control
+    int openLoopSpeed; // angular speed (degrees/second)
+    float openLoopGain; // speed correction factor
+    float startAngle; // used in angle esimation
 
-    void checkForActualPress(void);
-    void goToSafeAngle(void);
-
+    
   private:
     // doesn't really make sense to have any private variables for this parent class.
     // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -94,6 +115,13 @@ RobotMotor::RobotMotor() {
   isBudging = false;
   isOpenLoop = true;
   hasRamping = false;
+  hasLimitSwitches = false;
+  homingType = SINGLE_ENDED_HOMING;
+  homingDone = true;
+  openLoopSpeed = 0; // no speed by default;
+  openLoopGain = 1.0; // temp open loop control
+  homingPass = 0;
+  atSafeAngle = true;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -109,13 +137,18 @@ void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int
 }
 
 void RobotMotor::attachLimitSwitches(char type, int switch1, int switch2) {
-  if (type == 'f') {
+  hasLimitSwitches = true;
+  limitSwitchType = type;
+  if (type == FLEXION_SWITCH) {
     limSwitchFlex = switch1;
     limSwitchExtend = switch2;
   }
-  else if (type == 'c') {
+  else if (type == REVOLUTE_SWITCH) {
     limSwitchCw = switch1;
     limSwitchCcw = switch2;
+  }
+  else if (type == GRIPPER_SWITCH) {
+    limSwitchOpen = switch1;
   }
 }
 
@@ -168,6 +201,20 @@ void RobotMotor::switchDirectionLogic(void) {
 
 int RobotMotor::getDirectionLogic(void) {
   return directionModifier;
+}
+
+void RobotMotor::setGearRatio(float ratio) {
+  gearRatio = ratio;
+  gearRatioReciprocal = 1 / ratio;
+}
+
+void RobotMotor::setOpenLoopGain(float loopGain) {
+  openLoopGain = loopGain;
+}
+
+void RobotMotor::setMotorSpeed(float motorSpeed) {
+  openLoopSpeed = motorSpeed;
+  pidController.setOutputLimits(-motorSpeed, motorSpeed);
 }
 
 void RobotMotor::setSoftwareAngle(float angle) {
@@ -240,6 +287,34 @@ void RobotMotor::goToSafeAngle(void) {
   // in wait for the next trigger to be confirmed
   actualPress = false;
   limitSwitchState = 0;
+}
+
+void RobotMotor::homeMotor(char homingDir) {
+  homingPass++;
+#ifdef DEBUG_HOMING
+  UART_PORT.print("homeMotor pass ");
+  UART_PORT.println(homingPass);
+#endif
+  if (homingDir == 'i') { //(neg, cw)
+#ifdef DEBUG_HOMING
+    UART_PORT.println("homeMotor inwards");
+#endif
+    // set homing direction inwards
+    goToAngle(2 * minHardAngle);
+  }
+  else if (homingDir == 'o') { //(pos, ccw)
+#ifdef DEBUG_HOMING
+    UART_PORT.println("homeMotor outwards");
+#endif
+    goToAngle(2 * maxHardAngle);
+  }
+  homingDone = false;
+}
+
+void RobotMotor::stopHoming(void) {
+  homingDone = true;
+  homingPass = 0;
+  atSafeAngle = true;
 }
 
 #endif

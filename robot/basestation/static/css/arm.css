@@ -149,6 +149,12 @@ html, body {
     height:280px;
 }
 
-#write-to-log {
+textarea#write-to-log {
     min-width: 100%;
+    min-height: 450px;
+}
+
+input#serial-cmd-input {
+    margin: 4px;
+    width: 100%;
 }

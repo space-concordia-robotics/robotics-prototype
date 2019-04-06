@@ -165,29 +165,103 @@ $(document).ready(() => {
       },
       {
         $el: $('button#ping-button'),
-        event: 'mousedown',
+        event: 'mouseup',
         route: '/ping_rover',
         handler: (data) => {
             console.log(data);
             pingRover(data.ping_msg, data.ros_msg);
         },
-      }
+    }
     ],
   };
 
-  Site.init();
-  // keyboard events
-  document.addEventListener("keydown", function (event) {
-    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {
-        $.ajax("/ping_rover", {
-             success: function(data) {
-                 console.log(data);
-                 pingRover(data.ping_msg, data.ros_msg);
-             },
-             error: function() {
-                console.log("An error occured")
-             }
-          });
-    }
-  });
+    Site.init();
+
+    $("#mux-0").mouseup(function() {
+        $.ajax({
+            url: '/select_mux',
+            type: 'POST',
+            data: "0",
+            success: function(response){
+                $("button#mux").text("Device 0: Rover");
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    })
+
+    $("#mux-1").mouseup(function() {
+        $.ajax({
+            url: '/select_mux',
+            type: 'POST',
+            data: "1",
+            success: function(response){
+                $("button#mux").text("Device 1: Arm");
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    })
+
+    $("#mux-2").mouseup(function() {
+        $.ajax({
+            url: '/select_mux',
+            type: 'POST',
+            data: "2",
+            success: function(response){
+                $("button#mux").text("Device 2: Science");
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    })
+
+    $("#mux-3").mouseup(function() {
+        $.ajax({
+            url: '/select_mux',
+            type: 'POST',
+            data: "3",
+            success: function(response){
+                $("button#mux").text("Device 3: Lidar");
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    })
+
+    $("#send-serial-btn").mouseup(function() {
+        let cmd = $("#serial-cmd-input").val();
+
+        $.ajax({
+            url: '/serial_cmd',
+            type: 'POST',
+            data: {
+                'cmd': cmd
+            },
+            success: function(response){
+                clearSerialCmd();
+                appendToConsole(response.output);
+                scrollToBottom();
+            }
+        })
+    })
+
+    $("#serial-cmd-input").on('keyup', function (e) {
+        if (e.keyCode == 13) {
+            let cmd = $("#serial-cmd-input").val();
+
+            $.ajax({
+                url: '/serial_cmd',
+                type: 'POST',
+                data: {
+                    'cmd': cmd
+                },
+                success: function(response){
+                    clearSerialCmd();
+                    appendToConsole(response.output);
+                    scrollToBottom();
+                }
+            })
+        }
+    });
 });

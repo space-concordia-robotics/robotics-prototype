@@ -23,10 +23,6 @@ class ServoMotor: public RobotMotor {
     void budge(int dir);
 
     // stuff for open loop control
-    float openLoopError; // public variable for open loop control
-    int openLoopSpeed; // angular speed (degrees/second)
-    float openLoopGain; // speed correction factor
-    float startAngle; // used in angle esimation
     unsigned int numMillis; // how many milliseconds for servo to reach desired position
     elapsedMillis timeCount; // how long has the servo been turning for
 
@@ -47,9 +43,6 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
   this -> motorType = CONTINUOUS_SERVO;
   hasEncoder = false;
-
-  openLoopSpeed = 0; // no speed by default;
-  openLoopGain = 1.0; // temp open loop control
 }
 
 void ServoMotor::motorTimerInterrupt(void) {
@@ -60,6 +53,9 @@ void ServoMotor::motorTimerInterrupt(void) {
     }
     else {
       isBudging = false;
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -81,6 +77,9 @@ void ServoMotor::motorTimerInterrupt(void) {
     }
     else {
       // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
+      if (!atSafeAngle) {
+        atSafeAngle = true; // alert homing stuff that it can go to next part
+      }
       movementDone = true;
       stopRotation();
     }
@@ -90,6 +89,9 @@ void ServoMotor::motorTimerInterrupt(void) {
       calcCurrentAngle();
       float output = pidController.updatePID(getSoftwareAngle(), getDesiredAngle());
       if (output == 0) {
+        if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
         movementDone = true;
         stopRotation();
       }

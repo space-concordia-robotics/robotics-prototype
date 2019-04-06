@@ -6,9 +6,10 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 
 import os
 import subprocess
-from urllib.parse import urlparse
+import urllib
+from urllib.parse import urlparse, unquote
 import flask
-from flask import jsonify
+from flask import jsonify, request
 # import time
 
 # TODO: Rename modules to lowercase
@@ -17,7 +18,6 @@ from robot.basestation.serialport import SerialPort
 from robot.basestation.microcontroller import Microcontroller
 
 app = flask.Flask(__name__)
-
 
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
@@ -42,16 +42,17 @@ def fetch_ros_master_ip():
     return fetch_ros_master_uri().hostname
 
 
-def run_shell(cmd):
+def run_shell(cmd, arg=""):
     """Run script command supplied as string.
 
     Returns tuple of output and error.
     """
-    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    cmd_list = cmd.split()
+    cmd_list.append(str(arg))
+    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     output, error = process.communicate()
 
     return output, error
-
 
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
@@ -59,6 +60,12 @@ def run_shell(cmd):
 def index():
     """Current landing page, the arm panel."""
     return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
+
+
+@app.route("/rover")
+def rover():
+    """Rover control panel."""
+    return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/ping_rover")
@@ -100,6 +107,57 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
+@app.route("/select_mux", methods=["POST", "GET"])
+def select_mux():
+    print("select_mux")
+    dev = str(request.get_data(), "utf-8")
+    print("dev : " + dev)
+
+    output, error = run_shell("rosrun mux_selector mux_select_client.py", dev)
+    output = str(output, "utf-8")
+    print("output: " + output)
+
+    return jsonify(success=True, dev=dev, output=output)
+
+@app.route("/serial_cmd", methods=["POST", "GET"])
+def serial_cmd():
+    print("serial_cmd")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
+
+    print("cmd: " + cmd)
+
+    ros_cmd = "rosrun serial_cmd serial_cmd_client.py '" + cmd + "'"
+    print("ros_cmd: " + ros_cmd)
+
+    output, error = run_shell("rosrun serial_cmd serial_cmd_client.py", cmd)
+    output = str(output, "utf-8")
+
+    print("output: " + output)
+
+    return jsonify(success=True, cmd=cmd, output=output)
+
+# only to be used when hacky implementation is fixed
+# see odroid_rx package for details
+@app.route("/odroid_rx", methods=["POST"])
+def odroid_rx():
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    log_file = script_dir + "/../rospackages/src/odroid_rx/scripts/odroid_rx.txt"
+    print("odroid_rx")
+
+    # query the topic exactly once
+    output, error = run_shell("cat", log_file)
+    output = str(output, "utf-8")
+
+    print("output: " + output)
+
+    return jsonify(success=True, odroid_rx=output)
 
 # Declare some placeholder values for `Motor.__init__` parameters
 max_angle = 160
