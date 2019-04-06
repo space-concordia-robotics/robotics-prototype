@@ -147,7 +147,7 @@ bool DcMotor::calcCurrentAngle(void) {
     return true;
   }
   else if (hasEncoder) { // closed loop and has encoder
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     imaginedAngle = currentAngle;
     return true;
   }

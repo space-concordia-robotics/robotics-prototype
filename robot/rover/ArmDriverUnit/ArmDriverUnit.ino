@@ -603,6 +603,20 @@ void loop() {
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
+  /* heartbeat code */
+  /*
+  if(msgReceived){
+    if(valid){
+      goodblink();
+    }
+    else {
+      badblink();
+    }
+  }
+  else {
+    heartbeat();
+  }
+  */
 }
 
 void printMotorAngles(void) {

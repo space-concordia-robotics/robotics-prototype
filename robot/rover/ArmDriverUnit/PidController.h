@@ -88,6 +88,7 @@ float PidController::updatePID(volatile float currentAngle, float desiredAngle) 
   return pidOutput;
   // prepare for next pid call
   previousError = error;
+  //Serial.println(pidOutput);
   dt = 0; // Reset timer
 }
 

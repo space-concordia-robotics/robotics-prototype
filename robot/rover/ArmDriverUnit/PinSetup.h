@@ -129,13 +129,20 @@
 #define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN29_BIT
 #define M2_LIMIT_SW_FLEX   28
 #define M2_LIMIT_SW_EXTEND 29
-#define M2_ENCODER_RESOLUTION 7*2 //7*4 //48 // counts per motor shaft revolution
-#define M2_GEAR_RATIO      189.0*20.0 //99.508*20 //188 planetary gear chained to worm gear drive
+#define M2_ENCODER_RESOLUTION 48 // counts per motor shaft revolution
+#define M2_GEAR_RATIO      188.611 //*20.0 //99.508*20 //188 planetary gear chained to worm gear drive
+
 #define M2_MIN_HARD_ANGLE   -65.0
 #define M2_MAX_HARD_ANGLE   50.0
 #define M2_MIN_SOFT_ANGLE   -55.0
 #define M2_MAX_SOFT_ANGLE   40.0
 
+/*
+#define M2_MIN_HARD_ANGLE   -720.0
+#define M2_MAX_HARD_ANGLE   720.0
+#define M2_MIN_SOFT_ANGLE   -700.0
+#define M2_MAX_SOFT_ANGLE   700.0
+*/
 // servos
 
 #define M5_PWM_PIN         35
