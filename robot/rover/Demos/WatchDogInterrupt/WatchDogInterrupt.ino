@@ -1,34 +1,25 @@
-int CurrentTime;
-int DogTimer = 0;
+int dogTimer = 0;
+unsigned long int previousMillis = 0;
 const int led = 13;
-bool ledState = false;
+bool ledState = LOW;
 void setup() {
   // initialize the digital pin as an output.
   pinMode(led, OUTPUT);
-  // Indicate we are starting over by hold led off for 1s
-  ledState = false;
-  digitalWrite(led, ledState);
-  delay(1000);
-  // Indicate we are in setup by hold LED on
-  ledState = true;
-  digitalWrite(led, ledState);
-  delay(2000);
+  Serial.begin(9600);
   setDogTime(500);
   kickDog();
+  
 }
 
 void loop() {
-  
-  CurrentTime = millis();
+  unsigned long int currentTime = millis();
   while (true) {
-    ledState = !ledState;
-    digitalWrite(led, ledState);
-    delay(100);
-  if((CurrentTime - DogTimer) > 10){ 
-    kickDog();
-    DogTimer = millis();
-  } //if
- } //while
+    Blink();
+    if((currentTime - dogTimer) > 10){ 
+     kickDog();
+     dogTimer = millis();
+    } //if
+  } //while
 } //loop
 
 //The function "kicks the dog". Refreshes its timeout counter. If not refreshed, system will be reset.
@@ -38,7 +29,15 @@ void kickDog(){
   WDOG_REFRESH = 0xB480;
   interrupts();
 }
-
+void Blink(){
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis >= 100){
+    previousMillis = currentMillis;
+    ledState = !ledState;
+    digitalWrite(led, ledState);
+    Serial.println("test");
+  }
+}
 void setDogTime(int duration){
   
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ1; 
