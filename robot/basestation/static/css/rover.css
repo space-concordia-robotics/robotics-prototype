@@ -190,3 +190,7 @@ textarea#rover-log {
     min-width: 100%;
     min-height: 450px;
 }
+
+.speed-throttle-control {
+    color: white;
+}
