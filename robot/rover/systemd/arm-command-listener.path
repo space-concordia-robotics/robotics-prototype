@@ -1,3 +1,5 @@
+# make sure to enable this path as well as the service file with systemctl to make it actually work
+# example: sudo systemctl enable arm-command-listener.path
 [Unit]
 Description=Watch /dev/ttyACM0 and activate arm-command-listener.service
 
@@ -6,4 +8,3 @@ DirectoryNotEmpty=/dev/ttyACM0
 
 [Install]
 WantedBy=multi-user.target
-

@@ -259,6 +259,9 @@ while True:
                         response = ser.readline().decode()
                         #mySocket.sendto(str.encode(response), (clientIP, CLIENT_PORT))
                         print(response)
+                elif uart:
+                    u.tx(command)
+                    # get response, print it
 
     except Exception:
         if usb:

@@ -243,10 +243,6 @@ void setup() {
     delay(1000);  // do not print too fast!
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(1000);
-    digitalWrite(LED_BUILTIN, HIGH);
     Serial.println("setup complete");
 
     //  pinMode(DC_PIN_FRONT_RIGHT, OUTPUT);
@@ -296,7 +292,7 @@ void setup() {
     pinMode(LB_DIR, OUTPUT);
     pinMode(LB_PWM, OUTPUT);
 
-    ser_flush();
+    //ser_flush();
 
 //    analogWrite(RF.getPwmPin(), 127);
 //    Serial.println(RF.getPwmPin());
@@ -377,19 +373,24 @@ void loop() {
         String cmd = "";
         // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
         if (UART_PORT.available()) {
-            Serial.println("yooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
+            //Serial.println("yooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
             // parse command
             cmd = UART_PORT.readString();
-            throttle = getValue(cmd, ':', 0).toInt();
-            steering = getValue(cmd, ':', 1).toInt();
-            UART_PORT.print("TEENSY throttle: ");
-            UART_PORT.println(throttle);
-            UART_PORT.print("TEENSY steering: ");
-            UART_PORT.println(steering);
 
-            throttle -= 49.5;
-            steering -= 49.5;
+            if (cmd.indexOf(":") > 0) {
+                UART_PORT.println("Received command");
+                throttle = getValue(cmd, ':', 0).toInt();
+                steering = getValue(cmd, ':', 1).toInt();
+                UART_PORT.print("TEENSY throttle: ");
+                UART_PORT.println(throttle);
+                UART_PORT.print("TEENSY steering: ");
+                UART_PORT.println(steering);
+
+                throttle -= 49.5;
+                steering -= 49.5;
+            }
         } else {
+            UART_PORT.println("No command received");
             throttle = 0;
             steering = 0;
         }
@@ -471,7 +472,7 @@ void loop() {
         
 
         prevRead = millis();
-        ser_flush();
+        //ser_flush();
     }
 
 }

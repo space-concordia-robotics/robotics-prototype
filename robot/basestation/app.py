@@ -263,8 +263,8 @@ def rover_drive():
         # decode URI
         cmd = unquote(cmd)
 
-    rover_ip = "127.0.0.1" # for local testing
-    #rover_ip = "172.16.1.30" # for testing with radios
+    #rover_ip = "127.0.0.1" # for local testing
+    rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
     c = Connection("rover_drive", rover_ip, 5010)
