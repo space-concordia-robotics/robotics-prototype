@@ -15,7 +15,7 @@ if [ -f /aafirstboot ]; then /aafirstboot start ; fi
 # these GPIO pins will be used to select the proper MUX channel
 # for the corresponding serial device to communicate with
 
-# export and set physical pins 13 (GPIO 21) and 15 (GPIO 15) to output mode
+# export and set physical pins 13 (GPIO 21) and 15 (GPIO 18) to output mode
 sudo -u odroid /usr/local/bin/gpio export 21 out # s1
 sudo -u odroid /usr/local/bin/gpio export 18 out # s0
 
