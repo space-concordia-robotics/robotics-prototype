@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     rospy.init_node("task_handler_client")
 
-    # expecting 0, 1, 2, 3 for rover, arm, science, lidar
     task = sys.argv[1]
     status = sys.argv[2]
 

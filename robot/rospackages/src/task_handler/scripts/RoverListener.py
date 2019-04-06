@@ -7,9 +7,10 @@ import sys
 import time
 
 class RoverListener:
-    #command_listener = "./RoverCommandListener.py"
-    command_listener = "/home/beep/Programming/robotics-prototype/robot/rospackages/src/task_handler/scripts/RoverCommandListener.py"
-    #command_listener = "/usr/bin/RoverCommandListener.py"
+    # for local testing, set this absolute path to where RoverCommandListener script resides
+    #command_listener = "/home/beep/Programming/robotics-prototype/robot/rospackages/src/task_handler/scripts/RoverCommandListener.py"
+    # use this line for testing with odroid
+    command_listener = "/usr/bin/RoverCommandListener.py"
 
     def __init__(self):
         self.p1_pid = -1
