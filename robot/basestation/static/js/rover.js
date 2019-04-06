@@ -138,18 +138,6 @@ $(document).keyup(function(e) {
               $("#right-rear-current").text("0.3");
           }
 
-          // send REST signal
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 't'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
           break;
 
       case 87: // up
@@ -169,18 +157,6 @@ $(document).keyup(function(e) {
               $("#right-rear-current").text("0.3");
           }
 
-          // send REST signal
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 't'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
           break;
 
       case 68: // right
@@ -200,18 +176,6 @@ $(document).keyup(function(e) {
               $("#right-rear-current").text("0.3");
           }
 
-          // send REST signal
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 't'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
           break;
 
       case 83: // down
@@ -231,18 +195,6 @@ $(document).keyup(function(e) {
               $("#right-rear-current").text("0.3");
           }
 
-          // send REST signal
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 't'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
           break;
 
           case 73: // increase throttle
