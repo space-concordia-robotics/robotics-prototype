@@ -121,6 +121,16 @@ bool msgIsValid = false;
 bool msgCheck = false;
 bool msgState = false;
 
+/*LED variables*/
+const int ledPin = 13;
+unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated
+int ledState = LOW;
+const int goodBlinkCounter = 4;
+const int badBlinkCounter = 12;
+const int goodBlinkInterval = 250;
+const int badBlinkInterval = 100;
+bool complete = false;
+
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
 //ros::NodeHandle nh;
@@ -384,13 +394,6 @@ void loop() {
         nh.loginfo("pong");
 #endif
       }
-      else if (motorCommand.whoCommand) { // respond with which teensy this is
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("arm");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("arm");
-#endif
-      }
       else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
         for (int i = 0; i < NUM_MOTORS; i++) {
           motorArray[i]->stopRotation();
@@ -607,7 +610,7 @@ void loop() {
       nh.logerror("error: bad motor command");
 #endif
     }
-    msgCheck = !msgCheck; //Setting message check value to TRUE as a message is received
+    msgCheck = true; //Setting message check value to TRUE as a message is received
     if (msgIsValid == true){
       msgState = true;
     }
@@ -622,11 +625,11 @@ void loop() {
   
   /* heartbeat code */
   if(msgCheck == true){
-    if(msgState){
-      goodBlink();
+    if(msgState == true){
+      msgCheck = Blink(goodBlinkInterval, goodBlinkCounter);
     }
     else {
-      badBlink();
+      msgCheck = Blink(badBlinkInterval, badBlinkCounter);
     }
   }
   else {
@@ -1049,12 +1052,27 @@ void m4ExtendISR(void) {
 */
 
 /*LED blink when message received */
-void goodBlink(){ //2 quick blinks
-  
-}
-
-void badBlink(){ //quick blinking 6 time and twice as fast as goodBlink
-  
+/*When a good message is received, ledInterval = 250, maxBlinks = 4*/
+/*When a bad message is received, ledInterval = 100, maxBlinks = 12*/
+bool Blink(const int ledInterval, int maxBlinks){ 
+  static bool complete = false;
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis >= ledInterval){ 
+    previousMillis = currentMillis;
+    if(ledState == LOW){
+      ledState = HIGH;
+    } else{
+      ledState = LOW;
+    }
+    digitalWrite(led, ledState);
+    Serial.println(ledState);
+    blinkCounter++;
+  }
+  if(blinkCounter == maxBlinks){ 
+    complete = true;
+    blinkCounter = 0;
+  }
+  return complete;
 }
 
 void heartbeat(){
