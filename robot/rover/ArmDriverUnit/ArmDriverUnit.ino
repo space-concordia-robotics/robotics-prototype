@@ -118,6 +118,8 @@ Parser Parser; // object which parses and verifies commands
 
 bool msgReceived = false;
 bool msgIsValid = false;
+bool msgCheck = false;
+bool msgState = false;
 
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
@@ -598,25 +600,32 @@ void loop() {
       nh.logerror("error: bad motor command");
 #endif
     }
+    msgCheck = !msgCheck; //Setting message check value to TRUE as a message is received
+    if (msgIsValid == true){
+      msgState = true;
+    }
+    else{
+      msgState = false;
+    }
   }
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
+  
   /* heartbeat code */
-  /*
-  if(msgReceived){
-    if(valid){
-      goodblink();
+  if(msgCheck == true){
+    if(msgState){
+      goodBlink();
     }
     else {
-      badblink();
+      badBlink();
     }
   }
   else {
     heartbeat();
   }
-  */
+  
 }
 
 void printMotorAngles(void) {
@@ -1031,3 +1040,16 @@ void m4ExtendISR(void) {
     ;
   }
 */
+
+/*LED blink when message received */
+void goodBlink(){ //2 quick blinks
+  
+}
+
+void badBlink(){ //quick blinking 6 time and twice as fast as goodBlink
+  
+}
+
+void heartbeat(){
+  
+}
