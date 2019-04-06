@@ -11,6 +11,7 @@
 struct commandInfo {
   // commands that apply to the teensy in general
   bool pingCommand = false; // for ping command
+  bool whoCommand = false; // for asking which teensy it is
   bool stopAllMotors = false; // for stopping all motors
   bool resetAllMotors = false; // for resetting all angle values
   bool homeAllMotors = false; // to search for limit switches and obtain absolute position
@@ -78,6 +79,12 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     cmd.pingCommand = true;
 #ifdef DEBUG_PARSING
     UART_PORT.println("$S,Success: parsed ping command");
+#endif
+  }
+  else if (String(msgElem) == "who") {
+    cmd.whoCommand = true;
+#ifdef DEBUG_PARSING
+    UART_PORT.println("$S,Success: parsed who command");
 #endif
   }
   else if (String(msgElem) == "stop") {
@@ -374,6 +381,12 @@ bool Parser::verifCommand(commandInfo cmd) {
   if (cmd.pingCommand) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.println("$S,Success: verified ping command");
+#endif
+    return true;
+  }
+  else if (cmd.whoCommand) {
+#ifdef DEBUG_VERIFYING
+    UART_PORT.println("$S,Success: verified who command");
 #endif
     return true;
   }

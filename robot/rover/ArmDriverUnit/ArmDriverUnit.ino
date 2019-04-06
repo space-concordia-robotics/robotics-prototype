@@ -384,6 +384,13 @@ void loop() {
         nh.loginfo("pong");
 #endif
       }
+      else if (motorCommand.whoCommand) { // respond with which teensy this is
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("arm");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("arm");
+#endif
+      }
       else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
         for (int i = 0; i < NUM_MOTORS; i++) {
           motorArray[i]->stopRotation();
