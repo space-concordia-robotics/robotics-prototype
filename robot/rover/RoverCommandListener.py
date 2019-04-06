@@ -21,6 +21,7 @@ dynamic = False
 # class in /usr/bin and change the following line to
 # from connection import Connection
 # for the startup service to work properly
+#from connection import Connection
 from robot.comms.connection import Connection
 from robot.comms.uart import Uart
 
@@ -61,6 +62,7 @@ if usb:
     first_port = ports[0].name
     print("Connecting to port: " + first_port)
     ser = serial.Serial('/dev/' + first_port, 9600)
+    #ser = serial.Serial('/dev/ttyACM1', 9600)
 elif uart:
     u = Uart("/dev/ttySAC0", 9600)
 
@@ -84,7 +86,7 @@ print("Ready for incoming drive cmds!\n")
 
 print_commands_list()
 
-key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 't', 'q']
+key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'm', 'n', 'q']
 REST = 49.5
 throttle_speed = 0
 steering_speed = 0
@@ -148,11 +150,18 @@ while True:
                 elif uart:
                     u.tx(command)
 
-            # 't' --> reset to 0 on release key, otherwise motor keeps spinning
-            # 45.5:45.5
-            elif command == 't':
-                print("cmd: t --> stop moving")
-                command = str(REST) + ":" + str(REST) + "\n"
+            elif command == 'm':
+                print("cmd: m --> enable motor controls")
+                command = "activate\n"
+
+                if usb:
+                    ser.write(str.encode(command))
+                elif uart:
+                    u.tx(command)
+
+            elif command == 'n':
+                print("cmd: n --> disable motor controls")
+                command = "deactivate\n"
 
                 if usb:
                     ser.write(str.encode(command))
@@ -220,3 +229,4 @@ while True:
         traceback.print_exc(file=sys.stdout)
         print("-"*60)
         break
+
