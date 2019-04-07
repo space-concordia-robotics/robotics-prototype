@@ -5,23 +5,31 @@ const long delayInterval = 1000;
 const long stateInterval = 250;
 
 void setup() {
+  pinMode(led, OUTPUT);
   // put your setup code here, to run once:
-  pinMode(LED, OUTPUT);
+  Serial.begin(9600);
+  
 }
 
 void loop() {
-  unsigned long int currentMillis = millis();
-  
-  if(currentMillis - lastTime > delayInterval){
-    ledState = !(ledState);
-    digitalWrite(led, ledState);
-    lastTime = currentMillis;
-  } //if
-  else if(currentMillis - lastTime > stateInterval){
-    ledState = !(ledState);
-    digitalWrite(led, ledState);
-  } //elseif
-} //loop
+  //place code to loop here
+  heartbeat();
+}
 
-//To add a 2nd led which follows its own timing, just add a "lastTime2", and the const time values for the 2nd LED into
-//an extra if-else-if statement like the one above.
+void goodBlink(){
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis >= 1000){
+    previousMillis = currentMillis;
+    ledSwap();
+    digitalWrite(led, ledState);
+    Serial.println(ledState);
+  }
+}
+
+void ledSwap(){
+  if(ledState == HIGH){
+    ledState = LOW;
+  } else{
+    ledState = HIGH;
+  }
+}

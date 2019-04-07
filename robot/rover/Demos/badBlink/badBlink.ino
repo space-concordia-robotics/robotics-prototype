@@ -7,7 +7,6 @@ void setup() {
   pinMode(led, OUTPUT);
   // put your setup code here, to run once:
   Serial.begin(9600);
-  
 }
 
 void loop() {
@@ -23,14 +22,14 @@ void loop() {
 
 void goodBlink(){
   unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= 1000){ //set to 100 for badblink, set to 250 for goodblink
+  if(currentMillis - previousMillis >= 100){ //set to 100 for badblink, set to 250 for goodblink
     previousMillis = currentMillis;
     ledState = !ledState;
     digitalWrite(led, ledState);
     Serial.println(ledState);
     counter++;
   }
-  //if(counter == 4){ //set to 12 for badblink. 4 for goodblink
-  //  complete = true;
-  //}
+  if(counter == 12){ //set to 12 for badblink. 4 for goodblink
+    complete = true;
+  }
 }
