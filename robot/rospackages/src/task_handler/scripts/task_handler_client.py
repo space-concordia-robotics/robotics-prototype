@@ -22,7 +22,7 @@ def is_valid_request(task, status):
     status = int(status)
 
     # all known tasks to be handled by the handler
-    known_tasks = ["rover_listener"]
+    known_tasks = ["rover_listener", "arm_listener"]
 
     if task in known_tasks and status in [0, 1]:
         return True

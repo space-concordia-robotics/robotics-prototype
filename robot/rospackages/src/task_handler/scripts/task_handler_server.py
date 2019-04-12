@@ -4,7 +4,10 @@ import rospy
 from Listener import Listener
 from task_handler.srv import *
 
-running_tasks = [Listener("./RoverCommandListener.py", "python3")]
+# for local testing use "./RoverCommandListenr.py"
+scripts = ["/usr/bin/RoverCommandListener.py", "/usr/bin/ArmCommandListener.py"]
+running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3")]
+known_tasks = ["rover_listener", "arm_listener"]
 
 def handle_task_request(req):
     response = "\n" + handle_task(req.task, req.status)
@@ -17,18 +20,22 @@ def handle_task(task, status):
 
     global running_tasks
 
-    known_tasks = ["rover_listener"]
-
     if task in known_tasks and status in [0, 1]:
-        if task == "rover_listener":
+        if task in known_tasks:
+            i = 0 if "rover" in task else 1
+
             if status == 1:
-                if running_tasks[0].start():
+
+                if running_tasks[i].start():
                     response = "Started " + task
                 else:
                     response = "Failed to start " + task
+
+                    if running_tasks[i].is_running():
+                        response += ", already running"
             else:
-                if len(running_tasks) >= 1 and isinstance(running_tasks[0], Listener):
-                    if running_tasks[0].stop():
+                if len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
+                    if running_tasks[i].stop():
                         response = "Stopped " + task
                     else:
                         response = task + " not running, cannot terminate it"
