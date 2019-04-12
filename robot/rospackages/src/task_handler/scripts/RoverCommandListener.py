@@ -11,8 +11,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = True
-competition = False
+local = False
+competition = True
 # dynamic not working properly, keep at False
 dynamic = False
 

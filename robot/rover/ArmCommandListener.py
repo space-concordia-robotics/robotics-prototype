@@ -14,8 +14,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = True
-competition = False
+local = False
+competition = True
 #dynamic = True
 
 # note: since this program is in /usr/bin/ on the OBC
