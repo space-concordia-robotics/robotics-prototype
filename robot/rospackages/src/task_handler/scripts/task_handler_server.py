@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import rospy
-from RoverListener import RoverListener
+from Listener import Listener
 from task_handler.srv import *
 
-running_tasks = [RoverListener()]
+running_tasks = [Listener("./RoverCommandListener.py", "python3")]
 
 def handle_task_request(req):
     response = "\n" + handle_task(req.task, req.status)
@@ -22,13 +22,13 @@ def handle_task(task, status):
     if task in known_tasks and status in [0, 1]:
         if task == "rover_listener":
             if status == 1:
-                if running_tasks[0].start_listener():
+                if running_tasks[0].start():
                     response = "Started " + task
                 else:
                     response = "Failed to start " + task
             else:
-                if len(running_tasks) >= 1 and isinstance(running_tasks[0], RoverListener):
-                    if running_tasks[0].stop_listener():
+                if len(running_tasks) >= 1 and isinstance(running_tasks[0], Listener):
+                    if running_tasks[0].stop():
                         response = "Stopped " + task
                     else:
                         response = task + " not running, cannot terminate it"
