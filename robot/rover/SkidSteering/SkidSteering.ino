@@ -245,9 +245,12 @@ void setup() {
   UART_PORT.begin(9600);
   UART_PORT.setTimeout(50);
   //bluetooth.begin(9600);
-  delay(1000);  // do not print too fast!
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);  // do not print too fast!
+  toggleLed();
+  delay(1000);
+  toggleLed();
   Serial.println("setup complete");
   ser_flush();
 
@@ -372,33 +375,45 @@ void setup() {
 
 void loop() {
   if (UART_PORT.available() && !isActivated) {
-    //toggleLed();
-    String cmd = UART_PORT.readStringUntil('\n');
-    ser_flush();
-
-    UART_PORT.print("cmd: ");
-    UART_PORT.println(cmd);
-
-    if (cmd == "activate") {
+    if (!isActivated) {
       toggleLed();
-      isActivated = true;
-    } else Serial.println("bboobsfsodif");
+      String cmd = UART_PORT.readStringUntil('\n');
+      ser_flush();
+
+      UART_PORT.print("cmd: ");
+      UART_PORT.println(cmd);
+
+      if (cmd == "activate") {
+        toggleLed();
+        isActivated = true;
+      } else if (cmd == "who") {
+        UART_PORT.println("rover");
+      }
+      else {
+        Serial.println("bboobsfsodif");
+      }
+    }
   }
 
   if ((millis() - prevRead > 20) && isActivated)
     //      if ((millis() - prevRead > 20))
   {
-    toggleLed();
+    //toggleLed();
     // incoming format example: "5:7"
     // this represents the speed for throttle;steering
     // as well as direction by the positive/negative sign
     String cmd = "";
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
+      toggleLed();
       //Serial.println("yooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
       // parse command
       cmd = UART_PORT.readStringUntil('\n');
       ser_flush();
+
+      if (cmd == "who") {
+        UART_PORT.println("rover");
+      }
 
       if (cmd == "deactivate") {
         toggleLed();
@@ -416,7 +431,7 @@ void loop() {
         steering -= 49.5;
       }
     } else {
-      UART_PORT.println("No command received");
+      //UART_PORT.println("No command received");
       throttle = 0;
       steering = 0;
     }
@@ -424,10 +439,10 @@ void loop() {
     //throttle = phone.getThrottle();
     //steering = phone.getSteering();
 
-    UART_PORT.print("throttle: ");
-    UART_PORT.println(throttle);
-    UART_PORT.print("steering: ");
-    UART_PORT.println(steering);
+    //UART_PORT.print("throttle: ");
+    //UART_PORT.println(throttle);
+    //UART_PORT.print("steering: ");
+    //UART_PORT.println(steering);
 
 
     // If statement for CASE 1: steering toward the RIGHT
@@ -474,8 +489,8 @@ void loop() {
     LB.setVelocityNoPID(leftMotorDirection, abs(desiredVelocityLeft));
     //UART_PORT.print("leftMotorDirection: ");
     //UART_PORT.println(abs(leftMotorDirection));
-    UART_PORT.print("desiredVelocityLeft: ");
-    UART_PORT.println(abs(desiredVelocityLeft));
+    //UART_PORT.print("desiredVelocityLeft: ");
+    //UART_PORT.println(abs(desiredVelocityLeft));
 
 
     RF.calcCurrentVelocity();
