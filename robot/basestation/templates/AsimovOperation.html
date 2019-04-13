@@ -95,23 +95,35 @@
                 <div class="col-md" align="center">
                     <h5 class="container-header">Control Panel</h5>
                     <div class="row control-main-btn">
-                        <div class="col-sm-4" align="center" style="vertical-align:middle; border-style:none">
+                        <div class="col-sm-3" align="center" style="vertical-align:middle; border-style:none">
                             <button type="button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home Position</span>
+                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home</span>
                             </button>
                         </div>
-                        <div class="col-sm-4" align="center" style="vertical-align:middle; border-style:none">
+                        <div class="col-sm-3" align="center" style="vertical-align:middle; border-style:none">
                             <button type="button" id="ping-button" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
                                 <span style="font-family:'Helvetica Neue', Arial, sans-serif;">Ping</span>
                             </button>
                         </div>
-                        <div class="col-sm-4" align="center" style="border-style:none;">
+                        <div class="col-sm-3" align="center" style="border-style:none;">
                             <span>
                                 <strong>Manual Control</strong>
                             </span>
                             <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
                                 <label>
                                     <input id="manual-control-btn" type="checkbox" onchange="manualControl()">
+                                    <span> </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3" align="center" style="border-style:none;">
+                            <span>
+                                <strong>Enable Controls</strong>
+                            </span>
+                            <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                <label>
+                                    <input id="enable-control-btn" type="checkbox" onchange="enableArmListener()">
                                     <span> </span>
                                 </label>
                             </div>

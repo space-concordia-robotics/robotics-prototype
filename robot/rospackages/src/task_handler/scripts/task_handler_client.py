@@ -5,7 +5,7 @@ import datetime
 import rospy
 from task_handler.srv import *
 
-def task_handler_client(task, status):
+def task_handler_client(r_task, r_status):
     # convenience function that blocks until 'task_handler' is available
     rospy.wait_for_service('task_handler')
 
@@ -16,27 +16,34 @@ def task_handler_client(task, status):
     except rospy.ServiceException as e:
         print("Service call failed: {:s}".format(str(e)))
 
-def is_valid_request(task, status):
-
-    task = str(task)
-    status = int(status)
+def is_valid_request(r_task, r_status):
+    """
+    Validate client request parameters
+    r_task: requested task
+    r_status: status ON/OFF, represented by 1 and 0 respectively
+    """
+    r_task = str(r_task)
+    r_status = int(r_status)
 
     # all known tasks to be handled by the handler
     known_tasks = ["rover_listener", "arm_listener"]
 
-    if task in known_tasks and status in [0, 1]:
+    if r_task in known_tasks and r_status in [0, 1]:
         return True
 
     return False
 
 def usage():
+    """
+    Return string showcasing proper usage of this client script
+    """
     help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status]
-                  \nValid task options: ['rover_listener']
+                  \nValid task options: ['rover_listener', 'arm_listener']
                   \nValid status options: [0, 1]"""
     return help_msg
 
 if __name__ == "__main__":
-    if len(sys.argv) > 3 or len(sys.argv) < 3:
+    if len(sys.argv) < 3 or len(sys.argv) > 3:
         print(usage())
         sys.exit(1)
 
@@ -52,7 +59,7 @@ if __name__ == "__main__":
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
-    print("Running " if status else "Terminating " + str(task))
+    print("Running" if status else "Terminating", str(task))
     print(sent_ts)
     print("---")
 
