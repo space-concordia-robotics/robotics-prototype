@@ -29,7 +29,9 @@ class Listener:
             self.p1_pid = self.p1.pid
 
             # allow some time to pass
-            time.sleep(1)
+            # specifically waiting for 4 seconds since command listener scripts
+            # take an extra 2-3 seconds time to identify if the correct MCU is connected
+            time.sleep(4)
 
             poll = self.p1.poll()
 
@@ -42,7 +44,7 @@ class Listener:
 
                 return False
             else:
-
+                print("Assigned process id: " + str(self.p1_pid))
                 return True
         else:
             print("Failed to start process, script does not exist")

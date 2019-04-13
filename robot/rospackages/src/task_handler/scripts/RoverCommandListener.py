@@ -58,9 +58,90 @@ if not local and not competition and not dynamic:
 if usb:
     # set up connection to arduino
     ports = list(serial.tools.list_ports.comports())
-    first_port = ports[0].name
-    print("Connecting to port: " + first_port)
-    ser = serial.Serial('/dev/' + first_port, 9600)
+    is_rover = False
+
+    if len(ports) == 1:
+        print("1 USB device detected")
+        port = ports[0].name
+        ser = serial.Serial('/dev/' + port, 9600)
+
+        print("clearing buffer")
+        while ser.in_waiting:
+            print(ser.readline().decode())
+
+        for i in 0, 3:
+            who = ""
+            print("identifying MCU")
+            ser.write(str.encode("who\n"))
+
+            # CRITICAL: give time for MCU to respond
+            time.sleep(1)
+
+            while ser.in_waiting:
+                who = ser.readline().decode()
+                print("who: " + who)
+
+            if who.strip() == "rover":
+                print("Rover MCU identified!")
+                is_rover = True
+    elif len(ports) == 2:
+        print("2 USB devices detected")
+        port = ports[1].name
+        ser = serial.Serial('/dev/' + port, 9600)
+
+        print("clearing buffer")
+        while ser.in_waiting:
+            print(ser.readline().decode())
+
+        for i in 0, 3:
+            who = ""
+            print("identifying MCU")
+            ser.write(str.encode("who\n"))
+
+            # CRITICAL: give time for MCU to respond
+            time.sleep(1)
+
+            while ser.in_waiting:
+                who = ser.readline().decode()
+                print("who: " + who)
+
+            if who.strip() == "rover":
+                print("Rover MCU identified!")
+                is_rover = True
+
+        if not is_rover:
+            port = ports[0].name
+            ser = serial.Serial('/dev/' + port, 9600)
+
+            print("clearing buffer")
+            while ser.in_waiting:
+                print(ser.readline().decode())
+
+            for i in 0, 3:
+                who = ""
+                print("identifying MCU")
+                ser.write(str.encode("who\n"))
+
+                # CRITICAL: give time for MCU to respond
+                time.sleep(1)
+
+                while ser.in_waiting:
+                    who = ser.readline().decode()
+                    print("who: " + who)
+
+                if who.strip() == "rover":
+                    print("Rover MCU identified!")
+                    is_rover = True
+
+    else:
+        print("No USB devices recognized, exiting")
+        sys.exit(0)
+
+    if is_rover:
+        print("Connected to port: " + port)
+    else:
+        print("Incorrect MCU connected, terminating listener")
+        sys.exit(0)
 elif uart:
     u = Uart("/dev/ttySAC0", 9600)
 
