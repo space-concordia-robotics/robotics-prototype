@@ -50,9 +50,7 @@ if __name__ == "__main__":
     rospy.init_node("task_handler_client")
 
     task = sys.argv[1]
-    status = sys.argv[2]
-
-    print("status:", status)
+    status = int(sys.argv[2])
 
     if not is_valid_request(task, status):
         print("Invalid format")
@@ -61,7 +59,7 @@ if __name__ == "__main__":
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
-    print("Running" if status == "1" else "Terminating", str(task))
+    print("Running" if status == 1 else "Terminating", str(task))
     print(sent_ts)
     print("---")
 
