@@ -376,7 +376,7 @@ void setup() {
 void loop() {
   if (UART_PORT.available() && !isActivated) {
     if (!isActivated) {
-      toggleLed();
+      //toggleLed();
       String cmd = UART_PORT.readStringUntil('\n');
       ser_flush();
 
@@ -384,7 +384,7 @@ void loop() {
       UART_PORT.println(cmd);
 
       if (cmd == "activate") {
-        toggleLed();
+        //toggleLed();
         isActivated = true;
       } else if (cmd == "who") {
         UART_PORT.println("rover");
@@ -405,7 +405,7 @@ void loop() {
     String cmd = "";
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
-      toggleLed();
+      //toggleLed();
       //Serial.println("yooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
       // parse command
       cmd = UART_PORT.readStringUntil('\n');
@@ -416,7 +416,7 @@ void loop() {
       }
 
       if (cmd == "deactivate") {
-        toggleLed();
+        //toggleLed();
         isActivated = false;
       } else if (cmd.indexOf(":") > 0) {
         UART_PORT.println("Received command");

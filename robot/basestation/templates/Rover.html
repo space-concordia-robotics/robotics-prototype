@@ -142,24 +142,30 @@
                     <h5 class="container-header">Controls</h5>
                     <table align="center">
                         <tr>
-                            <td></td>
                             <td>
-                                <input type="checkbox" id="enable-rover-btn" onchange="enableRoverListener()" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
+                                Motor Controls
+                            </td>
+                            <td>
+                                Command Listener
                             </td>
                             <td style="text-align: center;">Front Camera</td>
                         </tr>
                         <tr>
                             <td>
-                                <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
+                                <input type="checkbox" id="enable-rover-motors-btn" onchange="enableRoverMotors()" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
-                            <td></td>
+                            <td>
+                                <input type="checkbox" id="enable-rover-btn" onchange="enableRoverListener()" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
+                            </td>
                             <td>
                                 <!-- <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">On</button></a> -->
                                 <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
                         </tr>
                         <tr>
-                            <td></td>
+                            <td>
+                                <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
+                            </td>
                             <td>
                                 <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Photo</button></a>
                             </td>

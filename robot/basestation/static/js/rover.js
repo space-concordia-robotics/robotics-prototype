@@ -112,32 +112,32 @@ $(document).keydown(function(e) {
               })
               break;
 
-      case 77: // 'm' --> enable motor control
-          $.ajax({
-                 url: '/rover_drive',
-                 type: 'POST',
-                 data: {
-                     cmd: 'm'
-                 },
-                 success: function(response){
-                     appendToConsole("cmd: " + response.cmd);
-                     scrollToBottom();
-                 }
-             })
-             break;
-         case 78: // 'n' --> disable motor control
-             $.ajax({
-                    url: '/rover_drive',
-                    type: 'POST',
-                    data: {
-                        cmd: 'n'
-                    },
-                    success: function(response){
-                        appendToConsole("cmd: " + response.cmd);
-                        scrollToBottom();
-                    }
-                })
-                break;
+      // case 77: // 'm' --> enable motor control
+      //     $.ajax({
+      //            url: '/rover_drive',
+      //            type: 'POST',
+      //            data: {
+      //                cmd: 'm'
+      //            },
+      //            success: function(response){
+      //                appendToConsole("cmd: " + response.cmd);
+      //                scrollToBottom();
+      //            }
+      //        })
+      //        break;
+      //    case 78: // 'n' --> disable motor control
+      //        $.ajax({
+      //               url: '/rover_drive',
+      //               type: 'POST',
+      //               data: {
+      //                   cmd: 'n'
+      //               },
+      //               success: function(response){
+      //                   appendToConsole("cmd: " + response.cmd);
+      //                   scrollToBottom();
+      //               }
+      //           })
+      //           break;
 
   default: return; // exit this handler for other keys
 }

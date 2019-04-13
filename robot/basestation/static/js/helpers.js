@@ -161,6 +161,34 @@ function enableRoverListener() {
     }
 }
 
+function enableRoverMotors() {
+    if ($("#enable-rover-motors-btn").is(":checked")) {
+        $.ajax({
+            url: '/rover_drive',
+            type: 'POST',
+            data: {
+                cmd: 'm'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                scrollToBottom();
+            }
+        })
+    } else {
+        $.ajax({
+            url: '/rover_drive',
+            type: 'POST',
+            data: {
+                cmd: 'n'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                scrollToBottom();
+            }
+        })
+    }
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest(msg) {
