@@ -32,8 +32,8 @@
   updated as of March 27 2019.
 */
 /* still in idea phase */
-#define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
-//#define DEVEL_MODE_2 2 // sends messages with Serial1, everything unlocked
+//#define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
+#define DEVEL_MODE_2 2 // sends messages with Serial1, everything unlocked
 //#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
 //#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
 //#define ENABLE_ROS 5 // turning this off will stop errors from rosserial not being installed.. as long as you don't want to be using it

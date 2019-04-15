@@ -23,6 +23,7 @@ class PidController {
     float pTerm, iTerm, dTerm;
     float error, previousError;
     float errorSum;
+    float pidOutput;
     float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
 
@@ -38,7 +39,6 @@ PidController::PidController() {
 }
 
 float PidController::updatePID(volatile float currentAngle, float desiredAngle) {
-  float pidOutput;
   error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
   // if the angle is outside the tolerance, move
   if (fabs(error) >= jointAngleTolerance)  {

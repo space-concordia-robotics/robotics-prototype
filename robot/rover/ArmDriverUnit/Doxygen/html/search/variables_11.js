@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['serialbuffer',['serialBuffer',['../ArmDriverUnit_8ino_a2f2bd16eae943e22633b21916d4b6b78.html#a2f2bd16eae943e22633b21916d4b6b78',1,'ArmDriverUnit.ino']]],
+  ['servo',['servo',['../classServoMotor_a2fea33c2363a8aa635043ae1a4080f4e.html#a2fea33c2363a8aa635043ae1a4080f4e',1,'ServoMotor']]],
+  ['servotimer',['servoTimer',['../ArmDriverUnit_8ino_a085983491b075c00757bf49a611bb0ca.html#a085983491b075c00757bf49a611bb0ca',1,'ArmDriverUnit.ino']]],
+  ['sinceangleprint',['sinceAnglePrint',['../ArmDriverUnit_8ino_a6e5e97e8aba5f23d6483dbd37594b0f6.html#a6e5e97e8aba5f23d6483dbd37594b0f6',1,'ArmDriverUnit.ino']]],
+  ['sincebudgecommand',['sinceBudgeCommand',['../classRobotMotor_a8f74f03b312b3984adb85c2cfe6efb43.html#a8f74f03b312b3984adb85c2cfe6efb43',1,'RobotMotor']]],
+  ['sincesteppercheck',['sinceStepperCheck',['../ArmDriverUnit_8ino_a285a5a8875c3a63fb238dc4610905ea3.html#a285a5a8875c3a63fb238dc4610905ea3',1,'ArmDriverUnit.ino']]],
+  ['sincetrigger',['sinceTrigger',['../classRobotMotor_af172d0daf62221a8eba80da985d98cf6.html#af172d0daf62221a8eba80da985d98cf6',1,'RobotMotor']]],
+  ['slowestspeed',['slowestSpeed',['../classPidController_a502216af29bf8fe91b4e7508a6148208.html#a502216af29bf8fe91b4e7508a6148208',1,'PidController']]],
+  ['speedcommand',['speedCommand',['../structcommandInfo_a8e9fc2a06cf5c0d27c59af40a2824a7f.html#a8e9fc2a06cf5c0d27c59af40a2824a7f',1,'commandInfo']]],
+  ['startangle',['startAngle',['../classRobotMotor_ab164987330e38d81c848258a3e38e37c.html#ab164987330e38d81c848258a3e38e37c',1,'RobotMotor']]],
+  ['stepcount',['stepCount',['../classStepperMotor_aaf867c16b940d403dc71aff0dcfeb349.html#aaf867c16b940d403dc71aff0dcfeb349',1,'StepperMotor']]],
+  ['steppin',['stepPin',['../classStepperMotor_a627d264485a37267f7fa2fd1d05f2042.html#a627d264485a37267f7fa2fd1d05f2042',1,'StepperMotor']]],
+  ['steppingmode',['steppingMode',['../classStepperMotor_ae3529704543b07ccf77166aec86cc2b7.html#ae3529704543b07ccf77166aec86cc2b7',1,'StepperMotor']]],
+  ['stepresolution',['stepResolution',['../classStepperMotor_a52ea45e128b05805d20b74d6fcc9463f.html#a52ea45e128b05805d20b74d6fcc9463f',1,'StepperMotor']]],
+  ['stopallmotors',['stopAllMotors',['../structcommandInfo_a6f36bc6a171d876897a0c7a0c0390d34.html#a6f36bc6a171d876897a0c7a0c0390d34',1,'commandInfo']]],
+  ['stopsinglemotor',['stopSingleMotor',['../structcommandInfo_af70a32bfe8c0f46f90cc5c62b8626c03.html#af70a32bfe8c0f46f90cc5c62b8626c03',1,'commandInfo']]],
+  ['switchdir',['switchDir',['../structcommandInfo_ab96d223ef77cdde15f5da4a8f444d9c5.html#ab96d223ef77cdde15f5da4a8f444d9c5',1,'commandInfo']]]
+];
