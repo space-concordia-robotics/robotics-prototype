@@ -32,25 +32,25 @@
   updated as of March 27 2019.
 */
 /* still in idea phase */
-//#define DEVEL_MODE_1 1 // sends messages with Serial, everything unlocked
-#define DEVEL_MODE_2 2 // sends messages with Serial1, everything unlocked
-//#define DEBUG_MODE 3 // sends messages with ROSserial, everything unlocked
-//#define USER_MODE 4 // sends messages with ROSserial, functionality restricted
-//#define ENABLE_ROS 5 // turning this off will stop errors from rosserial not being installed.. as long as you don't want to be using it
+//#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
+#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
+//#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
+//#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
+//#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case
 
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#define DEBUG_MAIN 10 // debug messages during main loop
-//#define DEBUG_PARSING 11 // debug messages during parsing function
-//#define DEBUG_VERIFYING 12 // debug messages during verification function
-//#define DEBUG_ENCODERS 13 // debug messages during encoder interrupts
-//#define DEBUG_PID 14 // debug messages during pid loop calculations
-#define DEBUG_SWITCHES 15 // debug messages during limit switch interrupts
-#define DEBUG_HOMING 16 // debug messages during homing sequence
-//#define DEBUG_DC_TIMER 17 // debug messages during dc timer interrupts
-//#define DEBUG_SERVO_TIMER 18 // debug messages during servo timer interrupts
-//#define DEBUG_STEPPER_3_TIMER 19 // debug messages during stepper 3 timer interrupts
-//#define DEBUG_STEPPER_4_TIMER 20 // debug messages during stepper 3 timer interrupts
+#define DEBUG_MAIN 10 //!< debug messages during main loop
+//#define DEBUG_PARSING 11 //!< debug messages during parsing function
+//#define DEBUG_VERIFYING 12 //!< debug messages during verification function
+//#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
+//#define DEBUG_PID 14 //!< debug messages during pid loop calculations
+#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
+#define DEBUG_HOMING 16 //!< debug messages during homing sequence
+//#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
+//#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
+//#define DEBUG_STEPPER_3_TIMER 19 //!< debug messages during stepper 3 timer interrupts
+//#define DEBUG_STEPPER_4_TIMER 20 //!< debug messages during stepper 3 timer interrupts
 #endif
 
 /*
@@ -61,7 +61,6 @@
 // serial communication over usb with pc, teensy not connected to odroid
 
 #if defined(DEVEL_MODE_1)
-// serial communication over uart with odroid, teensy plugged into pcb and odroid
 #define UART_PORT Serial
 #elif defined(DEVEL_MODE_2)
 #define UART_PORT Serial1
@@ -96,42 +95,45 @@
 #include "DcMotor.h"
 #include "ServoMotor.h"
 /* interrupt priorities */
-// motor control interrupts main loop, encoders interrupt motor control, limit switches interrupt encoder calculations
-#define LIMIT_SWITCH_NVIC_PRIORITY 100
-#define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4
-#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4
+#define LIMIT_SWITCH_NVIC_PRIORITY 100 //!< limit switch interrupt priority is highest
+#define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4 //!< encoder interrupt priority is second highest
+#define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4 //!< motor timer interrupt priority is third highest
 /* serial */
-#define BAUD_RATE 115200 // serial bit rate
-#define SERIAL_PRINT_INTERVAL 1000 // how often should teensy send angle data
-#define SERIAL_READ_TIMEOUT 50 // how often should the serial port be read
-#define BUFFER_SIZE 100 // size of the buffer for the serial commands
+#define BAUD_RATE 115200 //!< serial bit rate
+#define SERIAL_PRINT_INTERVAL 1000 //!< how often should teensy send angle data
+#define SERIAL_READ_TIMEOUT 50 //!< how often should the serial port be read
+#define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
 /* comms */
-char serialBuffer[BUFFER_SIZE]; // serial buffer used for early- and mid-stage tesing without ROSserial
+char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
+
 // kinda weird that this comes out of nowhere... maybe should be Parser.commandInfo or something. or define it here instead of parser
 /*
   info from parsing functionality is packaged and given to motor control functionality.
   many of these are set to 0 so that the message can reset, thus making sure that
   the code later on doesn't inadvertently make a motor move when it wasn't supposed to
 */
-commandInfo motorCommand, emptyMotorCommand; // emptyMotorCommand is used to reset the struct when the loop restarts
-Parser Parser; // object which parses and verifies commands
-
-bool msgReceived = false;
-bool msgIsValid = false;
-bool msgCheck = false;
-bool msgState = false;
+commandInfo motorCommand; //!< struct which holds command data to be sent to main loop
+commandInfo emptyMotorCommand; //!< used to reset the struct when the loop restarts
+Parser Parser; //!< object which parses and verifies commands
+bool msgReceived = false; //!< If true, the MCU will attempt to interpret a command.
+bool msgIsValid = false; //!< If true, the MCU will execute a command. Otherwise, it will send an error message.
 
 /*LED variables*/
-const int ledPin = 13;
-unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated
-int ledState = LOW;
 /*
+bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink (but it's not a blocking while loop).
+bool msgState = false; //!< If true, blinking will be in the success pattern. Otherwise it will be in the error pattern.
+
+const int ledPin = 13; // note to nick: LED_BUILTIN is predefined in arduino C++ so just use that instead
+unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated // note to nick: this variable name is too generic given how many other variables are used. Use more specific variable names, and also I recommend using elapsedMillis objects like I do to keep my code consistent
+int ledState = LOW;
+
 const int goodBlinkCounter = 4;
 const int badBlinkCounter = 12;
 const int goodBlinkInterval = 250;
 const int badBlinkInterval = 100;
-bool complete = false;
+bool complete = false; // note to nick: this variable name is way too generic to just be lying around in the middle of all my code. please use something more specific
 */
+
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
 //ros::NodeHandle nh;
@@ -187,48 +189,44 @@ ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
 #endif
 
 /* motors */
-// quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
+//! quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
 const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 };
 
 // instantiate motor objects here:
-DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO); // for cytron
-//ServoMotor motor1(M5_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
-DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO); // for cytron
+DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
+DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
 StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
-//ServoMotor motor5(M1_PWM_PIN, M5_GEAR_RATIO); // for testing homing with wrist servo
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
 DcMotor *m1 = &motor1; DcMotor *m2 = &motor2;
-//ServoMotor *m1 = &motor1; DcMotor *m2 = &motor2; // for testing homing with wrist servo
 StepperMotor *m3 = &motor3; StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
-// I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
-RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6};
-
+RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6}; //!< I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
 // instantiate timers here:
 IntervalTimer dcTimer; // motors 1&2
 IntervalTimer m3StepperTimer, m4StepperTimer;
 IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
-elapsedMillis sinceAnglePrint; // how long since last time angle data was sent
-elapsedMillis sinceStepperCheck; // how long since last time stepper angle was verified
+elapsedMillis sinceAnglePrint; //!< how long since last time angle data was sent
+elapsedMillis sinceStepperCheck; //!< how long since last time stepper angle was verified
+// note to nick: i'd recommend putting your blinkled timer here
 
 // homing variables
 bool isHoming = false;
-int homingMotor = NUM_MOTORS; // initialize to a value that's invalid so it'll be ignored
-bool motorsToHome[] = {false, false, false, false, false, false};
-
+int homingMotor = NUM_MOTORS; //! initialize to a value that's invalid so it'll be ignored. Used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
+//! used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
+bool motorsToHome[] = {false, false, false, false, false, false}; 
 /* function declarations */
-void printMotorAngles(void); // sends all motor angles over serial
-void initComms(void); // start up serial or whatever comms
-void initEncoders(void); // attach encoder interrupts
-void initLimitSwitches(void); // setup angle limits and attach limit switch interrupts
-void initSpeedParams(void); // setup open and closed loop speed
-void initMotorTimers(void); // start timers
+void printMotorAngles(void); //!< sends all motor angles over serial
+void initComms(void); //!< start up serial or usb communication
+void initEncoders(void); //!< attach encoder interrupts
+void initLimitSwitches(void); //!< setup angle limits and attach limit switch interrupts
+void initSpeedParams(void); //!< setup open and closed loop speed parameters
+void initMotorTimers(void); //!< start the timers which control the motors
 
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
@@ -253,16 +251,15 @@ void m4ExtendISR(void);
 //void m6OpenISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
-void dcInterrupt(void); // manages motors 1&2
-void servoInterrupt(void); // manages motors 5&6
+void dcInterrupt(void); //!< manages motors 1&2
+void servoInterrupt(void); //!< manages motors 5&6
 // stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
-void m3StepperInterrupt(void);
-void m4StepperInterrupt(void);
+void m3StepperInterrupt(void); //!< manages motor 3
+void m4StepperInterrupt(void); //!< manages motor 4
 
-/* Teensy setup */
+/*! Teensy setup */
 void setup() {
-  pinSetup(); // initializes all the appropriate pins to outputs or interrupt pins etc
-  // set up comms
+  pinSetup();
   initComms();
   initEncoders();
 
@@ -281,14 +278,14 @@ void setup() {
   initSpeedParams();
   motor3.switchDirectionLogic(); // motor is wired backwards?
   motor6.switchDirectionLogic(); // positive angles now mean opening
-  initMotorTimers(); // activate the timer interrupts
+  initMotorTimers();
 
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
   sinceAnglePrint = 0;
   sinceStepperCheck = 0;
 }
 
-/* main code loop */
+/*! main code which loops forever */
 void loop() {
   /* limit switch checks occur before listening for commands */
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
@@ -618,6 +615,8 @@ void loop() {
       nh.logerror("error: bad motor command");
 #endif
     }
+    /*
+    // blinkled stuff
     msgCheck = true; //Setting message check value to TRUE as a message is received
     if (msgIsValid == true){
       msgState = true;
@@ -625,13 +624,14 @@ void loop() {
     else{
       msgState = false;
     }
+    */
   }
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
   
-  /* heartbeat code */
+  /* heartbeat code blinkled stuff */
   /*
   if(msgCheck == true){
     if(msgState == true){

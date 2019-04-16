@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['ledpin',['ledPin',['../ArmDriverUnit_8ino_a2cd9f0d96c9cd0637798de3baa7aee60.html#a2cd9f0d96c9cd0637798de3baa7aee60',1,'ArmDriverUnit.ino']]],
-  ['ledstate',['ledState',['../ArmDriverUnit_8ino_a6bca96572a37f9b51ccae0fa72f57aba.html#a6bca96572a37f9b51ccae0fa72f57aba',1,'ArmDriverUnit.ino']]],
   ['lim_5fswitch_5fdir',['LIM_SWITCH_DIR',['../ArmDriverUnit_8ino_a6b8a84cc4515502c25cf28933b6b80ba.html#a6b8a84cc4515502c25cf28933b6b80ba',1,'ArmDriverUnit.ino']]],
   ['lim_5fswitch_5ffall',['LIM_SWITCH_FALL',['../PinSetup_8h_a6b4654ee148fc2309e2250af26393d09.html#a6b4654ee148fc2309e2250af26393d09',1,'PinSetup.h']]],
   ['lim_5fswitch_5fpullstate',['LIM_SWITCH_PULLSTATE',['../PinSetup_8h_ace782b3ef07b43e73091ed273464adcf.html#ace782b3ef07b43e73091ed273464adcf',1,'PinSetup.h']]],

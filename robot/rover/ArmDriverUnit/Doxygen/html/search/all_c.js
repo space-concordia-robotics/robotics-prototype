@@ -141,9 +141,7 @@ var searchData=
   ['motortimerinterrupt',['motorTimerInterrupt',['../classDcMotor_a43587a3a6216d98b05a92b7abf9fa7cc.html#a43587a3a6216d98b05a92b7abf9fa7cc',1,'DcMotor::motorTimerInterrupt()'],['../classServoMotor_a82def191060148a4744221b1e7ae8405.html#a82def191060148a4744221b1e7ae8405',1,'ServoMotor::motorTimerInterrupt()'],['../classStepperMotor_a3e7c4986b0d0a7f8eba4c49773620e21.html#a3e7c4986b0d0a7f8eba4c49773620e21',1,'StepperMotor::motorTimerInterrupt()']]],
   ['motortype',['motorType',['../classRobotMotor_a18649323e531783c2315f75963aa54f5.html#a18649323e531783c2315f75963aa54f5',1,'RobotMotor']]],
   ['movementdone',['movementDone',['../classRobotMotor_a207ad1280ac1b509c507ca8ee2837fe9.html#a207ad1280ac1b509c507ca8ee2837fe9',1,'RobotMotor']]],
-  ['msgcheck',['msgCheck',['../ArmDriverUnit_8ino_addb985dd22df88b542a899b5fc07feb5.html#addb985dd22df88b542a899b5fc07feb5',1,'ArmDriverUnit.ino']]],
   ['msgisvalid',['msgIsValid',['../ArmDriverUnit_8ino_aaed9618a990ef046630c17d7a8ab0109.html#aaed9618a990ef046630c17d7a8ab0109',1,'ArmDriverUnit.ino']]],
   ['msgreceived',['msgReceived',['../ArmDriverUnit_8ino_a0c0196118cf8dc54df66d79e21a975c7.html#a0c0196118cf8dc54df66d79e21a975c7',1,'ArmDriverUnit.ino']]],
-  ['msgstate',['msgState',['../ArmDriverUnit_8ino_a942366217f96fbcf4de99d661f7fe207.html#a942366217f96fbcf4de99d661f7fe207',1,'ArmDriverUnit.ino']]],
   ['multimove',['multiMove',['../structcommandInfo_a92ca24b55a45966e9914d17695ba7e3e.html#a92ca24b55a45966e9914d17695ba7e3e',1,'commandInfo']]]
 ];

@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['ledpin',['ledPin',['../ArmDriverUnit_8ino_a2cd9f0d96c9cd0637798de3baa7aee60.html#a2cd9f0d96c9cd0637798de3baa7aee60',1,'ArmDriverUnit.ino']]],
-  ['ledstate',['ledState',['../ArmDriverUnit_8ino_a6bca96572a37f9b51ccae0fa72f57aba.html#a6bca96572a37f9b51ccae0fa72f57aba',1,'ArmDriverUnit.ino']]],
   ['limitswitchstate',['limitSwitchState',['../classRobotMotor_a82a7103bbbcc19345e9ba4b11c8fb27c.html#a82a7103bbbcc19345e9ba4b11c8fb27c',1,'RobotMotor']]],
   ['limitswitchtype',['limitSwitchType',['../classRobotMotor_a5bfc4d4c471c24946c8cc6b44ca53db2.html#a5bfc4d4c471c24946c8cc6b44ca53db2',1,'RobotMotor']]],
   ['limswitchccw',['limSwitchCcw',['../classRobotMotor_a3a3e1d83ff86114165142e5081b590a9.html#a3a3e1d83ff86114165142e5081b590a9',1,'RobotMotor']]],

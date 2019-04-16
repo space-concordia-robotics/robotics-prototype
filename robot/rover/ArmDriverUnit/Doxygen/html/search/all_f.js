@@ -13,7 +13,6 @@ var searchData=
   ['pinsetup_2eh',['PinSetup.h',['../PinSetup_8h.html',1,'']]],
   ['position_5fservo',['POSITION_SERVO',['../RobotMotor_8h_a3d84d0c4686ce57991cf1330dcdee2cf.html#a3d84d0c4686ce57991cf1330dcdee2cfa5eb683dff1358f90f36c0ea76c3194fb',1,'RobotMotor.h']]],
   ['previouserror',['previousError',['../classPidController_a6d982947e078201084b1e2eaa689cae8.html#a6d982947e078201084b1e2eaa689cae8',1,'PidController']]],
-  ['previousmillis',['previousMillis',['../ArmDriverUnit_8ino_aefbfa6df3a194340296e05709e0ec5b9.html#aefbfa6df3a194340296e05709e0ec5b9',1,'ArmDriverUnit.ino']]],
   ['printmotorangles',['printMotorAngles',['../ArmDriverUnit_8ino_a365608a5db91b0dee90e14adc99c7eb3.html#a365608a5db91b0dee90e14adc99c7eb3',1,'ArmDriverUnit.ino']]],
   ['printpidparameters',['printPidParameters',['../classPidController_abdbfcdac0ac36f2f105da5c28231cb0a.html#abdbfcdac0ac36f2f105da5c28231cb0a',1,'PidController']]],
   ['pterm',['pTerm',['../classPidController_a85d48a593747bc9c83f087084efbdc21.html#a85d48a593747bc9c83f087084efbdc21',1,'PidController']]],
