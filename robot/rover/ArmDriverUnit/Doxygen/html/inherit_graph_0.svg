@@ -11,7 +11,7 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-24 78,-24 78,4 -4,4"/>
 <!-- Node0 -->
 <g id="node1" class="node"><title>Node0</title>
-<g id="a_node1"><a xlink:href="structcommandInfo.html" target="_top" xlink:title="commandInfo">
+<g id="a_node1"><a xlink:href="structcommandInfo.html" target="_top" xlink:title="This struct holds all the data about a specific command sent to it from the Odroid. ">
 <polygon fill="white" stroke="black" points="0,-0.5 0,-19.5 74,-19.5 74,-0.5 0,-0.5"/>
 <text text-anchor="middle" x="37" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">commandInfo</text>
 </a>

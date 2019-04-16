@@ -1,50 +1,61 @@
-
+/*! \file */
 #ifndef PARSER_H
 #define PARSER_H
 #include "PinSetup.h"
 #include "RobotMotor.h"
-#define MOTOR_NOT_COMMANDED "~" // this character means a motor is not to be moved
-// this struct is specific to the arm teensy at the moment.
-// it should either be generalized or put in the main code,
-// but it can't be put in the main code because commandInfo
-// needs to be defined where it's used as an input parameter
+#define MOTOR_NOT_COMMANDED "~" //!< this character means a motor is not to be moved
+
+// initially I wanted this to be generic to all the teensies,
+// but the types of commands may be so different that it's
+// extra overhead. to be rethought later...
+
+//! This struct holds all the data about a specific command sent to it from the Odroid.
 struct commandInfo {
   // commands that apply to the teensy in general
-  bool pingCommand = false; // for ping command
-  bool whoCommand = false; // for asking which teensy it is
-  bool stopAllMotors = false; // for stopping all motors
-  bool resetAllMotors = false; // for resetting all angle values
-  bool homeAllMotors = false; // to search for limit switches and obtain absolute position
-  int homingStyle = SINGLE_ENDED_HOMING; // by default only home to one limit switch
+  bool pingCommand = false; //!< for ping command
+  bool whoCommand = false; //!< for asking which teensy it is
+  bool stopAllMotors = false; //!< for stopping all motors
+  bool resetAllMotors = false; //!< for resetting all angle values
+  bool homeAllMotors = false; //!< to search for limit switches and obtain absolute position
+  int homingStyle = SINGLE_ENDED_HOMING; //!< by default only home to one limit switch
 
   // commands that apply to a specific motor
-  int whichMotor = 0; // which motor was requested to do something
+  int whichMotor = 0; //!< which motor was requested to do something
 
-  bool stopSingleMotor = false; // for stopping a single motor
-  bool switchDir = false; // for switching the direction logic
+  bool stopSingleMotor = false; //!< for stopping a single motor
+  bool switchDir = false; //!< for switching the direction logic
 
-  bool homeCommand = false; // for homing a single motor
-  bool loopCommand = false; // for choosing between open loop or closed loop control
-  int loopState = 0; // what type of loop state it is
+  bool homeCommand = false; //!< for homing a single motor
+  bool loopCommand = false; //!< for choosing between open loop or closed loop control
+  int loopState = 0; //!< what type of loop state it is
 
-  bool gearCommand = false; // to change gear ratio
-  float gearRatioVal = 0.0;
-  bool openLoopGainCommand = false; // to change open loop gain
-  float openLoopGain = 0.0;
-  bool speedCommand = false;
-  float motorSpeed = 0.0;
+  bool gearCommand = false; //!< to change gear ratio
+  float gearRatioVal = 0.0; //!< what's the new gear ratio
+  bool openLoopGainCommand = false; //!< to change open loop gain
+  float openLoopGain = 0.0; //!< adjusts how long to turn a motor in open loop
+  bool speedCommand = false; //!< for changing motor speed
+  float motorSpeed = 0.0; //!< what motor speed to set to
 
-  bool resetCommand = false; // indicates that something should be reset
-  bool resetAngleValue = false; // mostly for debugging/testing, reset the angle variable
-  bool resetJointPosition = false; // for moving a joint to its neutral position
+  bool resetCommand = false; //!< indicates that something should be reset
+  bool resetAngleValue = false; //!< mostly for debugging/testing, reset the angle variable
+  bool resetJointPosition = false; //!< for moving a joint to its neutral position
 
-  bool budgeCommand = false; // for turning without angle requests
-  int directionsToMove[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; // direction of budge control
-  bool multiMove = false; // for controlling multiple motors simultaneously
-  bool motorsToMove[NUM_MOTORS] = {false, false, false, false, false, false}; // which motor to move
-  float anglesToReach[NUM_MOTORS] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // motor angles
+  bool budgeCommand = false; //!< for turning without angle requests
+  int directionsToMove[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; //!< direction of budge control
+  bool multiMove = false; //!< for controlling multiple motors simultaneously
+  bool motorsToMove[NUM_MOTORS] = {false, false, false, false, false, false}; //!< which motor to move
+  float anglesToReach[NUM_MOTORS] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; //!< motor angles
 };
 
+/*! \brief This class is used to parse incoming messages to the arm teensy.
+ * 
+ * It can break up any message passed to it using parseCommand()
+ * and place the information in a commandInfo struct. It can then
+ * can verify the commandInfo to make sure all the parameters
+ * are correct. It also holds a helper function to make sure
+ * that commands expecting numbers actually receive numbers
+ * rather than letters or some other type of characters.
+ */
 class Parser {
   public:
     bool isValidNumber(String str, char type);
@@ -53,6 +64,10 @@ class Parser {
     bool verifCommand(commandInfo cmd);
 };
 
+/*! \brief Checks if the string passed as input contains an integer or a float.
+ * @param[in] str     The input string to be checked
+ * @param[in] type    The type of number to check for. 'f' for float or 'd' for integer
+ */
 bool Parser::isValidNumber(String str, char type) {
   if (str.length() == 0) {
     return false;
@@ -72,6 +87,12 @@ bool Parser::isValidNumber(String str, char type) {
   return true;
 }
 
+/*! \brief Goes through an array of characters, splits it up at each space
+ * character, then modifies the appropriate variables held in
+ * the commandInfo input parameter based on the message.
+ * @param[in] cmd           The commandInfo struct where the results go
+ * @param[in] restOfMessage A pointer to the array of characters to be parsed
+ */
 void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   // check for emergency stop has precedence
   char *msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
@@ -377,6 +398,11 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   }
 }
 
+/*! \brief Goes through the commandInfo input parameter and checks to
+ * make sure all the inputs are valid before allowing the main
+ * code to execute the command.
+ * @param[in] cmd The commandInfo struct to be verified
+ */
 bool Parser::verifCommand(commandInfo cmd) {
   if (cmd.pingCommand) {
 #ifdef DEBUG_VERIFYING
