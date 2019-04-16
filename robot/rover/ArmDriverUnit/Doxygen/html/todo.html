@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ArmDriverUnit: setup</title>
+<title>ArmDriverUnit: Todo List</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -67,7 +67,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a4fc01d736fe50cf5b977f755b675f11d.html','');});
+$(document).ready(function(){initNavTree('todo.html','');});
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -85,24 +85,38 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a4fc01d736fe50cf5b9
 </iframe>
 </div>
 
+<div class="header">
+  <div class="headertitle">
+<div class="title">Todo List </div>  </div>
+</div><!--header-->
 <div class="contents">
-<a id="a4fc01d736fe50cf5b977f755b675f11d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fc01d736fe50cf5b977f755b675f11d">&#9670;&nbsp;</a></span>setup()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void setup </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Teensy setup. Calls many init functions to prep comms and motors. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd><p class="startdd">Implement error checking, clean up code, comment code, make sure ISR variables are volatile </p>
+<div class="textblock"><dl class="reflist">
+<dt><a class="anchor" id="_todo000003"></a>Member <a class="el" href="ArmDriverUnit_8ino_a110d5b83b937b614c8acce5fbd0d0cc2.html#a110d5b83b937b614c8acce5fbd0d0cc2">initSpeedParams</a>  (void)</dt>
+<dd><p class="startdd">openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?</p>
+<p>open loop speed and closed loop max speed are different???? this is because closed loop has a max val whereas open loop has a fixed one, but these could maybe be the same???</p>
+<p class="enddd">stepper doesn't have speed the way servos and dcs do?????? this is because stepper calculates speed using durations, but this means openLoopGain and openLoopSpeed mean nothing for it???  </p>
+</dd>
+<dt><a class="anchor" id="_todo000002"></a>Member <a class="el" href="ArmDriverUnit_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>  ()</dt>
+<dd><p class="startdd">There should be a check so that if the motor is moving away from the goal position or has been moving for a while without reaching the expected angle, it stops... like a timeout. </p>
+<p>What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad. </p>
+<p class="enddd">If the stepper is trying to turn but hasn't gotten anywhere, there should be a check in the microcontroller that there's an issue (there can also be a check in the gui) </p>
+</dd>
+<dt><a class="anchor" id="_todo000006"></a>Class <a class="el" href="classParser.html">Parser</a>  </dt>
+<dd>Clean up parsing code to make it easier to read and reduce repetition.  </dd>
+<dt><a class="anchor" id="_todo000007"></a>Class <a class="el" href="classPidController.html">PidController</a>  </dt>
+<dd>Can I deal with the fact that angleTolerance is a <a class="el" href="classPidController.html" title="This is intended to be a generic PID controller class. ">PidController</a> attribute and not a <a class="el" href="classRobotMotor.html" title="The base class for ServoMotor, StepperMotor and DcMotor. ">RobotMotor</a> attribute?  </dd>
+<dt><a class="anchor" id="_todo000008"></a>Member <a class="el" href="classPidController_a345e065af2a6d2c8a9c9d9f758b1382f.html#a345e065af2a6d2c8a9c9d9f758b1382f">PidController::setOutputLimits</a>  (float minVal, float maxVal)</dt>
+<dd>should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...? but then i set openloopspeed to 50 in the <a class="el" href="ArmDriverUnit_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title="Teensy setup. Calls many init functions to prep comms and motors. ">setup()</a>???? i need to rethink the velocity vs speed vs direction stuff!  </dd>
+<dt><a class="anchor" id="_todo000009"></a>Member <a class="el" href="PinSetup_8h_a924fbe483fd8c13808cad6ab252d4cb0.html#a924fbe483fd8c13808cad6ab252d4cb0">pinSetup</a>  (void)</dt>
+<dd>Perhaps pinsetup.h &amp; pinsetup.cpp should be changed to motorsetup or just setup as it's also got angle limits and gear ratios  </dd>
+<dt><a class="anchor" id="_todo000010"></a>Class <a class="el" href="classRobotMotor.html">RobotMotor</a>  </dt>
+<dd><p class="startdd">Make joint objects instead of motor objects and have switches etc inside of them? </p>
+<p>Perhaps the initialization of motor angle parameters should be its own function </p>
+<p>Perhaps the initialization of the motor's pins should also be its own function </p>
+<p class="enddd">Perhaps the constructor should take a series of structs, one for each type  </p>
+</dd>
+<dt><a class="anchor" id="_todo000001"></a>Member <a class="el" href="ArmDriverUnit_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>  ()</dt>
+<dd><p class="startdd">Implement error checking, clean up code, comment code, make sure ISR variables are volatile </p>
 <p>Make sure the math calculations are written correctly and calculate as quickly as possible. Floating point math doesn't seem bad, but at worst, convert float to int before motor control and do int math inside interrupts. </p>
 <p>Fix up homing and limit switch functionality to deal with regions near angle limits </p>
 <p>(Nick) Finish implementing/integrating heartbeat and watchdog interrupt </p>
@@ -116,16 +130,13 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a4fc01d736fe50cf5b9
 <p>Determine whether it's worth it to use the built in quadrature decoders. Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore. Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?). </p>
 <p>stepper motor angle checks for open loop control remains to be fixed, updated, implemented </p>
 <p class="enddd">in stepper angle checks, also fix that issue with discrepancy </p>
-</dd></dl>
-
-</div>
-</div>
-</div><!-- contents -->
+</dd>
+</dl>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="ArmDriverUnit_8ino.html">ArmDriverUnit.ino</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>

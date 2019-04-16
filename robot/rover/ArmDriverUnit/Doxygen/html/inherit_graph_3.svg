@@ -11,7 +11,7 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-100 182,-100 182,4 -4,4"/>
 <!-- Node0 -->
 <g id="node1" class="node"><title>Node0</title>
-<g id="a_node1"><a xlink:href="classRobotMotor.html" target="_top" xlink:title="RobotMotor">
+<g id="a_node1"><a xlink:href="classRobotMotor.html" target="_top" xlink:title="The base class for ServoMotor, StepperMotor and DcMotor. ">
 <polygon fill="white" stroke="black" points="0,-38.5 0,-57.5 67,-57.5 67,-38.5 0,-38.5"/>
 <text text-anchor="middle" x="33.5" y="-45.5" font-family="Helvetica,sans-Serif" font-size="10.00">RobotMotor</text>
 </a>

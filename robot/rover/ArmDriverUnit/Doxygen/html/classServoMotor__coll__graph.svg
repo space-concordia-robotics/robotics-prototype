@@ -74,7 +74,7 @@ var sectionId = 'dynsection-1';
 </g>
 <!-- Node3 -->
 <g id="node2" class="node"><title>Node3</title>
-<g id="a_node2"><a xlink:href="classRobotMotor.html" target="_top" xlink:title="{RobotMotor\n|+ motorType\l+ limSwitchCcw\l+ limSwitchFlex\l+ limSwitchExtend\l+ limitSwitchState\l+ homingType\l+ atSafeAngle\l+ gearRatioReciprocal\l+ minJointAngle\l+ minSoftAngle\l+ openLoopGain\l+ numMotors\l# encoderShift\l# currentAngle\l|+ checkForActualPress()\l+ goToSafeAngle()\l+ homeMotor()\l+ stopHoming()\l+ RobotMotor()\l+ attachEncoder()\l+ attachLimitSwitches()\l+ setAngleLimits()\l+ withinJointAngleLimits()\l+ calcDirection()\l+ setDesiredAngle()\l+ getDesiredAngle()\l+ calcCurrentAngle()\l+ setSoftwareAngle()\l+ getSoftwareAngle()\l+ switchDirectionLogic()\l+ getDirectionLogic()\l+ setGearRatio()\l+ setOpenLoopGain()\l+ setMotorSpeed()\l+ stopRotation()\l+ setVelocity()\l+ goToCommandedAngle()\l+ goToAngle()\l+ budge()\l}">
+<g id="a_node2"><a xlink:href="classRobotMotor.html" target="_top" xlink:title="The base class for ServoMotor, StepperMotor and DcMotor. ">
 <polygon fill="white" stroke="black" points="397.5,-193.5 397.5,-657.5 529.5,-657.5 529.5,-193.5 397.5,-193.5"/>
 <text text-anchor="middle" x="463.5" y="-645.5" font-family="Helvetica,sans-Serif" font-size="10.00">RobotMotor</text>
 <polyline fill="none" stroke="black" points="397.5,-638.5 529.5,-638.5 "/>

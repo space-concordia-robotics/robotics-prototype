@@ -15,6 +15,13 @@ enum motor_direction {CLOCKWISE = -1, COUNTER_CLOCKWISE = 1}; // defines motor d
 enum loop_state {OPEN_LOOP = 1, CLOSED_LOOP}; // defines whether motor control is open loop or closed loop
 enum motor_type {DC_MOTOR = 1, POSITION_SERVO, CONTINUOUS_SERVO, STEPPER_MOTOR};
 
+/*! \brief The base class for ServoMotor, StepperMotor and DcMotor.
+ * 
+ * \todo Make joint objects instead of motor objects and have switches etc inside of them?
+ * \todo Perhaps the initialization of motor angle parameters should be its own function
+ * \todo Perhaps the initialization of the motor's pins should also be its own function
+ * \todo Perhaps the constructor should take a series of structs, one for each type
+ */
 class RobotMotor {
   public:
     // these variables are set at start and normally don't change during the main loop

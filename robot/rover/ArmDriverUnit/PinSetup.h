@@ -173,6 +173,11 @@
 #define M6_MIN_SOFT_ANGLE   -65.0 //-120.0
 #define M6_MAX_SOFT_ANGLE   65.0 // 150.0 //30.0
 
+/*! \brief Sets up all the Teensy pins and sends stop commands to motors that need it.
+ * 
+ * \todo Perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup
+ * or just setup as it's also got angle limits and gear ratios
+*/
 void pinSetup(void);
 
 #endif

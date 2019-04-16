@@ -31,6 +31,7 @@
   This code began development sometime in July 2018 and is still being
   updated as of March 27 2019.
 */
+
 /* still in idea phase */
 //#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
 #define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
@@ -257,7 +258,33 @@ void servoInterrupt(void); //!< manages motors 5&6
 void m3StepperInterrupt(void); //!< manages motor 3
 void m4StepperInterrupt(void); //!< manages motor 4
 
-/*! Teensy setup */
+/*! \brief Teensy setup. Calls many init functions to prep comms and motors.
+ * 
+ * \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
+ * \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
+ * Floating point math doesn't seem bad, but at worst, convert float to int
+ * before motor control and do int math inside interrupts.
+ * \todo Fix up homing and limit switch functionality to deal with regions near angle limits
+ * \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
+ * \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
+ * \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
+ * \todo Issue: interrupt functions must be defined outside of classes...
+ * \todo Confirm all the pins will work with interrupts and not stepping on each other.
+ * Do I send 3.3v to all interrupt pins simultaneously to test thing?
+ * \todo Deal with overflow of encoderCount.. does it ever reach max value?
+ * \todo What do I do for angles over 360? Do I keep counting up?
+ * Do I keep count of how many rotations I've done?
+ * \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
+ * Ramping of stepper should be linear, higher level ramping should occur in gui.
+ * The base station/odroid should be in charge of ramping up angles and the teensy
+ * should just go to them. Perhaps if a large angle is requested there should 
+ * still be a way to stop it though.
+ * \todo Determine whether it's worth it to use the built in quadrature decoders.
+ * Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
+ * Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
+ * \todo stepper motor angle checks for open loop control remains to be fixed, updated, implemented
+ * \todo in stepper angle checks, also fix that issue with discrepancy
+ */
 void setup() {
   pinSetup();
   initComms();
@@ -285,7 +312,17 @@ void setup() {
   sinceStepperCheck = 0;
 }
 
-/*! main code which loops forever */
+/*! \brief Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED.
+ * 
+ * \todo There should be a check so that if the motor is moving away from the goal position 
+ * or has been moving for a while without reaching the expected angle, it stops...
+ * like a timeout.
+ * \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
+ * \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
+ * a check in the microcontroller that there's an issue (there can also be a check in the gui)
+ * 
+ */
+
 void loop() {
   /* limit switch checks occur before listening for commands */
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
@@ -780,6 +817,20 @@ void initLimitSwitches(void) {
 
 }
 
+/*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,
+ * and finally, sets openLoopGain for any non-stepper motor.
+ * 
+ * \todo openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor...
+ * i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that.
+ * so maybe I can just initialize to 50 and not have it in the setup?
+ * 
+ * \todo open loop speed and closed loop max speed are different????
+ * this is because closed loop has a max val whereas open loop has a fixed one, but these could maybe be the same???
+ * 
+ * \todo stepper doesn't have speed the way servos and dcs do??????
+ * this is because stepper calculates speed using durations, but this means
+ * openLoopGain and openLoopSpeed mean nothing for it???
+*/
 void initSpeedParams(void) {
   // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
   // Abtin thinks 50% should be a hard limit that can't be modified this easily

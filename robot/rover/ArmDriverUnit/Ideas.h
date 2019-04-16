@@ -1,4 +1,3 @@
-// make joint objects instead of motor objects and have switches etc inside of them
 /* idea for stepper checks in open loop */
 /*
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) { // for open loop quasi closed loop control

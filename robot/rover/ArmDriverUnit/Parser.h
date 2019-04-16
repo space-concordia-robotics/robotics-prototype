@@ -1,4 +1,3 @@
-/*! \file */
 #ifndef PARSER_H
 #define PARSER_H
 #include "PinSetup.h"
@@ -55,6 +54,8 @@ struct commandInfo {
  * are correct. It also holds a helper function to make sure
  * that commands expecting numbers actually receive numbers
  * rather than letters or some other type of characters.
+ * 
+ * \todo Clean up parsing code to make it easier to read and reduce repetition.
  */
 class Parser {
   public:

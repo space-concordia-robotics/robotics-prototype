@@ -14,6 +14,8 @@
  * resolution which can be defined by the user. This is useful for
  * discrete plants such as stepper motors, or even continuous plants
  * for which small angle errors can be ignored.
+ * 
+ * \todo Can I deal with the fact that angleTolerance is a PidController attribute and not a RobotMotor attribute?
  */
 class PidController {
   public:
@@ -136,7 +138,11 @@ float PidController::getJointAngleTolerance(void) {
   return jointAngleTolerance;
 }
 
-//! Set the min and max outputs, represented as speed for motors. This version does not take the deadband into consideration.
+/*! \brief Set the min and max outputs, represented as speed for motors. This version does not take the deadband into consideration.
+ * 
+ * \todo should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...?
+ * but then i set openloopspeed to 50 in the setup()???? i need to rethink the velocity vs speed vs direction stuff!
+ */
 void PidController::setOutputLimits(float minVal, float maxVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;
