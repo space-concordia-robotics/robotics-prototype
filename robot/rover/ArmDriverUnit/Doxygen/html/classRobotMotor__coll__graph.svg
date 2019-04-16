@@ -118,7 +118,7 @@ var sectionId = 'dynsection-1';
 </g>
 <!-- Node6 -->
 <g id="node3" class="node"><title>Node6</title>
-<g id="a_node3"><a xlink:href="classPidController.html" target="_top" xlink:title="{PidController\n|&#45; kp\l&#45; minOutputValue\l&#45; pTerm\l&#45; dTerm\l&#45; previousError\l|+ PidController()\l+ updatePID()\l+ setJointAngleTolerance()\l+ setOutputLimits()\l+ setOutputLimits()\l+ setGainConstants()\l+ getMaxOutputValue()\l+ getMinOutputValue()\l+ getJointAngleTolerance()\l+ printPidParameters()\l}">
+<g id="a_node3"><a xlink:href="classPidController.html" target="_top" xlink:title="This is intended to be a generic PID controller class. ">
 <polygon fill="white" stroke="black" points="269.5,-622.5 269.5,-822.5 401.5,-822.5 401.5,-622.5 269.5,-622.5"/>
 <text text-anchor="middle" x="335.5" y="-810.5" font-family="Helvetica,sans-Serif" font-size="10.00">PidController</text>
 <polyline fill="none" stroke="black" points="269.5,-803.5 401.5,-803.5 "/>

@@ -112,6 +112,16 @@ $(document).ready(function(){initNavTree('classPidController_ac4cc8c442f9edf5b02
       </table>
 </div><div class="memdoc">
 
+<p>Calculates and returns the PID output based on the setpoint and measured point. If the error is not so small that the motor can't move to it, the P, I and D terms are calculated. The sum is checked and limited if it exceeds the output limits. If the sum is smaller than the minimum allowable motor speed, the output is set to 0. The result is returned directly but also saved inside the class. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">currentAngle</td><td>The current angle based on encoder values or open loop estimations </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">desiredAngle</td><td>The desired angle set by the motor command </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">pidOutput</td><td>The PID output </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 </div><!-- contents -->

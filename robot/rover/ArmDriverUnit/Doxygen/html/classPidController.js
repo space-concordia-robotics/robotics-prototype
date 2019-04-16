@@ -24,6 +24,6 @@ var classPidController =
     [ "error", "classPidController_a00d2bda1d7d5d8784afbfdd2efb32f3b.html#a00d2bda1d7d5d8784afbfdd2efb32f3b", null ],
     [ "previousError", "classPidController_a6d982947e078201084b1e2eaa689cae8.html#a6d982947e078201084b1e2eaa689cae8", null ],
     [ "errorSum", "classPidController_a4d86f13dfee3c9c0d6cfbfd656ef4f5b.html#a4d86f13dfee3c9c0d6cfbfd656ef4f5b", null ],
-    [ "pidOutput", "classPidController_a7f09ae8261d36e3b007515d5b7393a6c.html#a7f09ae8261d36e3b007515d5b7393a6c", null ],
-    [ "pidSum", "classPidController_a1039a1794e59c1329ee2057047d788a9.html#a1039a1794e59c1329ee2057047d788a9", null ]
+    [ "pidSum", "classPidController_a1039a1794e59c1329ee2057047d788a9.html#a1039a1794e59c1329ee2057047d788a9", null ],
+    [ "pidOutput", "classPidController_a7f09ae8261d36e3b007515d5b7393a6c.html#a7f09ae8261d36e3b007515d5b7393a6c", null ]
 ];

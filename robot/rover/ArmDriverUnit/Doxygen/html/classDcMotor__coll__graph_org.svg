@@ -97,7 +97,7 @@
 </g>
 <!-- Node5 -->
 <g id="node4" class="node"><title>Node5</title>
-<g id="a_node4"><a xlink:href="classPidController.html" target="_top" xlink:title="{PidController\n|&#45; kp\l&#45; minOutputValue\l&#45; pTerm\l&#45; dTerm\l&#45; previousError\l|+ PidController()\l+ updatePID()\l+ setJointAngleTolerance()\l+ setOutputLimits()\l+ setOutputLimits()\l+ setGainConstants()\l+ getMaxOutputValue()\l+ getMinOutputValue()\l+ getJointAngleTolerance()\l+ printPidParameters()\l}">
+<g id="a_node4"><a xlink:href="classPidController.html" target="_top" xlink:title="This is intended to be a generic PID controller class. ">
 <polygon fill="white" stroke="black" points="501.5,-805.5 501.5,-1005.5 633.5,-1005.5 633.5,-805.5 501.5,-805.5"/>
 <text text-anchor="middle" x="567.5" y="-993.5" font-family="Helvetica,sans-Serif" font-size="10.00">PidController</text>
 <polyline fill="none" stroke="black" points="501.5,-986.5 633.5,-986.5 "/>
