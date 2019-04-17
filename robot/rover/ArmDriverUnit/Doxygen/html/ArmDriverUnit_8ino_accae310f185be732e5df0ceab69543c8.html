@@ -101,6 +101,10 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_accae310f185be732e5
         </tr>
       </table>
 </div><div class="memdoc">
+<p>encoder states are 4 bit values. Top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states.</p>
+<p>&lt; shift current state into previous state</p>
+<p>put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits this is done by 1) grabbing the input register of the port, 2) shifting it until the relevant bits are in the lowest state, and 3) clearing all the bits higher than the lowest 2 next, place said (current) pin states into the bottom 2 bits of oldEncoderState</p>
+<p>the encoderStates[] array corresponds to the correct direction for a specific set of prev and current encoder states. The &amp; operation ensures that anything above the lowest 4 bits is cleared before accessing the array.</p>
 
 </div>
 </div>

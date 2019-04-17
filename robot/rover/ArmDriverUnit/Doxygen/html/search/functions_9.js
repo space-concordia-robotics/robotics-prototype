@@ -9,7 +9,6 @@ var searchData=
   ['m3_5fencoder_5finterrupt',['m3_encoder_interrupt',['../ArmDriverUnit_8ino_a91ef93e51d7b6a41eaf7611e4e19f6cc.html#a91ef93e51d7b6a41eaf7611e4e19f6cc',1,'ArmDriverUnit.ino']]],
   ['m3extendisr',['m3ExtendISR',['../ArmDriverUnit_8ino_a32ad865225c6f0200263d6b75d970279.html#a32ad865225c6f0200263d6b75d970279',1,'ArmDriverUnit.ino']]],
   ['m3flexisr',['m3FlexISR',['../ArmDriverUnit_8ino_a7ab57dbfb5457f70cfd215a01f563e98.html#a7ab57dbfb5457f70cfd215a01f563e98',1,'ArmDriverUnit.ino']]],
-  ['m3stepperinterrupt',['m3StepperInterrupt',['../ArmDriverUnit_8ino_af6335bc6cae99e65af103320d0ffd740.html#af6335bc6cae99e65af103320d0ffd740',1,'ArmDriverUnit.ino']]],
   ['m4_5fencoder_5finterrupt',['m4_encoder_interrupt',['../ArmDriverUnit_8ino_a12dbc1a044ebbb9c1b10f58adac3d300.html#a12dbc1a044ebbb9c1b10f58adac3d300',1,'ArmDriverUnit.ino']]],
   ['m4extendisr',['m4ExtendISR',['../ArmDriverUnit_8ino_a75d0a3c68fc969b13863874b0b9c7db8.html#a75d0a3c68fc969b13863874b0b9c7db8',1,'ArmDriverUnit.ino']]],
   ['m4flexisr',['m4FlexISR',['../ArmDriverUnit_8ino_a433ae2d92a46fb355428f979774d4bbf.html#a433ae2d92a46fb355428f979774d4bbf',1,'ArmDriverUnit.ino']]],

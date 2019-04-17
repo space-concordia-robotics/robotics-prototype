@@ -101,15 +101,25 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <p>What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad. </p>
 <p class="enddd">If the stepper is trying to turn but hasn't gotten anywhere, there should be a check in the microcontroller that there's an issue (there can also be a check in the gui) </p>
 </dd>
+<dt><a class="anchor" id="_todo000010"></a>Member <a class="el" href="PinSetup_8h_adf7fab7635b7d1bbf4e12db45ade26b5.html#adf7fab7635b7d1bbf4e12db45ade26b5">M1_GEAR_RATIO</a>  </dt>
+<dd>fix this based on gear reduction inside and outside motor  </dd>
+<dt><a class="anchor" id="_todo000012"></a>Member <a class="el" href="PinSetup_8h_aea73ec8384e5d37e1ea1d4f354b8b7a4.html#aea73ec8384e5d37e1ea1d4f354b8b7a4">M1_MAX_HARD_ANGLE</a>  </dt>
+<dd>work this out maybe with max or dharik  </dd>
+<dt><a class="anchor" id="_todo000011"></a>Member <a class="el" href="PinSetup_8h_abc51b6b3787c6d1c03f522086e3d1f4d.html#abc51b6b3787c6d1c03f522086e3d1f4d">M1_MIN_HARD_ANGLE</a>  </dt>
+<dd>work this out maybe with max or dharik  </dd>
+<dt><a class="anchor" id="_todo000009"></a>Member <a class="el" href="PinSetup_8h_a993707090a7306c5a4445645e6fc9e62.html#a993707090a7306c5a4445645e6fc9e62">MIN_JOINT_ANGLE</a>  </dt>
+<dd>I forget if I fixed this, but these angle limits need to be ignored for the wrist that rotates as it shouldn't have limits  </dd>
 <dt><a class="anchor" id="_todo000006"></a>Class <a class="el" href="classParser.html">Parser</a>  </dt>
 <dd>Clean up parsing code to make it easier to read and reduce repetition.  </dd>
 <dt><a class="anchor" id="_todo000007"></a>Class <a class="el" href="classPidController.html">PidController</a>  </dt>
 <dd>Can I deal with the fact that angleTolerance is a <a class="el" href="classPidController.html" title="This is intended to be a generic PID controller class. ">PidController</a> attribute and not a <a class="el" href="classRobotMotor.html" title="The base class for ServoMotor, StepperMotor and DcMotor. ">RobotMotor</a> attribute?  </dd>
 <dt><a class="anchor" id="_todo000008"></a>Member <a class="el" href="classPidController_a345e065af2a6d2c8a9c9d9f758b1382f.html#a345e065af2a6d2c8a9c9d9f758b1382f">PidController::setOutputLimits</a>  (float minVal, float maxVal)</dt>
 <dd>should setOutputLimits be restricted to just pidcontroller or should it be something for all motors...? but then i set openloopspeed to 50 in the <a class="el" href="ArmDriverUnit_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title="Teensy setup. Calls many init functions to prep comms and motors. ">setup()</a>???? i need to rethink the velocity vs speed vs direction stuff!  </dd>
-<dt><a class="anchor" id="_todo000009"></a>Member <a class="el" href="PinSetup_8h_a924fbe483fd8c13808cad6ab252d4cb0.html#a924fbe483fd8c13808cad6ab252d4cb0">pinSetup</a>  (void)</dt>
-<dd>Perhaps pinsetup.h &amp; pinsetup.cpp should be changed to motorsetup or just setup as it's also got angle limits and gear ratios  </dd>
-<dt><a class="anchor" id="_todo000010"></a>Class <a class="el" href="classRobotMotor.html">RobotMotor</a>  </dt>
+<dt><a class="anchor" id="_todo000013"></a>Member <a class="el" href="PinSetup_8h_a924fbe483fd8c13808cad6ab252d4cb0.html#a924fbe483fd8c13808cad6ab252d4cb0">pinSetup</a>  (void)</dt>
+<dd><p class="startdd">Perhaps pinsetup.h &amp; pinsetup.cpp should be changed to motorsetup or just setup as it's also got angle limits and gear ratios </p>
+<p class="enddd">If I think about it, physically there's the motor and the joint, so the motor params (internal reduction, encoder resolution) could be separate from the joint params (external reduction, angle limits)  </p>
+</dd>
+<dt><a class="anchor" id="_todo000014"></a>Class <a class="el" href="classRobotMotor.html">RobotMotor</a>  </dt>
 <dd><p class="startdd">Make joint objects instead of motor objects and have switches etc inside of them? </p>
 <p>Perhaps the initialization of motor angle parameters should be its own function </p>
 <p>Perhaps the initialization of the motor's pins should also be its own function </p>

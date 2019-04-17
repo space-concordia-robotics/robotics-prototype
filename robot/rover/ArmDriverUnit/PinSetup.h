@@ -17,7 +17,7 @@
 // 8 or 12 encoder interrupt pins (12 if servo mod happens)
 
 #define NUM_MOTORS 6 //!< used in parsing for commands for multiple motors
-/*! angle limits for all motors
+/*! \brief angle limits for all motors
  *
  * \todo I forget if I fixed this, but these angle limits need to be ignored
  * for the wrist that rotates as it shouldn't have limits
@@ -48,10 +48,13 @@
 #define M1_DIR_PIN          5 //!< chooses the direction the motor turns in
 #define M1_PWM_PIN          6 //!< the speed of the motor is controlled by the pwm signal
 // 7&8 are on port D with bits 2&3 respectively
-#define M1_ENCODER_PORT    GPIOD_PDIR
+#define M1_ENCODER_PORT    GPIOD_PDIR //!< the input register for the port connected to the encoder pins
+/*! \brief the position of the lower encoder pin bit. The encoder interrupt code
+ * expects this to function correctly.
+*/
 #define M1_ENCODER_SHIFT   CORE_PIN7_BIT
-#define M1_ENCODER_A        7
-#define M1_ENCODER_B        8
+#define M1_ENCODER_A        7 //!< encoder A pin
+#define M1_ENCODER_B        8 //!< encoder B pin
 #define M1_LIMIT_SW_CW_PORT   GPIOC_PDIR
 #define M1_LIMIT_SW_CCW_PORT  GPIOC_PDIR
 #define M1_LIMIT_SW_CW_SHIFT  CORE_PIN9_BIT
@@ -72,18 +75,19 @@
 #define M2_ENCODER_SHIFT   CORE_PIN26_BIT
 #define M2_ENCODER_A       26
 #define M2_ENCODER_B       27
-#define M2_LIMIT_SW_FLEX_PORT    GPIOA_PDIR
-#define M2_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR
-#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN28_BIT
-#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN29_BIT
-#define M2_LIMIT_SW_FLEX   28
-#define M2_LIMIT_SW_EXTEND 29
+#define M2_LIMIT_SW_FLEX_PORT    GPIOA_PDIR //!< input register for the port associated to flex limit switch pin
+#define M2_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR //!< input register for the port associated to extend limit switch pin
+#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN28_BIT //!< position of the limit switch flex pin bit
+#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN29_BIT //!< position of the limit switch extend pin bit
+#define M2_LIMIT_SW_FLEX   28 //!< limit switch flex pin
+#define M2_LIMIT_SW_EXTEND 29 //!< limit switch extend pin
 #define M2_ENCODER_RESOLUTION 48
-#define M2_GEAR_RATIO      188.611 //*20.0 //99.508*20 //188 planetary gear chained to worm gear drive
-#define M2_MIN_HARD_ANGLE   -65.0
-#define M2_MAX_HARD_ANGLE   50.0
-#define M2_MIN_SOFT_ANGLE   -55.0
-#define M2_MAX_SOFT_ANGLE   40.0
+//! planetary gear motor chained to worm gear drive
+#define M2_GEAR_RATIO      188.611 //*20.0 //99.508*20
+#define M2_MIN_HARD_ANGLE   -65.0 //!< the flexion angle at which the joint presses the limit switch
+#define M2_MAX_HARD_ANGLE   50.0 //!< the extension angle at which the joint presses the limit switch
+#define M2_MIN_SOFT_ANGLE   -55.0 //!< a safety margin is added to the flexion angle to avoid ever hitting the limit switch after homing is complete
+#define M2_MAX_SOFT_ANGLE   40.0 //!< a safety margin is added to the extension angle to avoid ever hitting the limit switch after homing is complete
 
 #define M3_PWM_PIN         21
 //#define M3_ENABLE_PIN      17
@@ -102,7 +106,8 @@
 #define M3_LIMIT_SW_EXTEND        23
 #define M3_ENCODER_RESOLUTION 48
 //#define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
-#define M3_GEAR_RATIO      188.611*(40.0/14.0)*18.0 // belt reduction chained to worm gear drive
+//! belt reduction chained to worm gear drive
+#define M3_GEAR_RATIO      188.611*(40.0/14.0)*18.0
 #define M3_MIN_HARD_ANGLE   -145.0
 #define M3_MAX_HARD_ANGLE   65.0
 #define M3_MIN_SOFT_ANGLE   -135.0
@@ -114,27 +119,25 @@
 #define M4_STEP_PIN        14 //!< on rising edges, stepper will take a step
 #define M4_DIR_PIN         15 //!< chooses the step direction
 // 11&12 are on port C with bits 6&7 respectively
-#define M4_ENCODER_PORT    GPIOC_PDIR //!< the input register for the port connected to the encoder pins
-/*! the position of the lower encoder pin bit. The encoder interrupt code
- * expects this to function correctly.
-*/
+#define M4_ENCODER_PORT    GPIOC_PDIR 
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT
-#define M4_ENCODER_A       11 //!< encoder A pin
-#define M4_ENCODER_B       12 //!< encoder B pin
-#define M4_LIMIT_SW_FLEX_PORT    GPIOA_PDIR //!< input register for the port associated to flex limit switch pin
-#define M4_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR //!< input register for the port associated to extend limit switch pin
-#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN25_BIT //!< position of the limit switch flex pin bit
-#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT //!< position of the limit switch extend pin bit
-#define M4_LIMIT_SW_FLEX   25 //!< limit switch flex pin
-#define M4_LIMIT_SW_EXTEND 24 //!< limit switch extend pin
+#define M4_ENCODER_A       11
+#define M4_ENCODER_B       12
+#define M4_LIMIT_SW_FLEX_PORT    GPIOA_PDIR
+#define M4_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR
+#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN25_BIT
+#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT
+#define M4_LIMIT_SW_FLEX   25
+#define M4_LIMIT_SW_EXTEND 24
 #define M4_ENCODER_RESOLUTION 2000 //!< counts per revolution of the stepper encoder
 #define M4_STEP_RESOLUTION 1.8 //!< the angle traversed by the stepper stepping once
 // the 1.3846 is a value i calculated based on the discrepancy between expected and actual angles
-#define M4_GEAR_RATIO      (30.0/18.0)*20.0/1.3846 //(30.0/18.0)*20.0 //!< belt reduction chained to worm gear drive
-#define M4_MIN_HARD_ANGLE   -90.0 //!< the flexion angle at which the joint presses the limit switch
-#define M4_MAX_HARD_ANGLE   75.0 //!< the extension angle at which the joint presses the limit switch
-#define M4_MIN_SOFT_ANGLE   -80.0 //!< a safety margin is added to the flexion angle to avoid ever hitting the limit switch after homing is complete
-#define M4_MAX_SOFT_ANGLE   65.0 //!< a safety margin is added to the extension angle to avoid ever hitting the limit switch after homing is complete
+//! belt reduction chained to worm gear drive
+#define M4_GEAR_RATIO      (30.0/18.0)*20.0/1.3846 //(30.0/18.0)*20.0 
+#define M4_MIN_HARD_ANGLE   -90.0
+#define M4_MAX_HARD_ANGLE   75.0
+#define M4_MIN_SOFT_ANGLE   -80.0
+#define M4_MAX_SOFT_ANGLE   65.0
 
 // servos
 
