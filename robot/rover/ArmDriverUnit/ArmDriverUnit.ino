@@ -255,8 +255,7 @@ void m4ExtendISR(void);
 void dcInterrupt(void); //!< manages motors 1&2
 /*! \brief manages motor 4
  * 
- * Stepper interrupts occur much faster and the code is more complicated,
- * so each stepper needs its own interrupt.
+ * Stepper interrupts occur much faster and the code is more complicated, so each stepper needs its own interrupt.
 */
 void m4StepperInterrupt(void);
 void servoInterrupt(void); //!< manages motors 5&6
@@ -292,27 +291,14 @@ void setup() {
   pinSetup();
   initComms();
   initEncoders();
-
-  // prepare and attach limit switch ISRs
-  // the following works if the switches are debounced by the hardware
-  /*
-    #if defined(LIM_SWITCH_FALL)
-    #define LIM_SWITCH_DIR FALLING
-    #elif defined(LIM_SWITCH_RISE)
-    #define LIM_SWITCH_DIR RISING
-    #endif
-  */
-  // the following is used because the software debounces the limit switches
-#define LIM_SWITCH_DIR CHANGE
-  initLimitSwitches(); // setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
+  initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
   //motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
   motor6.switchDirectionLogic(); // positive angles now mean opening
   initMotorTimers();
 
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
-  sinceAnglePrint = 0;
-  sinceStepperCheck = 0;
+  sinceAnglePrint = 0; sinceStepperCheck = 0;
 }
 
 /*! \brief Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED.
@@ -323,9 +309,8 @@ void setup() {
  * \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
  * \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
  * a check in the microcontroller that there's an issue (there can also be a check in the gui)
- * 
+ * \todo Check to see if any global variables can be turned into static variables inside loop()
  */
-
 void loop() {
   /* limit switch checks occur before listening for commands */
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
@@ -343,12 +328,12 @@ void loop() {
       }
       motorArray[i]->goToSafeAngle();
     }
-    // put code here to check if the motor should be at the end of its path but isn't?
-    // well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+    /*! \todo put code here to check if the motor should be at the end of its path but isn't?
+     * well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+    */
   }
 
   /* Homing functionality ignores most message types */
-  // do i need to modify my code so that hwen it receives a stop command it resets the homing variables?
   if (isHoming) { // not done homing the motors
     if (homingMotor < NUM_MOTORS) {
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
@@ -872,6 +857,7 @@ void initMotorTimers(void) {
 void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
+  motor3.motorTimerInterrupt();
 }
 void m4StepperInterrupt(void) {
   motor4.motorTimerInterrupt(m4StepperTimer);

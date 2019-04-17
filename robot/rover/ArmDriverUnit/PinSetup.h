@@ -41,6 +41,8 @@
 #define LIM_SWITCH_PULLSTATE INPUT_PULLDOWN
 #endif
 
+#define LIM_SWITCH_DIR CHANGE //!< interrupts occur on changing pin state because it's software debounced
+
 #define TRIGGER_DELAY 10 //!< how long to wait to make sure a limit switch was pressed and ignore bouncing
 
 // DC motors

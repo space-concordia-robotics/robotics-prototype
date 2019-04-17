@@ -11,6 +11,15 @@
   while(1); // infinite do nothing loop -- wait for the countdown
 }
 
+// the following works if the switches are debounced by the hardware
+  /*
+    #if defined(LIM_SWITCH_FALL)
+    #define LIM_SWITCH_DIR FALLING
+    #elif defined(LIM_SWITCH_RISE)
+    #define LIM_SWITCH_DIR RISING
+    #endif
+  */
+
 timers:
   -watchdog timer to be added into my code soonish to reset the teensy if it's hanging
    -heartbeat will be implemented using millis as millis uses systick so do we really need to do interrupts?
