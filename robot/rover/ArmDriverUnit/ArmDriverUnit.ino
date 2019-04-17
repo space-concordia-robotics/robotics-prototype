@@ -196,19 +196,19 @@ const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 // instantiate motor objects here:
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
-StepperMotor motor3(M3_ENABLE_PIN, M3_DIR_PIN, M3_STEP_PIN, M3_STEP_RESOLUTION, FULL_STEP, M3_GEAR_RATIO);
+DcMotor motor3(M3_DIR_PIN, M3_PWM_PIN, M3_GEAR_RATIO);
 StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
-DcMotor *m1 = &motor1; DcMotor *m2 = &motor2;
-StepperMotor *m3 = &motor3; StepperMotor *m4 = &motor4;
+DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3;
+StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
 RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6}; //!< I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
 // instantiate timers here:
-IntervalTimer dcTimer; // motors 1&2
-IntervalTimer m3StepperTimer, m4StepperTimer;
+IntervalTimer dcTimer; // motors 1,2&3
+IntervalTimer m4StepperTimer; // motor 4
 IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
@@ -253,10 +253,13 @@ void m4ExtendISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); //!< manages motors 1&2
+/*! \brief manages motor 4
+ * 
+ * Stepper interrupts occur much faster and the code is more complicated,
+ * so each stepper needs its own interrupt.
+*/
+void m4StepperInterrupt(void);
 void servoInterrupt(void); //!< manages motors 5&6
-// stepper interrupts occur much faster and the code is more complicated, so each stepper gets its own interrupt
-void m3StepperInterrupt(void); //!< manages motor 3
-void m4StepperInterrupt(void); //!< manages motor 4
 
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
  * 
@@ -303,7 +306,7 @@ void setup() {
 #define LIM_SWITCH_DIR CHANGE
   initLimitSwitches(); // setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
-  motor3.switchDirectionLogic(); // motor is wired backwards?
+  //motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
   motor6.switchDirectionLogic(); // positive angles now mean opening
   initMotorTimers();
 
@@ -845,37 +848,33 @@ void initSpeedParams(void) {
   // operate at 50% max speed, and the gains should vary based on which motor it is
   motor1.openLoopSpeed = 25; // 50% speed
   motor2.openLoopSpeed = 25; // 50% speed
-  motor3.openLoopSpeed = 50; // 50% speed
+  motor3.openLoopSpeed = 25; // 50% speed
   motor4.openLoopSpeed = 90; // 50% speed
   motor5.openLoopSpeed = 50; // 50% speed
   motor6.openLoopSpeed = 50; // 50% speed
   // open loop gain is only for time-based open loop control
   motor1.openLoopGain = 0.75; // needs to be tested
   motor2.openLoopGain = 0.0015; // needs to be tested
+  motor3.openLoopGain = 0.75; // needs to be tested
   motor5.openLoopGain = 0.32; // for 5V
   motor6.openLoopGain = 0.35; // for 5V
 }
 
 void initMotorTimers(void) {
-  m3StepperTimer.begin(m3StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-  m3StepperTimer.priority(MOTOR_NVIC_PRIORITY);
-  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
-  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
+  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
-void m3StepperInterrupt(void) {
-  motor3.motorTimerInterrupt(m3StepperTimer);
-}
-void m4StepperInterrupt(void) {
-  motor4.motorTimerInterrupt(m4StepperTimer);
-}
 void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
+}
+void m4StepperInterrupt(void) {
+  motor4.motorTimerInterrupt(m4StepperTimer);
 }
 void servoInterrupt(void) {
   motor5.motorTimerInterrupt();
@@ -884,26 +883,31 @@ void servoInterrupt(void) {
 
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
-  // encoder states are 4 bit values
-  // top 2 bits are the previous states of encoder channels A and B, bottom 2 are current states
+  /*! encoder states are 4 bit values. Top 2 bits are the previous states
+   * of encoder channels A and B, bottom 2 are current states.
+  */
   static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2; // shift current state into previous state
-  // put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
-  // this is done by 1) grabbing the input register of the port,
-  // 2) shifting it until the relevant bits are in the lowest state,
-  // and 3) clearing all the bits higher than the lowest 2
-  // next, place said (current) pin states into the bottom 2 bits of oldEncoderState
+  oldEncoderState <<= 2; //!< shift current state into previous state
+  /*! put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
+   * this is done by 1) grabbing the input register of the port,
+   * 2) shifting it until the relevant bits are in the lowest state,
+   * and 3) clearing all the bits higher than the lowest 2
+   * next, place said (current) pin states into the bottom 2 bits of oldEncoderState
+   */
   oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
-  // the dir[] array corresponds to the correct direction for a specific set of prev and current encoder states
-  // the & operation ensures that anything above the lowest 4 bits is cleared before accessing the array
+  /*! the encoderStates[] array corresponds to the correct direction
+   * for a specific set of prev and current encoder states.
+   * The & operation ensures that anything above the lowest 4 bits
+   * is cleared before accessing the array.
+  */
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 "); UART_PORT.println(motor1.encoderCount);
 #endif
 }
 /*
+  //! use this version if only one encoder channel is working
   void m1_encoder_interrupt(void) {
-  // if only one channel is working, the same interrupt means more angle attained
   motor1.encoderCount += motor1.rotationDirection * 2;
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 ");UART_PORT.println(motor1.encoderCount);
