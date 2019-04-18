@@ -103,6 +103,9 @@ void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
       movementDone = true;
       stopRotation();
       nextInterval = STEPPER_PID_PERIOD; // set it back to default
+      if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
     }
   }
   else if (!isOpenLoop) { // closed loop control
@@ -114,6 +117,9 @@ void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
         movementDone = true;
         stopRotation();
         nextInterval = STEPPER_PID_PERIOD; // set it back to default
+        if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
       }
       else {
         int dir = calcDirection(output);
@@ -129,6 +135,9 @@ void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
     }
     else {
       stopRotation();
+      if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
     }
   }
 }

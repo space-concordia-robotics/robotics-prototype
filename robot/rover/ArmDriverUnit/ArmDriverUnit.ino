@@ -370,12 +370,7 @@ void loop() {
           /*
           motor 3 homed to -80.5 and then didnt jump out of homing sequence??
           maybe because it was supposed to be more like -79.5 since the soft angle is -80?
-if motor.homingDone is false, nothing special occurs
-else:
-if motor.atSafeAngle::
-if motor.homingPass is 1 and its double ended it says its homing again and calls homeMotor again
-otherwise it's 2 or above so it's done and sets homingPass to 0?? then increments homingMotor
-so basically atSafeAngle probably doesn'tget set to true like it'ssupposedto after the second and maybe first direction
+          I think it's cause motor 3 was a stepper and I forgot to set atSafeAngle to true in the stepper code...
           */
             motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
             homingMotor++; // move on to the next motor

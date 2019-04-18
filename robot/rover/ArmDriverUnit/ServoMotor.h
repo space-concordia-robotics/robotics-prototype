@@ -107,6 +107,9 @@ void ServoMotor::motorTimerInterrupt(void) {
     }
     else {
       stopRotation();
+      if (!atSafeAngle) {
+          atSafeAngle = true; // alert homing stuff that it can go to next part
+        }
     }
   }
 }
