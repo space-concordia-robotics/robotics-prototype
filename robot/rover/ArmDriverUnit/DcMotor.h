@@ -9,35 +9,29 @@ class DcMotor: public RobotMotor {
   public:
     static int numDcMotors;
 
-    // DcMotor(int pwmPin, int encA, int encB); // for sabertooth
-    DcMotor(int dirPin, int pwmPin, float gearRatio); // for cytron
+    DcMotor(int dirPin, int pwmPin, float gearRatio);
     void motorTimerInterrupt(void);
     /* movement helper functions */
-    bool calcTurningDuration(float angle); // guesstimates how long to turn at the preset open loop motor speed to get to the desired position
+    bool calcTurningDuration(float angle); //!< guesstimates how long to turn at the preset open loop motor speed to get to the desired position
     bool calcCurrentAngle(void);
     /* movement functions */
     void stopRotation(void);
-    void setVelocity(int motorDir, float motorSpeed); // currently this actually activates the dc motor and makes it turn at a set speed/direction
+    void setVelocity(int motorDir, float motorSpeed); //!< currently this actually activates the dc motor and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
     void goToAngle(float angle);
     void budge(int dir);
 
     // stuff for open loop control
-    unsigned int numMillis; // how many milliseconds for dc motor to reach desired position
-    elapsedMillis timeCount; // how long has the dc motor been turning for
+    unsigned int numMillis; //!< how many milliseconds for dc motor to reach desired position
+    elapsedMillis timeCount; //!< how long has the dc motor been turning for
 
   private:
-    int directionPin; // for new driver
+    int directionPin;
     int pwmPin;
 };
 
 int DcMotor::numDcMotors = 0; // must initialize variable outside of class
 
-// for sabertooth
-// DcMotor::DcMotor(int pwmPin, int encA, int encB):
-// pwmPin(pwmPin), encA(encA), encB(encB)
-
-// for new driver
 DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
   directionPin(dirPin), pwmPin(pwmPin)
 {
@@ -157,7 +151,7 @@ bool DcMotor::calcCurrentAngle(void) {
 }
 
 void DcMotor::stopRotation(void) {
-  analogWrite(pwmPin, 0); // 0 for cytron, different implementation for sabertooth
+  analogWrite(pwmPin, 0);
   movementDone = true;
   isBudging = false;
 }
