@@ -32,7 +32,7 @@ class StepperMotor: public RobotMotor {
     void singleStep();
     void setVelocity(int motorDir, float motorSpeed);
     void goToCommandedAngle(void);
-    void goToAngle(float angle);
+    void forceToAngle(float angle);
     void budge(int dir);
 
     // stuff for open loop control
@@ -252,7 +252,7 @@ void StepperMotor::goToCommandedAngle() {
   }
 }
 
-void StepperMotor::goToAngle(float angle) {
+void StepperMotor::forceToAngle(float angle) {
   // this function does not check angle limits as it operates beyond them
   // perhaps a better way is to have a variable that ignores angle limits in my other code!!
   desiredAngle = angle;

@@ -18,7 +18,7 @@ class DcMotor: public RobotMotor {
     void stopRotation(void);
     void setVelocity(int motorDir, float motorSpeed); //!< currently this actually activates the dc motor and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
-    void goToAngle(float angle);
+    void forceToAngle(float angle);
     void budge(int dir);
 
     // stuff for open loop control
@@ -214,7 +214,7 @@ void DcMotor::goToCommandedAngle(void) {
   }
 }
 
-void DcMotor::goToAngle(float angle) {
+void DcMotor::forceToAngle(float angle) {
   desiredAngle = angle;
   if (isOpenLoop) {
     calcCurrentAngle();

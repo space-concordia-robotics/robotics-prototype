@@ -85,7 +85,7 @@ class RobotMotor {
     virtual void stopRotation(void) = 0; //!< stop turning the motor
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; //!< sets motor speed and direction until next timer interrupt
     virtual void goToCommandedAngle(void) = 0; //!< once an angle is set it will go to the angle and won't ignore limits
-    virtual void goToAngle(float angle) = 0; //!< goes to angle ignoring limits
+    virtual void forceToAngle(float angle) = 0; //!< goes to angle ignoring limits
     virtual void budge(int dir) = 0; //!< moves a motor as long as a new budge commmand comes in within 200ms
     // for open loop control
     float openLoopError; //!< public variable for open loop control
@@ -283,7 +283,7 @@ void RobotMotor::goToSafeAngle(void) {
     UART_PORT.println("and turning ccw to soft angle");
 #endif
     setSoftwareAngle(maxHardAngle);
-    goToAngle(maxSoftAngle);
+    forceToAngle(maxSoftAngle);
   }
   if (limitSwitchState == CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
@@ -292,7 +292,7 @@ void RobotMotor::goToSafeAngle(void) {
     UART_PORT.println("and turning cw to soft angle");
 #endif
     setSoftwareAngle(minHardAngle);
-    goToAngle(minSoftAngle);
+    forceToAngle(minSoftAngle);
   }
   // now that the behaviour is complete we can reset these,
   // in wait for the next trigger to be confirmed
@@ -311,13 +311,13 @@ void RobotMotor::homeMotor(char homingDir) {
     UART_PORT.println("homeMotor inwards");
 #endif
     // set homing direction inwards
-    goToAngle(2 * minHardAngle);
+    forceToAngle(1.5 * minHardAngle);
   }
   else if (homingDir == 'o') { //(pos, ccw)
 #ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor outwards");
 #endif
-    goToAngle(2 * maxHardAngle);
+    forceToAngle(1.5 * maxHardAngle);
   }
   homingDone = false;
 }

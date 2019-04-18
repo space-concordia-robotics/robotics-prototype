@@ -310,6 +310,7 @@ void setup() {
  * \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
  * a check in the microcontroller that there's an issue (there can also be a check in the gui)
  * \todo Check to see if any global variables can be turned into static variables inside loop()
+ * \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
  */
 void loop() {
   /* limit switch checks occur before listening for commands */
@@ -318,15 +319,15 @@ void loop() {
       motorArray[i]->checkForActualPress();
     }
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-#ifdef DEBUG_HOMING
-      UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+#ifdef DEBUG_SWITCHES
+      UART_PORT.print("motor "); UART_PORT.print(i + 1);
       UART_PORT.println(" hit limit switch");
 #endif
       motorArray[i]->atSafeAngle = false;
       if (isHoming) {
-        motorArray[i]->homingDone = true;
+        motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
       }
-      motorArray[i]->goToSafeAngle();
+      motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
     }
     /*! \todo put code here to check if the motor should be at the end of its path but isn't?
      * well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
@@ -346,8 +347,8 @@ void loop() {
         motorsToHome[homingMotor] = false; // set this to false so it only happens once
       }
       if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-        if (motorArray[homingMotor]->atSafeAngle) {
-          if (motorArray[homingMotor]->homingPass == 0) {
+        if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
+          if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
 #ifdef DEBUG_HOMING
             UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
             UART_PORT.println(" homing 1 done and at safe angle");
@@ -366,9 +367,16 @@ void loop() {
             UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
             UART_PORT.println(" homing complete. now to move to angle");
 #endif
-            // dunno if i need to use gotoangle anymore
-            // move to home should be a separate command to remove my headache
-            //motorArray[homingMotor]->goToAngle(motorArray[homingMotor]->neutralAngle);
+          /*
+          motor 3 homed to -80.5 and then didnt jump out of homing sequence??
+          maybe because it was supposed to be more like -79.5 since the soft angle is -80?
+if motor.homingDone is false, nothing special occurs
+else:
+if motor.atSafeAngle::
+if motor.homingPass is 1 and its double ended it says its homing again and calls homeMotor again
+otherwise it's 2 or above so it's done and sets homingPass to 0?? then increments homingMotor
+so basically atSafeAngle probably doesn'tget set to true like it'ssupposedto after the second and maybe first direction
+          */
             motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
             homingMotor++; // move on to the next motor
           }
@@ -383,6 +391,8 @@ void loop() {
       UART_PORT.println("all motors done homing, reinitializing motor timers");
 #endif
       isHoming = false;
+      // this would be a good place to call the goToNeutral function or whatever
+      //motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
     }
   }
 
@@ -429,6 +439,8 @@ void loop() {
           motorArray[i]->stopRotation();
           motorArray[i]->stopHoming();
         }
+        // the following variables are global rather than belonging to a class so must be dealt with separately
+        // i suppose i could package a bunch of this into a function called stopHoming
         isHoming = false;
         homingMotor = NUM_MOTORS;
         for (int i = 0; i < NUM_MOTORS; i++) {
@@ -446,22 +458,20 @@ void loop() {
             for (int i = 0; i < NUM_MOTORS; i++) {
               if (motorArray[i]->hasLimitSwitches) {
                 motorsToHome[i] = true;
+                #ifdef DEBUG_MAIN
+                UART_PORT.print("Motor ");UART_PORT.print(i+1);UART_PORT.println(" to be homed.");
+#endif
               }
             }
           }
           else if (motorCommand.homeCommand) {
             if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
               motorsToHome[motorCommand.whichMotor] = true;
+                              #ifdef DEBUG_MAIN
+                UART_PORT.print("Motor ");UART_PORT.print(motorCommand.whichMotor+1);UART_PORT.println(" to be homed.");
+#endif
             }
           }
-          // motor 3 homed to -80.5 and then didnt jump out of homing sequence??
-          // maybe because it was supposed to be more like -79.5 since the soft angle is -80?
-          /*
-            // for testing homing with wrist servo
-            motorsToHome[0]=true;
-            motor1.homingType=2;
-            Serial.println(motor1.homingType);
-          */
           isHoming = true;
           homingMotor = 0;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -545,7 +555,7 @@ void loop() {
 #endif
             }
             else if (motorCommand.resetJointPosition) {
-              motorArray[motorCommand.whichMotor - 1]->goToAngle(0.0);
+              motorArray[motorCommand.whichMotor - 1]->forceToAngle(0.0);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
               UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
 #endif
@@ -769,14 +779,14 @@ void initEncoders(void) {
 
 void initLimitSwitches(void) {
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
-  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  //motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
   motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
   //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
   //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
-  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+  //attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
   attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
@@ -816,31 +826,31 @@ void initLimitSwitches(void) {
 void initSpeedParams(void) {
   // set max and min speeds (in percentage)
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.setMotorSpeed(90); //25;
-  motor2.setMotorSpeed(90); //25;
-  motor3.setMotorSpeed(90); //25;
-  motor4.setMotorSpeed(90);
-  motor5.setMotorSpeed(50);
-  motor6.setMotorSpeed(50);
+  motor1.setMotorSpeed(90); // needs to be tuned
+  motor2.setMotorSpeed(90); // needs to be tuned
+  motor3.setMotorSpeed(90); // needs to be tuned
+  motor4.setMotorSpeed(90); // needs to be tuned?
+  motor5.setMotorSpeed(50); // probably done tuning
+  motor6.setMotorSpeed(50); // probably done tuning
 
   // set pid slowest speed before it cuts power, to avoid noise and energy drain
-  motor1.pidController.setSlowestSpeed(5.0);
-  motor2.pidController.setSlowestSpeed(5.0);
-  motor3.pidController.setSlowestSpeed(5.0);
-  motor4.pidController.setSlowestSpeed(5.0);
-  motor5.pidController.setSlowestSpeed(5.0);
-  motor6.pidController.setSlowestSpeed(5.0);
+  motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
+  motor2.pidController.setSlowestSpeed(5.0); // needs to be tuned
+  motor3.pidController.setSlowestSpeed(5.0); // needs to be tuned
+  //motor4.pidController.setSlowestSpeed(5.0); //honestly it doesn't really make sense for steppers? or does it
+  //motor5.pidController.setSlowestSpeed(5.0); // servos have no closed loop
+  //motor6.pidController.setSlowestSpeed(5.0); // servos have no closed loop
 
   // set open loop parameters. By default the motors are open loop,
   // have constant velocity profiles (no ramping), operate at 50% max speed,
   // and the gains should vary based on which motor it is
 
   // open loop gain is only for time-based open loop control
-  motor1.setOpenLoopGain(0.1); //0.5; // needs to be tested
-  motor2.setOpenLoopGain(0.1); //0.5; // needs to be tested
-  motor3.setOpenLoopGain(0.1); //0.5; // needs to be tested
-  motor5.setOpenLoopGain(0.32); // for 5V
-  motor6.setOpenLoopGain(0.35); // for 5V
+  motor1.setOpenLoopGain(0.1); //0.5; // needs to be tuned
+  motor2.setOpenLoopGain(0.1); //0.5; // needs to be tuned
+  motor3.setOpenLoopGain(0.1); //0.5; // needs to be tuned
+  motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
+  motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
 
 void initMotorTimers(void) {

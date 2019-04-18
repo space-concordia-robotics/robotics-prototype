@@ -19,7 +19,7 @@ class ServoMotor: public RobotMotor {
     void stopRotation(void);
     void setVelocity(int motorDir, float motorSpeed); //!< currently this actually activates the servo and makes it turn at a set speed/direction
     void goToCommandedAngle(void);
-    void goToAngle(float angle);
+    void forceToAngle(float angle);
     void budge(int dir);
 
     // stuff for open loop control
@@ -210,7 +210,7 @@ void ServoMotor::goToCommandedAngle(void) {
   }
 }
 
-void ServoMotor::goToAngle(float angle) {
+void ServoMotor::forceToAngle(float angle) {
   desiredAngle = angle;
   if (isOpenLoop) {
     calcCurrentAngle();
