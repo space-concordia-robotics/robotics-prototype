@@ -10,108 +10,118 @@ const MIN_THROTTLE_SPEED = 0;
 const MAX_STEERING_SPEED = 39;
 const MIN_STEERING_SPEED = 0;
 
+// for command thoughput limiting
+var start = new Date().getTime();
+const THROTTLE_TIME = 100;
+var lastCmdSent = 0;
+
+// Milliseconds since start time given
+function millisSince(start) {
+    var elapsed = new Date().getTime() - start;
+    return elapsed;
+}
+
 $(document).keydown(function(e) {
-  let currentSpeed = "";
+    let currentSpeed = "";
 
-  switch(e.which) {
-      case 73: // 'i' --> increase throttle
-          $("#throttle-increase > button").css("background-color", "rgb(255, 0, 0)");
-          currentSpeed = $("#throttle-speed").text();
+    switch(e.which) {
+        case 73: // 'i' --> increase throttle
+            $("#throttle-increase > button").css("background-color", "rgb(255, 0, 0)");
+            currentSpeed = $("#throttle-speed").text();
 
-          if (currentSpeed < MAX_THROTTLE_SPEED) {
-              $("#throttle-speed").text(parseFloat(currentSpeed) + 0.5);
-          }
+            if (currentSpeed < MAX_THROTTLE_SPEED) {
+                $("#throttle-speed").text(parseFloat(currentSpeed) + 0.5);
+            }
 
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 'i'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
-          break;
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'i'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            break;
 
-      case 74: // 'j' --> decrease throttle
-          $("#throttle-decrease > button").css("background-color", "rgb(255, 0, 0)");
-          currentSpeed = $("#throttle-speed").text();
+        case 74: // 'j' --> decrease throttle
+            $("#throttle-decrease > button").css("background-color", "rgb(255, 0, 0)");
+            currentSpeed = $("#throttle-speed").text();
 
-          if (currentSpeed > MIN_THROTTLE_SPEED) {
-              $("#throttle-speed").text(parseFloat(currentSpeed) - 0.5);
-          }
+            if (currentSpeed > MIN_THROTTLE_SPEED) {
+                $("#throttle-speed").text(parseFloat(currentSpeed) - 0.5);
+            }
 
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 'j'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
-          break;
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'j'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            break;
 
-      case 79: // 'o' --> increase steering
-          $("#steering-increase > button").css("background-color", "rgb(255, 0, 0)");
-          currentSpeed = $("#steering-speed").text();
+        case 79: // 'o' --> increase steering
+            $("#steering-increase > button").css("background-color", "rgb(255, 0, 0)");
+            currentSpeed = $("#steering-speed").text();
 
-          if (currentSpeed < MAX_STEERING_SPEED) {
-              $("#steering-speed").text(parseFloat(currentSpeed) + 0.5);
-          }
+            if (currentSpeed < MAX_STEERING_SPEED) {
+                $("#steering-speed").text(parseFloat(currentSpeed) + 0.5);
+            }
 
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 'o'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
-          break;
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'o'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            break;
 
-      case 75: // 'k' --> decrease steering
-          $("#steering-decrease > button").css("background-color", "rgb(255, 0, 0)");
-          currentSpeed = $("#steering-speed").text();
+        case 75: // 'k' --> decrease steering
+            $("#steering-decrease > button").css("background-color", "rgb(255, 0, 0)");
+            currentSpeed = $("#steering-speed").text();
 
-          if (currentSpeed > MIN_STEERING_SPEED) {
-              $("#steering-speed").text(parseFloat(currentSpeed) - 0.5);
-          }
+            if (currentSpeed > MIN_STEERING_SPEED) {
+                $("#steering-speed").text(parseFloat(currentSpeed) - 0.5);
+            }
 
-          $.ajax({
-              url: '/rover_drive',
-              type: 'POST',
-              data: {
-                  cmd: 'k'
-              },
-              success: function(response){
-                  appendToConsole("cmd: " + response.cmd);
-                  scrollToBottom();
-              }
-          })
-          break;
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'k'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            break;
 
-       case 66: // 'b' --> get buffered serial messages
-           $.ajax({
-                  url: '/rover_drive',
-                  type: 'POST',
-                  data: {
-                      cmd: 'b'
-                  },
-                  success: function(response){
-                      appendToConsole("cmd: " + response.cmd);
-                      scrollToBottom();
-                  }
-              })
-              break;
-
+         case 66: // 'b' --> get buffered serial messages
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'b'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            break;
       // case 77: // 'm' --> enable motor control
       //     $.ajax({
       //            url: '/rover_drive',
@@ -139,12 +149,14 @@ $(document).keydown(function(e) {
       //           })
       //           break;
 
-  default: return; // exit this handler for other keys
+        default: return; // exit this handler for other keys
 }
 e.preventDefault(); // prevent the default action (scroll / move caret)
 });
 
 
+// no throttling necessary as since keydown events are throttled
+// those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function(e) {
   switch(e.which) {
       case 65: // left
@@ -256,134 +268,141 @@ window.addEventListener('keyup',function(e){
 },true);
 
 function gameLoop() {
-    // 'a' --> rover turn left
-    if (keyState[65]) {
+    if (millisSince(lastCmdSent) > THROTTLE_TIME) {
+        // 'a' --> rover turn left
+        if (keyState[65]) {
 
-        $("#rover-left > button").css("background-color", "rgb(255, 0, 0)");
+            $("#rover-left > button").css("background-color", "rgb(255, 0, 0)");
 
-        if (mockRoverTable) {
-            $("#left-front-rpm").text("0");
-            $("#left-front-current").text("0.3");
-            $("#left-mid-rpm").text("0");
-            $("#left-mid-current").text("0.3");
-            $("#left-rear-rpm").text("0");
-            $("#left-rear-current").text("0.3");
-            $("#right-front-rpm").text("0");
-            $("#right-front-current").text("0.3");
-            $("#right-mid-rpm").text("0");
-            $("#right-mid-current").text("0.3");
-            $("#right-rear-rpm").text("0");
-            $("#right-rear-current").text("0.3");
+            if (mockRoverTable) {
+                $("#left-front-rpm").text("0");
+                $("#left-front-current").text("0.3");
+                $("#left-mid-rpm").text("0");
+                $("#left-mid-current").text("0.3");
+                $("#left-rear-rpm").text("0");
+                $("#left-rear-current").text("0.3");
+                $("#right-front-rpm").text("0");
+                $("#right-front-current").text("0.3");
+                $("#right-mid-rpm").text("0");
+                $("#right-mid-current").text("0.3");
+                $("#right-rear-rpm").text("0");
+                $("#right-rear-current").text("0.3");
+            }
+
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'a'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+
+            lastCmdSent = new Date().getTime();
+        }
+        // 'w' --> rover forward
+        else if (keyState[87]) {
+
+            $("#rover-up > button").css("background-color", "rgb(255, 0, 0)");
+
+            if (mockRoverTable) {
+                $("#left-front-rpm").text("0");
+                $("#left-front-current").text("0.3");
+                $("#left-mid-rpm").text("0");
+                $("#left-mid-current").text("0.3");
+                $("#left-rear-rpm").text("0");
+                $("#left-rear-current").text("0.3");
+                $("#right-front-rpm").text("0");
+                $("#right-front-current").text("0.3");
+                $("#right-mid-rpm").text("0");
+                $("#right-mid-current").text("0.3");
+                $("#right-rear-rpm").text("0");
+                $("#right-rear-current").text("0.3");
+            }
+
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'w'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            lastCmdSent = new Date().getTime();
+        }
+        // 'd' --> rover right
+        else if (keyState[68]) {
+
+            $("#rover-right > button").css("background-color", "rgb(255, 0, 0)");
+
+            if (mockRoverTable) {
+                $("#left-front-rpm").text("0");
+                $("#left-front-current").text("0.3");
+                $("#left-mid-rpm").text("0");
+                $("#left-mid-current").text("0.3");
+                $("#left-rear-rpm").text("0");
+                $("#left-rear-current").text("0.3");
+                $("#right-front-rpm").text("0");
+                $("#right-front-current").text("0.3");
+                $("#right-mid-rpm").text("0");
+                $("#right-mid-current").text("0.3");
+                $("#right-rear-rpm").text("0");
+                $("#right-rear-current").text("0.3");
+            }
+
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 'd'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            lastCmdSent = new Date().getTime();
         }
 
-        $.ajax({
-            url: '/rover_drive',
-            type: 'POST',
-            data: {
-                cmd: 'a'
-            },
-            success: function(response){
-                appendToConsole("cmd: " + response.cmd);
-                scrollToBottom();
+        // 's' --> rover back
+        else if (keyState[83]) {
+
+            $("#rover-down > button").css("background-color", "rgb(255, 0, 0)");
+
+            if (mockRoverTable) {
+                $("#left-front-rpm").text("0");
+                $("#left-front-current").text("0.3");
+                $("#left-mid-rpm").text("0");
+                $("#left-mid-current").text("0.3");
+                $("#left-rear-rpm").text("0");
+                $("#left-rear-current").text("0.3");
+                $("#right-front-rpm").text("0");
+                $("#right-front-current").text("0.3");
+                $("#right-mid-rpm").text("0");
+                $("#right-mid-current").text("0.3");
+                $("#right-rear-rpm").text("0");
+                $("#right-rear-current").text("0.3");
             }
-        })
-    }
-    // 'w' --> rover forward
-    else if (keyState[87]) {
 
-        $("#rover-up > button").css("background-color", "rgb(255, 0, 0)");
-
-        if (mockRoverTable) {
-            $("#left-front-rpm").text("0");
-            $("#left-front-current").text("0.3");
-            $("#left-mid-rpm").text("0");
-            $("#left-mid-current").text("0.3");
-            $("#left-rear-rpm").text("0");
-            $("#left-rear-current").text("0.3");
-            $("#right-front-rpm").text("0");
-            $("#right-front-current").text("0.3");
-            $("#right-mid-rpm").text("0");
-            $("#right-mid-current").text("0.3");
-            $("#right-rear-rpm").text("0");
-            $("#right-rear-current").text("0.3");
+            $.ajax({
+                url: '/rover_drive',
+                type: 'POST',
+                data: {
+                    cmd: 's'
+                },
+                success: function(response){
+                    appendToConsole("cmd: " + response.cmd);
+                    scrollToBottom();
+                }
+            })
+            lastCmdSent = new Date().getTime();
         }
-
-        $.ajax({
-            url: '/rover_drive',
-            type: 'POST',
-            data: {
-                cmd: 'w'
-            },
-            success: function(response){
-                appendToConsole("cmd: " + response.cmd);
-                scrollToBottom();
-            }
-        })
-    }
-    // 'd' --> rover right
-    else if (keyState[68]) {
-
-        $("#rover-right > button").css("background-color", "rgb(255, 0, 0)");
-
-        if (mockRoverTable) {
-            $("#left-front-rpm").text("0");
-            $("#left-front-current").text("0.3");
-            $("#left-mid-rpm").text("0");
-            $("#left-mid-current").text("0.3");
-            $("#left-rear-rpm").text("0");
-            $("#left-rear-current").text("0.3");
-            $("#right-front-rpm").text("0");
-            $("#right-front-current").text("0.3");
-            $("#right-mid-rpm").text("0");
-            $("#right-mid-current").text("0.3");
-            $("#right-rear-rpm").text("0");
-            $("#right-rear-current").text("0.3");
-        }
-
-        $.ajax({
-            url: '/rover_drive',
-            type: 'POST',
-            data: {
-                cmd: 'd'
-            },
-            success: function(response){
-                appendToConsole("cmd: " + response.cmd);
-                scrollToBottom();
-            }
-        })
-    }
-
-    // 's' --> rover back
-    else if (keyState[83]) {
-
-        $("#rover-down > button").css("background-color", "rgb(255, 0, 0)");
-
-        if (mockRoverTable) {
-            $("#left-front-rpm").text("0");
-            $("#left-front-current").text("0.3");
-            $("#left-mid-rpm").text("0");
-            $("#left-mid-current").text("0.3");
-            $("#left-rear-rpm").text("0");
-            $("#left-rear-current").text("0.3");
-            $("#right-front-rpm").text("0");
-            $("#right-front-current").text("0.3");
-            $("#right-mid-rpm").text("0");
-            $("#right-mid-current").text("0.3");
-            $("#right-rear-rpm").text("0");
-            $("#right-rear-current").text("0.3");
-        }
-
-        $.ajax({
-            url: '/rover_drive',
-            type: 'POST',
-            data: {
-                cmd: 's'
-            },
-            success: function(response){
-                appendToConsole("cmd: " + response.cmd);
-                scrollToBottom();
-            }
-        })
     }
     // send REST signal, mimicking behavior of bluetooth setup
     // else {
