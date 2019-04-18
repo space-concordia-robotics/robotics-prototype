@@ -104,6 +104,7 @@ class RobotMotor {
     volatile float imaginedAngle;
     float desiredAngle;
     int directionModifier;
+    // for open loop control
     int openLoopSpeed; //!< angular speed (degrees/second)
     float openLoopGain; //!< speed correction factor
     
@@ -126,7 +127,7 @@ RobotMotor::RobotMotor() {
   hasLimitSwitches = false;
   homingType = SINGLE_ENDED_HOMING;
   homingDone = true;
-  openLoopSpeed = 0; // no speed by default;
+  setMotorSpeed(50); // 50% speed by default;
   openLoopGain = 1.0; // temp open loop control
   homingPass = 0;
   atSafeAngle = true;

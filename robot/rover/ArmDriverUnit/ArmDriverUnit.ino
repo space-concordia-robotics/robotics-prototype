@@ -808,35 +808,29 @@ void initLimitSwitches(void) {
 
 /*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,
  * and finally, sets openLoopGain for any non-stepper motor.
- * 
- * \todo openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor...
- * i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that.
- * so maybe I can just initialize to 50 and not have it in the setup?
- * 
- * \todo open loop speed and closed loop max speed are different????
- * this is because closed loop has a max val whereas open loop has a fixed one, but these could maybe be the same???
- * 
+ *  
  * \todo stepper doesn't have speed the way servos and dcs do??????
  * this is because stepper calculates speed using durations, but this means
  * openLoopGain and openLoopSpeed mean nothing for it???
 */
 void initSpeedParams(void) {
-  // set max and min closed loop speeds (in percentage), I limit it to 50% for safety
+  // set max and min speeds (in percentage)
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.pidController.setOutputLimits(-50, 50, 5.0);
-  motor2.pidController.setOutputLimits(-50, 50, 5.0);
-  motor3.pidController.setOutputLimits(-50, 50, 5.0);
-  motor4.pidController.setOutputLimits(-50, 50, 5.0);
-  motor5.pidController.setOutputLimits(-50, 50, 5.0);
-  motor6.pidController.setOutputLimits(-50, 50, 5.0);
+  motor1.setMotorSpeed(90); //25;
+  motor2.setMotorSpeed(90); //25;
+  motor3.setMotorSpeed(90); //25;
+  motor4.setMotorSpeed(90);
+  motor5.setMotorSpeed(50);
+  motor6.setMotorSpeed(50);
 
-  // this command sets the pid limits too
-  motor1.setMotorSpeed(90); //25; // % speed
-  motor2.setMotorSpeed(90); //25; // % speed
-  motor3.setMotorSpeed(90); //25; // % speed
-  motor4.setMotorSpeed(90); // % speed
-  motor5.setMotorSpeed(50); // % speed
-  motor6.setMotorSpeed(50); // % speed
+  // set pid slowest speed before it cuts power, to avoid noise and energy drain
+  motor1.pidController.setSlowestSpeed(5.0);
+  motor2.pidController.setSlowestSpeed(5.0);
+  motor3.pidController.setSlowestSpeed(5.0);
+  motor4.pidController.setSlowestSpeed(5.0);
+  motor5.pidController.setSlowestSpeed(5.0);
+  motor6.pidController.setSlowestSpeed(5.0);
+
   // set open loop parameters. By default the motors are open loop,
   // have constant velocity profiles (no ramping), operate at 50% max speed,
   // and the gains should vary based on which motor it is

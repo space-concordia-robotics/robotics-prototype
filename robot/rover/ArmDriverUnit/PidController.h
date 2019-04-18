@@ -24,6 +24,7 @@ class PidController {
     void setJointAngleTolerance(float tolerance);
     void setOutputLimits(float minVal, float maxVal);
     void setOutputLimits(float minVal, float maxVal, float zeroVal);
+    void setSlowestSpeed(float speed);
     void setGainConstants(float kp, float ki, float kd);
     float getMaxOutputValue(void);
     float getMinOutputValue(void);
@@ -153,6 +154,11 @@ void PidController::setOutputLimits(float minVal, float maxVal, float zeroVal) {
   maxOutputValue = maxVal;
   minOutputValue = minVal;
   slowestSpeed = zeroVal;
+}
+
+//! Below this speed output from the pid, the motor will simply stop turning to avoid noise
+void PidController::setSlowestSpeed(float speed){
+  slowestSpeed = speed;
 }
 
 //! Return the max output value
