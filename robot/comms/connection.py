@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import socket
+import select
 
 class Connection:
     __active_ctr = 0
@@ -26,16 +27,33 @@ class Connection:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(str.encode(msg), (self.ip, self.port))
 
-    def receive(self):
+    def receive(self, timeout=0):
         # Internet --> AF_INET, UDP --> SOCK_DGRAM
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((self.ip, self.port))
 
-        while True:
-            data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-            print("received message:", data.decode())
+        # wait first until data available
+        if timeout > 0:
+            sock.setblocking(0)
 
-            return data.decode()
+            ready = select.select([sock], [], [], int(timeout))
+
+            if ready[0]:
+                data = sock.recv(1024)
+                print("received message:", data.decode())
+
+                return data.decode()
+            else:
+                print("Timeout limit exceeded, no data received")
+
+                return ""
+
+        else: # wait indefinitely
+            while True:
+                data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+                print("received message:", data.decode())
+
+                return data.decode()
 
 """
 c1 = Connection("c1", "127.0.0.1", 5005)
