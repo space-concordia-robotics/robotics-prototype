@@ -11,8 +11,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = False
-competition = True
+local = True
+competition = False
 # dynamic not working properly, keep at False
 dynamic = False
 
@@ -23,6 +23,9 @@ dynamic = False
 # for the startup service to work properly
 from robot.comms.connection import Connection
 from robot.comms.uart import Uart
+
+# returns current time in milliseconds
+current_millis = lambda: int(round(time.time() * 1000))
 
 def print_commands_list():
     print("""'q': quit\n
@@ -51,7 +54,7 @@ elif len(sys.argv) >= 3:
 
 
 if not local and not competition and not dynamic:
-    print("""local, competition and dynamic flags set to false, exiting""")
+    print("local, competition and dynamic flags set to false, exiting")
     sys.exit(0)
 
 
@@ -151,12 +154,13 @@ if local:
 # for competition
 elif competition:
     ROVER_IP = "172.16.1.30" # competition ip
-# physicial ip, does not need connection to internet to work
+# attempt to get: physicial ip, which should not need connection to internet to work
 #elif dynamic:
 #    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
 
 print("ROVER_IP: " + ROVER_IP)
 
+# Create connection object to send/receive data with base-station
 c = Connection("c1", ROVER_IP, SERVER_PORT)
 
 print("Rover server listening on port {} \n".format(SERVER_PORT))
@@ -166,13 +170,22 @@ print("Ready for incoming drive cmds!\n")
 print_commands_list()
 
 key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 't', 'q']
+# Arduino sketch considers this value to be the signal for the motors to not move
 REST = 49.5
+
+# initialize throttle/steering speeds to 0
 throttle_speed = 0
 steering_speed = 0
+
+# impose safety limits, theoretical limit at 49.5
 MIN_THROTTLE_SPEED = 0
 MAX_THROTTLE_SPEED = 25
 MIN_STEERING_SPEED = 0
 MAX_STEERING_SPEED = 39
+
+# for controlling command throughput
+last_cmd_sent = 0 # to keep track of the time of the last command sent
+THROTTLE_TIME = 100 # time to wait before receiving next command
 
 
 while True:
@@ -180,113 +193,127 @@ while True:
     #    print(ser.readline().decode())
 
     try:
-        command = c.receive()
-        print("OPERATOR command: " + command + "\n")
+        # only receive commands if last command was sent
+        # THROTTLE_TIME ago,
+        if current_millis() - last_cmd_sent > THROTTLE_TIME:
 
-        # for throttle speed, no backwards
-        if command in key_list:
-            if command == 'w':
-                print("cmd: w --> Forward\n")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = str(REST + throttle_speed) + ":" + str(REST) + "\n"
-                print("command: " + str(command))
+            command = c.receive()
+            print("OPERATOR command: " + command + "\n")
 
-                if usb:
-                    ser.write(str.encode(command))
-                elif uart:
-                    u.tx(command)
+            # for throttle speed, no backwards
+            if command in key_list:
+                if command == 'w':
+                    print("cmd: w --> Forward\n")
+                    #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                    command = str(REST + throttle_speed) + ":" + str(REST) + "\n"
+                    print("command: " + str(command))
 
-            elif command == 'a':
-                print("cmd: a --> Left\n")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = str(REST + throttle_speed) + ":" + str(REST - steering_speed) + "\n"
-                print("command: " + str(command))
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
-                if usb:
-                    ser.write(str.encode(command))
-                elif uart:
-                    u.tx(command)
+                    last_cmd_sent = current_millis()
 
-            elif command == 's':
-                print("cmd: s --> Back\n")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
-                command = str(REST - throttle_speed) + ":" + str(REST) + "\n"
-                print("command: " + str(command))
+                elif command == 'a':
+                    print("cmd: a --> Left\n")
+                    #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                    command = str(REST + throttle_speed) + ":" + str(REST - steering_speed) + "\n"
+                    print("command: " + str(command))
 
-                if usb:
-                    ser.write(str.encode(command))
-                elif uart:
-                    u.tx(command)
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
-            elif command == 'd':
-                print("cmd: d --> Right")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
-                command = str(REST + throttle_speed) + ":" + str(REST + steering_speed) + "\n"
-                print("command: " + str(command))
+                    last_cmd_sent = current_millis()
 
-                if usb:
-                    ser.write(str.encode(command))
-                elif uart:
-                    u.tx(command)
+                elif command == 's':
+                    print("cmd: s --> Back\n")
+                    #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                    command = str(REST - throttle_speed) + ":" + str(REST) + "\n"
+                    print("command: " + str(command))
 
-            # 't' --> reset to 0 on release key, otherwise motor keeps spinning
-            # 45.5:45.5
-            elif command == 't':
-                print("cmd: t --> stop moving")
-                command = str(REST) + ":" + str(REST) + "\n"
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
-                if usb:
-                    ser.write(str.encode(command))
-                elif uart:
-                    u.tx(command)
+                    last_cmd_sent = current_millis()
 
-            elif command == 'i':
-                print("cmd: i --> Increment throttle speed")
+                elif command == 'd':
+                    print("cmd: d --> Right")
+                    #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                    command = str(REST + throttle_speed) + ":" + str(REST + steering_speed) + "\n"
+                    print("command: " + str(command))
 
-                if throttle_speed < MAX_THROTTLE_SPEED:
-                    throttle_speed += 0.5
-                    print("throttle speed: " + str(throttle_speed))
-                else:
-                    print("throttle speed upper limit reached")
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
-            elif command == 'j':
-                print("cmd: j --> Decrement throttle speed")
+                    last_cmd_sent = current_millis()
 
-                if throttle_speed > MIN_THROTTLE_SPEED:
-                    throttle_speed -= 0.5
-                    print("throttle speed: " + str(throttle_speed))
-                else:
-                    print("throttle speed lower limit reached")
+                # 't' --> reset to 0 on release key, otherwise motor keeps spinning
+                # 45.5:45.5
+                elif command == 't':
+                    print("cmd: t --> stop moving")
+                    command = str(REST) + ":" + str(REST) + "\n"
 
-            elif command == 'o':
-                print("cmd: o --> Increment steering speed")
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
-                if steering_speed < MAX_STEERING_SPEED:
-                    steering_speed += 0.5
-                    print("steering speed: " + str(steering_speed))
-                else:
-                    print("steering speed upper limit reached")
+                    last_cmd_sent = current_millis()
 
-            elif command == 'k':
-                print("cmd: k --> Decrement steering speed")
+                elif command == 'i':
+                    print("cmd: i --> Increment throttle speed")
 
-                if steering_speed > MIN_STEERING_SPEED:
-                    steering_speed -= 0.5
-                    print("steering speed: " + str(steering_speed))
-                else:
-                    print("steering speed lower limit reached")
+                    if throttle_speed < MAX_THROTTLE_SPEED:
+                        throttle_speed += 0.5
+                        print("throttle speed: " + str(throttle_speed))
+                    else:
+                        print("throttle speed upper limit reached")
 
-            elif command == 'q':
-                print("\nTerminating connection.")
-                break
-            elif command == 'l':
-                print_commands_list()
-            elif command == 'b':
-                if usb:
-                    while ser.in_waiting:
-                        print(ser.readline().decode())
-                else:
-                    print("UART RX not supported (yet)")
+                elif command == 'j':
+                    print("cmd: j --> Decrement throttle speed")
+
+                    if throttle_speed > MIN_THROTTLE_SPEED:
+                        throttle_speed -= 0.5
+                        print("throttle speed: " + str(throttle_speed))
+                    else:
+                        print("throttle speed lower limit reached")
+
+                elif command == 'o':
+                    print("cmd: o --> Increment steering speed")
+
+                    if steering_speed < MAX_STEERING_SPEED:
+                        steering_speed += 0.5
+                        print("steering speed: " + str(steering_speed))
+                    else:
+                        print("steering speed upper limit reached")
+
+                elif command == 'k':
+                    print("cmd: k --> Decrement steering speed")
+
+                    if steering_speed > MIN_STEERING_SPEED:
+                        steering_speed -= 0.5
+                        print("steering speed: " + str(steering_speed))
+                    else:
+                        print("steering speed lower limit reached")
+
+                elif command == 'q':
+                    print("\nTerminating connection.")
+                    break
+                elif command == 'l':
+                    print_commands_list()
+                elif command == 'b':
+                    if usb:
+                        while ser.in_waiting:
+                            print(ser.readline().decode())
+                    else:
+                        print("UART RX not supported (yet)")
 
             if usb:
                 # flush buffer to avoid overflowing it

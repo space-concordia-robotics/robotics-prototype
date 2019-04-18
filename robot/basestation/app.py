@@ -6,7 +6,6 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 
 import os
 import subprocess
-import urllib
 from urllib.parse import urlparse, unquote
 import flask
 from flask import jsonify, request
@@ -271,8 +270,8 @@ def rover_drive():
         # decode URI
         cmd = unquote(cmd)
 
-    #rover_ip = "127.0.0.1" # for local testing
-    rover_ip = "172.16.1.30" # for testing with radios
+    rover_ip = "127.0.0.1" # for local testing
+    #rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
     c = Connection("rover_drive", rover_ip, 5010)
@@ -298,7 +297,7 @@ def task_handler():
     ros_cmd = "rosrun task_handler task_handler_client.py"
     cmd_args = ""
 
-    # choose appropriate arguments for ros service client call
+    # choose appropriate arguments for ROS service client call
     if cmd == "enable-arm-listener":
         cmd_args = "arm_listener 1"
     elif cmd == "disable-arm-listener":
