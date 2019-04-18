@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from connection import Connection
+from robot.comms.connection import Connection
 import threading
 import time
 
