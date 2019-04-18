@@ -33,8 +33,8 @@
 */
 
 /* still in idea phase */
-//#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
-#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
+#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
+//#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
 //#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
 //#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
 //#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case
@@ -224,7 +224,7 @@ bool motorsToHome[] = {false, false, false, false, false, false};
 /* function declarations */
 void printMotorAngles(void); //!< sends all motor angles over serial
 void initComms(void); //!< start up serial or usb communication
-void initEncoders(void); //!< attach encoder interrupts
+void initEncoders(void); //!< attach encoder interrupts and setup pid gains
 void initLimitSwitches(void); //!< setup angle limits and attach limit switch interrupts
 void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
@@ -727,6 +727,7 @@ void initComms(void) {
 
 void initEncoders(void) {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
+  // this function also sets pid parameters
 #ifdef M1_ENCODER_PORT
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);

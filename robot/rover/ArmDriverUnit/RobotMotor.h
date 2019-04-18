@@ -170,7 +170,7 @@ void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS) 
 }
 
 bool RobotMotor::withinJointAngleLimits(float angle) {
-  if (!hasAngleLimits || (angle > minJointAngle && angle < maxJointAngle)) {
+  if (!hasAngleLimits || (angle >= minJointAngle && angle <= maxJointAngle)) {
     return true;
   }
   else {
@@ -179,6 +179,7 @@ bool RobotMotor::withinJointAngleLimits(float angle) {
 }
 
 bool RobotMotor::setDesiredAngle(float angle) {
+  //! \todo try to make everything go through this by putting conditions based on movement mode?
   if (withinJointAngleLimits(angle)) {
     desiredAngle = angle;
     return true;
@@ -219,6 +220,7 @@ void RobotMotor::setOpenLoopGain(float loopGain) {
   openLoopGain = loopGain;
 }
 
+//! \todo make a version of this that applies a speed on all motors, requires thinking
 void RobotMotor::setMotorSpeed(float motorSpeed) {
   openLoopSpeed = motorSpeed;
   pidController.setOutputLimits(-motorSpeed, motorSpeed);
