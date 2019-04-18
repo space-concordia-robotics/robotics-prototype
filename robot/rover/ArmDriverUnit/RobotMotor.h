@@ -89,8 +89,6 @@ class RobotMotor {
     virtual void budge(int dir) = 0; //!< moves a motor as long as a new budge commmand comes in within 200ms
     // for open loop control
     float openLoopError; //!< public variable for open loop control
-    int openLoopSpeed; //!< angular speed (degrees/second)
-    float openLoopGain; //!< speed correction factor
     float startAngle; //!< used in angle esimation
 
     
@@ -106,6 +104,9 @@ class RobotMotor {
     volatile float imaginedAngle;
     float desiredAngle;
     int directionModifier;
+    int openLoopSpeed; //!< angular speed (degrees/second)
+    float openLoopGain; //!< speed correction factor
+    
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class

@@ -830,20 +830,23 @@ void initSpeedParams(void) {
   motor5.pidController.setOutputLimits(-50, 50, 5.0);
   motor6.pidController.setOutputLimits(-50, 50, 5.0);
 
-  // set open loop parameters. By default the motors are open loop, have constant velocity profiles (no ramping),
-  // operate at 50% max speed, and the gains should vary based on which motor it is
-  motor1.openLoopSpeed = 25; // 50% speed
-  motor2.openLoopSpeed = 25; // 50% speed
-  motor3.openLoopSpeed = 25; // 50% speed
-  motor4.openLoopSpeed = 90; // 50% speed
-  motor5.openLoopSpeed = 50; // 50% speed
-  motor6.openLoopSpeed = 50; // 50% speed
+  // this command sets the pid limits too
+  motor1.setMotorSpeed(90); //25; // % speed
+  motor2.setMotorSpeed(90); //25; // % speed
+  motor3.setMotorSpeed(90); //25; // % speed
+  motor4.setMotorSpeed(90); // % speed
+  motor5.setMotorSpeed(50); // % speed
+  motor6.setMotorSpeed(50); // % speed
+  // set open loop parameters. By default the motors are open loop,
+  // have constant velocity profiles (no ramping), operate at 50% max speed,
+  // and the gains should vary based on which motor it is
+
   // open loop gain is only for time-based open loop control
-  motor1.openLoopGain = 0.75; // needs to be tested
-  motor2.openLoopGain = 0.0015; // needs to be tested
-  motor3.openLoopGain = 0.75; // needs to be tested
-  motor5.openLoopGain = 0.32; // for 5V
-  motor6.openLoopGain = 0.35; // for 5V
+  motor1.setOpenLoopGain(0.1); //0.5; // needs to be tested
+  motor2.setOpenLoopGain(0.1); //0.5; // needs to be tested
+  motor3.setOpenLoopGain(0.1); //0.5; // needs to be tested
+  motor5.setOpenLoopGain(0.32); // for 5V
+  motor6.setOpenLoopGain(0.35); // for 5V
 }
 
 void initMotorTimers(void) {
@@ -859,6 +862,7 @@ void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
   motor3.motorTimerInterrupt();
+
 }
 void m4StepperInterrupt(void) {
   motor4.motorTimerInterrupt(m4StepperTimer);
