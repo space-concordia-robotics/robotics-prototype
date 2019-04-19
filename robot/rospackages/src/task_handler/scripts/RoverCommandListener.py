@@ -185,7 +185,7 @@ MAX_STEERING_SPEED = 39
 
 # for controlling command throughput
 last_cmd_sent = 0 # to keep track of the time of the last command sent
-THROTTLE_TIME = 100 # time to wait before receiving next command
+THROTTLE_TIME = 25 # time to wait before receiving next command
 
 
 while True:

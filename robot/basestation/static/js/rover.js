@@ -12,7 +12,7 @@ const MIN_STEERING_SPEED = 0;
 
 // for command thoughput limiting
 var start = new Date().getTime();
-const THROTTLE_TIME = 100;
+const THROTTLE_TIME = 25;
 var lastCmdSent = 0;
 
 // Milliseconds since start time given
