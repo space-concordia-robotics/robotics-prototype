@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+The intention of this class is to provide an easy way to send/receive messages
+accross a network using objects.
+
+Warnings:
+Note that testing sending and receiving using the same object won't work.
+To do this locally you must create one Connection object specifically or sending,
+the other only for receiving (and they must both be assigned different port numbers).
+It has not yet been officially confirmed, but I think this issue does not exist when testing
+on multiple machines with different IP addresses.
+"""
 import socket
 import select
 

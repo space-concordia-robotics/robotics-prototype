@@ -15,6 +15,68 @@ var start = new Date().getTime();
 const THROTTLE_TIME = 25;
 var lastCmdSent = 0;
 
+function enableRoverListener() {
+    if ($("#enable-rover-btn").is(":checked")) {
+        $.ajax({
+            url: '/task_handler',
+            type: 'POST',
+            data: {
+                cmd: 'enable-rover-listener'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                appendToConsole("output: " + response.output);
+                appendToConsole("error: " + response.error);
+                scrollToBottom();
+            }
+        })
+    } else {
+        $.ajax({
+            url: '/task_handler',
+            type: 'POST',
+            data: {
+                cmd: 'disable-rover-listener'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                appendToConsole("output: " + response.output);
+                appendToConsole("error: " + response.error);
+                scrollToBottom();
+            }
+        })
+    }
+}
+
+function enableRoverMotors() {
+    if ($("#enable-rover-motors-btn").is(":checked")) {
+        $.ajax({
+            url: '/rover_drive',
+            type: 'POST',
+            data: {
+                cmd: 'm'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                appendToConsole("feedback:\n" + response.feedback);
+                scrollToBottom();
+            }
+        })
+    } else {
+        $.ajax({
+            url: '/rover_drive',
+            type: 'POST',
+            data: {
+                cmd: 'n'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                appendToConsole("feedback:\n" + response.feedback);
+                scrollToBottom();
+            }
+        })
+    }
+}
+
 // Milliseconds since start time given
 function millisSince(start) {
     var elapsed = new Date().getTime() - start;
@@ -41,6 +103,7 @@ $(document).keydown(function(e) {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -62,6 +125,7 @@ $(document).keydown(function(e) {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -83,6 +147,7 @@ $(document).keydown(function(e) {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -104,6 +169,7 @@ $(document).keydown(function(e) {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -118,6 +184,7 @@ $(document).keydown(function(e) {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -297,6 +364,7 @@ function gameLoop() {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -331,6 +399,7 @@ function gameLoop() {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -364,6 +433,7 @@ function gameLoop() {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })
@@ -398,6 +468,7 @@ function gameLoop() {
                 },
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
+                    appendToConsole("feedback:\n" + response.feedback);
                     scrollToBottom();
                 }
             })

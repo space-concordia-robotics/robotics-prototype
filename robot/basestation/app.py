@@ -274,10 +274,14 @@ def rover_drive():
     #rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
-    c = Connection("rover_drive", rover_ip, 5010)
-    c.send(cmd)
+    sender = Connection("rover_drive_sender", rover_ip, 5010)
+    sender.send(cmd)
+    receiver = Connection("rover_drive_receiver", rover_ip, 5015)
+    feedback = receiver.receive(timeout=1)
 
-    return jsonify(success=True, cmd=cmd)
+    print("feedback:", feedback)
+
+    return jsonify(success=True, cmd=cmd, feedback=feedback)
 
 # Task handler services
 @app.route("/task_handler", methods=["POST"])
