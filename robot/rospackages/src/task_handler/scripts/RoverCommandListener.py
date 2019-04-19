@@ -169,7 +169,7 @@ print("Ready for incoming drive cmds!\n")
 
 print_commands_list()
 
-key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 't', 'q']
+key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'm', 'n', 't', 'q']
 # Arduino sketch considers this value to be the signal for the motors to not move
 REST = 49.5
 
@@ -253,6 +253,24 @@ while True:
                         u.tx(command)
 
                     last_cmd_sent = current_millis()
+
+                elif command == 'm':
+                    print("cmd: m --> enable motor controls")
+                    command = "activate\n"
+
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
+
+                elif command == 'n':
+                    print("cmd: n --> disable motor controls")
+                    command = "deactivate\n"
+
+                    if usb:
+                        ser.write(str.encode(command))
+                    elif uart:
+                        u.tx(command)
 
                 # 't' --> reset to 0 on release key, otherwise motor keeps spinning
                 # 45.5:45.5
