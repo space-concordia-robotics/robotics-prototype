@@ -30,10 +30,6 @@ wrist_max_angle = math.pi
 wrist_min_angle = -math.pi
 minmax = [[0,0], [proximal_min_angle,proximal_max_angle], [distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle]]
 
-#INITIALIZE GLOBAL VARIABLES
-computed_angles = [0, proximal_min_angle, distal_min_angle, wrist_min_angle]
-sample_size = 10
-workspace_rep = [[0,0] for x in range(pow(sample_size,3))]
 
 ###################PYGAME PARAMETERS###################
 Window_X = 640
@@ -52,11 +48,31 @@ def draw(self, pts):
 	for i in range(pts):
 		pygame.draw.line(self.screen, self.color, self.projected_position[i][0], self.projected_position[i][1], self.width)
 
-
 def drawText(screen, text, color, pos):
 	font = pygame.font.Font(None, 36)
 	text_surface = font.render(text, True, color)
 	screen.blit(text_surface, pos)
+
+def UpdateArmSideValues(angles):
+
+	base_start_point = [0,0]
+	base_end_point = [base_start_point[0], base_start_point[1] - base_length]
+	proximal_start_point = base_end_point
+	proximal_end_point =  [proximal_start_point[0] + proximal_length * math.cos(angles[1]) , proximal_start_point[1] - proximal_length * math.sin(angles[1])]
+	distal_start_point = proximal_end_point
+	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(angles[1] + angles[2]) , distal_start_point[1] - distal_length * math.sin(angles[1] + angles[2])]
+	wrist_start_point = distal_end_point
+	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(angles[1] + angles[2] + angles[3]) , wrist_start_point[1] - wrist_length * math.sin(angles[1] + angles[2] + angles[3])]
+
+	return [ [base_start_point, base_end_point], [proximal_start_point, proximal_end_point], [distal_start_point, distal_end_point] , [wrist_start_point, wrist_end_point] ]
+
+
+def UpdateArmTopValues(angles):
+	arm_start_point = [0,0]
+	arm_radius = proximal_length * math.cos(angles[1]) + distal_length * math.cos(angles[1] + angles[2]) + wrist_length * math.cos(angles[1] + angles[2] + angles[3])
+	arm_end_point = [arm_radius * math.cos(angles[0]), -arm_radius * math.sin(angles[0])]
+
+	return [[arm_start_point, arm_end_point]]
 
 def GenerateRepresentativeCoordinates(PointArray, offset_x, offset_y, size = 4):
 	Scale_Factor = 0.5
@@ -87,127 +103,115 @@ class ProjectionView:
         #MISSING FUNCTIONALITY FOR X AND Y
 
 
+class Arm:
+	def __init__(self, joint_num, link_array, angle_minmax, setangles = 0, sample = 10):
+		self.joint_num = joint_num
+		self.link = link_array
+		self.minmax = angle_minmax
+		self.workspace_sample_size = sample
+		workspace = [[0,0] for x in range(pow(self.workspace_sample_size,3))]
 
-#######################FUNCTIONS#######################
-
-
-def ComputeWorkspace(joint_num,minmax_array, length_array):
-	global sample_size
-	pt = [[0,0] for x in range(pow(sample_size,3))]
-	incremented_angle = [0,0,0]
-
-	for j1 in range(sample_size):
-		incremented_angle[0] = minmax_array[1][0] + j1*(minmax_array[1][1] - minmax_array[1][0])/(sample_size - 1)
-		for j2 in range(sample_size):
-			incremented_angle[1] = minmax_array[2][0] + j2*(minmax_array[2][1] - minmax_array[2][0])/(sample_size - 1)
-			for j3 in range(sample_size):
-					incremented_angle[2] = minmax_array[3][0] + j3*(minmax_array[3][1] - minmax_array[3][0])/(sample_size - 1)
-
-					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][0] = length_array[1] * math.cos(incremented_angle[0]) + length_array[2] * math.cos(incremented_angle[1] + incremented_angle[0]) + length_array[3] * math.cos(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
-					pt[ sample_size * sample_size * j1 + sample_size * j2 + j3][1] = length_array[0]-length_array[0] - length_array[1] * math.sin(-math.pi + incremented_angle[0]) - length_array[2] * math.sin(incremented_angle[1] + incremented_angle[0]) - length_array[3] * math.sin(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
-	return pt
-
-
-def ComputeIK(X, Y, Z, wrist_angle = -1):
-
-	global computed_angles
-	solution_angles = [[0,0,0,0], [0,0,0,0]]
-	solution_usable = [True, True]
-
-	#Base rotation CALCULATION
-	solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X)
-	R = math.sqrt( pow(X,2) + pow(Z,2) )
-	if (X <= 0 or Z <=0 ):
-		R *= -1
-		solution_angles[0][0] *= -1
-		solution_angles[1][1] *= -1
-
-	if(wrist_angle is -1):
-		beta = math.atan2(Y - base_length , R) #Calculates beta, which is the sum of the angles of all links
-		Wrist_X = R - wrist_length * math.cos(beta) #Calculates wrist X coordinate
-		Wrist_Y = (Y - base_length) - wrist_length * math.sin(beta) #Calculates wrist Y coordinate
-	else:
-		Wrist_X = R - wrist_length * math.cos(wrist_angle) #Calculates wrist X coordinate
-		Wrist_Y = (Y - base_length) - wrist_length * math.sin(wrist_angle) #Calculates wrist Y coordinate
-		beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
-
-	if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > proximal_length + distal_length:
-		print('ERROR: SET POINT BEYOND ARM WORKSPACE')
-		return computed_angles
-
-
-	cosine_distal_angle = (pow(Wrist_X,2) + pow(Wrist_Y,2) - pow(proximal_length,2) - pow(distal_length,2))/(2 * proximal_length * distal_length)
-	solution_angles[0][2] = math.acos(cosine_distal_angle)
-	solution_angles[1][2] = -solution_angles[0][2]
-
-
-	#Calculate phi: Angle between tangent line and proximal link
-	aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(proximal_length,2) - pow(distal_length,2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * proximal_length)
-	phi = math.acos(aphi)
-
-	#Depending on the configuration of the arm, phi and beta can be used to
-	#find the second angle
-
-	if solution_angles[0][2] <= 0:
-		solution_angles[0][1] = beta + phi
-		solution_angles[1][1] = beta - phi
-	else:
-		solution_angles[0][1] = beta - phi
-		solution_angles[1][1] = beta + phi
-
-	if(wrist_angle is -1):
-		solution_angles[0][3] = beta - (solution_angles[0][1] + solution_angles[0][2])
-		solution_angles[1][3] = beta - (solution_angles[1][1] + solution_angles[1][2])
-	else:
-		solution_angles[0][3] = wrist_angle - (solution_angles[0][1] + solution_angles[0][2])
-		solution_angles[1][3] = wrist_angle - (solution_angles[1][1] + solution_angles[1][2])
-
-	#ELIMIATION OF ONE OF THE ANGLE SETS
-
-	for i in range(1,4):
-		if solution_angles[0][i] > minmax[i][1] or solution_angles[0][1] < minmax[i][0]:
-			solution_usable[0] = False
-			solution = 1
-		if solution_angles[1][i] > minmax[i][1] or solution_angles[1][1] < minmax[i][0]:
-			solution_usable[1] = False
-			solution = 0
-
-	if (solution_usable[0] is False) and (solution_usable[1] is False):
-		print('Error: No arm configuration available for specified set point')
-		return 0
-
-	elif (solution_usable[0] is True) and (solution_usable[1] is True):
-		error0 = pow(solution_angles[0][1] - computed_angles[1],2) + pow(solution_angles[0][2] - computed_angles[2],2) + pow(solution_angles[0][3] - computed_angles[3],2)
-		error1 = pow(solution_angles[1][1] - computed_angles[1],2) + pow(solution_angles[1][2] - computed_angles[2],2) + pow(solution_angles[1][3] - computed_angles[3],2)
-		if error0 > error1:
-			solution = 1
-
+		if setangles is 0:
+			self.setangles = [self.minmax[i][0] for i in range(self.joint_num)]
 		else:
-			solution = 0
+			self.setangles = setangles
 
-	return solution_angles[solution]
 
-# Side view
-def UpdateArmSideValues(angles):
+	def ComputeWorkspace(self):
+		pt = [[0,0] for x in range(pow(self.workspace_sample_size,3))]
+		incremented_angle = [0,0,0]
 
-	base_start_point = [0,0]
-	base_end_point = [base_start_point[0], base_start_point[1] - base_length]
-	proximal_start_point = base_end_point
-	proximal_end_point =  [proximal_start_point[0] + proximal_length * math.cos(angles[1]) , proximal_start_point[1] - proximal_length * math.sin(angles[1])]
-	distal_start_point = proximal_end_point
-	distal_end_point =  [distal_start_point[0] + distal_length * math.cos(angles[1] + angles[2]) , distal_start_point[1] - distal_length * math.sin(angles[1] + angles[2])]
-	wrist_start_point = distal_end_point
-	wrist_end_point = [wrist_start_point[0] + wrist_length * math.cos(angles[1] + angles[2] + angles[3]) , wrist_start_point[1] - wrist_length * math.sin(angles[1] + angles[2] + angles[3])]
+		for j1 in range(self.workspace_sample_size):
+			incremented_angle[0] = self.minmax[1][0] + j1*(self.minmax[1][1] - self.minmax[1][0])/(self.workspace_sample_size - 1)
+			for j2 in range(self.workspace_sample_size):
+				incremented_angle[1] = self.minmax[2][0] + j2*(self.minmax[2][1] - self.minmax[2][0])/(self.workspace_sample_size - 1)
+				for j3 in range(self.workspace_sample_size):
+						incremented_angle[2] = self.minmax[3][0] + j3*(self.minmax[3][1] - self.minmax[3][0])/(self.workspace_sample_size - 1)
 
-	return [ [base_start_point, base_end_point], [proximal_start_point, proximal_end_point], [distal_start_point, distal_end_point] , [wrist_start_point, wrist_end_point] ]
+						pt[ self.workspace_sample_size * self.workspace_sample_size * j1 + self.workspace_sample_size * j2 + j3][0] = self.link[1] * math.cos(incremented_angle[0]) + self.link[2] * math.cos(incremented_angle[1] + incremented_angle[0]) + self.link[3] * math.cos(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
+						pt[ self.workspace_sample_size * self.workspace_sample_size * j1 + self.workspace_sample_size * j2 + j3][1] = self.link[0]-self.link[0] - self.link[1] * math.sin(-math.pi + incremented_angle[0]) - self.link[2] * math.sin(incremented_angle[1] + incremented_angle[0]) - self.link[3] * math.sin(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
+		self.workspace = pt
 
-# top view
-def UpdateArmTopValues(angles):
-	arm_start_point = [0,0]
-	arm_radius = proximal_length * math.cos(angles[1]) + distal_length * math.cos(angles[1] + angles[2]) + wrist_length * math.cos(angles[1] + angles[2] + angles[3])
-	arm_end_point = [arm_radius * math.cos(angles[0]), -arm_radius * math.sin(angles[0])]
 
-	return [[arm_start_point, arm_end_point]]
+	def ComputeIK(self, X, Y, Z, wrist_angle = -1):
+		if self.joint_num is 4:
+			solution_angles = [[0,0,0,0], [0,0,0,0]]
+			solution_usable = [True, True]
+
+			#Base rotation CALCULATION
+			solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X)
+			R = math.sqrt( pow(X,2) + pow(Z,2) )
+			if (X <= 0 or Z <=0 ):
+				R *= -1
+				solution_angles[0][0] *= -1
+				solution_angles[1][1] *= -1
+
+			if(wrist_angle is -1):
+				beta = math.atan2(Y - self.link[0] , R) #Calculates beta, which is the sum of the angles of all links
+				Wrist_X = R - self.link[3]  * math.cos(beta) #Calculates wrist X coordinate
+				Wrist_Y = (Y - self.link[0] ) - self.link[3]  * math.sin(beta) #Calculates wrist Y coordinate
+			else:
+				Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
+				Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
+				beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
+
+			if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > self.link[1]  + self.link[2]:
+				print('ERROR: SET POINT BEYOND ARM WORKSPACE')
+
+			else:
+				cosine_distal_angle = (pow(Wrist_X,2) + pow(Wrist_Y,2) - pow(self.link[1],2) - pow(self.link[2],2))/(2 * self.link[1] * self.link[2])
+				solution_angles[0][2] = math.acos(cosine_distal_angle)
+				solution_angles[1][2] = -solution_angles[0][2]
+
+
+				#Calculate phi: Angle between tangent line and proximal link
+				aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(self.link[1],2) - pow(self.link[2],2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * self.link[1])
+				phi = math.acos(aphi)
+
+				#Depending on the configuration of the arm, phi and beta can be used to
+				#find the second angle
+
+				if solution_angles[0][2] <= 0:
+					solution_angles[0][1] = beta + phi
+					solution_angles[1][1] = beta - phi
+				else:
+					solution_angles[0][1] = beta - phi
+					solution_angles[1][1] = beta + phi
+
+				if(wrist_angle is -1):
+					solution_angles[0][3] = beta - (solution_angles[0][1] + solution_angles[0][2])
+					solution_angles[1][3] = beta - (solution_angles[1][1] + solution_angles[1][2])
+				else:
+					solution_angles[0][3] = wrist_angle - (solution_angles[0][1] + solution_angles[0][2])
+					solution_angles[1][3] = wrist_angle - (solution_angles[1][1] + solution_angles[1][2])
+
+				#ELIMIATION OF ONE OF THE ANGLE SETS
+
+				for i in range(1,4):
+					if solution_angles[0][i] > minmax[i][1] or solution_angles[0][1] < minmax[i][0]:
+						solution_usable[0] = False
+						solution = 1
+					if solution_angles[1][i] > minmax[i][1] or solution_angles[1][1] < minmax[i][0]:
+						solution_usable[1] = False
+						solution = 0
+
+					if (solution_usable[0] is False) and (solution_usable[1] is False):
+						print('Error: No arm configuration available for specified set point')
+
+					elif (solution_usable[0] is True) and (solution_usable[1] is True):
+						error0 = pow(solution_angles[0][1] - self.setangles[1],2) + pow(solution_angles[0][2] - self.setangles[2],2) + pow(solution_angles[0][3] - self.setangles[3],2)
+						error1 = pow(solution_angles[1][1] - self.setangles[1],2) + pow(solution_angles[1][2] - self.setangles[2],2) + pow(solution_angles[1][3] - self.setangles[3],2)
+						if error0 > error1:
+							solution = 1
+
+						else:
+							solution = 0
+
+						self.setangles = solution_angles[solution]
+
+
+
+
 
 #########################MAIN#########################
 #################PYGAME INIT#################
@@ -219,6 +223,9 @@ pygame.display.set_caption("Inverse Kinematics Module")
 Sideview = ProjectionView(RED, Window_X/4, 3*Window_Y/4, screen)
 Topview = ProjectionView(RED, 3*Window_X/4, 3*Window_Y/8, screen)
 
+Asimov = Arm(4, length_array, minmax)
+
+
 done = False
 clock = pygame.time.Clock()
 
@@ -227,9 +234,11 @@ wrist_angle = 0
 
 workspace_enable = True
 if workspace_enable:
-	workspace = ComputeWorkspace(4,minmax, length_array)
-	for i in range(0, int(math.pow(sample_size,3))):
-	    workspace_rep[i] = GenerateRepresentativeCoordinates(workspace[i] , Sideview.X, Sideview.Y, 0)
+	Asimov.ComputeWorkspace()
+	workspace_rep = Asimov.workspace
+	for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
+	    workspace_rep[i] = GenerateRepresentativeCoordinates(Asimov.workspace[i] , Sideview.X, Sideview.Y, 0)
+		#NOT IDEAL, TO CHANGE
 #################PYGAME LOOP#################
 while not done:
 
@@ -260,11 +269,11 @@ while not done:
     	if (set_point[0] <= 0 and set_point[2] <= 0):
     		set_point_2D[0] *= -1
     	top_point = [set_point[0], set_point[2]]
-    	computed_angles = ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
+    	Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
 
 
 		#Sideview
-    	Sideview.actual_position = UpdateArmSideValues(computed_angles)
+    	Sideview.actual_position = UpdateArmSideValues(Asimov.setangles)
     	Sideview.projected_position = GenerateRepresentativeCoordinates(Sideview.actual_position, Sideview.X, Sideview.Y)
     	draw(Sideview, 4)
     	pygame.draw.circle(screen, RED, [int(Sideview.projected_position[0][0][0]),int(Sideview.projected_position[0][0][1])] , 10)
@@ -272,12 +281,11 @@ while not done:
 
 
 		#Topview
-    	Topview.actual_position = UpdateArmTopValues(computed_angles)
+    	Topview.actual_position = UpdateArmTopValues(Asimov.setangles)
     	Topview.projected_position = GenerateRepresentativeCoordinates(Topview.actual_position, Topview.X, Topview.Y, 1)
     	draw(Topview, 1)
     	pygame.draw.circle(screen, RED, [int(Topview.projected_position[0][0][0]),int(Topview.projected_position[0][0][1])] , 10)
     	drawText(screen, "Top View", BLACK, [Topview.X, Topview.Y + 50])
-    	#drawText(screen, computed_angles, BLACK, [0,0])
 
 		#Draw a circle around target point
     	desired_side_point = GenerateRepresentativeCoordinates(set_point_2D , Sideview.X, Sideview.Y, 0)
@@ -288,7 +296,7 @@ while not done:
 
 	#WORKSPACE MODE
     	if workspace_enable is True:
-    		for i in range(0, int(math.pow(sample_size,3))):
+    		for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
     			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
 
 
