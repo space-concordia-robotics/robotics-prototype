@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
-#include <ArduinoBlue.h>
+//#include <ArduinoBlue.h>
 
 #define SERVO_STOP 1500
 #define SERVO_MAX_CW 1600
@@ -10,12 +10,13 @@
   int elevator_feed(input_elevator_feed);//max 0.107inch/s
 */
 
-const int BLUETOOTH_TX_PIN = 10;
-const int BLUETOOTH_RX_PIN = 11;
+/*const int BLUETOOTH_TX_PIN = 10;
+  const int BLUETOOTH_RX_PIN = 11;
 
-SoftwareSerial bluetooth(BLUETOOTH_TX_PIN, BLUETOOTH_RX_PIN);
-ArduinoBlue phone(bluetooth);
+  SoftwareSerial bluetooth(BLUETOOTH_TX_PIN, BLUETOOTH_RX_PIN);
+  ArduinoBlue phone(bluetooth);*/
 
+bool isActivated = false;
 int button;
 int drill = 6;
 int drill_direction = 7;
@@ -50,7 +51,7 @@ void setup() {
 
   Serial.begin(9600);
   Serial.setTimeout(50);
-  bluetooth.begin(9600);
+  //  bluetooth.begin(9600);
 
   table.attach(tablePin);
   pinMode(drill, OUTPUT);
@@ -85,159 +86,173 @@ void setup() {
 void loop() {
 
   if (Serial.available()) {
-    char cmd = Serial.read();
+    String cmd = Serial.readStringUntil('\n');
 
-    if (button == 0) {
-      //turns drill counter-clockwise
-      analogWrite(drill, 0);
-      delay(100);
-      digitalWrite(drill_direction, HIGH);
-      analogWrite(drill, maxVelocity);
-      Serial.println("button0");
-    }
-    else if (button == 1) {
-      //turns drill clockwise
-      analogWrite(drill, 0);
-      delay(100);
-      digitalWrite(drill_direction, LOW);
-      analogWrite(drill, maxVelocity);
-      Serial.println("button1");
-    }
-    else if (button == 2) {
-      //stops drill
-      analogWrite(drill, 0);
-      Serial.println("button2");
-    }
-    else if (button == 3) {
-      //turns elevator clockwise
-      analogWrite(elevator, 0);
-      delay(100);
-      digitalWrite(elevator_direction, HIGH);
-      analogWrite(elevator, maxVelocity);
-      Serial.println("button3");
-    }
-    else if (button == 4) {
-      //turns elevator counter-clockwise
-      analogWrite(elevator, 0);
-      delay(100);
-      digitalWrite(elevator_direction, LOW);
-      analogWrite(elevator, maxVelocity);
-      Serial.println("button4");
-    }
-    else if (button == 5) {
-      //stops elevator
-      analogWrite(elevator, 0);
-      Serial.println("button5");
-    }
-    else if (button == 7) {
-      //turns table clockwise
-      table.writeMicroseconds(SERVO_STOP);
-      delay(100);
-      table.writeMicroseconds(SERVO_MAX_CW);
-      Serial.println("button7");
-    }
-    else if (button == 6) {
-      //turns table counter-clockwise
-      table.writeMicroseconds(SERVO_STOP);
-      delay(100);
-      table.writeMicroseconds(SERVO_MAX_CCW);
-      Serial.println("button6");
-    }
-    else if (button == 8) {
-      //stops table
-      table.writeMicroseconds(SERVO_STOP);
-      Serial.println("button8");
-    }
-    else if (button == 9) {
-      //turns pump1 counter-clockwise
-      digitalWrite(pump1A, HIGH);
-      digitalWrite(pump1B, LOW);
-      delay(100);
-      Serial.println("button9");
-    }
-    else if (button == 10) {
-      //turns pump1 clockwise
-      digitalWrite(pump1A, LOW);
-      digitalWrite(pump1B, HIGH);
-      delay(100);
-      Serial.println("button10");
-    }
-    else if (button == 11) {
-      //turns drill counter-clockwise
-      digitalWrite(pump2A, HIGH);
-      digitalWrite(pump2B, LOW);
-      delay(100);
-      Serial.println("button11");
-    }
-    else if (button == 12) {
-      //turns drill clockwise
-      digitalWrite(pump2A, LOW);
-      digitalWrite(pump2B, HIGH);
-      delay(100);
-      Serial.println("button12");
-    }
-    else if (button == 13) {
-      //stops pumps
-      digitalWrite(pump1A, LOW);
-      digitalWrite(pump1B, LOW);
-      digitalWrite(pump2A, LOW);
-      digitalWrite(pump2B, LOW);
-      Serial.println("button13");
-    }
-    else if (button == 14) {
-      digitalWrite(led1, HIGH);
-      delay(100);
-      val = analogRead(photoresistor);
-      voltage = val * (5.0 / 1023.0);
+    if (isActivated == false) {
 
-      Serial.print("Voltage On =");
-      Serial.print(voltage);
-      Serial.println();
-      phone.sendMessage(String(voltage));
-    }
-    else if (button == 15) {
-      digitalWrite(led1, LOW);
-      delay(100);
-      val = analogRead(photoresistor);
-      voltage = val * (5.0 / 1023.0);
+      Serial.print("cmd: ");
+      Serial.println(cmd);
 
-      Serial.print("Voltage Off =");
-      Serial.println(voltage);
-      phone.sendMessage(String(voltage));
+      if (cmd == "activate") {
+        isActivated = true;
+      }
+      else if (cmd == "who") {
+        Serial.print("drill");
+      }
     }
-    else if (button == 16) {
-      digitalWrite(led2, HIGH);
-      delay(100);
-      val = analogRead(photoresistor);
-      voltage = val * (5.0 / 1023.0);
+    else if (isActivated == true) {
 
-      Serial.print("Voltage On =");
-      Serial.print(voltage);
-      Serial.println();
-      phone.sendMessage(String(voltage));
-    }
-    else if (button == 17) {
-      digitalWrite(led2, LOW);
-      delay(100);
-      val = analogRead(photoresistor);
-      voltage = val * (5.0 / 1023.0);
+      if (button == 0) {
+        //turns drill counter-clockwise
+        analogWrite(drill, 0);
+        delay(100);
+        digitalWrite(drill_direction, HIGH);
+        analogWrite(drill, maxVelocity);
+        Serial.println("button0");
+      }
+      else if (button == 1) {
+        //turns drill clockwise
+        analogWrite(drill, 0);
+        delay(100);
+        digitalWrite(drill_direction, LOW);
+        analogWrite(drill, maxVelocity);
+        Serial.println("button1");
+      }
+      else if (button == 2) {
+        //stops drill
+        analogWrite(drill, 0);
+        Serial.println("button2");
+      }
+      else if (button == 3) {
+        //turns elevator clockwise
+        analogWrite(elevator, 0);
+        delay(100);
+        digitalWrite(elevator_direction, HIGH);
+        analogWrite(elevator, maxVelocity);
+        Serial.println("button3");
+      }
+      else if (button == 4) {
+        //turns elevator counter-clockwise
+        analogWrite(elevator, 0);
+        delay(100);
+        digitalWrite(elevator_direction, LOW);
+        analogWrite(elevator, maxVelocity);
+        Serial.println("button4");
+      }
+      else if (button == 5) {
+        //stops elevator
+        analogWrite(elevator, 0);
+        Serial.println("button5");
+      }
+      else if (button == 7) {
+        //turns table clockwise
+        table.writeMicroseconds(SERVO_STOP);
+        delay(100);
+        table.writeMicroseconds(SERVO_MAX_CW);
+        Serial.println("button7");
+      }
+      else if (button == 6) {
+        //turns table counter-clockwise
+        table.writeMicroseconds(SERVO_STOP);
+        delay(100);
+        table.writeMicroseconds(SERVO_MAX_CCW);
+        Serial.println("button6");
+      }
+      else if (button == 8) {
+        //stops table
+        table.writeMicroseconds(SERVO_STOP);
+        Serial.println("button8");
+      }
+      else if (button == 9) {
+        //turns pump1 counter-clockwise
+        digitalWrite(pump1A, HIGH);
+        digitalWrite(pump1B, LOW);
+        delay(100);
+        Serial.println("button9");
+      }
+      else if (button == 10) {
+        //turns pump1 clockwise
+        digitalWrite(pump1A, LOW);
+        digitalWrite(pump1B, HIGH);
+        delay(100);
+        Serial.println("button10");
+      }
+      else if (button == 11) {
+        //turns drill counter-clockwise
+        digitalWrite(pump2A, HIGH);
+        digitalWrite(pump2B, LOW);
+        delay(100);
+        Serial.println("button11");
+      }
+      else if (button == 12) {
+        //turns drill clockwise
+        digitalWrite(pump2A, LOW);
+        digitalWrite(pump2B, HIGH);
+        delay(100);
+        Serial.println("button12");
+      }
+      else if (button == 13) {
+        //stops pumps
+        digitalWrite(pump1A, LOW);
+        digitalWrite(pump1B, LOW);
+        digitalWrite(pump2A, LOW);
+        digitalWrite(pump2B, LOW);
+        Serial.println("button13");
+      }
+      else if (button == 14) {
+        digitalWrite(led1, HIGH);
+        delay(100);
+        val = analogRead(photoresistor);
+        voltage = val * (5.0 / 1023.0);
 
-      Serial.print("Voltage Off =");
-      Serial.println(voltage);
-      phone.sendMessage(String(voltage));
-    }
-    else if (button == 18) {
-      //stops all
-      table.writeMicroseconds(SERVO_STOP);
-      analogWrite(elevator, 0);
-      analogWrite(drill, 0);
-      digitalWrite(pump1A, LOW);
-      digitalWrite(pump1B, LOW);
-      digitalWrite(pump2A, LOW);
-      digitalWrite(pump2B, LOW);
-      digitalWrite(led1, LOW);
-      digitalWrite(led2, LOW);
-      Serial.println("button16");
+        Serial.print("Voltage On =");
+        Serial.print(voltage);
+        Serial.println("button14");
+      }
+      else if (button == 15) {
+        digitalWrite(led1, LOW);
+        delay(100);
+        val = analogRead(photoresistor);
+        voltage = val * (5.0 / 1023.0);
+
+        Serial.print("Voltage Off =");
+        Serial.print(voltage);
+        Serial.println("button15");
+      }
+      else if (button == 16) {
+        digitalWrite(led2, HIGH);
+        delay(100);
+        val = analogRead(photoresistor);
+        voltage = val * (5.0 / 1023.0);
+
+        Serial.print("Voltage On =");
+        Serial.print(voltage);
+        Serial.println("button16");
+      }
+      else if (button == 17) {
+        digitalWrite(led2, LOW);
+        delay(100);
+        val = analogRead(photoresistor);
+        voltage = val * (5.0 / 1023.0);
+
+        Serial.print("Voltage Off =");
+        Serial.print(voltage);
+        Serial.println("button17");
+      }
+      else if (cmd == "deactivate") {
+        //stops all
+        isActivated = false;
+        table.writeMicroseconds(SERVO_STOP);
+        analogWrite(elevator, 0);
+        analogWrite(drill, 0);
+        digitalWrite(pump1A, LOW);
+        digitalWrite(pump1B, LOW);
+        digitalWrite(pump2A, LOW);
+        digitalWrite(pump2B, LOW);
+        digitalWrite(led1, LOW);
+        digitalWrite(led2, LOW);
+        Serial.println("button18");
+      }
     }
   }
 }
