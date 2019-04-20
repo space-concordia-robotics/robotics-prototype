@@ -37,7 +37,7 @@ document.addEventListener("keydown", function (event) {
 // ping arm MCU
 document.addEventListener("keydown", function (event) {
     if (!$serialCmdInput.is(":focus") && event.code === "KeyP" && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-        console.log("ping");
+        $("button#ping-arm-mcu").css("background-color", "rgb(255, 0, 0)");
         $.ajax({
             url: '/manual_control',
             type: 'POST',
@@ -256,10 +256,10 @@ if (mockArmTable) {
 } else {
     // Implement game loop
     var keyState = {};
-    window.addEventListener('keydown',function(e){
+    window.addEventListener('keydown',function(e) {
         keyState[e.keyCode || e.which] = true;
     },true);
-    window.addEventListener('keyup',function(e){
+    window.addEventListener('keyup',function(e) {
         keyState[e.keyCode || e.which] = false;
     },true);
 
@@ -279,7 +279,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'w'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -301,7 +301,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 's'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -323,7 +323,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'e'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -345,7 +345,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'd'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -367,7 +367,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'r'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -389,7 +389,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'f'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -411,7 +411,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 't'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -433,7 +433,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'g'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -455,7 +455,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'y'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -477,7 +477,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'h'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -499,7 +499,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'u'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -521,7 +521,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'j'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -535,8 +535,7 @@ if (mockArmTable) {
 
             // 'z' --> stop all motors
             if (!$serialCmdInput.is(":focus") && keyState[90]) {
-                //toggleToManual();
-                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+                $("button#stop-all-motors").css("background-color", "rgb(255, 0, 0)");
 
                 $.ajax({
                     url: '/manual_control',
@@ -544,7 +543,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'z'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -558,8 +557,7 @@ if (mockArmTable) {
 
             // 'o' --> reset angle values
             if (!$serialCmdInput.is(":focus") && keyState[79]) {
-                //toggleToManual();
-                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+                $("button#reset-motor-angles").css("background-color", "rgb(255, 0, 0)");
 
                 $.ajax({
                     url: '/manual_control',
@@ -567,7 +565,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'o'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -590,7 +588,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'q'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -604,8 +602,7 @@ if (mockArmTable) {
 
             // 'a' --> debug msg
             if (!$serialCmdInput.is(":focus") && keyState[65] && millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE) {
-                //toggleToManual();
-                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+                $("button#show-buffered-msgs").css("background-color", "rgb(255, 0, 0)");
 
                 $.ajax({
                     url: '/manual_control',
@@ -613,7 +610,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'a'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -627,8 +624,7 @@ if (mockArmTable) {
 
             // 'l' --> list commands
             if (!$serialCmdInput.is(":focus") && keyState[76]) {
-                //toggleToManual();
-                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+                $("button#list-all-cmds").css("background-color", "rgb(255, 0, 0)");
 
                 $.ajax({
                     url: '/manual_control',
@@ -636,7 +632,7 @@ if (mockArmTable) {
                     data: {
                         cmd: 'l'
                     },
-                    success: function(response){
+                    success: function(response) {
                         appendToConsole("cmd: " + response.cmd);
                         appendToConsole("feedback: " + response.feedback);
                         if (response.error != "None") {
@@ -736,5 +732,36 @@ document.addEventListener("keyup", function (event) {
 document.addEventListener("keyup", function (event) {
     if (!$serialCmdInput.is(":focus") && event.code === "KeyJ") {
         $("#click_btn_motor6_cw > button").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+// EXTRA CONTROLS
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyP") {
+        $("button#ping-arm-mcu").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyZ") {
+        $("button#stop-all-motors").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyO") {
+        $("button#reset-motor-angles").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyL") {
+        $("button#list-all-cmds").css("background-color", "rgb(74, 0, 0)");
+    }
+});
+
+document.addEventListener("keyup", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyA") {
+        $("button#show-buffered-msgs").css("background-color", "rgb(74, 0, 0)");
     }
 });
