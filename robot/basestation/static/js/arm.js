@@ -12,25 +12,51 @@ if (mockArmTable) {
 
 // for command thoughput limiting
 const THROTTLE_TIME = 100;
+const PING_THROTTLE_TIME = 1000;
 var lastCmdSent = 0;
 
 // KEYBOARD EVENTS
 // rover ping
-if (mockArmTable) {
-    document.addEventListener("keydown", function (event) {
-    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP") {
+document.addEventListener("keydown", function (event) {
+    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP" && millisSince(lastCmdSent) > PING_THROTTLE_TIMEw) {
+        console.log(millisSince(lastCmdSent));
         $.ajax("/ping_rover", {
-             success: function(data) {
-                 console.log(data);
-                 pingRover(data.ping_msg, data.ros_msg);
-             },
-             error: function() {
+            success: function(data) {
+                console.log(data);
+                pingRover(data.ping_msg, data.ros_msg);
+            },
+            error: function() {
                 console.log("An error occured");
-             }
-          });
+            }
+        });
+        lastCmdSent = new Date().getTime();
     }
-    });
+});
 
+// ping arm MCU
+document.addEventListener("keydown", function (event) {
+    if (!$serialCmdInput.is(":focus") && event.code === "KeyP" && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+        console.log("ping");
+        $.ajax({
+            url: '/manual_control',
+            type: 'POST',
+            data: {
+                cmd: 'p'
+            },
+            success: function(response){
+                appendToConsole("cmd: " + response.cmd);
+                appendToConsole("feedback: " + response.feedback);
+                if (response.error != "None") {
+                    appendToConsole("error: " + response.error);
+                }
+                scrollToBottom();
+            }
+        })
+        lastCmdSent = new Date().getTime();
+    }
+});
+
+if (mockArmTable) {
     // manual controls
     let $serialCmdInput = $("#serial-cmd-input");
 
@@ -226,7 +252,6 @@ if (mockArmTable) {
             }
         }
     });
-
 } else {
     // Implement game loop
     var keyState = {};
@@ -586,29 +611,6 @@ if (mockArmTable) {
                     type: 'POST',
                     data: {
                         cmd: 'a'
-                    },
-                    success: function(response){
-                        appendToConsole("cmd: " + response.cmd);
-                        appendToConsole("feedback: " + response.feedback);
-                        if (response.error != "None") {
-                            appendToConsole("error: " + response.error);
-                        }
-                        scrollToBottom();
-                    }
-                })
-                lastCmdSent = new Date().getTime();
-            }
-
-            // 'p' --> ping
-            if (!$serialCmdInput.is(":focus") && keyState[80]) {
-                //toggleToManual();
-                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-                $.ajax({
-                    url: '/manual_control',
-                    type: 'POST',
-                    data: {
-                        cmd: 'p'
                     },
                     success: function(response){
                         appendToConsole("cmd: " + response.cmd);

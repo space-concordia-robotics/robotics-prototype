@@ -221,7 +221,6 @@ def click_btn_arm_right():
     print("click_btn_arm_right")
     return ""
 
-
 @app.route("/click_btn_arm_back")
 def click_btn_arm_back():
     print("click_btn_arm_back")
@@ -264,7 +263,7 @@ def manual_control():
     feedback = str(None)
 
     try:
-        feedback = receiver.receive(timeout=1)
+        feedback = receiver.receive(timeout=2)
     except OSError:
         error = "Network is unreachable"
         print(error)
@@ -308,7 +307,7 @@ def rover_drive():
     error = str(None)
 
     try:
-        feedback = receiver.receive(timeout=1)
+        feedback = receiver.receive(timeout=2)
     except OSError:
         error = "Network error"
         print(error)

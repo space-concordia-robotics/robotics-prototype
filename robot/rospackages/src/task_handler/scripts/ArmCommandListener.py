@@ -51,8 +51,8 @@ elif len(sys.argv) >= 3:
     print("example usage: python ServerListener.py <port>")
 
 
-if not local and not competition and not dynamic:
-    print("local, competition and dynamic flags set to false, exiting")
+if not local and not competition: #and not dynamic:
+    print("local, competition flags set to false, exiting")
     sys.exit(0)
 
 if usb:
@@ -152,8 +152,8 @@ if local:
 elif competition:
     ROVER_IP = "172.16.1.30" # competition ip
 # physicial ip, does not need connection to internet to work
-elif dynamic:
-    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
+# elif dynamic:
+#     ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
 
 print("ROVER_IP: " + ROVER_IP)
 
@@ -375,13 +375,19 @@ while True:
                     command = "ping\n"
                     feedback += "\ncommand: " + command
 
-                    ser.write(str.encode(command))
-                    ping_time = current_millis()
+                    for i in 0, 3:
+                        response = ""
+                        ser.write(str.encode(command))
 
-                    while current_millis() - ping_time < PING_TIMEOUT:
-                        response = ser.readline().decode()
-                        sender.send(str(response))
-                        print(response)
+                        # CRITICAL: give time for MCU to respond
+                        time.sleep(0.3)
+
+                        while ser.in_waiting:
+                            response = ser.readline().decode()
+                            if "pong" in response.strip():
+                                sender.send(response)
+                                break
+
                 elif uart:
                     print("sending ping command over UART")
                     u.tx(command)
