@@ -465,8 +465,11 @@ void loop() {
           if (motorCommand.homeAllMotors) {
             for (int i = 0; i < NUM_MOTORS; i++) {
               if (motorArray[i]->hasLimitSwitches) {
+                if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING){
+                  motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
+                }
                 motorsToHome[i] = true;
-                #ifdef DEBUG_MAIN
+#ifdef DEBUG_MAIN
                 UART_PORT.print("Motor ");UART_PORT.print(i+1);UART_PORT.println(" to be homed.");
 #endif
               }
@@ -474,9 +477,12 @@ void loop() {
           }
           else if (motorCommand.homeCommand) {
             if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
+              if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING){
+                motorArray[motorCommand.whichMotor]->homingType = DOUBLE_ENDED_HOMING;
+              }
               motorsToHome[motorCommand.whichMotor] = true;
-                              #ifdef DEBUG_MAIN
-                UART_PORT.print("Motor ");UART_PORT.print(motorCommand.whichMotor+1);UART_PORT.println(" to be homed.");
+#ifdef DEBUG_MAIN
+              UART_PORT.print("Motor ");UART_PORT.print(motorCommand.whichMotor+1);UART_PORT.println(" to be homed.");
 #endif
             }
           }
