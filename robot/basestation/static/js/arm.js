@@ -14,7 +14,7 @@ if (mockArmTable) {
 const THROTTLE_TIME = 100;
 const PING_THROTTLE_TIME = 1000;
 const MCU_FEEDBACK_THROTTLE = 1000;
-var lastCmdSent = 0;
+let lastCmdSent = 0;
 
 // KEYBOARD EVENTS
 // rover ping
