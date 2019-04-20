@@ -10,9 +10,9 @@ if (mockArmTable) {
 // update odroid rx data every second
 //setInterval(updateOdroidRx, 1000);
 
-
-//@TODO: implement game loop for keyboard events:
-// https://stackoverflow.com/questions/12273451/how-to-fix-delay-in-javascript-keydown
+// for command thoughput limiting
+const THROTTLE_TIME = 100;
+var lastCmdSent = 0;
 
 // KEYBOARD EVENTS
 // rover ping
@@ -25,7 +25,7 @@ if (mockArmTable) {
                  pingRover(data.ping_msg, data.ros_msg);
              },
              error: function() {
-                console.log("An error occured")
+                console.log("An error occured");
              }
           });
     }
@@ -240,321 +240,414 @@ if (mockArmTable) {
     function gameLoop() {
         let $serialCmdInput = $("#serial-cmd-input");
 
-        // 'w' --> m1 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[87]) {
-            toggleToManual();
-            $("#click_btn_motor1_ccw > button").css("background-color", "rgb(255, 0, 0)");
+        if (millisSince(lastCmdSent) > THROTTLE_TIME) {
 
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'w'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
+            // 'w' --> m1 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[87]) {
+                toggleToManual();
+                $("#click_btn_motor1_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'w'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 's' --> m1 cw
+            if (!$serialCmdInput.is(":focus") && keyState[83]) {
+                toggleToManual();
+                $("#click_btn_motor1_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 's'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'e' --> m2 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[69]) {
+                toggleToManual();
+                $("#click_btn_motor2_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'e'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'd' --> m2 cw
+            if (!$serialCmdInput.is(":focus") && keyState[68]) {
+                toggleToManual();
+                $("#click_btn_motor2_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'd'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'r' --> m3 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[82]) {
+                toggleToManual();
+                $("#click_btn_motor3_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'r'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'f' --> m3 cw
+            if (!$serialCmdInput.is(":focus") && keyState[70]) {
+                toggleToManual();
+                $("#click_btn_motor3_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'f'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 't' --> m4 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[84]) {
+                toggleToManual();
+                $("#click_btn_motor4_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 't'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'g' --> m4 cw
+            if (!$serialCmdInput.is(":focus") && keyState[71]) {
+                toggleToManual();
+                $("#click_btn_motor4_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'g'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'y' --> m5 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[89]) {
+                toggleToManual();
+                $("#click_btn_motor5_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'y'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'h' --> m5 cw
+            if (!$serialCmdInput.is(":focus") && keyState[72]) {
+                toggleToManual();
+                $("#click_btn_motor5_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'h'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'u' --> m6 ccw
+            if (!$serialCmdInput.is(":focus") && keyState[85]) {
+                toggleToManual();
+                $("#click_btn_motor6_ccw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'u'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+            // 'j' --> m6 cw
+            if (!$serialCmdInput.is(":focus") && keyState[74]) {
+                toggleToManual();
+                $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'j'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'z' --> stop all motors
+            if (!$serialCmdInput.is(":focus") && keyState[90]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'z'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'o' --> reset angle values
+            if (!$serialCmdInput.is(":focus") && keyState[79]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'o'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'q' --> terminate server listener
+            if (!$serialCmdInput.is(":focus") && keyState[81]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'q'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'a' --> debug msg
+            if (!$serialCmdInput.is(":focus") && keyState[65]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'a'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'p' --> ping
+            if (!$serialCmdInput.is(":focus") && keyState[80]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'p'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // 'l' --> list commands
+            if (!$serialCmdInput.is(":focus") && keyState[76]) {
+                //toggleToManual();
+                //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
+
+                $.ajax({
+                    url: '/manual_control',
+                    type: 'POST',
+                    data: {
+                        cmd: 'l'
+                    },
+                    success: function(response){
+                        appendToConsole("cmd: " + response.cmd);
+                        appendToConsole("feedback: " + response.feedback);
+                        if (response.error != "None") {
+                            appendToConsole("error: " + response.error);
+                        }
+                        scrollToBottom();
+                    }
+                })
+                lastCmdSent = new Date().getTime();
+            }
+
+            // redraw/reposition your object here
+            // also redraw/animate any objects not controlled by the user
         }
-        // 's' --> m1 cw
-        if (!$serialCmdInput.is(":focus") && keyState[83]) {
-            toggleToManual();
-            $("#click_btn_motor1_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 's'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'e' --> m2 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[69]) {
-            toggleToManual();
-            $("#click_btn_motor2_ccw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'e'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'd' --> m2 cw
-        if (!$serialCmdInput.is(":focus") && keyState[68]) {
-            toggleToManual();
-            $("#click_btn_motor2_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'd'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'r' --> m3 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[82]) {
-            toggleToManual();
-            $("#click_btn_motor3_ccw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'r'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'f' --> m3 cw
-        if (!$serialCmdInput.is(":focus") && keyState[70]) {
-            toggleToManual();
-            $("#click_btn_motor3_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'f'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 't' --> m4 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[84]) {
-            toggleToManual();
-            $("#click_btn_motor4_ccw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 't'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'g' --> m4 cw
-        if (!$serialCmdInput.is(":focus") && keyState[71]) {
-            toggleToManual();
-            $("#click_btn_motor4_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'g'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'y' --> m5 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[89]) {
-            toggleToManual();
-            $("#click_btn_motor5_ccw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'y'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'h' --> m5 cw
-        if (!$serialCmdInput.is(":focus") && keyState[72]) {
-            toggleToManual();
-            $("#click_btn_motor5_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'h'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'u' --> m6 ccw
-        if (!$serialCmdInput.is(":focus") && keyState[85]) {
-            toggleToManual();
-            $("#click_btn_motor6_ccw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'u'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-        // 'j' --> m6 cw
-        if (!$serialCmdInput.is(":focus") && keyState[74]) {
-            toggleToManual();
-            $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'j'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'z' --> stop all motors
-        if (!$serialCmdInput.is(":focus") && keyState[90]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'z'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'o' --> reset angle values
-        if (!$serialCmdInput.is(":focus") && keyState[79]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'o'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'q' --> terminate server listener
-        if (!$serialCmdInput.is(":focus") && keyState[81]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'q'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'a' --> debug msg
-        if (!$serialCmdInput.is(":focus") && keyState[65]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'a'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'p' --> ping
-        if (!$serialCmdInput.is(":focus") && keyState[80]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'p'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // 'l' --> list commands
-        if (!$serialCmdInput.is(":focus") && keyState[76]) {
-            //toggleToManual();
-            //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-            $.ajax({
-                url: '/manual_control',
-                type: 'POST',
-                data: {
-                    cmd: 'l'
-                },
-                success: function(response){
-                    appendToConsole("cmd: " + response.cmd);
-                    scrollToBottom();
-                }
-            })
-        }
-
-        // redraw/reposition your object here
-        // also redraw/animate any objects not controlled by the user
 
         setTimeout(gameLoop, 10);
     }

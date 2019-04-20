@@ -129,6 +129,12 @@ function enableArmListener() {
     }
 }
 
+// Milliseconds since start time given
+function millisSince(start) {
+    var elapsed = new Date().getTime() - start;
+    return elapsed;
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest(msg) {

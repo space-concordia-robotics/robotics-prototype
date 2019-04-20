@@ -11,7 +11,6 @@ const MAX_STEERING_SPEED = 39;
 const MIN_STEERING_SPEED = 0;
 
 // for command thoughput limiting
-var start = new Date().getTime();
 const THROTTLE_TIME = 25;
 var lastCmdSent = 0;
 
@@ -26,7 +25,9 @@ function enableRoverListener() {
             success: function(response){
                 appendToConsole("cmd: " + response.cmd);
                 appendToConsole("output: " + response.output);
-                appendToConsole("error: " + response.error);
+                if (response.error != "None") {
+                    appendToConsole("error:\n" + response.error);
+                }
                 scrollToBottom();
             }
         })
@@ -40,7 +41,9 @@ function enableRoverListener() {
             success: function(response){
                 appendToConsole("cmd: " + response.cmd);
                 appendToConsole("output: " + response.output);
-                appendToConsole("error: " + response.error);
+                if (response.error != "None") {
+                    appendToConsole("error:\n" + response.error);
+                }
                 scrollToBottom();
             }
         })
@@ -58,6 +61,9 @@ function enableRoverMotors() {
             success: function(response){
                 appendToConsole("cmd: " + response.cmd);
                 appendToConsole("feedback:\n" + response.feedback);
+                if (response.error != "None") {
+                    appendToConsole("error:\n" + response.error);
+                }
                 scrollToBottom();
             }
         })
@@ -71,18 +77,16 @@ function enableRoverMotors() {
             success: function(response){
                 appendToConsole("cmd: " + response.cmd);
                 appendToConsole("feedback:\n" + response.feedback);
+                if (response.error != "None") {
+                    appendToConsole("error:\n" + response.error);
+                }
                 scrollToBottom();
             }
         })
     }
 }
 
-// Milliseconds since start time given
-function millisSince(start) {
-    var elapsed = new Date().getTime() - start;
-    return elapsed;
-}
-
+// commands to change speed settings, get buffered serial messages
 $(document).keydown(function(e) {
     let currentSpeed = "";
 
@@ -104,6 +108,9 @@ $(document).keydown(function(e) {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -126,6 +133,9 @@ $(document).keydown(function(e) {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -148,6 +158,9 @@ $(document).keydown(function(e) {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -170,6 +183,9 @@ $(document).keydown(function(e) {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -185,6 +201,9 @@ $(document).keydown(function(e) {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -365,6 +384,9 @@ function gameLoop() {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -400,6 +422,9 @@ function gameLoop() {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -434,6 +459,9 @@ function gameLoop() {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
@@ -469,28 +497,31 @@ function gameLoop() {
                 success: function(response){
                     appendToConsole("cmd: " + response.cmd);
                     appendToConsole("feedback:\n" + response.feedback);
+                    if (response.error != "None") {
+                        appendToConsole("error:\n" + response.error);
+                    }
                     scrollToBottom();
                 }
             })
             lastCmdSent = new Date().getTime();
         }
+        // send REST signal, mimicking behavior of bluetooth setup
+        // else {
+            // $.ajax({
+            //     url: '/rover_drive',
+            //     type: 'POST',
+            //     data: {
+            //         cmd: 'k'
+            //     },
+            //     success: function(response){
+            //         appendToConsole("cmd: " + response.cmd);
+            //         scrollToBottom();
+            //     }
+            // })
+        // }
+        // redraw/reposition your object here
+        // also redraw/animate any objects not controlled by the user
     }
-    // send REST signal, mimicking behavior of bluetooth setup
-    // else {
-        // $.ajax({
-        //     url: '/rover_drive',
-        //     type: 'POST',
-        //     data: {
-        //         cmd: 'k'
-        //     },
-        //     success: function(response){
-        //         appendToConsole("cmd: " + response.cmd);
-        //         scrollToBottom();
-        //     }
-        // })
-    // }
-    // redraw/reposition your object here
-    // also redraw/animate any objects not controlled by the user
 
     setTimeout(gameLoop, 10);
 }

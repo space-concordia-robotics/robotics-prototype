@@ -22,6 +22,7 @@ class Connection:
         self.name = name
         self.ip = ip
         self.port = port
+        print("total active:", type(self).__active_ctr)
 
     def __del__(self):
         type(self).__active_ctr -= 1
@@ -41,6 +42,9 @@ class Connection:
     def receive(self, timeout=0):
         # Internet --> AF_INET, UDP --> SOCK_DGRAM
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print("binding to")
+        print("self.ip: ", self.ip)
+        print("self.port: ", self.port)
         sock.bind((self.ip, self.port))
 
         # wait first until data available

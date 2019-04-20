@@ -247,15 +247,34 @@ def manual_control():
         # decode URI
         cmd = unquote(cmd)
 
-    #rover_ip = "127.0.0.1" # for local testing
-    rover_ip = "172.16.1.30" # for testing with radios
+    rover_ip = "127.0.0.1" # for local testing
+    #rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
-    c = Connection("manual_control", rover_ip, 5005)
-    c.send(cmd)
+    sender = Connection("arm_cmd_sender", rover_ip, 5005)
+    error = str(None)
 
+    try:
+        sender.send(cmd)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
 
-    return jsonify(success=True, cmd=cmd)
+    receiver = Connection("arm_cmd_receiver", rover_ip, 5010)
+    feedback = str(None)
+
+    try:
+        feedback = receiver.receive(timeout=1)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
+
+    print("feedback:", feedback)
+
+    if not feedback:
+        feedback = "Timeout limit exceeded, no data received"
+
+    return jsonify(success=True, cmd=cmd, error=error, feedback=feedback)
 
 # Rover controls
 @app.route("/rover_drive", methods=["POST"])
@@ -274,14 +293,32 @@ def rover_drive():
     #rover_ip = "172.16.1.30" # for testing with radios
 
     print("cmd: " + cmd)
-    sender = Connection("rover_drive_sender", rover_ip, 5010)
-    sender.send(cmd)
-    receiver = Connection("rover_drive_receiver", rover_ip, 5015)
-    feedback = receiver.receive(timeout=1)
+    sender = Connection("rover_drive_sender", rover_ip, 5015)
+
+    error = str(None)
+
+    try:
+        sender.send(cmd)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
+
+    receiver = Connection("rover_drive_receiver", rover_ip, 5020)
+    feedback = str(None)
+    error = str(None)
+
+    try:
+        feedback = receiver.receive(timeout=1)
+    except OSError:
+        error = "Network error"
+        print(error)
 
     print("feedback:", feedback)
 
-    return jsonify(success=True, cmd=cmd, feedback=feedback)
+    if not feedback:
+        feedback = "Timeout limit exceeded, no data received"
+
+    return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
 # Task handler services
 @app.route("/task_handler", methods=["POST"])
@@ -311,6 +348,8 @@ def task_handler():
     elif cmd == "disable-rover-listener":
         cmd_args = "rover_listener 0"
 
+    print("cmd_args:", cmd_args)
+
     output, error = run_shell(ros_cmd, cmd_args)
     output = output.decode()
 
@@ -319,7 +358,7 @@ def task_handler():
     if error:
         print("Error: " + error.decode())
 
-    error = str(None) + "\n" if not error else str(error) + "\n"
+    error = str(None) if not error else str(error)
 
     return jsonify(success=True, cmd=cmd, output=output, error=error)
 

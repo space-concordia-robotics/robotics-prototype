@@ -42,8 +42,8 @@ def get_commands_list():
 # returns current time in milliseconds
 current_millis = lambda: int(round(time.time() * 1000))
 # pre-determined port for the ArmCommandListener
-SERVER_PORT = 5010
-FEEDBACK_PORT = 5015
+SERVER_PORT = 5015
+FEEDBACK_PORT = 5020
 
 if len(sys.argv) == 2:
     SERVER_PORT = int(sys.argv[1])

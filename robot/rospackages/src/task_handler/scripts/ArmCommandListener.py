@@ -14,8 +14,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = False
-competition = True
+local = True
+competition = False
 #dynamic = True
 
 # note: since this program is in /usr/bin/ on the OBC
@@ -26,20 +26,21 @@ competition = True
 from robot.comms.connection import Connection
 from robot.comms.uart import Uart
 
-def print_commands_list():
-    print("""'q': quit\n
+def get_commands_list():
+    return """'q': quit\n
 'p': ping\n
 'z': emergency stop all motors\n
 'o': reset memorized angle values\n
 'l': view key commands\n
 'a': post buffered messages from Teensy\n
 Keys 'w' to 'u': move motors 1-6 forwards\n
-Keys 's' to 'j': move motors 1-6 backwards\n\n""")
+Keys 's' to 'j': move motors 1-6 backwards\n\n"""
 
 # returns current time in milliseconds
 current_millis = lambda: int(round(time.time() * 1000))
 # pre-determined port for the ArmCommandListener
 SERVER_PORT = 5005
+FEEDBACK_PORT = 5010
 
 if len(sys.argv) == 2:
     SERVER_PORT = int(sys.argv[1])
@@ -51,7 +52,7 @@ elif len(sys.argv) >= 3:
 
 
 if not local and not competition and not dynamic:
-    print("""local, competition and dynamic flags set to false, exiting""")
+    print("local, competition and dynamic flags set to false, exiting")
     sys.exit(0)
 
 if usb:
@@ -156,13 +157,15 @@ elif dynamic:
 
 print("ROVER_IP: " + ROVER_IP)
 
-c = Connection("c1", ROVER_IP, SERVER_PORT)
+receiver = Connection("arm_command_receiver", ROVER_IP, SERVER_PORT)
+sender = Connection("arm_feedback_sender", ROVER_IP, FEEDBACK_PORT)
+
 
 print("Rover server listening on port {} \n".format(SERVER_PORT))
 
 print("Ready for incoming drive cmds!\n")
 
-print_commands_list()
+print(get_commands_list())
 
 RESPONSE_TIMEOUT = 75
 PING_TIMEOUT = 1000
@@ -174,14 +177,16 @@ while True:
             print("ser.readline():", ser.readline().decode())
 
     try:
-        command = c.receive()
+        command = receiver.receive()
         print("command: " + command + "\n")
 
         if command in key_list:
             if command == 'w':
-                print("cmd: w --> m1: Forward\n")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: w --> m1: Forward\n"
                 command = "budge fwd ~ ~ ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -189,9 +194,11 @@ while True:
                     u.tx(command)
 
             elif command == 's':
-                print("cmd: s --> m1: Back\n")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: s --> m1: Back\n"
                 command = "budge back ~ ~ ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -199,9 +206,11 @@ while True:
                     u.tx(command)
 
             elif command == 'e':
-                print("cmd: e --> m2: Forward\n")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: e --> m2: Forward\n"
                 command = "budge ~ fwd ~ ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -209,9 +218,11 @@ while True:
                     u.tx(command)
 
             elif command == 'd':
-                print("cmd: d --> m2: Back")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: d --> m2: Back"
                 command = "budge ~ back ~ ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -219,9 +230,12 @@ while True:
                     u.tx(command)
 
             elif command == 'r':
-                print("cmd: r --> m3: Forward")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: r --> m3: Forward"
                 command = "budge ~ ~ fwd ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
+
 
                 if usb:
                     ser.write(str.encode(command))
@@ -229,9 +243,11 @@ while True:
                     u.tx(command)
 
             elif command == 'f':
-                print("cmd: f --> m3: Back")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: f --> m3: Back"
                 command = "budge ~ ~ back ~ ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -239,9 +255,11 @@ while True:
                     u.tx(command)
 
             elif command == 't':
-                print("cmd: t --> m4: Forward")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: t --> m4: Forward"
                 command = "budge ~ ~ ~ fwd ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -249,9 +267,11 @@ while True:
                     u.tx(command)
 
             elif command == 'g':
-                print("cmd: g --> m4: Back")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: g --> m4: Back"
                 command = "budge ~ ~ ~ back ~ ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -259,9 +279,11 @@ while True:
                     u.tx(command)
 
             elif command == 'y':
-                print("cmd: y --> m5: Forward")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: y --> m5: Forward"
                 command = "budge ~ ~ ~ ~ fwd ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -269,9 +291,11 @@ while True:
                     u.tx(command)
 
             elif command == 'h':
-                print("cmd: h --> m5: Back")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: h --> m5: Back"
                 command = "budge ~ ~ ~ ~ back ~\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -279,9 +303,11 @@ while True:
                     u.tx(command)
 
             elif command == 'u':
-                print("cmd: u --> m6: Forward")
-                #mySocket.sendto(str.encode("Forward"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: u --> m6: Forward"
                 command = "budge ~ ~ ~ ~ ~ fwd\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -289,9 +315,11 @@ while True:
                     u.tx(command)
 
             elif command == 'j':
-                print("cmd: j --> m6: Back")
-                #mySocket.sendto(str.encode("Back"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: j --> m6: Back"
                 command = "budge ~ ~ ~ ~ ~ back\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -299,9 +327,11 @@ while True:
                     u.tx(command)
 
             elif command == 'z':
-                print("cmd: z --> stop all motors")
-                #mySocket.sendto(str.encode("stop"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: z --> stop all motors"
                 command = "stop\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -309,9 +339,11 @@ while True:
                     u.tx(command)
 
             elif command == 'o':
-                print("cmd: o --> reset angle values")
-                #mySocket.sendto(str.encode("reset"), (clientIP, CLIENT_PORT))
+                feedback = "cmd: o --> reset angle values"
                 command = "reset\n"
+                feedback += "\ncommand: " + command
+                print(feedback)
+                sender.send(feedback)
 
                 if usb:
                     ser.write(str.encode(command))
@@ -319,26 +351,36 @@ while True:
                     u.tx(command)
 
             elif command == 'q':
-                print("\nTerminating connection.")
+                feedback = "\nTerminating listener."
+                print(feedback)
+                sender.send(feedback)
                 break
+
             elif command == 'l':
-                print_commands_list()
+                print(get_commands_list())
+                sender.send(get_commands_list())
+
             elif command == 'a':
                 if usb:
+                    data = ""
                     while ser.in_waiting:
-                        print(ser.readline().decode())
+                        data += ser.readline().decode()
+                    print(data)
+                    sender.send(data)
                 else:
                     print("UART RX not supported (yet)")
             elif command == 'p':
                 if usb:
-                    print("cmd: p --> ping")
+                    feedback = "cmd: p --> ping"
                     command = "ping\n"
+                    feedback += "\ncommand: " + command
+
                     ser.write(str.encode(command))
                     ping_time = current_millis()
 
                     while current_millis() - ping_time < PING_TIMEOUT:
                         response = ser.readline().decode()
-                        #mySocket.sendto(str.encode(response), (clientIP, CLIENT_PORT))
+                        sender.send(str(response))
                         print(response)
                 elif uart:
                     print("sending ping command over UART")
@@ -352,4 +394,3 @@ while True:
         traceback.print_exc(file=sys.stdout)
         print("-"*60)
         break
-
