@@ -378,7 +378,8 @@ void loop() {
               }
             else {
               float angle = motorArray[homingMotor]->getSoftwareAngle();
-              if(angle < 0.3 && angle > -0.3){ //!< \todo this shouldn't be hardcoded!
+              float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
+              if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
                 motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
                 homingMotor++; // move on to the next motor
                 motorArray[homingMotor]->startedZeroing = false;
@@ -820,13 +821,12 @@ void initLimitSwitches(void) {
   motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
 
   // set motor shaft angle tolerances
-  motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
-  motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
-  motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
-  motor4.pidController.setJointAngleTolerance(1.8 * 2 * motor4.gearRatioReciprocal);
-  motor5.pidController.setJointAngleTolerance(2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
-  motor6.pidController.setJointAngleTolerance(2.0 * motor6.gearRatioReciprocal);
-
+  motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+  motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
+  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * 2 * motor3.gearRatioReciprocal);
+  motor4.pidController.setJointAngleTolerance(0.1);//1.8 * 2 * motor4.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
+  motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+  motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
 
 /*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,

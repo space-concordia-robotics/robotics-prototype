@@ -328,6 +328,7 @@ void RobotMotor::stopHoming(void) {
   homingDone = true;
   homingPass = 0;
   atSafeAngle = true;
+  startedZeroing = false;
 }
 
 #endif
