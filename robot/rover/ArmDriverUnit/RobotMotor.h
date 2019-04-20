@@ -319,7 +319,7 @@ void RobotMotor::homeMotor(char homingDir) {
 #ifdef DEBUG_HOMING
     UART_PORT.println("homeMotor outwards");
 #endif
-    forceToAngle(1.5 * maxHardAngle);
+    forceToAngle(5 * maxHardAngle);
   }
   homingDone = false;
 }

@@ -218,7 +218,7 @@ elapsedMillis sinceStepperCheck; //!< how long since last time stepper angle was
 
 // homing variables
 bool isHoming = false;
-int homingMotor = NUM_MOTORS; //! initialize to a value that's invalid so it'll be ignored. Used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
+int homingMotor = -1; //! initialize to a value that's invalid so it'll be ignored. Used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 //! used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 bool motorsToHome[] = {false, false, false, false, false, false}; 
 /* function declarations */
@@ -336,7 +336,7 @@ void loop() {
 
   /* Homing functionality ignores most message types */
   if (isHoming) { // not done homing the motors
-    if (homingMotor < NUM_MOTORS) {
+    if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
         // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
 #ifdef DEBUG_HOMING
@@ -363,26 +363,24 @@ void loop() {
             motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
           }
           else { // done finding angle limits, moving to home position and then next motor time
+            if(! (motorArray[homingMotor]->startedZeroing) ){ // start zeroing
 #ifdef DEBUG_HOMING
-            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" homing complete. now to move to angle");
+              UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+              UART_PORT.println(" homing complete. now to move to 0 degrees");
 #endif
-          /*
-          motor 3 homed to -80.5 and then didnt jump out of homing sequence??
-          maybe because it was supposed to be more like -79.5 since the soft angle is -80?
-          I think it's cause motor 3 was a stepper and I forgot to set atSafeAngle to true in the stepper code...
-          */
-            if(! (motorArray[homingMotor]->startedZeroing) ){
-                motorArray[homingMotor]->forceToAngle(0.0);
-                motorArray[homingMotor]->startedZeroing = true;
-              }
-            else {
+              motorArray[homingMotor]->forceToAngle(0.0);
+              motorArray[homingMotor]->startedZeroing = true;
+            }
+            else { // check to see if done zeroing yet, if so move on to next
               float angle = motorArray[homingMotor]->getSoftwareAngle();
               float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
               if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
-                motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
-                homingMotor++; // move on to the next motor
+                homingMotor--; // move on to the next motor
                 motorArray[homingMotor]->startedZeroing = false;
+#ifdef DEBUG_HOMING
+                UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+                UART_PORT.println(" zeroing complete.");
+#endif
               }
               else { // not done going to zero, not doing anything
                 ;
@@ -399,9 +397,19 @@ void loop() {
 #ifdef DEBUG_HOMING
       UART_PORT.println("all motors done homing, reinitializing motor timers");
 #endif
+      for(int i = 0; i<NUM_MOTORS; i++){
+        motorArray[i]->stopHoming();
+      }
       isHoming = false;
-      // this would be a good place to call the goToNeutral function or whatever
-      //motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
+      // interesting idea is to start homing the next motor while the previous one is finishing up
+      // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
+      // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
+      homingMotor = -1; // reset it until next homing call
+      /*
+        homing didnt stop for some reason???
+        at the end of homing motor 2 kept moving, stop command didn't work
+        i noticed angles weren't printing anymore, dunno when it stopped printing tho
+      */
     }
   }
 
@@ -451,7 +459,7 @@ void loop() {
         // the following variables are global rather than belonging to a class so must be dealt with separately
         // i suppose i could package a bunch of this into a function called stopHoming
         isHoming = false;
-        homingMotor = NUM_MOTORS;
+        homingMotor = NUM_MOTORS-1;
         for (int i = 0; i < NUM_MOTORS; i++) {
           motorsToHome[i] = false;
         }
@@ -464,7 +472,7 @@ void loop() {
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
           if (motorCommand.homeAllMotors) {
-            for (int i = 0; i < NUM_MOTORS; i++) {
+            for (int i = NUM_MOTORS - 1; i >= 0; i--) { // start with last motor and work inwards
               if (motorArray[i]->hasLimitSwitches) {
                 if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING){
                   motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
@@ -488,7 +496,7 @@ void loop() {
             }
           }
           isHoming = true;
-          homingMotor = 0;
+          homingMotor = NUM_MOTORS-1;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
           UART_PORT.println("initializing homing command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
@@ -860,8 +868,8 @@ void initSpeedParams(void) {
 
   // open loop gain is only for time-based open loop control
   motor1.setOpenLoopGain(0.001); // needs to be tuned
-  motor2.setOpenLoopGain(0.0025); // needs to be tuned
-  motor3.setOpenLoopGain(0.00455); // more or less tuned
+  motor2.setOpenLoopGain(0.0012); // needs to be tuned
+  motor3.setOpenLoopGain(0.004); // more or less tuned
   motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
   motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
@@ -879,7 +887,6 @@ void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
   motor3.motorTimerInterrupt();
-
 }
 void m4StepperInterrupt(void) {
   motor4.motorTimerInterrupt(m4StepperTimer);
