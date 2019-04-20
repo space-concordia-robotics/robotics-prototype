@@ -13,12 +13,13 @@ if (mockArmTable) {
 // for command thoughput limiting
 const THROTTLE_TIME = 100;
 const PING_THROTTLE_TIME = 1000;
+const MCU_FEEDBACK_THROTTLE = 1000;
 var lastCmdSent = 0;
 
 // KEYBOARD EVENTS
 // rover ping
 document.addEventListener("keydown", function (event) {
-    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP" && millisSince(lastCmdSent) > PING_THROTTLE_TIMEw) {
+    if (event.ctrlKey  &&  event.altKey  &&  event.code === "KeyP" && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
         console.log(millisSince(lastCmdSent));
         $.ajax("/ping_rover", {
             success: function(data) {
@@ -602,7 +603,7 @@ if (mockArmTable) {
             }
 
             // 'a' --> debug msg
-            if (!$serialCmdInput.is(":focus") && keyState[65]) {
+            if (!$serialCmdInput.is(":focus") && keyState[65] && millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE) {
                 //toggleToManual();
                 //$("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
 
