@@ -37,10 +37,11 @@ class RobotMotor {
     volatile int triggerState;
     int limitSwitchState;
     elapsedMillis sinceTrigger;
-    int homingType;
-    bool homingDone;
+    int homingType; //!< for homing
+    bool homingDone; //!< for homing
     bool atSafeAngle; //!< for homing
-    int homingPass;
+    bool startedZeroing; //!< for homing
+    int homingPass; //!< for homing
     void checkForActualPress(void);
     void goToSafeAngle(void);
     void homeMotor(char homingDir);
@@ -131,6 +132,7 @@ RobotMotor::RobotMotor() {
   openLoopGain = 1.0; // temp open loop control
   homingPass = 0;
   atSafeAngle = true;
+  startedZeroing = false;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :

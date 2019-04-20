@@ -19,7 +19,7 @@
     #define LIM_SWITCH_DIR RISING
     #endif
   */
-
+/*
 timers:
   -watchdog timer to be added into my code soonish to reset the teensy if it's hanging
    -heartbeat will be implemented using millis as millis uses systick so do we really need to do interrupts?

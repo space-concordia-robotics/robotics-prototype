@@ -49,6 +49,13 @@
 /*
 #define M1_DIR_PIN          5 //!< chooses the direction the motor turns in
 #define M1_PWM_PIN          6 //!< the speed of the motor is controlled by the pwm signal
+*/
+// swapping m1 pins with m3 pins so i can control m3
+// using the current setup since m1 isn't being used right now
+// and I need to test m2-4 for homing
+#define M1_DIR_PIN            20
+#define M1_PWM_PIN            21
+// end of swap
 // 7&8 are on port D with bits 2&3 respectively
 #define M1_ENCODER_PORT    GPIOD_PDIR //!< the input register for the port connected to the encoder pins
 //! \brief the position of the lower encoder pin bit. The encoder interrupt code expects this to function correctly.
@@ -61,23 +68,6 @@
 #define M1_LIMIT_SW_CCW_SHIFT CORE_PIN10_BIT
 #define M1_LIMIT_SW_CW        9
 #define M1_LIMIT_SW_CCW       10
-*/
-// swapping m1 pins with m3 pins so i can control m3
-// using the current setup since m1 isn't being used right now
-// and I need to test m2-4 for homing
-#define M1_DIR_PIN            20
-#define M1_PWM_PIN            21
-#define M1_ENCODER_PORT       GPIOB_PDIR
-#define M1_ENCODER_SHIFT      CORE_PIN19_BIT
-#define M1_ENCODER_A          19
-#define M1_ENCODER_B          18
-#define M1_LIMIT_SW_CW_PORT   GPIOC_PDIR
-#define M1_LIMIT_SW_CCW_PORT  GPIOC_PDIR
-#define M1_LIMIT_SW_CW_SHIFT  CORE_PIN22_BIT
-#define M1_LIMIT_SW_CCW_SHIFT CORE_PIN23_BIT
-#define M1_LIMIT_SW_CW        22
-#define M1_LIMIT_SW_CCW       23
-// end of swap
 #define M1_ENCODER_RESOLUTION 48
 #define M1_GEAR_RATIO         99.508*40.0 //!< \todo fix this based on gear reduction inside and outside motor
 #define M1_MIN_HARD_ANGLE     -350.0 //!< \todo work this out maybe with max or dharik
@@ -111,6 +101,13 @@
 //#define M3_STEP_PIN        21
 #define M3_DIR_PIN         20 // stays the same
 #define M3_PWM_PIN         21
+*/
+// swapping m1 pins with m3 pins so i can control m3
+// using the current setup since m1 isn't being used right now
+// and I need to test m2-4 for homing
+#define M3_DIR_PIN            5
+#define M3_PWM_PIN            6
+// end of swap
 // 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
 #define M3_ENCODER_SHIFT   CORE_PIN19_BIT
@@ -122,25 +119,7 @@
 #define M3_LIMIT_SW_EXTEND_SHIFT  CORE_PIN23_BIT
 #define M3_LIMIT_SW_FLEX          22
 #define M3_LIMIT_SW_EXTEND        23
-*/
-// swapping m1 pins with m3 pins so i can control m3
-// using the current setup since m1 isn't being used right now
-// and I need to test m2-4 for homing
-#define M3_DIR_PIN            5
-#define M3_PWM_PIN            6
-#define M3_ENCODER_PORT       GPIOD_PDIR
-#define M3_ENCODER_SHIFT      CORE_PIN7_BIT
-#define M3_ENCODER_A          7
-#define M3_ENCODER_B          8
-#define M3_LIMIT_SW_FLEX_PORT   GPIOC_PDIR
-#define M3_LIMIT_SW_EXTEND_PORT  GPIOC_PDIR
-#define M3_LIMIT_SW_FLEX_SHIFT  CORE_PIN9_BIT
-#define M3_LIMIT_SW_EXTEND_SHIFT CORE_PIN10_BIT
-#define M3_LIMIT_SW_FLEX      9
-#define M3_LIMIT_SW_EXTEND    10
-// end of swap
 #define M3_ENCODER_RESOLUTION 48
-//#define M3_STEP_RESOLUTION 1.8 // I think it's the same for all our steppers
 //! belt reduction chained to worm gear drive
 #define M3_GEAR_RATIO         99.508*(40.0/14.0)*18.0 //188.611*(40.0/14.0)*18.0
 #define M3_MIN_HARD_ANGLE     -145.0
@@ -168,7 +147,7 @@
 #define M4_STEP_RESOLUTION 1.8 //!< the angle traversed by the stepper stepping once
 // the 1.3846 is a value i calculated based on the discrepancy between expected and actual angles
 //! belt reduction chained to worm gear drive
-#define M4_GEAR_RATIO      (30.0/18.0)*20.0/1.3846 //(30.0/18.0)*20.0 
+#define M4_GEAR_RATIO      20.0///1.3846 //20.0 
 #define M4_MIN_HARD_ANGLE  -90.0
 #define M4_MAX_HARD_ANGLE  75.0
 #define M4_MIN_SOFT_ANGLE  -80.0

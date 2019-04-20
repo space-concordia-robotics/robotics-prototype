@@ -293,7 +293,7 @@ void setup() {
   initEncoders();
   initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
-  //motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
+  motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
   motor6.switchDirectionLogic(); // positive angles now mean opening
   initMotorTimers();
 
@@ -372,8 +372,21 @@ void loop() {
           maybe because it was supposed to be more like -79.5 since the soft angle is -80?
           I think it's cause motor 3 was a stepper and I forgot to set atSafeAngle to true in the stepper code...
           */
-            motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
-            homingMotor++; // move on to the next motor
+            if(! (motorArray[homingMotor]->startedZeroing) ){
+                motorArray[homingMotor]->forceToAngle(0.0);
+                motorArray[homingMotor]->startedZeroing = true;
+              }
+            else {
+              float angle = motorArray[homingMotor]->getSoftwareAngle();
+              if(angle < 0.3 && angle > -0.3){ //!< \todo this shouldn't be hardcoded!
+                motorArray[homingMotor]->homingPass = 0; // reset this for next time homing is requested
+                homingMotor++; // move on to the next motor
+                motorArray[homingMotor]->startedZeroing = false;
+              }
+              else { // not done going to zero, not doing anything
+                ;
+              }
+            }
           }
         }
       }
@@ -801,7 +814,6 @@ void initLimitSwitches(void) {
   motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
 
   // set motor shaft angle tolerances
-  // motor1.pidController.setJointAngleTolerance(1.8 * 3*motor1.gearRatioReciprocal); // if it was a stepper
   motor1.pidController.setJointAngleTolerance(2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
   motor2.pidController.setJointAngleTolerance(2.0 * motor2.gearRatioReciprocal);
   motor3.pidController.setJointAngleTolerance(1.8 * 2 * motor3.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
@@ -821,9 +833,9 @@ void initLimitSwitches(void) {
 void initSpeedParams(void) {
   // set max and min speeds (in percentage)
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.setMotorSpeed(90); // needs to be tuned
-  motor2.setMotorSpeed(90); // needs to be tuned
-  motor3.setMotorSpeed(90); // needs to be tuned
+  motor1.setMotorSpeed(50); // needs to be tuned
+  motor2.setMotorSpeed(30); // needs to be tuned
+  motor3.setMotorSpeed(50); // needs to be tuned
   motor4.setMotorSpeed(90); // needs to be tuned?
   motor5.setMotorSpeed(50); // probably done tuning
   motor6.setMotorSpeed(50); // probably done tuning
@@ -841,9 +853,9 @@ void initSpeedParams(void) {
   // and the gains should vary based on which motor it is
 
   // open loop gain is only for time-based open loop control
-  motor1.setOpenLoopGain(0.1); //0.5; // needs to be tuned
-  motor2.setOpenLoopGain(0.1); //0.5; // needs to be tuned
-  motor3.setOpenLoopGain(0.1); //0.5; // needs to be tuned
+  motor1.setOpenLoopGain(0.001); // needs to be tuned
+  motor2.setOpenLoopGain(0.0025); // needs to be tuned
+  motor3.setOpenLoopGain(0.00455); // more or less tuned
   motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
   motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
