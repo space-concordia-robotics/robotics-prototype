@@ -229,6 +229,8 @@ void initLimitSwitches(void); //!< setup angle limits and attach limit switch in
 void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
 
+bool setArmSpeedMultiplier(float factor); //!< set overall speed correction factor for arm
+
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
 void m1_encoder_interrupt(void);
@@ -882,6 +884,34 @@ void initMotorTimers(void) {
   m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
+}
+
+bool setArmSpeedMultiplier(float factor){
+  if (factor >= 0){
+    for (int i=0; i < NUM_MOTORS; i++){
+      float newSpeed = ( motorArray[i]->getMotorSpeed() ) * factor;
+      if (newSpeed >= 100){
+#ifdef DEBUG_MAIN
+        UART_PORT.print("$A,Alert: multiplier is too big, motor ");
+        UART_PORT.print(i+1);
+        UART_PORT.println(" speed is saturating at 100%");
+#endif
+        newSpeed = 100;
+      }
+#ifdef DEBUG_MAIN
+      UART_PORT.print("Motor "); UART_PORT.print(i+1);
+      UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
+#endif
+      motorArray[i]->setMotorSpeed(newSpeed);
+    }
+    return true;
+  }
+  else {
+#ifdef DEBUG_MAIN
+    UART_PORT.println("$E,Error: invalid multiplier value");
+#endif
+    return false;
+  }
 }
 
 void dcInterrupt(void) {

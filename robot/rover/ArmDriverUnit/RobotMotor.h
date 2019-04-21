@@ -82,6 +82,7 @@ class RobotMotor {
     void setGearRatio(float ratio); //!< sets the gear ratio for the motor joint
     void setOpenLoopGain(float loopGain); //!< set gain which adjusts open loop speed for open loop angle control
     void setMotorSpeed(float motorSpeed); //!< set open loop speed and max speed of pid output
+    float getMotorSpeed(void); //!< return motor speed
     /* movement functions */
     virtual void stopRotation(void) = 0; //!< stop turning the motor
     virtual void setVelocity(int motorDir, float motorSpeed) = 0; //!< sets motor speed and direction until next timer interrupt
@@ -228,6 +229,15 @@ void RobotMotor::setOpenLoopGain(float loopGain) {
 void RobotMotor::setMotorSpeed(float motorSpeed) {
   openLoopSpeed = motorSpeed;
   pidController.setOutputLimits(-motorSpeed, motorSpeed);
+}
+
+float RobotMotor::getMotorSpeed(void) {
+  if (isOpenLoop){
+    return openLoopSpeed;
+  }
+  else {
+    return pidController.getMaxOutputValue();
+  }
 }
 
 //! \todo needs to be tested to make sure that a call to calcCurrentAngle will return the same thing as getCurrentAngle
