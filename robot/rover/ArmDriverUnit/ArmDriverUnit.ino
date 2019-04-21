@@ -375,12 +375,11 @@ void loop() {
               float angle = motorArray[homingMotor]->getSoftwareAngle();
               float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
               if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
-                homingMotor--; // move on to the next motor
-                motorArray[homingMotor]->startedZeroing = false;
 #ifdef DEBUG_HOMING
                 UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
                 UART_PORT.println(" zeroing complete.");
 #endif
+                homingMotor--; // move on to the next motor
               }
               else { // not done going to zero, not doing anything
                 ;
@@ -408,7 +407,9 @@ void loop() {
       /*
         homing didnt stop for some reason???
         at the end of homing motor 2 kept moving, stop command didn't work
-        i noticed angles weren't printing anymore, dunno when it stopped printing tho
+        i noticed angles weren't printing anymore
+        in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
+        but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
       */
     }
   }
