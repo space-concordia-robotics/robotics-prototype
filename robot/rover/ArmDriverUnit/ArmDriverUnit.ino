@@ -217,7 +217,7 @@ elapsedMillis sinceStepperCheck; //!< how long since last time stepper angle was
 // note to nick: i'd recommend putting your blinkled timer here
 
 // homing variables
-bool isHoming = false;
+bool isHoming = false; //!< true while arm is homing, false otherwise
 int homingMotor = -1; //! initialize to a value that's invalid so it'll be ignored. Used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 //! used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 bool motorsToHome[] = {false, false, false, false, false, false}; 
@@ -229,6 +229,7 @@ void initLimitSwitches(void); //!< setup angle limits and attach limit switch in
 void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
 
+void homeArmMotors(void); //!< arm homing routine
 bool setArmSpeedMultiplier(float factor); //!< set overall speed correction factor for arm
 
 // all interrupt service routines (ISRs) must be global functions to work
@@ -338,82 +339,7 @@ void loop() {
 
   /* Homing functionality ignores most message types */
   if (isHoming) { // not done homing the motors
-    if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
-      if (motorsToHome[homingMotor]) { // is this motor supposed to home?
-        // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
-#ifdef DEBUG_HOMING
-        UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
-        UART_PORT.println(" inwards");
-#endif
-        motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
-        motorsToHome[homingMotor] = false; // set this to false so it only happens once
-      }
-      if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-        if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
-          if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
-#ifdef DEBUG_HOMING
-            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" homing 1 done and at safe angle");
-#endif
-          }
-          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
-#ifdef DEBUG_HOMING
-            UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" outwards");
-#endif
-            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
-          }
-          else { // done finding angle limits, moving to home position and then next motor time
-            if(! (motorArray[homingMotor]->startedZeroing) ){ // start zeroing
-#ifdef DEBUG_HOMING
-              UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-              UART_PORT.println(" homing complete. now to move to 0 degrees");
-#endif
-              motorArray[homingMotor]->forceToAngle(0.0);
-              motorArray[homingMotor]->startedZeroing = true;
-            }
-            else { // check to see if done zeroing yet, if so move on to next
-              float angle = motorArray[homingMotor]->getSoftwareAngle();
-              float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
-              if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
-#ifdef DEBUG_HOMING
-                UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-                UART_PORT.println(" zeroing complete.");
-#endif
-                homingMotor--; // move on to the next motor
-              }
-              else { // not done going to zero, not doing anything
-                ;
-              }
-            }
-          }
-        }
-      }
-      else { // not done homing the motor, will not do anything special
-        ;
-      }
-    }
-    else { // done homing all the motors
-#ifdef DEBUG_HOMING
-      UART_PORT.println("all motors done homing, reinitializing motor timers");
-#endif
-      for(int i = 0; i<NUM_MOTORS; i++){
-        motorArray[i]->stopHoming();
-      }
-      isHoming = false;
-      // interesting idea is to start homing the next motor while the previous one is finishing up
-      // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
-      // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
-      homingMotor = -1; // reset it until next homing call
-      /*
-        homing didnt stop for some reason???
-        at the end of homing motor 2 kept moving, stop command didn't work
-        i noticed angles weren't printing anymore
-        in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
-        but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
-      */
-    }
+    homeArmMotors();
   }
 
   /* message parsing functionality */
@@ -912,6 +838,85 @@ bool setArmSpeedMultiplier(float factor){
 #endif
     return false;
   }
+}
+
+void homeArmMotors(void){
+  if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
+      if (motorsToHome[homingMotor]) { // is this motor supposed to home?
+        // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+#ifdef DEBUG_HOMING
+        UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+        UART_PORT.println(" inwards");
+#endif
+        motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
+        motorsToHome[homingMotor] = false; // set this to false so it only happens once
+      }
+      if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+        if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
+          if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
+#ifdef DEBUG_HOMING
+            UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" homing 1 done and at safe angle");
+#endif
+          }
+          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
+#ifdef DEBUG_HOMING
+            UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+            UART_PORT.println(" outwards");
+#endif
+            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+          }
+          else { // done finding angle limits, moving to home position and then next motor time
+            if(! (motorArray[homingMotor]->startedZeroing) ){ // start zeroing
+#ifdef DEBUG_HOMING
+              UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+              UART_PORT.println(" homing complete. now to move to 0 degrees");
+#endif
+              motorArray[homingMotor]->forceToAngle(0.0);
+              motorArray[homingMotor]->startedZeroing = true;
+            }
+            else { // check to see if done zeroing yet, if so move on to next
+              float angle = motorArray[homingMotor]->getSoftwareAngle();
+              float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
+              if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
+#ifdef DEBUG_HOMING
+                UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+                UART_PORT.println(" zeroing complete.");
+#endif
+                homingMotor--; // move on to the next motor
+              }
+              else { // not done going to zero, not doing anything
+                ;
+              }
+            }
+          }
+        }
+      }
+      else { // not done homing the motor, will not do anything special
+        ;
+      }
+    }
+    else { // done homing all the motors
+#ifdef DEBUG_HOMING
+      UART_PORT.println("all motors done homing, reinitializing motor timers");
+#endif
+      for(int i = 0; i<NUM_MOTORS; i++){
+        motorArray[i]->stopHoming();
+      }
+      isHoming = false;
+      // interesting idea is to start homing the next motor while the previous one is finishing up
+      // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
+      // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
+      homingMotor = -1; // reset it until next homing call
+      /*
+        homing didnt stop for some reason???
+        at the end of homing motor 2 kept moving, stop command didn't work
+        i noticed angles weren't printing anymore
+        in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
+        but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
+      */
+    }
 }
 
 void dcInterrupt(void) {
