@@ -121,18 +121,18 @@ bool msgIsValid = false; //!< If true, the MCU will execute a command. Otherwise
 
 /*LED variables*/
 /*
-bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink (but it's not a blocking while loop).
-bool msgState = false; //!< If true, blinking will be in the success pattern. Otherwise it will be in the error pattern.
+  bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink (but it's not a blocking while loop).
+  bool msgState = false; //!< If true, blinking will be in the success pattern. Otherwise it will be in the error pattern.
 
-const int ledPin = 13; // note to nick: LED_BUILTIN is predefined in arduino C++ so just use that instead
-unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated // note to nick: this variable name is too generic given how many other variables are used. Use more specific variable names, and also I recommend using elapsedMillis objects like I do to keep my code consistent
-int ledState = LOW;
+  const int ledPin = 13; // note to nick: LED_BUILTIN is predefined in arduino C++ so just use that instead
+  unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated // note to nick: this variable name is too generic given how many other variables are used. Use more specific variable names, and also I recommend using elapsedMillis objects like I do to keep my code consistent
+  int ledState = LOW;
 
-const int goodBlinkCounter = 4;
-const int badBlinkCounter = 12;
-const int goodBlinkInterval = 250;
-const int badBlinkInterval = 100;
-bool complete = false; // note to nick: this variable name is way too generic to just be lying around in the middle of all my code. please use something more specific
+  const int goodBlinkCounter = 4;
+  const int badBlinkCounter = 12;
+  const int goodBlinkInterval = 250;
+  const int badBlinkInterval = 100;
+  bool complete = false; // note to nick: this variable name is way too generic to just be lying around in the middle of all my code. please use something more specific
 */
 
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
@@ -220,7 +220,7 @@ elapsedMillis sinceStepperCheck; //!< how long since last time stepper angle was
 bool isHoming = false; //!< true while arm is homing, false otherwise
 int homingMotor = -1; //! initialize to a value that's invalid so it'll be ignored. Used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 //! used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
-bool motorsToHome[] = {false, false, false, false, false, false}; 
+bool motorsToHome[] = {false, false, false, false, false, false};
 /* function declarations */
 void initComms(void); //!< start up serial or usb communication
 void initEncoders(void); //!< attach encoder interrupts and setup pid gains
@@ -229,7 +229,6 @@ void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
 
 void printMotorAngles(void); //!< sends all motor angles over serial
-bool setArmSpeedMultiplier(float factor); //!< set overall speed correction factor for arm
 void respondToLimitSwitches(void); //!< move motor back into software angle range. This function behaves differently each loop
 void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
 
@@ -258,39 +257,39 @@ void m4ExtendISR(void);
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); //!< manages motors 1&2
 /*! \brief manages motor 4
- * 
- * Stepper interrupts occur much faster and the code is more complicated, so each stepper needs its own interrupt.
+
+   Stepper interrupts occur much faster and the code is more complicated, so each stepper needs its own interrupt.
 */
 void m4StepperInterrupt(void);
 void servoInterrupt(void); //!< manages motors 5&6
 
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
- * 
- * \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
- * \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
- * Floating point math doesn't seem bad, but at worst, convert float to int
- * before motor control and do int math inside interrupts.
- * \todo Fix up homing and limit switch functionality to deal with regions near angle limits
- * \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
- * \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
- * \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
- * \todo Issue: interrupt functions must be defined outside of classes...
- * \todo Confirm all the pins will work with interrupts and not stepping on each other.
- * Do I send 3.3v to all interrupt pins simultaneously to test thing?
- * \todo Deal with overflow of encoderCount.. does it ever reach max value?
- * \todo What do I do for angles over 360? Do I keep counting up?
- * Do I keep count of how many rotations I've done?
- * \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
- * Ramping of stepper should be linear, higher level ramping should occur in gui.
- * The base station/odroid should be in charge of ramping up angles and the teensy
- * should just go to them. Perhaps if a large angle is requested there should 
- * still be a way to stop it though.
- * \todo Determine whether it's worth it to use the built in quadrature decoders.
- * Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
- * Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
- * \todo stepper motor angle checks for open loop control remains to be fixed, updated, implemented
- * \todo in stepper angle checks, also fix that issue with discrepancy
- */
+
+   \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
+   \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
+   Floating point math doesn't seem bad, but at worst, convert float to int
+   before motor control and do int math inside interrupts.
+   \todo Fix up homing and limit switch functionality to deal with regions near angle limits
+   \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
+   \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
+   \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
+   \todo Issue: interrupt functions must be defined outside of classes...
+   \todo Confirm all the pins will work with interrupts and not stepping on each other.
+   Do I send 3.3v to all interrupt pins simultaneously to test thing?
+   \todo Deal with overflow of encoderCount.. does it ever reach max value?
+   \todo What do I do for angles over 360? Do I keep counting up?
+   Do I keep count of how many rotations I've done?
+   \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
+   Ramping of stepper should be linear, higher level ramping should occur in gui.
+   The base station/odroid should be in charge of ramping up angles and the teensy
+   should just go to them. Perhaps if a large angle is requested there should
+   still be a way to stop it though.
+   \todo Determine whether it's worth it to use the built in quadrature decoders.
+   Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
+   Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
+   \todo stepper motor angle checks for open loop control remains to be fixed, updated, implemented
+   \todo in stepper angle checks, also fix that issue with discrepancy
+*/
 void setup() {
   pinSetup();
   initComms();
@@ -306,16 +305,16 @@ void setup() {
 }
 
 /*! \brief Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED.
- * 
- * \todo There should be a check so that if the motor is moving away from the goal position 
- * or has been moving for a while without reaching the expected angle, it stops...
- * like a timeout.
- * \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
- * \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
- * a check in the microcontroller that there's an issue (there can also be a check in the gui)
- * \todo Check to see if any global variables can be turned into static variables inside loop()
- * \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
- */
+
+   \todo There should be a check so that if the motor is moving away from the goal position
+   or has been moving for a while without reaching the expected angle, it stops...
+   like a timeout.
+   \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
+   \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
+   a check in the microcontroller that there's an issue (there can also be a check in the gui)
+   \todo Check to see if any global variables can be turned into static variables inside loop()
+   \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
+*/
 void loop() {
   respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
   if (isHoming) { // not done homing the motors
@@ -368,7 +367,7 @@ void loop() {
         // the following variables are global rather than belonging to a class so must be dealt with separately
         // i suppose i could package a bunch of this into a function called stopHoming
         isHoming = false;
-        homingMotor = NUM_MOTORS-1;
+        homingMotor = NUM_MOTORS - 1;
         for (int i = 0; i < NUM_MOTORS; i++) {
           motorsToHome[i] = false;
         }
@@ -383,29 +382,29 @@ void loop() {
           if (motorCommand.homeAllMotors) {
             for (int i = NUM_MOTORS - 1; i >= 0; i--) { // start with last motor and work inwards
               if (motorArray[i]->hasLimitSwitches) {
-                if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING){
+                if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
                   motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
                 }
                 motorsToHome[i] = true;
 #ifdef DEBUG_MAIN
-                UART_PORT.print("Motor ");UART_PORT.print(i+1);UART_PORT.println(" to be homed.");
+                UART_PORT.print("Motor "); UART_PORT.print(i + 1); UART_PORT.println(" to be homed.");
 #endif
               }
             }
           }
           else if (motorCommand.homeCommand) {
             if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
-              if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING){
+              if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
                 motorArray[motorCommand.whichMotor]->homingType = DOUBLE_ENDED_HOMING;
               }
               motorsToHome[motorCommand.whichMotor] = true;
 #ifdef DEBUG_MAIN
-              UART_PORT.print("Motor ");UART_PORT.print(motorCommand.whichMotor+1);UART_PORT.println(" to be homed.");
+              UART_PORT.print("Motor "); UART_PORT.print(motorCommand.whichMotor + 1); UART_PORT.println(" to be homed.");
 #endif
             }
           }
           isHoming = true;
-          homingMotor = NUM_MOTORS-1;
+          homingMotor = NUM_MOTORS - 1;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
           UART_PORT.println("initializing homing command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
@@ -421,6 +420,32 @@ void loop() {
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
           nh.loginfo("all motor angle values reset");
 #endif
+        }
+        else if (motorCommand.armSpeedCommand) {
+          float factor = motorCommand.armSpeedMultiplier;
+          if (factor >= 0) {
+            for (int i = 0; i < NUM_MOTORS; i++) {
+              float newSpeed = ( motorArray[i]->getMotorSpeed() ) * factor;
+              if (newSpeed >= 100) {
+#ifdef DEBUG_MAIN
+                UART_PORT.print("$A,Alert: multiplier is too big, motor ");
+                UART_PORT.print(i + 1);
+                UART_PORT.println(" speed is saturating at 100%");
+#endif
+                newSpeed = 100;
+              }
+#ifdef DEBUG_MAIN
+              UART_PORT.print("Motor "); UART_PORT.print(i + 1);
+              UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
+#endif
+              motorArray[i]->setMotorSpeed(newSpeed);
+            }
+          }
+          else {
+#ifdef DEBUG_MAIN
+            UART_PORT.println("$E,Error: invalid multiplier value");
+#endif
+          }
         }
         else { // following cases are for commands to specific motors
           if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
@@ -451,7 +476,7 @@ void loop() {
             UART_PORT.print(" has a new open loop gain of "); UART_PORT.println(motorCommand.openLoopGain);
 #endif
           }
-          else if (motorCommand.speedCommand) { // set speed for appropriate motor
+          else if (motorCommand.motorSpeedCommand) { // set speed for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
             UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
@@ -583,35 +608,35 @@ void loop() {
 #endif
     }
     /*
-    // blinkled stuff
-    msgCheck = true; //Setting message check value to TRUE as a message is received
-    if (msgIsValid == true){
+      // blinkled stuff
+      msgCheck = true; //Setting message check value to TRUE as a message is received
+      if (msgIsValid == true){
       msgState = true;
-    }
-    else{
+      }
+      else{
       msgState = false;
-    }
+      }
     */
   }
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
-  
+
   /* heartbeat code blinkled stuff */
   /*
-  if(msgCheck == true){
+    if(msgCheck == true){
     if(msgState == true){
       msgCheck = Blink(goodBlinkInterval, goodBlinkCounter);
     }
     else {
       msgCheck = Blink(badBlinkInterval, badBlinkCounter);
     }
-  }
-  else {
+    }
+    else {
     heartbeat();
-  }
-*/  
+    }
+  */
 }
 
 /* initialization functions */
@@ -715,11 +740,11 @@ void initLimitSwitches(void) {
   motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
 /*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,
- * and finally, sets openLoopGain for any non-stepper motor.
- *  
- * \todo stepper doesn't have speed the way servos and dcs do??????
- * this is because stepper calculates speed using durations, but this means
- * openLoopGain and openLoopSpeed mean nothing for it???
+   and finally, sets openLoopGain for any non-stepper motor.
+
+   \todo stepper doesn't have speed the way servos and dcs do??????
+   this is because stepper calculates speed using durations, but this means
+   openLoopGain and openLoopSpeed mean nothing for it???
 */
 void initSpeedParams(void) {
   // set max and min speeds (in percentage)
@@ -788,34 +813,7 @@ void printMotorAngles(void) {
   nh.spinOnce(); // does it cause problems if i spin twice in loop()
 #endif
 }
-bool setArmSpeedMultiplier(float factor){
-  if (factor >= 0){
-    for (int i=0; i < NUM_MOTORS; i++){
-      float newSpeed = ( motorArray[i]->getMotorSpeed() ) * factor;
-      if (newSpeed >= 100){
-#ifdef DEBUG_MAIN
-        UART_PORT.print("$A,Alert: multiplier is too big, motor ");
-        UART_PORT.print(i+1);
-        UART_PORT.println(" speed is saturating at 100%");
-#endif
-        newSpeed = 100;
-      }
-#ifdef DEBUG_MAIN
-      UART_PORT.print("Motor "); UART_PORT.print(i+1);
-      UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
-#endif
-      motorArray[i]->setMotorSpeed(newSpeed);
-    }
-    return true;
-  }
-  else {
-#ifdef DEBUG_MAIN
-    UART_PORT.println("$E,Error: invalid multiplier value");
-#endif
-    return false;
-  }
-}
-void respondToLimitSwitches(void){
+void respondToLimitSwitches(void) {
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
     if (motorArray[i]->triggered) { // check if the switch was hit
       motorArray[i]->checkForActualPress();
@@ -832,87 +830,87 @@ void respondToLimitSwitches(void){
       motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
     }
     /*! \todo put code here to check if the motor should be at the end of its path but isn't?
-     * well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+       well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
     */
   }
 }
-void homeArmMotors(void){
+void homeArmMotors(void) {
   if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
-      if (motorsToHome[homingMotor]) { // is this motor supposed to home?
-        // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+    if (motorsToHome[homingMotor]) { // is this motor supposed to home?
+      // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
 #ifdef DEBUG_HOMING
-        UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
-        UART_PORT.println(" inwards");
+      UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+      UART_PORT.println(" inwards");
 #endif
-        motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
-        motorsToHome[homingMotor] = false; // set this to false so it only happens once
-      }
-      if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-        if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
-          if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
+      motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
+      motorsToHome[homingMotor] = false; // set this to false so it only happens once
+    }
+    if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+      if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
+        if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
+#ifdef DEBUG_HOMING
+          UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
+          UART_PORT.println(" homing 1 done and at safe angle");
+#endif
+        }
+        // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+        if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
+#ifdef DEBUG_HOMING
+          UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
+          UART_PORT.println(" outwards");
+#endif
+          motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+        }
+        else { // done finding angle limits, moving to home position and then next motor time
+          if (! (motorArray[homingMotor]->startedZeroing) ) { // start zeroing
 #ifdef DEBUG_HOMING
             UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" homing 1 done and at safe angle");
+            UART_PORT.println(" homing complete. now to move to 0 degrees");
 #endif
+            motorArray[homingMotor]->forceToAngle(0.0);
+            motorArray[homingMotor]->startedZeroing = true;
           }
-          // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-          if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
-#ifdef DEBUG_HOMING
-            UART_PORT.print("homing motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" outwards");
-#endif
-            motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
-          }
-          else { // done finding angle limits, moving to home position and then next motor time
-            if(! (motorArray[homingMotor]->startedZeroing) ){ // start zeroing
+          else { // check to see if done zeroing yet, if so move on to next
+            float angle = motorArray[homingMotor]->getSoftwareAngle();
+            float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
+            if (fabs(angle) < tolerance * 2) { // within small enough angle range to move on to next motor
 #ifdef DEBUG_HOMING
               UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-              UART_PORT.println(" homing complete. now to move to 0 degrees");
+              UART_PORT.println(" zeroing complete.");
 #endif
-              motorArray[homingMotor]->forceToAngle(0.0);
-              motorArray[homingMotor]->startedZeroing = true;
+              homingMotor--; // move on to the next motor
             }
-            else { // check to see if done zeroing yet, if so move on to next
-              float angle = motorArray[homingMotor]->getSoftwareAngle();
-              float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
-              if(fabs(angle) < tolerance*2){ // within small enough angle range to move on to next motor
-#ifdef DEBUG_HOMING
-                UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
-                UART_PORT.println(" zeroing complete.");
-#endif
-                homingMotor--; // move on to the next motor
-              }
-              else { // not done going to zero, not doing anything
-                ;
-              }
+            else { // not done going to zero, not doing anything
+              ;
             }
           }
         }
       }
-      else { // not done homing the motor, will not do anything special
-        ;
-      }
     }
-    else { // done homing all the motors
+    else { // not done homing the motor, will not do anything special
+      ;
+    }
+  }
+  else { // done homing all the motors
 #ifdef DEBUG_HOMING
-      UART_PORT.println("all motors done homing, reinitializing motor timers");
+    UART_PORT.println("all motors done homing, reinitializing motor timers");
 #endif
-      for(int i = 0; i<NUM_MOTORS; i++){
-        motorArray[i]->stopHoming();
-      }
-      isHoming = false;
-      // interesting idea is to start homing the next motor while the previous one is finishing up
-      // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
-      // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
-      homingMotor = -1; // reset it until next homing call
-      /*
-        homing didnt stop for some reason???
-        at the end of homing motor 2 kept moving, stop command didn't work
-        i noticed angles weren't printing anymore
-        in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
-        but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
-      */
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      motorArray[i]->stopHoming();
     }
+    isHoming = false;
+    // interesting idea is to start homing the next motor while the previous one is finishing up
+    // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
+    // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
+    homingMotor = -1; // reset it until next homing call
+    /*
+      homing didnt stop for some reason???
+      at the end of homing motor 2 kept moving, stop command didn't work
+      i noticed angles weren't printing anymore
+      in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
+      but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
+    */
+  }
 }
 
 /* timer interrupts */
@@ -933,21 +931,21 @@ void servoInterrupt(void) {
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
   /*! encoder states are 4 bit values. Top 2 bits are the previous states
-   * of encoder channels A and B, bottom 2 are current states.
+     of encoder channels A and B, bottom 2 are current states.
   */
   static unsigned int oldEncoderState = 0;
   oldEncoderState <<= 2; //!< shift current state into previous state
   /*! put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
-   * this is done by 1) grabbing the input register of the port,
-   * 2) shifting it until the relevant bits are in the lowest state,
-   * and 3) clearing all the bits higher than the lowest 2
-   * next, place said (current) pin states into the bottom 2 bits of oldEncoderState
-   */
+     this is done by 1) grabbing the input register of the port,
+     2) shifting it until the relevant bits are in the lowest state,
+     and 3) clearing all the bits higher than the lowest 2
+     next, place said (current) pin states into the bottom 2 bits of oldEncoderState
+  */
   oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
   /*! the encoderStates[] array corresponds to the correct direction
-   * for a specific set of prev and current encoder states.
-   * The & operation ensures that anything above the lowest 4 bits
-   * is cleared before accessing the array.
+     for a specific set of prev and current encoder states.
+     The & operation ensures that anything above the lowest 4 bits
+     is cleared before accessing the array.
   */
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
 #ifdef DEBUG_ENCODERS
@@ -1171,10 +1169,10 @@ void m4ExtendISR(void) {
 /*When a good message is received, ledInterval = 250, maxBlinks = 4*/
 /*When a bad message is received, ledInterval = 100, maxBlinks = 12*/
 /*
-bool Blink(const int ledInterval, int maxBlinks){ 
+  bool Blink(const int ledInterval, int maxBlinks){
   static bool complete = false;
   unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= ledInterval){ 
+  if(currentMillis - previousMillis >= ledInterval){
     previousMillis = currentMillis;
     if(ledState == LOW){
       ledState = HIGH;
@@ -1185,14 +1183,14 @@ bool Blink(const int ledInterval, int maxBlinks){
     Serial.println(ledState);
     blinkCounter++;
   }
-  if(blinkCounter == maxBlinks){ 
+  if(blinkCounter == maxBlinks){
     complete = true;
     blinkCounter = 0;
   }
   return complete;
-}
+  }
 
-void heartbeat(){
-  
-}
+  void heartbeat(){
+
+  }
 */

@@ -15,6 +15,8 @@ struct commandInfo {
   bool whoCommand = false; //!< for asking which teensy it is
   bool stopAllMotors = false; //!< for stopping all motors
   bool resetAllMotors = false; //!< for resetting all angle values
+  bool armSpeedCommand = false; //!< for adjusting overall arm speed
+  float armSpeedMultiplier = 1.0; //!< what speed multiplier the arm should have
   bool homeAllMotors = false; //!< to search for limit switches and obtain absolute position
   int homingStyle = SINGLE_ENDED_HOMING; //!< by default only home to one limit switch
 
@@ -32,7 +34,7 @@ struct commandInfo {
   float gearRatioVal = 0.0; //!< what's the new gear ratio
   bool openLoopGainCommand = false; //!< to change open loop gain
   float openLoopGain = 0.0; //!< adjusts how long to turn a motor in open loop
-  bool speedCommand = false; //!< for changing motor speed
+  bool motorSpeedCommand = false; //!< for changing motor speed
   float motorSpeed = 0.0; //!< what motor speed to set to
 
   bool resetCommand = false; //!< indicates that something should be reset
@@ -47,16 +49,16 @@ struct commandInfo {
 };
 
 /*! \brief This class is used to parse incoming messages to the arm teensy.
- * 
- * It can break up any message passed to it using parseCommand()
- * and place the information in a commandInfo struct. It can then
- * can verify the commandInfo to make sure all the parameters
- * are correct. It also holds a helper function to make sure
- * that commands expecting numbers actually receive numbers
- * rather than letters or some other type of characters.
- * 
- * \todo Clean up parsing code to make it easier to read and reduce repetition.
- */
+
+   It can break up any message passed to it using parseCommand()
+   and place the information in a commandInfo struct. It can then
+   can verify the commandInfo to make sure all the parameters
+   are correct. It also holds a helper function to make sure
+   that commands expecting numbers actually receive numbers
+   rather than letters or some other type of characters.
+
+   \todo Clean up parsing code to make it easier to read and reduce repetition.
+*/
 class Parser {
   public:
     bool isValidNumber(String str, char type);
@@ -66,9 +68,9 @@ class Parser {
 };
 
 /*! \brief Checks if the string passed as input contains an integer or a float.
- * @param[in] str     The input string to be checked
- * @param[in] type    The type of number to check for. 'f' for float or 'd' for integer
- */
+   @param[in] str     The input string to be checked
+   @param[in] type    The type of number to check for. 'f' for float or 'd' for integer
+*/
 bool Parser::isValidNumber(String str, char type) {
   if (str.length() == 0) {
     return false;
@@ -89,11 +91,11 @@ bool Parser::isValidNumber(String str, char type) {
 }
 
 /*! \brief Goes through an array of characters, splits it up at each space
- * character, then modifies the appropriate variables held in
- * the commandInfo input parameter based on the message.
- * @param[in] cmd           The commandInfo struct where the results go
- * @param[in] restOfMessage A pointer to the array of characters to be parsed
- */
+   character, then modifies the appropriate variables held in
+   the commandInfo input parameter based on the message.
+   @param[in] cmd           The commandInfo struct where the results go
+   @param[in] restOfMessage A pointer to the array of characters to be parsed
+*/
 void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   // check for emergency stop has precedence
   char *msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
@@ -134,6 +136,22 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #ifdef DEBUG_PARSING
     UART_PORT.println("$S,Success: parsed command to reset all motor angle values");
 #endif
+  }
+  else if (String(msgElem) == "armspeed") {
+    msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (arm speed multiplier)
+    if (isValidNumber(String(msgElem), 'f')) {
+      cmd.armSpeedMultiplier = atof(msgElem); // update arm speed factor
+      cmd.armSpeedCommand = true;
+#ifdef DEBUG_PARSING
+      UART_PORT.print("$S,Success: parsed arm speed multiplier of ");
+      UART_PORT.println(cmd.armSpeedMultiplier);
+#endif
+    }
+    else {
+#ifdef DEBUG_PARSING
+      UART_PORT.println("$E,Error: parsed invalid arm speed multiplier input");
+#endif
+    }
   }
   // check for simultaneous motor control
   else if (String(msgElem) == "move" || String(msgElem) == "budge") {
@@ -244,16 +262,15 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
       UART_PORT.print("$S,Success: parsed motor ");
       UART_PORT.println(cmd.whichMotor);
 #endif
-      // check for motor stop command has precedence
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "stop") {
+      if (String(msgElem) == "stop") { // check for stop single motor command has precedence over all others
         // msgElem is a char array so it's safer to convert to string first
         cmd.stopSingleMotor = true;
 #ifdef DEBUG_PARSING
         UART_PORT.println("$S,Success: parsed request to stop single motor");
 #endif
       }
-      else if (String(msgElem) == "home") {
+      else if (String(msgElem) == "home") { // check for homingcommand
         // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (both limits or just 1?)
         if (String(msgElem) == "double") {
@@ -314,7 +331,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         // the following has no bad value error checking!!!!
         if (isValidNumber(String(msgElem), 'f')) {
           cmd.motorSpeed = atof(msgElem);
-          cmd.speedCommand = true;
+          cmd.motorSpeedCommand = true;
 #ifdef DEBUG_PARSING
           UART_PORT.print("$S,Success: parsed desired speed ");
           UART_PORT.println(cmd.motorSpeed);
@@ -347,8 +364,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      // check for angle reset command
-      else if (String(msgElem) == "reset") {
+      else if (String(msgElem) == "reset") { // check for angle reset command
         // msgElem is a char array so it's safer to convert to string first
         cmd.resetCommand = true;
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
@@ -372,7 +388,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      else if (String(msgElem) == "switchdirection") {
+      else if (String(msgElem) == "switchdirection") { // check for switch direction logic command
         cmd.switchDir = true;
 #ifdef DEBUG_PARSING
         UART_PORT.println("$S,Success: parsed request to switch direction logic");
@@ -400,10 +416,10 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 }
 
 /*! \brief Goes through the commandInfo input parameter and checks to
- * make sure all the inputs are valid before allowing the main
- * code to execute the command.
- * @param[in] cmd The commandInfo struct to be verified
- */
+   make sure all the inputs are valid before allowing the main
+   code to execute the command.
+   @param[in] cmd The commandInfo struct to be verified
+*/
 bool Parser::verifCommand(commandInfo cmd) {
   if (cmd.pingCommand) {
 #ifdef DEBUG_VERIFYING
@@ -444,6 +460,20 @@ bool Parser::verifCommand(commandInfo cmd) {
     UART_PORT.println("$S,Success: verified command to reset all motor angle values");
 #endif
     return true;
+  }
+  else if (cmd.armSpeedCommand) {
+    if (cmd.armSpeedMultiplier < 0) {
+#ifdef DEBUG_VERIFYING
+      UART_PORT.println("$E,Error: invalid arm speed multiplier");
+#endif
+      return false;
+    }
+    else {
+#ifdef DEBUG_VERIFYING
+      UART_PORT.println("$S,Success: verified command to update arm speed multiplier");
+#endif
+      return true;
+    }
   }
   else if (cmd.budgeCommand) {
     for (int i = 0; i < NUM_MOTORS; i++) {
@@ -505,8 +535,7 @@ bool Parser::verifCommand(commandInfo cmd) {
 #endif
     return true;
   }
-  // 0 means there was an invalid command and therefore motors shouldn't be controlled
-  else if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors) {
+  else if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors) { // 0 means there was an invalid command and therefore motors shouldn't be controlled
     if (cmd.stopSingleMotor) {
 #ifdef DEBUG_VERIFYING
       UART_PORT.print("$S,Success: verified command to stop motor ");
@@ -528,9 +557,9 @@ bool Parser::verifCommand(commandInfo cmd) {
 #endif
       return true;
     }
-    else if (cmd.speedCommand) {
+    else if (cmd.motorSpeedCommand) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to set speed to ");
+      UART_PORT.print("$S,Success: verified command to set motor speed to ");
       UART_PORT.println(cmd.motorSpeed);
 #endif
       return true;
