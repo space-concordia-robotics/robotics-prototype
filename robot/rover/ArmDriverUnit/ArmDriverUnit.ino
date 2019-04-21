@@ -222,15 +222,16 @@ int homingMotor = -1; //! initialize to a value that's invalid so it'll be ignor
 //! used in main loop to remember which motors need to be homed since commandInfo is reset each loop iteration
 bool motorsToHome[] = {false, false, false, false, false, false}; 
 /* function declarations */
-void printMotorAngles(void); //!< sends all motor angles over serial
 void initComms(void); //!< start up serial or usb communication
 void initEncoders(void); //!< attach encoder interrupts and setup pid gains
 void initLimitSwitches(void); //!< setup angle limits and attach limit switch interrupts
 void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
 
-void homeArmMotors(void); //!< arm homing routine
+void printMotorAngles(void); //!< sends all motor angles over serial
 bool setArmSpeedMultiplier(float factor); //!< set overall speed correction factor for arm
+void respondToLimitSwitches(void); //!< move motor back into software angle range. This function behaves differently each loop
+void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
 
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
@@ -316,30 +317,9 @@ void setup() {
  * \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
  */
 void loop() {
-  /* limit switch checks occur before listening for commands */
-  for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
-    if (motorArray[i]->triggered) { // check if the switch was hit
-      motorArray[i]->checkForActualPress();
-    }
-    if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-#ifdef DEBUG_SWITCHES
-      UART_PORT.print("motor "); UART_PORT.print(i + 1);
-      UART_PORT.println(" hit limit switch");
-#endif
-      motorArray[i]->atSafeAngle = false;
-      if (isHoming) {
-        motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
-      }
-      motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
-    }
-    /*! \todo put code here to check if the motor should be at the end of its path but isn't?
-     * well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
-    */
-  }
-
-  /* Homing functionality ignores most message types */
+  respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
   if (isHoming) { // not done homing the motors
-    homeArmMotors();
+    homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
   }
 
   /* message parsing functionality */
@@ -634,36 +614,7 @@ void loop() {
 */  
 }
 
-
-void printMotorAngles(void) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.print("Motor Angles: ");
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    UART_PORT.print(motorArray[i]->getSoftwareAngle());
-    if (i < NUM_MOTORS - 1) {
-      UART_PORT.print(", ");
-    }
-    else {
-      UART_PORT.println("");
-    }
-  }
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  float angles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    angles[i] = motorArray[i]->getSoftwareAngle();
-    angleMessages[i].position = &(angles[i]);
-    //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle();
-  }
-  pub_m1.publish(&m1_angle_msg);
-  pub_m2.publish(&m2_angle_msg);
-  pub_m3.publish(&m3_angle_msg);
-  pub_m4.publish(&m4_angle_msg);
-  pub_m5.publish(&m5_angle_msg);
-  pub_m6.publish(&m6_angle_msg);
-  nh.spinOnce(); // does it cause problems if i spin twice in loop()
-#endif
-}
-
+/* initialization functions */
 void initComms(void) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.begin(BAUD_RATE);
@@ -686,7 +637,6 @@ void initComms(void) {
   m6_angle_msg.header.frame_id = m6FrameId;
 #endif
 }
-
 void initEncoders(void) {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
   // this function also sets pid parameters
@@ -728,7 +678,6 @@ void initEncoders(void) {
   motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
 #endif
 }
-
 void initLimitSwitches(void) {
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
   //motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
@@ -765,7 +714,6 @@ void initLimitSwitches(void) {
   motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
   motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
-
 /*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,
  * and finally, sets openLoopGain for any non-stepper motor.
  *  
@@ -802,7 +750,6 @@ void initSpeedParams(void) {
   motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
   motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
-
 void initMotorTimers(void) {
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
@@ -812,6 +759,35 @@ void initMotorTimers(void) {
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
+/* functions which apply to all motors */
+void printMotorAngles(void) {
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+  UART_PORT.print("Motor Angles: ");
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    UART_PORT.print(motorArray[i]->getSoftwareAngle());
+    if (i < NUM_MOTORS - 1) {
+      UART_PORT.print(", ");
+    }
+    else {
+      UART_PORT.println("");
+    }
+  }
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+  float angles[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    angles[i] = motorArray[i]->getSoftwareAngle();
+    angleMessages[i].position = &(angles[i]);
+    //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle();
+  }
+  pub_m1.publish(&m1_angle_msg);
+  pub_m2.publish(&m2_angle_msg);
+  pub_m3.publish(&m3_angle_msg);
+  pub_m4.publish(&m4_angle_msg);
+  pub_m5.publish(&m5_angle_msg);
+  pub_m6.publish(&m6_angle_msg);
+  nh.spinOnce(); // does it cause problems if i spin twice in loop()
+#endif
+}
 bool setArmSpeedMultiplier(float factor){
   if (factor >= 0){
     for (int i=0; i < NUM_MOTORS; i++){
@@ -839,7 +815,27 @@ bool setArmSpeedMultiplier(float factor){
     return false;
   }
 }
-
+void respondToLimitSwitches(void){
+  for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
+    if (motorArray[i]->triggered) { // check if the switch was hit
+      motorArray[i]->checkForActualPress();
+    }
+    if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
+#ifdef DEBUG_SWITCHES
+      UART_PORT.print("motor "); UART_PORT.print(i + 1);
+      UART_PORT.println(" hit limit switch");
+#endif
+      motorArray[i]->atSafeAngle = false;
+      if (isHoming) {
+        motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+      }
+      motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
+    }
+    /*! \todo put code here to check if the motor should be at the end of its path but isn't?
+     * well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+    */
+  }
+}
 void homeArmMotors(void){
   if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
       if (motorsToHome[homingMotor]) { // is this motor supposed to home?
@@ -919,6 +915,7 @@ void homeArmMotors(void){
     }
 }
 
+/* timer interrupts */
 void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
@@ -932,6 +929,7 @@ void servoInterrupt(void) {
   motor6.motorTimerInterrupt();
 }
 
+/* encoder interrupts */
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
   /*! encoder states are 4 bit values. Top 2 bits are the previous states
@@ -1022,6 +1020,7 @@ void m6_encoder_interrupt(void) {
 }
 #endif
 
+/* limit switch interrupts */
 void m1CwISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
   if (!(motor1.triggered) && motor1.triggerState == 0) {
