@@ -224,12 +224,6 @@ void ServoMotor::forceToAngle(float angle) {
     numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
     timeCount = 0;
     movementDone = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-    UART_PORT.print("$A,Alert: motor");
-    UART_PORT.println(" to move back into software angle range");
-#endif
-#endif
   }
   else if (!isOpenLoop) {
     movementDone = false;

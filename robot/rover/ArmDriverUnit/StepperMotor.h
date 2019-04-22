@@ -275,12 +275,6 @@ void StepperMotor::forceToAngle(float angle) {
     stepCount = 0;
     enablePower(); // give power to the stepper finally
     movementDone = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-    UART_PORT.print("$A,Alert: motor");
-    UART_PORT.println(" to move back into software angle range");
-#endif
-#endif
   }
   else if (!isOpenLoop) {
     enablePower();

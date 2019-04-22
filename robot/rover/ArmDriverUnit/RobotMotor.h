@@ -225,7 +225,6 @@ void RobotMotor::setOpenLoopGain(float loopGain) {
   openLoopGain = loopGain;
 }
 
-//! \todo make a version of this that applies a speed on all motors, requires thinking
 void RobotMotor::setMotorSpeed(float motorSpeed) {
   openLoopSpeed = motorSpeed;
   pidController.setOutputLimits(-motorSpeed, motorSpeed);

@@ -46,12 +46,11 @@
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
 //#define DEBUG_PID 14 //!< debug messages during pid loop calculations
-#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
-#define DEBUG_HOMING 16 //!< debug messages during homing sequence
+//#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
+//#define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
-//#define DEBUG_STEPPER_3_TIMER 19 //!< debug messages during stepper 3 timer interrupts
-//#define DEBUG_STEPPER_4_TIMER 20 //!< debug messages during stepper 3 timer interrupts
+//#define DEBUG_STEPPER_4_TIMER 20 //!< debug messages during stepper 4 timer interrupts
 #endif
 
 /*
@@ -213,7 +212,6 @@ IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
 elapsedMillis sinceAnglePrint; //!< how long since last time angle data was sent
-elapsedMillis sinceStepperCheck; //!< how long since last time stepper angle was verified
 // note to nick: i'd recommend putting your blinkled timer here
 
 // homing variables
@@ -269,7 +267,6 @@ void servoInterrupt(void); //!< manages motors 5&6
    \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
    Floating point math doesn't seem bad, but at worst, convert float to int
    before motor control and do int math inside interrupts.
-   \todo Fix up homing and limit switch functionality to deal with regions near angle limits
    \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
    \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
    \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
@@ -282,13 +279,11 @@ void servoInterrupt(void); //!< manages motors 5&6
    \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
    Ramping of stepper should be linear, higher level ramping should occur in gui.
    The base station/odroid should be in charge of ramping up angles and the teensy
-   should just go to them. Perhaps if a large angle is requested there should
+   should just go to them? Perhaps if a large angle is requested there should
    still be a way to stop it though.
    \todo Determine whether it's worth it to use the built in quadrature decoders.
    Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
    Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
-   \todo stepper motor angle checks for open loop control remains to be fixed, updated, implemented
-   \todo in stepper angle checks, also fix that issue with discrepancy
 */
 void setup() {
   pinSetup();
@@ -301,7 +296,7 @@ void setup() {
   initMotorTimers();
 
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
-  sinceAnglePrint = 0; sinceStepperCheck = 0;
+  sinceAnglePrint = 0;
 }
 
 /*! \brief Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED.
@@ -514,7 +509,10 @@ void loop() {
             else if (motorCommand.resetJointPosition) {
               motorArray[motorCommand.whichMotor - 1]->forceToAngle(0.0);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("reset joint position (to 0 degrees) of motor "); UART_PORT.println(motorCommand.whichMotor);
+#ifdef DEBUG_MAIN
+    UART_PORT.print("reset joint position (to 0 degrees) of motor ");
+    UART_PORT.println(motorCommand.whichMotor);
+#endif
 #endif
             }
           }
@@ -751,7 +749,7 @@ void initSpeedParams(void) {
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
   motor1.setMotorSpeed(50); // needs to be tuned
   motor2.setMotorSpeed(30); // needs to be tuned
-  motor3.setMotorSpeed(50); // needs to be tuned
+  motor3.setMotorSpeed(60); // needs to be tuned
   motor4.setMotorSpeed(90); // needs to be tuned?
   motor5.setMotorSpeed(50); // probably done tuning
   motor6.setMotorSpeed(50); // probably done tuning
@@ -834,7 +832,7 @@ void respondToLimitSwitches(void) {
     */
   }
 }
-void homeArmMotors(void) {
+void homeArmMotors(void) { //!< \todo print homing debug just for motors which are homing
   if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
     if (motorsToHome[homingMotor]) { // is this motor supposed to home?
       // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
@@ -849,8 +847,10 @@ void homeArmMotors(void) {
       if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
         if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
 #ifdef DEBUG_HOMING
+if (motorsToHome[homingMotor]) {
           UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
           UART_PORT.println(" homing 1 done and at safe angle");
+}
 #endif
         }
         // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
@@ -864,8 +864,10 @@ void homeArmMotors(void) {
         else { // done finding angle limits, moving to home position and then next motor time
           if (! (motorArray[homingMotor]->startedZeroing) ) { // start zeroing
 #ifdef DEBUG_HOMING
+if (motorsToHome[homingMotor]) {
             UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
             UART_PORT.println(" homing complete. now to move to 0 degrees");
+}
 #endif
             motorArray[homingMotor]->forceToAngle(0.0);
             motorArray[homingMotor]->startedZeroing = true;
@@ -875,8 +877,10 @@ void homeArmMotors(void) {
             float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
             if (fabs(angle) < tolerance * 2) { // within small enough angle range to move on to next motor
 #ifdef DEBUG_HOMING
+if (motorsToHome[homingMotor]) {
               UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);
               UART_PORT.println(" zeroing complete.");
+}
 #endif
               homingMotor--; // move on to the next motor
             }
@@ -903,13 +907,6 @@ void homeArmMotors(void) {
     // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
     // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
     homingMotor = -1; // reset it until next homing call
-    /*
-      homing didnt stop for some reason???
-      at the end of homing motor 2 kept moving, stop command didn't work
-      i noticed angles weren't printing anymore
-      in last test stopped after "motor 1 homing 1 done and at safe angle"... it wasn't even supposed to say this so i fixed that and need to test it again
-      but anyway it never exited the loop to say that it finished homing. and also it never prints angles during the loop for some reason???
-    */
   }
 }
 
