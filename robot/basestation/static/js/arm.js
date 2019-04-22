@@ -11,7 +11,7 @@ if (mockArmTable) {
 //setInterval(updateOdroidRx, 1000);
 
 // for command thoughput limiting
-const THROTTLE_TIME = 100;
+const MANUAL_CONTROL_THROTTLE_TIME = 100;
 const PING_THROTTLE_TIME = 1000;
 const MCU_FEEDBACK_THROTTLE = 1000;
 let lastCmdSent = 0;
@@ -266,7 +266,7 @@ if (mockArmTable) {
     function gameLoop() {
         let $serialCmdInput = $("#serial-cmd-input");
 
-        if (millisSince(lastCmdSent) > THROTTLE_TIME) {
+        if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
 
             // 'w' --> m1 ccw
             if (!$serialCmdInput.is(":focus") && keyState[87]) {

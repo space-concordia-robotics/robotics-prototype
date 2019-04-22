@@ -171,7 +171,7 @@ print("Ready for incoming drive cmds!\n")
 
 print(get_commands_list())
 
-key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'm', 'n', 't', 'q']
+key_list = ['w', 'a', 's', 'd', 'i', 'j', 'l', 'o', 'k', 'm', 'n', 't', 'b', 'q']
 # Arduino sketch considers this value to be the signal for the motors to not move
 REST = 49.5
 
@@ -196,14 +196,15 @@ while True:
 
     try:
         # only receive commands if last command was sent
-        # THROTTLE_TIME ago,
+        # THROTTLE_TIME ago (in milliseconds)
         if current_millis() - last_cmd_sent > THROTTLE_TIME:
 
             command = receiver.receive()
-            print("OPERATOR command: " + command + "\n")
 
             # for throttle speed, no backwards
             if command in key_list:
+                print("OPERATOR command: " + command + " recognized\n")
+
                 if command == 'w':
                     feedback = "cmd: w --> Forward\n"
                     command = str(REST + throttle_speed) + ":" + str(REST) + "\n"
@@ -362,12 +363,16 @@ while True:
 
                 elif command == 'b':
                     if usb:
+                        data = ""
                         while ser.in_waiting:
-                            data = ser.readline().decode()
-                            print(data)
-                            sender.send(data)
+                            data += ser.readline().decode()
+
+                        print(data)
+                        sender.send(data)
                     else:
                         print("UART RX not supported (yet)")
+            else:
+                print("UNKOWN command " + command + "\n")
 
             if usb:
                 # flush buffer to avoid overflowing it
