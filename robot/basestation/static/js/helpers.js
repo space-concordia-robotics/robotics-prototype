@@ -129,27 +129,6 @@ function enableArmListener () {
   }
 }
 
-// for updating the toggle buttons if user pressed keyboard events triggered enabling/disabling
-function enableRoverMotorsBtn () {
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
-    'btn-success'
-  )
-  $('#enable-rover-motors-btn')[0].checked = true
-}
-
-function disableRoverMotorsBtn () {
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
-    'btn-success'
-  )
-  $('#enable-rover-motors-btn')[0].checked = false
-}
-
 // Milliseconds since start time given
 function millisSince (start) {
   var elapsed = new Date().getTime() - start

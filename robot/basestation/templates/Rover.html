@@ -155,10 +155,9 @@
                                 <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
                             </td>
                             <td>
-                                <input type="checkbox" id="enable-rover-btn" onchange="enableRoverListener()" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
+                                <input type="checkbox" id="toggle-rover-listener" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
                             </td>
                             <td>
-                                <!-- <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">On</button></a> -->
                                 <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
                         </tr>
@@ -177,7 +176,6 @@
                             </td>
                             <td></td>
                             <td>
-                                <!-- <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Off</button></a> -->
                                 <input type="checkbox" not-checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
                         </tr>
@@ -361,12 +359,12 @@
                                 <table>
                                     <tr>
                                         <td>
-                                            <button title="Ping Rover MCU" id="ping-rover-mcu" type="button" class="control-btn-mid" disabled>
-                                                <strong>P</strong>
+                                            <button title="List all commands" id="list-all-rover-cmds" type="button" class="control-btn-mid" disabled>
+                                                <strong>L</strong>
                                             </button>
                                         </td>
                                         <td>
-                                            <button title="Toggle listener script" id="toggle-rover-listener" type="button" class="control-btn-mid" disabled>
+                                            <button title="Toggle listener script" id="toggle-rover-listener-btn" type="button" class="control-btn-mid" disabled>
                                                 <strong>T</strong>
                                             </button>
                                         </td>
@@ -383,8 +381,8 @@
                                             </button>
                                         </td>
                                         <td>
-                                            <button title="Stop all motors" id="stop-rover-motors" type="button" class="control-btn-mid" disabled>
-                                                <strong>Z</strong>
+                                            <button title="Terminate listener script" id="terminate-listener-script" type="button" class="control-btn-mid" disabled>
+                                                <strong>Q</strong>
                                             </button>
                                         </td>
                                         <td>

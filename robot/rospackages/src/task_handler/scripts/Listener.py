@@ -64,9 +64,14 @@ class Listener:
 
     def is_running(self):
         if self.p1_pid >= 0:
-            return True
+            poll = self.p1.poll()
 
-        return False
+            if poll != None:
+                print("Something went wrong, process defunct (already terminated)")
+                self.p1_pid = -1
+                return False
+
+        return True
 
 # quick test for verification
 if __name__ == "__main__":

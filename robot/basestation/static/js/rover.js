@@ -14,6 +14,7 @@ const MIN_STEERING_SPEED = 0
 const DRIVE_THROTTLE_TIME = 25
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
+const LISTENER_TOGGLE_THROTTLE = 3000
 var lastCmdSent = 0
 
 function enableRoverListener () {
@@ -50,6 +51,45 @@ function enableRoverListener () {
       }
     })
   }
+}
+
+// for updating the toggle buttons if user pressed keyboard events triggered enabling/disabling
+function enableRoverMotorsBtn () {
+  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
+    'btn-danger off'
+  )
+  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
+    'btn-success'
+  )
+  $('#enable-rover-motors-btn')[0].checked = true
+}
+
+function disableRoverMotorsBtn () {
+  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
+    'btn-danger off'
+  )
+  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
+    'btn-success'
+  )
+  $('#enable-rover-motors-btn')[0].checked = false
+}
+
+function enableRoverListenerBtn () {
+  $($('.toggle > #toggle-rover-listener')[0].parentNode).removeClass(
+    'btn-danger off'
+  )
+  $($('.toggle > #toggle-rover-listener')[0].parentNode).addClass('btn-success')
+  $('#toggle-rover-listener')[0].checked = true
+}
+
+function disableRoverListenerBtn () {
+  $($('.toggle > #toggle-rover-listener')[0].parentNode).addClass(
+    'btn-danger off'
+  )
+  $($('.toggle > #toggle-rover-listener')[0].parentNode).removeClass(
+    'btn-success'
+  )
+  $('#toggle-rover-listener')[0].checked = false
 }
 
 // commands to change speed settings, get buffered serial messages
@@ -229,7 +269,98 @@ $(document).keydown(function (e) {
       })
       lastCmdSent = new Date().getTime()
       break
+    case 76: // 'l' --> list all commands
+      $('button#list-all-rover-cmds').css('background-color', 'rgb(255, 0, 0)')
+      $.ajax({
+        url: '/rover_drive',
+        type: 'POST',
+        data: {
+          cmd: 'l'
+        },
+        success: function (response) {
+          appendToConsole('cmd: ' + response.cmd)
+          appendToConsole('feedback:\n' + response.feedback)
+          if (!response.feedback.includes('limit exceeded')) {
+            disableRoverMotorsBtn()
+          }
+          if (response.error != 'None') {
+            appendToConsole('error:\n' + response.error)
+          }
+          scrollToBottom()
+        }
+      })
+      lastCmdSent = new Date().getTime()
+      break
+    case 84: // 't' --> toggle listener proxy script
+      if (millisSince(lastCmdSent) > LISTENER_TOGGLE_THROTTLE) {
+        $('button#toggle-rover-listener-btn').css(
+          'background-color',
+          'rgb(255, 0, 0)'
+        )
 
+        let request = ''
+
+        if ($('#toggle-rover-listener').is(':checked')) {
+          request = 'disable-rover-listener'
+        } else {
+          request = 'enable-rover-listener'
+        }
+
+        $.ajax({
+          url: '/task_handler',
+          type: 'POST',
+          data: {
+            cmd: request
+          },
+          success: function (response) {
+            console.log(response)
+            appendToConsole('cmd: ' + response.cmd)
+            appendToConsole('output: ' + response.output)
+            if (
+              !response.output.includes('Failed') &&
+              !response.output.includes('shutdown request')
+            ) {
+              if ($('#toggle-rover-listener').is(':checked')) {
+                disableRoverListenerBtn()
+              } else {
+                enableRoverListenerBtn()
+              }
+            }
+
+            if (response.error != 'None') {
+              appendToConsole('error:\n' + response.error)
+            }
+            scrollToBottom()
+          }
+        })
+        lastCmdSent = new Date().getTime()
+      }
+      break
+    case 81: // 'q' --> terminate (quit) listener script
+        $('button#terminate-listener-script').css(
+          'background-color',
+          'rgb(255, 0, 0)'
+        )
+        $.ajax({
+          url: '/rover_drive',
+          type: 'POST',
+          data: {
+            cmd: 'q'
+          },
+          success: function (response) {
+            appendToConsole('cmd: ' + response.cmd)
+            appendToConsole('feedback:\n' + response.feedback)
+            if (!response.feedback.includes('limit exceeded')) {
+              disableRoverListenerBtn()
+            }
+            if (response.error != 'None') {
+              appendToConsole('error:\n' + response.error)
+            }
+            scrollToBottom()
+          }
+        })
+        lastCmdSent = new Date().getTime()
+      break
     default:
       return // exit this handler for other keys
   }
@@ -340,8 +471,23 @@ $(document).keyup(function (e) {
     case 78: // disable rover motors
       $('button#disable-rover-motors').css('background-color', 'rgb(74, 0, 0)')
       break
-    case 66:
+    case 66: // show buffered serial messages from the MCU
       $('button#show-buffered-rover-msgs').css(
+        'background-color',
+        'rgb(74, 0, 0)'
+      )
+      break
+    case 76: // list all rover cmds
+      $('button#list-all-rover-cmds').css('background-color', 'rgb(74, 0, 0)')
+      break
+    case 84: // toggle rover listener proxy script
+      $('button#toggle-rover-listener-btn').css(
+        'background-color',
+        'rgb(74, 0, 0)'
+      )
+      break
+    case 81: // terminate listener script (quit)
+      $('button#terminate-listener-script').css(
         'background-color',
         'rgb(74, 0, 0)'
       )
