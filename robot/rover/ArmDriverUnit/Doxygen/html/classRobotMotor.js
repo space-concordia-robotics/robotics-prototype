@@ -20,10 +20,11 @@ var classRobotMotor =
     [ "setGearRatio", "classRobotMotor_a95f3f330513004ff7acaaa24eb8e7b0f.html#a95f3f330513004ff7acaaa24eb8e7b0f", null ],
     [ "setOpenLoopGain", "classRobotMotor_a5892daffe5060fa825ada30784378398.html#a5892daffe5060fa825ada30784378398", null ],
     [ "setMotorSpeed", "classRobotMotor_a20727963da18420582c94ce1f38d0d25.html#a20727963da18420582c94ce1f38d0d25", null ],
+    [ "getMotorSpeed", "classRobotMotor_a2a6c75e3f278f28b20a7b9459325330a.html#a2a6c75e3f278f28b20a7b9459325330a", null ],
     [ "stopRotation", "classRobotMotor_a4194a95960cd103feacf57751fd05944.html#a4194a95960cd103feacf57751fd05944", null ],
     [ "setVelocity", "classRobotMotor_a86298e08b3992d988aec05ff23b1a8f6.html#a86298e08b3992d988aec05ff23b1a8f6", null ],
     [ "goToCommandedAngle", "classRobotMotor_ad34a8bb64a9d074ccb43bd151f5534bd.html#ad34a8bb64a9d074ccb43bd151f5534bd", null ],
-    [ "goToAngle", "classRobotMotor_ac5968aa8641ce52ae82023d063e87554.html#ac5968aa8641ce52ae82023d063e87554", null ],
+    [ "forceToAngle", "classRobotMotor_a0aa12f7a74fa255f78355cbcd1415198.html#a0aa12f7a74fa255f78355cbcd1415198", null ],
     [ "budge", "classRobotMotor_a39b0bf7d57a48812b9245743a76a82eb.html#a39b0bf7d57a48812b9245743a76a82eb", null ],
     [ "motorType", "classRobotMotor_a18649323e531783c2315f75963aa54f5.html#a18649323e531783c2315f75963aa54f5", null ],
     [ "numMotors", "classRobotMotor_a37c03b59ccad8c613186e848dfd86214.html#a37c03b59ccad8c613186e848dfd86214", null ],
@@ -44,6 +45,7 @@ var classRobotMotor =
     [ "homingType", "classRobotMotor_a159f097b09ca6bdb26e1ae8fd5f4abf9.html#a159f097b09ca6bdb26e1ae8fd5f4abf9", null ],
     [ "homingDone", "classRobotMotor_a69544006152f247529494edfcbbda89f.html#a69544006152f247529494edfcbbda89f", null ],
     [ "atSafeAngle", "classRobotMotor_a1fe13dc35c05bb40d785f3a5dd980205.html#a1fe13dc35c05bb40d785f3a5dd980205", null ],
+    [ "startedZeroing", "classRobotMotor_a5f801a1ba595a5f4c73bfe194fd89d7a.html#a5f801a1ba595a5f4c73bfe194fd89d7a", null ],
     [ "homingPass", "classRobotMotor_aaf089e2e29f2a4e3fb8abde5f39f3871.html#aaf089e2e29f2a4e3fb8abde5f39f3871", null ],
     [ "gearRatio", "classRobotMotor_a637aa3be233b4177d0a7b200bd764b9b.html#a637aa3be233b4177d0a7b200bd764b9b", null ],
     [ "gearRatioReciprocal", "classRobotMotor_a2aed8f7fef3c2398570583a4b7e9c7c2.html#a2aed8f7fef3c2398570583a4b7e9c7c2", null ],
@@ -65,8 +67,6 @@ var classRobotMotor =
     [ "isBudging", "classRobotMotor_a1ba4b566c7e183fce88b9486883e8d8f.html#a1ba4b566c7e183fce88b9486883e8d8f", null ],
     [ "hasEncoder", "classRobotMotor_a0c459270cae206ebc477d0074db8ce30.html#a0c459270cae206ebc477d0074db8ce30", null ],
     [ "openLoopError", "classRobotMotor_a6c351a58305312afe309c1207ebf029b.html#a6c351a58305312afe309c1207ebf029b", null ],
-    [ "openLoopSpeed", "classRobotMotor_ab8ef2226eabf74bb2864d295322d7701.html#ab8ef2226eabf74bb2864d295322d7701", null ],
-    [ "openLoopGain", "classRobotMotor_af74161d12f330e4fab4655b9f5431268.html#af74161d12f330e4fab4655b9f5431268", null ],
     [ "startAngle", "classRobotMotor_ab164987330e38d81c848258a3e38e37c.html#ab164987330e38d81c848258a3e38e37c", null ],
     [ "encoderPort", "classRobotMotor_aa4558931ae10239eb79612f5dd95d2ae.html#aa4558931ae10239eb79612f5dd95d2ae", null ],
     [ "encoderShift", "classRobotMotor_af0d1842bab1ecd30ff5d0ffe986f317c.html#af0d1842bab1ecd30ff5d0ffe986f317c", null ],
@@ -74,5 +74,7 @@ var classRobotMotor =
     [ "currentAngle", "classRobotMotor_af4b9967a3f73aa081fb9d3d882cc436e.html#af4b9967a3f73aa081fb9d3d882cc436e", null ],
     [ "imaginedAngle", "classRobotMotor_a0f340a2aef26c5c266a08473ea378e22.html#a0f340a2aef26c5c266a08473ea378e22", null ],
     [ "desiredAngle", "classRobotMotor_a1872a3f3cb22e8a385c591558ff3b807.html#a1872a3f3cb22e8a385c591558ff3b807", null ],
-    [ "directionModifier", "classRobotMotor_a8e1064cbb021dd4a906c15103540109f.html#a8e1064cbb021dd4a906c15103540109f", null ]
+    [ "directionModifier", "classRobotMotor_a8e1064cbb021dd4a906c15103540109f.html#a8e1064cbb021dd4a906c15103540109f", null ],
+    [ "openLoopSpeed", "classRobotMotor_ab8ef2226eabf74bb2864d295322d7701.html#ab8ef2226eabf74bb2864d295322d7701", null ],
+    [ "openLoopGain", "classRobotMotor_af74161d12f330e4fab4655b9f5431268.html#af74161d12f330e4fab4655b9f5431268", null ]
 ];

@@ -7,7 +7,7 @@ var classDcMotor =
     [ "stopRotation", "classDcMotor_aab083df0f9dcdd57e16395da1ac06279.html#aab083df0f9dcdd57e16395da1ac06279", null ],
     [ "setVelocity", "classDcMotor_a01e87d49ecdf8cb357573600e6ee2fe5.html#a01e87d49ecdf8cb357573600e6ee2fe5", null ],
     [ "goToCommandedAngle", "classDcMotor_ace5cd579c1ebe671c55ac51c1c8a787c.html#ace5cd579c1ebe671c55ac51c1c8a787c", null ],
-    [ "goToAngle", "classDcMotor_a21215ebcdd1e347fdb4b34fabeedafe8.html#a21215ebcdd1e347fdb4b34fabeedafe8", null ],
+    [ "forceToAngle", "classDcMotor_acf877220f2ba839846e8ce5100ad7a8b.html#acf877220f2ba839846e8ce5100ad7a8b", null ],
     [ "budge", "classDcMotor_ab9e2bf3d4a29b7378e43ae50a0a3ae8d.html#ab9e2bf3d4a29b7378e43ae50a0a3ae8d", null ],
     [ "numDcMotors", "classDcMotor_ae3709104901266f69f9f7f052c4d842b.html#ae3709104901266f69f9f7f052c4d842b", null ],
     [ "numMillis", "classDcMotor_a1f1c9d37e42390b7443ed5605307c21b.html#a1f1c9d37e42390b7443ed5605307c21b", null ],

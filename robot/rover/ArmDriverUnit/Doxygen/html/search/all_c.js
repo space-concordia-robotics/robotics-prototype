@@ -132,6 +132,7 @@ var searchData=
   ['motorarray',['motorArray',['../ArmDriverUnit_8ino_a37cabc7c43b2f85e2a8046f39056160a.html#a37cabc7c43b2f85e2a8046f39056160a',1,'ArmDriverUnit.ino']]],
   ['motorcommand',['motorCommand',['../ArmDriverUnit_8ino_a35166dd0078514f8c769b2a05082180e.html#a35166dd0078514f8c769b2a05082180e',1,'ArmDriverUnit.ino']]],
   ['motorspeed',['motorSpeed',['../structcommandInfo_a3e5a581d34b12c08322006ed9cd8b204.html#a3e5a581d34b12c08322006ed9cd8b204',1,'commandInfo']]],
+  ['motorspeedcommand',['motorSpeedCommand',['../structcommandInfo_a5b8f2e028de22c90f9af2f9a739a0925.html#a5b8f2e028de22c90f9af2f9a739a0925',1,'commandInfo']]],
   ['motorstohome',['motorsToHome',['../ArmDriverUnit_8ino_ab70da3ba2ad0f6e2d60159838b23648c.html#ab70da3ba2ad0f6e2d60159838b23648c',1,'ArmDriverUnit.ino']]],
   ['motorstomove',['motorsToMove',['../structcommandInfo_a26b12349a73870a0b6331c6d690feace.html#a26b12349a73870a0b6331c6d690feace',1,'commandInfo']]],
   ['motortimerinterrupt',['motorTimerInterrupt',['../classDcMotor_a43587a3a6216d98b05a92b7abf9fa7cc.html#a43587a3a6216d98b05a92b7abf9fa7cc',1,'DcMotor::motorTimerInterrupt()'],['../classServoMotor_a82def191060148a4744221b1e7ae8405.html#a82def191060148a4744221b1e7ae8405',1,'ServoMotor::motorTimerInterrupt()'],['../classStepperMotor_a3e7c4986b0d0a7f8eba4c49773620e21.html#a3e7c4986b0d0a7f8eba4c49773620e21',1,'StepperMotor::motorTimerInterrupt()']]],

@@ -7,7 +7,7 @@ var classServoMotor =
     [ "stopRotation", "classServoMotor_a4db482fe7d6d402bba476972ff974742.html#a4db482fe7d6d402bba476972ff974742", null ],
     [ "setVelocity", "classServoMotor_a2b74970cfd86bc139f337facace40fad.html#a2b74970cfd86bc139f337facace40fad", null ],
     [ "goToCommandedAngle", "classServoMotor_aef6a29a7e103d022ddde96ee5aa22041.html#aef6a29a7e103d022ddde96ee5aa22041", null ],
-    [ "goToAngle", "classServoMotor_ae077ba407561e8d3ee7529028c3d098d.html#ae077ba407561e8d3ee7529028c3d098d", null ],
+    [ "forceToAngle", "classServoMotor_af24bb8f09557fd8bc6e466f9c6989656.html#af24bb8f09557fd8bc6e466f9c6989656", null ],
     [ "budge", "classServoMotor_a7a556d31dbdd30ec1c2b279165277a49.html#a7a556d31dbdd30ec1c2b279165277a49", null ],
     [ "numServoMotors", "classServoMotor_af77978d07764444c29d0553441101ecd.html#af77978d07764444c29d0553441101ecd", null ],
     [ "numMillis", "classServoMotor_a3f44b6ce9f89a7a7f2d65e387fae013f.html#a3f44b6ce9f89a7a7f2d65e387fae013f", null ],

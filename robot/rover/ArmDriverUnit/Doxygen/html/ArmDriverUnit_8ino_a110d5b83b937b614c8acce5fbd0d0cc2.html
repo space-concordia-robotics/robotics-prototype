@@ -104,9 +104,7 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a110d5b83b937b614c8
 
 <p>setup open and closed loop speed parameters </p>
 <p>Sets pidController output limits for each motor, then sets openLoopSpeed for each motor, and finally, sets openLoopGain for any non-stepper motor.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>openloopspeed right now is set in setup... but this defeats the purpose of initializing the speed to 0 in the constructor... i set it to 0 as a precaution but technically the motors shouldn't turn anyway because movementDone controls that. so maybe I can just initialize to 50 and not have it in the setup?</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>open loop speed and closed loop max speed are different???? this is because closed loop has a max val whereas open loop has a fixed one, but these could maybe be the same???</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>stepper doesn't have speed the way servos and dcs do?????? this is because stepper calculates speed using durations, but this means openLoopGain and openLoopSpeed mean nothing for it??? </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>stepper doesn't have speed the way servos and dcs do?????? this is because stepper calculates speed using durations, but this means openLoopGain and openLoopSpeed mean nothing for it??? </dd></dl>
 
 </div>
 </div>

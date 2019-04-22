@@ -102,7 +102,7 @@ $(document).ready(function(){initNavTree('classPidController.html','');});
 <div class="dynheader">
 Collaboration diagram for PidController:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classPidController__coll__graph.svg" width="231" height="566"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classPidController__coll__graph.svg" width="231" height="580"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -122,6 +122,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4c16da7a74de06375f2545e2cd311f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController_ab4c16da7a74de06375f2545e2cd311f4.html#ab4c16da7a74de06375f2545e2cd311f4">setOutputLimits</a> (float minVal, float maxVal, float zeroVal)</td></tr>
 <tr class="memdesc:ab4c16da7a74de06375f2545e2cd311f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the min and max outputs, represented as speed for motors. This version takes the deadband into consideration.  <a href="classPidController_ab4c16da7a74de06375f2545e2cd311f4.html#ab4c16da7a74de06375f2545e2cd311f4">More...</a><br /></td></tr>
 <tr class="separator:ab4c16da7a74de06375f2545e2cd311f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e71901586e9d56dd1942ed05dbc7f5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController_a5e71901586e9d56dd1942ed05dbc7f5d.html#a5e71901586e9d56dd1942ed05dbc7f5d">setSlowestSpeed</a> (float speed)</td></tr>
+<tr class="memdesc:a5e71901586e9d56dd1942ed05dbc7f5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Below this speed output from the pid, the motor will simply stop turning to avoid noise.  <a href="classPidController_a5e71901586e9d56dd1942ed05dbc7f5d.html#a5e71901586e9d56dd1942ed05dbc7f5d">More...</a><br /></td></tr>
+<tr class="separator:a5e71901586e9d56dd1942ed05dbc7f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9db1b9b62af7a458468363f6e97b9b14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController_a9db1b9b62af7a458468363f6e97b9b14.html#a9db1b9b62af7a458468363f6e97b9b14">setGainConstants</a> (float <a class="el" href="classPidController_aa6372a465d1a851ab41cbd6196a05eec.html#aa6372a465d1a851ab41cbd6196a05eec">kp</a>, float <a class="el" href="classPidController_a7316f19234e3df76efbbf93afdb98092.html#a7316f19234e3df76efbbf93afdb98092">ki</a>, float <a class="el" href="classPidController_a55dd2794ff0f1710b7a7fef0794fac81.html#a55dd2794ff0f1710b7a7fef0794fac81">kd</a>)</td></tr>
 <tr class="memdesc:a9db1b9b62af7a458468363f6e97b9b14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the PID gains.  <a href="classPidController_a9db1b9b62af7a458468363f6e97b9b14.html#a9db1b9b62af7a458468363f6e97b9b14">More...</a><br /></td></tr>
 <tr class="separator:a9db1b9b62af7a458468363f6e97b9b14"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,7 +190,7 @@ Private Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This is intended to be a generic PID controller class. </p>
 <p>As it stands, however, it is built with position control in mind. It holds modifiable P, I and D gains and limits the output to prevent saturation. The output ranges from -100.0% to 100.0% but by default it is limited to +/-50%. There is also a deadband range around 0% which can be used in the case of position control to stop a motor from whining when being sent pwm values close to 0. Finally, the PID controller ignores errors smaller than a certain resolution which can be defined by the user. This is useful for discrete plants such as stepper motors, or even continuous plants for which small angle errors can be ignored.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Can I deal with the fact that angleTolerance is a <a class="el" href="classPidController.html" title="This is intended to be a generic PID controller class. ">PidController</a> attribute and not a <a class="el" href="classRobotMotor.html" title="The base class for ServoMotor, StepperMotor and DcMotor. ">RobotMotor</a> attribute? </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Can I deal with the fact that angleTolerance is a <a class="el" href="classPidController.html" title="This is intended to be a generic PID controller class. ">PidController</a> attribute and not a <a class="el" href="classRobotMotor.html" title="The base class for ServoMotor, StepperMotor and DcMotor. ">RobotMotor</a> attribute? </dd></dl>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>C:/Users/vashm/Documents/git/robotics-prototype/robot/rover/ArmDriverUnit/<a class="el" href="PidController_8h_source.html">PidController.h</a></li>
 </ul>

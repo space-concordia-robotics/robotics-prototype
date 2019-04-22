@@ -102,9 +102,11 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_afe461d27b9c48d5921
 </div><div class="memdoc">
 
 <p>Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd><p class="startdd">There should be a check so that if the motor is moving away from the goal position or has been moving for a while without reaching the expected angle, it stops... like a timeout. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd><p class="startdd">There should be a check so that if the motor is moving away from the goal position or has been moving for a while without reaching the expected angle, it stops... like a timeout. </p>
 <p>What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad. </p>
-<p class="enddd">If the stepper is trying to turn but hasn't gotten anywhere, there should be a check in the microcontroller that there's an issue (there can also be a check in the gui)</p>
+<p>If the stepper is trying to turn but hasn't gotten anywhere, there should be a check in the microcontroller that there's an issue (there can also be a check in the gui) </p>
+<p>Check to see if any global variables can be turned into static variables inside <a class="el" href="ArmDriverUnit_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title="Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED...">loop()</a> </p>
+<p class="enddd">I noticed that sending a new move command while motors are moving messes with open loop calculations? </p>
 </dd></dl>
 
 </div>

@@ -104,7 +104,6 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a4fc01d736fe50cf5b9
 <p>Teensy setup. Calls many init functions to prep comms and motors. </p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd><p class="startdd">Implement error checking, clean up code, comment code, make sure ISR variables are volatile </p>
 <p>Make sure the math calculations are written correctly and calculate as quickly as possible. Floating point math doesn't seem bad, but at worst, convert float to int before motor control and do int math inside interrupts. </p>
-<p>Fix up homing and limit switch functionality to deal with regions near angle limits </p>
 <p>(Nick) Finish implementing/integrating heartbeat and watchdog interrupt </p>
 <p>Figure out where to disable interrupts so that I don't read a value while it's being modified </p>
 <p>Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself </p>
@@ -112,11 +111,10 @@ $(document).ready(function(){initNavTree('ArmDriverUnit_8ino_a4fc01d736fe50cf5b9
 <p>Confirm all the pins will work with interrupts and not stepping on each other. Do I send 3.3v to all interrupt pins simultaneously to test thing? </p>
 <p>Deal with overflow of encoderCount.. does it ever reach max value? </p>
 <p>What do I do for angles over 360? Do I keep counting up? Do I keep count of how many rotations I've done? </p>
-<p>Different types of ramping profiles - trapezoid vs quintic polynomial? Ramping of stepper should be linear, higher level ramping should occur in gui. The base station/odroid should be in charge of ramping up angles and the teensy should just go to them. Perhaps if a large angle is requested there should still be a way to stop it though. </p>
-<p>Determine whether it's worth it to use the built in quadrature decoders. Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore. Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?). </p>
-<p>stepper motor angle checks for open loop control remains to be fixed, updated, implemented </p>
-<p class="enddd">in stepper angle checks, also fix that issue with discrepancy </p>
+<p>Different types of ramping profiles - trapezoid vs quintic polynomial? Ramping of stepper should be linear, higher level ramping should occur in gui. The base station/odroid should be in charge of ramping up angles and the teensy should just go to them? Perhaps if a large angle is requested there should still be a way to stop it though. </p>
+<p class="enddd">Determine whether it's worth it to use the built in quadrature decoders. Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore. Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?). </p>
 </dd></dl>
+<p>&lt;</p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!! </dd></dl>
 
 </div>
 </div>

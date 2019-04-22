@@ -5,6 +5,7 @@ var classPidController =
     [ "setJointAngleTolerance", "classPidController_a4a3041430fce2ff9d44ed064954e8379.html#a4a3041430fce2ff9d44ed064954e8379", null ],
     [ "setOutputLimits", "classPidController_a345e065af2a6d2c8a9c9d9f758b1382f.html#a345e065af2a6d2c8a9c9d9f758b1382f", null ],
     [ "setOutputLimits", "classPidController_ab4c16da7a74de06375f2545e2cd311f4.html#ab4c16da7a74de06375f2545e2cd311f4", null ],
+    [ "setSlowestSpeed", "classPidController_a5e71901586e9d56dd1942ed05dbc7f5d.html#a5e71901586e9d56dd1942ed05dbc7f5d", null ],
     [ "setGainConstants", "classPidController_a9db1b9b62af7a458468363f6e97b9b14.html#a9db1b9b62af7a458468363f6e97b9b14", null ],
     [ "getMaxOutputValue", "classPidController_a240f7d2de27e2bf4c41d0a438e7fc61a.html#a240f7d2de27e2bf4c41d0a438e7fc61a", null ],
     [ "getMinOutputValue", "classPidController_a8b43853337743c86d52ce2c655418105.html#a8b43853337743c86d52ce2c655418105", null ],

@@ -10,7 +10,7 @@ var classStepperMotor =
     [ "singleStep", "classStepperMotor_a1378276324817fb14809ca5d0ede9cea.html#a1378276324817fb14809ca5d0ede9cea", null ],
     [ "setVelocity", "classStepperMotor_adedc822909f37aba709e8b2c71c4e94a.html#adedc822909f37aba709e8b2c71c4e94a", null ],
     [ "goToCommandedAngle", "classStepperMotor_aebdb7f117017408b922449b853ea7e90.html#aebdb7f117017408b922449b853ea7e90", null ],
-    [ "goToAngle", "classStepperMotor_a5d0c0eee2e6381c674f4ca014784168c.html#a5d0c0eee2e6381c674f4ca014784168c", null ],
+    [ "forceToAngle", "classStepperMotor_ac31ad0336a55da975aa8dc61a249821f.html#ac31ad0336a55da975aa8dc61a249821f", null ],
     [ "budge", "classStepperMotor_aea0eebd304b93b8764efa3930b4bfd53.html#aea0eebd304b93b8764efa3930b4bfd53", null ],
     [ "numStepperMotors", "classStepperMotor_a3a66d7b3eadd172cb955a516dc9f3294.html#a3a66d7b3eadd172cb955a516dc9f3294", null ],
     [ "stepResolution", "classStepperMotor_a52ea45e128b05805d20b74d6fcc9463f.html#a52ea45e128b05805d20b74d6fcc9463f", null ],

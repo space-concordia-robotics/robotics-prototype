@@ -6,6 +6,7 @@ var searchData=
   ['haslimitswitches',['hasLimitSwitches',['../classRobotMotor_abba326b4f0a9a9be428755e3f96ff64f.html#abba326b4f0a9a9be428755e3f96ff64f',1,'RobotMotor']]],
   ['hasramping',['hasRamping',['../classRobotMotor_a1814c597b9f1e772666a956138d4987b.html#a1814c597b9f1e772666a956138d4987b',1,'RobotMotor']]],
   ['homeallmotors',['homeAllMotors',['../structcommandInfo_a0cc7d4ee7539fec81d40056cee62cc2d.html#a0cc7d4ee7539fec81d40056cee62cc2d',1,'commandInfo']]],
+  ['homearmmotors',['homeArmMotors',['../ArmDriverUnit_8ino_ae349ccd7f7ee58d0c655f9ad330e6b1a.html#ae349ccd7f7ee58d0c655f9ad330e6b1a',1,'ArmDriverUnit.ino']]],
   ['homecommand',['homeCommand',['../structcommandInfo_a4131ad167f8a1404ef6c1bf160766d40.html#a4131ad167f8a1404ef6c1bf160766d40',1,'commandInfo']]],
   ['homemotor',['homeMotor',['../classRobotMotor_a4e2013a6067793935e887dcaab9a6e05.html#a4e2013a6067793935e887dcaab9a6e05',1,'RobotMotor']]],
   ['homingdone',['homingDone',['../classRobotMotor_a69544006152f247529494edfcbbda89f.html#a69544006152f247529494edfcbbda89f',1,'RobotMotor']]],
