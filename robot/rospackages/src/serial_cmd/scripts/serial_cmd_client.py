@@ -7,7 +7,7 @@ from serial_cmd.srv import *
 
 def serial_cmd_client(device):
     # convenience function that blocks until 'serial_cmd' is available
-    rospy.wait_for_service('serial_cmd')
+    #rospy.wait_for_service('serial_cmd')
 
     try:
         serial_cmd = rospy.ServiceProxy('serial_cmd', SerialCmd)

@@ -316,7 +316,8 @@ $(document).keydown(function (e) {
             appendToConsole('output: ' + response.output)
             if (
               !response.output.includes('Failed') &&
-              !response.output.includes('shutdown request')
+              !response.output.includes('shutdown request') &&
+              !response.output.includes('unavailable')
             ) {
               if ($('#toggle-rover-listener').is(':checked')) {
                 disableRoverListenerBtn()

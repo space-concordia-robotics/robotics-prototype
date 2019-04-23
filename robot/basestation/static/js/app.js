@@ -186,7 +186,9 @@ jQuery(document).ready(s => {
       type: 'POST',
       data: '0',
       success: function (response) {
-        $('button#mux').text('Device 0: Rover')
+        if (!response.output.includes('failed')) {
+          $('button#mux').text('Device 0: Rover')
+        }
         appendToConsole(response.output)
         scrollToBottom()
       }
@@ -199,7 +201,9 @@ jQuery(document).ready(s => {
       type: 'POST',
       data: '1',
       success: function (response) {
-        $('button#mux').text('Device 1: Arm')
+        if (!response.output.includes('failed')) {
+          $('button#mux').text('Device 1: Arm')
+        }
         appendToConsole(response.output)
         scrollToBottom()
       }
@@ -212,7 +216,9 @@ jQuery(document).ready(s => {
       type: 'POST',
       data: '2',
       success: function (response) {
-        $('button#mux').text('Device 2: Science')
+        if (!response.output.includes('failed')) {
+          $('button#mux').text('Device 2: Science')
+        }
         appendToConsole(response.output)
         scrollToBottom()
       }
@@ -225,7 +231,9 @@ jQuery(document).ready(s => {
       type: 'POST',
       data: '3',
       success: function (response) {
-        $('button#mux').text('Device 3: Lidar')
+        if (!response.output.includes('failed')) {
+          $('button#mux').text('Device 3: Lidar')
+        }
         appendToConsole(response.output)
         scrollToBottom()
       }
@@ -242,14 +250,20 @@ jQuery(document).ready(s => {
         cmd: cmd
       },
       success: function (response) {
-        clearSerialCmd()
-        appendToConsole(response.output)
+        if (!response.output.includes('Response')) {
+          appendToConsole(response.output)
+          appendToConsole('No response from serial_cmd ROS service\n')
+        } else {
+          appendToConsole(response.output)
+          clearSerialCmd()
+        }
         scrollToBottom()
       }
     })
   })
 
   $('#serial-cmd-input').on('keyup', function (e) {
+    // enter key
     if (e.keyCode == 13) {
       let cmd = $('#serial-cmd-input').val()
 
@@ -260,8 +274,13 @@ jQuery(document).ready(s => {
           cmd: cmd
         },
         success: function (response) {
-          clearSerialCmd()
-          appendToConsole(response.output)
+          if (!response.output.includes('Response')) {
+            appendToConsole(response.output)
+            appendToConsole('No response from serial_cmd ROS service\n')
+          } else {
+            appendToConsole(response.output)
+            clearSerialCmd()
+          }
           scrollToBottom()
         }
       })

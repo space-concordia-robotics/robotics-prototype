@@ -103,11 +103,15 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    console.log(millisSince(lastCmdSent))
     $.ajax('/ping_rover', {
       success: function (data) {
-        console.log(data)
-        pingRover(data.ping_msg, data.ros_msg)
+        appendToConsole(data.ping_msg)
+        if (!data.ros_msg.includes('Response')) {
+          appendToConsole('No response from ROS ping_acknowledgment service')
+        } else {
+          appendToConsole(data.ros_msg)
+        }
+        scrollToBottom()
       },
       error: function () {
         console.log('An error occured')

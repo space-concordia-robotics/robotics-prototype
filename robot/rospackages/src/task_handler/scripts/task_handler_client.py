@@ -7,7 +7,7 @@ from task_handler.srv import *
 
 def task_handler_client(r_task, r_status):
     # convenience function that blocks until 'task_handler' is available
-    rospy.wait_for_service('task_handler')
+    #rospy.wait_for_service('task_handler')
 
     try:
         task_handle = rospy.ServiceProxy('task_handler', HandleTask)
