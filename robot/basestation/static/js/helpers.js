@@ -135,6 +135,15 @@ function millisSince (start) {
   return elapsed
 }
 
+// convenience function for UI Buttons
+function lightUp(selector) {
+    $(selector).css('background-color', 'rgb(255, 0, 0)')
+}
+
+function dim(selector) {
+    $(selector).css('background-color', 'rgb(74, 0, 0)')
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest (msg) {

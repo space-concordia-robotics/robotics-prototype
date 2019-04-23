@@ -98,7 +98,7 @@ $(document).keydown(function (e) {
 
   switch (e.which) {
     case 73: // 'i' --> increase throttle
-      $('#throttle-increase > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#throttle-increase > button')
       currentSpeed = $('#throttle-speed').text()
 
       if (currentSpeed < MAX_THROTTLE_SPEED) {
@@ -124,7 +124,7 @@ $(document).keydown(function (e) {
       break
 
     case 74: // 'j' --> decrease throttle
-      $('#throttle-decrease > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#throttle-decrease > button')
       currentSpeed = $('#throttle-speed').text()
 
       if (currentSpeed > MIN_THROTTLE_SPEED) {
@@ -150,7 +150,7 @@ $(document).keydown(function (e) {
       break
 
     case 79: // 'o' --> increase steering
-      $('#steering-increase > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#steering-increase > button')
       currentSpeed = $('#steering-speed').text()
 
       if (currentSpeed < MAX_STEERING_SPEED) {
@@ -176,7 +176,7 @@ $(document).keydown(function (e) {
       break
 
     case 75: // 'k' --> decrease steering
-      $('#steering-decrease > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#steering-decrease > button')
       currentSpeed = $('#steering-speed').text()
 
       if (currentSpeed > MIN_STEERING_SPEED) {
@@ -203,10 +203,8 @@ $(document).keydown(function (e) {
 
     case 66: // 'b' --> get buffered serial messages
       if (millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE) {
-        $('button#show-buffered-rover-msgs').css(
-          'background-color',
-          'rgb(255, 0, 0)'
-        )
+        lightUp('button#show-buffered-rover-msgs')
+
         $.ajax({
           url: '/rover_drive',
           type: 'POST',
@@ -226,7 +224,8 @@ $(document).keydown(function (e) {
       }
       break
     case 77: // 'm' --> enable motor control
-      $('button#enable-rover-motors').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('button#enable-rover-motors')
+
       $.ajax({
         url: '/rover_drive',
         type: 'POST',
@@ -248,7 +247,8 @@ $(document).keydown(function (e) {
       lastCmdSent = new Date().getTime()
       break
     case 78: // 'n' --> disable motor control
-      $('button#disable-rover-motors').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('button#disable-rover-motors')
+
       $.ajax({
         url: '/rover_drive',
         type: 'POST',
@@ -270,7 +270,8 @@ $(document).keydown(function (e) {
       lastCmdSent = new Date().getTime()
       break
     case 76: // 'l' --> list all commands
-      $('button#list-all-rover-cmds').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('button#list-all-rover-cmds')
+
       $.ajax({
         url: '/rover_drive',
         type: 'POST',
@@ -293,10 +294,7 @@ $(document).keydown(function (e) {
       break
     case 84: // 't' --> toggle listener proxy script
       if (millisSince(lastCmdSent) > LISTENER_TOGGLE_THROTTLE) {
-        $('button#toggle-rover-listener-btn').css(
-          'background-color',
-          'rgb(255, 0, 0)'
-        )
+        lightUp('button#toggle-rover-listener-btn')
 
         let request = ''
 
@@ -337,10 +335,8 @@ $(document).keydown(function (e) {
       }
       break
     case 81: // 'q' --> terminate (quit) listener script
-      $('button#terminate-listener-script').css(
-        'background-color',
-        'rgb(255, 0, 0)'
-      )
+      lightUp('button#terminate-listener-script')
+
       $.ajax({
         url: '/rover_drive',
         type: 'POST',
@@ -372,7 +368,7 @@ $(document).keydown(function (e) {
 $(document).keyup(function (e) {
   switch (e.which) {
     case 65: // left
-      $('#rover-left > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#rover-left > button')
 
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
@@ -392,7 +388,8 @@ $(document).keyup(function (e) {
       break
 
     case 87: // up
-      $('#rover-up > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#rover-up > button')
+
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
         $('#left-front-current').text('0.3')
@@ -411,7 +408,8 @@ $(document).keyup(function (e) {
       break
 
     case 68: // right
-      $('#rover-right > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#rover-right > button')
+
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
         $('#left-front-current').text('0.3')
@@ -430,7 +428,8 @@ $(document).keyup(function (e) {
       break
 
     case 83: // down
-      $('#rover-down > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#rover-down > button')
+
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
         $('#left-front-current').text('0.3')
@@ -449,48 +448,39 @@ $(document).keyup(function (e) {
       break
 
     case 73: // increase throttle
-      $('#throttle-increase > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#throttle-increase > button')
       break
 
     case 74: // decrease throttle
-      $('#throttle-decrease > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#throttle-decrease > button')
       break
 
     case 79: // increase steering
-      $('#steering-increase > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#steering-increase > button')
       break
 
     case 75: // decrease steering
-      $('#steering-decrease > button').css('background-color', 'rgb(74, 0, 0)')
+      dim('#steering-decrease > button')
       break
 
     case 77: // enable rover motors
-      $('button#enable-rover-motors').css('background-color', 'rgb(74, 0, 0)')
+      dim('button#enable-rover-motors')
       break
 
     case 78: // disable rover motors
-      $('button#disable-rover-motors').css('background-color', 'rgb(74, 0, 0)')
+      dim('button#disable-rover-motors')
       break
     case 66: // show buffered serial messages from the MCU
-      $('button#show-buffered-rover-msgs').css(
-        'background-color',
-        'rgb(74, 0, 0)'
-      )
+      dim('button#show-buffered-rover-msgs')
       break
     case 76: // list all rover cmds
-      $('button#list-all-rover-cmds').css('background-color', 'rgb(74, 0, 0)')
+      dim('button#list-all-rover-cmds')
       break
     case 84: // toggle rover listener proxy script
-      $('button#toggle-rover-listener-btn').css(
-        'background-color',
-        'rgb(74, 0, 0)'
-      )
+      dim('button#toggle-rover-listener-btn')
       break
     case 81: // terminate listener script (quit)
-      $('button#terminate-listener-script').css(
-        'background-color',
-        'rgb(74, 0, 0)'
-      )
+      dim('button#terminate-listener-script')
       break
 
     default:
@@ -521,7 +511,7 @@ function gameLoop () {
   if (millisSince(lastCmdSent) > DRIVE_THROTTLE_TIME) {
     // 'a' --> rover turn left
     if (keyState[65]) {
-      $('#rover-left > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#rover-left > button')
 
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
@@ -558,7 +548,7 @@ function gameLoop () {
     }
     // 'w' --> rover forward
     else if (keyState[87]) {
-      $('#rover-up > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#rover-up > button')
 
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
@@ -594,7 +584,7 @@ function gameLoop () {
     }
     // 'd' --> rover right
     else if (keyState[68]) {
-      $('#rover-right > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#rover-right > button')
 
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
@@ -631,7 +621,7 @@ function gameLoop () {
 
     // 's' --> rover back
     else if (keyState[83]) {
-      $('#rover-down > button').css('background-color', 'rgb(255, 0, 0)')
+      lightUp('#rover-down > button')
 
       if (mockRoverTable) {
         $('#left-front-rpm').text('0')
@@ -665,22 +655,6 @@ function gameLoop () {
       })
       lastCmdSent = new Date().getTime()
     }
-    // send REST signal, mimicking behavior of bluetooth setup
-    // else {
-    // $.ajax({
-    //     url: '/rover_drive',
-    //     type: 'POST',
-    //     data: {
-    //         cmd: 'k'
-    //     },
-    //     success: function(response){
-    //         appendToConsole("cmd: " + response.cmd);
-    //         scrollToBottom();
-    //     }
-    // })
-    // }
-    // redraw/reposition your object here
-    // also redraw/animate any objects not controlled by the user
   }
 
   setTimeout(gameLoop, 10)

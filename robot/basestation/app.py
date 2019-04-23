@@ -284,8 +284,6 @@ def manual_control():
         error = "Network is unreachable"
         print(error)
 
-    #feedback = receiver.receive(timeout=2)
-
     print("feedback:", feedback)
 
     if not feedback:
