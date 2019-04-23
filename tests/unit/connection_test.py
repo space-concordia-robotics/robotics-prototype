@@ -31,6 +31,7 @@ def test_send_receive_success():
     sender_thread = threading.Thread(target=sender, args=("127.0.0.1", "hello there"))
 
     receiver_thread.start()
+    time.sleep(0.1)
     sender_thread.start()
 
     # wait until daemon threads have completed their work
