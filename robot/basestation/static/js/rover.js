@@ -337,29 +337,29 @@ $(document).keydown(function (e) {
       }
       break
     case 81: // 'q' --> terminate (quit) listener script
-        $('button#terminate-listener-script').css(
-          'background-color',
-          'rgb(255, 0, 0)'
-        )
-        $.ajax({
-          url: '/rover_drive',
-          type: 'POST',
-          data: {
-            cmd: 'q'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback:\n' + response.feedback)
-            if (!response.feedback.includes('limit exceeded')) {
-              disableRoverListenerBtn()
-            }
-            if (response.error != 'None') {
-              appendToConsole('error:\n' + response.error)
-            }
-            scrollToBottom()
+      $('button#terminate-listener-script').css(
+        'background-color',
+        'rgb(255, 0, 0)'
+      )
+      $.ajax({
+        url: '/rover_drive',
+        type: 'POST',
+        data: {
+          cmd: 'q'
+        },
+        success: function (response) {
+          appendToConsole('cmd: ' + response.cmd)
+          appendToConsole('feedback:\n' + response.feedback)
+          if (!response.feedback.includes('limit exceeded')) {
+            disableRoverListenerBtn()
           }
-        })
-        lastCmdSent = new Date().getTime()
+          if (response.error != 'None') {
+            appendToConsole('error:\n' + response.error)
+          }
+          scrollToBottom()
+        }
+      })
+      lastCmdSent = new Date().getTime()
       break
     default:
       return // exit this handler for other keys
