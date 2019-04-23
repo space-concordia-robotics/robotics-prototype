@@ -16,6 +16,63 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
+function enableArmListenerBtn () {
+  $('#enable-arm-btn')[0].checked = true
+}
+
+function disableArmListenerBtn () {
+  $('#enable-arm-btn')[0].checked = false
+}
+
+$(document).ready(function () {
+  $('#enable-arm-btn').on('click', function (event) {
+    event.preventDefault()
+
+    // click makes it checked during this time, so trying to enable
+    if ($('#enable-arm-btn').is(':checked')) {
+      $.ajax({
+        url: '/task_handler',
+        type: 'POST',
+        data: {
+          cmd: 'enable-arm-listener'
+        },
+        success: function (response) {
+          appendToConsole('cmd: ' + response.cmd)
+          appendToConsole('output: ' + response.output)
+          if (
+            !response.output.includes('Failed') &&
+            !response.output.includes('shutdown request')
+          ) {
+            enableArmListenerBtn()
+          }
+          appendToConsole('error: ' + response.error)
+          scrollToBottom()
+        }
+      })
+    } else {
+      $.ajax({
+        url: '/task_handler',
+        type: 'POST',
+        data: {
+          cmd: 'disable-arm-listener'
+        },
+        success: function (response) {
+          appendToConsole('cmd: ' + response.cmd)
+          appendToConsole('output: ' + response.output)
+          if (
+            !response.output.includes('Failed') &&
+            !response.output.includes('shutdown request')
+          ) {
+            disableArmListenerBtn()
+          }
+          appendToConsole('error: ' + response.error)
+          scrollToBottom()
+        }
+      })
+    }
+  })
+})
+
 // KEYBOARD EVENTS
 // rover ping
 document.addEventListener('keydown', function (event) {

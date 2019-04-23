@@ -97,37 +97,6 @@ function toggleToManual () {
   }
 }
 
-function enableArmListener () {
-  if ($('#enable-arm-btn').is(':checked')) {
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'enable-arm-listener'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        appendToConsole('error: ' + response.error)
-        scrollToBottom()
-      }
-    })
-  } else {
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'disable-arm-listener'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        appendToConsole('error: ' + response.error)
-        scrollToBottom()
-      }
-    })
-  }
-}
 
 // Milliseconds since start time given
 function millisSince (start) {
