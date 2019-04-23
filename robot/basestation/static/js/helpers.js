@@ -76,27 +76,6 @@ function updateOdroidRx () {
     }
   })
 }
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
-
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
-  } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
-  }
-}
-
-function toggleToManual () {
-  if (!$('#manual-control-btn')[0].checked) {
-    $('#manual-control-btn').click()
-  }
-}
-
 
 // Milliseconds since start time given
 function millisSince (start) {
@@ -105,12 +84,12 @@ function millisSince (start) {
 }
 
 // convenience function for UI Buttons
-function lightUp(selector) {
-    $(selector).css('background-color', 'rgb(255, 0, 0)')
+function lightUp (selector) {
+  $(selector).css('background-color', 'rgb(255, 0, 0)')
 }
 
-function dim(selector) {
-    $(selector).css('background-color', 'rgb(74, 0, 0)')
+function dim (selector) {
+  $(selector).css('background-color', 'rgb(74, 0, 0)')
 }
 
 // AJAX

@@ -24,6 +24,27 @@ function disableArmListenerBtn () {
   $('#enable-arm-btn')[0].checked = false
 }
 
+// Manual control
+function manualControl () {
+  var a = document.getElementById('ArmcontrolsOFF')
+  var b = document.getElementById('ArmcontrolsON')
+
+  if (a.style.display === 'none') {
+    a.style.display = 'block'
+    b.style.display = 'none'
+  } else {
+    a.style.display = 'none'
+    b.style.display = 'block'
+    b.style.borderRadius = '0'
+  }
+}
+
+function toggleToManual () {
+  if (!$('#manual-control-btn')[0].checked) {
+    $('#manual-control-btn').click()
+  }
+}
+
 $(document).ready(function () {
   $('#enable-arm-btn').on('click', function (event) {
     event.preventDefault()
