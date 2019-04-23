@@ -4,9 +4,7 @@ import rospy
 from Listener import Listener
 from task_handler.srv import *
 
-# for local testing use "./RoverCommandListenr.py"
-#scripts = ["./RoverCommandListener.py", "/./ArmCommandListener.py"]
-scripts = ["/usr/bin/RoverCommandListener.py", "/usr/bin/ArmCommandListener.py"]
+scripts = ["./RoverCommandListener.py", "/./ArmCommandListener.py"]
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3")]
 known_tasks = ["rover_listener", "arm_listener"]
 
