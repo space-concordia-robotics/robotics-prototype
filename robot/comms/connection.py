@@ -3,12 +3,46 @@
 The intention of this class is to provide an easy way to send/receive messages
 accross a network using objects.
 
-Warnings:
-Note that testing sending and receiving using the same object won't work.
-To do this locally you must create one Connection object specifically or sending,
-the other only for receiving (and they must both be assigned different port numbers).
-It has not yet been officially confirmed, but I think this issue does not exist when testing
-on multiple machines with different IP addresses.
+Testing locally or on multiple machines will affect the way the objects should be created.
+
+------------------------------------------------------------------------------------------
+LOCAL
+------------------------------------------------------------------------------------------
+For local testing you may create corresponding pairs of receiver/sender connection objects,
+making sure to either specify the localhost ("127.0.0.1") ip address for both objects
+or using the machines ip address for both. If you are simply using one script to send data
+and another to receive it, then you may assign the same port number to both objects.
+If you want to have bi-directional communication, you must create a pair of receiver/sender
+connection objects for each script that uses them, and make sure that you choose different
+ports for the communicating pairs.
+
+For an example of one directional communication, see testSend.py/testRecv.py.
+testRecv.py is meant to be run before testSend.py.
+
+Bi-directional configuration:
+
+--> server side
+[...]
+sender = Connection("sender", "127.0.0.1", 5005)
+receiver = Connection("receiver", "127.0.0.1", 5010)
+[...]
+
+--> client side
+receiver = Connection("receiver", "127.0.0.1", 5005)
+sender = Connection("sender", "127.0.0.1", 5010)
+------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------
+REMOTE (MULTIPLE MACHINES)
+------------------------------------------------------------------------------------------
+For remote testing it is the same idea as for local testing except that now when creating
+sender/receiver object pairs across different scripts on different computers on the same
+network you _must_ specify the ip address of the receiving machine for a given pair.
+
+As an example for bi-directional communication see testRemoteSendAndRecv.py/testRemoteRecvAndSend.py
+testRemoteRecvAndSend.py is meant to be run before testRemoteSendAndRecv.py.
+
+As you can see, the same port can be used for all objects in this configuration.
 """
 import socket
 import select
