@@ -11,8 +11,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = True
-competition = False
+local = False
+competition = True
 # dynamic not working properly, keep at False
 dynamic = False
 
@@ -41,12 +41,9 @@ def get_commands_list():
 
 # returns current time in milliseconds
 current_millis = lambda: int(round(time.time() * 1000))
-# pre-determined port for the ArmCommandListener
-SERVER_PORT = 5015
-FEEDBACK_PORT = 5020
 
 if len(sys.argv) == 2:
-    SERVER_PORT = int(sys.argv[1])
+    ROVER_PORT = int(sys.argv[1])
 elif len(sys.argv) >= 3:
     print(
         "too many arguments, one optional argument is the port number, otherwise default to 5010"
@@ -151,21 +148,28 @@ elif uart:
 
 # for local testing
 if local:
-    ROVER_IP = "127.0.0.1" # local testing
+    ROVER_IP = "127.0.0.1"
+    ROVER_PORT = 5020
+    BASE_IP = ROVER_IP
+    BASE_PORT = 5025
 # for competition
 elif competition:
-    ROVER_IP = "172.16.1.30" # competition ip
+    ROVER_IP = "172.16.1.30"
+    ROVER_PORT = 5030
+    BASE_IP = "172.16.1.20"
+    BASE_PORT = ROVER_PORT
 # attempt to get: physicial ip, which should not need connection to internet to work
 #elif dynamic:
 #    ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
 
 print("ROVER_IP: " + ROVER_IP)
+print("BASE_IP: " + BASE_IP)
 
 # Create connection object to send/receive data with base-station
-receiver = Connection("rover_drive_receiver", ROVER_IP, SERVER_PORT)
-sender = Connection("rover_feedback_sender", ROVER_IP, FEEDBACK_PORT)
+receiver = Connection("rover_drive_receiver", ROVER_IP, ROVER_PORT)
+sender = Connection("rover_feedback_sender", BASE_IP, BASE_PORT)
 
-print("Rover server listening on port {} \n".format(SERVER_PORT))
+print("Rover server listening on port {} \n".format(ROVER_PORT))
 
 print("Ready for incoming drive cmds!\n")
 

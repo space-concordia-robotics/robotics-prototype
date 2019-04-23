@@ -13,6 +13,13 @@ from robot.comms.connection import Connection
 
 app = flask.Flask(__name__)
 
+# feature toggles
+# the following two are used for UDP based communication with the Connection class
+global local
+global competition
+local = False
+competition = True
+
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
 
@@ -236,6 +243,7 @@ def click_btn_arm_forward():
 # Manual controls
 @app.route("/manual_control", methods=["POST"])
 def manual_control():
+
     print("manual_control")
 
     cmd = str(request.get_data('cmd'), "utf-8")
@@ -246,11 +254,19 @@ def manual_control():
         # decode URI
         cmd = unquote(cmd)
 
-    rover_ip = "127.0.0.1" # for local testing
-    #rover_ip = "172.16.1.30" # for testing with radios
+    if competition:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5015
+        base_port = rover_port
+    elif local:
+        rover_ip = "127.0.0.1"
+        base_ip = rover_ip
+        rover_port = 5005
+        base_port = 5010
 
     print("cmd: " + cmd)
-    sender = Connection("arm_cmd_sender", rover_ip, 5005)
+    sender = Connection("arm_cmd_sender", rover_ip, rover_port)
     error = str(None)
 
     try:
@@ -259,7 +275,7 @@ def manual_control():
         error = "Network is unreachable"
         print(error)
 
-    receiver = Connection("arm_cmd_receiver", rover_ip, 5010)
+    receiver = Connection("arm_cmd_receiver", base_ip, base_port)
     feedback = str(None)
 
     try:
@@ -267,6 +283,8 @@ def manual_control():
     except OSError:
         error = "Network is unreachable"
         print(error)
+
+    #feedback = receiver.receive(timeout=2)
 
     print("feedback:", feedback)
 
@@ -288,11 +306,19 @@ def rover_drive():
         # decode URI
         cmd = unquote(cmd)
 
-    rover_ip = "127.0.0.1" # for local testing
-    #rover_ip = "172.16.1.30" # for testing with radios
+    if competition:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5030
+        base_port = rover_port
+    elif local:
+        rover_ip = "127.0.0.1"
+        base_ip = rover_ip
+        rover_port = 5020
+        base_port = 5025
 
     print("cmd: " + cmd)
-    sender = Connection("rover_drive_sender", rover_ip, 5015)
+    sender = Connection("rover_drive_sender", rover_ip, rover_port)
 
     error = str(None)
 
@@ -302,7 +328,7 @@ def rover_drive():
         error = "Network is unreachable"
         print(error)
 
-    receiver = Connection("rover_drive_receiver", rover_ip, 5020)
+    receiver = Connection("rover_drive_receiver", base_ip, base_port)
     feedback = str(None)
     error = str(None)
 

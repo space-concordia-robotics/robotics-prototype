@@ -14,8 +14,8 @@ usb = True
 uart = False
 
 # if all the following are False then exit right away
-local = True
-competition = False
+local = False
+competition = True
 #dynamic = True
 
 # note: since this program is in /usr/bin/ on the OBC
@@ -38,12 +38,9 @@ Keys 's' to 'j': move motors 1-6 backwards\n\n"""
 
 # returns current time in milliseconds
 current_millis = lambda: int(round(time.time() * 1000))
-# pre-determined port for the ArmCommandListener
-SERVER_PORT = 5005
-FEEDBACK_PORT = 5010
 
 if len(sys.argv) == 2:
-    SERVER_PORT = int(sys.argv[1])
+    ROVER_PORT = int(sys.argv[1])
 elif len(sys.argv) >= 3:
     print(
         "too many arguments, one optional argument is the port number, otherwise default to 5000"
@@ -145,23 +142,31 @@ if usb:
 elif uart:
     u = Uart("/dev/ttySAC0", 9600)
 
+ROVER_PORT = ""
+BASE_PORT = ""
 # for local testing
 if local:
-    ROVER_IP = "127.0.0.1" # local testing
+    ROVER_IP = "127.0.0.1"
+    BASE_IP = ROVER_IP
+    ROVER_PORT = 5005
+    BASE_PORT = 5010
 # for competition
 elif competition:
-    ROVER_IP = "172.16.1.30" # competition ip
+    ROVER_IP = "172.16.1.30"
+    BASE_IP = "172.16.1.20"
+    ROVER_PORT = 5015
+    BASE_PORT = ROVER_PORT
 # physicial ip, does not need connection to internet to work
 # elif dynamic:
 #     ROVER_IP = ni.ifaddresses(ni.interfaces()[1])[AF_INET][0]['addr']
 
 print("ROVER_IP: " + ROVER_IP)
 
-receiver = Connection("arm_command_receiver", ROVER_IP, SERVER_PORT)
-sender = Connection("arm_feedback_sender", ROVER_IP, FEEDBACK_PORT)
+receiver = Connection("arm_command_receiver", ROVER_IP, ROVER_PORT)
+sender = Connection("arm_feedback_sender", BASE_IP, BASE_PORT)
 
 
-print("Rover server listening on port {} \n".format(SERVER_PORT))
+print("Rover server listening on port {} \n".format(ROVER_PORT))
 
 print("Ready for incoming drive cmds!\n")
 
