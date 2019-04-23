@@ -18,7 +18,7 @@ class Listener:
         self.type = type
 
     def start(self):
-        if self.p1_pid > -1:
+        if self.is_running():
             print("Listener already running")
             return False
 
@@ -70,6 +70,8 @@ class Listener:
                 print("Something went wrong, process defunct (already terminated)")
                 self.p1_pid = -1
                 return False
+        else:
+            return False
 
         return True
 
