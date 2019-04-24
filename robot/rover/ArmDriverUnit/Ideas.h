@@ -148,6 +148,69 @@
   }
 */
 
+// NICK STUFF
+/* variable definitions
+  bool msgCheck = false;
+  bool msgState = false;
+
+  const int ledPin = 13; // note to nick: LED_BUILTIN is predefined in arduino C++ so just use that instead
+  unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated // note to nick: this variable name is too generic given how many other variables are used. Use more specific variable names, and also I recommend using elapsedMillis objects like I do to keep my code consistent
+  int ledState = LOW;
+
+  const int goodBlinkCounter = 4;
+  const int badBlinkCounter = 12;
+  const int goodBlinkInterval = 250;
+  const int badBlinkInterval = 100;
+  bool complete = false; // note to nick: this variable name is way too generic to just be lying around in the middle of all my code. please use something more specific
+*/
+/* if msgReceived
+      msgCheck = true; //Setting message check value to TRUE as a message is received
+      if (msgIsValid == true){
+      msgState = true;
+      }
+      else{
+      msgState = false;
+      }
+*/
+/* in main loop outside of msgReceived
+  if(msgCheck == true){
+  if(msgState == true){
+  msgCheck = Blink(goodBlinkInterval, goodBlinkCounter);
+  }
+  else {
+  msgCheck = Blink(badBlinkInterval, badBlinkCounter);
+  }
+  }
+  else {
+  heartbeat();
+  }
+*/
+/* function definitions
+  bool Blink(const int ledInterval, int maxBlinks){
+  static bool complete = false;
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis >= ledInterval){
+    previousMillis = currentMillis;
+    if(ledState == LOW){
+      ledState = HIGH;
+    } else{
+      ledState = LOW;
+    }
+    digitalWrite(led, ledState);
+    Serial.println(ledState);
+    blinkCounter++;
+  }
+  if(blinkCounter == maxBlinks){
+    complete = true;
+    blinkCounter = 0;
+  }
+  return complete;
+  }
+
+  void heartbeat(){
+
+  }
+*/
 // ABTIN STUFF
 //setup(){
 /*

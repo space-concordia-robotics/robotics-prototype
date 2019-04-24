@@ -118,21 +118,17 @@ Parser Parser; //!< object which parses and verifies commands
 bool msgReceived = false; //!< If true, the MCU will attempt to interpret a command.
 bool msgIsValid = false; //!< If true, the MCU will execute a command. Otherwise, it will send an error message.
 
-/*LED variables*/
-/*
-  bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink (but it's not a blocking while loop).
-  bool msgState = false; //!< If true, blinking will be in the success pattern. Otherwise it will be in the error pattern.
-
-  const int ledPin = 13; // note to nick: LED_BUILTIN is predefined in arduino C++ so just use that instead
-  unsigned long int previousMillis = 0; //stores previous time (in millis) LED was updated // note to nick: this variable name is too generic given how many other variables are used. Use more specific variable names, and also I recommend using elapsedMillis objects like I do to keep my code consistent
-  int ledState = LOW;
-
-  const int goodBlinkCounter = 4;
-  const int badBlinkCounter = 12;
-  const int goodBlinkInterval = 250;
-  const int badBlinkInterval = 100;
-  bool complete = false; // note to nick: this variable name is way too generic to just be lying around in the middle of all my code. please use something more specific
-*/
+/* blink variables */
+bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink
+enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
+int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
+bool startBlinking = false; //!< if true, teensy blinks as response to a message
+int blinkCount = 0; //!< when it reaches max it goes back to heartbeat
+#define MAX_GOOD_BLINKS 5
+#define MAX_BAD_BLINKS 10
+#define GOOD_BLINK_PERIOD 100
+#define BAD_BLINK_PERIOD 70
+#define HEARTBEAT_PERIOD 1000
 
 // develmode1 actually isn't for ros... i will have to change things if i want ros over usb
 #ifdef DEVEL_MODE_1 // using the USB port
@@ -212,7 +208,7 @@ IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
 elapsedMillis sinceAnglePrint; //!< how long since last time angle data was sent
-// note to nick: i'd recommend putting your blinkled timer here
+elapsedMillis sinceBlink; //!< how long since previous blink occurred
 
 // homing variables
 bool isHoming = false; //!< true while arm is homing, false otherwise
@@ -227,6 +223,8 @@ void initSpeedParams(void); //!< setup open and closed loop speed parameters
 void initMotorTimers(void); //!< start the timers which control the motors
 
 void printMotorAngles(void); //!< sends all motor angles over serial
+void clearBlinkState(void); //!< sets some blink variables to zero
+void blinkLED(void); //!< blinks LED based on global variables
 void respondToLimitSwitches(void); //!< move motor back into software angle range. This function behaves differently each loop
 void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
 
@@ -339,7 +337,9 @@ void loop() {
   }
 #endif
   if (msgReceived) {
+    startBlinking = true;
     if (msgIsValid) {
+      blinkType = GOOD_BLINK; // alert the blink check that it was a good message
       if (motorCommand.pingCommand) { // respond to ping
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("pong");
@@ -609,42 +609,24 @@ void loop() {
       }
     }
     else { // alert the user that it's a bad command
+      blinkType = BAD_BLINK; // alert the blink check that it was a bad message
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
       UART_PORT.println("$E,Error: bad motor command");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
       nh.logerror("error: bad motor command");
 #endif
     }
-    /*
-      // blinkled stuff
-      msgCheck = true; //Setting message check value to TRUE as a message is received
-      if (msgIsValid == true){
-      msgState = true;
-      }
-      else{
-      msgState = false;
-      }
-    */
   }
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
   }
 
-  /* heartbeat code blinkled stuff */
-  /*
-    if(msgCheck == true){
-    if(msgState == true){
-      msgCheck = Blink(goodBlinkInterval, goodBlinkCounter);
-    }
-    else {
-      msgCheck = Blink(badBlinkInterval, badBlinkCounter);
-    }
-    }
-    else {
-    heartbeat();
-    }
-  */
+  if (startBlinking){ // freshen things up before changing blink type
+    startBlinking = false;
+    clearBlinkState();
+  }
+  blinkLED(); // decides how to blink based on global variables
 }
 
 /* initialization functions */
@@ -814,6 +796,46 @@ void printMotorAngles(void) {
   pub_m6.publish(&m6_angle_msg);
   nh.spinOnce(); // does it cause problems if i spin twice in loop()
 #endif
+}
+void clearBlinkState(void){
+  digitalWrite(LED_BUILTIN, LOW);
+  blinkCount = 0;
+  sinceBlink = 0;
+}
+void blinkLED(void){
+  if (blinkType == HEARTBEAT && sinceBlink >= HEARTBEAT_PERIOD){
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+    sinceBlink = 0;
+  }
+  else if (blinkType == GOOD_BLINK && sinceBlink >= GOOD_BLINK_PERIOD) {
+    if (blinkCount >= MAX_GOOD_BLINKS){
+      blinkType = HEARTBEAT;
+      clearBlinkState();
+    }
+    else {
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+      sinceBlink = 0;
+      if (digitalRead(LED_BUILTIN)){
+        blinkCount++;
+      }
+    }
+  }
+  else if (blinkType == BAD_BLINK && sinceBlink >= BAD_BLINK_PERIOD){
+    if (blinkCount >= MAX_BAD_BLINKS){
+      blinkType = HEARTBEAT;
+      clearBlinkState();
+    }
+    else {
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+      sinceBlink = 0;
+      if (digitalRead(LED_BUILTIN)){
+        blinkCount++;
+      }
+    }
+  }
+  else { // do nothing
+    ;
+  }
 }
 void respondToLimitSwitches(void) {
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
@@ -1164,35 +1186,5 @@ void m4ExtendISR(void) {
   }
   void m6OpenISR(void) {
     ;
-  }
-*/
-
-/*LED blink when message received */
-/*When a good message is received, ledInterval = 250, maxBlinks = 4*/
-/*When a bad message is received, ledInterval = 100, maxBlinks = 12*/
-/*
-  bool Blink(const int ledInterval, int maxBlinks){
-  static bool complete = false;
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= ledInterval){
-    previousMillis = currentMillis;
-    if(ledState == LOW){
-      ledState = HIGH;
-    } else{
-      ledState = LOW;
-    }
-    digitalWrite(led, ledState);
-    Serial.println(ledState);
-    blinkCounter++;
-  }
-  if(blinkCounter == maxBlinks){
-    complete = true;
-    blinkCounter = 0;
-  }
-  return complete;
-  }
-
-  void heartbeat(){
-
   }
 */
