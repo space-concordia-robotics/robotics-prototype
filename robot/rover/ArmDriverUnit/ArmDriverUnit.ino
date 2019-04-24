@@ -227,7 +227,7 @@ void clearBlinkState(void); //!< sets some blink variables to zero
 void blinkLED(void); //!< blinks LED based on global variables
 void respondToLimitSwitches(void); //!< move motor back into software angle range. This function behaves differently each loop
 void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
-
+void rebootTeensy(void); //!< reboots the teensy using the watchdog timer
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
 void m1_encoder_interrupt(void);
@@ -347,7 +347,7 @@ void loop() {
         nh.loginfo("pong");
 #endif
       }
-      if (motorCommand.whoCommand) { // respond to ping
+      else if (motorCommand.whoCommand) { // respond to ping
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("arm");
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
@@ -371,6 +371,14 @@ void loop() {
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
         nh.loginfo("all motors stopped because of emergency stop");
 #endif
+      }
+      else if (motorCommand.rebootCommand) {
+        #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+        UART_PORT.println("rebooting arm teensy... hang on a sec");
+#elif defined(DEBUG_MODE) || defined(USER_MODE)
+        nh.loginfo("rebooting arm teensy... hang on a sec");
+#endif
+        rebootTeensy();
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
@@ -934,6 +942,16 @@ if (motorsToHome[homingMotor]) {
     // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
     homingMotor = -1; // reset it until next homing call
   }
+}
+void rebootTeensy(void) { //!< software reset function using watchdog timer
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ1; 
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ2; 
+  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to.
+  WDOG_TOVALH = 0; //End value WDT compares itself to. 
+  WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN | 
+  WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
+  WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
+  while(1); // infinite do nothing loop -- wait for the countdown
 }
 
 /* timer interrupts */

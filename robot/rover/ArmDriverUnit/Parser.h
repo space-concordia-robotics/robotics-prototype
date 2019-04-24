@@ -14,6 +14,7 @@ struct commandInfo {
   bool pingCommand = false; //!< for ping command
   bool whoCommand = false; //!< for asking which teensy it is
   bool stopAllMotors = false; //!< for stopping all motors
+  bool rebootCommand = false; //!< reboots teensy with watchdog
   bool resetAllMotors = false; //!< for resetting all angle values
   bool armSpeedCommand = false; //!< for adjusting overall arm speed
   float armSpeedMultiplier = 1.0; //!< what speed multiplier the arm should have
@@ -123,6 +124,13 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     cmd.stopAllMotors = true;
 #ifdef DEBUG_PARSING
     UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
+#endif
+  }
+  else if (String(msgElem) == "reboot") {
+    // msgElem is a char array so it's safer to convert to string first
+    cmd.rebootCommand = true;
+#ifdef DEBUG_PARSING
+    UART_PORT.println("$S,Success: parsed command to reboot arm teensy");
 #endif
   }
   else if (String(msgElem) == "home") {
@@ -489,6 +497,12 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.stopAllMotors) {
 #ifdef DEBUG_VERIFYING
     UART_PORT.println("$S,Success: verified command to stop all motors");
+#endif
+    return true;
+  }
+  else if (cmd.rebootCommand) {
+#ifdef DEBUG_VERIFYING
+    UART_PORT.println("$S,Success: verified command to reboot arm teensy");
 #endif
     return true;
   }

@@ -1,15 +1,6 @@
 /*
   24) maybe we should have some way of covering the limit switches - what if someone accidentally presses one?
   thushanth said the way that 3d printers work is they move away then slowly move back to hit the switch again as a check
-  
- 
-  void sw_reset()
-// software reset function using watchdog timer
-{
-  wdt_enable(WDTO_15MS); // sets a "watchdog" timer to 15 ms
-  // so the arduino will reset in 15 ms if the timer is not stopped
-  while(1); // infinite do nothing loop -- wait for the countdown
-}
 
 // the following works if the switches are debounced by the hardware
   /*
