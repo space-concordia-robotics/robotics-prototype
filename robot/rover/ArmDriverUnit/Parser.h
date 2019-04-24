@@ -34,6 +34,13 @@ struct commandInfo {
   float gearRatioVal = 0.0; //!< what's the new gear ratio
   bool openLoopGainCommand = false; //!< to change open loop gain
   float openLoopGain = 0.0; //!< adjusts how long to turn a motor in open loop
+  bool pidCommand = false; //!< adjusts pid constants
+  bool kpCommand = false;
+  bool kiCommand = false;
+  bool kdCommand = false;
+  float kp = 0.0; //<! pid proportional gain
+  float ki = 0.0; //<! pid proportional gain
+  float kd = 0.0; //<! pid proportional gain
   bool motorSpeedCommand = false; //!< for changing motor speed
   float motorSpeed = 0.0; //!< what motor speed to set to
 
@@ -296,11 +303,6 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
           UART_PORT.println(cmd.anglesToReach[cmd.whichMotor - 1]);
 #endif
         }
-        else {
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed desired angle is not a number");
-#endif
-        }
       }
       else if (String(msgElem) == "gear") { // check for gear ratio change command
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
@@ -323,6 +325,57 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #ifdef DEBUG_PARSING
           UART_PORT.print("$S,Success: parsed desired open loop gain ");
           UART_PORT.println(cmd.openLoopGain);
+#endif
+        }
+      }
+      else if (String(msgElem) == "kp") { // check for kp gain command
+        msgElem = strtok_r(NULL, " ", &restOfMessage);
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.kp = atof(msgElem);
+          cmd.kpCommand = true;
+          cmd.pidCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired kp ");
+          UART_PORT.println(cmd.kp);
+#endif
+        }
+        else {
+#ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed kp gain is not a number");
+#endif
+        }
+      }
+      else if (String(msgElem) == "ki") { // check for ki gain command
+        msgElem = strtok_r(NULL, " ", &restOfMessage);
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.ki = atof(msgElem);
+          cmd.kiCommand = true;
+          cmd.pidCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired ki ");
+          UART_PORT.println(cmd.ki);
+#endif
+        }
+        else {
+#ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed ki gain is not a number");
+#endif
+        }
+      }
+      else if (String(msgElem) == "kd") { // check for kd gain command
+        msgElem = strtok_r(NULL, " ", &restOfMessage);
+        if (isValidNumber(String(msgElem), 'f')) {
+          cmd.kd = atof(msgElem);
+          cmd.kdCommand = true;
+          cmd.pidCommand = true;
+#ifdef DEBUG_PARSING
+          UART_PORT.print("$S,Success: parsed desired kd ");
+          UART_PORT.println(cmd.kd);
+#endif
+        }
+        else {
+#ifdef DEBUG_PARSING
+          UART_PORT.println("$E,Error: parsed kd gain is not a number");
 #endif
         }
       }
@@ -556,6 +609,38 @@ bool Parser::verifCommand(commandInfo cmd) {
       UART_PORT.println(cmd.openLoopGain);
 #endif
       return true;
+    }
+    else if (cmd.pidCommand) {
+      if (cmd.kpCommand) {
+#ifdef DEBUG_VERIFYING
+        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("kp gain to ");
+        UART_PORT.println(cmd.kp);
+#endif
+        return true;
+      }
+      else if (cmd.kiCommand) {
+#ifdef DEBUG_VERIFYING
+        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("ki gain to ");
+        UART_PORT.println(cmd.ki);
+#endif
+        return true;
+      }
+      else if (cmd.kdCommand) {
+#ifdef DEBUG_VERIFYING
+        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("kd gain to ");
+        UART_PORT.println(cmd.kd);
+#endif
+        return true;
+      }
+      else {
+#ifdef DEBUG_VERIFYING
+        UART_PORT.println("$E,Error: not a command for kp, ki or kd");
+#endif
+        return false;
+      }
     }
     else if (cmd.motorSpeedCommand) {
 #ifdef DEBUG_VERIFYING

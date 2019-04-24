@@ -1,5 +1,4 @@
-/* idea for stepper checks in open loop */
-/*
+/* // idea for stepper checks in open loop
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) { // for open loop quasi closed loop control
     // this code could (should?) also disable power
   // if (motor1.movementDone) motor1.disablePower();
@@ -76,72 +75,9 @@
   sinceStepperCheck = 0;
   }
 */
-/* idea to use a loop for motor control. scrapped because was trying to access motor-unique functions */
+
+/* create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class */
 /*
-  for(int i=0;i<NUM_MOTORS;i++){
-  if (motorCommand.motorsToMove[i]){
-
-    if(motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])){
-      if(motorArray[i]->isOpenLoop){
-        motorArray[i]->calcCurrentAngle(); //does it actually need to do this?
-        motorArray[i]->openLoopError=motorArray[i]->getDesiredAngle()-motorArray[i]->getCurrentAngle();
-        motorArray[i]->calcDirection(motorArray[i]->openLoopError);
-        if(motorArray[i]->motorType==DC_MOTOR){
-          if(motorArray[i]->calcTurningDuration(motorArray[i]->openLoopError)){
-            motorArray[i]->timeCount = 0;
-            motorArray[i]->movementDone = false;
-            UART_PORT.print("$S,Success: motor ");
-                        UART_PORT.print(i+1);
-                        UART_PORT.print(" to turn for ");
-                        UART_PORT.print(motorArray[i]->numMillis);
-                        UART_PORT.println(" milliseconds");
-          }
-          else{
-            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
-          }
-        }
-        else if(motorArray[i]->motorType==STEPPER_MOTOR){
-          if(motorArray[i]->calcNumSteps(motorArray[i]->openLoopError)){
-          // I don't set stepCount to 0?
-            motorArray[i]->enablePower();
-            motorArray[i]->movementDone = false;
-            UART_PORT.print("$S,Success: motor ");
-                        UART_PORT.print(i+1);
-                        UART_PORT.print(" to turn ");
-                        UART_PORT.print(motorArray[i]->numSteps);
-                        UART_PORT.println(" steps");
-          }
-          else{
-            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
-          }
-        }
-        else if(motorArray[i]->motorType==SERVO_MOTOR){
-          if(motorArray[i]->calcTurningDuration(motorArray[i]->openLoopError)){
-            motorArray[i]->timeCount = 0;
-            motorArray[i]->movementDone = false;
-            UART_PORT.print("$S,Success: motor ");
-                        UART_PORT.print(i+1);
-                        UART_PORT.print(" to turn for ");
-                        UART_PORT.print(motorArray[i]->numMillis);
-                        UART_PORT.println(" milliseconds");
-          }
-          else{
-            UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
-          }
-        }
-      }
-      else if(!(motorArray[i]->isOpenLoop)){
-        if(motorArray[i]->motorType==STEPPER_MOTOR){
-          motorArray[i]->enablePower();
-        }
-        motorArray[i]->movementDone = false;
-      }
-    }
-  }
-  }
-*/
-
-/*  // create wrappers to circumvent C++ refusing to attach instance-dependent interrupts inside a class
   void m1WrapperISR(void) {
   motor1.encoder_interrupt();
   }
@@ -157,7 +93,6 @@
   //void m5WrapperISR(void){ motor5.encoder_interrupt(); }
   //void m6WrapperISR(void){ motor6.encoder_interrupt(); }
 */
-
 /*
        attachInterrupt(motor1.encoderPinA, m1WrapperISR, CHANGE);
       attachInterrupt(motor1.encoderPinB, m1WrapperISR, CHANGE);
@@ -179,8 +114,7 @@
   attachInterrupt(motor6.encoderPinB, m6WrapperISR, CHANGE);
 */
 
-/*
-  // for multiple steppers in same timer interrupt (incomplete, complicated to implement)
+/* // for multiple steppers in same timer interrupt (incomplete, complicated to implement)
   void stepperInterrupt(void) {
   static int nextInterval = 0;
   int i = 3;
@@ -197,8 +131,7 @@
   }
 */
 
-/*
-  // takes the key (speed, time, etc) and updates?outputs? the next value
+/* // takes the key (speed, time, etc) and updates?outputs? the next value
   // this one is for unsigned ints, would need to define separate ones for other data types?
   parseKey(String key, unsigned int valueOut, String delimeter, unsigned int minVal, unsigned int maxVal) {
   char *msgElem = strtok_r(NULL, delimeter, &restOfMessage); // find the next message element
@@ -216,7 +149,6 @@
 */
 
 // ABTIN STUFF
-
 //setup(){
 /*
   noInterrupts();
@@ -259,7 +191,6 @@
   }
   }
 */
-
 /* void startMovement() {
   OCR1A = c0;
   TIMER1_INTERRUPTS_ON

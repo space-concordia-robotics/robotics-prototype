@@ -471,6 +471,16 @@ void loop() {
             UART_PORT.print(" has a new open loop gain of "); UART_PORT.println(motorCommand.openLoopGain);
 #endif
           }
+          else if (motorCommand.pidCommand) { // set open loop gain for appropriate motor
+            motorArray[motorCommand.whichMotor - 1]->pidController.setGainConstants(motorCommand.kp, motorCommand.ki, motorCommand.kd);
+#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+            UART_PORT.print("motor "); UART_PORT.print(motorCommand.whichMotor);
+            UART_PORT.print(" has new pid gains. kp: ");
+            UART_PORT.print(motorCommand.kp); UART_PORT.print(" ki: ");
+            UART_PORT.print(motorCommand.ki); UART_PORT.print(" kd: ");
+            UART_PORT.println(motorCommand.kd);
+#endif
+          }
           else if (motorCommand.motorSpeedCommand) { // set speed for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -663,43 +673,33 @@ void initComms(void) {
 void initEncoders(void) {
   // each motor with an encoder needs to attach the encoder and 2 interrupts
   // this function also sets pid parameters
-#ifdef M1_ENCODER_PORT
+  #ifdef DEBUG_MAIN
+  UART_PORT.println("Attaching encoders to motor objects and attaching encoder interrupts, changing edge.");
+  #endif
+  
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
-  // motor1.pidController.setGainConstants(0.35,0.000001,15.0);
   motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M2_ENCODER_PORT
+
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
   motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M3_ENCODER_PORT
+
+  //UART_PORT.println(motor2.encoderPinA);
+  //UART_PORT.println(motor2.encoderPinB);
+  
   motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
   attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
-  motor3.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M4_ENCODER_PORT
-  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
-  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
-  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
-  motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M5_ENCODER_PORT
-  motor5.attachEncoder(M5_ENCODER_A, M5_ENCODER_B, M5_ENCODER_PORT, M5_ENCODER_SHIFT, M5_ENCODER_RESOLUTION);
-  attachInterrupt(motor5.encoderPinA, m5_encoder_interrupt, CHANGE);
-  attachInterrupt(motor5.encoderPinB, m5_encoder_interrupt, CHANGE);
-  motor5.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
-#ifdef M6_ENCODER_PORT
-  motor6.attachEncoder(M6_ENCODER_A, M6_ENCODER_B, M6_ENCODER_PORT, M6_ENCODER_SHIFT, M6_ENCODER_RESOLUTION);
-  attachInterrupt(motor6.encoderPinA, m6_encoder_interrupt, CHANGE);
-  attachInterrupt(motor6.encoderPinB, m6_encoder_interrupt, CHANGE);
-  motor6.pidController.setGainConstants(1.0, 0.0, 0.0);
-#endif
+  motor3.pidController.setGainConstants(1.0, 0.005, 0.0);
+  
+  // motor4 is still a stepper for now
+  //motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
+  //attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+  //motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
 }
 void initLimitSwitches(void) {
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
@@ -747,7 +747,7 @@ void initLimitSwitches(void) {
 void initSpeedParams(void) {
   // set max and min speeds (in percentage)
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.setMotorSpeed(50); // needs to be tuned
+  motor1.setMotorSpeed(10); // needs to be tuned
   motor2.setMotorSpeed(30); // needs to be tuned
   motor3.setMotorSpeed(60); // needs to be tuned
   motor4.setMotorSpeed(90); // needs to be tuned?
@@ -795,6 +795,10 @@ void printMotorAngles(void) {
       UART_PORT.println("");
     }
   }
+  //UART_PORT.println(motor1.encoderCount);
+  //UART_PORT.println(motor2.encoderCount);
+  //UART_PORT.println(motor3.encoderCount);
+  //UART_PORT.println(digitalRead(motor3.encoderPinA));
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
   float angles[NUM_MOTORS];
   for (int i = 0; i < NUM_MOTORS; i++) {
@@ -949,6 +953,7 @@ void m1_encoder_interrupt(void) {
   UART_PORT.print("motor 1 "); UART_PORT.println(motor1.encoderCount);
 #endif
 }
+
 /*
   //! use this version if only one encoder channel is working
   void m1_encoder_interrupt(void) {
