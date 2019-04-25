@@ -1,23 +1,46 @@
 #include <Arduino.h>
-
+/*
+// for testing encoder counts on m2 pins
 //#define M2_ENCODER_PORT    GPIOA_PDIR
 //#define M2_ENCODER_SHIFT   CORE_PIN26_BIT
-#define M2_ENCODER_A       26
-#define M2_ENCODER_B       27
+int encoderA = 26;
+int encoderB = 27;
 int pwmpin = 30;
 int dirpin = 31;
+*/
+// for testing that both encoder channels work on m1 pins
+int pwmpin = 6;
+int dirpin = 5;
+int encoderA = 7;
+int encoderB = 8;
+
+// for 99 ratio (84rpm)
+float countablesPerRev = 4776.384; // every changing edge
+//float gear = 99.508;
+
+// for 189 ratio
+/*
 float countablesPerRev = 9053.328; // every changing edge
 //float gear = 188.611;
+*/
+
 volatile unsigned long encoderCount = 0;
 float revolutions = 0;
 float gearAngle = 0;
-int pwmval = 64;
+int pwmval = 50;
 char serialBuffer[100];
 elapsedMillis timer;
 
+/*
+// for testing encoder counts
 void ISR(void) {
   encoderCount++;
 }
+*/
+
+// for testing both encoder channels
+void ISRA(void){Serial.println("A");encoderCount++;}
+void ISRB(void){Serial.println("B");encoderCount++;}
 
 void printCommands(void) {
   Serial.println("start: start dc motor");
@@ -35,10 +58,16 @@ void setup() {
   Serial.begin(115200); Serial.setTimeout(10);
   pinMode(pwmpin, OUTPUT);
   pinMode(dirpin, OUTPUT); // for new driver
-  pinMode(M2_ENCODER_A, INPUT_PULLUP);
-  pinMode(M2_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(M2_ENCODER_A, ISR, CHANGE);
-  attachInterrupt(M2_ENCODER_B, ISR, CHANGE);
+  pinMode(encoderA, INPUT_PULLUP);
+  pinMode(encoderB, INPUT_PULLUP);
+  /*
+  // for testing encoder increment
+  attachInterrupt(encoderA, ISR, CHANGE);
+  attachInterrupt(encoderB, ISR, CHANGE);
+  */
+  // for testing both encoder channels
+  attachInterrupt(encoderA, ISRA, CHANGE);
+  attachInterrupt(encoderB, ISRA, CHANGE);
 
   digitalWrite(dirpin, LOW);
   analogWrite(pwmpin, 0);

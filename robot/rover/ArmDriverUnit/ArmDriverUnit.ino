@@ -1,35 +1,28 @@
 /*
   This is the main sketch which defines the control logic of the robotic arm of
-  the Space Concordia Division, which runs on a Teensy 3.6 that will communicate
+  the Space Concordia Division, which runs on a Teensy 3.6 that communicates
   with an Odroid XU4.
+  
   The code can be compiled for serial communication over usb (if connected to a
   standard computer), or for serial communication over TX/RX pins (if connected
   to the Odroid). In the latter case, communication can be done either directly
   with Serial1, or with ROSserial, if integration in the ROS network is desired.
-  Currently, this code is built for the control of six motors: two DC motors,
-  two stepper motors, and two continuous rotation servos. Several helper classes
+  Currently, this code is built for the control of six motors: three DC motors,
+  one stepper motor, and two continuous rotation servos. Several helper classes
   were written to abstract away the complexities of controlling different types
   of motors and communicating with a master device.
+  
   The code allows position control for all six of the arm's joints. It also
-  will have a homing routine which depends on limit switches and sets the
+  has a homing routine which depends on limit switches and sets the
   0 degrees position for each joint. The code also allows to stop motors at
   any point in time. Open loop control can be performed without the use of
   encoders but results in imprecise and jerky control. Use of ramping allows
   for less jerky control. The best control is closed loop control, which uses
-  encoders for smooth speed profiles.
-  The code starts by setting up a variety of events. It sets up the Teensy's
-  GPIO pins, initializes the motor objects with the correct parameters (gear
-  ratio, angle limits, etc), it starts up the timers and interrupt service
-  routines, and it initializes communications with the master device.
-  The main loop listens over the serial port for commands, parses them,
-  then verifies the commands. Based on the type of command, the microcontroller
-  will know how to control the motors.
-  Variables changed in the main loop allow the timer interrupts to actually turn
-  the motors, either in open loop or closed loop. The main loop can also perform
-  periodic checks for motors in open loop, to effectuate small corrections to
-  position during movements - if the appropriate motor has an encoder on it.
+  encoders for smooth speed profiles. Many parameters can be adjusted with the
+  appropriate command. The Teensy also has a software reboot command.
+  
   This code began development sometime in July 2018 and is still being
-  updated as of March 27 2019.
+  updated as of April 24 2019.
 */
 
 /* still in idea phase */
@@ -124,9 +117,9 @@ enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on 
 int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
 bool startBlinking = false; //!< if true, teensy blinks as response to a message
 int blinkCount = 0; //!< when it reaches max it goes back to heartbeat
-#define MAX_GOOD_BLINKS 5
+#define MAX_GOOD_BLINKS 2
 #define MAX_BAD_BLINKS 10
-#define GOOD_BLINK_PERIOD 100
+#define GOOD_BLINK_PERIOD 250
 #define BAD_BLINK_PERIOD 70
 #define HEARTBEAT_PERIOD 1000
 
@@ -638,7 +631,7 @@ void loop() {
 }
 
 /* initialization functions */
-void initComms(void) {
+void initComms(void) { //!< Starts up serial comms over USB or UART and uses ROSserial if the macro is defined
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.begin(BAUD_RATE);
   UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
@@ -660,9 +653,10 @@ void initComms(void) {
   m6_angle_msg.header.frame_id = m6FrameId;
 #endif
 }
+/*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
+ * This function also sets pid parameters and joint angle tolerances.
+ */
 void initEncoders(void) {
-  // each motor with an encoder needs to attach the encoder and 2 interrupts
-  // this function also sets pid parameters
   #ifdef DEBUG_MAIN
   UART_PORT.println("Attaching encoders to motor objects and attaching encoder interrupts, changing edge.");
   #endif
@@ -670,35 +664,50 @@ void initEncoders(void) {
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
   attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
-  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
-
+  
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
   attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
-  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
-
-  //UART_PORT.println(motor2.encoderPinA);
-  //UART_PORT.println(motor2.encoderPinB);
   
   motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
   attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
-  motor3.pidController.setGainConstants(1.0, 0.005, 0.0);
-  
+    
   // motor4 is still a stepper for now
   //motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
   //attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   //attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
-  //motor4.pidController.setGainConstants(1.0, 0.0, 0.0);
+
+  // set pid gains
+  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
+  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
+  motor3.pidController.setGainConstants(1.0, 0.005, 0.0);
+  //motor4.pidController.setGainConstants(1.0, 0.0, 0.0); // motor4 is still a stepper for now
+
+  // set motor shaft angle tolerances
+  motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+  motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
+  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * 2 * motor3.gearRatioReciprocal);
+  motor4.pidController.setJointAngleTolerance(0.1);//1.8 * 2 * motor4.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
+  motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+  motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
+/*! Each motor with limit switches needs to attach the limit switch and 2 ish interrupts.
+ *  this function also sets angle limits for the joints
+*/
 void initLimitSwitches(void) {
-  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper
+  #ifdef DEBUG_MAIN
+  UART_PORT.println("Attaching limit switches to motor objects and attaching limit switch interrupts, falling edge.");
+  #endif
+  
+  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper (assuming only one switch)
   //motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
   motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
   //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
   //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
+  
   //attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
@@ -718,29 +727,25 @@ void initLimitSwitches(void) {
   motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
   // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
   motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
-
-  // set motor shaft angle tolerances
-  motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
-  motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
-  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * 2 * motor3.gearRatioReciprocal);
-  motor4.pidController.setJointAngleTolerance(0.1);//1.8 * 2 * motor4.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
-  motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
-  motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
-/*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor,
-   and finally, sets openLoopGain for any non-stepper motor.
-
-   \todo stepper doesn't have speed the way servos and dcs do??????
-   this is because stepper calculates speed using durations, but this means
-   openLoopGain and openLoopSpeed mean nothing for it???
+/*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor.
+ * Also sets openLoopGain for any non-stepper motor.
+ *
+ * \todo stepper doesn't have speed the way servos and dcs do??????
+ * this is because stepper calculates speed using durations, but this means
+ * openLoopGain and openLoopSpeed mean nothing for it???
 */
 void initSpeedParams(void) {
-  // set max and min speeds (in percentage)
+  // set speed limits (in percentage). It also sets open loop gains to make sure the angle estimations are ok
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-  motor1.setMotorSpeed(10); // needs to be tuned
-  motor2.setMotorSpeed(30); // needs to be tuned
-  motor3.setMotorSpeed(60); // needs to be tuned
-  motor4.setMotorSpeed(90); // needs to be tuned?
+  #ifdef DEBUG_MAIN
+  UART_PORT.println("Setting motor speeds and open loop gains.");
+  #endif
+  
+  motor1.setMotorSpeed(40); // 84 rpm
+  motor2.setMotorSpeed(30); // 32 rpm... 30 was for 45rpm though. needs to be tuned.
+  motor3.setMotorSpeed(60); // 45 rpm
+  motor4.setMotorSpeed(90); // needs to be tuned with new dc motor
   motor5.setMotorSpeed(50); // probably done tuning
   motor6.setMotorSpeed(50); // probably done tuning
 
@@ -763,7 +768,12 @@ void initSpeedParams(void) {
   motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
   motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
+//! Attaches interrupt functions to motor timers. Also sets interrupt priorities.
 void initMotorTimers(void) {
+  #ifdef DEBUG_MAIN
+  UART_PORT.println("Starting up motor timer interrupts.");
+  #endif
+  
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
   m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
@@ -772,7 +782,7 @@ void initMotorTimers(void) {
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
-/* functions which apply to all motors */
+/* functions which apply to all motors or to the teensy in general */
 void printMotorAngles(void) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.print("Motor Angles: ");
