@@ -51,8 +51,7 @@ StepperMotor::StepperMotor(int enablePin, int dirPin, int stepPin, float stepRes
 {
   numStepperMotors++;
   // variables declared in RobotMotor require the this-> operator
-  this -> gearRatio = gearRatio;
-  this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  setGearRatio(gearRatio);
   this -> motorType = STEPPER_MOTOR;
   hasEncoder = false; // by default the motor has no encoder
   stepResolution = fullStepResolution * steppingMode;
@@ -171,7 +170,7 @@ bool StepperMotor::calcCurrentAngle(void) {
     return true;
   }
   else if (hasEncoder) {
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    currentAngle = directionModifier * (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     imaginedAngle = currentAngle;
     return true;
   }

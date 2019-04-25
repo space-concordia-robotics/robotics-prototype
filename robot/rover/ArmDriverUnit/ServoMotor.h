@@ -39,8 +39,7 @@ ServoMotor::ServoMotor(int pwmPin, float gearRatio):
   servo.attach(pwmPin);
   numServoMotors++;
   // variables declared in RobotMotor require the this-> operator
-  this -> gearRatio = gearRatio;
-  this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  setGearRatio(gearRatio);
   this -> motorType = CONTINUOUS_SERVO;
   hasEncoder = false;
 }
@@ -98,7 +97,7 @@ void ServoMotor::motorTimerInterrupt(void) {
       else {
         int dir = calcDirection(output);
         setVelocity(dir, output);
-#ifdef DEBUG_DC_TIMER
+#ifdef DEBUG_SERVO_TIMER
         UART_PORT.println("motor");
         UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
         UART_PORT.print(output); UART_PORT.println(" next output");
@@ -143,7 +142,7 @@ bool ServoMotor::calcCurrentAngle(void) {
     return true;
   }
   else if (hasEncoder) {
-    currentAngle = (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    currentAngle = directionModifier * (float) encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     imaginedAngle = currentAngle;
     return true;
   }

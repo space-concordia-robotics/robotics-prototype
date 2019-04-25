@@ -97,7 +97,6 @@ float PidController::updatePID(volatile float currentAngle, float desiredAngle) 
     UART_PORT.print("PID output is: ");
     UART_PORT.println(pidSum);
 #endif
-
     if (pidSum > maxOutputValue)    {
       pidOutput = maxOutputValue; // give max output
     }

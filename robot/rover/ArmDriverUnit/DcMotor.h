@@ -37,8 +37,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
 {
   numDcMotors++;
   // variables declared in RobotMotor require the this-> operator
-  this -> gearRatio = gearRatio;
-  this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+  setGearRatio(gearRatio);
   this -> motorType = DC_MOTOR;
   hasEncoder = false;
 }
@@ -141,7 +140,7 @@ bool DcMotor::calcCurrentAngle(void) {
     return true;
   }
   else if (hasEncoder) { // closed loop and has encoder
-    currentAngle = (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
+    currentAngle = directionModifier * (float)encoderCount * 360.0 * gearRatioReciprocal * encoderResolutionReciprocal;
     imaginedAngle = currentAngle;
     return true;
   }

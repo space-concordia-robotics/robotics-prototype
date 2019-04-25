@@ -46,16 +46,9 @@
 #define TRIGGER_DELAY 10 //!< how long to wait to make sure a limit switch was pressed and ignore bouncing
 
 // DC motors
-/*
+
 #define M1_DIR_PIN          5 //!< chooses the direction the motor turns in
 #define M1_PWM_PIN          6 //!< the speed of the motor is controlled by the pwm signal
-*/
-// swapping m1 pins with m3 pins so i can control m3
-// using the current setup since m1 isn't being used right now
-// and I need to test m2-4 for homing
-#define M1_DIR_PIN            20
-#define M1_PWM_PIN            21
-// end of swap
 // 7&8 are on port D with bits 2&3 respectively
 #define M1_ENCODER_PORT    GPIOD_PDIR //!< the input register for the port connected to the encoder pins
 //! \brief the position of the lower encoder pin bit. The encoder interrupt code expects this to function correctly.
@@ -96,18 +89,11 @@
 #define M2_MIN_SOFT_ANGLE     -55.0 //!< a safety margin is added to the flexion angle to avoid ever hitting the limit switch after homing is complete
 #define M2_MAX_SOFT_ANGLE     40.0 //!< a safety margin is added to the extension angle to avoid ever hitting the limit switch after homing is complete
 
-/*
+// this used to be a stepper
 //#define M3_ENABLE_PIN      17
 //#define M3_STEP_PIN        21
 #define M3_DIR_PIN         20 // stays the same
 #define M3_PWM_PIN         21
-*/
-// swapping m1 pins with m3 pins so i can control m3
-// using the current setup since m1 isn't being used right now
-// and I need to test m2-4 for homing
-#define M3_DIR_PIN            5
-#define M3_PWM_PIN            6
-// end of swap
 // 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
 #define M3_ENCODER_SHIFT   CORE_PIN19_BIT

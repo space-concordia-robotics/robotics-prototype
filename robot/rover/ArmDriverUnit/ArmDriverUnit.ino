@@ -38,7 +38,7 @@
 //#define DEBUG_PARSING 11 //!< debug messages during parsing function
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
-//#define DEBUG_PID 14 //!< debug messages during pid loop calculations
+#define DEBUG_PID 14 //!< debug messages during pid loop calculations
 //#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
 //#define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
@@ -663,7 +663,8 @@ void initEncoders(void) {
   
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
-  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+  // encoder B doesn't work
   
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
@@ -678,10 +679,16 @@ void initEncoders(void) {
   //attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
   //attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
+  // set activate PIDs
+  //motor1.isOpenLoop = false; // keep this open loop until new motor is in
+  motor2.isOpenLoop = false;
+  motor3.isOpenLoop = false;
+  //motor4.isOpenLoop = false; // motor4 is still a stepper for now
+
   // set pid gains
-  motor1.pidController.setGainConstants(1.0, 0.0, 0.0);
-  motor2.pidController.setGainConstants(1.0, 0.0, 0.0);
-  motor3.pidController.setGainConstants(1.0, 0.005, 0.0);
+  motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
+  motor2.pidController.setGainConstants(10.0, 0.0, 0.0);
+  motor3.pidController.setGainConstants(10.0, 0.0, 0.0);
   //motor4.pidController.setGainConstants(1.0, 0.0, 0.0); // motor4 is still a stepper for now
 
   // set motor shaft angle tolerances
@@ -787,6 +794,7 @@ void printMotorAngles(void) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
   UART_PORT.print("Motor Angles: ");
   for (int i = 0; i < NUM_MOTORS; i++) {
+    motorArray[i]->calcCurrentAngle();
     UART_PORT.print(motorArray[i]->getSoftwareAngle());
     if (i < NUM_MOTORS - 1) {
       UART_PORT.print(", ");
@@ -979,8 +987,11 @@ void servoInterrupt(void) {
 }
 
 /* encoder interrupts */
+#define M1_SINGLE_CHANNEL 1
+//#define M1_DUAL_CHANNEL 2
 #ifdef M1_ENCODER_PORT
 void m1_encoder_interrupt(void) {
+#ifdef M1_DUAL_CHANNEL
   /*! encoder states are 4 bit values. Top 2 bits are the previous states
      of encoder channels A and B, bottom 2 are current states.
   */
@@ -999,21 +1010,21 @@ void m1_encoder_interrupt(void) {
      is cleared before accessing the array.
   */
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-#ifdef DEBUG_ENCODERS
+  #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 "); UART_PORT.println(motor1.encoderCount);
+  #endif
 #endif
-}
-
-/*
+#ifdef M1_SINGLE_CHANNEL
   //! use this version if only one encoder channel is working
-  void m1_encoder_interrupt(void) {
+  // this doesn't seem to work though so maybe don't... or fix it
   motor1.encoderCount += motor1.rotationDirection * 2;
   #ifdef DEBUG_ENCODERS
   UART_PORT.print("motor 1 ");UART_PORT.println(motor1.encoderCount);
   #endif
-  }
-*/
 #endif
+}
+#endif
+
 #ifdef M2_ENCODER_PORT
 void m2_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;

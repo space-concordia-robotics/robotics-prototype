@@ -46,7 +46,7 @@ class RobotMotor {
     void goToSafeAngle(void);
     void homeMotor(char homingDir);
     void stopHoming(void);
-// other stuff
+    // other stuff
     float gearRatio, gearRatioReciprocal; //!< calculating this beforehand improves speed of floating point calculations
     float encoderResolutionReciprocal; //!< calculating this beforehand improves speed of floating point calculations
     float maxJointAngle, minJointAngle; //!< joint angle limits, used to make sure the arm doesn't bend too far and break itself
@@ -92,8 +92,6 @@ class RobotMotor {
     // for open loop control
     float openLoopError; //!< public variable for open loop control
     float startAngle; //!< used in angle esimation
-
-    
   private:
     // doesn't really make sense to have any private variables for this parent class.
     // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -109,7 +107,6 @@ class RobotMotor {
     // for open loop control
     int openLoopSpeed; //!< angular speed (degrees/second)
     float openLoopGain; //!< speed correction factor
-    
 };
 
 int RobotMotor::numMotors = 0; // must initialize variable outside of class
@@ -129,8 +126,8 @@ RobotMotor::RobotMotor() {
   hasLimitSwitches = false;
   homingType = SINGLE_ENDED_HOMING;
   homingDone = true;
-  setMotorSpeed(50); // 50% speed by default;
-  openLoopGain = 1.0; // temp open loop control
+  setMotorSpeed(30); // 30% speed by default;
+  openLoopGain = 0.005; // temp open loop control
   homingPass = 0;
   atSafeAngle = true;
   startedZeroing = false;
