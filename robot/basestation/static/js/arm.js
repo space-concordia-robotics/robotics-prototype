@@ -62,7 +62,8 @@ $(document).ready(function () {
           appendToConsole('output: ' + response.output)
           if (
             !response.output.includes('Failed') &&
-            !response.output.includes('shutdown request')
+            !response.output.includes('shutdown request') &&
+            !response.output.includes('unavailable')
           ) {
             enableArmListenerBtn()
           }
@@ -82,7 +83,8 @@ $(document).ready(function () {
           appendToConsole('output: ' + response.output)
           if (
             !response.output.includes('Failed') &&
-            !response.output.includes('shutdown request')
+            !response.output.includes('shutdown request') &&
+            !response.output.includes('unavailable')
           ) {
             disableArmListenerBtn()
           }
