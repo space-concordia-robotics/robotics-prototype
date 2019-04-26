@@ -10,8 +10,8 @@ import serial.tools.list_ports
 #import netifaces as ni
 
 # feature toggles
-usb = True
-uart = False
+usb = False
+uart = True
 
 # if all the following are False then exit right away
 local = False
@@ -140,7 +140,7 @@ if usb:
         print("Incorrect MCU connected, terminating listener")
         sys.exit(0)
 elif uart:
-    u = Uart("/dev/ttySAC0", 9600)
+    u = Uart("/dev/ttySAC0", 9600, timeout=3)
 
 ROVER_PORT = ""
 BASE_PORT = ""
@@ -372,8 +372,11 @@ while True:
                         data += ser.readline().decode()
                     print(data)
                     sender.send(data)
-                else:
-                    print("UART RX not supported (yet)")
+                elif uart:
+                    data = u.rx()
+                    print(data)
+                    sender.send(data)
+                    #print("UART RX not supported (yet)")
             elif command == 'p':
                 if usb:
                     feedback = "cmd: p --> ping"
