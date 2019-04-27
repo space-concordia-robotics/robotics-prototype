@@ -38,7 +38,7 @@
 //#define DEBUG_PARSING 11 //!< debug messages during parsing function
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
-#define DEBUG_PID 14 //!< debug messages during pid loop calculations
+//#define DEBUG_PID 14 //!< debug messages during pid loop calculations
 //#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
 //#define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
@@ -387,22 +387,24 @@ void loop() {
 #endif
               }
             }
+            homingMotor = NUM_MOTORS - 1;
           }
           else if (motorCommand.homeCommand) {
-            if (motorArray[motorCommand.whichMotor]->hasLimitSwitches) {
+            if (motorArray[motorCommand.whichMotor - 1]->hasLimitSwitches) {
               if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
-                motorArray[motorCommand.whichMotor]->homingType = DOUBLE_ENDED_HOMING;
+                motorArray[motorCommand.whichMotor - 1]->homingType = DOUBLE_ENDED_HOMING;
               }
-              motorsToHome[motorCommand.whichMotor] = true;
+              motorsToHome[motorCommand.whichMotor - 1] = true;
 #ifdef DEBUG_MAIN
-              UART_PORT.print("Motor "); UART_PORT.print(motorCommand.whichMotor + 1); UART_PORT.println(" to be homed.");
+              UART_PORT.print("Motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" to be homed.");
 #endif
             }
+            homingMotor = motorCommand.whichMotor - 1;
           }
           isHoming = true;
-          homingMotor = NUM_MOTORS - 1;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.println("initializing homing command");
+          UART_PORT.print("initializing homing commandm starting with motor ");
+          UART_PORT.println(homingMotor + 1);
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
           nh.loginfo("initializing homing command");
 #endif
@@ -689,7 +691,7 @@ void initEncoders(void) {
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
   motor2.pidController.setGainConstants(10.0, 0.0, 0.0);
   motor3.pidController.setGainConstants(10.0, 0.0, 0.0);
-  //motor4.pidController.setGainConstants(1.0, 0.0, 0.0); // motor4 is still a stepper for now
+  //motor4.pidController.setGainConstants(10.0, 0.0, 0.0); // motor4 is still a stepper for now
 
   // set motor shaft angle tolerances
   motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
@@ -750,15 +752,15 @@ void initSpeedParams(void) {
   #endif
   
   motor1.setMotorSpeed(40); // 84 rpm
-  motor2.setMotorSpeed(30); // 32 rpm... 30 was for 45rpm though. needs to be tuned.
-  motor3.setMotorSpeed(60); // 45 rpm
+  motor2.setMotorSpeed(42); // 32 rpm
+  motor3.setMotorSpeed(65); // 45 rpm
   motor4.setMotorSpeed(90); // needs to be tuned with new dc motor
   motor5.setMotorSpeed(50); // probably done tuning
   motor6.setMotorSpeed(50); // probably done tuning
 
   // set pid slowest speed before it cuts power, to avoid noise and energy drain
   motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
-  motor2.pidController.setSlowestSpeed(5.0); // needs to be tuned
+  motor2.pidController.setSlowestSpeed(10.0); // needs to be tuned
   motor3.pidController.setSlowestSpeed(5.0); // needs to be tuned
   //motor4.pidController.setSlowestSpeed(5.0); //honestly it doesn't really make sense for steppers? or does it
   //motor5.pidController.setSlowestSpeed(5.0); // servos have no closed loop
@@ -926,8 +928,9 @@ if (motorsToHome[homingMotor]) {
           }
           else { // check to see if done zeroing yet, if so move on to next
             float angle = motorArray[homingMotor]->getSoftwareAngle();
-            float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
-            if (fabs(angle) < tolerance * 2) { // within small enough angle range to move on to next motor
+            //float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
+            //if (fabs(angle) < tolerance * 3) { // within small enough angle range to move on to next motor
+            if (fabs(angle) <= 1) { // changed angle for testing
 #ifdef DEBUG_HOMING
 if (motorsToHome[homingMotor]) {
               UART_PORT.print("motor "); UART_PORT.print(homingMotor + 1);

@@ -243,7 +243,7 @@ void RobotMotor::setSoftwareAngle(float angle) {
   }
   else {
     currentAngle = angle;
-    encoderCount = angle * gearRatio * encoderResolution / 360.0;
+    encoderCount = directionModifier * angle * gearRatio * encoderResolution / 360.0; // does adding directionModifier fix it?
   }
 }
 
