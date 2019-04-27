@@ -13,13 +13,6 @@ from robot.comms.connection import Connection
 
 app = flask.Flask(__name__)
 
-# feature toggles
-# the following two are used for UDP based communication with the Connection class
-global local
-global competition
-local = False
-competition = True
-
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
 
@@ -385,5 +378,15 @@ def task_handler():
 
     return jsonify(success=True, cmd=cmd, output=output, error=error)
 
-app.run(debug=True)
-# add param `host= '0.0.0.0'` if you want to run on your machine's IP address
+
+if __name__ == "__main__":
+
+    # feature toggles
+    # the following two are used for UDP based communication with the Connection class
+    global local
+    global competition
+    local = False
+    competition = True
+
+    app.run(debug=True)
+    # add param `host= '0.0.0.0'` if you want to run on your machine's IP address

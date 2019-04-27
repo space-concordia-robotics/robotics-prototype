@@ -5,7 +5,7 @@ from Listener import Listener
 from task_handler.srv import *
 
 scripts = ["./RoverCommandListener.py", "./ArmCommandListener.py", "./start_stream.sh"]
-running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash")]
+running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", True, 1)]
 known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
 
 def handle_task_request(req):
