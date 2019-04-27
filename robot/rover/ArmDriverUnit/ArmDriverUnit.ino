@@ -609,8 +609,8 @@ void initEncoders(void) {
 
   // set activate PIDs
   //motor1.isOpenLoop = false; // keep this open loop until new motor is in
-  motor2.isOpenLoop = false;
-  motor3.isOpenLoop = false;
+  //motor2.isOpenLoop = false;
+  //motor3.isOpenLoop = false;
   //motor4.isOpenLoop = false; // motor4 is still a stepper for now
 
   // set pid gains
