@@ -54,7 +54,8 @@ class Listener:
     def stop(self):
         if self.is_running():
             print("Terminating process...")
-            self.p1.send_signal(signal.SIGINT)
+            self.p1.kill()
+
             print("Process terminated")
             self.p1_pid = -1
             return True

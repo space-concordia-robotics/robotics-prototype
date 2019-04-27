@@ -26,7 +26,7 @@ def is_valid_request(r_task, r_status):
     r_status = int(r_status)
 
     # all known tasks to be handled by the handler
-    known_tasks = ["rover_listener", "arm_listener"]
+    known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
 
     if r_task in known_tasks and r_status in [0, 1]:
         return True
@@ -38,7 +38,7 @@ def usage():
     Return string showcasing proper usage of this client script
     """
     help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status]
-                  \nValid task options: ['rover_listener', 'arm_listener']
+                  \nValid task options: ['rover_listener', 'arm_listener', 'camera_stream']
                   \nValid status options: [0, 1]"""
     return help_msg
 
