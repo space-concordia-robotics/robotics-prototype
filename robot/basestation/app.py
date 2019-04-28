@@ -380,6 +380,10 @@ def task_handler():
         cmd_args = "rover_listener 1"
     elif cmd == "disable-rover-listener":
         cmd_args = "rover_listener 0"
+    elif cmd == "enable-arm-stream":
+        cmd_args = "camera_stream 1"
+    elif cmd == "disable-arm-stream":
+        cmd_args = "camera_stream 0"
 
     print("cmd_args:", cmd_args)
 
