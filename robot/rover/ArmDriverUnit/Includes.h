@@ -8,7 +8,7 @@
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #define DEBUG_MAIN 10 //!< debug messages during main loop
-//#define DEBUG_PARSING 11 //!< debug messages during parsing function
+#define DEBUG_PARSING 11 //!< debug messages during parsing function
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
 //#define DEBUG_PID 14 //!< debug messages during pid loop calculations

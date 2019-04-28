@@ -36,9 +36,9 @@ struct commandInfo {
   bool openLoopGainCommand = false; //!< to change open loop gain
   float openLoopGain = 0.0; //!< adjusts how long to turn a motor in open loop
   bool pidCommand = false; //!< adjusts pid constants
-  bool kpCommand = false;
-  bool kiCommand = false;
-  bool kdCommand = false;
+  bool kpCommand = false; //!< adjusts p constant
+  bool kiCommand = false; //!< adjusts i constant
+  bool kdCommand = false; //!< adjusts d constant
   float kp = 0.0; //<! pid proportional gain
   float ki = 0.0; //<! pid proportional gain
   float kd = 0.0; //<! pid proportional gain
@@ -70,6 +70,8 @@ struct commandInfo {
 class Parser {
   public:
     bool isValidNumber(String str, char type);
+    bool parseWord(char *msg, String cmdWord, bool & cmdBool);
+    bool parseKeyValue(char *msg, String cmdWord, float & cmdValue, bool & cmdBool, char *restMsg);
     void parseCommand(commandInfo & cmd, char *restOfMessage);
     //void parseRosCommand(commandInfo & cmd, String message);
     bool verifCommand(commandInfo cmd);
@@ -98,6 +100,48 @@ bool Parser::isValidNumber(String str, char type) {
   return true;
 }
 
+bool Parser::parseWord(char *msg, String cmdWord, bool & cmdBool) {
+  if (String(msg) == cmdWord) {
+    cmdBool = true;
+#ifdef DEBUG_PARSING
+    UART_PORT.print("$S,Success: parsed ");
+    UART_PORT.print(cmdWord);
+    UART_PORT.println(" command");
+#endif
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool Parser::parseKeyValue(char *msg, String cmdWord, float & cmdValue, bool & cmdBool, char *restMsg) {
+  if (String(msg) == cmdWord) {
+    msg = strtok_r(NULL, " ", &restMsg); // go to next msg element (arm speed multiplier)
+    if (isValidNumber(String(msg), 'f')) {
+      cmdValue = atof(msg);
+      cmdBool = true;
+#ifdef DEBUG_PARSING
+      UART_PORT.print("$S,Success: parsed ");
+      UART_PORT.print(cmdWord);
+      UART_PORT.print(" value of ");
+      UART_PORT.println(cmdValue);
+#endif
+      return true;
+    }
+    else {
+#ifdef DEBUG_PARSING
+      UART_PORT.print("$E,Error: parsed invalid ");
+      UART_PORT.print(cmdWord);
+      UART_PORT.println(" input");
+#endif
+      return false;
+    }
+  }
+  else {
+    return false;
+  }
+}
 /*! \brief Goes through an array of characters, splits it up at each space
    character, then modifies the appropriate variables held in
    the commandInfo input parameter based on the message.
@@ -107,32 +151,11 @@ bool Parser::isValidNumber(String str, char type) {
 void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
   // check for emergency stop has precedence
   char *msgElem = strtok_r(restOfMessage, " ", &restOfMessage); // look for first element (first tag)
-  if (String(msgElem) == "ping") {
-    cmd.pingCommand = true;
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed ping command");
-#endif
-  }
-  else if (String(msgElem) == "who") {
-    cmd.whoCommand = true;
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed who command");
-#endif
-  }
-  else if (String(msgElem) == "stop") {
-    // msgElem is a char array so it's safer to convert to string first
-    cmd.stopAllMotors = true;
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed emergency command to stop all motors");
-#endif
-  }
-  else if (String(msgElem) == "reboot") {
-    // msgElem is a char array so it's safer to convert to string first
-    cmd.rebootCommand = true;
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed command to reboot arm teensy");
-#endif
-  }
+  if (parseWord(msgElem, "ping", cmd.pingCommand)) return;
+  else if (parseWord(msgElem, "who", cmd.whoCommand)) return;
+  else if (parseWord(msgElem, "stop", cmd.stopAllMotors)) return;
+  else if (parseWord(msgElem, "reboot", cmd.rebootCommand)) return;
+  else if (parseWord(msgElem, "reset", cmd.resetAllMotors)) return;
   else if (String(msgElem) == "home") {
     // msgElem is a char array so it's safer to convert to string first
     msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (both limits or just 1?)
@@ -145,29 +168,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     UART_PORT.println(cmd.homingStyle);
 #endif
   }
-  else if (String(msgElem) == "reset") {
-    // msgElem is a char array so it's safer to convert to string first
-    cmd.resetAllMotors = true;
-#ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed command to reset all motor angle values");
-#endif
-  }
-  else if (String(msgElem) == "armspeed") {
-    msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (arm speed multiplier)
-    if (isValidNumber(String(msgElem), 'f')) {
-      cmd.armSpeedMultiplier = atof(msgElem); // update arm speed factor
-      cmd.armSpeedCommand = true;
-#ifdef DEBUG_PARSING
-      UART_PORT.print("$S,Success: parsed arm speed multiplier of ");
-      UART_PORT.println(cmd.armSpeedMultiplier);
-#endif
-    }
-    else {
-#ifdef DEBUG_PARSING
-      UART_PORT.println("$E,Error: parsed invalid arm speed multiplier input");
-#endif
-    }
-  }
+  else if (parseKeyValue(msgElem, "armspeed", cmd.armSpeedMultiplier, cmd.armSpeedCommand, restOfMessage)) return;
   // check for simultaneous motor control
   else if (String(msgElem) == "move" || String(msgElem) == "budge") {
     // msgElem is a char array so it's safer to convert to string first
@@ -299,106 +300,26 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         UART_PORT.println(cmd.homingStyle);
 #endif
       }
-      else if (String(msgElem) == "angle") { // check for angle command
-        // msgElem is a char array so it's safer to convert to string first
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.motorsToMove[cmd.whichMotor - 1] = true;
-          cmd.anglesToReach[cmd.whichMotor - 1] = atof(msgElem);
-          cmd.multiMove = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired angle ");
-          UART_PORT.println(cmd.anglesToReach[cmd.whichMotor - 1]);
-#endif
-        }
+      else if (parseKeyValue(msgElem, "angle", cmd.anglesToReach[cmd.whichMotor - 1], cmd.motorsToMove[cmd.whichMotor - 1], restOfMessage)) {
+        cmd.multiMove = true;
+        return;
       }
-      else if (String(msgElem) == "gear") { // check for gear ratio change command
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired gear ratio)
-        // the following has no bad value error checking!!!!
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.gearRatioVal = atof(msgElem);
-          cmd.gearCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired gear ratio ");
-          UART_PORT.println(cmd.gearRatioVal);
-#endif
-        }
+      else if (parseKeyValue(msgElem, "gear", cmd.gearRatioVal, cmd.gearCommand, restOfMessage)) return;
+      // the following has no bad value error checking!!!!
+      else if (parseKeyValue(msgElem, "opengain", cmd.openLoopGain, cmd.openLoopGainCommand, restOfMessage)) return;
+      else if (parseKeyValue(msgElem, "kp", cmd.kp, cmd.kpCommand, restOfMessage)) {
+        cmd.pidCommand = true;
+        return;
       }
-      else if (String(msgElem) == "opengain") { // check for gear ratio change command
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired open loop gain)
-        // the following has no bad value error checking!!!!
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.openLoopGain = atof(msgElem);
-          cmd.openLoopGainCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired open loop gain ");
-          UART_PORT.println(cmd.openLoopGain);
-#endif
-        }
+      else if (parseKeyValue(msgElem, "ki", cmd.ki, cmd.kiCommand, restOfMessage)) {
+        cmd.pidCommand = true;
+        return;
       }
-      else if (String(msgElem) == "kp") { // check for kp gain command
-        msgElem = strtok_r(NULL, " ", &restOfMessage);
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.kp = atof(msgElem);
-          cmd.kpCommand = true;
-          cmd.pidCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired kp ");
-          UART_PORT.println(cmd.kp);
-#endif
-        }
-        else {
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed kp gain is not a number");
-#endif
-        }
+      else if (parseKeyValue(msgElem, "kd", cmd.kd, cmd.kdCommand, restOfMessage)) {
+        cmd.pidCommand = true;
+        return;
       }
-      else if (String(msgElem) == "ki") { // check for ki gain command
-        msgElem = strtok_r(NULL, " ", &restOfMessage);
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.ki = atof(msgElem);
-          cmd.kiCommand = true;
-          cmd.pidCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired ki ");
-          UART_PORT.println(cmd.ki);
-#endif
-        }
-        else {
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed ki gain is not a number");
-#endif
-        }
-      }
-      else if (String(msgElem) == "kd") { // check for kd gain command
-        msgElem = strtok_r(NULL, " ", &restOfMessage);
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.kd = atof(msgElem);
-          cmd.kdCommand = true;
-          cmd.pidCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired kd ");
-          UART_PORT.println(cmd.kd);
-#endif
-        }
-        else {
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed kd gain is not a number");
-#endif
-        }
-      }
-      else if (String(msgElem) == "speed") { // check for gear ratio change command
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired speed)
-        // the following has no bad value error checking!!!!
-        if (isValidNumber(String(msgElem), 'f')) {
-          cmd.motorSpeed = atof(msgElem);
-          cmd.motorSpeedCommand = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed desired speed ");
-          UART_PORT.println(cmd.motorSpeed);
-#endif
-        }
-      }
+      else if (parseKeyValue(msgElem, "speed", cmd.motorSpeed, cmd.motorSpeedCommand, restOfMessage)) return;
       else if (String(msgElem) == "loop") { // check for loop state command
         // msgElem is a char array so it's safer to convert to string first
         cmd.loopCommand = true;
@@ -449,12 +370,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      else if (String(msgElem) == "switchdirection") { // check for switch direction logic command
-        cmd.switchDir = true;
-#ifdef DEBUG_PARSING
-        UART_PORT.println("$S,Success: parsed request to switch direction logic");
-#endif
-      }
+      else if (parseWord(msgElem, "switchdirection", cmd.switchDir)) return;
       else {
 #ifdef DEBUG_PARSING
         UART_PORT.print("$E,Error: parsed unknown motor ");
