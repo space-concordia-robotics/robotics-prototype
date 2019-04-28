@@ -56,6 +56,23 @@ def run_shell(cmd, args=""):
 
     return output, error
 
+def get_pid(keyword):
+    cmd = "ps aux"
+    output, error = run_shell(cmd)
+
+    ting = output.decode().split('\n')
+
+    #print(ting)
+
+    for line in ting:
+        if keyword in line:
+            #print("FOUND PID:", line)
+            words = line.split()
+            print("PID:", words[1])
+
+            return words[1]
+
+    return -1
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")

@@ -5,7 +5,7 @@ import subprocess
 import os
 import sys
 import time
-from robot.basestation.app import run_shell
+from robot.basestation.app import run_shell, get_pid
 
 class Listener:
     def __init__(self, script, type, force_kill=False, children=0):
@@ -61,12 +61,15 @@ class Listener:
             print("Terminating process...")
 
             if self.force_kill:
-                for i in range(0, self.children):
-                    print("i:", i)
-                    output, error = run_shell("kill -9", str(self.p1_pid + 1 + i))
-                    print("output:", output)
-                    print("kill -9", str(self.p1_pid + 1 + i))
+                # edge case due to current implementation of video streamer
+                if "start_stream" in self.script:
+                    real_pid = get_pid("mjpg_streamer")
 
+                    if real_pid != -1:
+                        output, error = run_shell("kill -9", str(real_pid))
+                        print("kill -9", str(real_pid))
+                    else:
+                        return False
             else:
                 self.p1.kill()
 
