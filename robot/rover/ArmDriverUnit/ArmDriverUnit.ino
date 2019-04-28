@@ -180,6 +180,7 @@ void servoInterrupt(void); //!< manages motors 5&6
 
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
 
+   \todo do housekeeping stuff
    \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
    \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
    Floating point math doesn't seem bad, but at worst, convert float to int

@@ -63,6 +63,8 @@ struct commandInfo {
    rather than letters or some other type of characters.
 
    \todo Clean up parsing code to make it easier to read and reduce repetition.
+   \todo set motor software angle (not just 0 but other values)
+   \todo stop multiple motors (multimove style)
 */
 class Parser {
   public:
