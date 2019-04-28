@@ -264,16 +264,16 @@ def manual_control():
         # decode URI
         cmd = unquote(cmd)
 
-    if competition:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5015
-        base_port = rover_port
-    elif local:
+    if local:
         rover_ip = "127.0.0.1"
         base_ip = rover_ip
         rover_port = 5005
         base_port = 5010
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5015
+        base_port = rover_port
 
     print("cmd: " + cmd)
     sender = Connection("arm_cmd_sender", rover_ip, rover_port)
@@ -314,17 +314,16 @@ def rover_drive():
         # decode URI
         cmd = unquote(cmd)
 
-    if competition:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5030
-        base_port = rover_port
-    elif local:
+    if local:
         rover_ip = "127.0.0.1"
         base_ip = rover_ip
         rover_port = 5020
         base_port = 5025
-
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5030
+        base_port = rover_port
     print("cmd: " + cmd)
     sender = Connection("rover_drive_sender", rover_ip, rover_port)
 
@@ -405,9 +404,13 @@ if __name__ == "__main__":
     # feature toggles
     # the following two are used for UDP based communication with the Connection class
     global local
-    global competition
-    local = False
-    competition = True
+    local = True
+    # print("fetch_ros_master_ip:", fetch_ros_master_ip())
+    #
+    # # either local or competition
+    # ros_master_ip = fetch_ros_master_ip()
+    # if ros_master_ip in ["127.0.0.1", "localhost"]
+    #     local = True
 
     app.run(debug=True)
     # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
