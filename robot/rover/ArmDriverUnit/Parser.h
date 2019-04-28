@@ -25,6 +25,7 @@ struct commandInfo {
   int whichMotor = 0; //!< which motor was requested to do something
 
   bool stopSingleMotor = false; //!< for stopping a single motor
+  bool resetSingleMotor = false; //!< mostly for debugging/testing, reset the angle variable
   bool switchDir = false; //!< for switching the direction logic
 
   bool homeCommand = false; //!< for homing a single motor
@@ -44,10 +45,6 @@ struct commandInfo {
   float kd = 0.0; //<! pid proportional gain
   bool motorSpeedCommand = false; //!< for changing motor speed
   float motorSpeed = 0.0; //!< what motor speed to set to
-
-  bool resetCommand = false; //!< indicates that something should be reset
-  bool resetAngleValue = false; //!< mostly for debugging/testing, reset the angle variable
-  bool resetJointPosition = false; //!< for moving a joint to its neutral position
 
   bool budgeCommand = false; //!< for turning without angle requests
   int directionsToMove[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; //!< direction of budge control
@@ -142,6 +139,7 @@ bool Parser::parseKeyValue(char *msg, String cmdWord, float & cmdValue, bool & c
     return false;
   }
 }
+
 /*! \brief Goes through an array of characters, splits it up at each space
    character, then modifies the appropriate variables held in
    the commandInfo input parameter based on the message.
@@ -279,13 +277,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
       UART_PORT.println(cmd.whichMotor);
 #endif
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
-      if (String(msgElem) == "stop") { // check for stop single motor command has precedence over all others
-        // msgElem is a char array so it's safer to convert to string first
-        cmd.stopSingleMotor = true;
-#ifdef DEBUG_PARSING
-        UART_PORT.println("$S,Success: parsed request to stop single motor");
-#endif
-      }
+      if (parseWord(msgElem, "stop", cmd.stopSingleMotor)) return;
       else if (String(msgElem) == "home") { // check for homingcommand
         // msgElem is a char array so it's safer to convert to string first
         msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (both limits or just 1?)
@@ -346,30 +338,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 #endif
         }
       }
-      else if (String(msgElem) == "reset") { // check for angle reset command
-        // msgElem is a char array so it's safer to convert to string first
-        cmd.resetCommand = true;
-        msgElem = strtok_r(NULL, " ", &restOfMessage); // go to next msg element (desired angle value)
-        if (String(msgElem) == "angle") {
-          cmd.resetAngleValue = true;
-
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$S,Success: parsed request to reset angle value");
-#endif
-
-        }
-        else if (String(msgElem) == "position") {
-          cmd.resetJointPosition = true;
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$S,Sucess: parsed request to reset joint position");
-#endif
-        }
-        else {
-#ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed unknown reset request");
-#endif
-        }
-      }
+      else if (parseWord(msgElem, "reset", cmd.resetSingleMotor)) return;
       else if (parseWord(msgElem, "switchdirection", cmd.switchDir)) return;
       else {
 #ifdef DEBUG_PARSING
@@ -600,26 +569,13 @@ bool Parser::verifCommand(commandInfo cmd) {
         return false;
       }
     }
-    else if (cmd.resetCommand) {
-      if (cmd.resetAngleValue || cmd.resetJointPosition) {
+    else if (cmd.resetSingleMotor) {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to reset motor ");
-        UART_PORT.print(cmd.whichMotor);
-        if (cmd.resetAngleValue) {
-          UART_PORT.println(" saved angle value");
-        }
-        if (cmd.resetJointPosition) {
-          UART_PORT.println(" physical joint position");
-        }
+      UART_PORT.print("$S,Success: verified command to reset motor ");
+      UART_PORT.print(cmd.whichMotor);
+      UART_PORT.println(" saved angle value");
 #endif
-        return true;
-      }
-      else {
-#ifdef DEBUG_VERIFYING
-        UART_PORT.println("$E,Error: invalid reset request");
-#endif
-        return false;
-      }
+      return true;
     }
     else if (cmd.switchDir) {
 #ifdef DEBUG_VERIFYING
