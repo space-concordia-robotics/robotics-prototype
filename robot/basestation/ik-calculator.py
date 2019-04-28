@@ -141,11 +141,17 @@ class Arm:
 			#Base rotation CALCULATION
 			solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X)
 			R = math.sqrt( pow(X,2) + pow(Z,2) )
-			if (X <= 0 or Z <=0 ):
-				R *= -1
-				solution_angles[0][0] *= -1
-				solution_angles[1][1] *= -1
-
+			if (X <= 0 and Z <= 0):
+				solution_angles[0][0] += math.pi
+				solution_angles[1][0] += math.pi
+			elif (X <= 0):
+				#R *= -1
+				solution_angles[0][0] += math.pi
+				solution_angles[1][0] += math.pi
+			#if (Z <= 0):
+				#R *= -1
+				#solution_angles[0][0] += math.pi
+				#solution_angles[1][0] += math.pi
 			if(wrist_angle is -1):
 				beta = math.atan2(Y - self.link[0] , R) #Calculates beta, which is the sum of the angles of all links
 				Wrist_X = R - self.link[3]  * math.cos(beta) #Calculates wrist X coordinate
@@ -266,8 +272,8 @@ while not done:
 
 	#INVERSE KINEMATICS MODE
     	set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
-    	if (set_point[0] <= 0 and set_point[2] <= 0):
-    		set_point_2D[0] *= -1
+    	#if (set_point[0] <= 0 and set_point[2] <= 0):
+    		#Bset_point_2D[0] *= -1
     	top_point = [set_point[0], set_point[2]]
     	Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
 
