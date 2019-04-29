@@ -473,7 +473,7 @@ void iniNav(void){
 void displayGpsinfo(void){                      // The function that prints the info
     if (gps.location.isValid())                 // checks if valid location data is available
     {
-        Serial.print("GPS");                    // string initials to allow the Pyhton code to pickup
+        Serial.print("GPS-OK");                    // string initials to allow the Pyhton code to pickup
         Serial.print(" ");                      // space
         Serial.print(gps.location.lat(), 6);    // print the latitude with 6 digits after the point
         Serial.print(" ");                      // space
@@ -482,7 +482,7 @@ void displayGpsinfo(void){                      // The function that prints the 
     }
     else
     {
-        Serial.println(F("N/A"));
+        Serial.println(F("GPS-N/A"));
     }
 }
 void navHnadler(void){
