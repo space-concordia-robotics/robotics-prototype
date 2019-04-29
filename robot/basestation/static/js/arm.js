@@ -150,6 +150,70 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
+// start video stream
+document.addEventListener('keydown', function (event) {
+  if (
+    !$serialCmdInput.is(':focus') &&
+    event.code === 'KeyN' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+  ) {
+    $('button#disable-arm-stream').css('background-color', 'rgb(255, 0, 0)')
+    $.ajax({
+      url: '/task_handler',
+      type: 'POST',
+      data: {
+        cmd: 'disable-arm-stream'
+      },
+      success: function (response) {
+        appendToConsole('cmd: ' + response.cmd)
+        appendToConsole('output: ' + response.output)
+        if (
+          !response.output.includes('Failed') &&
+          !response.output.includes('shutdown request') &&
+          !response.output.includes('unavailable')
+        ) {
+          // enableArmListenerBtn()
+        }
+        appendToConsole('error: ' + response.error)
+        scrollToBottom()
+      }
+    })
+    lastCmdSent = new Date().getTime()
+  }
+})
+
+// stop video stream
+document.addEventListener('keydown', function (event) {
+  if (
+    !$serialCmdInput.is(':focus') &&
+    event.code === 'KeyB' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+  ) {
+    $('button#enable-arm-stream').css('background-color', 'rgb(255, 0, 0)')
+    $.ajax({
+      url: '/task_handler',
+      type: 'POST',
+      data: {
+        cmd: 'enable-arm-stream'
+      },
+      success: function (response) {
+        appendToConsole('cmd: ' + response.cmd)
+        appendToConsole('output: ' + response.output)
+        if (
+          !response.output.includes('Failed') &&
+          !response.output.includes('shutdown request') &&
+          !response.output.includes('unavailable')
+        ) {
+          // enableArmListenerBtn()
+        }
+        appendToConsole('error: ' + response.error)
+        scrollToBottom()
+      }
+    })
+    lastCmdSent = new Date().getTime()
+  }
+})
+
 if (mockArmTable) {
   // manual controls
   let $serialCmdInput = $('#serial-cmd-input')
@@ -938,5 +1002,17 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$serialCmdInput.is(':focus') && event.code === 'KeyN') {
+    $('button#disable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$serialCmdInput.is(':focus') && event.code === 'KeyB') {
+    $('button#enable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
   }
 })

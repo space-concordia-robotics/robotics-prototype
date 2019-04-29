@@ -13,13 +13,6 @@ from robot.comms.connection import Connection
 
 app = flask.Flask(__name__)
 
-# feature toggles
-# the following two are used for UDP based communication with the Connection class
-global local
-global competition
-local = False
-competition = True
-
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
 
@@ -63,6 +56,23 @@ def run_shell(cmd, args=""):
 
     return output, error
 
+def get_pid(keyword):
+    cmd = "ps aux"
+    output, error = run_shell(cmd)
+
+    ting = output.decode().split('\n')
+
+    #print(ting)
+
+    for line in ting:
+        if keyword in line:
+            #print("FOUND PID:", line)
+            words = line.split()
+            print("PID:", words[1])
+
+            return words[1]
+
+    return -1
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
@@ -254,16 +264,16 @@ def manual_control():
         # decode URI
         cmd = unquote(cmd)
 
-    if competition:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5015
-        base_port = rover_port
-    elif local:
+    if local:
         rover_ip = "127.0.0.1"
         base_ip = rover_ip
         rover_port = 5005
         base_port = 5010
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5015
+        base_port = rover_port
 
     print("cmd: " + cmd)
     sender = Connection("arm_cmd_sender", rover_ip, rover_port)
@@ -304,17 +314,16 @@ def rover_drive():
         # decode URI
         cmd = unquote(cmd)
 
-    if competition:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5030
-        base_port = rover_port
-    elif local:
+    if local:
         rover_ip = "127.0.0.1"
         base_ip = rover_ip
         rover_port = 5020
         base_port = 5025
-
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5030
+        base_port = rover_port
     print("cmd: " + cmd)
     sender = Connection("rover_drive_sender", rover_ip, rover_port)
 
@@ -370,6 +379,10 @@ def task_handler():
         cmd_args = "rover_listener 1"
     elif cmd == "disable-rover-listener":
         cmd_args = "rover_listener 0"
+    elif cmd == "enable-arm-stream":
+        cmd_args = "camera_stream 1"
+    elif cmd == "disable-arm-stream":
+        cmd_args = "camera_stream 0"
 
     print("cmd_args:", cmd_args)
 
@@ -385,5 +398,19 @@ def task_handler():
 
     return jsonify(success=True, cmd=cmd, output=output, error=error)
 
-app.run(debug=True)
-# add param `host= '0.0.0.0'` if you want to run on your machine's IP address
+
+if __name__ == "__main__":
+
+    # feature toggles
+    # the following two are used for UDP based communication with the Connection class
+    global local
+    local = True
+    # print("fetch_ros_master_ip:", fetch_ros_master_ip())
+    #
+    # # either local or competition
+    # ros_master_ip = fetch_ros_master_ip()
+    # if ros_master_ip in ["127.0.0.1", "localhost"]
+    #     local = True
+
+    app.run(debug=True)
+    # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
