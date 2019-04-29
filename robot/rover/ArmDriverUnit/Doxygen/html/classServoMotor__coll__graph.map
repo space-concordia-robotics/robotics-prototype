@@ -1,4 +1,0 @@
-<map id="ServoMotor" name="ServoMotor">
-<area shape="rect" id="node2" href="$classRobotMotor.html" title="The base class for ServoMotor, StepperMotor and DcMotor. " alt="" coords="535,784,711,1433"/>
-<area shape="rect" id="node4" href="$classPidController.html" title="This is intended to be a generic PID controller class. " alt="" coords="674,292,850,575"/>
-</map>
