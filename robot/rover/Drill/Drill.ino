@@ -10,14 +10,13 @@
   int elevator_feed(input_elevator_feed);//max 0.107inch/s
 */
 
-/*const int BLUETOOTH_TX_PIN = 10;
-  const int BLUETOOTH_RX_PIN = 11;
+void elevatorTopInterrupt (void);
+void elevatorBottomInterrupt (void);
+void cuvettePosition (void);
+void turnTable (int cuvette, int desiredPosition);
 
-  SoftwareSerial bluetooth(BLUETOOTH_TX_PIN, BLUETOOTH_RX_PIN);
-  ArduinoBlue phone(bluetooth);*/
-
-bool isActivated = false;
 int button;
+bool isActivated = false;
 int drill = 6;
 int drill_direction = 7;
 int elevator = 4;
@@ -33,9 +32,9 @@ int pump4A = 46;
 int pump4B = 48;
 int pump5A = 50;
 int pump5B = 52;
-int elevato_top = 41;
-int elevator_bottom = 43;
-int table_position = 45;
+int limit_top = 19;
+int limit_bottom = 20;
+int table_limit_switch = 21;
 int led1 = 12;
 int led2 = 13;
 int photoresistor = A2;
@@ -44,6 +43,9 @@ int drillSpeed;
 int elevatorSpeed;
 float val = 0;
 float voltage = 0;
+char tableDirection = 'n'; // n for neutal, i for increasing, d for decreasing
+int tablePosition[13];
+int i = 0;
 
 Servo table;
 
@@ -64,8 +66,12 @@ void setup() {
   pinMode(pump2B, OUTPUT);
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
-  pinMode(photoresistor, INPUT);
-
+  pinMode(limit_top, INPUT_PULLUP);
+  pinMode(limit_bottom, INPUT_PULLUP);
+  pinMode(photoresistor, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(limit_top), elevatorTopInterrupt, HIGH);
+  attachInterrupt(digitalPinToInterrupt(limit_bottom), elevatorBottomInterrupt, HIGH);
+  attachInterrupt(digitalPinToInterrupt(table_limit_switch), cuvettePosition, HIGH);
   delay(100);
 
   analogWrite(drill, 0);
@@ -77,6 +83,10 @@ void setup() {
   digitalWrite(led1, LOW);
   digitalWrite(led2, LOW);
   table.writeMicroseconds(SERVO_STOP);
+
+  for (i = 0; i <= 12; i++) {
+    tablePosition[i] = i;
+  }
   delay(1000);
 
   Serial.print("\nsetup complete");
@@ -93,12 +103,12 @@ void loop() {
       Serial.print("cmd: ");
       Serial.println(cmd);
 
-      if (cmd == "activate") {
-        isActivated = true;
-      }
-      else if (cmd == "who") {
-        Serial.print("drill");
-      }
+    }
+    if (cmd == "activate") {
+      isActivated = true;
+    }
+    else if (cmd == "who") {
+      Serial.print("drill");
     }
     else if (isActivated == true) {
 
@@ -144,11 +154,32 @@ void loop() {
         analogWrite(elevator, 0);
         Serial.println("button5");
       }
+      else if (cmd == "goto") {
+        //sends table to wanted position
+        int cuvette;
+        int desiredPosition;
+
+        Serial.println("What is the cuvette of interest?");
+        cuvette = int(Serial.read());
+        Serial.println("What is the desired position?");
+        desiredPosition = int(Serial.read());
+
+        if (cuvette > 12) {
+          Serial.println("Error. Chose cuvette number from 0 to 12");
+        }
+        else if (desiredPosition > 12) {
+          Serial.println("Error. Chose position number from 0 to 12");
+        }
+        else {
+          turnTable (cuvette, desiredPosition);
+        }
+      }
       else if (button == 7) {
         //turns table clockwise
         table.writeMicroseconds(SERVO_STOP);
         delay(100);
         table.writeMicroseconds(SERVO_MAX_CW);
+        tableDirection = 'd';
         Serial.println("button7");
       }
       else if (button == 6) {
@@ -156,11 +187,13 @@ void loop() {
         table.writeMicroseconds(SERVO_STOP);
         delay(100);
         table.writeMicroseconds(SERVO_MAX_CCW);
+        tableDirection = 'i';
         Serial.println("button6");
       }
       else if (button == 8) {
         //stops table
         table.writeMicroseconds(SERVO_STOP);
+        tableDirection = 'n';
         Serial.println("button8");
       }
       else if (button == 9) {
@@ -251,11 +284,74 @@ void loop() {
         digitalWrite(pump2B, LOW);
         digitalWrite(led1, LOW);
         digitalWrite(led2, LOW);
+        tableDirection = 'n';
         Serial.println("button18");
       }
     }
   }
 }
+
+void elevatorTopInterrupt () {
+  //stops elevator
+  analogWrite(elevator, 0);
+  delay(100);
+  digitalWrite(elevator_direction, HIGH);
+  analogWrite(elevator, maxVelocity);
+  delay(1000);
+  analogWrite(elevator, 0);
+}
+void elevatorBottomInterrupt () {
+  //stops elevator
+  analogWrite(elevator, 0);
+  delay(100);
+  digitalWrite(elevator_direction, LOW);
+  analogWrite(elevator, maxVelocity);
+  delay(1000);
+  analogWrite(elevator, 0);
+}
+void cuvettePosition() {
+  //gives the integer value of the cuvette of the table 1 to 12, chute is cuvettePosition 0
+  if (tableDirection == 'n') {
+  }
+  else if (tableDirection == 'i') {
+    for (i = 0; i <= 12; i++) {
+      tablePosition[i] = (tablePosition[i] + 1) % 13;
+    }
+  }
+  else if (tableDirection == 'd') {
+    int temp = tablePosition[0];
+    for (i = 0; i <= 12; i++) {
+      tablePosition[i] = (tablePosition[i] - 1) % 13;
+      if (tablePosition[i] == -1)tablePosition[i] = 12;
+    }
+  }
+
+}
+
+void turnTable (int cuvette, int desiredPosition) {
+  int initialPosition = 0;
+  int difference = 0;
+
+  for (i = 0; i <= 12; i++) {
+    initialPosition = i;
+    if (tablePosition[i] = cuvette)break;
+  }
+
+  difference = desiredPosition - initialPosition;
+
+  while ( tablePosition[desiredPosition] != cuvette) {
+    if ( (difference > -7 && difference < 0) || (difference > 7 && difference < 13)) {
+      table.writeMicroseconds(SERVO_MAX_CCW);
+      tableDirection = 'i';
+    }
+    else if ( (difference > -13 && difference < -7) || (difference > 0 && difference < 7)) {
+      table.writeMicroseconds(SERVO_MAX_CW);
+      tableDirection = 'd';
+    }
+  }
+  table.writeMicroseconds(SERVO_STOP);
+}
+
 
 /*
   int drill_speed() {
