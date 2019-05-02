@@ -312,18 +312,21 @@ This will explain the steps necessary to setup the odroid with rocket M900 radio
 
 1. Setup the rocket M900 radios
 
-Use the rocket labeled `192.168.1.45` for the odroid, and the one labeled `192.168.1.40` for the basestation.
+- Use the rocket labeled `192.168.1.45` for the odroid, and the one labeled `192.168.1.40` for the basestation.
 Connect the power adapter to a power socket, use ethernet cables to connect `POE` (power over ethernet) to the `LAN` port on the radio.
 Make sure that you connect some omni-directional antennas to `Chain0` or `Chain1` connectors on the radios. Make sure to use the same for both.
 DO NOT connect `LAN` to `LAN`, this can cause issues. After having done the last step, connect the `LAN` port from the power adapter to either the odroid or basestation ethernet port.
 When both LEDs on the radios are on (green, red, yellow/orange) as opposed to the first two green ones then both radios are connected to each other.
-Of course, make sure to power up the Odroid using it's power adapter. You should see a solid blue LED at first which then will begin to flash (this indicates normal boot behavior).
-Insert the USB connection for the webcam to the odroid (preferably 3.0 USB hub) _after_ it has booted up.
-Unfortunately this step is not automated: When the camera powers up it will show two options.
+For an example diagram of the connections see the description of [this](https://github.com/space-concordia-robotics/robotics-prototype/pull/80) pull request.
+The only difference is that the ip addresses start with `172.16` vs `192.168`, and that if you are using the laptop I donated the IP address should end with `25` rather than `20`.
+- Power up the Odroid using it's power adapter. You should see a solid blue LED at first which then will begin to flash (this indicates normal boot behavior).
+- Insert the USB connection for the webcam to the odroid (preferably 3.0 USB hub) _after_ it has booted up.
+- Unfortunately this step is not automated: When the camera powers up it will show two options.
 Select `PC Camera` using the up/down navigation buttons on the side and click OK (on the top) to select it.
 
 2. Run corresponding software
 
+- After logging in to the basesation computer, select the correct ethernet configuration by clicking on the wifi logo button in the top right corner and clicking (if using the donated laptop) `Base station direct 1`. This will properly set the computers IP for competition mode.
 - Open a terminal run `base` which will take you to the basestation folder.
 - Run `./app.py` which will run the GUI on `localhost:5000`
 - Open chrome and go visit the link `localhost:5000`
