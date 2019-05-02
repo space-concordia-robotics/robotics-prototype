@@ -318,6 +318,9 @@ Make sure that you connect some omni-directional antennas to `Chain0` or `Chain1
 DO NOT connect `LAN` to `LAN`, this can cause issues. After having done the last step, connect the `LAN` port from the power adapter to either the odroid or basestation ethernet port.
 When both LEDs on the radios are on (green, red, yellow/orange) as opposed to the first two green ones then both radios are connected to each other.
 Of course, make sure to power up the Odroid using it's power adapter. You should see a solid blue LED at first which then will begin to flash (this indicates normal boot behavior).
+Insert the USB connection for the webcam to the odroid (preferably 3.0 USB hub) _after_ it has booted up.
+Unfortunately this step is not automated: When the camera powers up it will show two options.
+Select `PC Camera` using the up/down navigation buttons on the side and click OK (on the top) to select it.
 
 2. Run corresponding software
 
