@@ -16,6 +16,12 @@ In short, the Teensy is connected to the drivers (and the servos). The drivers (
 
 On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
+### Doxygen
+This folder contains files related to the Doxygen auto-generated documentation.
+"Doxyfile" is what my laptop uses to generate the documentation, including where on my laptop to place it.
+"index.html - Shortcut" links to the most recently generated documentation on my laptop.
+"ArmDriverUnit- Main Page" is a link to the most recently uploaded version of the documentation to my personal ENCS website.
+
 ### Odroid
 This folder contains preliminary code to be run on the Odroid which will communicate with the arm Teensy.
 
