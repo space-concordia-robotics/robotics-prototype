@@ -883,8 +883,8 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
 void rebootTeensy(void) { //!< software reset function using watchdog timer
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
-  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to.
-  WDOG_TOVALH = 0; //End value WDT compares itself to.
+  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to. Time value is in milliseconds.
+  WDOG_TOVALH = 0; //End value WDT compares itself to. Time value is in milliseconds.
   WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
                   WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
   WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
@@ -1133,6 +1133,17 @@ void m4ExtendISR(void) {
   else {
     motor4.triggerState = 0;
   }
+}
+
+/*This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
+This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
+Calling the kickDog() function will reset the time-out counter.*/
+/*Todo: Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().*/
+void kickDog() {  
+  noInterrupts();
+  WDOG_REFRESH = 0xA602;
+  WDOG_REFRESH = 0xB480;
+  interrupts();
 }
 
 /*
