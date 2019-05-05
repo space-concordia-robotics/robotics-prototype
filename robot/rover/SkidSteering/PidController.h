@@ -39,7 +39,7 @@ PidController::PidController()
 
 float PidController::updatePID(volatile float currentAngle, float desiredAngle)
 {
-    float pidOutput;
+//    float pidOutput;
     error = desiredAngle - currentAngle; // these angle variables need to be obtained from the notor object
     // if the angle is outside the tolerance, move
 //  if (fabs(error) >= jointVelocityTolerance)

@@ -1,11 +1,12 @@
 
 #include <ArduinoBlue.h>
 #include "DcMotor.h"
+#include <SoftwareSerial.h>
 
 //GPS & IMU Includes
 #include <SparkFun_I2C_GPS_Arduino_Library.h>
 I2CGPS myI2CGPS;  // I2C object
-#include <TinyGPS++.h>
+#include "TinyGPS++.h"
 TinyGPSPlus gps;   // GPS object
 #include <Wire.h>
 #include <LSM303.h>
@@ -79,11 +80,6 @@ ArduinoBlue phone(bluetooth);
 #define LB_EA    33
 #define LB_EB    34
 
-#define RANGE 255
-#define REST  0
-#define MAX_PWM REST + RANGE
-#define MIN_PWM REST - RANGE
-
 
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO);
 DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO);
@@ -93,8 +89,8 @@ DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO);
 DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO);
 DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO);
 
-RobotMotor motorList[] = {RF = 1, RM, RB, LF, LM, LB};
-int throttle, steering, loop_state; // Input values for set velocity functions
+RobotMotor motorList[] = {RF, RM, RB, LF, LM, LB};
+int throttle, steering, loop_state, button, i; // Input values for set velocity functions
 float deg = 0;  // steering ratio between left and right wheel
 int maxInputSignal = 49;  // maximum speed signal from controller
 int minInputSignal = -49; // minimum speed signal from controller
@@ -120,7 +116,7 @@ boolean isActivated = false;
 boolean isOpenloop = false; // No PID controller
 boolean bluetoothMode = true;
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
-void motor_encoder_interrupt(int motorNumber)
+void motor_encoder_interrupt(int motorNumber);
 void rf_encoder_interrupt(void);
 void rm_encoder_interrupt(void);
 void rb_encoder_interrupt(void);
@@ -155,6 +151,7 @@ void setup() {
     initEncoders();
     initPids();
     initNav();
+
 }
 
 void loop() {
@@ -206,28 +203,28 @@ void loop() {
             } else if (cmd == "OpenLoop"){    // Open loop activation command
                 minOutputSignal = -30;
                 maxOutputSignal = 30;
-                for (i = 1, i <= 6, i++){
-                    motorList[i].isOpenLoop = True;
+                for (i = 1; i <= 6; i++) {
+                    motorList[i].isOpenLoop = true;
                     UART_PORT.print("Motor ");
                     UART_PORT.print(i);
                     UART_PORT.print(" open loop status is: ");
                     UART_PORT.println(motorList[i].isOpenLoop);
                 }
-            } else if (cmd == 'CloseLoop') {
+            } else if (cmd == "CloseLoop") {
                 minOutputSignal = -255;
                 maxOutputSignal = 255;
-                for (i = 1, i <= 6, i++){
-                    motorList[i].isOpenLoop = False;
+                for (i = 1; i <= 6; i++){
+                    motorList[i].isOpenLoop = false;
                     UART_PORT.print("Motor ");
                     UART_PORT.print(i);
                     UART_PORT.print(" open loop status is: ");
                     UART_PORT.println(motorList[i].isOpenLoop);
                 }
-            }else if (cmd == 'ble-on'){
+            }else if (cmd == "ble-on") {
                 minInputSignal = -49;
                 maxInputSignal = 49;
                 bluetoothMode = true;
-            }else if (cmd == 'ble-off'){
+            }else if (cmd == "ble-off") {
                 minInputSignal = -49;
                 maxInputSignal = 49;
                 bluetoothMode = false;
@@ -262,12 +259,8 @@ void loop() {
     //UART_PORT.println(steering);
 
     velocityHandler(throttle, steering);
-    roverVelocityCalclater();
-    rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
-    leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
+    roverVelocityCalculator();
 
-    forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
-    rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
 
     //ser_flush();
     prevRead = millis();
@@ -387,43 +380,43 @@ void initEncoders(void) {
     RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
     pinMode(RF.encoderPinB, INPUT_PULLUP);
     pinMode(RF.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), motor_encoder_interrupt(1), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), motor_encoder_interrupt(1), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
     pinMode(RM.encoderPinB, INPUT_PULLUP);
     pinMode(RM.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), motor_encoder_interrupt(2), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), motor_encoder_interrupt(2), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     RB.attachEncoder(RB_EA, RB_EB, PULSES_PER_REV);
     pinMode(RB.encoderPinB, INPUT_PULLUP);
     pinMode(RB.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), motor_encoder_interrupt(3), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), motor_encoder_interrupt(3), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
     pinMode(LF.encoderPinB, INPUT_PULLUP);
     pinMode(LF.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), motor_encoder_interrupt(4), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), motor_encoder_interrupt(4), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     LM.attachEncoder(LM_EA, LM_EB, PULSES_PER_REV);
     pinMode(LM.encoderPinB, INPUT_PULLUP);
     pinMode(LM.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), motor_encoder_interrupt(5), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), motor_encoder_interrupt(5), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
     pinMode(LB.encoderPinB, INPUT_PULLUP);
     pinMode(LB.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), motor_encoder_interrupt(6), CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), motor_encoder_interrupt(6), CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
     RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }                                       // Initiate encoder for dcMotor objects and pinModes
 
@@ -444,7 +437,6 @@ void initPids(void) {
 //    LM.pidController.setOutputLimits(-50, 50, 5.0);
 //    LB.pidController.setOutputLimits(-50, 50, 5.0);
 }                                           // Initiate PID objects for Dc Motors
-
 void motor_encoder_interrupt(int motorNumber) {         // This interrupt is responsible for updating dt, prevtime and encoderCount variable for a DcMotor object which is used to calculate the velocity of the motor
     motorList[motorNumber].dt += micros() -  motorList[motorNumber].prevTime;
     motorList[motorNumber].prevTime = micros();
@@ -460,7 +452,7 @@ void roverVelocityCalculator(void){
 
 
 }
-void iniNav(void){
+void initNav(void){
     if (myI2CGPS.begin(Wire , 400000) == false)        // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     {
         while(1);                     // This will freeze the code to have the user check wiring
@@ -471,21 +463,22 @@ void iniNav(void){
     compass.m_max = (LSM303::vector<int16_t>){+5933, +7826, +6528};
 }
 void displayGpsinfo(void){                      // The function that prints the info
-    if (gps.location.isValid())                 // checks if valid location data is available
+    if (gps.location.isValid())      // checks if valid location data is available
     {
-        Serial.print("GPS-OK");                    // string initials to allow the Pyhton code to pickup
-        Serial.print(" ");                      // space
-        Serial.print(gps.location.lat(), 6);    // print the latitude with 6 digits after the point
-        Serial.print(" ");                      // space
-        Serial.print(gps.location.lng(), 6);    // print the longitude with 6 digits after the point
-        Serial.print("\n");                     // new line
+        UART_PORT.print("GPS-OK");          // string initials to allow the Pyhton code to pickup
+        UART_PORT.print(" ");            // space
+        UART_PORT.print(gps.location.lat(), 6);   // print the latitude with 6 digits after the point
+        UART_PORT.print(" ");           // space
+        UART_PORT.print(gps.location.lng(), 6);   // print the longitude with 6 digits after the point
+        UART_PORT.print("--");             // new line
     }
     else
     {
-        Serial.println(F("GPS-N/A"));
+        UART_PORT.print(F("GPS-N/A"));
+        UART_PORT.print("--");
     }
 }
-void navHnadler(void){
+void navHandler(void){
 
     compass.read();
     float heading = compass.heading();
@@ -497,42 +490,41 @@ void navHnadler(void){
 
     if (gps.time.isUpdated())         // Checks to see if new GPS info is available
     {
-        displayInfo();                  // Print the info on the serial monitor
+        displayGpsInfo();                  // Print the info on the serial monitor
     }
-    Serial.print("Heading");
-    Serial.print(" ");
-    Serial.print(heading);
-    Serial.print("\n");
-
+    UART_PORT.print("Heading");
+    UART_PORT.print(" ");
+    UART_PORT.print(heading);
+    UART_PORT.print("\n");
 }
-//void rf_encoder_interrupt(void) {
-//    RF.dt += micros() - RF.prevTime;
-//    RF.prevTime = micros();
-//    RF.encoderCount++;
-//}
+void rf_encoder_interrupt(void) {
+    RF.dt += micros() - RF.prevTime;
+    RF.prevTime = micros();
+    RF.encoderCount++;
+}
 
-//void rm_encoder_interrupt(void) {
-//    RM.dt += micros() - RM.prevTime;
-//    RM.prevTime = micros();
-//    RM.encoderCount++;
-//}
-//void rb_encoder_interrupt(void) {
-//    RB.dt += micros() - RB.prevTime;
-//    RB.prevTime = micros();
-//    RB.encoderCount++;
-//}
-//void lf_encoder_interrupt(void) {
-//    LF.dt += micros() - LF.prevTime;
-//    LF.prevTime = micros();
-//    LF.encoderCount++;
-//}
-//void lm_encoder_interrupt(void) {
-//    LM.dt += micros() - LM.prevTime;
-//    LM.prevTime = micros();
-//    LM.encoderCount++;
-//}
-//void lb_encoder_interrupt(void) {
-//    LB.dt += micros() - LB.prevTime;
-//    LB.prevTime = micros();
-//    LB.encoderCount++;
-//}
+void rm_encoder_interrupt(void) {
+    RM.dt += micros() - RM.prevTime;
+    RM.prevTime = micros();
+    RM.encoderCount++;
+}
+void rb_encoder_interrupt(void) {
+    RB.dt += micros() - RB.prevTime;
+    RB.prevTime = micros();
+    RB.encoderCount++;
+}
+void lf_encoder_interrupt(void) {
+    LF.dt += micros() - LF.prevTime;
+    LF.prevTime = micros();
+    LF.encoderCount++;
+}
+void lm_encoder_interrupt(void) {
+    LM.dt += micros() - LM.prevTime;
+    LM.prevTime = micros();
+    LM.encoderCount++;
+}
+void lb_encoder_interrupt(void) {
+    LB.dt += micros() - LB.prevTime;
+    LB.prevTime = micros();
+    LB.encoderCount++;
+}
