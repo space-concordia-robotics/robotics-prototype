@@ -462,7 +462,7 @@ void initNav(void){
     compass.m_min = (LSM303::vector<int16_t>){-9506, -6666, -8003};
     compass.m_max = (LSM303::vector<int16_t>){+5933, +7826, +6528};
 }
-void displayGpsinfo(void){                      // The function that prints the info
+void displayGpsInfo(void){                      // The function that prints the info
     if (gps.location.isValid())      // checks if valid location data is available
     {
         UART_PORT.print("GPS-OK");          // string initials to allow the Pyhton code to pickup
