@@ -28,12 +28,8 @@ void pinSetup(void) {
   pinMode(M3_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
   pinMode(M3_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
-  // stepper motor
-
-  pinMode(M4_ENABLE_PIN, OUTPUT);
-  digitalWrite(M4_ENABLE_PIN, HIGH); // cut power
   pinMode(M4_DIR_PIN, OUTPUT);
-  pinMode(M4_STEP_PIN, OUTPUT);
+  pinMode(M4_PWM_PIN, OUTPUT);
   pinMode(M4_ENCODER_A, INPUT_PULLUP);
   pinMode(M4_ENCODER_B, INPUT_PULLUP);
   pinMode(M4_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);

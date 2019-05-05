@@ -111,16 +111,18 @@ const int encoderStates[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1,
 DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
 DcMotor motor3(M3_DIR_PIN, M3_PWM_PIN, M3_GEAR_RATIO);
-DcMotor motor4(M4_DIR_PIN, M4_PWM_PIN, M4_GEAR_RATIO);
+StepperMotor motor4(M4_ENABLE_PIN, M4_DIR_PIN, M4_STEP_PIN, M4_STEP_RESOLUTION, FULL_STEP, M4_GEAR_RATIO);
 ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
 ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
-DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3; DcMotor *m4 = &motor4;
+DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3;
+StepperMotor *m4 = &motor4;
 ServoMotor *m5 = &motor5; ServoMotor *m6 = &motor6;
 RobotMotor *motorArray[] = {m1, m2, m3, m4, m5, m6}; //!< I can use this instead of switch/case statements by doing motorArray[motornumber]->attribute
 // instantiate timers here:
-IntervalTimer dcTimer; // motors 1,2,3&4
+IntervalTimer dcTimer; // motors 1,2&3
+IntervalTimer m4StepperTimer; // motor 4
 IntervalTimer servoTimer; // motors 5&6
 
 // these are a nicer way of timing events than using millis()
@@ -168,7 +170,12 @@ void m4ExtendISR(void);
 //void m6OpenISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
-void dcInterrupt(void); //!< manages motors 1-4
+void dcInterrupt(void); //!< manages motors 1&2
+/*! \brief manages motor 4
+
+   Stepper interrupts occur much faster and the code is more complicated, so each stepper needs its own interrupt.
+*/
+void m4StepperInterrupt(void);
 void servoInterrupt(void); //!< manages motors 5&6
 
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
@@ -585,9 +592,10 @@ void initEncoders(void) {
   attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
   attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
 
-  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
-  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
-  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+  // motor4 is still a stepper for now
+  //motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
+  //attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
+  //attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
   // set activate PIDs
   //motor1.isOpenLoop = false; // keep this open loop until new motor is in
@@ -599,13 +607,13 @@ void initEncoders(void) {
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
   motor2.pidController.setGainConstants(10.0, 0.0, 0.0);
   motor3.pidController.setGainConstants(10.0, 0.0, 0.0);
-  motor4.pidController.setGainConstants(10.0, 0.0, 0.0);
+  //motor4.pidController.setGainConstants(10.0, 0.0, 0.0); // motor4 is still a stepper for now
 
   // set motor shaft angle tolerances
   motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
   motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
-  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * motor3.gearRatioReciprocal);
-  motor4.pidController.setJointAngleTolerance(0.1);//2.0 * motor4.gearRatioReciprocal);
+  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * 2 * motor3.gearRatioReciprocal);
+  motor4.pidController.setJointAngleTolerance(0.1);//1.8 * 2 * motor4.gearRatioReciprocal); // 1.8 is the min stepper resolution so I gave it +/- tolerance
   motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
   motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
@@ -659,10 +667,10 @@ void initSpeedParams(void) {
   UART_PORT.println("Setting motor speeds and open loop gains.");
 #endif
 
-  motor1.setMotorSpeed(30); // 60 rpm
+  motor1.setMotorSpeed(40); // 84 rpm
   motor2.setMotorSpeed(42); // 32 rpm
   motor3.setMotorSpeed(65); // 45 rpm
-  motor4.setMotorSpeed(30); // 60 rpm
+  motor4.setMotorSpeed(90); // needs to be tuned with new dc motor
   motor5.setMotorSpeed(50); // probably done tuning
   motor6.setMotorSpeed(50); // probably done tuning
 
@@ -670,7 +678,7 @@ void initSpeedParams(void) {
   motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
   motor2.pidController.setSlowestSpeed(10.0); // needs to be tuned
   motor3.pidController.setSlowestSpeed(5.0); // needs to be tuned
-  motor4.pidController.setSlowestSpeed(5.0); // needs to be tuned
+  //motor4.pidController.setSlowestSpeed(5.0); //honestly it doesn't really make sense for steppers? or does it
   //motor5.pidController.setSlowestSpeed(5.0); // servos have no closed loop
   //motor6.pidController.setSlowestSpeed(5.0); // servos have no closed loop
 
@@ -682,7 +690,6 @@ void initSpeedParams(void) {
   motor1.setOpenLoopGain(0.001); // needs to be tuned
   motor2.setOpenLoopGain(0.0012); // needs to be tuned
   motor3.setOpenLoopGain(0.004); // more or less tuned
-  motor4.setOpenLoopGain(0.004); // needs to be tuned
   motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
   motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
 }
@@ -694,6 +701,8 @@ void initMotorTimers(void) {
 
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
+  m4StepperTimer.begin(m4StepperInterrupt, STEPPER_PID_PERIOD); // 1000ms
+  m4StepperTimer.priority(MOTOR_NVIC_PRIORITY);
   servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
@@ -874,8 +883,8 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
 void rebootTeensy(void) { //!< software reset function using watchdog timer
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
-  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to.
-  WDOG_TOVALH = 0; //End value WDT compares itself to.
+  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to. Time value is in milliseconds.
+  WDOG_TOVALH = 0; //End value WDT compares itself to. Time value is in milliseconds.
   WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
                   WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
   WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
@@ -887,7 +896,9 @@ void dcInterrupt(void) {
   motor1.motorTimerInterrupt();
   motor2.motorTimerInterrupt();
   motor3.motorTimerInterrupt();
-  motor4.motorTimerInterrupt();
+}
+void m4StepperInterrupt(void) {
+  motor4.motorTimerInterrupt(m4StepperTimer);
 }
 void servoInterrupt(void) {
   motor5.motorTimerInterrupt();
@@ -1122,6 +1133,17 @@ void m4ExtendISR(void) {
   else {
     motor4.triggerState = 0;
   }
+}
+
+/*This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
+This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
+Calling the kickDog() function will reset the time-out counter.*/
+/*Todo: Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().*/
+void kickDog() {  
+  noInterrupts();
+  WDOG_REFRESH = 0xA602;
+  WDOG_REFRESH = 0xB480;
+  interrupts();
 }
 
 /*

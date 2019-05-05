@@ -115,9 +115,10 @@
 
 // stepper
 
-#define M4_ENABLE_PIN      16 //!< controls whether power goes to stepper or not
-#define M4_STEP_PIN        14 //!< on rising edges, stepper will take a step
+//#define M4_ENABLE_PIN      16 //!< controls whether power goes to stepper or not
+//#define M4_STEP_PIN        14 //!< on rising edges, stepper will take a step
 #define M4_DIR_PIN         15 //!< chooses the step direction
+#define M4_PWM_PIN        14
 // 11&12 are on port C with bits 6&7 respectively
 #define M4_ENCODER_PORT    GPIOC_PDIR 
 #define M4_ENCODER_SHIFT   CORE_PIN11_BIT
