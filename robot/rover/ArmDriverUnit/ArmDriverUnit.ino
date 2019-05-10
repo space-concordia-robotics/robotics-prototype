@@ -49,59 +49,7 @@ int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will beha
 bool startBlinking = false; //!< if true, teensy blinks as response to a message
 int blinkCount = 0; //!< when it reaches max it goes back to heartbeat
 
-// develmode1 actually isn't for ros... i will have to change things if i want ros over usb
-#ifdef DEVEL_MODE_1 // using the USB port
-//ros::NodeHandle nh;
-#elif defined(DEBUG_MODE) || defined(USER_MODE) // using hardware serial (Serial1 in this case)
-// the following commented block allows you to choose the hardware serial port
-/*
-  class NewHardware : public ArduinoHardware {
-  public:
-  long baud = 57600;
-  NewHardware():ArduinoHardware(&Serial1, baud){}; // place the serial port of your choosing (1 to 6)
-  };
-
-  ros::NodeHandle_<NewHardware> nh;
-*/
-// otherwise just use this
-ros::NodeHandle nh;
-#endif
-#ifdef ENABLE_ROS
-void messageCallback(const std_msgs::String& cmd_message) {
-  msgReceived = true;
-  int i = 0;
-  while (cmd_message.data[i] != '\0') {
-    serialBuffer[i] = cmd_message.data[i];
-  }
-  Parser.parseCommand(motorCommand, serialBuffer);
-  if (Parser.verifCommand(motorCommand)) {
-    msgIsValid = true;
-  }
-  memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-}
-ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
-
-// these hold information that is sent from the teensy to ros
-char m1FrameId[] = "/m1_angle";
-char m2FrameId[] = "/m2_angle";
-char m3FrameId[] = "/m3_angle";
-char m4FrameId[] = "/m4_angle";
-char m5FrameId[] = "/m5_angle";
-char m6FrameId[] = "/m6_angle";
-sensor_msgs::JointState m1_angle_msg;
-sensor_msgs::JointState m2_angle_msg;
-sensor_msgs::JointState m3_angle_msg;
-sensor_msgs::JointState m4_angle_msg;
-sensor_msgs::JointState m5_angle_msg;
-sensor_msgs::JointState m6_angle_msg;
-sensor_msgs::JointState angleMessages[NUM_MOTORS] = {m1_angle_msg, m2_angle_msg, m3_angle_msg, m4_angle_msg, m5_angle_msg, m6_angle_msg};
-ros::Publisher pub_m1("m1_joint_state", &m1_angle_msg);
-ros::Publisher pub_m2("m2_joint_state", &m2_angle_msg);
-ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg);
-ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
-ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg);
-ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
-#endif
+// i took the ROS stuff from here and stuck it into ideas.h
 
 /* motors */
 //! quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -510,8 +458,8 @@ void loop() {
               }
             }
           }
-        }
-      }
+        } // end of commands to a specific motor
+      } // end of commands ignored during homing
       else { // alert the user that the arm is homing so ignoring certain commands
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("arm is homing! ignoring all commands besides ping or stop");
@@ -519,7 +467,7 @@ void loop() {
         nh.loginfo("arm is homing! ignoring all commands besides ping or stop");
 #endif
       }
-    }
+    } // end of executing valid commands
     else { // alert the user that it's a bad command
       blinkType = BAD_BLINK; // alert the blink check that it was a bad message
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -528,7 +476,7 @@ void loop() {
       nh.logerror("error: bad motor command");
 #endif
     }
-  }
+  } // end of message parsing
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
     sinceAnglePrint = 0; // reset the timer
@@ -539,7 +487,7 @@ void loop() {
     clearBlinkState();
   }
   blinkLED(); // decides how to blink based on global variables
-}
+} // end of loop
 
 /* initialization functions */
 void initComms(void) { //!< Starts up serial comms over USB or UART and uses ROSserial if the macro is defined
@@ -574,8 +522,7 @@ void initEncoders(void) {
 
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
-  //attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
-  // encoder B doesn't work
+  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
 
   motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
   attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
@@ -590,10 +537,10 @@ void initEncoders(void) {
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
   // set activate PIDs
-  //motor1.isOpenLoop = false; // keep this open loop until new motor is in
+  //motor1.isOpenLoop = false;
   //motor2.isOpenLoop = false;
   //motor3.isOpenLoop = false;
-  //motor4.isOpenLoop = false; // motor4 is still a stepper for now
+  //motor4.isOpenLoop = false;
 
   // set pid gains
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
@@ -618,15 +565,15 @@ void initLimitSwitches(void) {
 #endif
 
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper (assuming only one switch)
-  //motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
   motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
   motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
   //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
   //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
 
-  //attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
   attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
   attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
@@ -895,9 +842,14 @@ void servoInterrupt(void) {
 }
 
 /* encoder interrupts */
-#define M1_SINGLE_CHANNEL 1
-//#define M1_DUAL_CHANNEL 2
+//#define M1_SINGLE_CHANNEL 1
+#define M1_DUAL_CHANNEL 2
 #ifdef M1_ENCODER_PORT
+/*! encoder interrupt service routine
+ * 
+ * \todo can I make a skeleton function that gets called in these interrupts
+     that I can just pass the appropriate registers etc into?
+ */
 void m1_encoder_interrupt(void) {
 #ifdef M1_DUAL_CHANNEL
   /*! encoder states are 4 bit values. Top 2 bits are the previous states
@@ -990,6 +942,10 @@ void m6_encoder_interrupt(void) {
 #endif
 
 /* limit switch interrupts */
+/* //! limit switch interrupt service routine
+\todo can I make a skeleton function that gets called in these interrupts
+     that I can just pass the appropriate registers etc into?
+*/
 void m1CwISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
   if (!(motor1.triggered) && motor1.triggerState == 0) {

@@ -1,3 +1,55 @@
+/* ROS stuff for beginning of the sketch
+// develmode1 actually isn't for ros... i will have to change things if i want ros over usb
+#ifdef DEVEL_MODE_1 // using the USB port
+//ros::NodeHandle nh;
+#elif defined(DEBUG_MODE) || defined(USER_MODE) // using hardware serial (Serial1 in this case)
+// the following code allows you to choose the hardware serial port
+  class NewHardware : public ArduinoHardware {
+  public:
+  long baud = 57600;
+  NewHardware():ArduinoHardware(&Serial1, baud){}; // place the serial port of your choosing (1 to 6)
+  };
+  ros::NodeHandle_<NewHardware> nh;
+// otherwise just use this
+ros::NodeHandle nh;
+#endif
+#ifdef ENABLE_ROS
+void messageCallback(const std_msgs::String& cmd_message) {
+  msgReceived = true;
+  int i = 0;
+  while (cmd_message.data[i] != '\0') {
+    serialBuffer[i] = cmd_message.data[i];
+  }
+  Parser.parseCommand(motorCommand, serialBuffer);
+  if (Parser.verifCommand(motorCommand)) {
+    msgIsValid = true;
+  }
+  memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
+}
+ros::Subscriber<std_msgs::String> cmdSubscriber("arm_command", &messageCallback);
+
+// these hold information that is sent from the teensy to ros
+char m1FrameId[] = "/m1_angle";
+char m2FrameId[] = "/m2_angle";
+char m3FrameId[] = "/m3_angle";
+char m4FrameId[] = "/m4_angle";
+char m5FrameId[] = "/m5_angle";
+char m6FrameId[] = "/m6_angle";
+sensor_msgs::JointState m1_angle_msg;
+sensor_msgs::JointState m2_angle_msg;
+sensor_msgs::JointState m3_angle_msg;
+sensor_msgs::JointState m4_angle_msg;
+sensor_msgs::JointState m5_angle_msg;
+sensor_msgs::JointState m6_angle_msg;
+sensor_msgs::JointState angleMessages[NUM_MOTORS] = {m1_angle_msg, m2_angle_msg, m3_angle_msg, m4_angle_msg, m5_angle_msg, m6_angle_msg};
+ros::Publisher pub_m1("m1_joint_state", &m1_angle_msg);
+ros::Publisher pub_m2("m2_joint_state", &m2_angle_msg);
+ros::Publisher pub_m3("m3_joint_state", &m3_angle_msg);
+ros::Publisher pub_m4("m4_joint_state", &m4_angle_msg);
+ros::Publisher pub_m5("m5_joint_state", &m5_angle_msg);
+ros::Publisher pub_m6("m6_joint_state", &m6_angle_msg);
+#endif
+ */
 /* // idea for stepper checks in open loop
   if (sinceStepperCheck >= STEPPER_CHECK_INTERVAL) { // for open loop quasi closed loop control
     // this code could (should?) also disable power
