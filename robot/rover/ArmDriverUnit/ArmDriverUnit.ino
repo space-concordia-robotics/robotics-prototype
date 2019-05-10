@@ -93,6 +93,7 @@ void blinkLED(void); //!< blinks LED based on global variables
 void respondToLimitSwitches(void); //!< move motor back into software angle range. This function behaves differently each loop
 void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
 void rebootTeensy(void); //!< reboots the teensy using the watchdog timer
+void kickDog(void); //!< resets the watchdog timer. If the teensy is stuck in a loop and this is not called, teensy resets.
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
 void m1_encoder_interrupt(void);
@@ -821,12 +822,25 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
 void rebootTeensy(void) { //!< software reset function using watchdog timer
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
-  WDOG_TOVALL = 15; // The next 2 lines sets the time-out value. This is the value that the watchdog timer compare itself to.
-  WDOG_TOVALH = 0; //End value WDT compares itself to.
+  // The next 2 lines set the time-out value.
+  WDOG_TOVALL = 15; // This is the value (ms) that the watchdog timer compare itself to.
+  WDOG_TOVALH = 0; // End value (ms) WDT compares itself to.
   WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
                   WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
   WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
   while (1); // infinite do nothing loop -- wait for the countdown
+}
+/*! This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
+This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
+Calling the kickDog() function will reset the time-out counter.
+
+\todo Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().
+*/
+void kickDog(void) {  
+  noInterrupts();
+  WDOG_REFRESH = 0xA602;
+  WDOG_REFRESH = 0xB480;
+  interrupts();
 }
 
 /* timer interrupts */
