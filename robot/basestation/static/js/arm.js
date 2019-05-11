@@ -176,6 +176,7 @@ document.addEventListener('keydown', function (event) {
         }
         appendToConsole('error: ' + response.error)
         scrollToBottom()
+        $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
       }
     })
     lastCmdSent = new Date().getTime()
@@ -208,6 +209,8 @@ document.addEventListener('keydown', function (event) {
         }
         appendToConsole('error: ' + response.error)
         scrollToBottom()
+        $('img#camera-feed')[0].src =
+          'http://' + getRoverIP() + ':8090/?action=stream'
       }
     })
     lastCmdSent = new Date().getTime()

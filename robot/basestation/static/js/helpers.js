@@ -92,6 +92,16 @@ function dim (selector) {
   $(selector).css('background-color', 'rgb(74, 0, 0)')
 }
 
+function getRoverIP () {
+  let local = false
+
+  if (local) {
+    return '127.0.0.1' // localhost
+  }
+
+  return '172.16.1.30' // competition IP
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest (msg) {
