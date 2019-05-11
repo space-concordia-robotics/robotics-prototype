@@ -3,7 +3,7 @@ This repo contains the Robotics software team code, as well as some of the other
 
 ## Contributing and Development Environment Instructions
 
-Firstly, this project is built in Python 3.3+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy. 
 

@@ -11,7 +11,7 @@ import struct
 
 '''
 This class represents a motor component that will be used inside
-the mother `Microcontroller` class container (such as the Arduino/ODROID).
+the mother `Microcontroller` class container (such as the Arduino/Teensy).
 '''
 
 
