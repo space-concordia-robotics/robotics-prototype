@@ -8,6 +8,7 @@
 **/*sh.exe.stackdump
 **/venv
 **/env
+**/.envrc
 **/stress-test-results_*
 **/node_modules
 **/configEthernet.log
@@ -17,3 +18,4 @@
 **/rospackages/build
 **/rospackages/devel
 **/odroid_rx.txt
+**/c_cpp_properties.json

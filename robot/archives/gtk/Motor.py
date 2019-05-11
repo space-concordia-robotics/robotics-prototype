@@ -7,6 +7,12 @@
 # working software over comprehensive documentation
 # customer collaboration over contract negotiation
 # responding to change over following a plan
+import struct
+
+'''
+This class represents a motor component that will be used inside
+the mother `Microcontroller` class container (such as the Arduino/Teensy).
+'''
 
 
 class Motor:
@@ -26,6 +32,7 @@ class Motor:
         self.name = name
         self.set_max_min_angles(max_angle, min_angle)
         self.set_max_min_currents(max_current, min_current)
+        self.set_angle_position(home_angle)
 
     # will definitely have to be configured during testing
     # def home_position(self):
@@ -47,7 +54,7 @@ class Motor:
 
     # we don't want to intentionally try to set angle positions out of the possible ranges
     def set_angle_position(self, angle):
-        if angle > self.min_angle and angle < self.max_angle:
+        if int(angle) >= self.min_angle and int(angle) <= self.max_angle:
             self.angle_position = angle
             return True
         else:
@@ -85,3 +92,10 @@ class Motor:
             self.alive = False
         else:
             self.alive = True
+
+    def write(self, serial, angle):
+        self.set_angle_position(angle)
+        serial.write(struct.pack('>B', int(self.get_angle_position())))
+
+    def read(self, serial):
+        return int(serial.read())
