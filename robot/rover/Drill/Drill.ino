@@ -49,6 +49,9 @@ float val = 0;
 float voltage = 0;
 volatile char tableDirection = 'n'; // n for neutral, i for increasing, d for decreasing
 volatile int tablePosition[13];
+int cuvette = 0;
+int desiredPosition = 0;
+bool turnTableFree = true;
 int i = 0;
 /*
   void elevatorTopInterrupt (void);
@@ -168,8 +171,6 @@ void loop() {
       else if (cmd == "goto") {
         //sends table to wanted position
         //eventually need split function for a single string command
-        int cuvette;
-        int desiredPosition;
 
         Serial.println("What is the cuvette of interest?");
         while (!Serial.available()) {
@@ -214,6 +215,7 @@ void loop() {
         //stops table
         table.writeMicroseconds(SERVO_STOP);
         tableDirection = 'n';
+        turnTableFree = true;
         Serial.println("ts");
       }
       else if (cmd == "p1ccw") {
@@ -309,6 +311,7 @@ void loop() {
         tableDirection = 'n';
         Serial.print("cmd: ");
         Serial.println(cmd);
+        turnTableFree = true;
       }
     }
   }
@@ -347,6 +350,11 @@ void loop() {
     isActualPress = false;
     isPushed = false;
   }
+  if ((turnTableFree == false) && (tablePosition[desiredPosition] == cuvette)) {
+    table.writeMicroseconds(SERVO_STOP);
+    tableDirection = 'n';
+    turnTableFree = true;
+  }
 }
 /*
   void elevatorTopInterrupt () {
@@ -370,7 +378,7 @@ void cuvettePosition() {
   }
   else if (tableDirection == 'i') {
     for (i = 0; i <= 12; i++) {
-      tablePosition[i] = (tablePosition[i] + 1) % 13;
+      tablePosition[i] = (tablePosition[i]+1) % 13;
     }
     Serial.print("tablePosition[0]: ");
     Serial.println(tablePosition[0]);
@@ -379,7 +387,7 @@ void cuvettePosition() {
     int temp = tablePosition[0];
     for (i = 0; i <= 12; i++) {
       tablePosition[i] = (tablePosition[i] - 1) % 13;
-      if (tablePosition[i] == -1)tablePosition[i] = 12;
+      if (tablePosition[i] == -1){tablePosition[i] = 12;}
     }
     Serial.print("tablePosition[0]: ");
     Serial.println(tablePosition[0]);
@@ -392,7 +400,7 @@ void turnTable (int cuvette, int desiredPosition) {
 
   for (i = 0; i <= 12; i++) {
     initialPosition = i;
-    if (tablePosition[i] = cuvette)break;
+    if (tablePosition[i] == cuvette)break;
   }
 
   Serial.print("initialPosition: ");
@@ -406,25 +414,12 @@ void turnTable (int cuvette, int desiredPosition) {
   if ( (difference > -7 && difference < 0) || (difference > 7 && difference < 13)) {
     tableDirection = 'i';
     table.writeMicroseconds(SERVO_MAX_CCW);
-    while (1) {
-      if (tablePosition[desiredPosition] == cuvette) {
-        table.writeMicroseconds(SERVO_STOP);
-        tableDirection = 'n';
-        break;
-      }
-    }
   }
   else if ( (difference > -13 && difference < -7) || (difference > 0 && difference < 7)) {
     tableDirection = 'd';
     table.writeMicroseconds(SERVO_MAX_CW);
-    while (1) {
-      if (tablePosition[desiredPosition] == cuvette) {
-        table.writeMicroseconds(SERVO_STOP);
-        tableDirection = 'n';
-        break;
-      }
-    }
   }
+  turnTableFree = false;
 }
 
 void limSwitchTable(void) {
