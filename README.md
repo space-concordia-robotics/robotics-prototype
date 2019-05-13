@@ -4,9 +4,18 @@
 This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
 ## Contributing and Development Environment Instructions
-Firstly, this project is built in Python 3.6+. You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
-Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project.
+Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+
+Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy. 
+
+### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
+Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
+```
+$ npm install
+```
+
+This command will install all of the required dependencies (mostly just ESLint stuff at the time of writing) as depicted in the `package.json` file.
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
@@ -245,7 +254,7 @@ For further details on these images please see the [Custom Odroid Images wiki pa
 
 ### How to upload Arduino scripts from the odroid
 
-1. Make sure the arduino is plugged into the odroid
+1. Make sure the Arduino is plugged into the odroid
 
 2. Copy your Arduino source(s) into platformio/src/
 
@@ -331,4 +340,46 @@ Select `PC Camera` using the up/down navigation buttons on the side and click OK
 - Run `./app.py` which will run the GUI on `localhost:5000`
 - Open chrome and go visit the link `localhost:5000`
 - Hover over the buttons to see a description of what they should do. Currently `B` is for enable stream and `N` is for disable.
-- Enable the stream with `B`, wait for the response to appear in the console log. If in the response you see a succesful message like: "started stream", then refresh the cache of the page with `ctrl + shift + r` and you should see the video stream appear.
+- Enable the stream with `B`, wait for the response to appear in the console log. If in the response you see a succesful message like: "started stream", you should see the video stream appear.
+
+## TEENSY
+### Flashing the Teensy from a PC
+
+Flashing code to a Teensy is very similar to flashing to Arduino, but the Teensyduino add-on is required. [This link](https://www.pjrc.com/teensy/td_download.html) explains how to set up the Arduino IDE and Teensyduino on Windows, Linux and Mac. I (Josh) use Arduino 1.8.5 with Teensyduino 1.42 on Windows 10 x64. In the case of Linux, make sure that the installer is executable: `chmod +x TeensyduinoInstall.linux64` or replace it with whatever the installer's name is.
+
+[This link](https://www.pjrc.com/teensy/td_usage.html) explains how to flash the sketch.
+
+Teensy programming has all of the Arduino functions, as well as extra features described on [the pjrc website](https://www.pjrc.com/teensy/td_libs.html). Currently used features are digitalWriteFast(), IntervalTimer and ellapsedMillis.
+
+I (Josh) currently use Sublime Text to write my code, and then compile it using the Arduino IDE and use the Serial Monitor to communicate with the Teensy. The recommended editors are Atom or VS Code as the rest of this project has configuration files for those text editors.
+
+### A note on ROS for Teensy 3.5/3.6
+
+The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular are missing a conditional in one of the header files. According to [this link](https://github.com/ros-drivers/rosserial/issues/259) and [this link](https://forum.pjrc.com/threads/40418-rosserial_arduino-for-Teensy), `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` has to be added to line 44 of ArduinoHardware.h BUT I found that the correct file is actually ArduinoIncludes.h. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src`.
+
+This was found to be insufficient. In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, in the same file, the following two lines must be commented out:
+```
+#include <usb_serial.h>  // Teensy 3.0 and 3.1
+#define SERIAL_CLASS usb_serial_class
+```
+and the following lines must be added:
+```
+#ifdef USE_TEENSY_HW_SERIAL
+  #include <HardwareSerial.h>
+  #define SERIAL_CLASS HardwareSerial
+#else
+  #include <usb_serial.h>
+  #define SERIAL_CLASS usb_serial_class
+#endif
+```
+If you want to choose a different hardware Serial port, the following block of code presented [here](https://answers.ros.org/question/198247/how-to-change-the-serial-port-in-the-rosserial-lib-for-the-arduino-side/#post-id-295159) should do the trick, though it hasn't been tested yet:
+```
+class NewHardware : public ArduinoHardware
+{
+  public:
+  NewHardware():ArduinoHardware(&Serial1, 57600){};
+};
+
+ros::NodeHandle_<NewHardware>  nh;
+```
+Where Serial1 can be anything from Serial1 to Serial6.
