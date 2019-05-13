@@ -1,5 +1,0 @@
-[Unit]
-Description=Arm command listener
-
-[Service]
-ExecStart=/usr/bin/ArmCommandListener.py
