@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import datetime
@@ -8,7 +8,7 @@ from ping_acknowledgment.srv import *
 
 def ping_response_client(msg):
     # convenience function that blocks until 'ping_response' is available
-    rospy.wait_for_service('ping_response')
+    #rospy.wait_for_service('ping_response')
 
     try:
         ping_response = rospy.ServiceProxy('ping_response', PingResponse)

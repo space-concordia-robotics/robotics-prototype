@@ -6,16 +6,10 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 
 import os
 import subprocess
-import urllib
 from urllib.parse import urlparse, unquote
 import flask
 from flask import jsonify, request
-# import time
-
-# TODO: Rename modules to lowercase
-from robot.basestation.motor import Motor
-from robot.basestation.serialport import SerialPort
-from robot.basestation.microcontroller import Microcontroller
+from robot.comms.connection import Connection
 
 app = flask.Flask(__name__)
 
@@ -42,18 +36,43 @@ def fetch_ros_master_ip():
     return fetch_ros_master_uri().hostname
 
 
-def run_shell(cmd, arg=""):
+def run_shell(cmd, args=""):
     """Run script command supplied as string.
 
     Returns tuple of output and error.
     """
     cmd_list = cmd.split()
-    cmd_list.append(str(arg))
+    arg_list = args.split()
+
+    print("arg_list:", arg_list)
+
+    for arg in arg_list:
+        cmd_list.append(str(arg))
+
+    print("cmd_list:", cmd_list)
+
     process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     output, error = process.communicate()
 
     return output, error
 
+def get_pid(keyword):
+    cmd = "ps aux"
+    output, error = run_shell(cmd)
+
+    ting = output.decode().split('\n')
+
+    #print(ting)
+
+    for line in ting:
+        if keyword in line:
+            #print("FOUND PID:", line)
+            words = line.split()
+            print("PID:", words[1])
+
+            return words[1]
+
+    return -1
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
@@ -159,223 +178,168 @@ def odroid_rx():
 
     return jsonify(success=True, odroid_rx=output)
 
-# Declare some placeholder values for `Motor.__init__` parameters
-max_angle = 160
-min_angle = 0
-max_current = 3
-min_current = 0
-home_angle = 0
-
-# Initialize Motor class object instance variables to map to various motor button objects
-m1 = Motor("1", max_angle, min_angle, max_current, min_current, home_angle)
-m2 = Motor("2", max_angle, min_angle, max_current, min_current, home_angle)
-m3 = Motor("3", max_angle, min_angle, max_current, min_current, home_angle)
-m4 = Motor("4", max_angle, min_angle, max_current, min_current, home_angle)
-m5 = Motor("5", max_angle, min_angle, max_current, min_current, home_angle)
-m6 = Motor("6", max_angle, min_angle, max_current, min_current, home_angle)
-
-# Initialize a Port instance used to connect to teensy via serial
-# port = SerialPort(path="/dev/cu.usbmodem3049051", baudrate=9600, timeout=1)
-serial_port = SerialPort()
-
-# Intialize `Microcontroller` object representing the mother Arduino object
-# containing `Motor` instance array
-teensy = Microcontroller("teensy", serial_port, [m1, m2, m3, m4, m5, m6])
-
-
-# Automatic controls
-@app.route("/mousedown_btn_pitch_up")
-def mousedown_btn_pitch_up():
-    btn_id = "mousedown_btn_pitch_up"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_pitch_down")
-def mousedown_btn_pitch_down():
-    btn_id = "mousedown_btn_pitch_down"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_roll_left")
-def mousedown_btn_roll_left():
-    btn_id = "mousedown_btn_roll_left"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_roll_right")
-def mousedown_btn_roll_right():
-    btn_id = "mousedown_btn_roll_right"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_claw_open")
-def mousedown_btn_claw_open():
-    btn_id = "mousedown_btn_claw_open"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_claw_close")
-def mousedown_btn_claw_close():
-    btn_id = "mousedown_btn_claw_close"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_up")
-def mousedown_btn_arm_up():
-    btn_id = "mousedown_btn_arm_up"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_down")
-def mousedown_btn_arm_down():
-    btn_id = "mousedown_btn_arm_down"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_left")
-def mousedown_btn_arm_left():
-    btn_id = "mousedown_btn_arm_left"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_right")
-def mousedown_btn_arm_right():
-    btn_id = "mousedown_btn_arm_right"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_backward")
-def mousedown_btn_arm_backward():
-    btn_id = "mousedown_btn_arm_backward"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_arm_forward")
-def mousedown_btn_arm_forward():
-    btn_id = "mousedown_btn_arm_forward"
-    print(btn_id)
-    return jsonify(success=True, button=btn_id)
-
 
 # Manual controls
-@app.route("/mousedown_btn_motor1_ccw")
-def mousedown_btn_motor1_ccw():
-    btn_id = "mousedown_btn_motor1_ccw"
-    print(btn_id)
-    teensy.motors.get(name="1").rotate(20, direction='ccw')
-    # teensy.write(m1.name, "1")
-    return jsonify(success=True, button=btn_id)
+@app.route("/manual_control", methods=["POST"])
+def manual_control():
+
+    print("manual_control")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
+
+    if local:
+        rover_ip = "127.0.0.1"
+        base_ip = rover_ip
+        rover_port = 5005
+        base_port = 5010
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5015
+        base_port = rover_port
+
+    print("cmd: " + cmd)
+    sender = Connection("arm_cmd_sender", rover_ip, rover_port)
+    error = str(None)
+
+    try:
+        sender.send(cmd)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
+
+    receiver = Connection("arm_cmd_receiver", base_ip, base_port)
+    feedback = str(None)
+
+    try:
+        feedback = receiver.receive(timeout=2)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
+
+    print("feedback:", feedback)
+
+    if not feedback:
+        feedback = "Timeout limit exceeded, no data received"
+
+    return jsonify(success=True, cmd=cmd, error=error, feedback=feedback)
+
+# Rover controls
+@app.route("/rover_drive", methods=["POST"])
+def rover_drive():
+    print("rover_drive")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
+
+    if local:
+        rover_ip = "127.0.0.1"
+        base_ip = rover_ip
+        rover_port = 5020
+        base_port = 5025
+    else:
+        rover_ip = "172.16.1.30"
+        base_ip = "172.16.1.20"
+        rover_port = 5030
+        base_port = rover_port
+    print("cmd: " + cmd)
+    sender = Connection("rover_drive_sender", rover_ip, rover_port)
+
+    error = str(None)
+
+    try:
+        sender.send(cmd)
+    except OSError:
+        error = "Network is unreachable"
+        print(error)
+
+    receiver = Connection("rover_drive_receiver", base_ip, base_port)
+    feedback = str(None)
+    error = str(None)
+
+    try:
+        feedback = receiver.receive(timeout=2)
+    except OSError:
+        error = "Network error"
+        print(error)
+
+    print("feedback:", feedback)
+
+    if not feedback:
+        feedback = "Timeout limit exceeded, no data received"
+
+    return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
+
+# Task handler services
+@app.route("/task_handler", methods=["POST"])
+def task_handler():
+    print("task_handler")
+
+    cmd = str(request.get_data('cmd'), "utf-8")
+    print("cmd: " + cmd)
+    # remove fluff, only command remains
+    if cmd:
+        cmd = cmd.split("=")[1]
+        # decode URI
+        cmd = unquote(cmd)
+
+    print("cmd: " + cmd)
+
+    ros_cmd = "rosrun task_handler task_handler_client.py"
+    cmd_args = ""
+
+    # choose appropriate arguments for ROS service client call
+    if cmd == "enable-arm-listener":
+        cmd_args = "arm_listener 1"
+    elif cmd == "disable-arm-listener":
+        cmd_args = "arm_listener 0"
+    elif cmd == "enable-rover-listener":
+        cmd_args = "rover_listener 1"
+    elif cmd == "disable-rover-listener":
+        cmd_args = "rover_listener 0"
+    elif cmd == "enable-arm-stream":
+        cmd_args = "camera_stream 1"
+    elif cmd == "disable-arm-stream":
+        cmd_args = "camera_stream 0"
+
+    print("cmd_args:", cmd_args)
+
+    output, error = run_shell(ros_cmd, cmd_args)
+    output = output.decode()
+
+    print("Output: " + output)
+
+    if error:
+        print("Error: " + error.decode())
+
+    error = str(None) if not error else str(error)
+
+    return jsonify(success=True, cmd=cmd, output=output, error=error)
 
 
-@app.route("/mousedown_btn_motor1_cw")
-def mousedown_btn_motor1_cw():
-    btn_id = "mousedown_btn_motor1_cw"
-    print(btn_id)
-    teensy.motors.get(name="1").rotate(20, direction='cw')
-    # teensy.write(m1.name, "0")
-    return jsonify(success=True, button=btn_id)
+if __name__ == "__main__":
 
+    # feature toggles
+    # the following two are used for UDP based communication with the Connection class
+    global local
+    local = True
+    # print("fetch_ros_master_ip:", fetch_ros_master_ip())
+    #
+    # # either local or competition
+    # ros_master_ip = fetch_ros_master_ip()
+    # if ros_master_ip in ["127.0.0.1", "localhost"]
+    #     local = True
 
-@app.route("/mousedown_btn_motor2_ccw")
-def mousedown_btn_motor2_ccw():
-    btn_id = "mousedown_btn_motor2_ccw"
-    print(btn_id)
-    teensy.motors.get(name="2").rotate(20, direction='ccw')
-    # teensy.write(m2.name, "1")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor2_cw")
-def mousedown_btn_motor2_cw():
-    btn_id = "mousedown_btn_motor2_cw"
-    print(btn_id)
-    teensy.motors.get(name="2").rotate(20, direction='cw')
-    # teensy.write(m2.name, "0")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor3_ccw")
-def mousedown_btn_motor3_ccw():
-    btn_id = "mousedown_btn_motor3_ccw"
-    print(btn_id)
-    teensy.motors.get(name="3").rotate(20, direction='ccw')
-    # teensy.write(m3.name, "1")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor3_cw")
-def mousedown_btn_motor3_cw():
-    btn_id = "mousedown_btn_motor3_cw"
-    print(btn_id)
-    teensy.motors.get(name="3").rotate(20, direction='cw')
-    # teensy.write(m3.name, "0")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor4_ccw")
-def mousedown_btn_motor4_ccw():
-    btn_id = "mousedown_btn_motor4_ccw"
-    print(btn_id)
-    teensy.motors.get(name="4").rotate(20, direction='ccw')
-    # teensy.write(m4.name, "1")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor4_cw")
-def mousedown_btn_motor4_cw():
-    btn_id = "mousedown_btn_motor4_cw"
-    print(btn_id)
-    teensy.motors.get(name="4").rotate(20, direction='cw')
-    # teensy.write(m4.name, "0")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor5_ccw")
-def mousedown_btn_motor5_ccw():
-    btn_id = "mousedown_btn_motor5_ccw"
-    print(btn_id)
-    teensy.motors.get(name="5").rotate(20, direction='ccw')
-    # teensy.write(m5.name, "1")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor5_cw")
-def mousedown_btn_motor5_cw():
-    btn_id = "mousedown_btn_motor5_cw"
-    print(btn_id)
-    teensy.motors.get(name="5").rotate(20, direction='cw')
-    # teensy.write(m5.name, "0")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor6_ccw")
-def mousedown_btn_motor6_ccw():
-    btn_id = "mousedown_btn_motor6_ccw"
-    print(btn_id)
-    teensy.motors.get(name="6").rotate(20, direction='ccw')
-    # teensy.write(m6.name, "1")
-    return jsonify(success=True, button=btn_id)
-
-
-@app.route("/mousedown_btn_motor6_cw")
-def mousedown_btn_motor6_cw():
-    btn_id = "mousedown_btn_motor6_cw"
-    print(btn_id)
-    teensy.motors.get(name="6").rotate(20, direction='cw')
-    # teensy.write(m6.name, "0")
-    return jsonify(success=True, button=btn_id)
-
-
-app.run(debug=True)
-# add param `host= '0.0.0.0'` if you want to run on your machine's IP address
+    app.run(debug=True)
+    # add param `host= '0.0.0.0'` if you want to run on your machine's IP address

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
+
 # robotics-prototype
 This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
@@ -63,12 +65,12 @@ However, this GUI will soon be replaced by a new one using flask, so unless your
 #### Install and configure `pygobject3`
 If you ran into issues installing `pygobject` when trying to `pip install -r requirements.txt`, then here are possible reasons:
 
-**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as: 
+**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as:
 ```
 (venv) $ brew install pygobject3 gtk+3
 ```
 
-**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again: 
+**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again:
 ```
 (venv) $ brew install libffi
 ```
@@ -84,7 +86,7 @@ Now you should be able to retry installing the requirements:
 Which should produce no errors!
 
 ### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
-When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`). 
+When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`).
 
 In other words, this means all imports of modules inside the `robot` directory should be imported with absolute path, e.g. inside `"tests/unit/motor_test.py"`, the `Motor` class can be imported using:
 ```
@@ -155,7 +157,7 @@ All in all, by using these tools, we will ensure that the codebase is consistent
 Although most of the syntax/format will be handled by `pylint`/`yapf`, some things that aren't are briefly outlined here (namely regarding source file naming guidelines):
 - As stated [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3163-file-naming-s3163-file-naming), file names shouldn't include dashes since they need to be importable.
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
-- Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery). 
+- Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
 #### Atom (tested on ubuntu 16.04, Windows 7)
 If you're using Atom, setting up should be fairly easy.
@@ -310,6 +312,35 @@ ssh net_name@login.encs.concordia.ca
 ssh odroid@ip_address
 ```
 - It should ask you for a password, which will be `odroid`
+
+### Video Streaming Procedure
+
+This will explain the steps necessary to setup the odroid with rocket M900 radios and the GUI to view a video stream from the odroid.
+
+#### Hardware setup:
+
+1. Setup the rocket M900 radios
+
+- Use the rocket labeled `192.168.1.45` for the odroid, and the one labeled `192.168.1.40` for the basestation.
+Connect the power adapter to a power socket, use ethernet cables to connect `POE` (power over ethernet) to the `LAN` port on the radio.
+Make sure that you connect some omni-directional antennas to `Chain0` or `Chain1` connectors on the radios. Make sure to use the same for both.
+DO NOT connect `LAN` to `LAN`, this can cause issues. After having done the last step, connect the `LAN` port from the power adapter to either the odroid or basestation ethernet port.
+When both LEDs on the radios are on (green, red, yellow/orange) as opposed to the first two green ones then both radios are connected to each other.
+For an example diagram of the connections see the description of [this](https://github.com/space-concordia-robotics/robotics-prototype/pull/80) pull request.
+The only difference is that the ip addresses start with `172.16` vs `192.168`, and that if you are using the laptop I donated the IP address should end with `25` rather than `20`.
+- Power up the Odroid using it's power adapter. You should see a solid blue LED at first which then will begin to flash (this indicates normal boot behavior).
+- Insert the USB connection for the webcam to the odroid (preferably 3.0 USB hub) _after_ it has booted up.
+- Unfortunately this step is not automated: When the camera powers up it will show two options.
+Select `PC Camera` using the up/down navigation buttons on the side and click OK (on the top) to select it.
+
+2. Run corresponding software
+
+- After logging in to the basesation computer, select the correct ethernet configuration by clicking on the wifi logo button in the top right corner and clicking (if using the donated laptop) `Base station direct 1`. This will properly set the computers IP for competition mode.
+- Open a terminal run `base` which will take you to the basestation folder.
+- Run `./app.py` which will run the GUI on `localhost:5000`
+- Open chrome and go visit the link `localhost:5000`
+- Hover over the buttons to see a description of what they should do. Currently `B` is for enable stream and `N` is for disable.
+- Enable the stream with `B`, wait for the response to appear in the console log. If in the response you see a succesful message like: "started stream", you should see the video stream appear.
 
 ## TEENSY
 ### Flashing the Teensy from a PC
