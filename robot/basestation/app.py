@@ -19,6 +19,7 @@ from robot.basestation.microcontroller import Microcontroller
 
 app = flask.Flask(__name__)
 
+
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
 
@@ -54,6 +55,7 @@ def run_shell(cmd, arg=""):
 
     return output, error
 
+
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
@@ -66,6 +68,12 @@ def index():
 def rover():
     """Rover control panel."""
     return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
+
+
+@app.route("/science")
+def science():
+    """Science page."""
+    return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/ping_rover")
@@ -107,6 +115,7 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
+
 @app.route("/select_mux", methods=["POST", "GET"])
 def select_mux():
     print("select_mux")
@@ -118,6 +127,7 @@ def select_mux():
     print("output: " + output)
 
     return jsonify(success=True, dev=dev, output=output)
+
 
 @app.route("/serial_cmd", methods=["POST", "GET"])
 def serial_cmd():
@@ -143,6 +153,7 @@ def serial_cmd():
 
     return jsonify(success=True, cmd=cmd, output=output)
 
+
 # only to be used when hacky implementation is fixed
 # see odroid_rx package for details
 @app.route("/odroid_rx", methods=["POST"])
@@ -158,6 +169,7 @@ def odroid_rx():
     print("output: " + output)
 
     return jsonify(success=True, odroid_rx=output)
+
 
 # Declare some placeholder values for `Motor.__init__` parameters
 max_angle = 160
