@@ -32,7 +32,7 @@
 
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href=""javascript:void(0)"">
             <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
@@ -47,7 +47,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/">Arm</a>
                     <a class="dropdown-item" href="/rover">Rover</a>
-                    <a class="dropdown-item" href="#">...</a>
+                    <a class="dropdown-item" href=""javascript:void(0)"">...</a>
                 </div>
                 </li>
             </ul>
@@ -142,34 +142,40 @@
                     <h5 class="container-header">Controls</h5>
                     <table align="center">
                         <tr>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                Motor Controls
+                            </td>
+                            <td>
+                                Command Listener
+                            </td>
                             <td style="text-align: center;">Front Camera</td>
                         </tr>
                         <tr>
                             <td>
-                                <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
+                                <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
                             </td>
-                            <td></td>
                             <td>
-                                <!-- <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">On</button></a> -->
+                                <input type="checkbox" id="toggle-rover-listener" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
+                            </td>
+                            <td>
                                 <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
                         </tr>
                         <tr>
-                            <td></td>
                             <td>
-                                <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Photo</button></a>
+                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Photo</button></a>
                             </td>
                             <td style="text-align: center;">Back Camera</td>
                         </tr>
                         <tr>
                             <td>
-                                <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Ping Test</button></a>
+                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Ping Test</button></a>
                             </td>
                             <td></td>
                             <td>
-                                <!-- <a href=# id="click_btn_motor3_cw"><button type="button" class="control-btn3">Off</button></a> -->
                                 <input type="checkbox" not-checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
                             </td>
                         </tr>
@@ -208,6 +214,54 @@
                                     </td>
                                 </tr>
                                 </tbody>
+                            </table>
+                            <h5 class="container-header">Throttle speed</h5>
+                            <table align="center">
+                                <tbody>
+                                    <tr class="speed-throttle-control">
+                                        <td>i</td>
+                                        <td>j</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <a href="javascript:void(0);" id="throttle-increase">
+                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0);" id="throttle-decrease">
+                                                <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td id="throttle-speed">
+                                            0
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5 class="container-header">Steering speed</h5>
+                            <table align="center">
+                                <tbody>
+                                    <tr class="speed-throttle-control">
+                                        <td>o</td>
+                                        <td>k</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <a href="javascript:void(0);" id="steering-increase">
+                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0);" id="steering-decrease">
+                                                <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td id="steering-speed">
+                                            0
+                                        </td>
+                                    </tr>
+                                </tbody>
                                 <!--Table body-->
                             </table>
                             <!--Table-->
@@ -219,7 +273,7 @@
                                 <tr>
                                     <td><strong>Front</strong></td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_home">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_home">
                                             <button type="button" class="control-btn2">
                                                 Home
                                             </button>
@@ -228,28 +282,28 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_lpan">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
                                             <button type="button" class="control-btn2">
                                                 LPan
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_rpan">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
                                             <button type="button" class="control-btn2">
                                                 RPan
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_tilt_up">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
                                             <button type="button" class="control-btn2">
                                                 &#8593;Tilt
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_tilt_down">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
                                             <button type="button" class="control-btn2">
                                                 &#8595;Tilt
                                             </button>
@@ -263,7 +317,7 @@
                                 <tr>
                                     <td><strong>Back</strong></td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_home">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_home">
                                             <button type="button" class="control-btn2">
                                                 Home
                                             </button>
@@ -272,34 +326,71 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_lpan">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
                                             <button type="button" class="control-btn2">
                                                 LPan
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_rpan">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
                                             <button type="button" class="control-btn2">
                                                 RPan
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_tilt_up">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
                                             <button type="button" class="control-btn2">
                                                 &#8593;Tilt
                                             </button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href=# id="click_btn_camera_back_tilt_down">
+                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
                                             <button type="button" class="control-btn2">
                                                 &#8595;Tilt
                                             </button>
                                         </a>
                                     </td>
                                 </tr>
+                                </table>
+                                <h5 class="container-header">EXTRA CONTROLS</h5>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <button title="List all commands" id="list-all-rover-cmds" type="button" class="control-btn-mid" disabled>
+                                                <strong>L</strong>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button title="Toggle listener script" id="toggle-rover-listener-btn" type="button" class="control-btn-mid" disabled>
+                                                <strong>T</strong>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button title="Show buffered serial messages" id="show-buffered-rover-msgs" type="button" class="control-btn-mid" disabled>
+                                                <strong>B</strong>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button title="Enable motor controls" id="enable-rover-motors" type="button" class="control-btn-mid" disabled>
+                                                <strong>M</strong>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button title="Terminate listener script" id="terminate-listener-script" type="button" class="control-btn-mid" disabled>
+                                                <strong>Q</strong>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button title="Disable motor controls" id="disable-rover-motors" type="button" class="control-btn-mid" disabled>
+                                                <strong>N</strong>
+                                            </button>
+                                        </td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
@@ -309,15 +400,15 @@
                 <div class="col-md">
                     <h5 class="container-header">Log Console</h5>
                     <div class="form-group">
-                        <textarea id="rover-log" rows="8" readonly></textarea>
+                        <textarea id="write-to-log" rows="8" readonly></textarea>
                         <br>
                         <!--log console buttons-->
                         <div class="btn-group" role="group" id="logs-btn">
-                            <a href=# id=click_btn>
+                            <a href="javascript:void(0)" id=click_btn>
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="clear-log">
-                                <button type="button" class="btn btn-secondary" onclick="clearText()">Clear Logs</button>
+                                <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                             </a>
                             <a href="javascript:void(0)" id="test-log">
                                 <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import datetime
@@ -7,7 +7,7 @@ from mux_selector.srv import *
 
 def mux_select_client(device):
     # convenience function that blocks until 'ping_response' is available
-    rospy.wait_for_service('mux_select')
+    #rospy.wait_for_service('mux_select')
 
     try:
         mux_select = rospy.ServiceProxy('mux_select', SelectMux)

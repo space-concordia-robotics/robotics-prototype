@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # NOTE: the str(output, "utf-8") only works if we run this with python2
 

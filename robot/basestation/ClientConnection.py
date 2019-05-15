@@ -98,11 +98,13 @@ class ClientConnection:
             # the server is up so return true
             if not test:
                 self.status = True
+
             print("connection established")
             return self.status
         # the server is down so return false
         if not test:
             self.status = False
+
         print("no response from server")
         return self.status
 
