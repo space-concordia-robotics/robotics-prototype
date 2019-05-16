@@ -16,6 +16,17 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
+function printCommandsList() {
+  appendToConsole("Welcome to the arm command page! Here are some commands:")
+  appendToConsole("'p': ping")
+  appendToConsole("'z': emergency stop all motors")
+  appendToConsole("'o': reset memorized angle values")
+  appendToConsole("'l': view key commands")
+  appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
+  appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
+}
+printCommandsList()
+
 // Manual control
 function manualControl () {
   var a = document.getElementById('ArmcontrolsOFF')
@@ -105,6 +116,18 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
+// print commands list
+document.addEventListener('keydown', function (event) {
+  if (
+    !$serialCmdInput.is(':focus') &&
+    event.code === 'KeyL' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+  ) {
+    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
+    printCommandsList()
+    lastCmdSent = new Date().getTime()
+  }
+})
 
 if (mockArmTable) {
   // manual controls
@@ -359,6 +382,9 @@ if (mockArmTable) {
     let $serialCmdInput = $('#serial-cmd-input')
 
     if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
+      let budgeArray = ['~','~','~','~','~','~']
+      let i=0
+      let toBudge = false
       // 'w' --> m1 ccw
       if (!$serialCmdInput.is(':focus') && keyState[87]) {
         toggleToManual()
@@ -367,48 +393,23 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'w'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 's' --> m1 cw
-      if (!$serialCmdInput.is(':focus') && keyState[83]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[83]) {
         toggleToManual()
         $('#click_btn_motor1_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 's'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
+      i+=1
       // 'e' --> m2 ccw
       if (!$serialCmdInput.is(':focus') && keyState[69]) {
         toggleToManual()
@@ -417,48 +418,23 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'e'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 'd' --> m2 cw
-      if (!$serialCmdInput.is(':focus') && keyState[68]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[68]) {
         toggleToManual()
         $('#click_btn_motor2_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'd'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
+      i+=1
       // 'r' --> m3 ccw
       if (!$serialCmdInput.is(':focus') && keyState[82]) {
         toggleToManual()
@@ -467,48 +443,23 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'r'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 'f' --> m3 cw
-      if (!$serialCmdInput.is(':focus') && keyState[70]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[70]) {
         toggleToManual()
         $('#click_btn_motor3_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'f'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
+      i+=1
       // 't' --> m4 ccw
       if (!$serialCmdInput.is(':focus') && keyState[84]) {
         toggleToManual()
@@ -517,48 +468,23 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 't'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 'g' --> m4 cw
-      if (!$serialCmdInput.is(':focus') && keyState[71]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[71]) {
         toggleToManual()
         $('#click_btn_motor4_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'g'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
+      i+=1
       // 'y' --> m5 ccw
       if (!$serialCmdInput.is(':focus') && keyState[89]) {
         toggleToManual()
@@ -567,48 +493,23 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'y'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 'h' --> m5 cw
-      if (!$serialCmdInput.is(':focus') && keyState[72]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[72]) {
         toggleToManual()
         $('#click_btn_motor5_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'h'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
+      i+=1
       // 'u' --> m6 ccw
       if (!$serialCmdInput.is(':focus') && keyState[85]) {
         toggleToManual()
@@ -617,46 +518,20 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'u'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='fwd'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
       // 'j' --> m6 cw
-      if (!$serialCmdInput.is(':focus') && keyState[74]) {
+      else if (!$serialCmdInput.is(':focus') && keyState[74]) {
         toggleToManual()
         $('#click_btn_motor6_cw > button').css(
           'background-color',
           'rgb(255, 0, 0)'
         )
 
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'j'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        budgeArray[i]='back'
+        toBudge = true
         lastCmdSent = new Date().getTime()
       }
 
@@ -666,82 +541,21 @@ if (mockArmTable) {
         sendArmCommand('stop')
         lastCmdSent = new Date().getTime()
       }
+      else if (toBudge) {
+        let cmd = 'budge '
+        for (var motor in budgeArray) {
+          cmd += budgeArray[motor]
+          if (motor != 5) {
+            cmd += ' '
+          }
+        }
+        sendArmCommand(cmd)
+      }
 
       // 'o' --> reset angle values
       if (!$serialCmdInput.is(':focus') && keyState[79]) {
         $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
         sendArmCommand('reset')
-        lastCmdSent = new Date().getTime()
-      }
-
-      // 'q' --> terminate server listener
-      if (!$serialCmdInput.is(':focus') && keyState[81]) {
-        // toggleToManual();
-        // $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
-
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'q'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
-        lastCmdSent = new Date().getTime()
-      }
-
-      // 'a' --> debug msg
-      if (
-        !$serialCmdInput.is(':focus') &&
-        keyState[65] &&
-        millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE
-      ) {
-        $('button#show-buffered-msgs').css('background-color', 'rgb(255, 0, 0)')
-
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'a'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
-        lastCmdSent = new Date().getTime()
-      }
-
-      // 'l' --> list commands
-      if (!$serialCmdInput.is(':focus') && keyState[76]) {
-        $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
-
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'l'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
         lastCmdSent = new Date().getTime()
       }
 

@@ -66,6 +66,7 @@ function requestMuxChannel(elemID) {
   let request = new ROSLIB.ServiceRequest({ device : dev })
   let sentTime = new Date().getTime()
 
+  console.log(request)
   appendToConsole('Sending request to switch to channel ' + $('a'+elemID).text())
   scrollToBottom()
 
@@ -91,6 +92,7 @@ function requestSerialCommand(command) {
   let request = new ROSLIB.ServiceRequest({ msg : command+'\n' })
   let sentTime = new Date().getTime()
 
+  console.log(request)
   appendToConsole('Sending request to execute command \"' + command + '\"')
   scrollToBottom()
 
@@ -112,6 +114,7 @@ function requestTask(reqTask, reqStatus, buttonID) {
   let request = new ROSLIB.ServiceRequest({ task : reqTask, status : reqStatus })
   let sentTime = new Date().getTime()
 
+  console.log(request)
   if (reqStatus == 0) {
     appendToConsole('Sending request to stop ' + reqTask + ' task')
   } else if (reqStatus == 1) {
@@ -153,6 +156,7 @@ function sendArmRequest(command) {
   let request = new ROSLIB.ServiceRequest({ msg : command })
   let sentTime = new Date().getTime()
 
+  console.log(request)
   appendToConsole('Sending request to execute command \"' + command + '\"')
   scrollToBottom()
 
