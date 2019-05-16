@@ -126,30 +126,7 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
-@app.route("/serial_cmd", methods=["POST", "GET"])
-def serial_cmd():
-    print("serial_cmd")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    print("cmd: " + cmd)
-
-    ros_cmd = "rosrun serial_cmd serial_cmd_client.py '" + cmd + "'"
-    print("ros_cmd: " + ros_cmd)
-
-    output, error = run_shell("rosrun serial_cmd serial_cmd_client.py", cmd)
-    output = str(output, "utf-8")
-
-    print("output: " + output)
-
-    return jsonify(success=True, cmd=cmd, output=output)
-
+    
 # only to be used when hacky implementation is fixed
 # see odroid_rx package for details
 @app.route("/odroid_rx", methods=["POST"])

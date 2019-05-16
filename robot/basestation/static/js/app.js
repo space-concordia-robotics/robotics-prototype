@@ -1,50 +1,9 @@
-function requestMuxChannel(elemID) {
-  let dev = elemID[elemID.length -1]
-  let request = new ROSLIB.ServiceRequest({ device : dev })
-  let sentTime = new Date().getTime()
-
-  appendToConsole('Sending request to switch to channel ' + $('a'+elemID).text())
-
-  mux_select_client.callService(request, function(result){
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response.slice(0, result.response.length-1)
-    if (msg.includes('failed') || msg.includes('ERROR')) { // how to account for a lack of response?
-      appendToConsole('Request failed. Received \"' + msg + '"')
-    }
-    else {
-      $('button#mux').text('Device ' + $('a'+elemID).text())
-      appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
-    }
-    scrollToBottom()
-  })
-}
-
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
   const Site = {
     init () {
       // connect ros to the rosbridge websockets server
-      let ros = new ROSLIB.Ros({
-        url : 'ws://localhost:9090'
-      })
-
-      ros.on('connection', function() {
-        appendToConsole('Connected to websocket server.')
-      })
-
-      ros.on('error', function(error) {
-        appendToConsole('Error connecting to websocket server: ', error)
-      })
-
-      ros.on('close', function() {
-        appendToConsole('Connection to websocket server closed.')
-      })
-
-      // setup a client for the mux_select_service
-      mux_select_client = new ROSLIB.Service({
-        ros : ros, name : 'mux_select', serviceType : 'SelectMux'
-      })
+      initRosWeb()
 
       this.bindEventHandlers()
     },
@@ -224,6 +183,7 @@ $(document).ready(() => {
 
   Site.init()
 
+  // select mux channel using mux_select service
   $('#mux-0').mouseup(function () {
     requestMuxChannel('#mux-0')
   })
@@ -240,50 +200,16 @@ $(document).ready(() => {
     requestMuxChannel('#mux-3')
   })
 
+  // send serial command using serial_cmd service
   $('#send-serial-btn').mouseup(function () {
-    let cmd = $('#serial-cmd-input').val()
-
-    $.ajax({
-      url: '/serial_cmd',
-      type: 'POST',
-      data: {
-        cmd: cmd
-      },
-      success: function (response) {
-        if (!response.output.includes('Response')) {
-          appendToConsole(response.output)
-          appendToConsole('No response from serial_cmd ROS service\n')
-        } else {
-          appendToConsole(response.output)
-          clearSerialCmd()
-        }
-        scrollToBottom()
-      }
-    })
+    requestSerialCommand($('#serial-cmd-input').val())
   })
 
   $('#serial-cmd-input').on('keyup', function (e) {
     // enter key
     if (e.keyCode == 13) {
-      let cmd = $('#serial-cmd-input').val()
-
-      $.ajax({
-        url: '/serial_cmd',
-        type: 'POST',
-        data: {
-          cmd: cmd
-        },
-        success: function (response) {
-          if (!response.output.includes('Response')) {
-            appendToConsole(response.output)
-            appendToConsole('No response from serial_cmd ROS service\n')
-          } else {
-            appendToConsole(response.output)
-            clearSerialCmd()
-          }
-          scrollToBottom()
-        }
-      })
+      requestSerialCommand($('#serial-cmd-input').val())
     }
   })
+
 })
