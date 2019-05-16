@@ -28,6 +28,8 @@ def uart_tx(msg):
     #sleep(0.5)
     #print(ser.readline())
 
+    # Josh says: I recommend actually listening for the response
+    # in here, actually. Maybe grabbing 500ms of responses or something.
     ser.close()
 
     return "Message sent: '" + msg + "'\n"
