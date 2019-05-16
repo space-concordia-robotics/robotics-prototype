@@ -126,7 +126,7 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
-    
+
 # only to be used when hacky implementation is fixed
 # see odroid_rx package for details
 @app.route("/odroid_rx", methods=["POST"])
@@ -265,11 +265,7 @@ def task_handler():
     cmd_args = ""
 
     # choose appropriate arguments for ROS service client call
-    if cmd == "enable-arm-listener":
-        cmd_args = "arm_listener 1"
-    elif cmd == "disable-arm-listener":
-        cmd_args = "arm_listener 0"
-    elif cmd == "enable-rover-listener":
+    if cmd == "enable-rover-listener":
         cmd_args = "rover_listener 1"
     elif cmd == "disable-rover-listener":
         cmd_args = "rover_listener 0"

@@ -15,7 +15,7 @@ function initRosWeb(){
     appendToConsole('Connection to websocket server closed.')
   })
 
-  /* general ROS stuff */
+  /* general controls */
 
   // setup a client for the mux_select service
   mux_select_client = new ROSLIB.Service({
@@ -23,16 +23,41 @@ function initRosWeb(){
   })
 
   // setup a client for the serial_cmd service
-  mux_select_client = new ROSLIB.Service({
-    ros : ros, name : 'serial_cmd', serviceType : 'SerialCmd'
-  })
-
-  // setup a client for the serial_cmd service
   serial_cmd_client = new ROSLIB.Service({
     ros : ros, name : 'serial_cmd', serviceType : 'SerialCmd'
   })
 
+  // setup a client for the task_handler service
+  task_handler_client = new ROSLIB.Service({
+    ros : ros, name : 'task_handler', serviceType : 'HandleTask'
+  })
+
   /* arm controls */
+
+  // setup a client for the arm_request service
+  arm_request_client = new ROSLIB.Service({
+  	ros : ros, name : '/arm_request', serviceType : 'ArmRequest'
+  });
+
+  // setup a publisher for the arm_command topic
+  arm_command_publisher = new ROSLIB.Topic({
+      ros : ros, name : '/arm_command', messageType : 'std_msgs/String'
+    });
+
+  // setup a subscriber for the arm_angles topic
+  arm_angles_listener = new ROSLIB.Topic({
+    ros : ros, name : '/arm_angles', messageType : 'std_msgs/String'
+  });
+
+  /* rover controls (placeholder descriptions, names are subject to change) */
+
+  // setup a client for the rover_request service
+
+  // setup a publisher for the rover_command topic
+
+  // setup a subscriber for the rover_vels topic
+
+  // setup a subscriber for the gps_data topic
 
 }
 
@@ -76,6 +101,31 @@ function requestSerialCommand(command) {
     }
     else {
       appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+    }
+    scrollToBottom()
+  })
+}
+
+function requestTask(reqTask, reqStatus) {
+  let request = new ROSLIB.ServiceRequest({ task : reqTask, status : reqStatus })
+  let sentTime = new Date().getTime()
+
+  if (reqStatus == 0) {
+    appendToConsole('Sending request to stop ' + reqTask + ' task')
+  } else if (reqStatus == 1) {
+    appendToConsole('Sending request to start ' + reqTask + ' task')
+  }
+
+  task_handler_client.callService(request, function(result){
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response.slice(0, result.response.length-1) // remove newline character
+    if (msg.includes('Failed') || msg.includes('shutdown request') || msg.includes('unavailable')) { // how to account for a lack of response?
+      appendToConsole('Request failed. Received \"' + msg + '\"')
+    }
+    else {
+      appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+      $('#enable-arm-btn')[0].checked = true
     }
     scrollToBottom()
   })
