@@ -1,7 +1,51 @@
-/* eslint-disable no-unused-vars */
+function requestMuxChannel(elemID) {
+  let dev = elemID[elemID.length -1]
+  let request = new ROSLIB.ServiceRequest({ device : dev })
+  let sentTime = new Date().getTime()
+
+  appendToConsole('Sending request to switch to channel ' + $('a'+elemID).text())
+
+  mux_select_client.callService(request, function(result){
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response.slice(0, result.response.length-1)
+    if (msg.includes('failed') || msg.includes('ERROR')) { // how to account for a lack of response?
+      appendToConsole('Request failed. Received \"' + msg + '"')
+    }
+    else {
+      $('button#mux').text('Device ' + $('a'+elemID).text())
+      appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+    }
+    scrollToBottom()
+  })
+}
+
+/* eslint-disable no-unused-lets */
 $(document).ready(() => {
   const Site = {
     init () {
+      // connect ros to the rosbridge websockets server
+      let ros = new ROSLIB.Ros({
+        url : 'ws://localhost:9090'
+      })
+
+      ros.on('connection', function() {
+        appendToConsole('Connected to websocket server.')
+      })
+
+      ros.on('error', function(error) {
+        appendToConsole('Error connecting to websocket server: ', error)
+      })
+
+      ros.on('close', function() {
+        appendToConsole('Connection to websocket server closed.')
+      })
+
+      // setup a client for the mux_select_service
+      mux_select_client = new ROSLIB.Service({
+        ros : ros, name : 'mux_select', serviceType : 'SelectMux'
+      })
+
       this.bindEventHandlers()
     },
     bindEventHandlers () {
@@ -181,63 +225,19 @@ $(document).ready(() => {
   Site.init()
 
   $('#mux-0').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '0',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 0: Rover')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
+    requestMuxChannel('#mux-0')
   })
 
   $('#mux-1').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '1',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 1: Arm')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
+    requestMuxChannel('#mux-1')
   })
 
   $('#mux-2').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '2',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 2: Science')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
+    requestMuxChannel('#mux-2')
   })
 
   $('#mux-3').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '3',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 3: Lidar')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
+    requestMuxChannel('#mux-3')
   })
 
   $('#send-serial-btn').mouseup(function () {

@@ -126,18 +126,6 @@ def ping_rover():
 
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
-@app.route("/select_mux", methods=["POST", "GET"])
-def select_mux():
-    print("select_mux")
-    dev = str(request.get_data(), "utf-8")
-    print("dev : " + dev)
-
-    output, error = run_shell("rosrun mux_selector mux_select_client.py", dev)
-    output = str(output, "utf-8")
-    print("output: " + output)
-
-    return jsonify(success=True, dev=dev, output=output)
-
 @app.route("/serial_cmd", methods=["POST", "GET"])
 def serial_cmd():
     print("serial_cmd")

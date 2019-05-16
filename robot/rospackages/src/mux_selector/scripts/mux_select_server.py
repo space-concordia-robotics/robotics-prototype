@@ -49,6 +49,7 @@ def select_device(device):
 
 # consider removing following lines to make given "test" argument flag present
 # or better: user ros params as per tatums suggestion
+    
     with open(gpio_dir + "/gpio18/value", "w") as f:
         f.write(str(s0_val))
 
@@ -59,6 +60,7 @@ def select_device(device):
     s1_state = "s1: " + str(s1_val)
     print(s0_state)
     print(s1_state)
+    
 
     return s0_state + "\n" + s1_state
 
