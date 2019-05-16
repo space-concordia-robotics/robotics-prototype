@@ -64,6 +64,18 @@ function disableRoverListenerBtn () {
   $('#toggle-rover-listener')[0].checked = false
 }
 
+$(document).ready(function () {
+  $('#toggle-rover-listener').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#toggle-rover-listener').is(':checked')) {
+      requestTask("rover_listener", 1, '#toggle-rover-listener')
+    } else { // closing arm listener
+      requestTask("rover_listener", 0, '#toggle-rover-listener')
+    }
+  })
+})
+
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
   let currentSpeed = ''

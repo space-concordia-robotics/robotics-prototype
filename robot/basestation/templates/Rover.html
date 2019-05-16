@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SC Robotics GUI</title>
+    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
 
     <!-- Bootstrap CSS -->
     <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
@@ -160,7 +161,14 @@
                                 <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
                             </td>
                             <td>
-                                <input type="checkbox" id="toggle-rover-listener" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
+                              <div class="col-sm-3" align="center" style="border-style:none;">
+                                  <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                      <label>
+                                          <input id="toggle-rover-listener" type="checkbox">
+                                          <span> </span>
+                                      </label>
+                                  </div>
+                              </div>
                             </td>
                             <td>
                                 <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
