@@ -67,6 +67,7 @@ function requestMuxChannel(elemID) {
   let sentTime = new Date().getTime()
 
   appendToConsole('Sending request to switch to channel ' + $('a'+elemID).text())
+  scrollToBottom()
 
   mux_select_client.callService(request, function(result){
     let latency = millisSince(sentTime)
@@ -87,10 +88,11 @@ function requestMuxChannel(elemID) {
 // port is already open due to an already running python node
 // (for example, roverlistener.py or ArmNode.py or whatever)
 function requestSerialCommand(command) {
-  let request = new ROSLIB.ServiceRequest({ msg : command })
+  let request = new ROSLIB.ServiceRequest({ msg : command+'\n' })
   let sentTime = new Date().getTime()
 
   appendToConsole('Sending request to execute command \"' + command + '\"')
+  scrollToBottom()
 
   mux_select_client.callService(request, function(result){
     let latency = millisSince(sentTime)
@@ -115,6 +117,7 @@ function requestTask(reqTask, reqStatus, buttonID) {
   } else if (reqStatus == 1) {
     appendToConsole('Sending request to start ' + reqTask + ' task')
   }
+  scrollToBottom()
 
   task_handler_client.callService(request, function(result){
     let latency = millisSince(sentTime)
@@ -135,5 +138,34 @@ function requestTask(reqTask, reqStatus, buttonID) {
       scrollToBottom()
       return true
     }
+  })
+}
+
+function sendArmCommand(cmd) {
+  let command = new ROSLIB.Message({data : cmd+'\n'})
+  console.log(command)
+  appendToConsole('Sending \"' + cmd + '\" to arm Teensy')
+  scrollToBottom()
+  arm_command_publisher.publish(command);
+}
+
+function sendArmRequest(command) {
+  let request = new ROSLIB.ServiceRequest({ msg : command })
+  let sentTime = new Date().getTime()
+
+  appendToConsole('Sending request to execute command \"' + command + '\"')
+  scrollToBottom()
+
+  arm_request_client.callService(request, function(result){
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response.slice(0, result.response.length-1) // remove newline character
+    if (msg.includes('failed') || msg.includes('ERROR')) { // how to account for a lack of response?
+      appendToConsole('Request failed. Received \"' + msg + '\"')
+    }
+    else {
+      appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+    }
+    scrollToBottom()
   })
 }

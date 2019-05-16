@@ -100,21 +100,7 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     $('button#ping-arm-mcu').css('background-color', 'rgb(255, 0, 0)')
-    $.ajax({
-      url: '/manual_control',
-      type: 'POST',
-      data: {
-        cmd: 'p'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('feedback: ' + response.feedback)
-        if (response.error != 'None') {
-          appendToConsole('error: ' + response.error)
-        }
-        scrollToBottom()
-      }
-    })
+    sendArmRequest('ping')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -677,44 +663,14 @@ if (mockArmTable) {
       // 'z' --> stop all motors
       if (!$serialCmdInput.is(':focus') && keyState[90]) {
         $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
-
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'z'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        sendArmCommand('stop')
         lastCmdSent = new Date().getTime()
       }
 
       // 'o' --> reset angle values
       if (!$serialCmdInput.is(':focus') && keyState[79]) {
         $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
-
-        $.ajax({
-          url: '/manual_control',
-          type: 'POST',
-          data: {
-            cmd: 'o'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback: ' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error: ' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        sendArmCommand('reset')
         lastCmdSent = new Date().getTime()
       }
 
@@ -799,6 +755,8 @@ if (mockArmTable) {
 }
 
 // In any case
+// the following code just makes the buttons stop lighting up
+// when the user stops pressing the respective key
 let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
@@ -908,17 +866,5 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyN') {
-    $('button#disable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyB') {
-    $('button#enable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
   }
 })
