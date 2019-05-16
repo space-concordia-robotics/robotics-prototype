@@ -44,9 +44,22 @@ function initRosWeb(){
       ros : ros, name : 'arm_command', messageType : 'std_msgs/String'
     });
 
-  // setup a subscriber for the arm_angles topic
-  arm_angles_listener = new ROSLIB.Topic({
-    ros : ros, name : 'arm_angles', messageType : 'std_msgs/String'
+  // setup a subscriber for the arm_joint_states topic
+  arm_joint_states_listener = new ROSLIB.Topic({
+    ros : ros, name : 'arm_joint_states', messageType : 'sensor_msgs/JointState'
+  })
+
+  arm_joint_states_listener.subscribe(function(message) {
+    for (var angle in message.position) {
+      //let motor = angle+1;
+      let motor = String.fromCharCode(angle.charCodeAt(0) + 1)
+      $('#m'+motor+'-angle').text(message.position[angle])
+    }
+  })
+
+  // setup a subscriber for the arm_feedback topic
+  arm_feedback_listener = new ROSLIB.Topic({
+    ros : ros, name : 'arm_feedback', messageType : 'std_msgs/String'
   });
 
   /* rover controls (placeholder descriptions, names are subject to change) */

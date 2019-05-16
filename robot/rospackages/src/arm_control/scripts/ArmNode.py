@@ -7,8 +7,9 @@ import re
 import serial
 import serial.tools.list_ports #pyserial
 import rospy
-from std_msgs.msg import String
-from std_srvs.srv import Trigger, TriggerResponse #used as a placeholder for a proper service
+from std_msgs.msg import String, Header
+from sensor_msgs.msg import JointState
+from arm_control.srv import *
 
 global ser
 
@@ -72,6 +73,7 @@ def init_serial():
 
     if is_arm:
         rospy.loginfo("Connected to port: " + port)
+        return
     else:
         rospy.loginfo("Incorrect MCU connected, terminating listener")
         sys.exit(0)
@@ -87,28 +89,21 @@ def init_serial():
 # todo: maybe publish/parse the string if it's not ping? this might cause errors but it's worth a shot
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo("received ping request from client")
-    data_str = ""
-    response = TriggerResponse(
-        success = False,
-        message = "no response"
-    )
-    ser.write(str.encode("ping\n")) # ping the teensy
+    rospy.loginfo("received "+req.msg)
+    msg = ArmRequestResponse()
+    msg.response = 'no response'
+    msg.success = False
+    ser.write(str.encode(req.msg+'\n')) # ping the teensy
     while True: # beware that there's no timeout for this right now
         if ser.in_waiting:
             data_str = ser.readline().decode()
             if "pong" in data_str:
-                data_str = "received "+data_str
-                data_str+=" at %f" % rospy.get_time()
-                response.success = True;
-                response.message = data_str;
-                rospy.loginfo(response)
+                msg.response = "received "+data_str
+                msg.response+=" at %f" % rospy.get_time()
+                msg.success = True;
+                rospy.loginfo(msg)
                 break
-    # the Trigger handler expects a TriggerResponse object to be returned (goes back to client)
-    # note that empty responses seem to break it (in python, according to google and my experience)
-    # I was therefore forced to use a .srv with a response
-    # todo: make a package for this and define my own .srv file
-    return response
+    return msg
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
@@ -122,38 +117,72 @@ def subscriber_callback(message):
                 data_str+=" at %f" % rospy.get_time()
                 rospy.loginfo(data_str)
                 break
+    return
+
+def publish_joint_states(message):
+    # parse the data received from Teensy
+    lhs,rhs = message.split('Motor Angles: ')
+    lhs,rhs = rhs.split('\n')
+    angles = lhs.split(', ')
+    # create the message to be published
+    msg = JointState()
+    msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
+    try:
+        for angle in angles:
+            msg.position.append(float(angle))
+    except:
+        rospy.logwarn('trouble parsing motor angles:',sys.exc_info()[0])
+        return
+
+    # publish it
+    anglePub.publish(msg)
+    return
 
 if __name__ == '__main__':
     node_name = 'arm_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" multidirectional node')
-    
+
     init_serial()
-    
-    publish_topic = '/arm_angles'
-    rospy.loginfo('Beginning to publish to "'+publish_topic+'" topic')
-    pub = rospy.Publisher(publish_topic, String, queue_size=10)
-    rate = rospy.Rate(10) # 10hz
-    
+
+    angle_pub_topic = '/arm_joint_states'
+    rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
+    anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
+
+    feedback_pub_topic = '/arm_feedback'
+    rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
+    feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
+
+    # maybe make a global param for publishing and subscribing this data
+    # the arm node publishes at a rate, this node listens and publishes,
+    # plus the website publishes/requests commands at its own rate...
+    rate = rospy.Rate(20) # 20hz
+
     data = ""; getTime = ""; data_str = ""
-    
+
     subscribe_topic = 'arm_command'
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
-    
+
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
-    serv = rospy.Service(service_name, Trigger, handle_client)
-    
+    serv = rospy.Service(service_name, ArmRequest, handle_client)
+
     # service requests are implicitly handled but only at the rate the node publishes at
     try:
         while not rospy.is_shutdown():
             if ser.in_waiting:
-                data = ser.readline().decode()
-                getTime = "received at %f" % rospy.get_time()
-                data_str = data + ' ' + getTime
-                rospy.loginfo(data_str)
-                pub.publish(data_str)
+                try:
+                    data = ser.readline().decode()
+                    getTime = "received at %f" % rospy.get_time()
+                    data_str = data + ' ' + getTime
+                    rospy.loginfo(data_str)
+                    if 'Motor Angles' in data_str and data_str[0]=='@':
+                        publish_joint_states(data_str)
+                    elif data_str is not '':
+                        feedbackPub.publish(data_str)
+                except:
+                    rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
             rate.sleep()
     except rospy.ROSInterruptException:
         pass

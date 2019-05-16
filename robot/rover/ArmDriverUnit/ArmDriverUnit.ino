@@ -649,7 +649,7 @@ void initMotorTimers(void) {
 /* functions which apply to all motors or to the teensy in general */
 void printMotorAngles(void) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.print("Motor Angles: ");
+  UART_PORT.print("@Motor Angles: ");
   for (int i = 0; i < NUM_MOTORS; i++) {
     motorArray[i]->calcCurrentAngle();
     UART_PORT.print(motorArray[i]->getSoftwareAngle());
