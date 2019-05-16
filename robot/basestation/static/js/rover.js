@@ -18,38 +18,10 @@ const LISTENER_TOGGLE_THROTTLE = 3000
 var lastCmdSent = 0
 
 function enableRoverListener () {
-  if ($('#enable-rover-btn').is(':checked')) {
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'enable-rover-listener'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        if (response.error != 'None') {
-          appendToConsole('error:\n' + response.error)
-        }
-        scrollToBottom()
-      }
-    })
+  if ($('#toggle-rover-listener-btn').is(':checked')) {
+    requestTask("rover_listener", 1, '#toggle-rover-listener-btn')
   } else {
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'disable-rover-listener'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        if (response.error != 'None') {
-          appendToConsole('error:\n' + response.error)
-        }
-        scrollToBottom()
-      }
-    })
+    requestTask("rover_listener", 0, '#toggle-rover-listener-btn')
   }
 }
 

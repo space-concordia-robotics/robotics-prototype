@@ -106,7 +106,7 @@ function requestSerialCommand(command) {
   })
 }
 
-function requestTask(reqTask, reqStatus) {
+function requestTask(reqTask, reqStatus, buttonID) {
   let request = new ROSLIB.ServiceRequest({ task : reqTask, status : reqStatus })
   let sentTime = new Date().getTime()
 
@@ -122,11 +122,18 @@ function requestTask(reqTask, reqStatus) {
     let msg = result.response.slice(0, result.response.length-1) // remove newline character
     if (msg.includes('Failed') || msg.includes('shutdown request') || msg.includes('unavailable')) { // how to account for a lack of response?
       appendToConsole('Request failed. Received \"' + msg + '\"')
+      scrollToBottom()
+      return false
     }
     else {
       appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
-      $('#enable-arm-btn')[0].checked = true
+      if (reqStatus == 0) {
+        $(buttonID)[0].checked = false
+      } else if (reqStatus == 1) {
+        $(buttonID)[0].checked = true
+      }
+      scrollToBottom()
+      return true
     }
-    scrollToBottom()
   })
 }

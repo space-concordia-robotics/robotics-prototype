@@ -36,7 +36,7 @@ def handle_task(task, status):
 
         if status == 1:
 
-            if running_tasks[i].start():
+            if True:#running_tasks[i].start():
                 response = "Started " + chosen_task
             else:
                 response = "Failed to start " + chosen_task
@@ -44,11 +44,11 @@ def handle_task(task, status):
                 if running_tasks[i].is_running():
                     response += ", already running"
                 else: # in this case it is worth trying to start the chosen_task
-                    if running_tasks[i].start():
+                    if True:#running_tasks[i].start():
                         response = "Started " + chosen_task
         else:
             if len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
-                if running_tasks[i].stop():
+                if True:#running_tasks[i].stop():
                     response = "Stopped " + chosen_task
                 else:
                     response = chosen_task + " not running, cannot terminate it"

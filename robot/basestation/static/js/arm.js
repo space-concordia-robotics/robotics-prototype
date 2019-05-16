@@ -38,15 +38,29 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  $('#enable-arm-btn').on('click', function (event) {
+  $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
-
     // click makes it checked during this time, so trying to enable
-    if ($('#enable-arm-btn').is(':checked')) {
-      requestTask("arm_listener", 1)
+    if ($('#toggle-arm-listener-btn').is(':checked')) {
+      requestTask("arm_listener", 1, '#toggle-arm-listener-btn')
+    } else { // closing arm listener
+      requestTask("arm_listener", 0, '#toggle-arm-listener-btn')
     }
-    else {
-      requestTask("arm_listener", 0)
+  })
+  $('#toggle-arm-stream-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#toggle-arm-stream-btn').is(':checked')) {
+      if (requestTask("camera_stream", 1, '#toggle-arm-stream-btn')) {
+        $('img#camera-feed')[0].src =
+          'http://' + getRoverIP() + ':8090/?action=stream'
+      } else { // failed to open stream
+        $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+      }
+    }
+    else { // closing stream
+      requestTask("camera_stream", 0, '#toggle-arm-stream-btn')
+      $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
     }
   })
 })
@@ -105,72 +119,6 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
-// start video stream
-document.addEventListener('keydown', function (event) {
-  if (
-    !$serialCmdInput.is(':focus') &&
-    event.code === 'KeyN' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    $('button#disable-arm-stream').css('background-color', 'rgb(255, 0, 0)')
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'disable-arm-stream'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        if (
-          !response.output.includes('Failed') &&
-          !response.output.includes('shutdown request') &&
-          !response.output.includes('unavailable')
-        ) {
-          // enableArmListenerBtn()
-        }
-        appendToConsole('error: ' + response.error)
-        scrollToBottom()
-        $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-      }
-    })
-    lastCmdSent = new Date().getTime()
-  }
-})
-
-// stop video stream
-document.addEventListener('keydown', function (event) {
-  if (
-    !$serialCmdInput.is(':focus') &&
-    event.code === 'KeyB' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    $('button#enable-arm-stream').css('background-color', 'rgb(255, 0, 0)')
-    $.ajax({
-      url: '/task_handler',
-      type: 'POST',
-      data: {
-        cmd: 'enable-arm-stream'
-      },
-      success: function (response) {
-        appendToConsole('cmd: ' + response.cmd)
-        appendToConsole('output: ' + response.output)
-        if (
-          !response.output.includes('Failed') &&
-          !response.output.includes('shutdown request') &&
-          !response.output.includes('unavailable')
-        ) {
-          // enableArmListenerBtn()
-        }
-        appendToConsole('error: ' + response.error)
-        scrollToBottom()
-        $('img#camera-feed')[0].src =
-          'http://' + getRoverIP() + ':8090/?action=stream'
-      }
-    })
-    lastCmdSent = new Date().getTime()
-  }
-})
 
 if (mockArmTable) {
   // manual controls

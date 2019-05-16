@@ -246,48 +246,6 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
-# Task handler services
-@app.route("/task_handler", methods=["POST"])
-def task_handler():
-    print("task_handler")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    print("cmd: " + cmd)
-
-    ros_cmd = "rosrun task_handler task_handler_client.py"
-    cmd_args = ""
-
-    # choose appropriate arguments for ROS service client call
-    if cmd == "enable-rover-listener":
-        cmd_args = "rover_listener 1"
-    elif cmd == "disable-rover-listener":
-        cmd_args = "rover_listener 0"
-    elif cmd == "enable-arm-stream":
-        cmd_args = "camera_stream 1"
-    elif cmd == "disable-arm-stream":
-        cmd_args = "camera_stream 0"
-
-    print("cmd_args:", cmd_args)
-
-    output, error = run_shell(ros_cmd, cmd_args)
-    output = output.decode()
-
-    print("Output: " + output)
-
-    if error:
-        print("Error: " + error.decode())
-
-    error = str(None) if not error else str(error)
-
-    return jsonify(success=True, cmd=cmd, output=output, error=error)
-
 
 if __name__ == "__main__":
 
