@@ -36,17 +36,17 @@ function initRosWeb(){
 
   // setup a client for the arm_request service
   arm_request_client = new ROSLIB.Service({
-  	ros : ros, name : '/arm_request', serviceType : 'ArmRequest'
+  	ros : ros, name : 'arm_request', serviceType : 'ArmRequest'
   });
 
   // setup a publisher for the arm_command topic
   arm_command_publisher = new ROSLIB.Topic({
-      ros : ros, name : '/arm_command', messageType : 'std_msgs/String'
+      ros : ros, name : 'arm_command', messageType : 'std_msgs/String'
     });
 
   // setup a subscriber for the arm_angles topic
   arm_angles_listener = new ROSLIB.Topic({
-    ros : ros, name : '/arm_angles', messageType : 'std_msgs/String'
+    ros : ros, name : 'arm_angles', messageType : 'std_msgs/String'
   });
 
   /* rover controls (placeholder descriptions, names are subject to change) */
@@ -164,7 +164,7 @@ function sendArmRequest(command) {
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response.slice(0, result.response.length-1) // remove newline character
-    if (msg.includes('failed') || msg.includes('ERROR')) { // how to account for a lack of response?
+    if (!result.success) { // how to account for a lack of response?
       appendToConsole('Request failed. Received \"' + msg + '\"')
     }
     else {

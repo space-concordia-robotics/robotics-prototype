@@ -1,0 +1,103 @@
+always start with roscore
+
+use help or -h for help on a command like rosnode
+use -h for help on a subcommand like rosnode ping
+
+rosrun <package> <node> (__name:=<override-node-name>)
+for rosrun, you can set a parameter by using _<parameter>:=<value>
+
+rosnode: list, kill, cleanup, info <node-name>, ping, maachine
+rosnode list: / means global namespace, /turtlesim means turtlesim package namespace i guess
+
+rostopic list, find, info: does what you'd expect
+rostopic: hz, bw (bytes/sec, bandwidth)
+rostopic delay: delay of topic based on timestamp
+rostopic type: print topic/field type
+rostopic echo: echo topic messages to screen
+
+rostopic pub <topic-name> <message-type> <message-data>
+-1 for send once: latch for 3 seconds and close
+-l (default) for latched: stay open and publish only once to any new subscribers
+-r for stay open and send at rate (follow by rate in hz)
+-f for file? somehow can use standard input?
+
+message type: <package-name>/<type>
+
+message-data example: geometry_msgs/Twist '[2,0,0]' '[0,0,0]' which is 2 Vector3 messages combined
+"We use single quotes (’. . . ’) and square brackets ([. . . ]) to group the individual subfields into the two top-level composite fields."
+otherwise you can type " and tab-completion will fill in the required message info for you
+
+rosmsg: show <message-type>
+rqt_graph: graph of nodes, it is also itself a node (can also run with rosrun rqt_graph rqt_graph)
+rqt_plot can plot the data published on topics
+/rosout is a topic which is subscribed to by /rosout node
+topics and nodes both can start with / for namespace
+
+packages are defined by having a manifest (package.xml)
+the directory holding the manifest is where all the package suff is inside
+rospack list (list packages)
+rospack find <name>
+
+rosls, roscd
+roscd log: takes you to log file location if log file exists
+rospd: remembers previous directories and lets you jump between them easily, similar to pushd in regular bash
+rosd: lists the stack used in rospd if needed
+
+rosed <package> <file>
+to set default editor place one of these into ~/.bashrc:
+export EDITOR='<nongui> -w'
+export EDITOR='<gui> -nw'
+to change the editor for one call to rosed: EDITOR=<editor>
+basically, setting EDITOR=<something> does it only once but using export sets it permanent for this shell
+
+roswtf
+
+printenv | grep ROS: shows me all the ROS environment variables
+
+i can make a message that contains all the angles as an array of joint state whatever they're called... then maybe split them up in a second node. nice decoupling hehe. useful for receiving angles and maybe sending angle commands too
+
+check out std_msgs/Header and also others
+sensor_msgs/NavSatFix
+
+
+rosservice: list, find, type
+rosservice call <service> <args>
+rosservice uri: 
+rossrv show <message-type>
+rosservice type <type> | rossrv show: pipes the type into rossrv show to show the contents of this message type
+
+The Parameter Server can store integers, floats, boolean, dictionaries, and lists. it uses YAML
+1 is an integer, 1.0 is a float, one is a string, true is a boolean, [1, 2, 3] is a list of integers, and {a: b, c: d} is a dictionary
+string: 'foo'
+integer: 1234
+float: 1234.5
+boolean: true
+list: [1.0, mixed list]
+dictionary: {a: b, c: d}
+python math works: "angle: rad(2*pi)" or "deg(180)" or "angle: !degrees 181.0"
+
+rosparam list
+rosparam: set <parameter> <value>
+rosparam set /background_r 150
+rosparam: get,delete <parameter>
+rosparam get /
+rosparam: load,dump <filename> <namespace (optional)>
+rosparam load params.yaml copy (new namespace)
+rosparam get /copy/background_b
+
+rosmake vs catkin_make? aparently rosmake builds only what you need for a specific package, idk how this works
+
+
+
+the following is used when you have a specific rate at which you want to activate a node, and you also don't want:
+
+while not rospy.is_shutdown():
+    rate.sleep()
+except rospy.ROSInterruptException:
+    pass
+
+rospy.spin() basically does:
+while not rospy.is_shutdown():
+	sleep()
+
+so basically spin is used to prevent the node from closing and runs forever and blocks, whereas the top implementation allows you to choose a rate and also lets you execute things during the loop

@@ -17,7 +17,6 @@ const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
 function printCommandsList() {
-  appendToConsole("Welcome to the arm command page! Here are some commands:")
   appendToConsole("'p': ping")
   appendToConsole("'z': emergency stop all motors")
   appendToConsole("'o': reset memorized angle values")
@@ -25,7 +24,6 @@ function printCommandsList() {
   appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
-printCommandsList()
 
 // Manual control
 function manualControl () {
