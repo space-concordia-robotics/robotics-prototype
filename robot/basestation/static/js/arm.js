@@ -574,31 +574,24 @@ let $serialCmdInput = $('#serial-cmd-input')
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyW') {
     $('#click_btn_motor1_ccw > button').css('background-color', 'rgb(74, 0, 0)')
-
-    if (mockArmTable) {
-      $('#m1-current').text('0.2')
-    }
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyS') {
     $('#click_btn_motor1_cw > button').css('background-color', 'rgb(74, 0, 0)')
-    $('#m1-current').text('0.2')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyE') {
     $('#click_btn_motor2_ccw > button').css('background-color', 'rgb(74, 0, 0)')
-    $('#m2-current').text('0.2')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyD') {
     $('#click_btn_motor2_cw > button').css('background-color', 'rgb(74, 0, 0)')
-    $('#m2-current').text('0.2')
   }
 })
 

@@ -14,9 +14,7 @@ from arm_control.srv import *
 global ser
 
 # todo: test different serial read styles with an actual teensy
-# todo: test ros+website with teensy
 # todo: test ros+website over network with teensy
-# todo: make a package
 # todo: make a script for serial stuff so it's easier to interact with teensy
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
@@ -78,31 +76,30 @@ def init_serial():
         rospy.loginfo("Incorrect MCU connected, terminating listener")
         sys.exit(0)
 
-# this used to be purely part of a publisher function but can actually be called within a service function
-# in fact, I'm not even sure if it needs to be inside a function to work properly, I'm just copying examples and it works
-# todo: instead of simply publishing the message, it should parse it and publish to 6 joint angle topics
-
-
-# expects an empty request and returns a Trigger message with bool and string
 # in this case, when the request is received it sends "ping" to the teensy and waits for pong indefinitely
 # todo: implement a timeout
 # todo: maybe publish/parse the string if it's not ping? this might cause errors but it's worth a shot
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo("received "+req.msg)
+    rospy.loginfo('received '+req.msg+' from GUI')
     msg = ArmRequestResponse()
     msg.response = 'no response'
     msg.success = False
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
     while True: # beware that there's no timeout for this right now
         if ser.in_waiting:
-            data_str = ser.readline().decode()
-            if "pong" in data_str:
-                msg.response = "received "+data_str
-                msg.response+=" at %f" % rospy.get_time()
-                msg.success = True;
-                rospy.loginfo(msg)
-                break
+            try:
+                data = ser.readline().decode()
+                data_str = 'received '+data
+                data_str += "from Arm Teensy at %f" % rospy.get_time()
+                rospy.loginfo(data_str)
+                if "pong" in data_str:
+                    msg.response = data
+                    msg.success = True
+                    break
+            except:
+                rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
+    rospy.loginfo('sending '+msg.response+' back to GUI')
     return msg
 
 def subscriber_callback(message):
@@ -111,12 +108,15 @@ def subscriber_callback(message):
     ser.write(str.encode(message.data+'\n')) # send command to teensy
     while True: # beware that there's no timeout for this right now
         if ser.in_waiting:
-            data_str = ser.readline().decode()
-            if "Motor Angles" not in data_str:
-                data_str = "received "+data_str
-                data_str+=" at %f" % rospy.get_time()
-                rospy.loginfo(data_str)
-                break
+            try:
+                data_str = ser.readline().decode()
+                if "Motor Angles" not in data_str:
+                    data_str = "received "+data_str
+                    data_str+=" at %f" % rospy.get_time()
+                    rospy.loginfo(data_str)
+                    break
+            except:
+                rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
     return
 
 def publish_joint_states(message):
@@ -136,6 +136,7 @@ def publish_joint_states(message):
 
     # publish it
     anglePub.publish(msg)
+    rospy.logdebug(msg.position)
     return
 
 if __name__ == '__main__':
@@ -174,15 +175,22 @@ if __name__ == '__main__':
             if ser.in_waiting:
                 try:
                     data = ser.readline().decode()
-                    getTime = "received at %f" % rospy.get_time()
-                    data_str = data + ' ' + getTime
-                    rospy.loginfo(data_str)
-                    if 'Motor Angles' in data_str and data_str[0]=='@':
-                        publish_joint_states(data_str)
-                    elif data_str is not '':
-                        feedbackPub.publish(data_str)
+                    #if data[0]=='@':
+                    if 'Motor Angles' in data and data[0]=='@':
+                        publish_joint_states(data)
+                    elif data is not '':
+                        getTime = "received at %f" % rospy.get_time()
+                        data_str = data + ' ' + getTime
+                        rospy.logdebug(data_str)
+                        feedbackPub.publish(data)
                 except:
                     rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
             rate.sleep()
     except rospy.ROSInterruptException:
         pass
+
+    def shutdown_hook():
+        rospy.logwarn('This node ('+node_name+') is shutting down')
+        time.sleep(1)
+
+    rospy.on_shutdown(shutdown_hook)

@@ -262,6 +262,7 @@
                         <!-- Manual controls section -->
                         <table class="table-grp2" style="display: none;" id="ArmcontrolsON" align="center">
                             <tr>
+                                <!-- motor 1 -->
                                 <td>
                                     <a href="javascript:void(0)" id="click_btn_motor1_ccw">
                                         <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
@@ -269,7 +270,7 @@
                                 </td>
                                 <td>
                                     <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M1</strong>
+                                        <strong>M1 Shoulder ccw/cw</strong>
                                     </button>
                                 </td>
                                 <td>
@@ -277,40 +278,10 @@
                                         <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
                                     </a>
                                 </td>
+
                                 <td style="width:30px"></td>
-                                <td>
-                                    <a href="javascript:void(0)" id="click_btn_motor2_ccw">
-                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                    </a>
-                                </td>
-                                <td>
-                                    <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M2</strong>
-                                    </button>
-                                </td>
-                                <td>
-                                    <a href="javascript:void(0)" id="click_btn_motor2_cw">
-                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="javascript:void(0)" id="click_btn_motor3_ccw">
-                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
-                                    </a>
-                                </td>
-                                <td>
-                                    <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M3</strong>
-                                    </button>
-                                </td>
-                                <td>
-                                    <a href="javascript:void(0)" id="click_btn_motor3_cw">
-                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
-                                    </a>
-                                </td>
-                                <td></td>
+
+                                <!-- motor 4 -->
                                 <td>
                                     <a href="javascript:void(0)" id="click_btn_motor4_ccw">
                                         <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
@@ -318,7 +289,7 @@
                                 </td>
                                 <td>
                                     <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M4</strong>
+                                        <strong>M4 Wrist ext/flex</strong>
                                     </button>
                                 </td>
                                 <td>
@@ -328,6 +299,26 @@
                                 </td>
                             </tr>
                             <tr>
+                              <!-- motor 2 -->
+                              <td>
+                                  <a href="javascript:void(0)" id="click_btn_motor2_ccw">
+                                      <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                  </a>
+                              </td>
+                              <td>
+                                  <button type="button" class="control-btn-mid" disabled>
+                                      <strong>M2 Shoulder ext/flex</strong>
+                                  </button>
+                              </td>
+                              <td>
+                                  <a href="javascript:void(0)" id="click_btn_motor2_cw">
+                                      <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                  </a>
+                              </td>
+
+                                <td></td>
+
+                                <!-- motor 5 -->
                                 <td>
                                     <a href="javascript:void(0)" id="click_btn_motor5_ccw">
                                         <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
@@ -335,7 +326,7 @@
                                 </td>
                                 <td>
                                     <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M5</strong>
+                                        <strong>M5 Wrist ccw/cw</strong>
                                     </button>
                                 </td>
                                 <td>
@@ -343,7 +334,29 @@
                                         <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
                                     </a>
                                 </td>
+
+                            </tr>
+                            <tr>
+                              <!-- motor 3 -->
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_motor3_ccw">
+                                        <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <button type="button" class="control-btn-mid" disabled>
+                                        <strong>M3 Elbow ext/flex</strong>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_motor3_cw">
+                                        <button type="button" class="control-btn2 control-btn-right fa fa-chevron-right fa-3x"></button>
+                                    </a>
+                                </td>
+                                
                                 <td></td>
+
+                                <!-- motor 6 -->
                                 <td>
                                     <a href="javascript:void(0)" id="click_btn_motor6_ccw">
                                         <button type="button" class="control-btn2 control-btn-left fa fa-chevron-left fa-3x"></button>
@@ -351,7 +364,7 @@
                                 </td>
                                 <td>
                                     <button type="button" class="control-btn-mid" disabled>
-                                        <strong>M6</strong>
+                                        <strong>M6 Gripper open/close</strong>
                                     </button>
                                 </td>
                                 <td>
@@ -415,65 +428,49 @@
                     <table class="table table-sm table-bordered" id="motor-table" style="font-size:12px; background:#FDD3DF; text-align: left">
                         <thead class="thead-dark">
                             <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Status
-                                    <br>(Alive/Dead)
-                                </th>
-                                <th scope="col"> Motor Position
-                                    <br>(Displacement)
-                                </th>
-                                <th scope="col">Motor Current (A)</th>
+                                <th scope="col">Motor (Number)</th>
+                                <th scope="col">Status (Alive/Dead)</th>
+                                <th scope="col">Position (Degrees)</th>
+                                <th scope="col">Current (A)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <th scope="row">Stepper
-                                    <br>Motor 1
-                                </th>
-                                <!-- @TODO: add backend code to update status/motor position/motor current-->
-                                <td>ALIVE</td>
-                                <td id="m1-angle">0</td>
-                                <td id="m1-current">0.2</td>
+                                <th scope="row">M1 (Shoulder Swivel)</th>
+                                <!-- @TODO: add backend code to update status/motor current-->
+                                <td id="m1-status">DATA UNAVAILABLE</td>
+                                <td id="m1-angle">-</td>
+                                <td id="m1-current">DATA UNAVAILABLE</td>
                             </tr>
                             <tr>
-                                <th scope="row">DC
-                                    <br>Motor 2
-                                </th>
-                                <td>ALIVE</td>
-                                <td id="m2-angle">0</td>
-                                <td id="m2-current">0.2</td>
+                                <th scope="row">M2 (Shoulder Flex)</th>
+                                <td id="m2-status">DATA UNAVAILABLE</td>
+                                <td id="m2-angle">-</td>
+                                <td id="m2-current">DATA UNAVAILABLE</td>
                             </tr>
                             <tr>
-                                <th scope="row">Stepper
-                                    <br>Motor 3
-                                </th>
-                                <td>ALIVE</td>
-                                <td id="m3-angle">0</td>
-                                <td>-</td>
+                                <th scope="row">M3 (Elbow Flex)</th>
+                                <td id="m3-status">DATA UNAVAILABLE</td>
+                                <td id="m3-angle">-</td>
+                                <td id="m3-current">DATA UNAVAILABLE</td>
                             </tr>
                             <tr>
-                                <th scope="row">Stepper
-                                    <br>Motor 4
-                                </th>
-                                <td>ALIVE</td>
-                                <td id="m4-angle">0</td>
-                                <td>-</td>
+                                <th scope="row">M4 (Wrist Flex)</th>
+                                <td id="m4-status">DATA UNAVAILABLE</td>
+                                <td id="m4-angle">-</td>
+                                <td id="m4-current">DATA UNAVAILABLE</td>
                             </tr>
                             <tr>
-                                <th scope="row">Arm Servo
-                                    <br>Motor 1
-                                </th>
-                                <td>ALIVE</td>
-                                <td id="m5-angle">0</td>
-                                <td>-</td>
+                                <th scope="row">M5 (Wrist Twist)</th>
+                                <td id="m5-status">DATA UNAVAILABLE</td>
+                                <td id="m5-angle">-</td>
+                                <td id="m5-current">DATA UNAVAILABLE</td>
                             </tr>
                             <tr>
-                                <th>Arm Servo
-                                    <br>Motor 2
-                                </th>
-                                <td>ALIVE</td>
-                                <td id="m6-angle">0</td>
-                                <td>-</td>
+                                <th>M6 (Gripper)</th>
+                                <td id="m6-status">DATA UNAVAILABLE</td>
+                                <td id="m6-angle">-</td>
+                                <td id="m6-current">DATA UNAVAILABLE</td>
                             </tr>
                         </tbody>
                     </table>
