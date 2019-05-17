@@ -22,11 +22,6 @@ function initRosWeb(){
     ros : ros, name : 'mux_select', serviceType : 'SelectMux'
   })
 
-  // setup a client for the serial_cmd service
-  serial_cmd_client = new ROSLIB.Service({
-    ros : ros, name : 'serial_cmd', serviceType : 'SerialCmd'
-  })
-
   // setup a client for the task_handler service
   task_handler_client = new ROSLIB.Service({
     ros : ros, name : 'task_handler', serviceType : 'HandleTask'
@@ -92,31 +87,6 @@ function requestMuxChannel(elemID) {
     }
     else {
       $('button#mux').text('Device ' + $('a'+elemID).text())
-      appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
-    }
-    scrollToBottom()
-  })
-}
-
-// todo: make sure that this doesn't work if the odroid's serial
-// port is already open due to an already running python node
-// (for example, roverlistener.py or ArmNode.py or whatever)
-function requestSerialCommand(command) {
-  let request = new ROSLIB.ServiceRequest({ msg : command+'\n' })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command \"' + command + '\"')
-  scrollToBottom()
-
-  mux_select_client.callService(request, function(result){
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response.slice(0, result.response.length-1) // remove newline character
-    if (msg.includes('failed') || msg.includes('ERROR')) { // how to account for a lack of response?
-      appendToConsole('Request failed. Received \"' + msg + '\"')
-    }
-    else {
       appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
     }
     scrollToBottom()

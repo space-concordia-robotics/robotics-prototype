@@ -184,31 +184,52 @@ $(document).ready(() => {
   Site.init()
 
   // select mux channel using mux_select service
-  $('#mux-0').mouseup(function () {
+  $('#mux-0').mouseup(function () { // Arm
     requestMuxChannel('#mux-0')
   })
 
-  $('#mux-1').mouseup(function () {
+  $('#mux-1').mouseup(function () { // Rover
     requestMuxChannel('#mux-1')
   })
 
-  $('#mux-2').mouseup(function () {
+  $('#mux-2').mouseup(function () { // Science
     requestMuxChannel('#mux-2')
   })
 
-  $('#mux-3').mouseup(function () {
+  $('#mux-3').mouseup(function () { // PDS // not lidar anymore
     requestMuxChannel('#mux-3')
   })
 
-  // send serial command using serial_cmd service
+  // send serial command based on mux channel and current page
+  // beware that if choosing a different mux channel than the current page,
+  // commands will probably mess something up until this is done in a smart manner
   $('#send-serial-btn').mouseup(function () {
-    requestSerialCommand($('#serial-cmd-input').val())
+    // b
+    let cmd = $('#serial-cmd-input').val()
+    let buttonText = $('button#mux').text()
+    if (buttonText.includes('Rover') && window.location.pathname=='/rover') {
+      // sendRoverCommand(cmd) // rover commands not yet implemented
+    } else if (buttonText.includes('Arm') && window.location.pathname=='/') {
+      sendArmCommand(cmd)
+    }
+    // this implementation is tricky to think about... save it for later
+    /*
+    if (buttonText.includes('Rover')) {
+      sendArmCommand(cmd)
+    } else if (buttonText.includes('Arm')) {
+      // sendRoverCommand(cmd) // rover commands not yet implemented
+    } else if (buttonText.includes('Science')) {
+      // sendScienceCommand(cmd) // science commands not yet implemented
+    } else if (buttonText.includes('PDS')) {
+      // sendPdsCommand(cmd) // pds commands not yet implemented
+    }
+    else appendToConsole('Unable to send serial command. Mux channel ')
+    */
   })
 
   $('#serial-cmd-input').on('keyup', function (e) {
-    // enter key
-    if (e.keyCode == 13) {
-      requestSerialCommand($('#serial-cmd-input').val())
+    if (e.keyCode == 13) { // enter key
+      // copy code from above
     }
   })
 
