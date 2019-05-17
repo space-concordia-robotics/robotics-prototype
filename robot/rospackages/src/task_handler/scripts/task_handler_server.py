@@ -6,8 +6,9 @@ from Listener import Listener
 from task_handler.srv import *
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
+arm_control_dir = current_dir+'../../arm_control/scripts/'
 print(current_dir)
-scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "start_stream.sh"]
+scripts = [current_dir + "RoverCommandListener.py", arm_control_dir + "ArmNode.py", current_dir + "start_stream.sh"]
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", 1, True)]
 known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
 
