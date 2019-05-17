@@ -78,7 +78,7 @@ def get_pid(keyword):
 @app.route("/")
 def index():
     """Current landing page, the arm panel."""
-    return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/rover")
