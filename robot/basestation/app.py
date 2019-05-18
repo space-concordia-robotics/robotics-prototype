@@ -343,7 +343,7 @@ if __name__ == "__main__":
     # feature toggles
     # the following two are used for UDP based communication with the Connection class
     global local
-    local = True
+    local = False
     # print("fetch_ros_master_ip:", fetch_ros_master_ip())
     #
     # # either local or competition

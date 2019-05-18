@@ -16,16 +16,16 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
-function enableArmListenerBtn() {
+function enableArmListenerBtn () {
   $('#enable-arm-btn')[0].checked = true
 }
 
-function disableArmListenerBtn() {
+function disableArmListenerBtn () {
   $('#enable-arm-btn')[0].checked = false
 }
 
 // Manual control
-function manualControl() {
+function manualControl () {
   var a = document.getElementById('ArmcontrolsOFF')
   var b = document.getElementById('ArmcontrolsON')
 
@@ -39,14 +39,14 @@ function manualControl() {
   }
 }
 
-function toggleToManual() {
+function toggleToManual () {
   if (!$('#manual-control-btn')[0].checked) {
     $('#manual-control-btn').click()
   }
 }
 
-$(document).ready(function() {
-  $('#enable-arm-btn').on('click', function(event) {
+$(document).ready(function () {
+  $('#enable-arm-btn').on('click', function (event) {
     event.preventDefault()
 
     // click makes it checked during this time, so trying to enable
@@ -57,7 +57,7 @@ $(document).ready(function() {
         data: {
           cmd: 'enable-arm-listener'
         },
-        success: function(response) {
+        success: function (response) {
           appendToConsole('cmd: ' + response.cmd)
           appendToConsole('output: ' + response.output)
           if (
@@ -78,7 +78,7 @@ $(document).ready(function() {
         data: {
           cmd: 'disable-arm-listener'
         },
-        success: function(response) {
+        success: function (response) {
           appendToConsole('cmd: ' + response.cmd)
           appendToConsole('output: ' + response.output)
           if (
@@ -97,10 +97,8 @@ $(document).ready(function() {
 })
 
 // KEYBOARD EVENTS
-let $serialCmdInput = $('#serial-cmd-input')
-
 // rover ping
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   if (
     event.ctrlKey &&
     event.altKey &&
@@ -108,7 +106,7 @@ document.addEventListener('keydown', function(event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     $.ajax('/ping_rover', {
-      success: function(data) {
+      success: function (data) {
         appendToConsole(data.ping_msg)
         if (!data.ros_msg.includes('Response')) {
           appendToConsole('No response from ROS ping_acknowledgment service')
@@ -117,7 +115,7 @@ document.addEventListener('keydown', function(event) {
         }
         scrollToBottom()
       },
-      error: function() {
+      error: function () {
         console.log('An error occured')
       }
     })
@@ -126,9 +124,9 @@ document.addEventListener('keydown', function(event) {
 })
 
 // ping arm MCU
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
+    !$('#serial-cmd-input').is(':focus') &&
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -139,7 +137,7 @@ document.addEventListener('keydown', function(event) {
       data: {
         cmd: 'p'
       },
-      success: function(response) {
+      success: function (response) {
         appendToConsole('cmd: ' + response.cmd)
         appendToConsole('feedback: ' + response.feedback)
         if (response.error != 'None') {
@@ -153,9 +151,9 @@ document.addEventListener('keydown', function(event) {
 })
 
 // start video stream
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
+    !$('#serial-cmd-input').is(':focus') &&
     event.code === 'KeyN' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -166,7 +164,7 @@ document.addEventListener('keydown', function(event) {
       data: {
         cmd: 'disable-arm-stream'
       },
-      success: function(response) {
+      success: function (response) {
         appendToConsole('cmd: ' + response.cmd)
         appendToConsole('output: ' + response.output)
         if (
@@ -186,9 +184,9 @@ document.addEventListener('keydown', function(event) {
 })
 
 // stop video stream
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
+    !$('#serial-cmd-input').is(':focus') &&
     event.code === 'KeyB' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -199,7 +197,7 @@ document.addEventListener('keydown', function(event) {
       data: {
         cmd: 'enable-arm-stream'
       },
-      success: function(response) {
+      success: function (response) {
         appendToConsole('cmd: ' + response.cmd)
         appendToConsole('output: ' + response.output)
         if (
@@ -221,11 +219,9 @@ document.addEventListener('keydown', function(event) {
 
 if (mockArmTable) {
   // manual controls
-  let $serialCmdInput = $('#serial-cmd-input')
-
   // motor 1
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyW') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
       toggleToManual()
       $('#click_btn_motor1_ccw > button').css(
         'background-color',
@@ -245,8 +241,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyS') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
       toggleToManual()
       $('#click_btn_motor1_cw > button').css(
         'background-color',
@@ -266,8 +262,8 @@ if (mockArmTable) {
   })
 
   // motor 2
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyE') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyE') {
       toggleToManual()
       $('#click_btn_motor2_ccw > button').css(
         'background-color',
@@ -286,8 +282,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyD') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
       toggleToManual()
       $('#click_btn_motor2_cw > button').css(
         'background-color',
@@ -307,8 +303,8 @@ if (mockArmTable) {
   })
 
   // motor 3
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyR') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyR') {
       toggleToManual()
       $('#click_btn_motor3_ccw > button').css(
         'background-color',
@@ -325,8 +321,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyF') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyF') {
       toggleToManual()
       $('#click_btn_motor3_cw > button').css(
         'background-color',
@@ -344,8 +340,8 @@ if (mockArmTable) {
   })
 
   // motor 4
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyT') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyT') {
       toggleToManual()
       $('#click_btn_motor4_ccw > button').css(
         'background-color',
@@ -362,8 +358,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyG') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyG') {
       toggleToManual()
       $('#click_btn_motor4_cw > button').css(
         'background-color',
@@ -382,8 +378,8 @@ if (mockArmTable) {
   })
 
   // motor 5
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyY') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyY') {
       toggleToManual()
       $('#click_btn_motor5_ccw > button').css(
         'background-color',
@@ -398,8 +394,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyH') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyH') {
       toggleToManual()
       $('#click_btn_motor5_cw > button').css(
         'background-color',
@@ -415,8 +411,8 @@ if (mockArmTable) {
   })
 
   // motor 6
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyU') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
       toggleToManual()
       $('#click_btn_motor6_ccw > button').css(
         'background-color',
@@ -433,8 +429,8 @@ if (mockArmTable) {
     }
   })
 
-  document.addEventListener('keydown', function(event) {
-    if (!$serialCmdInput.is(':focus') && event.code === 'KeyJ') {
+  document.addEventListener('keydown', function (event) {
+    if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
       toggleToManual()
       $('#click_btn_motor6_cw > button').css(
         'background-color',
@@ -455,25 +451,23 @@ if (mockArmTable) {
   var keyState = {}
   window.addEventListener(
     'keydown',
-    function(e) {
+    function (e) {
       keyState[e.keyCode || e.which] = true
     },
     true
   )
   window.addEventListener(
     'keyup',
-    function(e) {
+    function (e) {
       keyState[e.keyCode || e.which] = false
     },
     true
   )
 
-  function gameLoop() {
-    let $serialCmdInput = $('#serial-cmd-input')
-
+  function gameLoop () {
     if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
       // 'w' --> m1 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[87]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[87]) {
         toggleToManual()
         $('#click_btn_motor1_ccw > button').css(
           'background-color',
@@ -486,7 +480,7 @@ if (mockArmTable) {
           data: {
             cmd: 'w'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -498,7 +492,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 's' --> m1 cw
-      if (!$serialCmdInput.is(':focus') && keyState[83]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[83]) {
         toggleToManual()
         $('#click_btn_motor1_cw > button').css(
           'background-color',
@@ -511,7 +505,7 @@ if (mockArmTable) {
           data: {
             cmd: 's'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -523,7 +517,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'e' --> m2 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[69]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[69]) {
         toggleToManual()
         $('#click_btn_motor2_ccw > button').css(
           'background-color',
@@ -536,7 +530,7 @@ if (mockArmTable) {
           data: {
             cmd: 'e'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -548,7 +542,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'd' --> m2 cw
-      if (!$serialCmdInput.is(':focus') && keyState[68]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[68]) {
         toggleToManual()
         $('#click_btn_motor2_cw > button').css(
           'background-color',
@@ -561,7 +555,7 @@ if (mockArmTable) {
           data: {
             cmd: 'd'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -573,7 +567,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'r' --> m3 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[82]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[82]) {
         toggleToManual()
         $('#click_btn_motor3_ccw > button').css(
           'background-color',
@@ -586,7 +580,7 @@ if (mockArmTable) {
           data: {
             cmd: 'r'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -598,7 +592,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'f' --> m3 cw
-      if (!$serialCmdInput.is(':focus') && keyState[70]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[70]) {
         toggleToManual()
         $('#click_btn_motor3_cw > button').css(
           'background-color',
@@ -611,7 +605,7 @@ if (mockArmTable) {
           data: {
             cmd: 'f'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -623,7 +617,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 't' --> m4 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[84]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[84]) {
         toggleToManual()
         $('#click_btn_motor4_ccw > button').css(
           'background-color',
@@ -636,7 +630,7 @@ if (mockArmTable) {
           data: {
             cmd: 't'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -648,7 +642,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'g' --> m4 cw
-      if (!$serialCmdInput.is(':focus') && keyState[71]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[71]) {
         toggleToManual()
         $('#click_btn_motor4_cw > button').css(
           'background-color',
@@ -661,7 +655,7 @@ if (mockArmTable) {
           data: {
             cmd: 'g'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -673,7 +667,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'y' --> m5 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[89]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[89]) {
         toggleToManual()
         $('#click_btn_motor5_ccw > button').css(
           'background-color',
@@ -686,7 +680,7 @@ if (mockArmTable) {
           data: {
             cmd: 'y'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -698,7 +692,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'h' --> m5 cw
-      if (!$serialCmdInput.is(':focus') && keyState[72]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[72]) {
         toggleToManual()
         $('#click_btn_motor5_cw > button').css(
           'background-color',
@@ -711,7 +705,7 @@ if (mockArmTable) {
           data: {
             cmd: 'h'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -723,7 +717,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'u' --> m6 ccw
-      if (!$serialCmdInput.is(':focus') && keyState[85]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[85]) {
         toggleToManual()
         $('#click_btn_motor6_ccw > button').css(
           'background-color',
@@ -736,7 +730,7 @@ if (mockArmTable) {
           data: {
             cmd: 'u'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -748,7 +742,7 @@ if (mockArmTable) {
         lastCmdSent = new Date().getTime()
       }
       // 'j' --> m6 cw
-      if (!$serialCmdInput.is(':focus') && keyState[74]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[74]) {
         toggleToManual()
         $('#click_btn_motor6_cw > button').css(
           'background-color',
@@ -761,7 +755,7 @@ if (mockArmTable) {
           data: {
             cmd: 'j'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -774,7 +768,7 @@ if (mockArmTable) {
       }
 
       // 'z' --> stop all motors
-      if (!$serialCmdInput.is(':focus') && keyState[90]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[90]) {
         $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
 
         $.ajax({
@@ -783,7 +777,7 @@ if (mockArmTable) {
           data: {
             cmd: 'z'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -796,7 +790,7 @@ if (mockArmTable) {
       }
 
       // 'o' --> reset angle values
-      if (!$serialCmdInput.is(':focus') && keyState[79]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[79]) {
         $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
 
         $.ajax({
@@ -805,7 +799,7 @@ if (mockArmTable) {
           data: {
             cmd: 'o'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -818,7 +812,7 @@ if (mockArmTable) {
       }
 
       // 'q' --> terminate server listener
-      if (!$serialCmdInput.is(':focus') && keyState[81]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[81]) {
         // toggleToManual();
         // $("#click_btn_motor6_cw > button").css("background-color", "rgb(255, 0, 0)");
 
@@ -828,7 +822,7 @@ if (mockArmTable) {
           data: {
             cmd: 'q'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -842,7 +836,7 @@ if (mockArmTable) {
 
       // 'a' --> debug msg
       if (
-        !$serialCmdInput.is(':focus') &&
+        !$('#serial-cmd-input').is(':focus') &&
         keyState[65] &&
         millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE
       ) {
@@ -854,7 +848,7 @@ if (mockArmTable) {
           data: {
             cmd: 'a'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -867,7 +861,7 @@ if (mockArmTable) {
       }
 
       // 'l' --> list commands
-      if (!$serialCmdInput.is(':focus') && keyState[76]) {
+      if (!$('#serial-cmd-input').is(':focus') && keyState[76]) {
         $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
 
         $.ajax({
@@ -876,7 +870,7 @@ if (mockArmTable) {
           data: {
             cmd: 'l'
           },
-          success: function(response) {
+          success: function (response) {
             appendToConsole('cmd: ' + response.cmd)
             appendToConsole('feedback: ' + response.feedback)
             if (response.error != 'None') {
@@ -898,10 +892,8 @@ if (mockArmTable) {
 }
 
 // In any case
-let $serialCmdInput = $('#serial-cmd-input')
-
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyW') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
     $('#click_btn_motor1_ccw > button').css('background-color', 'rgb(74, 0, 0)')
 
     if (mockArmTable) {
@@ -910,114 +902,114 @@ document.addEventListener('keyup', function(event) {
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyS') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
     $('#click_btn_motor1_cw > button').css('background-color', 'rgb(74, 0, 0)')
     $('#m1-current').text('0.2')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyE') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyE') {
     $('#click_btn_motor2_ccw > button').css('background-color', 'rgb(74, 0, 0)')
     $('#m2-current').text('0.2')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyD') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
     $('#click_btn_motor2_cw > button').css('background-color', 'rgb(74, 0, 0)')
     $('#m2-current').text('0.2')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyR') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyR') {
     $('#click_btn_motor3_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyF') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyF') {
     $('#click_btn_motor3_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyT') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyT') {
     $('#click_btn_motor4_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyG') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyG') {
     $('#click_btn_motor4_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyY') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyY') {
     $('#click_btn_motor5_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyH') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyH') {
     $('#click_btn_motor5_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyU') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
     $('#click_btn_motor6_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyJ') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
     $('#click_btn_motor6_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 // EXTRA CONTROLS
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyP') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyP') {
     $('button#ping-arm-mcu').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyZ') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyZ') {
     $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyO') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyO') {
     $('button#reset-motor-angles').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyL') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyL') {
     $('button#list-all-cmds').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyA') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyN') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyN') {
     $('button#disable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
-document.addEventListener('keyup', function(event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyB') {
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyB') {
     $('button#enable-arm-stream').css('background-color', 'rgb(74, 0, 0)')
   }
 })
