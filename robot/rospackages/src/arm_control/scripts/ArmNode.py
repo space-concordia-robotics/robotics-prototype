@@ -13,63 +13,74 @@ from arm_control.srv import *
 
 global ser
 
-# todo: test different serial read styles with an actual teensy
+# 300 ms timeout... could potentially be even less, needs testing
+timeout = 0.3 # each time thru the loop the timeout increases by 0.5s
+
 # todo: test ros+website over network with teensy
 # todo: make a script for serial stuff so it's easier to interact with teensy
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
 # set up connection to teensy. If only one USB device is connected it checks it's the arm teensy
 # this should eventually check all usb ports or check uart like the original code does
+
 def init_serial():
     global ser #make global so it can be used in other parts of the code
 
     ports = list(serial.tools.list_ports.comports())
-    #is_arm = False
 
+    startConnecting = time.time()
+    '''
     if len(ports) == 1:
         rospy.loginfo("1 USB device detected")
         port = ports[0].name
+        rospy.loginfo('/dev/'+port)
         ser = serial.Serial('/dev/' + port, 115200)
 
         rospy.loginfo("clearing buffer...")
         while ser.in_waiting:
-            rospy.loginfo(ser.readline().decode())
+            ser.readline()
 
-        for i in 0, 3:
-            who = ""
-            rospy.loginfo("identifying MCU by sending 'who'")
-            ser.write(str.encode("who\n"))
-
-            # the following can probably be replaced by the comment block below but a timeout is needed
-            # CRITICAL: give time for MCU to respond
-            time.sleep(1)
-            while ser.in_waiting:
-                response = ser.readline().decode()
-                rospy.loginfo("response: \"" + response.strip() + "\"")
-                if "arm" in response.strip():
-                    rospy.loginfo("Arm MCU idenified!")
-    #               is_arm = True
-                    rospy.loginfo("Connected to port: " + port) # added from below
-                    return
-    #               break
-    #       if is_arm:
-    #           break
-
-            ''' the following code probably responds faster but a timeout is needed:
-            timeout = 0.5 # each time thru the loop the timeout could increase by 0.5s
+        rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
+        for i in range(5):
+            rospy.loginfo('attempt #%d...', i+1)
             startListening = time.time()
-            # 500 ms timeout... could potentially be even less, needs testing
-            # would be cool to see how long it takes between sending and receiving
-            while (time.time()-startListening < 0.5):
+            ser.write(str.encode('who\n'))
+            while (time.time()-startListening < timeout):
                 if ser.in_waiting: # if there is data in the serial buffer
                     response = ser.readline().decode()
+                    rospy.loginfo('response: '+response)
                     if "arm" in response:
                         rospy.loginfo("Arm MCU idenified!")
-                        rospy.loginfo("Connected to port: " + port) # added from below
+                        rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
+                        rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
                         return
-                        '''
-    # todo: check for cases where multiple usb devices are connected
-    #elif len(ports) >1:
+    '''
+    if len(ports) > 0:
+        rospy.loginfo("%d USB device(s) detected", len(ports))
+        for portObj in ports:
+            port = portObj.name
+            rospy.loginfo('/dev/'+port)
+            ser = serial.Serial('/dev/' + port, 115200)
+
+            rospy.loginfo("clearing buffer...")
+            while ser.in_waiting:
+                ser.readline()
+
+            rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
+            for i in range(5):
+                rospy.loginfo('attempt #%d...', i+1)
+                startListening = time.time()
+                ser.write(str.encode('who\n'))
+                while (time.time()-startListening < timeout):
+                    if ser.in_waiting: # if there is data in the serial buffer
+                        response = ser.readline().decode()
+                        rospy.loginfo('response: '+response)
+                        if "arm" in response:
+                            rospy.loginfo("Arm MCU idenified!")
+                            rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
+                            rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                            return
+
     # todo: take uart possibility into account as well
     #if usb:
     #elif uart:
@@ -77,14 +88,7 @@ def init_serial():
         rospy.loginfo("No USB devices recognized, exiting")
         sys.exit(0)
 
-    #if is_arm:
-    #    rospy.loginfo("Connected to port: " + port)
-    #    return
-    #else:
-    #    rospy.loginfo("Incorrect MCU connected, terminating listener")
-    #    sys.exit(0)
-    # got thru 3 attempts without reaching the mcu...
-    rospy.loginfo("Incorrect MCU connected, terminating listener")
+    rospy.loginfo('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
 def handle_client(req):
@@ -98,7 +102,7 @@ def handle_client(req):
     startListening = time.time()
     # 500 ms timeout... could potentially be even less, needs testing
     # would be cool to see how long it takes between sending and receiving
-    while (time.time()-startListening < 0.5):
+    while (time.time()-startListening < timeout):
         if ser.in_waiting:
             try:
                 data = ser.readline().decode()
@@ -125,7 +129,7 @@ def subscriber_callback(message):
 
     startListening = time.time()
     # 500 ms timeout... could potentially be even less, needs testing
-    while (time.time()-startListening < 0.5):
+    while (time.time()-startListening < timeout):
         if ser.in_waiting:
             try:
                 data_str = ser.readline().decode()

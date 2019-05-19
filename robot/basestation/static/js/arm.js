@@ -23,6 +23,7 @@ function printCommandsList() {
   appendToConsole("'l': view key commands")
   appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
+  scrollToBottom()
 }
 
 // Manual control
