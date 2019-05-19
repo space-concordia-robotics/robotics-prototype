@@ -24,7 +24,7 @@ def init_serial():
     global ser #make global so it can be used in other parts of the code
 
     ports = list(serial.tools.list_ports.comports())
-    is_arm = False
+    #is_arm = False
 
     if len(ports) == 1:
         rospy.loginfo("1 USB device detected")
@@ -34,7 +34,6 @@ def init_serial():
         rospy.loginfo("clearing buffer...")
         while ser.in_waiting:
             rospy.loginfo(ser.readline().decode())
-            #ser.readline().decode() #test this to see if it works... we don't really need to see the output
 
         for i in 0, 3:
             who = ""
@@ -49,17 +48,26 @@ def init_serial():
                 rospy.loginfo("response: \"" + response.strip() + "\"")
                 if "arm" in response.strip():
                     rospy.loginfo("Arm MCU idenified!")
-                    is_arm = True
-                    break
+    #               is_arm = True
+                    rospy.loginfo("Connected to port: " + port) # added from below
+                    return
+    #               break
+    #       if is_arm:
+    #           break
 
             ''' the following code probably responds faster but a timeout is needed:
-            while True:
+            timeout = 0.5 # each time thru the loop the timeout could increase by 0.5s
+            startListening = time.time()
+            # 500 ms timeout... could potentially be even less, needs testing
+            # would be cool to see how long it takes between sending and receiving
+            while (time.time()-startListening < 0.5):
                 if ser.in_waiting: # if there is data in the serial buffer
                     response = ser.readline().decode()
                     if "arm" in response:
                         rospy.loginfo("Arm MCU idenified!")
-                        is_arm = True
-                        break'''
+                        rospy.loginfo("Connected to port: " + port) # added from below
+                        return
+                        '''
     # todo: check for cases where multiple usb devices are connected
     #elif len(ports) >1:
     # todo: take uart possibility into account as well
@@ -69,12 +77,15 @@ def init_serial():
         rospy.loginfo("No USB devices recognized, exiting")
         sys.exit(0)
 
-    if is_arm:
-        rospy.loginfo("Connected to port: " + port)
-        return
-    else:
-        rospy.loginfo("Incorrect MCU connected, terminating listener")
-        sys.exit(0)
+    #if is_arm:
+    #    rospy.loginfo("Connected to port: " + port)
+    #    return
+    #else:
+    #    rospy.loginfo("Incorrect MCU connected, terminating listener")
+    #    sys.exit(0)
+    # got thru 3 attempts without reaching the mcu...
+    rospy.loginfo("Incorrect MCU connected, terminating listener")
+    sys.exit(0)
 
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
