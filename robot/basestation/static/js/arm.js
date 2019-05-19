@@ -17,7 +17,7 @@ const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
 function printCommandsList() {
-  appendToConsole("'p': ping")
+  appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'z': emergency stop all motors")
   appendToConsole("'o': reset memorized angle values")
   appendToConsole("'l': view key commands")
@@ -47,6 +47,34 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
+  $('#ping-odroid').on('click', function (event) {
+    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+      appendToConsole('pinging odroid')
+      scrollToBottom()
+      $.ajax('/ping_rover', {
+        success: function (data) {
+          appendToConsole(data.ping_msg)
+          if (!data.ros_msg.includes('Response')) {
+            appendToConsole('No response from ROS ping_acknowledgment service')
+          } else {
+            appendToConsole(data.ros_msg)
+          }
+          scrollToBottom()
+        },
+        error: function () {
+          console.log('An error occured')
+        }
+      })
+      lastCmdSent = new Date().getTime()
+    }
+  })
+  $('#ping-arm-mcu').on('click', function (event) {
+    event.preventDefault()
+    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+      sendArmRequest('ping')
+      lastCmdSent = new Date().getTime()
+    }
+  })
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
@@ -132,6 +160,8 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
+    appendToConsole('pinging odroid')
+    scrollToBottom()
     $.ajax('/ping_rover', {
       success: function (data) {
         appendToConsole(data.ping_msg)
@@ -146,19 +176,6 @@ document.addEventListener('keydown', function (event) {
         console.log('An error occured')
       }
     })
-    lastCmdSent = new Date().getTime()
-  }
-})
-
-// ping arm MCU
-document.addEventListener('keydown', function (event) {
-  if (
-    !$serialCmdInput.is(':focus') &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    $('button#ping-arm-mcu').css('background-color', 'rgb(255, 0, 0)')
-    sendArmRequest('ping')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -693,11 +710,6 @@ document.addEventListener('keyup', function (event) {
 })
 
 // EXTRA CONTROLS
-document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyP') {
-    $('button#ping-arm-mcu').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
 
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyZ') {

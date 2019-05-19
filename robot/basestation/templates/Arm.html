@@ -102,13 +102,13 @@
                     <h5 class="container-header">Control Panel</h5>
                     <div class="row control-main-btn">
                         <div class="col-sm-3" align="center" style="vertical-align:middle; border-style:none">
-                            <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home</span>
+                            <button type="button" id="ping-odroid" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;">Ping Odroid</span>
                             </button>
                         </div>
                         <div class="col-sm-3" align="center" style="vertical-align:middle; border-style:none">
-                            <button type="button" id="ping-button" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;">Ping</span>
+                            <button type="button" id="ping-arm-mcu" class="btn btn-primary btn-lg fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                                <span style="font-family:'Helvetica Neue', Arial, sans-serif;">Ping Arm MCU</span>
                             </button>
                         </div>
                         <div class="col-sm-3" align="center" style="border-style:none;">
@@ -386,11 +386,6 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <button title="Ping Arm MCU" id="ping-arm-mcu" type="button" class="control-btn-mid" disabled>
-                                        <strong>P</strong>
-                                    </button>
-                                </td>
-                                <td>
                                     <button title="Stop all motors" id="stop-all-motors" type="button" class="control-btn-mid" disabled>
                                         <strong>Z</strong>
                                     </button>
@@ -404,6 +399,13 @@
                                     <button title="List all commands" id="list-all-cmds" type="button" class="control-btn-mid" disabled>
                                         <strong>L</strong>
                                     </button>
+                                </td>
+                                <td>
+                                  <div class="col-sm-3" align="center" style="vertical-align:middle; border-style:none">
+                                      <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                                          <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home</span>
+                                      </button>
+                                  </div>
                                 </td>
                                 <td> <!-- arm camera toggle -->
                                   <div class="col-sm-3" align="center" style="border-style:none;">
