@@ -62,7 +62,7 @@ sensor_msgs/NavSatFix
 
 rosservice: list, find, type
 rosservice call <service> <args>
-rosservice uri: 
+rosservice uri:
 rossrv show <message-type>
 rosservice type <type> | rossrv show: pipes the type into rossrv show to show the contents of this message type
 
@@ -87,6 +87,8 @@ rosparam get /copy/background_b
 
 rosmake vs catkin_make? aparently rosmake builds only what you need for a specific package, idk how this works
 
+roslaunch <package> <launch file>
+it's good practice to have a launch folder but not Required
 
 
 the following is used when you have a specific rate at which you want to activate a node, and you also don't want:

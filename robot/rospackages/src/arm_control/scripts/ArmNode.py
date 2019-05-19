@@ -76,9 +76,6 @@ def init_serial():
         rospy.loginfo("Incorrect MCU connected, terminating listener")
         sys.exit(0)
 
-# in this case, when the request is received it sends "ping" to the teensy and waits for pong indefinitely
-# todo: implement a timeout
-# todo: maybe publish/parse the string if it's not ping? this might cause errors but it's worth a shot
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
     rospy.loginfo('received '+req.msg+' from GUI')
@@ -86,27 +83,38 @@ def handle_client(req):
     msg.response = 'no response'
     msg.success = False
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
-    while True: # beware that there's no timeout for this right now
+
+    startListening = time.time()
+    # 500 ms timeout... could potentially be even less, needs testing
+    # would be cool to see how long it takes between sending and receiving
+    while (time.time()-startListening < 0.5):
         if ser.in_waiting:
             try:
                 data = ser.readline().decode()
                 data_str = 'received '+data
                 data_str += "from Arm Teensy at %f" % rospy.get_time()
                 rospy.loginfo(data_str)
-                if "pong" in data_str:
+                if "Motor Angles" not in data_str:
                     msg.response = data
                     msg.success = True
+                    rospy.loginfo('took %f ms to receive response', (time.time()-startListening)*1000)
                     break
+                else:
+                    publish_joint_states(data_str)
             except:
-                rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
+                rospy.logwarn('trouble reading from serial port')
     rospy.loginfo('sending '+msg.response+' back to GUI')
     return msg
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
     rospy.loginfo('sending: '+message.data)
-    ser.write(str.encode(message.data+'\n')) # send command to teensy
-    while True: # beware that there's no timeout for this right now
+    command = str.encode(message.data+'\n')
+    ser.write(command) # send command to teensy
+
+    startListening = time.time()
+    # 500 ms timeout... could potentially be even less, needs testing
+    while (time.time()-startListening < 0.5):
         if ser.in_waiting:
             try:
                 data_str = ser.readline().decode()
@@ -115,8 +123,10 @@ def subscriber_callback(message):
                     data_str+=" at %f" % rospy.get_time()
                     rospy.loginfo(data_str)
                     break
+                else:
+                    publish_joint_states(data_str)
             except:
-                rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
+                rospy.logwarn('trouble reading from serial port')
     return
 
 def publish_joint_states(message):
@@ -142,7 +152,7 @@ def publish_joint_states(message):
 if __name__ == '__main__':
     node_name = 'arm_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
-    rospy.loginfo('Initialized "'+node_name+'" multidirectional node')
+    rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
     init_serial()
 
@@ -184,13 +194,15 @@ if __name__ == '__main__':
                         rospy.logdebug(data_str)
                         feedbackPub.publish(data)
                 except:
-                    rospy.logwarn('trouble reading from serial port')#:',sys.exc_info()[0])
+                    rospy.logwarn('trouble reading from serial port')
             rate.sleep()
     except rospy.ROSInterruptException:
         pass
 
     def shutdown_hook():
         rospy.logwarn('This node ('+node_name+') is shutting down')
-        time.sleep(1)
+        ser.close() # good practice to close the serial port
+        # do I need to clear the serial buffer too?
+        time.sleep(1) # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)

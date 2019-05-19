@@ -37,6 +37,7 @@ catkin_package(
 #  LIBRARIES mux_selector
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
+CATKIN_DEPENDS message_runtime
 )
 
 ###########
