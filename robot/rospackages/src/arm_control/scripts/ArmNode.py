@@ -5,9 +5,10 @@ import traceback
 import time
 import re
 
-import serial
-import serial.tools.list_ports #pyserial
+import serial # pyserial
+import serial.tools.list_ports # pyserial
 #from robot.comms.uart import Uart
+#import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
 from std_msgs.msg import String, Header
