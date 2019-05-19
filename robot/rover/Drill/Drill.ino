@@ -3,16 +3,16 @@
 #include <SoftwareSerial.h>
 
 #define SERVO_STOP 1500
-#define SERVO_MAX_CW 1300
-#define SERVO_MAX_CCW 1700
+#define SERVO_MAX_CW 1250
+#define SERVO_MAX_CCW 1750
 
 #define TABLE_SWITCH_PIN  21
 #define TRIGGER_DELAY     50
 
-/*
-  int drill_speed(input_drill_speed);//max 165RPM
-  int elevator_feed(input_elevator_feed);//max 0.107inch/s
-*/
+
+int drill_speed(int input_drill_speed);//max 165RPM
+float elevator_feed(int input_elevator_feed);//max 0.107inch/s
+
 
 volatile bool isTriggered = false;
 volatile bool isContacted = false;
@@ -52,10 +52,12 @@ volatile int tablePosition[13];
 int cuvette = 0;
 int desiredPosition = 0;
 bool turnTableFree = true;
+bool elevatorInUse = false;
 int i = 0;
-/*
-  void elevatorTopInterrupt (void);
-  void elevatorBottomInterrupt (void);   */
+
+void elevatorTopInterrupt (void);
+void elevatorBottomInterrupt (void);
+
 void cuvettePosition (void);
 void turnTable (int cuvette, int desiredPosition);
 
@@ -84,7 +86,6 @@ void setup() {
   pinMode(photoresistor, INPUT_PULLUP);
   /*  attachInterrupt(digitalPinToInterrupt(limit_top), elevatorTopInterrupt, HIGH);
     attachInterrupt(digitalPinToInterrupt(limit_bottom), elevatorBottomInterrupt, HIGH); */
-  // attachInterrupt(digitalPinToInterrupt(table_limit_switch), cuvettePosition, RISING);
 
   pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), limSwitchTable, CHANGE);
@@ -126,6 +127,32 @@ void loop() {
     }
     else if (isActivated == true) {
 
+      if (cmd == "drill") {
+        //turns drill at desired speed
+        int drillDigiDirection = 0;
+        int drillSpeedPercent = 0;
+        Serial.println("What is the desired drill direction? CCW=1 CW=0");
+        while (!Serial.available()) {
+          ;
+        }
+        drillDigiDirection = (Serial.readStringUntil('\n')).toInt();
+        Serial.println(drillDigiDirection);
+
+        Serial.println("What percentage of max speed?");
+        while (!Serial.available()) {
+          ;
+        }
+        drillSpeedPercent = (Serial.readStringUntil('\n')).toInt();
+
+        Serial.println(drill_speed(drillSpeedPercent));
+        Serial.println("RPM\n");
+        if (drillDigiDirection == 1)Serial.println("CCW\n");
+        else if (drillDigiDirection == 0)Serial.println("CW\n");
+        analogWrite(drill, 0);
+        delay(50);
+        digitalWrite(drill_direction, drillDigiDirection);
+        analogWrite(drill, drillSpeedPercent * 255 / 100);
+      }
       if (cmd == "dccw") {
         //turns drill counter-clockwise
         analogWrite(drill, 0);
@@ -147,12 +174,39 @@ void loop() {
         analogWrite(drill, 0);
         Serial.println("ds");
       }
+      if (cmd == "elevator") {
+        //turns drill at desired speed
+        int elevatorDigiDirection = 0;
+        int elevatorFeedPercent = 0;
+        Serial.println("What is the desired elevator direction? Up=1 Down=0");
+        while (!Serial.available()) {
+          ;
+        }
+        elevatorDigiDirection = (Serial.readStringUntil('\n')).toInt();
+        Serial.println(elevatorDigiDirection);
+
+        Serial.println("What percentage of max feed?");
+        while (!Serial.available()) {
+          ;
+        }
+        elevatorFeedPercent = (Serial.readStringUntil('\n')).toInt();
+
+        Serial.println(elevator_feed(elevatorFeedPercent));
+        Serial.println("inch/min\n");
+        if (elevatorDigiDirection == 1)Serial.println("Up\n");
+        else if (elevatorDigiDirection == 0)Serial.println("Down\n");
+        analogWrite(elevator, 0);
+        delay(50);
+        digitalWrite(elevator_direction, elevatorDigiDirection);
+        analogWrite(elevator, elevatorFeedPercent * 255 / 100);
+      }
       else if (cmd == "eup") {
         //turns elevator clockwise
         analogWrite(elevator, 0);
         delay(100);
         digitalWrite(elevator_direction, HIGH);
         analogWrite(elevator, maxVelocity);
+        elevatorInUse = true;
         Serial.println("eup");
       }
       else if (cmd == "edown") {
@@ -160,12 +214,14 @@ void loop() {
         analogWrite(elevator, 0);
         delay(100);
         digitalWrite(elevator_direction, LOW);
-        analogWrite(elevator, 255);
+        analogWrite(elevator, maxVelocity);
+        elevatorInUse = true;
         Serial.println("edown");
       }
       else if (cmd == "es") {
         //stops elevator
         analogWrite(elevator, 0);
+        elevatorInUse = false;
         Serial.println("es");
       }
       else if (cmd == "goto") {
@@ -312,6 +368,7 @@ void loop() {
         Serial.print("cmd: ");
         Serial.println(cmd);
         turnTableFree = true;
+        elevatorInUse = false;
       }
     }
   }
@@ -340,12 +397,11 @@ void loop() {
     unsigned long timer = millis();
     Serial.println("isPushed");
     Serial.println(isPushed);
-    cuvettePosition();
-    if (isPushed) {
-      while ((millis() - timer) < 500) {
-        ;
-      }
-    }
+    if (!elevatorInUse)cuvettePosition();
+    /*    if (isPushed) {
+          while ((millis() - timer) < 100) {
+            ;
+          } */
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
     isActualPress = false;
     isPushed = false;
@@ -356,29 +412,38 @@ void loop() {
     turnTableFree = true;
   }
 }
-/*
-  void elevatorTopInterrupt () {
+
+void elevatorTopInterrupt () {
   //stops elevator
-  analogWrite(elevator, 0);
-  digitalWrite(elevator_direction, HIGH);
-  analogWrite(elevator, maxVelocity);
-  analogWrite(elevator, 0);
-  }
-  void elevatorBottomInterrupt () {
-  //stops elevator
+  unsigned long timer = millis();
+
   analogWrite(elevator, 0);
   digitalWrite(elevator_direction, LOW);
   analogWrite(elevator, maxVelocity);
-  analogWrite(elevator, 0);
+  while ((millis() - timer) < 250) {
+    ;
   }
-*/
+  analogWrite(elevator, 0);
+}
+void elevatorBottomInterrupt () {
+  //stops elevator
+  unsigned long timer = millis();
+  analogWrite(elevator, 0);
+  digitalWrite(elevator_direction, HIGH);
+  analogWrite(elevator, maxVelocity);
+  while ((millis() - timer) < 250) {
+    ;
+  }
+  analogWrite(elevator, 0);
+}
+
 void cuvettePosition() {
   //gives the integer value of the cuvette of the table 1 to 12, chute is cuvettePosition 0
   if (tableDirection == 'n') {
   }
   else if (tableDirection == 'i') {
     for (i = 0; i <= 12; i++) {
-      tablePosition[i] = (tablePosition[i]+1) % 13;
+      tablePosition[i] = (tablePosition[i] + 1) % 13;
     }
     Serial.print("tablePosition[0]: ");
     Serial.println(tablePosition[0]);
@@ -387,7 +452,9 @@ void cuvettePosition() {
     int temp = tablePosition[0];
     for (i = 0; i <= 12; i++) {
       tablePosition[i] = (tablePosition[i] - 1) % 13;
-      if (tablePosition[i] == -1){tablePosition[i] = 12;}
+      if (tablePosition[i] == -1) {
+        tablePosition[i] = 12;
+      }
     }
     Serial.print("tablePosition[0]: ");
     Serial.println(tablePosition[0]);
@@ -443,28 +510,26 @@ void limSwitchTable(void) {
   }
 }
 
-/*
-  int drill_speed() {
-  int input_drill_speed=0;
+
+int drill_speed(int input_drill_speed) {
   if (input_drill_speed < 0) {
     input_drill_speed = 0;
   }
-  if (input_drill_speed > 165) {
-    input_drill_speed = 165;
+  if (input_drill_speed > 100) {
+    input_drill_speed = 100;
   }
-  return input_drill_speed * 255 / 165;
-  }
+  return (input_drill_speed * 165 / 100);
+}
 
-  int elevator_feed() {
-  float input_elevator_feed=0;
+float elevator_feed(int input_elevator_feed) {
   if (input_elevator_feed < 0) {
-    input_drill_speed = 0;
+    input_elevator_feed = 0;
   }
-  if (input_drill_speed > 0.1066) {
-    input_drill_speed = 0.1066;
+  if (input_elevator_feed > 100) {
+    input_elevator_feed = 0.1066;
   }
-  return input_drill_speed * 255 / 0.1066;
-  }
-*/
+  return input_elevator_feed * 0.1066 / 100;
+}
+
 
 
