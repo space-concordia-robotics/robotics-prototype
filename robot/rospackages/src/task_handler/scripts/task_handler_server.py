@@ -8,15 +8,16 @@ from task_handler.srv import *
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 print(current_dir)
 scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "start_stream.sh"]
-running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", 1, True)]
+running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", "", 1, True)]
 known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
 
+# return the response string after calling the task handling function
 def handle_task_request(req):
-    response = "\n" + handle_task(req.task, req.status)
+    response = "\n" + handle_task(req.task, req.status, req.args)
 
     return response
 
-def handle_task(task, status):
+def handle_task(task, status, args):
 
     response = "Nothing happened"
 
@@ -30,6 +31,12 @@ def handle_task(task, status):
             if t.partition("_")[0] in task:
                 chosen_task = t
                 print('task chosen:', chosen_task)
+
+                if chosen_task == "camera_stream":
+                    print("CAMERA_STREAM")
+                    # set appropriate usb port in args
+                    if args:
+                        running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
                 break
             i += 1
 
