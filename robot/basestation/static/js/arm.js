@@ -47,6 +47,10 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
+  $('#homing-button').on('click', function (event) {
+    event.preventDefault()
+    sendArmCommand('home') // REIMPLEMENT AS AN ACTION
+  })
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
@@ -70,6 +74,51 @@ $(document).ready(function () {
     else { // closing stream
       requestTask("camera_stream", 0, '#toggle-arm-stream-btn')
       $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+    }
+  })
+
+  $('#m1-closed-loop-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#m1-closed-loop-btn').is(':checked')) {
+      if (sendArmRequest('motor 1 loop open')) {
+        $('#m1-closed-loop-btn')[0].checked = false
+      } else { // failed to switch to closed loop
+        $('#m1-closed-loop-btn')[0].checked = true
+      }
+    }
+  })
+  $('#m2-closed-loop-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#m2-closed-loop-btn').is(':checked')) {
+      if (sendArmRequest('motor 2 loop open')) {
+        $('#m2-closed-loop-btn')[0].checked = false
+      } else { // failed to switch to closed loop
+        $('#m2-closed-loop-btn')[0].checked = true
+      }
+    }
+  })
+  $('#m3-closed-loop-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#m3-closed-loop-btn').is(':checked')) {
+      if (sendArmRequest('motor 3 loop open')) {
+        $('#m3-closed-loop-btn')[0].checked = false
+      } else { // failed to switch to closed loop
+        $('#m3-closed-loop-btn')[0].checked = true
+      }
+    }
+  })
+  $('#m4-closed-loop-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#m4-closed-loop-btn').is(':checked')) {
+      if (sendArmRequest('motor 4 loop open')) {
+        $('#m4-closed-loop-btn')[0].checked = false
+      } else { // failed to switch to closed loop
+        $('#m4-closed-loop-btn')[0].checked = true
+      }
     }
   })
 })

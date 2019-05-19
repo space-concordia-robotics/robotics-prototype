@@ -128,7 +128,7 @@ function requestTask(reqTask, reqStatus, buttonID) {
 }
 
 function sendArmCommand(cmd) {
-  let command = new ROSLIB.Message({data : cmd+'\n'})
+  let command = new ROSLIB.Message({data : cmd})
   console.log(command)
   appendToConsole('Sending \"' + cmd + '\" to arm Teensy')
   scrollToBottom()
@@ -149,10 +149,13 @@ function sendArmRequest(command) {
     let msg = result.response.slice(0, result.response.length-1) // remove newline character
     if (!result.success) { // how to account for a lack of response?
       appendToConsole('Request failed. Received \"' + msg + '\"')
+      scrollToBottom()
+      return false
     }
     else {
       appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+      scrollToBottom
+      return true
     }
-    scrollToBottom()
   })
 }
