@@ -183,21 +183,46 @@ $(document).ready(() => {
 
   Site.init()
 
+  function isListenerOpen(){
+    return (
+      ($('#toggle-rover-listener-btn')[0].checked == true) ||
+      ($('#toggle-arm-listener-btn')[0].checked == true) //||
+      // science Listener
+      // pds Listener
+    )
+  }
+
   // select mux channel using mux_select service
-  $('#mux-0').mouseup(function () { // Arm
-    requestMuxChannel('#mux-0')
+  $('#mux-0').mouseup(function () { // Rover
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-0')
+    }
   })
 
-  $('#mux-1').mouseup(function () { // Rover
-    requestMuxChannel('#mux-1')
+  $('#mux-1').mouseup(function () { // Arm
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-1')
+    }
   })
 
   $('#mux-2').mouseup(function () { // Science
-    requestMuxChannel('#mux-2')
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-2')
+    }
   })
 
   $('#mux-3').mouseup(function () { // PDS // not lidar anymore
-    requestMuxChannel('#mux-3')
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-3')
+    }
   })
 
   // send serial command based on mux channel and current page
@@ -207,24 +232,24 @@ $(document).ready(() => {
     // b
     let cmd = $('#serial-cmd-input').val()
     let buttonText = $('button#mux').text()
-    if (buttonText.includes('Rover') && window.location.pathname=='/rover') {
-      // sendRoverCommand(cmd) // rover commands not yet implemented
-    } else if (buttonText.includes('Arm') && window.location.pathname=='/') {
-      sendArmCommand(cmd)
+    if (buttonText.includes('Select Device Channel')) {
+      appendToConsole('Unable to send serial command. Try opening a mux channel.')
+    } else {
+      // if the appropriate listener is open, send a command to it
+      if (buttonText.includes('Rover') && $('#toggle-rover-listener-btn')[0].checked == true) {
+        // sendRoverCommand(cmd) // rover commands not yet implemented
+      } else if (buttonText.includes('Arm') && $('#toggle-arm-listener-btn')[0].checked == true) {
+        sendArmCommand(cmd)
+      } else if (buttonText.includes('Science')) { // science buttons unknown
+        // sendScienceCommand(cmd) // science commands not yet implemented
+      } else if (buttonText.includes('PDS')) { // pds buttons unknown
+        // sendPdsCommand(cmd) // pds commands not yet implemented
+      }
+      // no listener is open, send generic request
+      else if (!buttonText.includes('Select Device Channel')) {
+        requestSerialCommand(cmd)
+      }
     }
-    // this implementation is tricky to think about... save it for later
-    /*
-    if (buttonText.includes('Rover')) {
-      sendArmCommand(cmd)
-    } else if (buttonText.includes('Arm')) {
-      // sendRoverCommand(cmd) // rover commands not yet implemented
-    } else if (buttonText.includes('Science')) {
-      // sendScienceCommand(cmd) // science commands not yet implemented
-    } else if (buttonText.includes('PDS')) {
-      // sendPdsCommand(cmd) // pds commands not yet implemented
-    }
-    else appendToConsole('Unable to send serial command. Mux channel ')
-    */
   })
 
   $('#serial-cmd-input').on('keyup', function (e) {

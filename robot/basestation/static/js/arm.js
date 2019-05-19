@@ -23,7 +23,6 @@ function printCommandsList() {
   appendToConsole("'l': view key commands")
   appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
-  scrollToBottom()
 }
 
 // Manual control
@@ -51,7 +50,6 @@ $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')
-      scrollToBottom()
       $.ajax('/ping_rover', {
         success: function (data) {
           appendToConsole(data.ping_msg)
@@ -60,7 +58,6 @@ $(document).ready(function () {
           } else {
             appendToConsole(data.ros_msg)
           }
-          scrollToBottom()
         },
         error: function () {
           console.log('An error occured')
@@ -84,7 +81,12 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-arm-listener-btn').is(':checked')) {
-      requestTask("arm_listener", 1, '#toggle-arm-listener-btn')
+      if ($('button#mux').text().includes('Arm')){
+        requestTask("arm_listener", 1, '#toggle-arm-listener-btn')
+      }
+      else {
+        appendToConsole('Cannot turn arm listener on if not in arm mux channel!')
+      }
     } else { // closing arm listener
       requestTask("arm_listener", 0, '#toggle-arm-listener-btn')
     }
@@ -162,7 +164,6 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     appendToConsole('pinging odroid')
-    scrollToBottom()
     $.ajax('/ping_rover', {
       success: function (data) {
         appendToConsole(data.ping_msg)
@@ -171,7 +172,6 @@ document.addEventListener('keydown', function (event) {
         } else {
           appendToConsole(data.ros_msg)
         }
-        scrollToBottom()
       },
       error: function () {
         console.log('An error occured')
