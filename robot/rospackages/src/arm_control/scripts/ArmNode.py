@@ -4,63 +4,58 @@ import sys
 import traceback
 import time
 import re
+
 import serial
 import serial.tools.list_ports #pyserial
+#from robot.comms.uart import Uart
+
 import rospy
 from std_msgs.msg import String, Header
 from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
-global ser
+global ser # make global so it can be used in other parts of the code
 
 # 300 ms timeout... could potentially be even less, needs testing
-timeout = 0.3 # each time thru the loop the timeout increases by 0.5s
+timeout = 0.3 # to wait for a response from the MCU
 
 # todo: test ros+website over network with teensy
-# todo: make a script for serial stuff so it's easier to interact with teensy
+# todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
-# set up connection to teensy. If only one USB device is connected it checks it's the arm teensy
-# this should eventually check all usb ports or check uart like the original code does
-
+# setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 def init_serial():
+    baudrate = 115200
+    # in a perfect world, you can choose the baudrate
+    rospy.loginfo('Using %d baud by default', baudrate)
+    # in a perfect world, usb vs uart will be set by ROS params
+    usb = True; uart = False
+    myargv = rospy.myargv(argv=sys.argv)
+    if len(myargv) == 1:
+        rospy.loginfo('Using USB by default')
+    if len(myargv) > 1:
+        if myargv[1] == 'uart':
+            usb=False; uart=True
+            rospy.loginfo('Using UART and 115200 baud by default')
+        elif myargv[1] == 'usb':
+            usb=True; uart=False
+            rospy.loginfo('Using USB and 115200 baud by default')
+        else:
+            rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
+            sys.exit(0)
+
     global ser #make global so it can be used in other parts of the code
 
     ports = list(serial.tools.list_ports.comports())
 
     startConnecting = time.time()
-    '''
-    if len(ports) == 1:
-        rospy.loginfo("1 USB device detected")
-        port = ports[0].name
-        rospy.loginfo('/dev/'+port)
-        ser = serial.Serial('/dev/' + port, 115200)
-
-        rospy.loginfo("clearing buffer...")
-        while ser.in_waiting:
-            ser.readline()
-
-        rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-        for i in range(5):
-            rospy.loginfo('attempt #%d...', i+1)
-            startListening = time.time()
-            ser.write(str.encode('who\n'))
-            while (time.time()-startListening < timeout):
-                if ser.in_waiting: # if there is data in the serial buffer
-                    response = ser.readline().decode()
-                    rospy.loginfo('response: '+response)
-                    if "arm" in response:
-                        rospy.loginfo("Arm MCU idenified!")
-                        rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                        rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
-                        return
-    '''
-    if len(ports) > 0:
-        rospy.loginfo("%d USB device(s) detected", len(ports))
-        for portObj in ports:
-            port = portObj.name
-            rospy.loginfo('/dev/'+port)
-            ser = serial.Serial('/dev/' + port, 115200)
+    if usb:
+        '''
+        if len(ports) == 1:
+            rospy.loginfo("1 USB device detected")
+            port = ports[0].name
+            rospy.loginfo('Attempting to connect to /dev/'+port)
+            ser = serial.Serial('/dev/' + port, baudrate)
 
             rospy.loginfo("clearing buffer...")
             while ser.in_waiting:
@@ -80,15 +75,65 @@ def init_serial():
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                             rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
                             return
+        '''
+        if len(ports) > 0:
+            rospy.loginfo("%d USB device(s) detected", len(ports))
+            for portObj in ports:
+                port = portObj.name
+                rospy.loginfo('Attempting to connect to /dev/'+port)
+                ser = serial.Serial('/dev/' + port, baudrate)
 
-    # todo: take uart possibility into account as well
-    #if usb:
-    #elif uart:
-    else:
-        rospy.loginfo("No USB devices recognized, exiting")
-        sys.exit(0)
+                rospy.loginfo("clearing buffer...")
+                while ser.in_waiting:
+                    ser.readline()
 
-    rospy.loginfo('Incorrect MCU connected, terminating listener')
+                rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
+                for i in range(5):
+                    rospy.loginfo('attempt #%d...', i+1)
+                    startListening = time.time()
+                    ser.write(str.encode('who\n'))
+                    while (time.time()-startListening < timeout):
+                        if ser.in_waiting: # if there is data in the serial buffer
+                            response = ser.readline().decode()
+                            rospy.loginfo('response: '+response)
+                            if "arm" in response:
+                                rospy.loginfo("Arm MCU idenified!")
+                                rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
+                                rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                                return
+        else:
+            rospy.logerr("No USB devices recognized, exiting")
+            sys.exit(0)
+
+    elif uart:
+        port = 'ttySAC0'
+        rospy.loginfo('Attempting to connect to /dev/'+port)
+        try:
+            ser = serial.Serial('/dev/' + port, baudrate)
+        except:
+            rospy.logerr('No UART device recognized, terminating arm node')
+            sys.exit(0)
+
+        rospy.loginfo("clearing buffer...")
+        while ser.in_waiting:
+            ser.readline()
+
+        rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
+        for i in range(5):
+            rospy.loginfo('attempt #%d...', i+1)
+            startListening = time.time()
+            ser.write(str.encode('who\n'))
+            while (time.time()-startListening < timeout):
+                if ser.in_waiting: # if there is data in the serial buffer
+                    response = ser.readline().decode()
+                    rospy.loginfo('response: '+response)
+                    if "arm" in response:
+                        rospy.loginfo("Arm MCU idenified!")
+                        rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
+                        rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                        return
+
+    rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
 def handle_client(req):
