@@ -110,11 +110,12 @@ class Arm:
 		self.minmax = angle_minmax
 		self.workspace_sample_size = sample
 		workspace = [[0,0] for x in range(pow(self.workspace_sample_size,3))]
-
-		if setangles is 0:
+		if (setangles is 0):
 			self.setangles = [self.minmax[i][0] for i in range(self.joint_num)]
 		else:
 			self.setangles = setangles
+
+		self.altangles = None
 
 
 	def ComputeWorkspace(self):
@@ -214,6 +215,11 @@ class Arm:
 							solution = 0
 
 						self.setangles = solution_angles[solution]
+						alt_solution = abs(solution - 1)
+						if solution_usable[alt_solution] is True:
+							self.altangles = solution_angles[abs(solution - 1)]
+						else:
+							self.altangles = None
 
 
 
