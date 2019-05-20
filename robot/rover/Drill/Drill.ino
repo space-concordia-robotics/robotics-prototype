@@ -6,6 +6,8 @@
 #define SERVO_MAX_CW 1250
 #define SERVO_MAX_CCW 1750
 
+#define LIMIT_TOP         19
+#define LIMIT_BOTTOM      20
 #define TABLE_SWITCH_PIN  21
 #define TRIGGER_DELAY     50
 
@@ -36,9 +38,6 @@ int pump4A = 46;
 int pump4B = 48;
 int pump5A = 50;
 int pump5B = 52;
-int limit_top = 19;
-int limit_bottom = 20;
-//int table_limit_switch = 21;
 int led1 = 11;
 int led2 = 12;
 int photoresistor = A2;
@@ -53,15 +52,16 @@ int cuvette = 0;
 int desiredPosition = 0;
 bool turnTableFree = true;
 bool elevatorInUse = false;
+volatile char previousElevatorState = 'n'; // n for neutral, u for up, d for down
 int i = 0;
 
-void elevatorTopInterrupt (void);
+//void elevatorTopInterrupt (void);
 void elevatorBottomInterrupt (void);
 
 void cuvettePosition (void);
 void turnTable (int cuvette, int desiredPosition);
 
-void limSwitchTable(void);
+void debouncing(void);
 
 Servo table;
 
@@ -80,15 +80,14 @@ void setup() {
   pinMode(pump2B, OUTPUT);
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
-  pinMode(limit_top, INPUT_PULLUP);
-  pinMode(limit_bottom, INPUT_PULLUP);
-  //  pinMode(table_limit_switch, INPUT_PULLUP);
+  pinMode(LIMIT_TOP, INPUT_PULLUP);
+  pinMode(LIMIT_BOTTOM, INPUT_PULLUP);
   pinMode(photoresistor, INPUT_PULLUP);
-  /*  attachInterrupt(digitalPinToInterrupt(limit_top), elevatorTopInterrupt, HIGH);
-    attachInterrupt(digitalPinToInterrupt(limit_bottom), elevatorBottomInterrupt, HIGH); */
+  //  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), elevatorTopInterrupt, HIGH);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING );
 
-  pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), limSwitchTable, CHANGE);
+  //  pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
+  //  attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);
 
   analogWrite(drill, 0);
   analogWrite(elevator, 0);
@@ -199,6 +198,8 @@ void loop() {
         delay(50);
         digitalWrite(elevator_direction, elevatorDigiDirection);
         analogWrite(elevator, elevatorFeedPercent * 255 / 100);
+        if (elevatorDigiDirection == 1)previousElevatorState = 'u';
+        else previousElevatorState = 'd';
       }
       else if (cmd == "eup") {
         //turns elevator clockwise
@@ -206,7 +207,7 @@ void loop() {
         delay(100);
         digitalWrite(elevator_direction, HIGH);
         analogWrite(elevator, maxVelocity);
-        elevatorInUse = true;
+        previousElevatorState = 'u';
         Serial.println("eup");
       }
       else if (cmd == "edown") {
@@ -215,13 +216,13 @@ void loop() {
         delay(100);
         digitalWrite(elevator_direction, LOW);
         analogWrite(elevator, maxVelocity);
-        elevatorInUse = true;
+        previousElevatorState = 'd';
         Serial.println("edown");
       }
       else if (cmd == "es") {
         //stops elevator
         analogWrite(elevator, 0);
-        elevatorInUse = false;
+        previousElevatorState = 'n';
         Serial.println("es");
       }
       else if (cmd == "goto") {
@@ -365,10 +366,10 @@ void loop() {
         digitalWrite(led2, LOW);
         turnTable (0, 0);
         tableDirection = 'n';
+        turnTableFree = true;
+        previousElevatorState = 'n';
         Serial.print("cmd: ");
         Serial.println(cmd);
-        turnTableFree = true;
-        elevatorInUse = false;
       }
     }
   }
@@ -394,47 +395,55 @@ void loop() {
     }
   }
   if (isActualPress) {
-    unsigned long timer = millis();
     Serial.println("isPushed");
     Serial.println(isPushed);
-    if (!elevatorInUse)cuvettePosition();
-    /*    if (isPushed) {
-          while ((millis() - timer) < 100) {
-            ;
-          } */
-    // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
-    isActualPress = false;
-    isPushed = false;
+    Serial.println(previousElevatorState);
+    if (previousElevatorState == 'n')cuvettePosition();
+    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
+    else if (previousElevatorState == 'd')elevatorBottomInterrupt();
   }
+  /*    if (isPushed) {
+        while ((millis() - timer) < 100) {
+          ;
+        } */
+  // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
+  isActualPress = false;
+  isPushed = false;
+
   if ((turnTableFree == false) && (tablePosition[desiredPosition] == cuvette)) {
     table.writeMicroseconds(SERVO_STOP);
     tableDirection = 'n';
     turnTableFree = true;
   }
 }
-
-void elevatorTopInterrupt () {
+/*
+  void elevatorTopInterrupt () {
   //stops elevator
   unsigned long timer = millis();
 
   analogWrite(elevator, 0);
   digitalWrite(elevator_direction, LOW);
   analogWrite(elevator, maxVelocity);
-  while ((millis() - timer) < 250) {
+  while ((millis() - timer) < 500) {
     ;
   }
   analogWrite(elevator, 0);
-}
+          previousElevatorState = 'n';
+  }
+*/
 void elevatorBottomInterrupt () {
   //stops elevator
+  Serial.print("\ninside function");
   unsigned long timer = millis();
+
   analogWrite(elevator, 0);
   digitalWrite(elevator_direction, HIGH);
   analogWrite(elevator, maxVelocity);
-  while ((millis() - timer) < 250) {
+  while ((millis() - timer) < 500) {
     ;
   }
   analogWrite(elevator, 0);
+  previousElevatorState = 'n';
 }
 
 void cuvettePosition() {
@@ -489,7 +498,7 @@ void turnTable (int cuvette, int desiredPosition) {
   turnTableFree = false;
 }
 
-void limSwitchTable(void) {
+void debouncing(void) {
   // if this is the first time the switch was pressed in a while,
   // alert loop() that the switch was pressed and set up the timer
   if (!isTriggered && !isContacted) {
@@ -499,14 +508,38 @@ void limSwitchTable(void) {
 
   /* every interrupt, update isContacted based on the pin state */
   // if the contact is connected, the pin will read low so set isContacted to true
-  if (digitalRead(TABLE_SWITCH_PIN) == LOW) {
-    isContacted = true;
-    Serial.println("minus");
+  if (previousElevatorState == 'n') {
+    if (digitalRead(TABLE_SWITCH_PIN) == LOW) {
+      isContacted = true;
+      Serial.println("minus");
+    }
+    // otherwise the contact is bouncing so set it to false
+    else if (digitalRead(TABLE_SWITCH_PIN) == HIGH) {
+      isContacted = false;
+      Serial.println("plus");
+    }
   }
-  // otherwise the contact is bouncing so set it to false
-  else if (digitalRead(TABLE_SWITCH_PIN) == HIGH) {
-    isContacted = false;
-    Serial.println("plus");
+  else if (previousElevatorState == 'u'){
+    if (digitalRead(LIMIT_TOP) == LOW) {
+      isContacted = true;
+      Serial.println("minus");
+    }
+    // otherwise the contact is bouncing so set it to false
+    else if (digitalRead(LIMIT_TOP) == HIGH) {
+      isContacted = false;
+      Serial.println("plus");
+    }
+  }
+    else if (previousElevatorState == 'd'){
+    if (digitalRead(LIMIT_BOTTOM) == LOW) {
+      isContacted = true;
+      Serial.println("minus");
+    }
+    // otherwise the contact is bouncing so set it to false
+    else if (digitalRead(LIMIT_BOTTOM) == HIGH) {
+      isContacted = false;
+      Serial.println("plus");
+    }
   }
 }
 
