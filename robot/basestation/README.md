@@ -15,3 +15,5 @@ You will see: `Running on http://127.0.0.1:5000`
 Visit this link in your browser to see the GUI.
 
 If the rover machine is running `StreamDispatcher.py`, then you will see a live video stream of the arm camera.
+
+You also need to have the rosbridge_suite package installed. After running app.py, run rosbridge_websocket.launch to connect the webpage to a ROS websockets server (port 9090 by default).
