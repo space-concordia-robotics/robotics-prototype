@@ -51,32 +51,6 @@ def init_serial():
 
     startConnecting = time.time()
     if usb:
-        '''
-        if len(ports) == 1:
-            rospy.loginfo("1 USB device detected")
-            port = ports[0].name
-            rospy.loginfo('Attempting to connect to /dev/'+port)
-            ser = serial.Serial('/dev/' + port, baudrate)
-
-            rospy.loginfo("clearing buffer...")
-            while ser.in_waiting:
-                ser.readline()
-
-            rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-            for i in range(5):
-                rospy.loginfo('attempt #%d...', i+1)
-                startListening = time.time()
-                ser.write(str.encode('who\n'))
-                while (time.time()-startListening < timeout):
-                    if ser.in_waiting: # if there is data in the serial buffer
-                        response = ser.readline().decode()
-                        rospy.loginfo('response: '+response)
-                        if "arm" in response:
-                            rospy.loginfo("Arm MCU idenified!")
-                            rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
-                            return
-        '''
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
             for portObj in ports:
@@ -146,8 +120,7 @@ def handle_client(req):
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
 
     startListening = time.time()
-    # 500 ms timeout... could potentially be even less, needs testing
-    # would be cool to see how long it takes between sending and receiving
+    # 300 ms timeout... could potentially be even less, needs testing
     while (time.time()-startListening < timeout):
         if ser.in_waiting:
             try:
@@ -156,10 +129,9 @@ def handle_client(req):
                 data_str += "from Arm Teensy at %f" % rospy.get_time()
                 rospy.loginfo(data_str)
                 if "Motor Angles" not in data_str:
-                    msg.response = data
+                    msg.response += data
                     msg.success = True
                     rospy.loginfo('took %f ms to receive response', (time.time()-startListening)*1000)
-                    break
                 else:
                     publish_joint_states(data_str)
             except:
@@ -174,7 +146,7 @@ def subscriber_callback(message):
     ser.write(command) # send command to teensy
 
     startListening = time.time()
-    # 500 ms timeout... could potentially be even less, needs testing
+    # 300 ms timeout... could potentially be even less, needs testing
     while (time.time()-startListening < timeout):
         if ser.in_waiting:
             try:
@@ -232,7 +204,7 @@ if __name__ == '__main__':
 
     data = ""; getTime = ""; data_str = ""
 
-    subscribe_topic = 'arm_command'
+    subscribe_topic = '/arm_command'
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
 

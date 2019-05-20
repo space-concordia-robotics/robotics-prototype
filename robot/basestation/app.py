@@ -144,57 +144,6 @@ def odroid_rx():
     return jsonify(success=True, odroid_rx=output)
 
 
-# Manual controls
-@app.route("/manual_control", methods=["POST"])
-def manual_control():
-
-    print("manual_control")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    if local:
-        rover_ip = "127.0.0.1"
-        base_ip = rover_ip
-        rover_port = 5005
-        base_port = 5010
-    else:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5015
-        base_port = rover_port
-
-    print("cmd: " + cmd)
-    sender = Connection("arm_cmd_sender", rover_ip, rover_port)
-    error = str(None)
-
-    try:
-        sender.send(cmd)
-    except OSError:
-        error = "Network is unreachable"
-        print(error)
-
-    receiver = Connection("arm_cmd_receiver", base_ip, base_port)
-    feedback = str(None)
-
-    try:
-        feedback = receiver.receive(timeout=2)
-    except OSError:
-        error = "Network is unreachable"
-        print(error)
-
-    print("feedback:", feedback)
-
-    if not feedback:
-        feedback = "Timeout limit exceeded, no data received"
-
-    return jsonify(success=True, cmd=cmd, error=error, feedback=feedback)
-
 # Rover controls
 @app.route("/rover_drive", methods=["POST"])
 def rover_drive():

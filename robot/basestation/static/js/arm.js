@@ -108,6 +108,30 @@ $(document).ready(function () {
     }
   })
 
+  $('#arm-speed-multiplier-btn').mouseup(function () {
+    let multiplier = $('#arm-speed-multiplier-input').val()
+    if (parseInt(multiplier, 10) >=0 && parseInt(multiplier, 10) < 10){
+      let cmd = 'armspeed '+multiplier
+      sendArmRequest(cmd)
+    }
+    else {
+      appendToConsole('speed multiplier must be between 0 and 10!')
+    }
+  })
+
+  $('#arm-speed-multiplier-input').on('keyup', function (e) {
+    if (e.keyCode == 13) { // enter key
+      let multiplier = $('#arm-speed-multiplier-input').val()
+      if (parseInt(multiplier, 10) >=0 && parseInt(multiplier, 10) < 10){
+        let cmd = 'armspeed '+multiplier
+        sendArmRequest(cmd)
+      }
+      else {
+        appendToConsole('speed multiplier must be between 0 and 10!')
+      }
+    }
+  })
+
   $('#m1-closed-loop-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
