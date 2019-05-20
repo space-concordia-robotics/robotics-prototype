@@ -185,8 +185,8 @@ $(document).ready(() => {
 
   function isListenerOpen(){
     return (
-      ($('#toggle-rover-listener-btn')[0].checked == true) ||
-      ($('#toggle-arm-listener-btn')[0].checked == true) //||
+      ((window.location.pathname == '/rover') && ($('#toggle-rover-listener-btn')[0].checked == true)) ||
+      ((window.location.pathname == '/') && ($('#toggle-arm-listener-btn')[0].checked == true)) //||
       // science Listener
       // pds Listener
     )

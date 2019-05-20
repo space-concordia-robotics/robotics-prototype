@@ -82,6 +82,7 @@ function requestMuxChannel(elemID) {
   console.log(request)
   appendToConsole('Sending request to switch to channel ' + $('a'+elemID).text())
 
+  gotResponse = false;
   mux_select_client.callService(request, function(result){
     let latency = millisSince(sentTime)
     console.log(result)
@@ -92,13 +93,11 @@ function requestMuxChannel(elemID) {
     else {
       $('button#mux').text('Device ' + $('a'+elemID).text())
       appendToConsole('Received \"' + msg + '\" with ' + latency.toString() + ' ms latency')
+      gotResponse = true;
     }
   })
 }
 
-// todo: make sure that this doesn't work if the odroid's serial
-// port is already open due to an already running python node
-// (for example, roverlistener.py or ArmNode.py or whatever)
 function requestSerialCommand(command) {
   let request = new ROSLIB.ServiceRequest({ msg : command+'\n' })
   let sentTime = new Date().getTime()
