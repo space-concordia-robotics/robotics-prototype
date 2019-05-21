@@ -7,7 +7,7 @@
 #more information about workings of the code, contact Maxim Kaller.
 
 import math
-
+#pygame import moved into __main__ to avoid unnecessary import message when not being used
 
 ############MANIPULATOR PHYSICAL PARAMETERS############
 
@@ -24,12 +24,12 @@ length_array = [base_length, proximal_length, distal_length, wrist_length]
 #added multipliers to make it a bit more accurate
 swivel_min_angle = -math.pi*0.95
 swivel_max_angle = math.pi*0.95
-proximal_min_angle = -math.pi*.9
-proximal_max_angle = math.pi*.8
-distal_min_angle = -math.pi*.7
-distal_max_angle = math.pi*.65
-wrist_min_angle = -math.pi
-wrist_max_angle = math.pi*.9
+proximal_min_angle = -(math.pi/2)*.9
+proximal_max_angle = (math.pi/2)*.8
+distal_min_angle = -(math.pi/2)*.7
+distal_max_angle = (math.pi/2)*.65
+wrist_min_angle = -(math.pi/2)
+wrist_max_angle = (math.pi/2)*.9
 minmax = [ [swivel_min_angle,swivel_max_angle], [proximal_min_angle,proximal_max_angle], \
 [distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle] ]
 
@@ -138,7 +138,7 @@ class Arm:
 
 
 	def anglesInRange(self, angles):
-		if len(angles) == self.joint_num:
+		if len(angles) is self.joint_num:
 			for i,angle in enumerate(angles):
 				if angle < self.minmax[i][0] or angle > self.minmax[i][1]:
 					print('Error: angles not in range')
@@ -158,8 +158,16 @@ class Arm:
 	def getCurrentAngles(self):
 		return self.setangles
 
+	def angleWraparound(angle):
+		if angle > math.pi*2:
+			return angle - math.pi*2
+		elif angle < -math.pi*2:
+			return angle + math.pi*2
+		else:
+			return angle
+
 	def computeFK(self, X, Y, Z, wrist_angle=None):
-		if wrist_angle == None:
+		if wrist_angle is None:
 			wrist_angle = self.setangles[self.joint_num-1]
 		#calculate position in plane
 
@@ -169,18 +177,21 @@ class Arm:
 
 	def computeIK(self, X, Y, Z, wrist_angle=None):
 		if self.joint_num is not 4:
-			solution_status = 'Error: this code currently only works for 4-link serial manipulators
+			solution_status = 'Error: this code currently only works for 4-link serial manipulators'
 		else:
 			solution_angles = [[0,0,0,0], [0,0,0,0]]
 			solution_usable = [True, True]
 			solution_status = ''
 
-			#Base rotation CALCULATION
-			if wrist_angle == None:
+			if wrist_angle is None:
 				wrist_angle = self.setangles[self.joint_num-1]
 
-			# swivel angle
-			solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X) # what if X=0 ?
+			###### joint 1 (base rotation) calculation ######
+			if X is 0:
+				solution_angle[0][0] = solution_angle[1][0] = pi/2
+			else:
+				solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X)
+
 			R = math.sqrt( pow(X,2) + pow(Z,2) )
 			if (X <= 0 and Z <= 0):
 				solution_angles[0][0] += math.pi
@@ -194,12 +205,21 @@ class Arm:
 				#solution_angles[0][0] += math.pi
 				#solution_angles[1][0] += math.pi
 
-			# end effector
+			# the preferred method is using atan2 but there are bugs apparently:
+			#solution_angles[0][0] = math.atan2(Z,X)
+			#solution_angles[1][0] += math.pi
+
+			# keep angles between -2*pi and +2*pi rad
+			solution_angles[1][0] = self.angleWraparound(solution_angles[1][0])
+			solution_angles[0][0] = self.angleWraparound(solution_angles[0][0])
+
+
+			###### joint 3 (elbow flex) calculation ######
 			Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
 			Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
-			beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
+			beta = math.atan2(Wrist_Y, Wrist_X) #Calculates beta, which is the sum of the angles of all links
 
-			if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > self.link[1]  + self.link[2]:
+			if math.sqrt(pow(Wrist_X, 2) + pow(Wrist_Y, 2)) > self.link[1]  + self.link[2]:
 				solution_status = 'Error: Setpoint beyond workspace'
 
 			else:
@@ -207,6 +227,7 @@ class Arm:
 				solution_angles[0][2] = math.acos(cosine_distal_angle)
 				solution_angles[1][2] = -solution_angles[0][2]
 
+				###### joint 2 (shoulder flex) calculation ######
 				#Calculate phi: Angle between tangent line and proximal link
 				aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(self.link[1],2) - pow(self.link[2],2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * self.link[1])
 				phi = math.acos(aphi)
@@ -220,14 +241,11 @@ class Arm:
 					solution_angles[0][1] = beta - phi
 					solution_angles[1][1] = beta + phi
 
-				if(wrist_angle is -1):
-					solution_angles[0][3] = beta - (solution_angles[0][1] + solution_angles[0][2])
-					solution_angles[1][3] = beta - (solution_angles[1][1] + solution_angles[1][2])
-				else:
-					solution_angles[0][3] = wrist_angle - (solution_angles[0][1] + solution_angles[0][2])
-					solution_angles[1][3] = wrist_angle - (solution_angles[1][1] + solution_angles[1][2])
+				####### joint 4 (wrist flex) calculation #######
+				solution_angles[0][3] = wrist_angle - (solution_angles[0][1] + solution_angles[0][2])
+				solution_angles[1][3] = wrist_angle - (solution_angles[1][1] + solution_angles[1][2])
 
-				# verification of solution sets
+				####### verification of solution sets ######
 				solution_usable[0] = self.anglesInRange(solution_angles[0])
 				solution_usable[1] = self.anglesInRange(solution_angles[1])
 				if (not solution_usable[0]) and (not solution_usable[1]):
