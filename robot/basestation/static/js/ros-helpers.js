@@ -87,7 +87,7 @@ function initRosWeb () {
   // setup a subscriber for the gps_data topic
 }
 
-function requestMuxChannel (elemID) {
+function requestMuxChannel (elemID, callback) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
@@ -97,7 +97,6 @@ function requestMuxChannel (elemID) {
     'Sending request to switch to channel ' + $('a' + elemID).text()
   )
 
-  gotResponse = false
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
@@ -105,17 +104,18 @@ function requestMuxChannel (elemID) {
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
+      callback([false, msg])
     } else {
       $('button#mux').text('Device ' + $('a' + elemID).text())
       appendToConsole(
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
-      gotResponse = true
+      callback([true])
     }
   })
 }
 
-function requestSerialCommand (command) {
+function requestSerialCommand (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command + '\n' })
   let sentTime = new Date().getTime()
 
@@ -129,10 +129,12 @@ function requestSerialCommand (command) {
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
+      callback([false, msg])
     } else {
       appendToConsole(
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
+      callback([true])
     }
   })
 }
@@ -205,7 +207,7 @@ function sendArmRequest (command, callback) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
       // return false
-      callback([false])
+      callback([false, msg])
     } else {
       appendToConsole(
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'

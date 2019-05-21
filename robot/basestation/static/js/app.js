@@ -197,7 +197,14 @@ $(document).ready(() => {
     if (isListenerOpen()){
       appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
-      requestMuxChannel('#mux-0')
+      requestMuxChannel('#mux-0', function(msgs) {
+        console.log(msgs)
+        if (msgs[0]) {
+          console.log('yeet')
+        } else {
+          console.log('neet')//appendToConsole('Request failed. Received "' + msg + '"')
+        }
+      })
     }
   })
 
@@ -247,7 +254,14 @@ $(document).ready(() => {
       }
       // no listener is open, send generic request
       else if (!buttonText.includes('Select Device Channel')) {
-        requestSerialCommand(cmd)
+        requestSerialCommand(cmd, function(msgs) {
+          console.log(msgs)
+          if (msgs[0]) {
+            console.log('nice')
+          } else {
+            console.log('not nice')
+          }
+        })
       }
     }
   })
