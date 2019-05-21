@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ############################################################
 ############SCRB 2019 INVERSE KINEMATICS PACKAGE############
 ############################################################
@@ -160,7 +162,7 @@ class Arm:
 	def getCurrentAngles(self):
 		return self.setangles
 
-	def angleWraparound(angle):
+	def angleWraparound(self, angle):
 		if angle > math.pi*2:
 			return angle - math.pi*2
 		elif angle < -math.pi*2:
@@ -179,8 +181,7 @@ class Arm:
 				angle+=angles[i] #take the angle from the horizontal
 				horizontal += self.link[i]*math.cos(angle)
 
-			#vertical=self.link[0] #FK and I think IK only calculate from the shoulder flex joint 2
-			vertical=0
+			vertical=self.link[0] #FK
 			angle=0
 			for i in range(1, self.joint_num):
 				angle += angles[i] # take the angle from the horizontal
@@ -195,7 +196,7 @@ class Arm:
 		else:
 			return None
 
-	def computeIK(self, X, Y, Z, wrist_angle=None):
+	def computeIK(self, position=None, wrist_angle=None):
 		if self.joint_num is not 4:
 			solution_status = 'Error: this code currently only works for 4-link serial manipulators'
 		else:
@@ -203,12 +204,17 @@ class Arm:
 			solution_usable = [True, True]
 			solution_status = ''
 
+
+			if position is None and wrist_angle is None:
+				position=self.computeFK(self.setangles)
+			X=position[0];Y=position[1];Z=position[2]
 			if wrist_angle is None:
-				wrist_angle = self.setangles[self.joint_num-1]
+				# take the angle from the horizontal
+				wrist_angle = self.setangles[self.joint_num-1]+self.setangles[1]+self.setangles[2]
 
 			###### joint 1 (base rotation) calculation ######
 			if X is 0:
-				solution_angle[0][0] = solution_angle[1][0] = pi/2
+				solution_angles[0][0] = solution_angles[1][0] = math.pi/2
 			else:
 				solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X)
 
@@ -238,8 +244,9 @@ class Arm:
 			Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
 			Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
 			beta = math.atan2(Wrist_Y, Wrist_X) #Calculates beta, which is the sum of the angles of all links
-
 			if math.sqrt(pow(Wrist_X, 2) + pow(Wrist_Y, 2)) > self.link[1]  + self.link[2]:
+				print( math.sqrt(pow(Wrist_X, 2) + pow(Wrist_Y, 2)) )
+				print( self.link[1]  + self.link[2] )
 				solution_status = 'Error: Setpoint beyond workspace'
 
 			else:
@@ -268,6 +275,7 @@ class Arm:
 				####### verification of solution sets ######
 				solution_usable[0] = self.anglesInRange(solution_angles[0])
 				solution_usable[1] = self.anglesInRange(solution_angles[1])
+
 				if (not solution_usable[0]) and (not solution_usable[1]):
 					solution_status = 'Error: No arm configuration available for specified set point'
 				elif solution_usable[0] and solution_usable[1]:
