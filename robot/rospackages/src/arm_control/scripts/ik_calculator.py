@@ -168,7 +168,9 @@ class Arm:
 		return #position
 
 	def computeIK(self, X, Y, Z, wrist_angle=None):
-		if self.joint_num is 4:
+		if self.joint_num is not 4:
+			solution_status = 'Error: this code currently only works for 4-link serial manipulators
+		else:
 			solution_angles = [[0,0,0,0], [0,0,0,0]]
 			solution_usable = [True, True]
 			solution_status = ''
@@ -178,7 +180,7 @@ class Arm:
 				wrist_angle = self.setangles[self.joint_num-1]
 
 			# swivel angle
-			solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X)
+			solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X) # what if X=0 ?
 			R = math.sqrt( pow(X,2) + pow(Z,2) )
 			if (X <= 0 and Z <= 0):
 				solution_angles[0][0] += math.pi
@@ -205,14 +207,12 @@ class Arm:
 				solution_angles[0][2] = math.acos(cosine_distal_angle)
 				solution_angles[1][2] = -solution_angles[0][2]
 
-
 				#Calculate phi: Angle between tangent line and proximal link
 				aphi = (pow(Wrist_X,2) + pow(Wrist_Y,2) + pow(self.link[1],2) - pow(self.link[2],2))/(2 * math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) * self.link[1])
 				phi = math.acos(aphi)
 
 				#Depending on the configuration of the arm, phi and beta can be used to
 				#find the second angle
-
 				if solution_angles[0][2] <= 0:
 					solution_angles[0][1] = beta + phi
 					solution_angles[1][1] = beta - phi
@@ -227,40 +227,36 @@ class Arm:
 					solution_angles[0][3] = wrist_angle - (solution_angles[0][1] + solution_angles[0][2])
 					solution_angles[1][3] = wrist_angle - (solution_angles[1][1] + solution_angles[1][2])
 
-				#ELIMIATION OF ONE OF THE ANGLE SETS
-
-				for i in range(1,4):
-					if solution_angles[0][i] > minmax[i][1] or solution_angles[0][1] < minmax[i][0]:
-						solution_usable[0] = False
+				# verification of solution sets
+				solution_usable[0] = self.anglesInRange(solution_angles[0])
+				solution_usable[1] = self.anglesInRange(solution_angles[1])
+				if (not solution_usable[0]) and (not solution_usable[1]):
+					solution_status = 'Error: No arm configuration available for specified set point'
+				elif solution_usable[0] and solution_usable[1]:
+					error0 = pow(solution_angles[0][1] - self.setangles[1],2) + pow(solution_angles[0][2] - self.setangles[2],2) + pow(solution_angles[0][3] - self.setangles[3],2)
+					error1 = pow(solution_angles[1][1] - self.setangles[1],2) + pow(solution_angles[1][2] - self.setangles[2],2) + pow(solution_angles[1][3] - self.setangles[3],2)
+					if error0 > error1:
 						solution = 1
-					if solution_angles[1][i] > minmax[i][1] or solution_angles[1][1] < minmax[i][0]:
-						solution_usable[1] = False
+					else:
 						solution = 0
+				elif solution_usable[0]:
+					solution = 0
+				elif solution_usable[1]:
+					solution = 1
 
-					if (solution_usable[0] is False) and (solution_usable[1] is False):
-						solution_status = 'Error: No arm configuration available for specified set point'
-
-					elif (solution_usable[0] is True) and (solution_usable[1] is True):
-						error0 = pow(solution_angles[0][1] - self.setangles[1],2) + pow(solution_angles[0][2] - self.setangles[2],2) + pow(solution_angles[0][3] - self.setangles[3],2)
-						error1 = pow(solution_angles[1][1] - self.setangles[1],2) + pow(solution_angles[1][2] - self.setangles[2],2) + pow(solution_angles[1][3] - self.setangles[3],2)
-						if error0 > error1:
-							solution = 1
-						else:
-							solution = 0
-
-						#remove the following line and make a separate function for setting the angles
-						self.setangles = solution_angles[solution]
-						alt_solution = abs(solution - 1)
-						if solution_usable[alt_solution] is True:
-							self.altangles = solution_angles[abs(solution - 1)]
-							solution_status = 'Success: both solutions exist'
-						else:
-							self.altangles = None
-							solution_status = 'Success: only one solution exists'
-						return [solution_angles[1], self.altangles, solution_status]
-
-
-
+		if 'Error' in solution_status:
+			return None, None, solution_status
+		else:
+			#self.setCurrentAngles(solution_angles[solution]) #angles should be set externally based on feedback
+			alt_solution = abs(solution - 1)
+			if solution_usable[alt_solution]:
+				#self.altangles = solution_angles[abs(solution - 1)]
+				solution_status = 'Success: both solutions exist'
+			else:
+				#self.altangles = None
+				solution_angles[alt_solution] = None
+				solution_status = 'Success: only one solution exists'
+			return solution_angles[solution], solution_angles[alt_solution], solution_status
 
 
 #########################MAIN#########################
