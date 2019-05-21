@@ -100,7 +100,7 @@ function requestMuxChannel (elemID, callback) {
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -125,7 +125,7 @@ function requestSerialCommand (command, callback) {
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -153,7 +153,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback) {
   task_handler_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
     if (
       msg.includes('Failed') ||
       msg.includes('shutdown request') ||
@@ -202,7 +202,7 @@ function sendArmRequest (command, callback) {
   arm_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')

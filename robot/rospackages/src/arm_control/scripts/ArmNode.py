@@ -133,39 +133,47 @@ def handle_client(req):
                     msg.success = True
                     rospy.loginfo('took %f ms to receive response', (time.time()-startListening)*1000)
                 else:
-                    publish_joint_states(data_str)
+                    publish_joint_states(data_str.strip('\n\r'))
             except:
                 rospy.logwarn('trouble reading from serial port')
+    msg.response = msg.response.strip('\n\r')
     rospy.loginfo('sending '+msg.response+' back to GUI')
     return msg
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
     rospy.loginfo('sending: '+message.data)
+    msg = String()
+    msg.data = ''
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
 
     startListening = time.time()
-    # 300 ms timeout... could potentially be even less, needs testing
-    while (time.time()-startListening < timeout):
+    # 100ms timeout. this timeout must be below 200ms for budge commands to work.
+    # messages normally take like 10ms to go through at 115200 so 100ms gives time for around 10 messages
+    while (time.time()-startListening < 0.1):
         if ser.in_waiting:
             try:
-                data_str = ser.readline().decode()
+                data = ser.readline().decode()
+                data_str += "received "+data
+                data_str+=" at %f" % rospy.get_time()
+                rospy.loginfo(data_str)
                 if "Motor Angles" not in data_str:
-                    data_str = "received "+data_str
-                    data_str+=" at %f" % rospy.get_time()
-                    rospy.loginfo(data_str)
+                    msg.data += data
                     break
                 else:
-                    publish_joint_states(data_str)
+                    publish_joint_states(data_str.strip('\n\r'))
             except:
                 rospy.logwarn('trouble reading from serial port')
+    if msg.data is not '':
+        msg.data = msg.data.strip('\n\r')
+        rospy.loginfo('sending '+msg.data+' back to GUI')
+        feedbackPub.publish(msg)
     return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
     lhs,rhs = message.split('Motor Angles: ')
-    lhs,rhs = rhs.split('\n')
     angles = lhs.split(', ')
     # create the message to be published
     msg = JointState()
@@ -217,7 +225,7 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             if ser.in_waiting:
                 try:
-                    data = ser.readline().decode()
+                    data = ser.readline().decode().strip('\n\r')
                     #if data[0]=='@':
                     if 'Motor Angles' in data and data[0]=='@':
                         publish_joint_states(data)
