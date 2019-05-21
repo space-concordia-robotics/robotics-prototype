@@ -21,13 +21,17 @@ wrist_length = 0.072 + 0.143 #m (until tip of fingers)
 length_array = [base_length, proximal_length, distal_length, wrist_length]
 
 #ANGLES (IN RADIANS):
-proximal_max_angle = math.pi
-proximal_min_angle = -math.pi
-distal_max_angle = math.pi
-distal_min_angle = -math.pi
-wrist_max_angle = math.pi
+#added multipliers to make it a bit more accurate
+swivel_min_angle = -math.pi*0.95
+swivel_max_angle = math.pi*0.95
+proximal_min_angle = -math.pi*.9
+proximal_max_angle = math.pi*.8
+distal_min_angle = -math.pi*.7
+distal_max_angle = math.pi*.65
 wrist_min_angle = -math.pi
-minmax = [[0,0], [proximal_min_angle,proximal_max_angle], [distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle]]
+wrist_max_angle = math.pi*.9
+minmax = [ [swivel_min_angle,swivel_max_angle], [proximal_min_angle,proximal_max_angle], \
+[distal_min_angle, distal_max_angle], [wrist_min_angle, wrist_max_angle] ]
 
 
 ###################PYGAME PARAMETERS###################
@@ -103,15 +107,15 @@ class ProjectionView:
 
 
 class Arm:
-	def __init__(self, joint_num, link_array, angle_minmax, setangles = 0, sample = 10):
+	def __init__(self, joint_num, link_array, angle_minmax, setangles = None, sample = 10):
 		self.joint_num = joint_num
 		self.link = link_array
 		self.minmax = angle_minmax
 		self.workspace_sample_size = sample
 		workspace = [[0,0] for x in range(pow(self.workspace_sample_size,3))]
 
-		if setangles is 0:
-			self.setangles = [self.minmax[i][0] for i in range(self.joint_num)]
+		if setangles is None:
+			self.setangles = [0]*joint_num
 		else:
 			self.setangles = setangles
 		self.altangles = None
@@ -133,6 +137,27 @@ class Arm:
 		self.workspace = pt
 
 
+	def anglesInRange(self, angles):
+		if len(angles) == self.joint_num:
+			for i,angle in enumerate(angles):
+				if angle < self.minmax[i][0] or angle > self.minmax[i][1]:
+					print('Error: angles not in range')
+					return False
+			return True
+		else:
+			print('Error: length of array is not equal to number of joints in model')
+			return False
+
+	def setCurrentAngles(self, angles):
+		if (self.anglesInRange(angles)):
+			self.setangles = angles
+			return True
+		else:
+			return False
+
+	def getCurrentAngles(self):
+		return self.setangles
+
 	def computeFK(self, X, Y, Z, wrist_angle=None):
 		if wrist_angle == None:
 			wrist_angle = self.setangles[self.joint_num-1]
@@ -152,7 +177,8 @@ class Arm:
 			if wrist_angle == None:
 				wrist_angle = self.setangles[self.joint_num-1]
 
-			solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X)
+			# swivel angle
+			solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X)
 			R = math.sqrt( pow(X,2) + pow(Z,2) )
 			if (X <= 0 and Z <= 0):
 				solution_angles[0][0] += math.pi
@@ -165,6 +191,8 @@ class Arm:
 				#R *= -1
 				#solution_angles[0][0] += math.pi
 				#solution_angles[1][0] += math.pi
+
+			# end effector
 			Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
 			Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
 			beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
