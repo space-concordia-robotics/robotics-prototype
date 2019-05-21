@@ -24,8 +24,8 @@ length_array = [base_length, proximal_length, distal_length, wrist_length]
 #added multipliers to make it a bit more accurate
 swivel_min_angle = -math.pi*0.95
 swivel_max_angle = math.pi*0.95
-proximal_min_angle = -(math.pi/2)*.9
-proximal_max_angle = (math.pi/2)*.8
+proximal_min_angle = math.pi/2 - (math.pi/2)*.9
+proximal_max_angle = math.pi/2 + (math.pi/2)*.8
 distal_min_angle = -(math.pi/2)*.7
 distal_max_angle = (math.pi/2)*.65
 wrist_min_angle = -(math.pi/2)
@@ -116,6 +116,8 @@ class Arm:
 
 		if setangles is None:
 			self.setangles = [0]*joint_num
+			for i in range (0,joint_num):
+				self.setangles[i] = (minmax[i][0]+minmax[i][1])/2
 		else:
 			self.setangles = setangles
 		self.altangles = None
@@ -166,14 +168,32 @@ class Arm:
 		else:
 			return angle
 
-	def computeFK(self, X, Y, Z, wrist_angle=None):
-		if wrist_angle is None:
-			wrist_angle = self.setangles[self.joint_num-1]
-		#calculate position in plane
+	def computeFK(self, angles=None):
+		if angles is None:
+			angles = self.setangles
+		if (self.anglesInRange(angles)):
+			#calculate position in plane
+			horizontal=0
+			angle=0
+			for i in range(1, self.joint_num):
+				angle+=angles[i] #take the angle from the horizontal
+				horizontal += self.link[i]*math.cos(angle)
 
-		#calculate 3D position based on rotated base joint
+			#vertical=self.link[0] #FK and I think IK only calculate from the shoulder flex joint 2
+			vertical=0
+			angle=0
+			for i in range(1, self.joint_num):
+				angle += angles[i] # take the angle from the horizontal
+				vertical += self.link[i]*math.sin(angle)
 
-		return #position
+			#calculate 3D position based on rotated base joint
+			X = horizontal*math.cos(angles[0])
+			Y = vertical
+			Z = horizontal*math.sin(angles[0])
+
+			return [X, Y, Z]
+		else:
+			return None
 
 	def computeIK(self, X, Y, Z, wrist_angle=None):
 		if self.joint_num is not 4:
