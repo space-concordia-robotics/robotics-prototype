@@ -7,7 +7,6 @@
 #more information about workings of the code, contact Maxim Kaller.
 
 import math
-import pygame
 
 
 ############MANIPULATOR PHYSICAL PARAMETERS############
@@ -115,6 +114,7 @@ class Arm:
 			self.setangles = [self.minmax[i][0] for i in range(self.joint_num)]
 		else:
 			self.setangles = setangles
+		self.altangles = None
 
 
 	def ComputeWorkspace(self):
@@ -133,12 +133,25 @@ class Arm:
 		self.workspace = pt
 
 
-	def ComputeIK(self, X, Y, Z, wrist_angle = -1):
+	def computeFK(self, X, Y, Z, wrist_angle=None):
+		if wrist_angle == None:
+			wrist_angle = self.setangles[self.joint_num-1]
+		#calculate position in plane
+
+		#calculate 3D position based on rotated base joint
+
+		return #position
+
+	def computeIK(self, X, Y, Z, wrist_angle=None):
 		if self.joint_num is 4:
 			solution_angles = [[0,0,0,0], [0,0,0,0]]
 			solution_usable = [True, True]
+			solution_status = ''
 
 			#Base rotation CALCULATION
+			if wrist_angle == None:
+				wrist_angle = self.setangles[self.joint_num-1]
+
 			solution_angles[0][0] = solution_angles[1][0] = math.atan( Z/X)
 			R = math.sqrt( pow(X,2) + pow(Z,2) )
 			if (X <= 0 and Z <= 0):
@@ -152,17 +165,12 @@ class Arm:
 				#R *= -1
 				#solution_angles[0][0] += math.pi
 				#solution_angles[1][0] += math.pi
-			if(wrist_angle is -1):
-				beta = math.atan2(Y - self.link[0] , R) #Calculates beta, which is the sum of the angles of all links
-				Wrist_X = R - self.link[3]  * math.cos(beta) #Calculates wrist X coordinate
-				Wrist_Y = (Y - self.link[0] ) - self.link[3]  * math.sin(beta) #Calculates wrist Y coordinate
-			else:
-				Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
-				Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
-				beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
+			Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
+			Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
+			beta = math.atan2(Wrist_Y  , Wrist_X) #Calculates beta, which is the sum of the angles of all links
 
 			if math.sqrt(pow(Wrist_X,2) + pow(Wrist_Y,2)) > self.link[1]  + self.link[2]:
-				print('ERROR: SET POINT BEYOND ARM WORKSPACE')
+				solution_status = 'Error: Setpoint beyond workspace'
 
 			else:
 				cosine_distal_angle = (pow(Wrist_X,2) + pow(Wrist_Y,2) - pow(self.link[1],2) - pow(self.link[2],2))/(2 * self.link[1] * self.link[2])
@@ -202,18 +210,26 @@ class Arm:
 						solution = 0
 
 					if (solution_usable[0] is False) and (solution_usable[1] is False):
-						print('Error: No arm configuration available for specified set point')
+						solution_status = 'Error: No arm configuration available for specified set point'
 
 					elif (solution_usable[0] is True) and (solution_usable[1] is True):
 						error0 = pow(solution_angles[0][1] - self.setangles[1],2) + pow(solution_angles[0][2] - self.setangles[2],2) + pow(solution_angles[0][3] - self.setangles[3],2)
 						error1 = pow(solution_angles[1][1] - self.setangles[1],2) + pow(solution_angles[1][2] - self.setangles[2],2) + pow(solution_angles[1][3] - self.setangles[3],2)
 						if error0 > error1:
 							solution = 1
-
 						else:
 							solution = 0
 
+						#remove the following line and make a separate function for setting the angles
 						self.setangles = solution_angles[solution]
+						alt_solution = abs(solution - 1)
+						if solution_usable[alt_solution] is True:
+							self.altangles = solution_angles[abs(solution - 1)]
+							solution_status = 'Success: both solutions exist'
+						else:
+							self.altangles = None
+							solution_status = 'Success: only one solution exists'
+						return [solution_angles[1], self.altangles, solution_status]
 
 
 
@@ -221,92 +237,94 @@ class Arm:
 
 #########################MAIN#########################
 #################PYGAME INIT#################
-pygame.init()
-pygame.font.init()
-screen = pygame.display.set_mode((Window_X,Window_Y))
-pygame.display.set_caption("Inverse Kinematics Module")
+if __name__ == '__main__':
+	import pygame
+	pygame.init()
+	pygame.font.init()
+	screen = pygame.display.set_mode((Window_X,Window_Y))
+	pygame.display.set_caption("Inverse Kinematics Module")
 
-Sideview = ProjectionView(RED, Window_X/4, 3*Window_Y/4, screen)
-Topview = ProjectionView(RED, 3*Window_X/4, 3*Window_Y/8, screen)
+	Sideview = ProjectionView(RED, Window_X/4, 3*Window_Y/4, screen)
+	Topview = ProjectionView(RED, 3*Window_X/4, 3*Window_Y/8, screen)
 
-Asimov = Arm(4, length_array, minmax)
-
-
-done = False
-clock = pygame.time.Clock()
-
-set_point = [0.5, 0.6, 0.5]
-wrist_angle = 0
-
-workspace_enable = True
-if workspace_enable:
-	Asimov.ComputeWorkspace()
-	workspace_rep = Asimov.workspace
-	for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
-	    workspace_rep[i] = GenerateRepresentativeCoordinates(Asimov.workspace[i] , Sideview.X, Sideview.Y, 0)
-		#NOT IDEAL, TO CHANGE
-#################PYGAME LOOP#################
-while not done:
-
-	#Check if user closed window
-    clock.tick(10)
-    for event in pygame.event.get():
-    	if event.type == pygame.QUIT:
-            done=True
-    	if event.type == pygame.KEYDOWN:
-            	if event.key == pygame.K_UP:
-            		set_point[1] += increment
-            	if event.key == pygame.K_DOWN:
-            		set_point[1] -= increment
-            	if event.key == pygame.K_RIGHT:
-            		set_point[0] += increment
-            	if event.key == pygame.K_LEFT:
-            		set_point[0] -= increment
-            	if event.key == pygame.K_PERIOD:
-            		set_point[2] += increment
-            	if event.key == pygame.K_COMMA:
-            		set_point[2] -= increment
-
-		#Update arm view
-    	screen.fill(WHITE)
-
-	#INVERSE KINEMATICS MODE
-    	set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
-    	#if (set_point[0] <= 0 and set_point[2] <= 0):
-    		#Bset_point_2D[0] *= -1
-    	top_point = [set_point[0], set_point[2]]
-    	Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
+	Asimov = Arm(4, length_array, minmax)
 
 
-		#Sideview
-    	Sideview.actual_position = UpdateArmSideValues(Asimov.setangles)
-    	Sideview.projected_position = GenerateRepresentativeCoordinates(Sideview.actual_position, Sideview.X, Sideview.Y)
-    	draw(Sideview, 4)
-    	pygame.draw.circle(screen, RED, [int(Sideview.projected_position[0][0][0]),int(Sideview.projected_position[0][0][1])] , 10)
-    	drawText(screen, "Side View", BLACK, [Sideview.X, Sideview.Y + 50])
+	done = False
+	clock = pygame.time.Clock()
+
+	set_point = [0.5, 0.6, 0.5]
+	wrist_angle = 0
+
+	workspace_enable = True
+	if workspace_enable:
+		Asimov.ComputeWorkspace()
+		workspace_rep = Asimov.workspace
+		for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
+		    workspace_rep[i] = GenerateRepresentativeCoordinates(Asimov.workspace[i] , Sideview.X, Sideview.Y, 0)
+			#NOT IDEAL, TO CHANGE
+	#################PYGAME LOOP#################
+	while not done:
+
+		#Check if user closed window
+	    clock.tick(10)
+	    for event in pygame.event.get():
+	    	if event.type == pygame.QUIT:
+	            done=True
+	    	if event.type == pygame.KEYDOWN:
+	            	if event.key == pygame.K_UP:
+	            		set_point[1] += increment
+	            	if event.key == pygame.K_DOWN:
+	            		set_point[1] -= increment
+	            	if event.key == pygame.K_RIGHT:
+	            		set_point[0] += increment
+	            	if event.key == pygame.K_LEFT:
+	            		set_point[0] -= increment
+	            	if event.key == pygame.K_PERIOD:
+	            		set_point[2] += increment
+	            	if event.key == pygame.K_COMMA:
+	            		set_point[2] -= increment
+
+			#Update arm view
+	    	screen.fill(WHITE)
+
+		#INVERSE KINEMATICS MODE
+	    	set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
+	    	#if (set_point[0] <= 0 and set_point[2] <= 0):
+	    		#Bset_point_2D[0] *= -1
+	    	top_point = [set_point[0], set_point[2]]
+	    	Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
 
 
-		#Topview
-    	Topview.actual_position = UpdateArmTopValues(Asimov.setangles)
-    	Topview.projected_position = GenerateRepresentativeCoordinates(Topview.actual_position, Topview.X, Topview.Y, 1)
-    	draw(Topview, 1)
-    	pygame.draw.circle(screen, RED, [int(Topview.projected_position[0][0][0]),int(Topview.projected_position[0][0][1])] , 10)
-    	drawText(screen, "Top View", BLACK, [Topview.X, Topview.Y + 50])
-
-		#Draw a circle around target point
-    	desired_side_point = GenerateRepresentativeCoordinates(set_point_2D , Sideview.X, Sideview.Y, 0)
-    	pygame.draw.circle(screen, BLUE, desired_side_point , 15, 3)
-
-    	desired_top_point = GenerateRepresentativeCoordinates(top_point , Topview.X, Topview.Y, 0)
-    	pygame.draw.circle(screen, BLUE, desired_top_point , 15, 3)
-
-	#WORKSPACE MODE
-    	if workspace_enable is True:
-    		for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
-    			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
+			#Sideview
+	    	Sideview.actual_position = UpdateArmSideValues(Asimov.setangles)
+	    	Sideview.projected_position = GenerateRepresentativeCoordinates(Sideview.actual_position, Sideview.X, Sideview.Y)
+	    	draw(Sideview, 4)
+	    	pygame.draw.circle(screen, RED, [int(Sideview.projected_position[0][0][0]),int(Sideview.projected_position[0][0][1])] , 10)
+	    	drawText(screen, "Side View", BLACK, [Sideview.X, Sideview.Y + 50])
 
 
-	#This is required to update the display
-    pygame.display.flip()
+			#Topview
+	    	Topview.actual_position = UpdateArmTopValues(Asimov.setangles)
+	    	Topview.projected_position = GenerateRepresentativeCoordinates(Topview.actual_position, Topview.X, Topview.Y, 1)
+	    	draw(Topview, 1)
+	    	pygame.draw.circle(screen, RED, [int(Topview.projected_position[0][0][0]),int(Topview.projected_position[0][0][1])] , 10)
+	    	drawText(screen, "Top View", BLACK, [Topview.X, Topview.Y + 50])
 
-pygame.quit()
+			#Draw a circle around target point
+	    	desired_side_point = GenerateRepresentativeCoordinates(set_point_2D , Sideview.X, Sideview.Y, 0)
+	    	pygame.draw.circle(screen, BLUE, desired_side_point , 15, 3)
+
+	    	desired_top_point = GenerateRepresentativeCoordinates(top_point , Topview.X, Topview.Y, 0)
+	    	pygame.draw.circle(screen, BLUE, desired_top_point , 15, 3)
+
+		#WORKSPACE MODE
+	    	if workspace_enable is True:
+	    		for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
+	    			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
+
+
+		#This is required to update the display
+	    pygame.display.flip()
+
+	pygame.quit()
