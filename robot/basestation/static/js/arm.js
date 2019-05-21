@@ -66,6 +66,7 @@ $(document).ready(function () {
       lastCmdSent = new Date().getTime()
     }
   })
+
   $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -167,23 +168,24 @@ $(document).ready(function () {
 
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()
-    if (parseInt(multiplier, 10) >= 0 && parseInt(multiplier, 10) < 10) {
+    let maxMultiplier = 5.0
+    if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
       let cmd = 'armspeed ' + multiplier
       sendArmRequest(cmd, function (msgs) {})
     } else {
-      appendToConsole('speed multiplier must be between 0 and 10!')
+      appendToConsole('speed multiplier must be between 0 and '+maxMultiplier+'!')
     }
   })
 
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
-    if (e.keyCode == 13) {
-      // enter key
+    if (e.keyCode == 13) { // enter key
       let multiplier = $('#arm-speed-multiplier-input').val()
-      if (parseInt(multiplier, 10) >= 0 && parseInt(multiplier, 10) < 10) {
+      let maxMultiplier = 5.0
+      if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
         let cmd = 'armspeed ' + multiplier
         sendArmRequest(cmd, function (msgs) {})
       } else {
-        appendToConsole('speed multiplier must be between 0 and 10!')
+        appendToConsole('speed multiplier must be between 0 and '+maxMultiplier+'!')
       }
     }
   })
@@ -217,42 +219,75 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m2-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 2 loop closed')) {
-        $('#m2-closed-loop-btn')[0].checked = true
-      } else {
-        // failed to switch to closed loop
-        if (sendArmRequest('motor 4 loop open')) {
+      sendArmRequest('motor 2 loop closed', function (succeeded) {
+        if (succeeded) {
+          $('#m2-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        } else {
           $('#m2-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
         }
-      }
+      })
+    } else {
+      sendArmRequest('motor 2 loop open', function (succeeded) {
+        if (succeeded) {
+          $('#m2-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
+        } else {
+          $('#m2-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        }
+      })
     }
   })
   $('#m3-closed-loop-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m3-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 3 loop closed')) {
-        $('#m3-closed-loop-btn')[0].checked = true
-      } else {
-        // failed to switch to closed loop
-        if (sendArmRequest('motor 4 loop open')) {
+      sendArmRequest('motor 3 loop closed', function (succeeded) {
+        if (succeeded) {
+          $('#m3-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        } else {
           $('#m3-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
         }
-      }
+      })
+    } else {
+      sendArmRequest('motor 3 loop open', function (succeeded) {
+        if (succeeded) {
+          $('#m3-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
+        } else {
+          $('#m3-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        }
+      })
     }
   })
   $('#m4-closed-loop-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m4-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 4 loop closed')) {
-        $('#m4-closed-loop-btn')[0].checked = true
-      } else {
-        // failed to switch to closed loop
-        if (sendArmRequest('motor 4 loop open')) {
+      sendArmRequest('motor 4 loop closed', function (succeeded) {
+        if (succeeded) {
+          $('#m4-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        } else {
           $('#m4-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
         }
-      }
+      })
+    } else {
+      sendArmRequest('motor 4 loop open', function (succeeded) {
+        if (succeeded) {
+          $('#m4-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
+        } else {
+          $('#m4-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        }
+      })
     }
   })
 })
@@ -280,6 +315,17 @@ document.addEventListener('keydown', function (event) {
         console.log('An error occured')
       }
     })
+    lastCmdSent = new Date().getTime()
+  }
+})
+
+document.addEventListener('keydown', function (event) {
+  if (
+    !$serialCmdInput.is(':focus') &&
+    event.code === 'KeyP' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+  ) {
+    sendArmRequest('ping', function (msgs) {})
     lastCmdSent = new Date().getTime()
   }
 })

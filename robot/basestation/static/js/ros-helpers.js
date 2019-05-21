@@ -183,17 +183,19 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
+/*
 // usage
 sendArmRequest('this is a command', function (succeeded) {
   console.log(succeeded ? 'command succeeded' : 'command failed')
 })
+*/
 
 function sendArmRequest (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  appendToConsole('Sending request to execute command \"' + command + '\"')
 
   arm_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
