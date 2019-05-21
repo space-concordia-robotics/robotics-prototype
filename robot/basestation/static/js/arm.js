@@ -16,7 +16,7 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
-function printCommandsList() {
+function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'z': emergency stop all motors")
   appendToConsole("'o': reset memorized angle values")
@@ -69,64 +69,120 @@ $(document).ready(function () {
   $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendArmRequest('ping')
+      sendArmRequest('ping', function (msgs) {})
       lastCmdSent = new Date().getTime()
     }
   })
+
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
+
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-arm-listener-btn').is(':checked')) {
-      if ($('button#mux').text().includes('Arm')){
-        requestTask("arm_listener", 1, '#toggle-arm-listener-btn')
+      if (
+        $('button#mux')
+          .text()
+          .includes('Arm')
+      ) {
+        requestTask('arm_listener', 1, '#toggle-arm-listener-btn', function (
+          msgs
+        ) {
+          console.log('msgs[0]', msgs[0])
+          if (msgs.length == 2) {
+            console.log('msgs[1]', msgs[1])
+            // if already running
+            if (msgs[1].includes('already running')) {
+              $('#toggle-arm-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-arm-listener-btn')[0].checked = false
+            }
+          } else {
+            if (msgs[0]) {
+              $('#toggle-arm-listener-btn')[0].checked = false
+            } else {
+              $('#toggle-arm-listener-btn')[0].checked = true
+            }
+          }
+        })
+        // console.log('returnVals', returnVals)
+      } else {
+        appendToConsole(
+          'Cannot turn arm listener on if not in arm mux channel!'
+        )
       }
-      else {
-        appendToConsole('Cannot turn arm listener on if not in arm mux channel!')
-      }
-    } else { // closing arm listener
-      requestTask("arm_listener", 0, '#toggle-arm-listener-btn')
+    } else {
+      // closing arm listener
+      requestTask('arm_listener', 0, '#toggle-arm-listener-btn', function (
+        msgs
+      ) {
+        console.log('msgs[0]', msgs[0])
+        if (msgs.length == 2) {
+          console.log('msgs[1]', msgs[1])
+          if (msgs[1].includes('already running')) {
+            $('#toggle-arm-listener-btn')[0].checked = true
+          } else {
+            $('#toggle-arm-listener-btn')[0].checked = false
+          }
+        } else {
+          if (msgs[0]) {
+            $('#toggle-arm-listener-btn')[0].checked = true
+          } else {
+            $('#toggle-arm-listener-btn')[0].checked = false
+          }
+        }
+      })
     }
   })
+
   $('#toggle-arm-stream-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-arm-stream-btn').is(':checked')) {
-      if (requestTask("camera_stream", 1, '#toggle-arm-stream-btn')) {
-        $('img#camera-feed')[0].src =
-          'http://' + getRoverIP() + ':8090/?action=stream'
-      } else { // failed to open stream
-        $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-      }
-    }
-    else { // closing stream
-      requestTask("camera_stream", 0, '#toggle-arm-stream-btn')
-      $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+      requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
+        if (msgs[0]) {
+          $('img#camera-feed')[0].src =
+            'http://' + getRoverIP() + ':8090/?action=stream'
+        } else {
+          // failed to open stream
+          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+        }
+      })
+    } else {
+      requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
+        if (msgs[0]) {
+          // succeeded to close stream
+          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+        } else {
+          // failed to close stream
+          $('img#camera-feed')[0].src =
+            'http://' + getRoverIP() + ':8090/?action=stream'
+        }
+      })
     }
   })
 
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()
-    if (parseInt(multiplier, 10) >=0 && parseInt(multiplier, 10) < 10){
-      let cmd = 'armspeed '+multiplier
-      sendArmRequest(cmd)
-    }
-    else {
+    if (parseInt(multiplier, 10) >= 0 && parseInt(multiplier, 10) < 10) {
+      let cmd = 'armspeed ' + multiplier
+      sendArmRequest(cmd, function (msgs) {})
+    } else {
       appendToConsole('speed multiplier must be between 0 and 10!')
     }
   })
 
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
-    if (e.keyCode == 13) { // enter key
+    if (e.keyCode == 13) {
+      // enter key
       let multiplier = $('#arm-speed-multiplier-input').val()
-      if (parseInt(multiplier, 10) >=0 && parseInt(multiplier, 10) < 10){
-        let cmd = 'armspeed '+multiplier
-        sendArmRequest(cmd)
-      }
-      else {
+      if (parseInt(multiplier, 10) >= 0 && parseInt(multiplier, 10) < 10) {
+        let cmd = 'armspeed ' + multiplier
+        sendArmRequest(cmd, function (msgs) {})
+      } else {
         appendToConsole('speed multiplier must be between 0 and 10!')
       }
     }
@@ -136,21 +192,38 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m1-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 1 loop open')) {
-        $('#m1-closed-loop-btn')[0].checked = false
-      } else { // failed to switch to closed loop
-        $('#m1-closed-loop-btn')[0].checked = true
-      }
+      sendArmRequest('motor 1 loop closed', function (succeeded) {
+        if (succeeded) {
+          $('#m1-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        } else {
+          $('#m1-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
+        }
+      })
+    } else {
+      sendArmRequest('motor 1 loop open', function (succeeded) {
+        if (succeeded) {
+          $('#m1-closed-loop-btn')[0].checked = false
+          console.log('falseeee')
+        } else {
+          $('#m1-closed-loop-btn')[0].checked = true
+          console.log('trueee')
+        }
+      })
     }
   })
   $('#m2-closed-loop-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m2-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 2 loop open')) {
-        $('#m2-closed-loop-btn')[0].checked = false
-      } else { // failed to switch to closed loop
+      if (sendArmRequest('motor 2 loop closed')) {
         $('#m2-closed-loop-btn')[0].checked = true
+      } else {
+        // failed to switch to closed loop
+        if (sendArmRequest('motor 4 loop open')) {
+          $('#m2-closed-loop-btn')[0].checked = false
+        }
       }
     }
   })
@@ -158,10 +231,13 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m3-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 3 loop open')) {
-        $('#m3-closed-loop-btn')[0].checked = false
-      } else { // failed to switch to closed loop
+      if (sendArmRequest('motor 3 loop closed')) {
         $('#m3-closed-loop-btn')[0].checked = true
+      } else {
+        // failed to switch to closed loop
+        if (sendArmRequest('motor 4 loop open')) {
+          $('#m3-closed-loop-btn')[0].checked = false
+        }
       }
     }
   })
@@ -169,10 +245,13 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m4-closed-loop-btn').is(':checked')) {
-      if (sendArmRequest('motor 4 loop open')) {
-        $('#m4-closed-loop-btn')[0].checked = false
-      } else { // failed to switch to closed loop
+      if (sendArmRequest('motor 4 loop closed')) {
         $('#m4-closed-loop-btn')[0].checked = true
+      } else {
+        // failed to switch to closed loop
+        if (sendArmRequest('motor 4 loop open')) {
+          $('#m4-closed-loop-btn')[0].checked = false
+        }
       }
     }
   })
@@ -471,8 +550,8 @@ if (mockArmTable) {
     let $serialCmdInput = $('#serial-cmd-input')
 
     if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
-      let budgeArray = ['~','~','~','~','~','~']
-      let i=0
+      let budgeArray = ['~', '~', '~', '~', '~', '~']
+      let i = 0
       let toBudge = false
       // 'w' --> m1 ccw
       if (!$serialCmdInput.is(':focus') && keyState[87]) {
@@ -482,7 +561,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -494,11 +573,11 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
-      i+=1
+      i += 1
       // 'e' --> m2 ccw
       if (!$serialCmdInput.is(':focus') && keyState[69]) {
         toggleToManual()
@@ -507,7 +586,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -519,11 +598,11 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
-      i+=1
+      i += 1
       // 'r' --> m3 ccw
       if (!$serialCmdInput.is(':focus') && keyState[82]) {
         toggleToManual()
@@ -532,7 +611,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -544,11 +623,11 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
-      i+=1
+      i += 1
       // 't' --> m4 ccw
       if (!$serialCmdInput.is(':focus') && keyState[84]) {
         toggleToManual()
@@ -557,7 +636,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -569,11 +648,11 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
-      i+=1
+      i += 1
       // 'y' --> m5 ccw
       if (!$serialCmdInput.is(':focus') && keyState[89]) {
         toggleToManual()
@@ -582,7 +661,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -594,11 +673,11 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
-      i+=1
+      i += 1
       // 'u' --> m6 ccw
       if (!$serialCmdInput.is(':focus') && keyState[85]) {
         toggleToManual()
@@ -607,7 +686,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='fwd'
+        budgeArray[i] = 'fwd'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -619,7 +698,7 @@ if (mockArmTable) {
           'rgb(255, 0, 0)'
         )
 
-        budgeArray[i]='back'
+        budgeArray[i] = 'back'
         toBudge = true
         lastCmdSent = new Date().getTime()
       }
@@ -629,8 +708,7 @@ if (mockArmTable) {
         $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
         sendArmCommand('stop')
         lastCmdSent = new Date().getTime()
-      }
-      else if (toBudge) {
+      } else if (toBudge) {
         let cmd = 'budge '
         for (var motor in budgeArray) {
           cmd += budgeArray[motor]

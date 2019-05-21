@@ -30,10 +30,10 @@ def init_serial():
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
-    usb = True; uart = False
+    usb = False; uart = True
     myargv = rospy.myargv(argv=sys.argv)
     if len(myargv) == 1:
-        rospy.loginfo('Using USB by default')
+        rospy.loginfo('Using UART by default')
     if len(myargv) > 1:
         if myargv[1] == 'uart':
             usb=False; uart=True
