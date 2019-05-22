@@ -24,7 +24,7 @@ def handle_task(task, status, args):
 
     global running_tasks
 
-    if status in [0, 1] and task in known_tasks:
+    if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
         i = 0
 
@@ -32,6 +32,11 @@ def handle_task(task, status, args):
             if t.partition("_")[0] in task:
                 chosen_task = t
                 print('task chosen:', chosen_task)
+
+                if status == 2:
+                    response = chosen_task
+                    is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
+                    return response + is_running_str + "\n"
 
                 # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
                 if chosen_task == "camera_stream":

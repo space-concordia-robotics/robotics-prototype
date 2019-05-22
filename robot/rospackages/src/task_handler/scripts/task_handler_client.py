@@ -29,7 +29,7 @@ def is_valid_request(r_task, r_status, r_args):
     known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
     camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScience"]
 
-    if r_task in known_tasks and r_status in [0, 1]:
+    if r_task in known_tasks and r_status in [0, 1, 2]:
         if r_task == "camera_stream" and not r_args in camera_args:
             return False
         return True
