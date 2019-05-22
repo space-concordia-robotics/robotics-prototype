@@ -54,6 +54,13 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
 
+  // setup a publisher for the arm_command topic
+  ik_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'ik_command',
+    messageType: 'IkCommand'
+  })
+
   // setup a subscriber for the arm_joint_states topic
   arm_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
@@ -183,6 +190,13 @@ function sendArmCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
+}
+
+function sendIkCommand (position, wristAngle) {
+  let command = new ROSLIB.Message({ x : position[0], y : position[1], z : position[2], wrist : wristAngle })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to ikNode')
+  ik_command_publisher.publish(command)
 }
 
 /*
