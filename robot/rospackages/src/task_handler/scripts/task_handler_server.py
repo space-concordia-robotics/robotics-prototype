@@ -32,7 +32,7 @@ def handle_task(task, status, args):
                 chosen_task = t
                 print('task chosen:', chosen_task)
 
-                if chosen_task == "camera_stream":
+                if chosen_task == "camera_stream" and not running_tasks[i].is_running():
                     print("CAMERA_STREAM")
                     # set appropriate usb port in args
                     if args:

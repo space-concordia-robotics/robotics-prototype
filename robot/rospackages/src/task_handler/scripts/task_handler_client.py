@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 4:
         args = sys.argv[3]
+    else:
+        args = ""
 
     if not is_valid_request(task, status):
         print("Invalid format")
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     print(sent_ts)
     print("---")
 
-    print("Response: " + str(task_handler_client(task, status)))
+    print("Response: " + str(task_handler_client(task, status, args)))
     received = datetime.datetime.now()
     received_st = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (received.microsecond / 10000))
     print(received_st)
