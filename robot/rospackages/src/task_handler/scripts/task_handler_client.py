@@ -16,7 +16,7 @@ def task_handler_client(r_task, r_status, r_args=""):
     except rospy.ServiceException as e:
         print("Service call failed: {:s}".format(str(e)))
 
-def is_valid_request(r_task, r_status):
+def is_valid_request(r_task, r_status, r_args):
     """
     Validate client request parameters
     r_task: requested task
@@ -27,8 +27,11 @@ def is_valid_request(r_task, r_status):
 
     # all known tasks to be handled by the handler
     known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
+    camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScience"]
 
     if r_task in known_tasks and r_status in [0, 1]:
+        if r_task == "camera_stream" and not r_args in camera_args:
+            return False
         return True
 
     return False
@@ -58,7 +61,7 @@ if __name__ == "__main__":
     else:
         args = ""
 
-    if not is_valid_request(task, status):
+    if not is_valid_request(task, status, args):
         print("Invalid format")
         print(usage())
         sys.exit(0)

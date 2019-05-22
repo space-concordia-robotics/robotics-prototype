@@ -4,6 +4,7 @@ import rospy
 import os
 from Listener import Listener
 from task_handler.srv import *
+import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 print(current_dir)
@@ -36,7 +37,12 @@ def handle_task(task, status, args):
                     print("CAMERA_STREAM")
                     # set appropriate usb port in args
                     if args:
-                        running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
+                        ports = glob.glob('/dev/tty[A-Za-z]*')
+                        if args in ports:
+                            running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
+                        else:
+                            response = "Requested port not available, is the camera properly plugged into the USB port?"
+                            return response + "\n"
                 break
             i += 1
 
