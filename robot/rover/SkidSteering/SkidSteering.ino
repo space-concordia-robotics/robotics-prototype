@@ -28,14 +28,14 @@ LSM303 compass;
 #if defined(DEVEL_MODE_1)
 // serial communication over uart with odroid, teensy plugged into pcb and odroid
 #define UART_PORT Serial
-#define PRINT(a) Serial.print(a); bluetooth.print(a);
-#define PRINTln(a) Serial.println(a); bluetooth.println(a);
-#define PRINTRES(a,b) Serial.print(a, b); bluetooth.print(a, b)
+#define PRINT(a) Serial.print(a); delay(70); bluetooth.print(a); delay(70);
+#define PRINTln(a) Serial.println(a); delay(70); bluetooth.println(a); delay(70);
+#define PRINTRES(a,b) Serial.print(a, b); delay(70); bluetooth.print(a, b); delay(70);
 #elif defined(DEVEL_MODE_2)
 #define UART_PORT Serial4
-#define PRINT(a) Serial4.print(a); bluetooth.print(a)
-#define PRINTln(a) Serial4.println(a); bluetooth.println(a)
-#define PRINTRES(a,b) Serial4.print(a, b); bluetooth.print(a, b)
+#define PRINT(a) Serial4.print(a); delay(70); bluetooth.print(a); delay(70);
+#define PRINTln(a) Serial4.println(a); delay(70); bluetooth.println(a); delay(70);
+#define PRINTRES(a,b) Serial4.print(a, b); delay(70); bluetooth.print(a, b); delay(70);
 #endif
 
 #if defined(DEBUG_MODE) || defined(USER_MODE)
@@ -47,6 +47,9 @@ LSM303 compass;
 SoftwareSerial bluetooth(9, 10);
 
 ArduinoBlue phone(bluetooth);
+
+
+
 
 // F -> Front, B -> Back,  M -> Middle, L -> Left, R -> Right,
 // DIR -> Direction pin, PWM -> Signal Pin, EA ->Encoder A, EB -> Encoder B
@@ -98,6 +101,9 @@ DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor");
 DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor");
 DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
+
+//Commands cmd;
+
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 int throttle, steering, loop_state, button, i; // Input values for set velocity functions
 float deg = 0;  // steering ratio between left and right wheel
@@ -121,8 +127,8 @@ String rotation; // Rotation direction of the whole rover
 // Modes of operation
 // Bluetooth control - basestation control - PID - Open Loop
 
-boolean isActivated = false;
 //boolean isActivated = false;
+boolean isActivated = false;
 boolean isOpenloop = true; // No PID controller
 boolean bluetoothMode = true;
 boolean joystickMode = true;
@@ -146,16 +152,17 @@ void initNav(void);
 void displayGpsInfo(void);
 void navHandler(void);
 void roverVelocityCalculator(void);
+
+#include "commands.h"
+
+Commands Commands;
+
 void setup() {
     // initialize serial communications at 115200 bps:
     UART_PORT.begin(115200); // switched from 9600 as suggested to conform with the given gps library
     UART_PORT.setTimeout(50);
     bluetooth.begin(9600);
     bluetooth.setTimeout(50);
-
-//    Serial2.begin(9600);
-
-    PRINTln("\n\n~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 
     delay(50);  // do not print too fast!
 
@@ -165,57 +172,40 @@ void setup() {
     initPids();
     initNav();
 
-    PRINTln("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-
-    delay(500);  // do not print too fast!
-    toggleLed2();
-    delay(500);
-    toggleLed();
-
-
+    {
 //    analogWrite(LB_PWM, 60);
 //    analogWrite(RB_PWM, 60);
 //    analogWrite(LM_PWM, 60);
 //    analogWrite(RM_PWM, 60);
 //    analogWrite(RF_PWM, 60);
 //    analogWrite(LF_PWM, 60);
-    PRINTln("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+    }
 
-    PRINTln("setup complete");
-    delay(70);
-
-    PRINTln("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n");
-    delay(70);
-
-    PRINTln("Rover Wheels are deactivated");
-    delay(70);
-
-    PRINTln("Ble-Mode On");
-    delay(100);
-
+    Commands.setupMessage();
 }
 
 void loop() {
-    if (UART_PORT.available() && !isActivated) {
+    if (UART_PORT.available()) {
         String cmd = UART_PORT.readStringUntil('\n');
         ser_flush();
         PRINT("cmd: ");
         PRINTln(cmd);
-        if (cmd == "activate") {
-            //toggleLed();
-            isActivated = true;
-            bluetoothMode = false;
-            toggleLed2();
+        Commands.handler(cmd);
+//        if (cmd == "activate") {
+//            //toggleLed();
+//            isActivated = true;
+//            bluetoothMode = false;
+//            toggleLed2();
+//
+//            PRINTln("Rover Wheels are Active");
+//            PRINTln("BLE-Mode is OFF");
+//
+//        } else if (cmd == "who") {
+//            PRINTln("rover");
+//        }
+//        else {
+//            PRINTln("Please Activate Rover Wheels");
 
-            PRINTln("Rover Wheels are Active");
-            PRINTln("BLE-Mode is OFF");
-
-        } else if (cmd == "who") {
-            PRINTln("rover");
-        }
-        else {
-            PRINTln("Please Activate Rover Wheels");
-        }
     }
 
     else if (bluetooth.available() && !isActivated && joystickMode) {
@@ -243,23 +233,23 @@ void loop() {
         }
     }
     else if (bluetooth.available() && !isActivated && !joystickMode) {
-        String cmd = bluetooth.readStringUntil('\n');
-//        ser_flush();
-        PRINT("cmd: ");
-        PRINTln(cmd);
-        if (cmd == "activate") {
-            //toggleLed();
-            isActivated = true;
-//            bluetoothMode = false;
-            PRINTln("Rover Wheels are Active");
-            toggleLed2();
-
-        } else if (cmd == "who") {
-            PRINTln("rover");
-        }
-        else {
-            PRINTln("Please Activate Rover Wheels");
-        }
+//        String cmd = bluetooth.readStringUntil('\n');
+////        ser_flush();
+//        PRINT("cmd: ");
+//        PRINTln(cmd);
+//        if (cmd == "activate") {
+//            //toggleLed();
+//            isActivated = true;
+////            bluetoothMode = false;
+//            PRINTln("Rover Wheels are Active");
+//            toggleLed2();
+//
+//        } else if (cmd == "who") {
+//            PRINTln("rover");
+//        }
+//        else {
+//            PRINTln("Please Activate Rover Wheels");
+//        }
     }
 
 
@@ -273,59 +263,111 @@ void loop() {
         if (UART_PORT.available()) {
             toggleLed();
             cmd = UART_PORT.readStringUntil('\n');
+            Commands.handler(cmd);
             ser_flush();
-            if (cmd == "who") {
-                PRINTln("happy rover");
-            }
-            else if (cmd == "deactivate") {
-                //toggleLed();
-                isActivated = false;
-                PRINTln("Rover Wheels are Deactivated");
-            } else if (cmd == "CloseLoop") {   // Close loop activation command
-                minOutputSignal = -30;
-                maxOutputSignal = 30;
-                for (i = 1; i <= 6; i++) {
-                    motorList[i].isOpenLoop = false;
-                    PRINT("Motor ");
-                    PRINT(i);
-                    PRINT(" open loop status is: ");
-                    PRINTln(motorList[i].isOpenLoop);
-                    delay(80);
-
-                }
-            } else if (cmd == "OpenLoop") {
-                minOutputSignal = -255;
-                maxOutputSignal = 255;
-                for (i = 1; i <= 6; i++) {
-                    motorList[i].isOpenLoop = true;
-                    PRINT("Motor ");
-                    PRINT(i);
-                    PRINT(" open loop status is: ");
-                    PRINTln(motorList[i].isOpenLoop);
-                    delay(80);
-
-                }
-            } else if (cmd == "ble-on") {
-                minInputSignal = -49;
-                maxInputSignal = 49;
-                bluetoothMode = true;
-                PRINTln("Bluetooth Control is active");
-
-            } else if (cmd == "ble-off") {
-                minInputSignal = -49;
-                maxInputSignal = 49;
-                bluetoothMode = false;
-                PRINTln("Bluetooth Control is off");
-
-            } else if ((cmd.indexOf(":") > 0) && !bluetoothMode) {
-                PRINTln("Received command");
-                throttle = getValue(cmd, ':', 0).toInt();
-                steering = getValue(cmd, ':', 1).toInt();
-                PRINT("TEENSY throttle: ");
-                PRINTln(throttle);
-                PRINT("TEENSY steering: ");
-                PRINTln(steering);
-            }
+//            if (cmd == "who") {
+//                PRINTln("happy rover");
+//            }
+//            else if (cmd == "deactivate") {
+//                //toggleLed();
+//                isActivated = false;
+//                PRINTln("Rover Wheels are Deactivated");
+//            } else if (cmd == "CloseLoop") {   // Close loop activation command
+//                minOutputSignal = -30;
+//                maxOutputSignal = 30;
+//                for (i = 1; i <= 6; i++) {
+//                    motorList[i].isOpenLoop = false;
+//                    PRINT("Motor ");
+//                    PRINT(i);
+//                    PRINT(" open loop status is: ");
+//                    PRINTln(motorList[i].isOpenLoop);
+//                    delay(80);
+//
+//                }
+//            } else if (cmd == "OpenLoop") {
+//                minOutputSignal = -255;
+//                maxOutputSignal = 255;
+//                for (i = 1; i <= 6; i++) {
+//                    motorList[i].isOpenLoop = true;
+//                    PRINT("Motor ");
+//                    PRINT(i);
+//                    PRINT(" open loop status is: ");
+//                    PRINTln(motorList[i].isOpenLoop);
+//                    delay(80);
+//
+//                }
+//            } else if (cmd == "ble-on") {
+//                minInputSignal = -49;
+//                maxInputSignal = 49;
+//                bluetoothMode = true;
+//                PRINTln("Bluetooth Control is active");
+//
+//            } else if (cmd == "ble-off") {
+//                minInputSignal = -49;
+//                maxInputSignal = 49;
+//                bluetoothMode = false;
+//                PRINTln("Bluetooth Control is off");
+//
+//            }
+//            else if ((cmd.indexOf(":") > 0) && !bluetoothMode) {
+//                PRINTln("Received command");
+//                throttle = getValue(cmd, ':', 0).toInt();
+//                steering = getValue(cmd, ':', 1).toInt();
+//                PRINT("TEENSY throttle: ");
+//                PRINTln(throttle);
+//                PRINT("TEENSY steering: ");
+//                PRINTln(steering);
+//            }
+//            else if ((cmd.indexOf(":") > 0)){
+//                motorNumber = getValue(cmd, ':', 0).toInt();
+//                int speed = getValue(cmd, ':', 1).toInt();
+//                steering = 0;
+//                PRINTln(motorList[motorNumber].isOpenLoop);
+//                PRINT(motorList[motorNumber].motorName);
+//                PRINT("'s throttle speed: ");
+//                delay(80);
+//                int dir = 1;
+//
+//                PRINTln(speed);
+//                if (throttle < 0 ){
+//                    dir = - 1;
+//                }
+//                motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
+//                PRINT(motorList[motorNumber].motorName);
+//                PRINT("'s desired speed: ");
+//                delay(80);
+//                PRINT(motorList[motorNumber].getDesiredVelocity());
+//                PRINTln(" PWM");
+//
+//                delay(500);
+//
+//                PRINT("Encoder Count is ");
+//                PRINTln(motorList[motorNumber].encoderCount)
+//            }
+//            else if (cmd == "enc") {
+//
+//                for (i = 1; i <= 6; i++) {
+//                    motorList[i].isOpenLoop = true;
+//                    PRINT("Motor ");
+//                    PRINT(i);
+//                    PRINT(" encoder count: ");
+//                    PRINTln(motorList[i].encoderCount);
+//                    delay(80);
+//
+//                }
+//            }
+//            else if (cmd == "stop"){
+//                for (i = 1; i <= 6; i++) {
+//                    motorList[i].setVelocity(1 , 0, motorList[i].getCurrentVelocity());
+//
+//
+//                    PRINT("Motor ");
+//                    PRINT(i);
+//                    PRINT(" Speed is: ");
+//                    PRINTln(motorList[i].getDesiredVelocity());
+//                    delay(80);
+//                }
+//            }
         }
         else if (bluetoothMode) {
             cmd = Serial2.readStringUntil('\n');
@@ -381,7 +423,19 @@ void loop() {
 
                 }
             }
-            if ((cmd.indexOf(":") > 0) && !joystickMode){
+            else if (cmd == "enc") {
+
+                for (i = 1; i <= 6; i++) {
+                    motorList[i].isOpenLoop = true;
+                    PRINT("Motor ");
+                    PRINT(i);
+                    PRINT(" encoder count: ");
+                    PRINTln(motorList[i].encoderCount);
+                    delay(80);
+
+                }
+            }
+            else if ((cmd.indexOf(":") > 0) && !joystickMode){
                 motorNumber = getValue(cmd, ':', 0).toInt();
                 int speed = getValue(cmd, ':', 1).toInt();
                 steering = 0;
@@ -400,9 +454,24 @@ void loop() {
                 PRINT("'s desired speed: ");
                 delay(80);
                 PRINT(motorList[motorNumber].getDesiredVelocity());
-
                 PRINTln(" PWM");
 
+                delay(500);
+
+                PRINT("Encoder Count is");
+                PRINTln(motorList[motorNumber].encoderCount)
+            }
+            else if (cmd == "stop"){
+                for (i = 1; i <= 6; i++) {
+                    motorList[i].setVelocity(1 , 0, motorList[i].getCurrentVelocity());
+
+
+                    PRINT("Motor ");
+                    PRINT(i);
+                    PRINT(" Speed is: ");
+                    PRINTln(motorList[i].getDesiredVelocity());
+                    delay(80);
+                }
             }
         }
 
@@ -419,12 +488,12 @@ void loop() {
 
         else if (!bluetoothMode){
             //PRINTln("No command received");
-            throttle = 0;
-            steering = 0;
+//            throttle = 0;
+//            steering = 0;
         }
 
-        velocityHandler(throttle, steering);
-        roverVelocityCalculator();
+//        velocityHandler(throttle, steering);
+//        roverVelocityCalculator();
 
 
         //ser_flush();
@@ -440,10 +509,10 @@ void loop() {
 
 
 
-//    if (millis() - prevReadNav > 2000) {
-//        navHandler();
-//        prevReadNav = millis();
-//    }
+    if (millis() - prevReadNav > 500) {
+        navHandler();
+        prevReadNav = millis();
+    }
 }
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -649,13 +718,8 @@ void initNav(void) {
     {
 //        while (1);
 // This will freeze the code to have the user check wiring
-        delay(70);
-
-        PRINTln("NAV ERROR:");
-        delay(70);
-        PRINTln(" - GPS wires arent connected properly");
-        delay(70);
-
+        Commands.error = true;
+        Commands.errorMessage = "GPS wires aren't connected properly";
     }
     compass.init();
     compass.enableDefault();
@@ -667,7 +731,7 @@ void initNav(void) {
     };
 }
 void displayGpsInfo(void) {                     // The function that prints the info
-    if (gps.location.isValid())      // checks if valid location data is available
+    if (gps.location.isValid() && Commands.isGpsImu)      // checks if valid location data is available
     {
         PRINT("GPS-OK");          // string initials to allow the Pyhton code to pickup
         PRINT(" ");            // space
@@ -676,7 +740,7 @@ void displayGpsInfo(void) {                     // The function that prints the 
         PRINTRES(gps.location.lng(), 6);   // print the longitude with 6 digits after the point
         PRINT("--");             // new line
     }
-    else
+    else if (Commands.isGpsImu)
     {
         PRINT(F("GPS-N/A"));
         PRINT("--");
@@ -685,9 +749,9 @@ void displayGpsInfo(void) {                     // The function that prints the 
 void navHandler(void) {
 
     compass.read();
-    float heading = compass.heading();
+    float heading = compass.heading(LSM303::vector<int>{-1, 0, 0});
 
-    while (myI2CGPS.available())          // returns the number of available bytes from the GPS module
+    if (myI2CGPS.available())          // returns the number of available bytes from the GPS module
     {
         gps.encode(myI2CGPS.read());       // Feeds the GPS parser
     }
@@ -696,10 +760,12 @@ void navHandler(void) {
     {
         displayGpsInfo();                  // Print the info on the serial monitor
     }
-    PRINT("Heading");
-    PRINT(" ");
-    PRINT(heading);
-    PRINT("\n");
+    if (Commands.isGpsImu) {
+        PRINT("Heading");
+        PRINT(" ");
+        PRINT(heading);
+        PRINT("\n");
+    }
 }
 void rf_encoder_interrupt(void) {
     RF.dt += micros() - RF.prevTime;
