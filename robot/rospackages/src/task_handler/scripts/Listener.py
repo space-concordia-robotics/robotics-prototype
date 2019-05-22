@@ -101,6 +101,10 @@ class Listener:
 
         return True
 
+
+    def get_args(self):
+        return self.args
+
 # quick test for verification
 if __name__ == "__main__":
 

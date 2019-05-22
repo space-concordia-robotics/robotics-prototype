@@ -33,10 +33,14 @@ def handle_task(task, status, args):
                 chosen_task = t
                 print('task chosen:', chosen_task)
 
-                if chosen_task == "camera_stream" and not running_tasks[i].is_running():
-                    print("CAMERA_STREAM")
+                # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
+                if chosen_task == "camera_stream":
+                    if running_tasks[i].is_running() and args != running_tasks[i].get_args():
+                        response = "Camera stream already running on port " + running_tasks[i].get_args()
+                        response += "\nTurn this stream of before starting or stopping a new one\n"
+                        return response
                     # set appropriate usb port in args
-                    if args:
+                    elif args and not running_tasks[i].is_running():
                         ports = glob.glob('/dev/tty[A-Za-z]*')
                         if args in ports:
                             running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
