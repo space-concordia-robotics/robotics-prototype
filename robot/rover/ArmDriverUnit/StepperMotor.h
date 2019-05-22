@@ -87,10 +87,12 @@ void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
       }
       timer.update(nextInterval); // sets the new period for the timer interrupt
 #ifdef DEBUG_STEPPER_3_TIMER
-      UART_PORT.println("motor");
+      UART_PORT.print("ARM motor ");
       UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print("ARM ");
       UART_PORT.print(stepCount); UART_PORT.print("\t / ");
       UART_PORT.print(numSteps); UART_PORT.println(" steps");
+      UART_PORT.print("ARM ");
       UART_PORT.print(getSoftwareAngle()); UART_PORT.print("\t / ");
       UART_PORT.print(getDesiredAngle()); UART_PORT.print("\t / ");
       UART_PORT.print(startAngle); UART_PORT.println(" degrees");
@@ -127,8 +129,9 @@ void StepperMotor::motorTimerInterrupt(IntervalTimer & timer) {
         timer.update(nextInterval); // sets the new period for the timer interrupt
       }
 #ifdef DEBUG_STEPPER_3_TIMER
-      UART_PORT.println("motor");
+      UART_PORT.print("ARM motor ");
       UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
+      UART_PORT.print("ARM ");
       UART_PORT.print(nextInterval); UART_PORT.println(" next interval");
 #endif
     }
@@ -241,7 +244,7 @@ void StepperMotor::goToCommandedAngle() {
       movementDone = false;
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #ifdef DEBUG_MAIN
-      UART_PORT.print("$S,Success: motor");
+      UART_PORT.print("ARM $S,Success: motor");
       UART_PORT.print(" to turn ");
       UART_PORT.print(numSteps);
       UART_PORT.println(" steps");
@@ -250,7 +253,7 @@ void StepperMotor::goToCommandedAngle() {
     }
     else {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.println("$E,Error: requested angle is too close to current angle. Motor not changing course.");
+      UART_PORT.println("ARM $E,Error: requested angle is too close to current angle. Motor not changing course.");
 #endif
     }
   }

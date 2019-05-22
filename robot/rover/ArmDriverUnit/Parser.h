@@ -103,7 +103,7 @@ bool Parser::parseWord(char *msg, String cmdWord, bool & cmdBool) {
   if (String(msg) == cmdWord) {
     cmdBool = true;
 #ifdef DEBUG_PARSING
-    UART_PORT.print("$S,Success: parsed ");
+    UART_PORT.print("ARM $S,Success: parsed ");
     UART_PORT.print(cmdWord);
     UART_PORT.println(" command");
 #endif
@@ -121,7 +121,7 @@ bool Parser::parseKeyValue(char *msg, String cmdWord, float & cmdValue, bool & c
       cmdValue = atof(msg);
       cmdBool = true;
 #ifdef DEBUG_PARSING
-      UART_PORT.print("$S,Success: parsed ");
+      UART_PORT.print("ARM $S,Success: parsed ");
       UART_PORT.print(cmdWord);
       UART_PORT.print(" value of ");
       UART_PORT.println(cmdValue);
@@ -130,7 +130,7 @@ bool Parser::parseKeyValue(char *msg, String cmdWord, float & cmdValue, bool & c
     }
     else {
 #ifdef DEBUG_PARSING
-      UART_PORT.print("$E,Error: parsed invalid ");
+      UART_PORT.print("ARM $E,Error: parsed invalid ");
       UART_PORT.print(cmdWord);
       UART_PORT.println(" input");
 #endif
@@ -164,7 +164,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     }
     cmd.homeAllMotors = true; // regardless, home the motor if "home"
 #ifdef DEBUG_PARSING
-    UART_PORT.println("$S,Success: parsed command to home all motor joints in mode ");
+    UART_PORT.println("ARM $S,Success: parsed command to home all motor joints in mode ");
     UART_PORT.println(cmd.homingStyle);
 #endif
   }
@@ -196,7 +196,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         else if (String(msgElem) == MOTOR_NOT_COMMANDED) {
           // don't do anything to move motors bool array
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed motor ");
+          UART_PORT.print("ARM $S,Success: parsed motor ");
           UART_PORT.print(i + 1);
           UART_PORT.println(" to maintain old desired position");
 #endif
@@ -204,7 +204,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         else {
           isValidBudge = false;
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$E,Error: parsed invalid budge for  motor ");
+          UART_PORT.print("ARM $E,Error: parsed invalid budge for  motor ");
           UART_PORT.println(i + 1);
 #endif
           break;
@@ -215,7 +215,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
           cmd.anglesToReach[i] = atof(msgElem); // update value in motor angles array
           cmd.motorsToMove[i] = true; // set bool in move motors bool array to true
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed angle of ");
+          UART_PORT.print("ARM $S,Success: parsed angle of ");
           UART_PORT.print(cmd.anglesToReach[i]);
           UART_PORT.print(" degrees for motor ");
           UART_PORT.println(i + 1);
@@ -224,7 +224,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         else if (String(msgElem) == MOTOR_NOT_COMMANDED) {
           // don't do anything to move motors bool array
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed motor ");
+          UART_PORT.print("ARM $S,Success: parsed motor ");
           UART_PORT.print(i + 1);
           UART_PORT.println(" to maintain old desired position");
 #endif
@@ -232,7 +232,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         else {
           isValidMove = false;
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$E,Error: parsed invalid angle of ");
+          UART_PORT.print("ARM $E,Error: parsed invalid angle of ");
           UART_PORT.print(msgElem);
           UART_PORT.print(" degrees for motor ");
           UART_PORT.println(i + 1);
@@ -254,17 +254,17 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     }
     else if (i < NUM_MOTORS) {
 #ifdef DEBUG_PARSING
-      UART_PORT.println("$E,Error: parsed insufficient input arguments for simultaneous motor control");
+      UART_PORT.println("ARM $E,Error: parsed insufficient input arguments for simultaneous motor control");
 #endif
     }
     else if (i > NUM_MOTORS) { // this doesn't actually get checked right now
 #ifdef DEBUG_PARSING
-      UART_PORT.println("$E,Error: parsed too many input arguments for simultaneous motor control");
+      UART_PORT.println("ARM $E,Error: parsed too many input arguments for simultaneous motor control");
 #endif
     }
     else if (!isValidCommand) {
 #ifdef DEBUG_PARSING
-      UART_PORT.println("$E,Error: parsed invalid simultaneous motor control command");
+      UART_PORT.println("ARM $E,Error: parsed invalid simultaneous motor control command");
 #endif
     }
   }
@@ -275,7 +275,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     cmd.whichMotor = atoi(msgElem);
     if (cmd.whichMotor > 0 && cmd.whichMotor <= NUM_MOTORS) {
 #ifdef DEBUG_PARSING
-      UART_PORT.print("$S,Success: parsed motor ");
+      UART_PORT.print("ARM $S,Success: parsed motor ");
       UART_PORT.println(cmd.whichMotor);
 #endif
       msgElem = strtok_r(NULL, " ", &restOfMessage); // find the next message element (direction tag)
@@ -288,7 +288,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         }
         cmd.homeCommand = true; // regardless, home the motor if "home"
 #ifdef DEBUG_PARSING
-        UART_PORT.print("$S,Success: parsed command to home motor ");
+        UART_PORT.print("ARM $S,Success: parsed command to home motor ");
         UART_PORT.print(cmd.whichMotor);
         UART_PORT.print(" joint in mode ");
         UART_PORT.println(cmd.homingStyle);
@@ -321,7 +321,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         if (String(msgElem) == "open") {
           cmd.loopState = OPEN_LOOP;
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed open loop state (");
+          UART_PORT.print("ARM $S,Success: parsed open loop state (");
           UART_PORT.print(cmd.loopState);
           UART_PORT.println(") request");
 #endif
@@ -329,14 +329,14 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
         else if (String(msgElem) == "closed") {
           cmd.loopState = CLOSED_LOOP;
 #ifdef DEBUG_PARSING
-          UART_PORT.print("$S,Success: parsed closed loop state (");
+          UART_PORT.print("ARM $S,Success: parsed closed loop state (");
           UART_PORT.print(cmd.loopState);
           UART_PORT.println(") request");
 #endif
         }
         else {
 #ifdef DEBUG_PARSING
-          UART_PORT.println("$E,Error: parsed unknown loop state");
+          UART_PORT.println("ARM $E,Error: parsed unknown loop state");
 #endif
         }
       }
@@ -344,7 +344,7 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
       else if (parseWord(msgElem, "switchdirection", cmd.switchDir)) return;
       else {
 #ifdef DEBUG_PARSING
-        UART_PORT.print("$E,Error: parsed unknown motor ");
+        UART_PORT.print("ARM $E,Error: parsed unknown motor ");
         UART_PORT.print(cmd.whichMotor);
         UART_PORT.println(" command");
 #endif
@@ -352,13 +352,13 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
     }
     else {
 #ifdef DEBUG_PARSING
-      UART_PORT.println("$E,Error: parsed invalid motor number");
+      UART_PORT.println("ARM $E,Error: parsed invalid motor number");
 #endif
     }
   }
   else {
 #ifdef DEBUG_PARSING
-    UART_PORT.println("$E,Error: parsed unknown motor command");
+    UART_PORT.println("ARM $E,Error: parsed unknown motor command");
 #endif
   }
 }
@@ -371,38 +371,38 @@ void Parser::parseCommand(commandInfo & cmd, char *restOfMessage) {
 bool Parser::verifCommand(commandInfo cmd) {
   if (cmd.pingCommand) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified ping command");
+    UART_PORT.println("ARM $S,Success: verified ping command");
 #endif
     return true;
   }
   else if (cmd.whoCommand) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified who command");
+    UART_PORT.println("ARM $S,Success: verified who command");
 #endif
     return true;
   }
   else if (cmd.stopAllMotors) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified command to stop all motors");
+    UART_PORT.println("ARM $S,Success: verified command to stop all motors");
 #endif
     return true;
   }
   else if (cmd.rebootCommand) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified command to reboot arm teensy");
+    UART_PORT.println("ARM $S,Success: verified command to reboot arm teensy");
 #endif
     return true;
   }
   else if (cmd.homeAllMotors) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.print("$S,Success: verified command to home all motor joints in mode ");
+    UART_PORT.print("ARM $S,Success: verified command to home all motor joints in mode ");
     UART_PORT.println(cmd.homingStyle);
 #endif
     return true;
   }
   else if (cmd.homeCommand) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.print("$S,Success: verified command to home motor joint");
+    UART_PORT.print("ARM $S,Success: verified command to home motor joint");
     UART_PORT.print(cmd.whichMotor);
     UART_PORT.print(" in mode ");
     UART_PORT.println(cmd.homingStyle);
@@ -411,20 +411,20 @@ bool Parser::verifCommand(commandInfo cmd) {
   }
   else if (cmd.resetAllMotors) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified command to reset all motor angle values");
+    UART_PORT.println("ARM $S,Success: verified command to reset all motor angle values");
 #endif
     return true;
   }
   else if (cmd.armSpeedCommand) {
     if (cmd.armSpeedMultiplier < 0) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.println("$E,Error: invalid arm speed multiplier");
+      UART_PORT.println("ARM $E,Error: invalid arm speed multiplier");
 #endif
       return false;
     }
     else {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.println("$S,Success: verified command to update arm speed multiplier");
+      UART_PORT.println("ARM $S,Success: verified command to update arm speed multiplier");
 #endif
       return true;
     }
@@ -438,7 +438,7 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
     }
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified command to budge all motors for directions: ");
+    UART_PORT.println("ARM $S,Success: verified command to budge all motors for directions: ");
     for (int i = 0; i < NUM_MOTORS; i++) {
       if (cmd.motorsToMove[i]) {
         UART_PORT.print(cmd.directionsToMove[i]);
@@ -457,7 +457,7 @@ bool Parser::verifCommand(commandInfo cmd) {
       if (cmd.motorsToMove[i]) {
         if (cmd.anglesToReach[i] < MIN_JOINT_ANGLE || cmd.anglesToReach[i] > MAX_JOINT_ANGLE) {
 #ifdef DEBUG_VERIFYING
-          UART_PORT.print("$E,Error: invalid angle of ");
+          UART_PORT.print("ARM $E,Error: invalid angle of ");
           UART_PORT.print(cmd.anglesToReach[i]);
           UART_PORT.print(" degrees for motor ");
           UART_PORT.println(i + 1);
@@ -466,7 +466,7 @@ bool Parser::verifCommand(commandInfo cmd) {
         }
         else {
 #ifdef DEBUG_VERIFYING
-          UART_PORT.print("$S,Success: verified angle of ");
+          UART_PORT.print("ARM $S,Success: verified angle of ");
           UART_PORT.print(cmd.anglesToReach[i]);
           UART_PORT.print(" degrees for motor ");
           UART_PORT.println(i + 1);
@@ -475,7 +475,7 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
     }
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$S,Success: verified command to move all motors for angles: ");
+    UART_PORT.println("ARM $S,Success: verified command to move all motors for angles: ");
     for (int i = 0; i < NUM_MOTORS; i++) {
       if (cmd.motorsToMove[i]) {
         UART_PORT.print(cmd.anglesToReach[i]);
@@ -492,21 +492,21 @@ bool Parser::verifCommand(commandInfo cmd) {
   else if (cmd.whichMotor > 0 && cmd.whichMotor <= RobotMotor::numMotors) { // 0 means there was an invalid command and therefore motors shouldn't be controlled
     if (cmd.stopSingleMotor) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to stop motor ");
+      UART_PORT.print("ARM $S,Success: verified command to stop motor ");
       UART_PORT.println(cmd.whichMotor);
 #endif
       return true;
     }
     else if (cmd.gearCommand) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to set gear ratio to ");
+      UART_PORT.print("ARM $S,Success: verified command to set gear ratio to ");
       UART_PORT.println(cmd.gearRatioVal);
 #endif
       return true;
     }
     else if (cmd.openLoopGainCommand) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to set open loop gain to ");
+      UART_PORT.print("ARM $S,Success: verified command to set open loop gain to ");
       UART_PORT.println(cmd.openLoopGain);
 #endif
       return true;
@@ -514,7 +514,7 @@ bool Parser::verifCommand(commandInfo cmd) {
     else if (cmd.pidCommand) {
       if (cmd.kpCommand) {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("ARM $S,Success: verified command to set ");
         UART_PORT.print("kp gain to ");
         UART_PORT.println(cmd.kp);
 #endif
@@ -522,7 +522,7 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
       else if (cmd.kiCommand) {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("ARM $S,Success: verified command to set ");
         UART_PORT.print("ki gain to ");
         UART_PORT.println(cmd.ki);
 #endif
@@ -530,7 +530,7 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
       else if (cmd.kdCommand) {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to set ");
+        UART_PORT.print("ARM $S,Success: verified command to set ");
         UART_PORT.print("kd gain to ");
         UART_PORT.println(cmd.kd);
 #endif
@@ -538,14 +538,14 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
       else {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.println("$E,Error: not a command for kp, ki or kd");
+        UART_PORT.println("ARM $E,Error: not a command for kp, ki or kd");
 #endif
         return false;
       }
     }
     else if (cmd.motorSpeedCommand) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to set motor speed to ");
+      UART_PORT.print("ARM $S,Success: verified command to set motor speed to ");
       UART_PORT.println(cmd.motorSpeed);
 #endif
       return true;
@@ -553,7 +553,7 @@ bool Parser::verifCommand(commandInfo cmd) {
     else if (cmd.loopCommand) {
       if (cmd.loopState == OPEN_LOOP || cmd.loopState == CLOSED_LOOP) {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.print("$S,Success: verified command to set motor ");
+        UART_PORT.print("ARM $S,Success: verified command to set motor ");
         UART_PORT.print(cmd.whichMotor);
         if (cmd.loopState == OPEN_LOOP) {
           UART_PORT.println(" to open loop");
@@ -566,14 +566,14 @@ bool Parser::verifCommand(commandInfo cmd) {
       }
       else {
 #ifdef DEBUG_VERIFYING
-        UART_PORT.println("$E,Error: invalid loop state");
+        UART_PORT.println("ARM $E,Error: invalid loop state");
 #endif
         return false;
       }
     }
     else if (cmd.resetSingleMotor) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to reset motor ");
+      UART_PORT.print("ARM $S,Success: verified command to reset motor ");
       UART_PORT.print(cmd.whichMotor);
       UART_PORT.println(" saved angle value");
 #endif
@@ -581,7 +581,7 @@ bool Parser::verifCommand(commandInfo cmd) {
     }
     else if (cmd.switchDir) {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$S,Success: verified command to switch motor ");
+      UART_PORT.print("ARM $S,Success: verified command to switch motor ");
       UART_PORT.print(cmd.whichMotor);
       UART_PORT.println(" direction logic");
 #endif
@@ -589,7 +589,7 @@ bool Parser::verifCommand(commandInfo cmd) {
     }
     else {
 #ifdef DEBUG_VERIFYING
-      UART_PORT.print("$E,Error: invalid command for motor ");
+      UART_PORT.print("ARM $E,Error: invalid command for motor ");
       UART_PORT.println(cmd.whichMotor);
 #endif
       return false;
@@ -597,7 +597,7 @@ bool Parser::verifCommand(commandInfo cmd) {
   }
   else if (cmd.whichMotor < 0 || cmd.whichMotor >= RobotMotor::numMotors) {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$E,Error: invalid motor index");
+    UART_PORT.println("ARM $E,Error: invalid motor index");
 #endif
     return false;
   }
