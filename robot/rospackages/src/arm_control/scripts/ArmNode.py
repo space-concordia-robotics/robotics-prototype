@@ -174,7 +174,7 @@ def subscriber_callback(message):
 def publish_joint_states(message):
     # parse the data received from Teensy
     lhs,rhs = message.split('Motor Angles: ')
-    angles = lhs.split(', ')
+    angles = rhs.split(', ')
     # create the message to be published
     msg = JointState()
     msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
@@ -182,7 +182,7 @@ def publish_joint_states(message):
         for angle in angles:
             msg.position.append(float(angle))
     except:
-        rospy.logwarn('trouble parsing motor angles:',sys.exc_info()[0])
+        rospy.logwarn('trouble parsing motor angles')
         return
 
     # publish it
@@ -228,6 +228,7 @@ if __name__ == '__main__':
                     data = ser.readline().decode().strip('\n\r')
                     #if data[0]=='@':
                     if 'Motor Angles' in data and data[0]=='@':
+                        data=data[1:len(data)]
                         publish_joint_states(data)
                     elif data is not '':
                         getTime = "received at %f" % rospy.get_time()

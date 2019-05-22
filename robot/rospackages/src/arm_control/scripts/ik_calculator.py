@@ -124,7 +124,6 @@ class Arm:
 			self.setangles = setangles
 		self.altangles = None
 
-
 	def ComputeWorkspace(self):
 		pt = [[0,0] for x in range(pow(self.workspace_sample_size,3))]
 		incremented_angle = [0,0,0]
@@ -139,7 +138,6 @@ class Arm:
 						pt[ self.workspace_sample_size * self.workspace_sample_size * j1 + self.workspace_sample_size * j2 + j3][0] = self.link[1] * math.cos(incremented_angle[0]) + self.link[2] * math.cos(incremented_angle[1] + incremented_angle[0]) + self.link[3] * math.cos(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
 						pt[ self.workspace_sample_size * self.workspace_sample_size * j1 + self.workspace_sample_size * j2 + j3][1] = self.link[0]-self.link[0] - self.link[1] * math.sin(-math.pi + incremented_angle[0]) - self.link[2] * math.sin(incremented_angle[1] + incremented_angle[0]) - self.link[3] * math.sin(incremented_angle[2] + incremented_angle[1] + incremented_angle[0])
 		self.workspace = pt
-
 
 	def anglesInRange(self, angles):
 		if len(angles) is self.joint_num:
@@ -213,7 +211,7 @@ class Arm:
 				wrist_angle = self.setangles[self.joint_num-1]+self.setangles[1]+self.setangles[2]
 
 			###### joint 1 (base rotation) calculation ######
-			if X is 0:
+			if X == 0:
 				solution_angles[0][0] = solution_angles[1][0] = math.pi/2
 			else:
 				solution_angles[0][0] = solution_angles[1][0] = math.atan(Z/X)
@@ -241,7 +239,7 @@ class Arm:
 
 
 			###### joint 3 (elbow flex) calculation ######
-			Wrist_X = R - self.link[3]  * math.cos(wrist_angle) #Calculates wrist X coordinate
+			Wrist_X = R - self.link[3] * math.cos(wrist_angle) #Calculates wrist X coordinate
 			Wrist_Y = (Y - self.link[0] ) - self.link[3] * math.sin(wrist_angle) #Calculates wrist Y coordinate
 			beta = math.atan2(Wrist_Y, Wrist_X) #Calculates beta, which is the sum of the angles of all links
 			if math.sqrt(pow(Wrist_X, 2) + pow(Wrist_Y, 2)) > self.link[1]  + self.link[2]:
@@ -275,34 +273,36 @@ class Arm:
 				####### verification of solution sets ######
 				solution_usable[0] = self.anglesInRange(solution_angles[0])
 				solution_usable[1] = self.anglesInRange(solution_angles[1])
-
+				
 				if (not solution_usable[0]) and (not solution_usable[1]):
 					solution_status = 'Error: No arm configuration available for specified set point'
 				elif solution_usable[0] and solution_usable[1]:
 					error0 = pow(solution_angles[0][1] - self.setangles[1],2) + pow(solution_angles[0][2] - self.setangles[2],2) + pow(solution_angles[0][3] - self.setangles[3],2)
 					error1 = pow(solution_angles[1][1] - self.setangles[1],2) + pow(solution_angles[1][2] - self.setangles[2],2) + pow(solution_angles[1][3] - self.setangles[3],2)
+					solution_status = 'Success: both solutions exist'
 					if error0 > error1:
 						solution = 1
 					else:
 						solution = 0
 				elif solution_usable[0]:
 					solution = 0
+					solution_status = 'Success: only the first solution exists'
 				elif solution_usable[1]:
 					solution = 1
+					solution_status = 'Success: only the second solution exists'
 
 		if 'Error' in solution_status:
 			return None, None, solution_status
 		else:
 			#self.setCurrentAngles(solution_angles[solution]) #angles should be set externally based on feedback
 			alt_solution = abs(solution - 1)
-			if solution_usable[alt_solution]:
+			if solution_usable[alt_solution] and not solution_usable[solution]:
+				return solution_angles[alt_solution], None, solution_status
 				#self.altangles = solution_angles[abs(solution - 1)]
-				solution_status = 'Success: both solutions exist'
 			else:
 				#self.altangles = None
 				solution_angles[alt_solution] = None
-				solution_status = 'Success: only one solution exists'
-			return solution_angles[solution], solution_angles[alt_solution], solution_status
+				return solution_angles[solution], solution_angles[alt_solution], solution_status
 
 
 #########################MAIN#########################

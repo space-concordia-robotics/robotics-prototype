@@ -21,6 +21,11 @@ add_service_files(
   ArmRequest.srv
 )
 
+add_message_files(
+  FILES
+  IkCommand.msg
+)
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
