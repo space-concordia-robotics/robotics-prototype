@@ -194,23 +194,23 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 1 loop closed', function (msgs) {
+        if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = true
-          console.log('trueee')
+          //console.log('trueee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
+          //console.log('falseeee')
         }
       })
     } else {
-      sendArmRequest('motor 1 loop open', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 1 loop open', function (msgs) {
+        if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
+          //console.log('falseeee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = true
-          console.log('trueee')
+          //console.log('trueee')
         }
       })
     }
@@ -219,23 +219,19 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m2-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 2 loop closed', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 2 loop closed', function (msgs) {
+        if (msgs[0]) {
           $('#m2-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         } else {
           $('#m2-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         }
       })
     } else {
-      sendArmRequest('motor 2 loop open', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 2 loop open', function (msgs) {
+        if (msgs[0]) {
           $('#m2-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         } else {
           $('#m2-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         }
       })
     }
@@ -244,23 +240,19 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m3-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 3 loop closed', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 3 loop closed', function (msgs) {
+        if (msgs[0]) {
           $('#m3-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         } else {
           $('#m3-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         }
       })
     } else {
-      sendArmRequest('motor 3 loop open', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 3 loop open', function (msgs) {
+        if (msgs[0]) {
           $('#m3-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         } else {
           $('#m3-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         }
       })
     }
@@ -269,23 +261,19 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#m4-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 4 loop closed', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 4 loop closed', function (msgs) {
+        if (msgs[0]) {
           $('#m4-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         } else {
           $('#m4-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         }
       })
     } else {
-      sendArmRequest('motor 4 loop open', function (succeeded) {
-        if (succeeded) {
+      sendArmRequest('motor 4 loop open', function (msgs) {
+        if (msgs[0]) {
           $('#m4-closed-loop-btn')[0].checked = false
-          console.log('falseeee')
         } else {
           $('#m4-closed-loop-btn')[0].checked = true
-          console.log('trueee')
         }
       })
     }

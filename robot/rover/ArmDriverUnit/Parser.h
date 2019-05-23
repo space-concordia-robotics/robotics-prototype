@@ -603,7 +603,7 @@ bool Parser::verifCommand(commandInfo cmd) {
   }
   else {
 #ifdef DEBUG_VERIFYING
-    UART_PORT.println("$E,Error: invalid motor command");
+    UART_PORT.println("ARM $E,Error: invalid motor command");
 #endif
     return false;
   }

@@ -94,87 +94,70 @@ def init_serial():
             ser.readline()
 
         rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-        for i in range(5):
-            rospy.loginfo('attempt #%d...', i+1)
+        for i in range(1,6):
+            rospy.loginfo('attempt #%d...', i)
             startListening = time.time()
             ser.write(str.encode('who\n'))
             while (time.time()-startListening < timeout):
-                if ser.in_waiting: # if there is data in the serial buffer
-                    response = ser.readline().decode()
-                    rospy.loginfo('response: '+response)
-                    if "arm" in response:
-                        rospy.loginfo("Arm MCU idenified!")
-                        rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                        rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
-                        return
+                if ser.in_waiting:
+                    dat='';data=None
+                    try:
+                        dat = ser.readline().decode()
+                        data = stripFeedback(dat)
+                    except:
+                        rospy.logwarn('trouble reading from serial port')
+                    if data is not None:
+                        if "arm" in response:
+                            rospy.loginfo("Arm MCU idenified!")
+                            rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
+                            rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                            return
+                    else:
+                        rospy.loginfo('got raw message: '+dat)
 
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
+requests = {
+    'ping' : 'pong',
+    'who' : 'arm',
+    'loop open' : 'open',
+    'loop closed' : 'closed'
+}
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo('received '+req.msg+' from GUI')
-    msg = ArmRequestResponse()
-    msg.response = 'no response'
-    msg.success = False
+    global reqFeedback
+    global reqInWaiting
+    armResponse = ArmRequestResponse()
+    timeout = 0.1 # 100ms timeout
+    reqInWaiting=True
+    sinceRequest = time.time()
+    rospy.loginfo('received '+req.msg+' request from GUI, sending to arm Teensy')
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
-
-    startListening = time.time()
-    # 300 ms timeout... could potentially be even less, needs testing
-    while (time.time()-startListening < timeout):
-        if ser.in_waiting:
-            try:
-                data = ser.readline().decode()
-                data_str = 'received '+data
-                data_str += "from Arm Teensy at %f" % rospy.get_time()
-                rospy.loginfo(data_str)
-                if "Motor Angles" not in data_str:
-                    msg.response += data
-                    msg.success = True
-                    rospy.loginfo('took %f ms to receive response', (time.time()-startListening)*1000)
-                else:
-                    publish_joint_states(data_str.strip('\n\r'))
-            except:
-                rospy.logwarn('trouble reading from serial port')
-    msg.response = msg.response.strip('\n\r')
-    rospy.loginfo('sending '+msg.response+' back to GUI')
-    return msg
+    while armResponse.success is False and (time.time()-sinceRequest < timeout):
+        if reqFeedback is not '':
+            for request in requests:
+                if request in req.msg and requests[request] in reqFeedback:
+                    armResponse.response = reqFeedback
+                    armResponse.success = True #a valid request and a valid response from the
+        rospy.Rate(100).sleep()
+    rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
+    rospy.loginfo(armResponse)
+    reqFeedback=''
+    reqInWaiting=False
+    return armResponse
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo('sending: '+message.data)
-    msg = String()
-    msg.data = ''
+    rospy.loginfo('received: '+message.data+' command from GUI, sending to arm Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
-
-    startListening = time.time()
-    # 100ms timeout. this timeout must be below 200ms for budge commands to work.
-    # messages normally take like 10ms to go through at 115200 so 100ms gives time for around 10 messages
-    while (time.time()-startListening < 0.1):
-        if ser.in_waiting:
-            try:
-                data = ser.readline().decode()
-                data_str += "received "+data
-                data_str+=" at %f" % rospy.get_time()
-                rospy.loginfo(data_str)
-                if "Motor Angles" not in data_str:
-                    msg.data += data
-                    break
-                else:
-                    publish_joint_states(data_str.strip('\n\r'))
-            except:
-                rospy.logwarn('trouble reading from serial port')
-    if msg.data is not '':
-        msg.data = msg.data.strip('\n\r')
-        rospy.loginfo('sending '+msg.data+' back to GUI')
-        feedbackPub.publish(msg)
     return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,rhs = message.split('Motor Angles: ')
-    angles = rhs.split(', ')
+    lhs,message = message.split('Motor Angles: ')
+    angles = message.split(', ')
     # create the message to be published
     msg = JointState()
     msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
@@ -184,11 +167,20 @@ def publish_joint_states(message):
     except:
         rospy.logwarn('trouble parsing motor angles')
         return
-
     # publish it
     anglePub.publish(msg)
     rospy.logdebug(msg.position)
     return
+
+def stripFeedback(data):
+    startStrip='ARM '
+    endStrip='\r\n'
+    if data.startswith(startStrip) and data.count(startStrip) == 1:
+        if data.endswith(endStrip) and data.count(endStrip) == 1:
+            data,right = data.split(endStrip)
+            left,data = data.split(startStrip)
+            return data
+    return None
 
 if __name__ == '__main__':
     node_name = 'arm_node'
@@ -205,13 +197,6 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    # maybe make a global param for publishing and subscribing this data
-    # the arm node publishes at a rate, this node listens and publishes,
-    # plus the website publishes/requests commands at its own rate...
-    rate = rospy.Rate(20) # 20hz
-
-    data = ""; getTime = ""; data_str = ""
-
     subscribe_topic = '/arm_command'
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
@@ -221,23 +206,38 @@ if __name__ == '__main__':
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     # service requests are implicitly handled but only at the rate the node publishes at
+    global ser
+    global reqFeedback
+    reqFeedback=''
+    global reqInWaiting
+    reqInWaiting=False
     try:
         while not rospy.is_shutdown():
+            #if I try reading from the serial port inside callbacks, bad things happen
+            #instead I send the data elsewhere if required but only read from serial here.
+            #not sure if I need the same precautions when writing but so far it seems ok.
             if ser.in_waiting:
+                data=''
+                feedback=None
                 try:
-                    data = ser.readline().decode().strip('\n\r')
-                    #if data[0]=='@':
-                    if 'Motor Angles' in data and data[0]=='@':
-                        data=data[1:len(data)]
-                        publish_joint_states(data)
-                    elif data is not '':
-                        getTime = "received at %f" % rospy.get_time()
-                        data_str = data + ' ' + getTime
-                        rospy.logdebug(data_str)
-                        feedbackPub.publish(data)
+                    data = ser.readline().decode()
+                    feedback = stripFeedback(data)
                 except:
                     rospy.logwarn('trouble reading from serial port')
-            rate.sleep()
+                if feedback is not None:
+                    if 'Motor Angles' in feedback:
+                        rospy.loginfo(feedback)
+                        publish_joint_states(feedback)
+                    else:
+                        #rospy.loginfo(feedback)
+                        if reqInWaiting:
+                            reqFeedback += feedback+'\r\n' #pass data to request handler
+                        else:
+                            #rospy.loginfo(feedback)
+                            feedbackPub.publish(feedback)
+                else:
+                    rospy.loginfo('got raw data: '+data)
+            rospy.Rate(100).sleep()
     except rospy.ROSInterruptException:
         pass
 

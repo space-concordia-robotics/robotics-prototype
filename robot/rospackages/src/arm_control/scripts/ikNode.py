@@ -61,6 +61,7 @@ if __name__ == '__main__':
     # warning: the ik_calculator library sets the shoulder 0 angle as horizontal whereas in my code it's vertical
     rospy.loginfo('Initialized arm inverse kinematics model')
 
+    #do some calculations to make sure everything works
     rospy.loginfo( 'default angles: '+str(asimov.getCurrentAngles()) )
     startCalc=time.time()
     position = asimov.computeFK()

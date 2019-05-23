@@ -83,6 +83,10 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
 
+  arm_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
+  })
+
   /* rover controls (placeholder descriptions, names are subject to change) */
 
   // setup a client for the rover_request service
@@ -227,7 +231,7 @@ function sendArmRequest (command, callback) {
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
       // return true
-      callback([true])
+      callback([true, msg])
     }
   })
 }

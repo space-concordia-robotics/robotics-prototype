@@ -7,7 +7,7 @@
 
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#define DEBUG_MAIN 10 //!< debug messages during main loop
+//#define DEBUG_MAIN 10 //!< debug messages during main loop
 //#define DEBUG_PARSING 11 //!< debug messages during parsing function
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
@@ -72,6 +72,6 @@
 #define HEARTBEAT_PERIOD 1000
 /* serial */
 #define BAUD_RATE 115200 //!< serial bit rate
-#define SERIAL_PRINT_INTERVAL 100 //!< how often should teensy send angle data
-#define SERIAL_READ_TIMEOUT 50 //!< how often should the serial port be read
+#define SERIAL_PRINT_INTERVAL 50 //!< how often should teensy send angle data
+#define SERIAL_READ_TIMEOUT 20 //!< how often should the serial port be read
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
