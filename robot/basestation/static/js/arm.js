@@ -18,7 +18,8 @@ let lastCmdSent = 0
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'z': emergency stop all motors")
+  appendToConsole("'p': ping arm mcu")
+  appendToConsole("'q': emergency stop all motors")
   appendToConsole("'o': reset memorized angle values")
   appendToConsole("'l': view key commands")
   appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
@@ -66,7 +67,6 @@ $(document).ready(function () {
       lastCmdSent = new Date().getTime()
     }
   })
-
   $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -138,7 +138,6 @@ $(document).ready(function () {
       })
     }
   })
-
   $('#toggle-arm-stream-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
@@ -172,11 +171,8 @@ $(document).ready(function () {
     if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
       let cmd = 'armspeed ' + multiplier
       sendArmRequest(cmd, function (msgs) {})
-    } else {
-      appendToConsole('speed multiplier must be between 0 and '+maxMultiplier+'!')
     }
   })
-
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
     if (e.keyCode == 13) { // enter key
       let multiplier = $('#arm-speed-multiplier-input').val()
@@ -184,8 +180,6 @@ $(document).ready(function () {
       if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
         let cmd = 'armspeed ' + multiplier
         sendArmRequest(cmd, function (msgs) {})
-      } else {
-        appendToConsole('speed multiplier must be between 0 and '+maxMultiplier+'!')
       }
     }
   })
@@ -307,6 +301,7 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
+// arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
     !$serialCmdInput.is(':focus') &&
@@ -738,11 +733,13 @@ if (mockArmTable) {
       }
 
       // 'z' --> stop all motors
-      if (!$serialCmdInput.is(':focus') && keyState[90]) {
+      if (!$serialCmdInput.is(':focus') && keyState[81]) {
         $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
         sendArmCommand('stop')
         lastCmdSent = new Date().getTime()
-      } else if (toBudge) {
+      }
+
+      else if (toBudge) {
         let cmd = 'budge '
         for (var motor in budgeArray) {
           cmd += budgeArray[motor]
@@ -849,7 +846,7 @@ document.addEventListener('keyup', function (event) {
 // EXTRA CONTROLS
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyZ') {
+  if (!$serialCmdInput.is(':focus') && event.code === 'KeyQ') {
     $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
   }
 })

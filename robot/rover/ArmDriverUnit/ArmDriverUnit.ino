@@ -402,7 +402,7 @@ void loop() {
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
                 // this is SUPER DUPER GROSS
                 int tempVal = i + 1;
-                String infoMessage = "motor " + tempVal;
+                String infoMessage = "ARM motor " + tempVal;
                 infoMessage += " desired direction is: ";
                 infoMessage += motorCommand.directionsToMove[i];
                 char actualMessage[60];
