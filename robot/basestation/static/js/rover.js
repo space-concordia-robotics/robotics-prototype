@@ -1,14 +1,9 @@
 // @TODO: implement game loop for keyboard events:
 // https://stackoverflow.com/questions/12273451/how-to-fix-delay-in-javascript-keydown
 
-// feature toggle for mock data in rover table
-let mockRoverTable = false
-
 // constants for speed setting limits (absolute max: 45)
-const MAX_THROTTLE_SPEED = 25
-const MIN_THROTTLE_SPEED = 0
+const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 39
-const MIN_STEERING_SPEED = 0
 
 // for command thoughput limiting
 const DRIVE_THROTTLE_TIME = 25
@@ -16,6 +11,15 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 const LISTENER_TOGGLE_THROTTLE = 3000
 var lastCmdSent = 0
+var maxSoftThrottle = 25
+var maxSoftSteering = 39
+var throttle = 0
+var steering = 0
+var throttleIncrement = 1
+var steeringIncrement = 1
+var maxThrottleIncrement = 1
+var maxSteeringIncrement = 1
+var movementCommanded = false
 
 
 // for updating the toggle buttons if user pressed keyboard events triggered enabling/disabling
@@ -110,110 +114,41 @@ $(document).ready(function () {
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  let currentSpeed = ''
-
   switch (e.which) {
-    case 73: // 'i' --> increase throttle
-      lightUp('#throttle-increase > button')
-      currentSpeed = $('#throttle-speed').text()
-
-      if (currentSpeed < MAX_THROTTLE_SPEED) {
-        $('#throttle-speed').text(parseFloat(currentSpeed) + 0.5)
+    case 73: // 'i' --> increase max throttle
+      lightUp('#max-throttle-increase > button')
+      maxSoftThrottle += maxThrottleIncrement
+      if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
+        maxSoftThrottle = MAX_THROTTLE_SPEED
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'i'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      $('#max-throttle-speed').text(maxSoftThrottle)
       lastCmdSent = new Date().getTime()
       break
-
-    case 74: // 'j' --> decrease throttle
-      lightUp('#throttle-decrease > button')
-      currentSpeed = $('#throttle-speed').text()
-
-      if (currentSpeed > MIN_THROTTLE_SPEED) {
-        $('#throttle-speed').text(parseFloat(currentSpeed) - 0.5)
+    case 85: // 'u' --> decrease max throttle
+      lightUp('#max-throttle-decrease > button')
+      maxSoftThrottle -= maxThrottleIncrement
+      if (maxSoftThrottle < 0 ) {
+        maxSoftThrottle = 0
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'j'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      $('#max-throttle-speed').text(maxSoftThrottle)
       lastCmdSent = new Date().getTime()
       break
-
-    case 79: // 'o' --> increase steering
-      lightUp('#steering-increase > button')
-      currentSpeed = $('#steering-speed').text()
-
-      if (currentSpeed < MAX_STEERING_SPEED) {
-        $('#steering-speed').text(parseFloat(currentSpeed) + 0.5)
+    case 75: // 'k' --> increase max steering
+      lightUp('#max-steering-increase > button')
+      maxSoftSteering += maxSteeringIncrement
+      if (maxSoftSteering > MAX_STEERING_SPEED) {
+        maxSoftSteering = MAX_STEERING_SPEED
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'o'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      $('#max-steering-speed').text(maxSoftSteering)
       lastCmdSent = new Date().getTime()
       break
-
-    case 75: // 'k' --> decrease steering
-      lightUp('#steering-decrease > button')
-      currentSpeed = $('#steering-speed').text()
-
-      if (currentSpeed > MIN_STEERING_SPEED) {
-        $('#steering-speed').text(parseFloat(currentSpeed) - 0.5)
+    case 74: // 'j' --> decrease max steering
+      lightUp('#max-steering-decrease > button')
+      maxSoftSteering -= maxSteeringIncrement
+      if (maxSoftSteering < 0) {
+        maxSoftSteering = 0
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'k'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      $('#max-steering-speed').text(maxSoftSteering)
       lastCmdSent = new Date().getTime()
       break
 
@@ -386,104 +321,33 @@ $(document).keyup(function (e) {
   switch (e.which) {
     case 65: // left
       dim('#rover-left > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
-      }
-
       break
-
     case 87: // up
       dim('#rover-up > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
-      }
-
       break
-
     case 68: // right
       dim('#rover-right > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
-      }
-
       break
-
     case 83: // down
       dim('#rover-down > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
-      }
-
       break
 
     case 73: // increase throttle
-      dim('#throttle-increase > button')
+      dim('#max-throttle-increase > button')
       break
-
-    case 74: // decrease throttle
-      dim('#throttle-decrease > button')
+    case 85: // decrease throttle
+      dim('#max-throttle-decrease > button')
       break
-
-    case 79: // increase steering
-      dim('#steering-increase > button')
+    case 75: // increase steering
+      dim('#max-steering-increase > button')
       break
-
-    case 75: // decrease steering
-      dim('#steering-decrease > button')
+    case 74: // decrease steering
+      dim('#max-steering-decrease > button')
       break
 
     case 77: // enable rover motors
       dim('button#enable-rover-motors')
       break
-
     case 78: // disable rover motors
       dim('button#disable-rover-motors')
       break
@@ -529,156 +393,76 @@ function gameLoop () {
     // 'a' --> rover turn left
     if (keyState[65]) {
       lightUp('#rover-left > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
+      if (steering < 0) {
+        steering += 3*steeringIncrement
+      } else {
+        steering += steeringIncrement
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'a'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
-
-      lastCmdSent = new Date().getTime()
-    }
-    // 'w' --> rover forward
-    else if (keyState[87]) {
-      lightUp('#rover-up > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
+      if (steering > maxSoftSteering) {
+        steering = maxSoftSteering
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'w'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
       lastCmdSent = new Date().getTime()
     }
     // 'd' --> rover right
     else if (keyState[68]) {
       lightUp('#rover-right > button')
 
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
+      if (steering > 0) {
+        steering -= 3*steeringIncrement
+      } else {
+        steering -= steeringIncrement
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'd'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      if (steering < -maxSoftSteering) {
+        steering = -maxSoftSteering
+      }
       lastCmdSent = new Date().getTime()
     }
-
+    // return to no steering angle
+    else {
+      if (steering < 0) {
+        steering += steeringIncrement
+      } else if (steering > 0) {
+        steering -= steeringIncrement
+      }
+    }
+    // 'w' --> rover forward
+    if (keyState[87]) {
+      lightUp('#rover-up > button')
+      if (throttle < 0) {
+        throttle += 3*throttleIncrement
+      } else {
+        throttle += throttleIncrement
+      }
+      if (throttle > maxSoftThrottle) {
+        throttle = maxSoftThrottle
+      }
+      lastCmdSent = new Date().getTime()
+    }
     // 's' --> rover back
     else if (keyState[83]) {
       lightUp('#rover-down > button')
-
-      if (mockRoverTable) {
-        $('#left-front-rpm').text('0')
-        $('#left-front-current').text('0.3')
-        $('#left-mid-rpm').text('0')
-        $('#left-mid-current').text('0.3')
-        $('#left-rear-rpm').text('0')
-        $('#left-rear-current').text('0.3')
-        $('#right-front-rpm').text('0')
-        $('#right-front-current').text('0.3')
-        $('#right-mid-rpm').text('0')
-        $('#right-mid-current').text('0.3')
-        $('#right-rear-rpm').text('0')
-        $('#right-rear-current').text('0.3')
+      if (throttle > 0) {
+        throttle -= 3*throttleIncrement
+      } else {
+        throttle -= throttleIncrement
       }
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 's'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
+      if (throttle < -maxSoftThrottle) {
+        throttle = -maxSoftThrottle
+      }
       lastCmdSent = new Date().getTime()
     }
+    // decelerate
+    else {
+      if (throttle < 0) {
+        throttle += throttleIncrement
+      } else if (throttle > 0) {
+        throttle -= throttleIncrement
+      }
+    }
+    $('#throttle-speed').text(throttle)
+    $('#steering-speed').text(steering)
   }
-
   setTimeout(gameLoop, 10)
 }
 
 gameLoop()
-
-if (mockRoverTable) {
-  setInterval(mockRoverTableLog, 1000)
-}

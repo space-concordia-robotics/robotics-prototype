@@ -67,9 +67,12 @@
     <div class="container fill">
         <div>
             <div class="row">
-                <div class="col-md-6">
-                    <h5 class="container-header">GPS Map</h5>
-                    <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
+                <div class="col-md-2">
+                  <h5>Navigation Data</h5>
+                </div>
+                <div class="col-md-4">
+                  <h5 class="container-header">GPS Map</h5>
+                  <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
                 </div>
                 <div class="col-md-6">
                     <h5 class="container-header">Camera</h5>
@@ -203,27 +206,35 @@
                                 <tr>
                                     <td></td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-up">
+                                        <a id="rover-up">
                                             <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                         </a>
                                     </td>
                                     <td></td>
+                                    <td><h4>Throttle:</h4></td>
+                                    <td>
+                                        <h1 id="throttle-speed">-</h1>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-left">
+                                        <a id="rover-left">
                                             <button type="button" class="control-btn4 fa fa-chevron-left fa-1x"></button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-down">
+                                        <a id="rover-down">
                                             <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-right">
+                                        <a id="rover-right">
                                             <button type="button" class="control-btn4 fa fa-chevron-right fa-1x"></button>
                                         </a>
+                                    </td>
+                                    <td><h4>Steering:</h4></td>
+                                    <td>
+                                        <h1 id="steering-speed">-</h1>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -232,22 +243,23 @@
                             <table align="center">
                                 <tbody>
                                     <tr class="speed-throttle-control">
-                                        <td>i</td>
-                                        <td>j</td>
+                                        <td>U</td> <!--85-->
+                                        <td>I</td> <!--73-->
                                     </tr>
                                     <tr>
                                         <td>
-                                            <a href="javascript:void(0);" id="throttle-increase">
-                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a href="javascript:void(0);" id="throttle-decrease">
+                                            <a id="max-throttle-decrease">
                                                 <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
                                             </a>
                                         </td>
-                                        <td id="throttle-speed">
-                                            0
+                                        <td>
+                                            <a id="max-throttle-increase">
+                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td><h5>Max<br>Throttle:</h5></td>
+                                        <td>
+                                            <h4 id="max-throttle-speed">25</h4><!-- in practice this shouldn't be hardcoded but anyway it gets refreshed when a button is pressed -->
                                         </td>
                                     </tr>
                                 </tbody>
@@ -256,22 +268,23 @@
                             <table align="center">
                                 <tbody>
                                     <tr class="speed-throttle-control">
-                                        <td>o</td>
-                                        <td>k</td>
+                                        <td>J</td> <!--74-->
+                                        <td>K</td> <!--75-->
                                     </tr>
                                     <tr>
-                                        <td>
-                                            <a href="javascript:void(0);" id="steering-increase">
+                                      <td>
+                                          <a id="max-steering-decrease">
+                                              <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                          </a>
+                                      </td>
+                                      <td>
+                                            <a id="max-steering-increase">
                                                 <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                             </a>
                                         </td>
+                                        <td><h5>Max<br>Steering:</h5></td>
                                         <td>
-                                            <a href="javascript:void(0);" id="steering-decrease">
-                                                <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td id="steering-speed">
-                                            0
+                                            <h4 id="max-steering-speed">39</h4><!-- in practice this shouldn't be hardcodedbut anyway it gets refreshed when a button is pressed -->
                                         </td>
                                     </tr>
                                 </tbody>
