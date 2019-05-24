@@ -54,7 +54,7 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
 
-  // setup a publisher for the arm_command topic
+  // setup a publisher for the ik_command topic
   ik_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'ik_command',
@@ -87,16 +87,65 @@ function initRosWeb () {
     appendToConsole(message.data)
   })
 
-  /* rover controls (placeholder descriptions, names are subject to change) */
+  /* rover commands */
 
   // setup a client for the rover_request service
+  rover_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'rover_request',
+    serviceType: 'ArmRequest' // for now... might change
+  })
 
-  // setup a publisher for the rover_command topic
+  // setup a publisher for the arm_command topic
+  rover_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_command',
+    messageType: 'std_msgs/String'
+  })
 
-  // setup a subscriber for the rover_vels topic
+  // setup a subscriber for the rover_joint_states topic
+  rover_joint_states_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_joint_states',
+    messageType: 'sensor_msgs/JointState'
+  })
+
+  rover_joint_states_listener.subscribe(function (message) {
+    //TODO: make sure the indices are correct...
+    $('#left-front-rpm').text(message.velocity[0])
+    $('#right-front-rpm').text(message.velocity[1])
+    $('#left-mid-rpm').text(message.velocity[2])
+    $('#right-mid-rpm').text(message.velocity[3])
+    $('#left-back-rpm').text(message.velocity[4])
+    $('#right-back-rpm').text(message.velocity[5])
+  })
 
   // setup a subscriber for the gps_data topic
+  rover_nav_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_nav',
+    messageType: 'sensor_msgs/JointState' //subject to change
+  })
+
+  rover_nav_listener.subscribe(function (message) {
+    //TODO: place the data somewhere, call ros node, etc?
+    // idk how this will work exactly, maybe a ros python node does stuff
+    // this could still display the data though i guess
+  })
+
+  // setup a subscriber for the arm_feedback topic
+  rover_feedback_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_feedback',
+    messageType: 'std_msgs/String'
+  })
+
+  rover_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
+  })
 }
+
+/* functions used in main code */
 
 function requestMuxChannel (elemID, callback) {
   let dev = elemID[elemID.length - 1]
@@ -196,13 +245,6 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
-function sendIkCommand (position, wristAngle) {
-  let command = new ROSLIB.Message({ x : position[0], y : position[1], z : position[2], wrist : wristAngle })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to ikNode')
-  ik_command_publisher.publish(command)
-}
-
 /*
 // usage
 sendArmRequest('this is a command', function (succeeded) {
@@ -218,6 +260,46 @@ function sendArmRequest (command, callback) {
   appendToConsole('Sending request to execute command \"' + command + '\"')
 
   arm_request_client.callService(request, function (result) {
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    if (!result.success) {
+      // how to account for a lack of response?
+      appendToConsole('Request failed. Received "' + msg + '"')
+      // return false
+      callback([false, msg])
+    } else {
+      appendToConsole(
+        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
+      )
+      // return true
+      callback([true, msg])
+    }
+  })
+}
+
+function sendRoverCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to rover Teensy')
+  rover_command_publisher.publish(command)
+}
+
+/*
+// example usage
+sendRoverRequest('this is a command', function (succeeded) {
+  console.log(succeeded ? 'command succeeded' : 'command failed')
+})
+*/
+
+function sendRoverRequest (command, callback) {
+  let request = new ROSLIB.ServiceRequest({ msg: command })
+  let sentTime = new Date().getTime()
+
+  console.log(request)
+  appendToConsole('Sending request to execute command \"' + command + '\"')
+
+  rover_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
