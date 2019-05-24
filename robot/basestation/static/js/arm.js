@@ -79,6 +79,10 @@ $(document).ready(function () {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
+  $('#reboot-button').on('click', function (event) {
+    event.preventDefault()
+    sendArmCommand('reboot')
+  })
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()

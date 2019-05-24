@@ -12,6 +12,7 @@ import serial.tools.list_ports # pyserial
 
 import rospy
 from std_msgs.msg import String, Header
+from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
@@ -120,11 +121,9 @@ def init_serial():
 
 requests = {
     'ping' : 'pong',
-    'who' : 'arm',
-    'loop open' : 'open',
-    'loop closed' : 'closed',
-    'armspeed' : 'Alert',
-    'armspeed' : 'Success',
+    'who' : 'Astro',
+    'open-loop' : 'open',
+    'close-loop' : 'closed',
     'reboot' : 'rebooting'
 }
 def handle_client(req):
@@ -165,24 +164,29 @@ def subscriber_callback(message):
 
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,message = message.split('Motor Angles: ')
-    angles = message.split(', ')
+    lhs,message = message.split('Motor Speeds: ')
+    speeds = message.split(', ')
     # create the message to be published
     msg = JointState()
     msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
     try:
-        for angle in angles:
-            msg.position.append(float(angle))
+        for speed in speeds:
+            #TODO: convert speed to SI units?
+            msg.velocity.append(float(speed))
     except:
-        rospy.logwarn('trouble parsing motor angles')
+        rospy.logwarn('trouble parsing motor speeds')
         return
     # publish it
-    anglePub.publish(msg)
+    speedPub.publish(msg)
     rospy.logdebug(msg.position)
     return
 
+def publish_nav_states(message):
+    #base this off of function above
+    return
+
 def stripFeedback(data):
-    startStrip='ARM '
+    startStrip='ASTRO '
     endStrip='\r\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
@@ -192,27 +196,34 @@ def stripFeedback(data):
     return None
 
 if __name__ == '__main__':
-    node_name = 'arm_node'
+    node_name = 'rover_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
     init_serial()
 
-    angle_pub_topic = '/arm_joint_states'
-    rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
-    anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
+    speed_pub_topic = '/rover_joint_states'
+    rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')
+    speedPub = rospy.Publisher(speed_pub_topic, JointState, queue_size=10)
 
-    feedback_pub_topic = '/arm_feedback'
+    nav_pub_topic = '/rover_nav'
+    rospy.loginfo('Beginning to publish to "'+nav_pub_topic+'" topic')
+    # will either make my own message type or use a standard one
+    navPub = rospy.Publisher(nav_pub_topic, JointState, queue_size=10)
+
+    feedback_pub_topic = '/rover_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    subscribe_topic = '/arm_command'
+    subscribe_topic = '/rover_command'
+    #first of all, it should subscribe to Twist and decide how to send it to the rover...
+    #for now i might just have it subscribe to Strings tho
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    #I could have a topic that listens for JointStateso and constructs the message here...
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
 
-    service_name = '/arm_request'
+    service_name = '/rover_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
+    #TODO: change to RoverRequest? or just McuRequest? meaning change arm and arm_control etc?
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     # service requests are implicitly handled but only at the rate the node publishes at
@@ -235,9 +246,11 @@ if __name__ == '__main__':
                 except:
                     rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
-                    if 'Motor Angles' in feedback:
+                    if 'Motor Speeds' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
+                    elif: 'GPS' in feedback: #use a better string? longer?
+                        publish_nav_states(feedback)
                     else:
                         #rospy.loginfo(feedback)
                         if reqInWaiting:

@@ -19,9 +19,16 @@
     <script src="../static/js/arm.js"></script>
 
     <!-- for roslibjs stuff -->
-    <script type="text/javascript" src="../static/js/eventemitter2.min.js"></script>
-    <script type="text/javascript" src="../static/js/roslib.min.js"></script>
-    <script type="text/javascript" src="../static/js/ros-helpers.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
+    <!-- all for ros3d -->
+    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
+    <!-- homemade -->
+    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
@@ -42,10 +49,10 @@
           Select Device Channel
         </button>
         <div class="dropdown-menu">
-          <a id="mux-0" class="dropdown-item" href="javascript:void(0);">0: Rover</a>
-          <a id="mux-1" class="dropdown-item" href="javascript:void(0);">1: Arm</a>
-          <a id="mux-2" class="dropdown-item" href="javascript:void(0);">2: Science</a>
-          <a id="mux-3" class="dropdown-item" href="javascript:void(0);">3: PDS</a>
+          <a id="mux-0" class="dropdown-item">0: Rover</a>
+          <a id="mux-1" class="dropdown-item">1: Arm</a>
+          <a id="mux-2" class="dropdown-item">2: Science</a>
+          <a id="mux-3" class="dropdown-item">3: PDS</a>
         </div>
       </div>
 
@@ -85,13 +92,13 @@
               <br>
               <!--log console buttons-->
               <div class="btn-group" role="group" id="logs-btn">
-                <a href=javascript:void(0) id="click_btn">
+                <a id="click_btn">
                   <button type="button" class="btn btn-secondary">Open Logs</button>
                 </a>
-                <a href="javascript:void(0)" id="clear-log">
+                <a id="clear-log">
                   <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                 </a>
-                <a href="javascript:void(0)" id="test-log">
+                <a id="test-log">
                   <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');">Test</button>
                 </a>
               </div>
@@ -145,6 +152,11 @@
                   <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
                       <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
                           <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home</span>
+                      </button>
+                  </div>
+                  <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
+                      <button type="button" id="reboot-button" class="btn btn-primary btn-lg fa fa-retweet fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                          <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Reboot MCU</span>
                       </button>
                   </div>
                 </div>
@@ -441,10 +453,10 @@
               <table class="table table-sm table-bordered" id="motor-table" style="font-size:12px; background:#FDD3DF; text-align: left">
                 <thead class="thead-dark">
                   <tr>
-                    <th scope="col">Motor<br>(Number)</th>
-                    <th scope="col">Status<br>(Alive/Dead)</th>
-                    <th scope="col">Position<br>(Degrees)</th>
-                    <th scope="col">Current<br>(A)</th>
+                    <th scope="col">Motor</br>(Number)</th>
+                    <th scope="col">Status</br>(Alive/Dead)</th>
+                    <th scope="col">Position</br>(Degrees)</th>
+                    <th scope="col">Current</br>(A)</th>
                   </tr>
                 </thead>
                 <tbody>

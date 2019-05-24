@@ -16,8 +16,8 @@
     <script src="../static/js/jquery-3.3.1.min.js"></script>
 
     <!-- for roslibjs stuff -->
-    <script type="text/javascript" src="../static/js/eventemitter2.min.js"></script>
     <script type="text/javascript" src="../static/js/roslib.min.js"></script>
+    <script type="text/javascript" src="../static/js/eventemitter2.min.js"></script>
     <script type="text/javascript" src="../static/js/ros-helpers.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -49,11 +49,12 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
                 <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">Settings</a>
+                    aria-expanded="false">Select Device Channel</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="/">Arm</a>
-                    <a class="dropdown-item" href="/rover">Rover</a>
-                    <a class="dropdown-item" href=""javascript:void(0)"">...</a>
+                  <a id="mux-0" class="dropdown-item">0: Rover</a>
+                  <a id="mux-1" class="dropdown-item">1: Arm</a>
+                  <a id="mux-2" class="dropdown-item">2: Science</a>
+                  <a id="mux-3" class="dropdown-item">3: PDS</a>
                 </div>
                 </li>
             </ul>
@@ -86,57 +87,56 @@
                         <!--Table head-->
                         <thead>
                             <tr>
-                                <th></th>
-                                <th align="center">Status</th>
-                                <th>Speed </br>(RPM)</th>
-                                <th>Current Drawn </br>(A)</th>
+                              <th scope="col">Motor</br>(Number)</th>
+                              <th scope="col">Status</br>(Alive/Dead)</th>
+                              <th scope="col">Speed</br>(RPM)</th>
+                              <th scope="col">Current</br>(A)</th>
                             </tr>
                         </thead>
-                        <!--Table head-->
                         <!--Table body-->
                         <tbody>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 L Front Motor
                             </th>
-                            <td>Alive</td>
-                            <td id="left-front-rpm">0</td>
-                            <td id="left-front-current">0.3</td>
+                            <td id="left-front-status">N/A</td>
+                            <td id="left-front-rpm">-</td>
+                            <td id="left-front-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 R Front Motor</th>
-                            <td>Alive</td>
-                            <td id="right-front-rpm">0</td>
-                            <td id="right-front-current">0.3</td>
+                            <td id="right-front-status">N/A</td>
+                            <td id="right-front-rpm">-</td>
+                            <td id="right-front-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 L Mid Motor</th>
-                            <td>Alive</td>
-                            <td id="left-mid-rpm">0</td>
-                            <td id="left-mid-current">0.3</td>
+                            <td id="left-mid-status">N/A</td>
+                            <td id="left-mid-rpm">-</td>
+                            <td id="left-mid-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 R Mid Motor</th>
-                            <td>Alive</td>
-                            <td id="right-mid-rpm">0</td>
-                            <td id="right-mid-current">0.3</td>
+                            <td id="right-mid-status">N/A</td>
+                            <td id="right-mid-rpm">-</td>
+                            <td id="right-mid-current">N</t/Ad>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 L Rear Motor</th>
-                            <td>Alive</td>
-                            <td id="left-rear-rpm">0</td>
-                            <td id="left-rear-current">0.3</td>
+                            <td id="left-rear-status">N/A</td>
+                            <td id="left-rear-rpm">-</td>
+                            <td id="left-rear-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
                                 R Rear Motor</th>
-                            <td>Alive</td>
-                            <td id="right-rear-rpm">0</td>
-                            <td id="right-rear-current">0.3</td>
+                            <td id="right-rear-status">N/A</td>
+                            <td id="right-rear-rpm">-</td>
+                            <td id="right-rear-current">N/A</td>
                             </tr>
                         </tbody>
                         <!--Table body-->
@@ -417,13 +417,13 @@
                         <br>
                         <!--log console buttons-->
                         <div class="btn-group" role="group" id="logs-btn">
-                            <a href="javascript:void(0)" id=click_btn>
+                            <a id=click_btn>
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
-                            <a href="javascript:void(0)" id="clear-log">
+                            <a id="clear-log">
                                 <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                             </a>
-                            <a href="javascript:void(0)" id="test-log">
+                            <a id="test-log">
                                 <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>
                             </a>
                         </div>

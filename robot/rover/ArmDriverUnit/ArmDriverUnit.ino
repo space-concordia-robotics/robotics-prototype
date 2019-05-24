@@ -290,7 +290,7 @@ void loop() {
         }
         else if (motorCommand.armSpeedCommand) {
           float factor = motorCommand.armSpeedMultiplier;
-          if (factor >= 0) {
+          if (factor > 0) {
             for (int i = 0; i < NUM_MOTORS; i++) {
               float newSpeed = ( motorArray[i]->getMotorSpeed() ) * factor;
               if (newSpeed >= 100) {
@@ -302,7 +302,7 @@ void loop() {
                 newSpeed = 100;
               }
 #ifdef DEBUG_MAIN
-              UART_PORT.print("ARM Motor "); UART_PORT.print(i + 1);
+              UART_PORT.print("ARM $S,Success: Motor "); UART_PORT.print(i + 1);
               UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
 #endif
               motorArray[i]->setMotorSpeed(newSpeed);
