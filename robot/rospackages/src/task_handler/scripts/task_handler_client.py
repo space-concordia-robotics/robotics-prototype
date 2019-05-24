@@ -27,7 +27,7 @@ def is_valid_request(r_task, r_status, r_args):
 
     # all known tasks to be handled by the handler
     known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
-    camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScience"]
+    camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
         if r_task == "camera_stream" and not r_args in camera_args:
@@ -43,7 +43,7 @@ def usage():
     help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]
                   \nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']
                   \nValid status options: [0, 1, 2]
-                  \nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam/', '/dev/ttyArmScienceCam/']"""
+                  \nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam', '/dev/ttyArmScienceCam']"""
     return help_msg
 
 if __name__ == "__main__":
