@@ -1,38 +1,11 @@
-.circle-container {
-    	position: relative;
-    	width: 24em;
-    	height: 24em;
-    	padding: 2.8em;
-        /*2.8em = 2em*1.4 (2em = half the width of a link with img, 1.4 = sqrt(2))*/
-    	border: dashed 1px;
-    	border-radius: 50%;
-    	margin: 1.75em auto 0;
-    }
-    .circle-container a {
-    	display: block;
-    	position: absolute;
-    	top: 50%; left: 50%;
-    	width: 4em; height: 4em;
-    	margin: -2em;
-    }
-    .circle-container img { display: block; width: 100%; }
-    .deg0 { transform: translate(12em); } /* 12em = half the width of the wrapper */
-	.deg2769 { transform: rotate(27.69deg) translate(12em) rotate(-27.69deg); }
-	.deg5538 { transform: rotate(55.38deg) translate(12em) rotate(-55.38deg); }
-	.deg8307 { transform: rotate(83.07deg) translate(12em) rotate(-83.07deg); }
-	.deg11076 { transform: rotate(110.76deg) translate(12em) rotate(-110.76deg); }
-	.deg13835 { transform: rotate(138.35deg) translate(12em) rotate(-138.35deg); }
-	.deg16614 { transform: rotate(166.14deg) translate(12em) rotate(-166.14deg); }
-	.deg19383 { transform: rotate(193.83deg) translate(12em) rotate(-193.83deg); }
-	.deg22152 { transform: rotate(221.52deg) translate(12em) rotate(-221.52deg); }
-	.deg24921 { transform: rotate(249.21deg) translate(12em) rotate(-249.21deg); }
-	.deg27690 { transform: rotate(276.90deg) translate(12em) rotate(-276.90deg); }
-	.deg30459 { transform: rotate(304.59deg) translate(12em) rotate(-304.59deg); }
-	.deg33228 { transform: rotate(332.28deg) translate(12em) rotate(-332.28deg); }
-	.deg35997 { transform: rotate(359.97deg) translate(12em) rotate(-359.97deg); }
-	
-	
-	
-	.deg180 { transform: translate(-12em); }
-    .deg225 { transform: rotate(225deg) translate(12em) rotate(-225deg); }
-    .deg315 { transform: rotate(315deg) translate(12em) rotate(-315deg); }
+.button {
+  display:          inline-block;
+  width:            200px;
+  height:           44px;
+  background-color: black;
+  color:            white;
+  font-family:      helvetica, sans-serif;
+  font-size:        2.2em;
+  text-align:       center;
+  margin:           25px;
+}

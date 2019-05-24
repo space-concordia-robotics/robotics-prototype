@@ -27,11 +27,11 @@
 	<!-- JS -->
 	<script src="../static/js/helpers.js"></script>
 	<script src="../static/js/app.js"></script>
-	<script src="../static/js/rover.js"></script>
+	<script src="../static/js/science.js"></script>
 
 </head>
 
-<body>
+<body onload="run()">
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
 		<a class="navbar-brand" href="#">
 			<img src="https://spaceconcordia.github.io/img/sclogo_header.png">
@@ -131,6 +131,15 @@
 					</table>
 
 				</div>
+
+                <div>
+                    <canvas id="myCanvas" width="500" height="500" style="border:2px solid #000;"></canvas>
+                    <div>
+                        <input type="button" id="button_rpos" class="button" value="ROTATE &#x27F2"/>
+                        <input type="button" id="button_rneg" class="button" value="ROTATE &#x27F3"/>
+                    </div>
+                </div>
+
 				<!-- CONTROLS & ROVER DRIVE & CAMERA TILT/PAN -->
 				<div class="col-md">
 					<h5 class="container-header">Science Experiment</h5>
@@ -177,56 +186,8 @@
 
 						</tbody>
 					</table>
-					<div class='circle-container'>
-						<a href='#' class='center'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg0'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg2769'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg5538'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg8307'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg11076'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg13835'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg16614'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg19383'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg22152'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
+                </div>
 
-						<a href='#' class='deg24921'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-
-						<a href='#' class='deg27690'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-
-						<a href='#' class='deg30459'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-
-						<a href='#' class='deg33228'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-
-
-						<a href='#' class='deg35997'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-
-
-
-
-						<!-- <a href='#' class='deg180'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg225'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a>
-						<a href='#' class='deg315'><img
-								src='https://freepngimg.com/thumb/shape/29779-8-circle-file.png'></a> -->
-					</div>
-
-				</div>
 				<!-- LOG CONSOLE -->
 				<div class="col-md">
 					<h5 class="container-header">Log Console</h5>
