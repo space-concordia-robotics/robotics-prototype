@@ -41,9 +41,9 @@ class Listener:
             self.p1_pid = self.p1.pid
 
             # allow some time to pass
-            # specifically waiting for 4 seconds since command listener scripts
+            # specifically waiting for 3 seconds since command listener scripts
             # take an extra 2-3 seconds time to identify if the correct MCU is connected
-            time.sleep(4)
+            time.sleep(3)
 
             poll = self.p1.poll()
 
