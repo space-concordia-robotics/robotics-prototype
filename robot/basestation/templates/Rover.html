@@ -69,6 +69,47 @@
             <div class="row">
                 <div class="col-md-2">
                   <h5>Navigation Data</h5>
+                  <div id="antenna-data">
+                    <div id="antenna-inputs" class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">lat, long, dir (Antenna)</span><br>
+                      </div>
+                      <input type="text" id="initial-antenna-latitude">
+                      <input type="text" id="initial-antenna-longitude">
+                      <input type="text" id="initial-antenna-heading">
+                      <button type="button" id="send-antenna-pos" class="btn btn-primary">Send</button>
+                      <p>Input the data above to get recommended antenna angle and more</p>
+                    </div>
+                    <div hidden="true" id="antenna-unchanging">
+                      <h6>Antenna coords:</h6>
+                      <h5>lat: <span id="antenna-latitude">-</span></h5>
+                      <h5>long: <span id="antenna-longitude">-</span></h5>
+                      <div>
+                        <h6>Direct antenna to:</h6>
+                        <h3 id="recommended-antenna-heading">-</h3>
+                        <button type="button" id="change-antenna-pos" class="btn btn-primary">Change antenna data</button>
+                      </div>
+                    </div>
+                    <div hidden="true" id="gps-inputs" class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">lat, long (Destination)</span><br>
+                      </div>
+                      <input type="text" id="desired-gps-latitude">
+                      <input type="text" id="desired-gps-longitude">
+                      <button type="button" id="send-gps-pos" class="btn btn-primary">Send</button>
+                    </div>
+                    <div hidden="true" id="gps-unchanging">
+                      <h6>Destination coords:</h6>
+                      <h5>lat: <span id="destination-latitude">-</span></h5>
+                      <h5>long: <span id="destination-longitude">-</span></h5>
+                      <div>
+                        <h6>Direct rover to:</h6>
+                        <h5>dir: <span id="recommended-rover-heading">-</span></h5>
+                        <h5>dist (m): <span id="distance-to-destination">-</span></h5>
+                        <button type="button" id="change-gps-coords" class="btn btn-primary">Change gps coords</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <h5 class="container-header">GPS Map</h5>
