@@ -4,25 +4,32 @@ import rospy
 import os
 from Listener import Listener
 from task_handler.srv import *
+import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
-print(current_dir)
-scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "start_stream.sh"]
-running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", 1, True)]
-known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
+scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "ScienceCommandListener.py", current_dir + "start_stream.sh"]
+running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "bash", "", 1, True)]
+known_tasks = ["rover_listener", "arm_listener", "science_listener", "camera_stream"]
+known_listeners = known_tasks[:-1]
 
+i = 0
+for task in running_tasks:
+    task.set_name(known_tasks[i])
+    i += 1
+
+# return the response string after calling the task handling function
 def handle_task_request(req):
-    response = "\n" + handle_task(req.task, req.status)
+    response = "\n" + handle_task(req.task, req.status, req.args)
 
     return response
 
-def handle_task(task, status):
+def handle_task(task, status, args):
 
     response = "Nothing happened"
 
     global running_tasks
 
-    if status in [0, 1] and task in known_tasks:
+    if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
         i = 0
 
@@ -30,6 +37,34 @@ def handle_task(task, status):
             if t.partition("_")[0] in task:
                 chosen_task = t
                 print('task chosen:', chosen_task)
+
+                if status == 2:
+                    response = chosen_task
+                    is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
+                    return response + is_running_str + "\n"
+
+                if chosen_task in known_listeners:
+                    other_listeners = [x for x in known_listeners if x != chosen_task]
+
+                    for listener in running_tasks:
+                        if listener.get_name() in other_listeners and listener.is_running():
+                            response = listener.get_name() + " is running, kill it before running " + chosen_task
+                            return response + "\n"
+
+                # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
+                if chosen_task == "camera_stream":
+                    if running_tasks[i].is_running() and args != running_tasks[i].get_args():
+                        response = "Camera stream already running on port " + running_tasks[i].get_args()
+                        response += "\nTurn this stream of before starting or stopping a new one\n"
+                        return response
+                    # set appropriate usb port in args
+                    elif args and not running_tasks[i].is_running():
+                        ports = glob.glob('/dev/tty[A-Za-z]*')
+                        if args in ports:
+                            running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
+                        else:
+                            response = "Requested port not available, is the camera properly plugged into the USB port?"
+                            return response + "\n"
                 break
             i += 1
 
