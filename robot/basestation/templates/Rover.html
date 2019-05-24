@@ -164,7 +164,7 @@
                               <div class="col-sm-3" align="center" style="border-style:none;">
                                   <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
                                       <label>
-                                          <input id="toggle-rover-listener" type="checkbox">
+                                          <input id="toggle-rover-listener-btn" type="checkbox">
                                           <span> </span>
                                       </label>
                                   </div>
@@ -185,7 +185,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Ping Test</button></a>
+                                <a id="ping-rover-mcu"><button type="button" class="control-btn3">Ping Test</button></a>
                             </td>
                             <td></td>
                             <td>
@@ -376,26 +376,11 @@
                                                 <strong>L</strong>
                                             </button>
                                         </td>
-                                        <td>
-                                            <button title="Toggle listener script" id="toggle-rover-listener-btn" type="button" class="control-btn-mid" disabled>
-                                                <strong>T</strong>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button title="Show buffered serial messages" id="show-buffered-rover-msgs" type="button" class="control-btn-mid" disabled>
-                                                <strong>B</strong>
-                                            </button>
-                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <button title="Enable motor controls" id="enable-rover-motors" type="button" class="control-btn-mid" disabled>
                                                 <strong>M</strong>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button title="Terminate listener script" id="terminate-listener-script" type="button" class="control-btn-mid" disabled>
-                                                <strong>Q</strong>
                                             </button>
                                         </td>
                                         <td>

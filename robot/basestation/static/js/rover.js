@@ -17,13 +17,6 @@ const MCU_FEEDBACK_THROTTLE = 1000
 const LISTENER_TOGGLE_THROTTLE = 3000
 var lastCmdSent = 0
 
-function enableRoverListener () {
-  if ($('#toggle-rover-listener-btn').is(':checked')) {
-    requestTask("rover_listener", 1, '#toggle-rover-listener-btn')
-  } else {
-    requestTask("rover_listener", 0, '#toggle-rover-listener-btn')
-  }
-}
 
 // for updating the toggle buttons if user pressed keyboard events triggered enabling/disabling
 function enableRoverMotorsBtn () {
@@ -46,32 +39,71 @@ function disableRoverMotorsBtn () {
   $('#enable-rover-motors-btn')[0].checked = false
 }
 
-function enableRoverListenerBtn () {
-  $($('.toggle > #toggle-rover-listener')[0].parentNode).removeClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #toggle-rover-listener')[0].parentNode).addClass('btn-success')
-  $('#toggle-rover-listener')[0].checked = true
-}
-
-function disableRoverListenerBtn () {
-  $($('.toggle > #toggle-rover-listener')[0].parentNode).addClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #toggle-rover-listener')[0].parentNode).removeClass(
-    'btn-success'
-  )
-  $('#toggle-rover-listener')[0].checked = false
-}
-
 $(document).ready(function () {
-  $('#toggle-rover-listener').on('click', function (event) {
+  $('#ping-rover-mcu').on('click', function (event) {
+    event.preventDefault()
+    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+      sendRoverRequest('ping', function (msgs) {})
+      lastCmdSent = new Date().getTime()
+    }
+  })
+
+  $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
-    if ($('#toggle-rover-listener').is(':checked')) {
-      requestTask("rover_listener", 1, '#toggle-rover-listener')
-    } else { // closing arm listener
-      requestTask("rover_listener", 0, '#toggle-rover-listener')
+    if ($('#toggle-rover-listener-btn').is(':checked')) {
+      if (
+        $('button#mux')
+          .text()
+          .includes('Rover')
+      ) {
+        requestTask('rover_listener', 1, '#toggle-rover-listener-btn', function (
+          msgs
+        ) {
+          console.log('msgs[0]', msgs[0])
+          if (msgs.length == 2) {
+            console.log('msgs[1]', msgs[1])
+            // if already running
+            if (msgs[1].includes('already running')) {
+              $('#toggle-rover-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-rover-listener-btn')[0].checked = false
+            }
+          } else {
+            if (msgs[0]) {
+              $('#toggle-rover-listener-btn')[0].checked = false
+            } else {
+              $('#toggle-rover-listener-btn')[0].checked = true
+            }
+          }
+        })
+        // console.log('returnVals', returnVals)
+      } else {
+        appendToConsole(
+          'Cannot turn rover listener on if not in rover mux channel!'
+        )
+      }
+    } else {
+      // closing rover listener
+      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (
+        msgs
+      ) {
+        console.log('msgs[0]', msgs[0])
+        if (msgs.length == 2) {
+          console.log('msgs[1]', msgs[1])
+          if (msgs[1].includes('already running')) {
+            $('#toggle-rover-listener-btn')[0].checked = true
+          } else {
+            $('#toggle-rover-listener-btn')[0].checked = false
+          }
+        } else {
+          if (msgs[0]) {
+            $('#toggle-rover-listener-btn')[0].checked = true
+          } else {
+            $('#toggle-rover-listener-btn')[0].checked = false
+          }
+        }
+      })
     }
   })
 })
