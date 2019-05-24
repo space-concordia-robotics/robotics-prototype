@@ -23,6 +23,7 @@ class Listener:
         self.children = children
         # arguments for scripts
         self.args = args
+        self.name = "none"
 
     def start(self):
         if self.is_running():
@@ -104,6 +105,12 @@ class Listener:
 
     def get_args(self):
         return self.args
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
 
 # quick test for verification
 if __name__ == "__main__":

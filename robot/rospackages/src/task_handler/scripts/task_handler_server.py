@@ -8,9 +8,15 @@ import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 print(current_dir)
-scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "start_stream.sh"]
-running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "bash", "", 1, True)]
-known_tasks = ["rover_listener", "arm_listener", "camera_stream"]
+scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "ScienceCommandListener.py", current_dir + "start_stream.sh"]
+running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "bash", "", 1, True)]
+known_tasks = ["rover_listener", "arm_listener", "science_listener", "camera_stream"]
+known_listeners = known_tasks[:-1]
+
+i = 0
+for task in running_tasks:
+    task.set_name(known_tasks[i])
+    i += 1
 
 # return the response string after calling the task handling function
 def handle_task_request(req):
@@ -37,6 +43,15 @@ def handle_task(task, status, args):
                     response = chosen_task
                     is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
                     return response + is_running_str + "\n"
+
+                if chosen_task in known_listeners:
+#                    other_listeners = list(known_listeners)
+                    other_listeners = [x for x in known_listeners if x != chosen_task]
+
+                    for listener in running_tasks:
+                        if listener.get_name() in other_listeners and listener.is_running():
+                            response = listener.get_name() + " is running, kill it before running " + chosen_task
+                            return response + "\n"
 
                 # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
                 if chosen_task == "camera_stream":
