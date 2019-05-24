@@ -8,7 +8,7 @@ import time
 from robot.basestation.app import run_shell, get_pid
 
 class Listener:
-    def __init__(self, script, type, force_kill=False, children=0):
+    def __init__(self, script, type, args='', force_kill=False, children=0):
         # initialize pid to -1 to imply process hasn't yet started
         self.p1_pid = -1
         # the actual process object itself
@@ -21,6 +21,9 @@ class Listener:
         self.force_kill = force_kill
         # amount of children processes spawned
         self.children = children
+        # arguments for scripts
+        self.args = args
+        self.name = "none"
 
     def start(self):
         if self.is_running():
@@ -30,13 +33,17 @@ class Listener:
         if os.path.isfile(self.script):
             print("Starting listener service...")
             # non-blocking
-            self.p1 = subprocess.Popen([self.type, self.script], stdout=subprocess.PIPE)
+            if self.args:
+                self.p1 = subprocess.Popen([self.type, self.script, self.args], stdout=subprocess.PIPE)
+            else:
+                self.p1 = subprocess.Popen([self.type, self.script], stdout=subprocess.PIPE)
+
             self.p1_pid = self.p1.pid
 
             # allow some time to pass
-            # specifically waiting for 4 seconds since command listener scripts
+            # specifically waiting for 3 seconds since command listener scripts
             # take an extra 2-3 seconds time to identify if the correct MCU is connected
-            time.sleep(4)
+            time.sleep(3)
 
             poll = self.p1.poll()
 
@@ -95,11 +102,23 @@ class Listener:
 
         return True
 
+
+    def get_args(self):
+        return self.args
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
 # quick test for verification
 if __name__ == "__main__":
 
     try:
-        dispatcher = Listener("/home/odroid/Programming/robotics-prototype/robot/rover/ArmCommandListener.py", "python3")
+        current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
+        dispatcher = Listener(current_dir + "start_stream.sh", "bash")
+        #dispatcher = Listener(current_dir + "start_stream.sh", "bash", "/dev/video0")
         dispatcher.start()
 
         print("Is running: " + str(dispatcher.is_running()))
