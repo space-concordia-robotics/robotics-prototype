@@ -1,12 +1,21 @@
 #include <Arduino.h>
 #include <Servo.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
+
+#define DEVEL_MODE_1       1     //Use with USB
+//#define DEVEL_MODE_2       2   //Use with UART4
+
+#if defined(DEVEL_MODE_1)
+#define UART_PORT Serial
+#elif defined(DEVEL_MODE_2)
+#define UART_PORT Serial4
+#endif
 
 #define SERVO_STOP     1500
 #define SERVO_MAX_CW   1250
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
-
+//Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
 #define S2                  2
@@ -36,9 +45,9 @@
 #define LED1               33
 #define LED2               34
 
-#define DRILL              36
+#define DRILL              36 //PWM
 #define DRILL_DIRECTION    35
-#define ELEVATOR           38
+#define ELEVATOR           38 //PWM
 #define ELEVATOR_DIRECTION 37
 
 //debouncing variables
@@ -52,35 +61,36 @@ unsigned long triggerTime;
 bool isActivated = false;
 bool turnTableFree = true;
 bool elevatorInUse = false;
-
+bool deactivating = false;
 int maxVelocity = 255;
 int drillSpeed;
 int elevatorSpeed;
 int cuvette = 0;
 int desiredPosition = 0;
-int i = 0;
-float val = 0;
-float voltage = 0;
+int i = 0; // Used in all the for loops, don't worry no nested loops
 volatile int tablePosition[26];
+float val = 0; // Photoresistor
+float voltage = 0;  // Photoresistor
 volatile char tableDirection = 'n'; // n for neutral, i for increasing, d for decreasing
 volatile char previousElevatorState = 'n'; // n for neutral, u for up, d for down
+unsigned long homingTimer;
 
 //Functions
 
-int drill_speed(int input_drill_speed);//max 165RPM
-float elevator_feed(int input_elevator_feed);//max 0.107inch/s
-void elevatorTopInterrupt (void);
-void elevatorBottomInterrupt (void);
-void cuvettePosition (void);
-void turnTable (int cuvette, int desiredPosition);
-void debouncing(void);
-float photoChoice(int led);
+int drill_speed(int input_drill_speed);//takes percentage returns RPM, max 165RPM
+float elevator_feed(int input_elevator_feed);//takes percentage returns inch/s, max 0.107inch/s
+void elevatorTopInterrupt (void); //limit switch
+void elevatorBottomInterrupt (void); //limit switch
+void cuvettePosition (void); //tracks the position of the cuvettes 0-25 relative to the table positions 0-25
+void turnTable (int cuvette, int desiredPosition);// sends the wanted cuvette to the wanted position
+void debouncing(void); //pure magic
+float photoChoice(int led); // choses the photoresistor from which to read the voltage
 
 Servo table;
 
 void setup() {
 
-  Serial.begin(115200); Serial.setTimeout(10);
+  UART_PORT.begin(115200); UART_PORT.setTimeout(10);
 
   table.attach(TABLE_PIN);
   pinMode(DRILL, OUTPUT);
@@ -143,24 +153,24 @@ void setup() {
 
   delay(1000);
 
-  Serial.print("\nsetup complete");
+  UART_PORT.print("\nsetup complete");
 }
 
 void loop() {
-  if (Serial.available()) {
-    String cmd = Serial.readStringUntil('\n');
+  if (UART_PORT.available()) {
+    String cmd = UART_PORT.readStringUntil('\n');
 
     if (isActivated == false) {
 
-      Serial.print("cmd: ");
-      Serial.println(cmd);
+      UART_PORT.print("cmd: ");
+      UART_PORT.println(cmd);
 
     }
     if (cmd == "activate") {
       isActivated = true;
     }
     else if (cmd == "who") {
-      Serial.println("drill");
+      UART_PORT.println("drill");
     }
     else if (isActivated == true) {
 
@@ -168,23 +178,23 @@ void loop() {
         //turns drill at desired speed
         int drillDigiDirection = 0;
         int drillSpeedPercent = 0;
-        Serial.println("What is the desired drill direction? CCW=1 CW=0");
-        while (!Serial.available()) {
+        UART_PORT.println("What is the desired drill direction? CCW=1 CW=0");
+        while (!UART_PORT.available()) {
           ;
         }
-        drillDigiDirection = (Serial.readStringUntil('\n')).toInt();
-        Serial.println(drillDigiDirection);
+        drillDigiDirection = (UART_PORT.readStringUntil('\n')).toInt();
+        UART_PORT.println(drillDigiDirection);
 
-        Serial.println("What percentage of max speed?");
-        while (!Serial.available()) {
+        UART_PORT.println("What percentage of max speed?");
+        while (!UART_PORT.available()) {
           ;
         }
-        drillSpeedPercent = (Serial.readStringUntil('\n')).toInt();
+        drillSpeedPercent = (UART_PORT.readStringUntil('\n')).toInt();
 
-        Serial.println(drill_speed(drillSpeedPercent));
-        Serial.println("RPM\n");
-        if (drillDigiDirection == 1)Serial.println("CCW\n");
-        else if (drillDigiDirection == 0)Serial.println("CW\n");
+        UART_PORT.println(drill_speed(drillSpeedPercent));
+        UART_PORT.println("RPM\n");
+        if (drillDigiDirection == 1)UART_PORT.println("CCW\n");
+        else if (drillDigiDirection == 0)UART_PORT.println("CW\n");
         analogWrite(DRILL, 0);
         delay(50);
         digitalWrite(DRILL_DIRECTION, drillDigiDirection);
@@ -196,7 +206,7 @@ void loop() {
         delay(100);
         digitalWrite(DRILL_DIRECTION, HIGH);
         analogWrite(DRILL, maxVelocity);
-        Serial.println("dccw");
+        UART_PORT.println("dccw");
       }
       else if (cmd == "dcw") {
         //turns drill clockwise
@@ -204,34 +214,34 @@ void loop() {
         delay(100);
         digitalWrite(DRILL_DIRECTION, LOW);
         analogWrite(DRILL, maxVelocity);
-        Serial.println("dcw");
+        UART_PORT.println("dcw");
       }
       else if (cmd == "ds") {
         //stops drill
         analogWrite(DRILL, 0);
-        Serial.println("ds");
+        UART_PORT.println("ds");
       }
       if (cmd == "elevator") {
         //turns drill at desired speed
         int elevatorDigiDirection = 0;
         int elevatorFeedPercent = 0;
-        Serial.println("What is the desired elevator direction? Up=1 Down=0");
-        while (!Serial.available()) {
+        UART_PORT.println("What is the desired elevator direction? Up=1 Down=0");
+        while (!UART_PORT.available()) {
           ;
         }
-        elevatorDigiDirection = (Serial.readStringUntil('\n')).toInt();
-        Serial.println(elevatorDigiDirection);
+        elevatorDigiDirection = (UART_PORT.readStringUntil('\n')).toInt();
+        UART_PORT.println(elevatorDigiDirection);
 
-        Serial.println("What percentage of max feed?");
-        while (!Serial.available()) {
+        UART_PORT.println("What percentage of max feed?");
+        while (!UART_PORT.available()) {
           ;
         }
-        elevatorFeedPercent = (Serial.readStringUntil('\n')).toInt();
+        elevatorFeedPercent = (UART_PORT.readStringUntil('\n')).toInt();
 
-        Serial.println(elevator_feed(elevatorFeedPercent));
-        Serial.println("inch/min\n");
-        if (elevatorDigiDirection == 1)Serial.println("Up\n");
-        else if (elevatorDigiDirection == 0)Serial.println("Down\n");
+        UART_PORT.println(elevator_feed(elevatorFeedPercent));
+        UART_PORT.println("inch/min\n");
+        if (elevatorDigiDirection == 1)UART_PORT.println("Up\n");
+        else if (elevatorDigiDirection == 0)UART_PORT.println("Down\n");
         analogWrite(ELEVATOR, 0);
         delay(50);
         digitalWrite(ELEVATOR_DIRECTION, elevatorDigiDirection);
@@ -246,7 +256,7 @@ void loop() {
         digitalWrite(ELEVATOR_DIRECTION, HIGH);
         analogWrite(ELEVATOR, maxVelocity);
         previousElevatorState = 'u';
-        Serial.println("eup");
+        UART_PORT.println("eup");
       }
       else if (cmd == "edown") {
         //turns elevator counter-clockwise
@@ -255,37 +265,37 @@ void loop() {
         digitalWrite(ELEVATOR_DIRECTION, LOW);
         analogWrite(ELEVATOR, maxVelocity);
         previousElevatorState = 'd';
-        Serial.println("edown");
+        UART_PORT.println("edown");
       }
       else if (cmd == "es") {
         //stops elevator
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';
-        Serial.println("es");
+        UART_PORT.println("es");
       }
       else if (cmd == "goto") {
         //sends table to wanted position
         //eventually need split function for a single string command
 
-        Serial.println("What is the cuvette of interest?");
-        while (!Serial.available()) {
+        UART_PORT.println("What is the cuvette of interest?");
+        while (!UART_PORT.available()) {
           ;
         }
-        cuvette = (Serial.readStringUntil('\n')).toInt();
-        Serial.println(cuvette);
+        cuvette = (UART_PORT.readStringUntil('\n')).toInt();
+        UART_PORT.println(cuvette);
 
-        Serial.println("What is the desired position?");
-        while (!Serial.available()) {
+        UART_PORT.println("What is the desired position?");
+        while (!UART_PORT.available()) {
           ;
         }
-        desiredPosition = (Serial.readStringUntil('\n')).toInt();
-        Serial.println(desiredPosition);
+        desiredPosition = (UART_PORT.readStringUntil('\n')).toInt();
+        UART_PORT.println(desiredPosition);
 
         if (cuvette >= 26) {
-          Serial.println("Error. Chose cuvette number from 0 to 25");
+          UART_PORT.println("Error. Chose cuvette number from 0 to 25");
         }
         if (desiredPosition >= 26) {
-          Serial.println("Error. Chose position number from 0 to 25");
+          UART_PORT.println("Error. Chose position number from 0 to 25");
         }
         turnTable (cuvette, desiredPosition);
 
@@ -296,7 +306,7 @@ void loop() {
         delay(100);
         table.writeMicroseconds(SERVO_MAX_CCW);
         tableDirection = 'i';
-        Serial.println("tccw");
+        UART_PORT.println("tccw");
       }
       else if (cmd == "tcw") {
         //turns table clockwise
@@ -304,84 +314,84 @@ void loop() {
         delay(100);
         table.writeMicroseconds(SERVO_MAX_CW);
         tableDirection = 'd';
-        Serial.println("tcw");
+        UART_PORT.println("tcw");
       }
       else if (cmd == "ts") {
         //stops table
         table.writeMicroseconds(SERVO_STOP);
         tableDirection = 'n';
         turnTableFree = true;
-        Serial.println("ts");
+        UART_PORT.println("ts");
       }
       else if (cmd == "p1ccw") {               //pump1
         //turns pump1 counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP1_SPEED, HIGH);
         delay(100);
-        Serial.println("p1ccw");
+        UART_PORT.println("p1ccw");
       }
       else if (cmd == "p1cw") {               //pump1
         //turns pump1 clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP1_SPEED, HIGH);
         delay(100);
-        Serial.println("p1cw");
+        UART_PORT.println("p1cw");
       }
       else if (cmd == "p2ccw") {               //pump2
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP2_SPEED, HIGH);
         delay(100);
-        Serial.println("p2ccw");
+        UART_PORT.println("p2ccw");
       }
       else if (cmd == "p2cw") {               //pump2
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP2_SPEED, HIGH);
         delay(100);
-        Serial.println("p2cw");
+        UART_PORT.println("p2cw");
       }
       else if (cmd == "p3ccw") {               //pump3
         //turns pump1 counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP3_SPEED, HIGH);
         delay(100);
-        Serial.println("p3ccw");
+        UART_PORT.println("p3ccw");
       }
       else if (cmd == "p3cw") {               //pump3
         //turns pump1 clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP3_SPEED, HIGH);
         delay(100);
-        Serial.println("p3cw");
+        UART_PORT.println("p3cw");
       }
       else if (cmd == "p4ccw") {               //pump4
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP4_SPEED, HIGH);
         delay(100);
-        Serial.println("p4ccw");
+        UART_PORT.println("p4ccw");
       }
       else if (cmd == "p4cw") {               //pump4
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP4_SPEED, HIGH);
         delay(100);
-        Serial.println("p4cw");
+        UART_PORT.println("p4cw");
       }
       else if (cmd == "p5ccw") {               //pump5
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP5_SPEED, HIGH);
         delay(100);
-        Serial.println("p5ccw");
+        UART_PORT.println("p5ccw");
       }
       else if (cmd == "p5cw") {               //pump5
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP5_SPEED, HIGH);
         delay(100);
-        Serial.println("p5cw");
+        UART_PORT.println("p5cw");
       }
       else if (cmd == "ps") {
         //stops pumps
@@ -391,31 +401,31 @@ void loop() {
         digitalWrite(PUMP4_SPEED, LOW);
         digitalWrite(PUMP5_SPEED, LOW);
         digitalWrite(PUMPS_LEGA, LOW);
-        Serial.println("ps");
+        UART_PORT.println("ps");
       }
       else if (cmd == "v1") {
         digitalWrite(VIBRATOR1, HIGH);
-        Serial.println("v1");
+        UART_PORT.println("v1");
       }
       else if (cmd == "v2") {
         digitalWrite(VIBRATOR2, HIGH);
-        Serial.println("v2");
+        UART_PORT.println("v2");
       }
       else if (cmd == "v3") {
         digitalWrite(VIBRATOR3, HIGH);
-        Serial.println("v3");
+        UART_PORT.println("v3");
       }
       else if (cmd == "v4") {
         digitalWrite(VIBRATOR4, HIGH);
-        Serial.println("v4");
+        UART_PORT.println("v4");
       }
       else if (cmd == "v5") {
         digitalWrite(VIBRATOR5, HIGH);
-        Serial.println("v5");
+        UART_PORT.println("v5");
       }
       else if (cmd == "v6") {
         digitalWrite(VIBRATOR6, HIGH);
-        Serial.println("v6");
+        UART_PORT.println("v6");
       }
       else if (cmd == "vs") {
         digitalWrite(VIBRATOR1, LOW);
@@ -424,7 +434,7 @@ void loop() {
         digitalWrite(VIBRATOR4, LOW);
         digitalWrite(VIBRATOR5, LOW);
         digitalWrite(VIBRATOR6, LOW);
-        Serial.println("v1");
+        UART_PORT.println("v1");
       }
       else if (cmd == "led1") {
         digitalWrite(LED1, HIGH);
@@ -433,22 +443,22 @@ void loop() {
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        Serial.print("Voltage On =");
-        Serial.print(voltage);
-        Serial.println("led1");
+        UART_PORT.print("Voltage On =");
+        UART_PORT.print(voltage);
+        UART_PORT.println("led1");
       }
       else if (cmd == "led1s") {
         digitalWrite(LED1, LOW);
         delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        Serial.print("Voltage Off =");
-        Serial.print(voltage);
+        UART_PORT.print("Voltage Off =");
+        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        Serial.println("led1s");
+        UART_PORT.println("led1s");
       }
       else if (cmd == "led2") {
         digitalWrite(LED2, HIGH);
@@ -457,27 +467,34 @@ void loop() {
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        Serial.print("Voltage On =");
-        Serial.print(voltage);
-        Serial.println("led2");
+        UART_PORT.print("Voltage On =");
+        UART_PORT.print(voltage);
+        UART_PORT.println("led2");
       }
       else if (cmd == "led2s") {
         digitalWrite(LED2, LOW);
         delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        Serial.print("Voltage Off =");
-        Serial.print(voltage);
+        UART_PORT.print("Voltage Off =");
+        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        Serial.println("led2s");
+        UART_PORT.println("led2s");
       }
 
       else if (cmd == "deactivate") {
         //stops all
-        table.writeMicroseconds(SERVO_STOP);
+        UART_PORT.print("cmd: ");
+        UART_PORT.println(cmd);
+        UART_PORT.print("Homing Table");
+        homingTimer = millis();
+        turnTable (0, 0);
+        deactivating = true;
+      }
+      if (deactivating == true && (millis() - homingTimer > 45000)) {
         analogWrite(ELEVATOR, 0);
         analogWrite(DRILL, 0);
         digitalWrite(PUMP1_SPEED, LOW);
@@ -498,15 +515,13 @@ void loop() {
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        Serial.print("Homing Table");
-        turnTable (0, 0);
+        table.writeMicroseconds(SERVO_STOP);
         tableDirection = 'n';
         turnTableFree = true;
         previousElevatorState = 'n';
-
         isActivated = false;
-        Serial.print("cmd: ");
-        Serial.println(cmd);
+        deactivating == true;
+        UART_PORT.print("deactivated");
       }
     }
   }
@@ -567,15 +582,15 @@ void elevatorBottomInterrupt () {
 }
 
 void cuvettePosition() {
-  //gives the integer value of the cuvette of the table 1 to 25, cuvettes are only on even numbers,4 chute is cuvettePosition 0
+  //gives the integer value of the cuvette of the table 1 to 25, cuvettes are only on even numbers, chute is cuvettePosition 0
   if (tableDirection == 'n') {
   }
   else if (tableDirection == 'i') {
     for (i = 0; i <= 25; i++) {
       tablePosition[i] = (tablePosition[i] + 1) % 26;
     }
-    Serial.print("tablePosition[0]: ");
-    Serial.println(tablePosition[0]);
+    UART_PORT.print("tablePosition[0]: ");
+    UART_PORT.println(tablePosition[0]);
   }
   else if (tableDirection == 'd') {
     int temp = tablePosition[0];
@@ -585,8 +600,8 @@ void cuvettePosition() {
         tablePosition[i] = 25;
       }
     }
-    Serial.print("tablePosition[0]: ");
-    Serial.println(tablePosition[0]);
+    UART_PORT.print("tablePosition[0]: ");
+    UART_PORT.println(tablePosition[0]);
   }
 }
 
@@ -599,13 +614,13 @@ void turnTable (int cuvette, int desiredPosition) {
     if (tablePosition[i] == cuvette)break;
   }
 
-  Serial.print("initialPosition: ");
-  Serial.println(initialPosition);
+  UART_PORT.print("initialPosition: ");
+  UART_PORT.println(initialPosition);
 
   difference = desiredPosition - initialPosition;
 
-  Serial.print("difference: ");
-  Serial.println(difference);
+  UART_PORT.print("difference: ");
+  UART_PORT.println(difference);
 
   if ( (difference > -13 && difference < 0) || (difference > 13 && difference < 26)) {
     tableDirection = 'i';
