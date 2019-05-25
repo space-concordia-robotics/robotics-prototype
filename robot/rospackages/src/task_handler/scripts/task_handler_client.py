@@ -30,7 +30,7 @@ def is_valid_request(r_task, r_status, r_args):
     camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
-        if r_task == "camera_stream" and not r_args in camera_args:
+        if r_args and r_task == "camera_stream" and not r_args in camera_args:
             return False
         return True
 
