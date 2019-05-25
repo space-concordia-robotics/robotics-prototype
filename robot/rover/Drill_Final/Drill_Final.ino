@@ -448,7 +448,7 @@ void loop() {
         digitalWrite(VIBRATOR4, LOW);
         digitalWrite(VIBRATOR5, LOW);
         digitalWrite(VIBRATOR6, LOW);
-        UART_PORT.println("v1");
+        UART_PORT.println("vs");
       }
       else if (cmd == "led1") {
         digitalWrite(LED1, HIGH);
@@ -463,6 +463,7 @@ void loop() {
       }
       else if (cmd == "led1s") {
         digitalWrite(LED1, LOW);
+        photoChoice(1);
         delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
@@ -487,6 +488,7 @@ void loop() {
       }
       else if (cmd == "led2s") {
         digitalWrite(LED2, LOW);
+        photoChoice(2);
         delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
@@ -508,7 +510,7 @@ void loop() {
         turnTable (0, 0);
         deactivating = true;
       }
-      if (deactivating == true && (millis() - homingTimer > 45000)) {
+      if (cmd == "stop" || (deactivating == true && (millis() - homingTimer > 45000))) {
         analogWrite(ELEVATOR, 0);
         analogWrite(DRILL, 0);
         digitalWrite(PUMP1_SPEED, LOW);
