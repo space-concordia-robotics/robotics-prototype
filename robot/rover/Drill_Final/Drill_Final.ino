@@ -239,7 +239,7 @@ void loop() {
         elevatorFeedPercent = (UART_PORT.readStringUntil('\n')).toInt();
 
         UART_PORT.println(elevator_feed(elevatorFeedPercent));
-        UART_PORT.println("inch/min\n");
+        UART_PORT.println("inch/s\n");
         if (elevatorDigiDirection == 1)UART_PORT.println("Up\n");
         else if (elevatorDigiDirection == 0)UART_PORT.println("Down\n");
         analogWrite(ELEVATOR, 0);
@@ -291,10 +291,10 @@ void loop() {
         desiredPosition = (UART_PORT.readStringUntil('\n')).toInt();
         UART_PORT.println(desiredPosition);
 
-        if (cuvette >= 26) {
+        if (cuvette >= 26 || cuvette < 0) {
           UART_PORT.println("Error. Chose cuvette number from 0 to 25");
         }
-        if (desiredPosition >= 26) {
+        if (desiredPosition >= 26 || desiredPosition < 0) {
           UART_PORT.println("Error. Chose position number from 0 to 25");
         }
         turnTable (cuvette, desiredPosition);
@@ -315,6 +315,20 @@ void loop() {
         table.writeMicroseconds(SERVO_MAX_CW);
         tableDirection = 'd';
         UART_PORT.println("tcw");
+      }
+      else if (cmd == "tccwstep") {
+        //turns table counter-clockwise
+        table.writeMicroseconds(SERVO_STOP);
+        delay(10);
+        turnTable(tablePosition[0], 25);
+        UART_PORT.println("tccwstep");
+      }
+      else if (cmd == "tcwstep") {
+        //turns table clockwise
+        table.writeMicroseconds(SERVO_STOP);
+        delay(10);
+        turnTable(tablePosition[0], 1);
+        UART_PORT.println("tcwstep");
       }
       else if (cmd == "ts") {
         //stops table
