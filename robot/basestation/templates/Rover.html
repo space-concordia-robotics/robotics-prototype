@@ -70,7 +70,7 @@
                 <div class="col-md-2">
                   <h5>Navigation Data</h5>
                   <div id="antenna-data">
-                    <div id="antenna-inputs" class="input-group input-group-sm">
+                    <div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
                       <div class="input-group-prepend">
                         <span class="input-group-text">lat, long, dir (Antenna)</span><br>
                       </div>
@@ -80,7 +80,7 @@
                       <button type="button" id="send-antenna-pos" class="btn btn-primary">Send</button>
                       <p>Input the data above to get recommended antenna angle and more</p>
                     </div>
-                    <div id="antenna-unchanging">
+                    <div style="display: none" id="antenna-unchanging">
                       <h6>Antenna coords:</h6>
                       <h5>lat: <span id="antenna-latitude">-</span></h5>
                       <h5>long: <span id="antenna-longitude">-</span></h5>
@@ -90,7 +90,7 @@
                         <button type="button" id="change-antenna-pos" class="btn btn-primary">Change antenna data</button>
                       </div>
                     </div>
-                    <div id="gps-inputs" class="input-group input-group-sm">
+                    <div style="display: none" id="gps-inputs" class="input-group input-group-sm">
                       <div class="input-group-prepend">
                         <span class="input-group-text">lat, long (Destination)</span><br>
                       </div>
@@ -98,7 +98,7 @@
                       <input type="text" id="desired-gps-longitude">
                       <button type="button" id="send-gps-pos" class="btn btn-primary">Send</button>
                     </div>
-                    <div id="gps-unchanging">
+                    <div style="display: none" id="gps-unchanging">
                       <h6>Destination coords:</h6>
                       <h5>lat: <span id="destination-latitude">-</span></h5>
                       <h5>long: <span id="destination-longitude">-</span></h5>
