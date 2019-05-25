@@ -121,7 +121,6 @@ RobotMotor::RobotMotor() {
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
   isBudging = false;
-  isOpenLoop = true;
   hasRamping = false;
   hasLimitSwitches = false;
   homingType = SINGLE_ENDED_HOMING;

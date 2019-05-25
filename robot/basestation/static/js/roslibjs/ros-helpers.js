@@ -121,20 +121,20 @@ function initRosWeb () {
     $('#right-back-rpm').text(message.velocity[5])
   })
 
-  // setup a subscriber for the gps_data topic
-  rover_nav_listener = new ROSLIB.Topic({
+  // setup a subscriber for the rover_position topic
+  rover_position_listener = new ROSLIB.Topic({
     ros: ros,
-    name: 'rover_nav',
-    messageType: 'sensor_msgs/JointState' //subject to change
+    name: 'rover_position',
+    messageType: 'RoverPosition'
   })
 
-  rover_nav_listener.subscribe(function (message) {
+  rover_position_listener.subscribe(function (message) {
     //TODO: place the data somewhere, call ros node, etc?
     // idk how this will work exactly, maybe a ros python node does stuff
     // this could still display the data though i guess
   })
 
-  // setup a subscriber for the arm_feedback topic
+  // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_feedback',

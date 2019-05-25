@@ -4,6 +4,7 @@
 void pinSetup(void) {
   pinMode(LED_BUILTIN, OUTPUT); // pin 13
   digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(V_SENSE, INPUT); // battery sensing
   
   // DC motors
 
