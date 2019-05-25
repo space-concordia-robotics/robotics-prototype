@@ -9,9 +9,18 @@ DEVICES="$(v4l2-ctl --list-devices)"
 
 echo "$DEVICES" > tmp
 
-port=`tail -1 tmp`
-port="$(echo -e "${port}" | sed -e 's/^[[:space:]]*//')"
-echo "port: $port"
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    port=`tail -1 tmp`
+    port="$(echo -e "${port}" | sed -e 's/^[[:space:]]*//')"
+    echo "port: $port"
+  else
+    echo "Port argument supplied: $1"
+    port=$1
+fi
+
 
 /usr/local/bin/mjpg_streamer  -i "input_uvc.so -r 640x480 -m 50000 -n -f 1 -d $port" -o "output_http.so -p 8090 -w /usr/local/share/mjpg-streamer/www/"
 
