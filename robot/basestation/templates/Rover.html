@@ -39,25 +39,23 @@
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
         <a class="navbar-brand" href=""javascript:void(0)"">
-            <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
+            <img src="../static/img/sclogo_header.png">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
             aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-                <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">Select Device Channel</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                  <a id="mux-0" class="dropdown-item">0: Rover</a>
-                  <a id="mux-1" class="dropdown-item">1: Arm</a>
-                  <a id="mux-2" class="dropdown-item">2: Science</a>
-                  <a id="mux-3" class="dropdown-item">3: PDS</a>
-                </div>
-                </li>
-            </ul>
+        <div class="dropdown col-md-2">
+          <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Select Device Channel
+          </button>
+          <div class="dropdown-menu">
+            <a id="mux-0" class="dropdown-item">0: Rover</a>
+            <a id="mux-1" class="dropdown-item">1: Arm</a>
+            <a id="mux-2" class="dropdown-item">2: Science</a>
+            <a id="mux-3" class="dropdown-item">3: PDS</a>
+          </div>
         </div>
     </nav>
     <br>

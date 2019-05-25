@@ -15,6 +15,11 @@ function appendToRoverLog (msg) {
   $('#rover-log').scrollTop($('#rover-log')[0].scrollHeight)
 }
 
+function appendToScienceLog (msg) {
+  $('#science-log').append(msg)
+  $('#science-log').scrollTop($('#science-log')[0].scrollHeight)
+}
+
 function clearLogConsole () {
   $(logConsole).html('')
 }

@@ -195,3 +195,54 @@ const timer = delay => {
     setTimeout(resolve, delay)
   })
 }
+
+$(document).ready(function () {
+  // ROS related stuff
+  $('#science-listener-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#science-listener-btn').is(':checked')) {
+      if (
+        $('button#mux')
+          .text()
+          .includes('Science')
+      ) {
+        requestTask('science_listener', 1, '#science-listener-btn', function (
+          msgs
+        ) {
+          console.log(msgs)
+          if (msgs[0]) {
+            $('#science-listener-btn')[0].checked = true
+          } else {
+            $('#science-listener-btn')[0].checked = false
+          }
+        })
+      } else {
+        appendToConsole(
+          'Cannot turn science listener on if not in science mux channel!'
+        )
+      }
+    } else {
+      // closing arm listener
+      requestTask('science_listener', 0, '#science-listener-btn', function (
+        msgs
+      ) {
+        console.log('msgs[0]', msgs[0])
+        if (msgs.length == 2) {
+          console.log('msgs[1]', msgs[1])
+          if (msgs[1].includes('already running')) {
+            $('#science-listener-btn')[0].checked = true
+          } else {
+            $('#science-listener-btn')[0].checked = false
+          }
+        } else {
+          if (msgs[0]) {
+            $('#science-listener-btn')[0].checked = true
+          } else {
+            $('#science-listener-btn')[0].checked = false
+          }
+        }
+      })
+    }
+  })
+})
