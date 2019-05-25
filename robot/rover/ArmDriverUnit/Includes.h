@@ -8,12 +8,12 @@
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
 #define DEBUG_MAIN 10 //!< debug messages during main loop
-#define DEBUG_PARSING 11 //!< debug messages during parsing function
+//#define DEBUG_PARSING 11 //!< debug messages during parsing function
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
 //#define DEBUG_PID 14 //!< debug messages during pid loop calculations
 //#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
-//#define DEBUG_HOMING 16 //!< debug messages during homing sequence
+#define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
 //#define DEBUG_STEPPER_4_TIMER 20 //!< debug messages during stepper 4 timer interrupts
@@ -72,6 +72,6 @@
 #define HEARTBEAT_PERIOD 1000
 /* serial */
 #define BAUD_RATE 115200 //!< serial bit rate
-#define SERIAL_PRINT_INTERVAL 1000 //!< how often should teensy send angle data
-#define SERIAL_READ_TIMEOUT 50 //!< how often should the serial port be read
+#define SERIAL_PRINT_INTERVAL 50 //!< how often should teensy send angle data
+#define SERIAL_READ_TIMEOUT 20 //!< how often should the serial port be read
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands

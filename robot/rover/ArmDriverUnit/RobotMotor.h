@@ -121,7 +121,6 @@ RobotMotor::RobotMotor() {
   rotationDirection = 0; // by default invalid value
   directionModifier = 1; // this flips the direction sign if necessary;
   isBudging = false;
-  isOpenLoop = true;
   hasRamping = false;
   hasLimitSwitches = false;
   homingType = SINGLE_ENDED_HOMING;
@@ -277,7 +276,7 @@ void RobotMotor::checkForActualPress(void) {
 
 void RobotMotor::goToSafeAngle(void) {
 #ifdef DEBUG_SWITCHES
-  UART_PORT.print("motor");
+  UART_PORT.print("ARM motor");
   UART_PORT.print(" limit switch state ");
   UART_PORT.println(limitSwitchState);
 #endif
@@ -286,7 +285,7 @@ void RobotMotor::goToSafeAngle(void) {
   // then move the angle back to the max/min software angle
   if (limitSwitchState == COUNTER_CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
-    UART_PORT.print("motor is at hard angle ");
+    UART_PORT.print("ARM motor is at hard angle ");
     UART_PORT.print(maxHardAngle);
     UART_PORT.println("and turning ccw to soft angle");
 #endif
@@ -295,7 +294,7 @@ void RobotMotor::goToSafeAngle(void) {
   }
   if (limitSwitchState == CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
-    UART_PORT.print("motor is at hard angle ");
+    UART_PORT.print("ARM motor is at hard angle ");
     UART_PORT.print(minHardAngle);
     UART_PORT.println("and turning cw to soft angle");
 #endif
@@ -311,19 +310,19 @@ void RobotMotor::goToSafeAngle(void) {
 void RobotMotor::homeMotor(char homingDir) {
   homingPass++;
 #ifdef DEBUG_HOMING
-  UART_PORT.print("homeMotor pass ");
+  UART_PORT.print("ARM homeMotor pass ");
   UART_PORT.println(homingPass);
 #endif
   if (homingDir == 'i') { //(neg, cw)
 #ifdef DEBUG_HOMING
-    UART_PORT.println("homeMotor inwards");
+    UART_PORT.println("ARM homeMotor inwards");
 #endif
     // set homing direction inwards
     forceToAngle(1.5 * minHardAngle);
   }
   else if (homingDir == 'o') { //(pos, ccw)
 #ifdef DEBUG_HOMING
-    UART_PORT.println("homeMotor outwards");
+    UART_PORT.println("ARM homeMotor outwards");
 #endif
     forceToAngle(5 * maxHardAngle);
   }

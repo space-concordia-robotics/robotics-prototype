@@ -81,7 +81,7 @@ def get_pid(keyword):
 @app.route("/")
 def index():
     """Current landing page, the arm panel."""
-    return flask.render_template("AsimovOperation.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/rover")
@@ -136,44 +136,6 @@ def ping_rover():
     return jsonify(success=True, ping_msg=ping_output, ros_msg=ros_output)
 
 
-@app.route("/select_mux", methods=["POST", "GET"])
-def select_mux():
-    print("select_mux")
-    dev = str(request.get_data(), "utf-8")
-    print("dev : " + dev)
-
-    output, error = run_shell("rosrun mux_selector mux_select_client.py", dev)
-    output = str(output, "utf-8")
-    print("output: " + output)
-
-    return jsonify(success=True, dev=dev, output=output)
-
-
-@app.route("/serial_cmd", methods=["POST", "GET"])
-def serial_cmd():
-    print("serial_cmd")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    print("cmd: " + cmd)
-
-    ros_cmd = "rosrun serial_cmd serial_cmd_client.py '" + cmd + "'"
-    print("ros_cmd: " + ros_cmd)
-
-    output, error = run_shell("rosrun serial_cmd serial_cmd_client.py", cmd)
-    output = str(output, "utf-8")
-
-    print("output: " + output)
-
-    return jsonify(success=True, cmd=cmd, output=output)
-
-
 # only to be used when hacky implementation is fixed
 # see odroid_rx package for details
 @app.route("/odroid_rx", methods=["POST"])
@@ -189,57 +151,6 @@ def odroid_rx():
     print("output: " + output)
 
     return jsonify(success=True, odroid_rx=output)
-
-# Manual controls
-@app.route("/manual_control", methods=["POST"])
-def manual_control():
-
-    print("manual_control")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    if local:
-        rover_ip = "127.0.0.1"
-        base_ip = rover_ip
-        rover_port = 5005
-        base_port = 5010
-    else:
-        rover_ip = "172.16.1.30"
-        base_ip = "172.16.1.20"
-        rover_port = 5015
-        base_port = rover_port
-
-    print("cmd: " + cmd)
-    sender = Connection("arm_cmd_sender", rover_ip, rover_port)
-    error = str(None)
-
-    try:
-        sender.send(cmd)
-    except OSError:
-        error = "Network is unreachable"
-        print(error)
-
-    receiver = Connection("arm_cmd_receiver", base_ip, base_port)
-    feedback = str(None)
-
-    try:
-        feedback = receiver.receive(timeout=2)
-    except OSError:
-        error = "Network is unreachable"
-        print(error)
-
-    print("feedback:", feedback)
-
-    if not feedback:
-        feedback = "Timeout limit exceeded, no data received"
-
-    return jsonify(success=True, cmd=cmd, error=error, feedback=feedback)
 
 # Rover controls
 @app.route("/rover_drive", methods=["POST"])
@@ -291,52 +202,6 @@ def rover_drive():
         feedback = "Timeout limit exceeded, no data received"
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
-
-# Task handler services
-@app.route("/task_handler", methods=["POST"])
-def task_handler():
-    print("task_handler")
-
-    cmd = str(request.get_data('cmd'), "utf-8")
-    print("cmd: " + cmd)
-    # remove fluff, only command remains
-    if cmd:
-        cmd = cmd.split("=")[1]
-        # decode URI
-        cmd = unquote(cmd)
-
-    print("cmd: " + cmd)
-
-    ros_cmd = "rosrun task_handler task_handler_client.py"
-    cmd_args = ""
-
-    # choose appropriate arguments for ROS service client call
-    if cmd == "enable-arm-listener":
-        cmd_args = "arm_listener 1"
-    elif cmd == "disable-arm-listener":
-        cmd_args = "arm_listener 0"
-    elif cmd == "enable-rover-listener":
-        cmd_args = "rover_listener 1"
-    elif cmd == "disable-rover-listener":
-        cmd_args = "rover_listener 0"
-    elif cmd == "enable-arm-stream":
-        cmd_args = "camera_stream 1"
-    elif cmd == "disable-arm-stream":
-        cmd_args = "camera_stream 0"
-
-    print("cmd_args:", cmd_args)
-
-    output, error = run_shell(ros_cmd, cmd_args)
-    output = output.decode()
-
-    print("Output: " + output)
-
-    if error:
-        print("Error: " + error.decode())
-
-    error = str(None) if not error else str(error)
-
-    return jsonify(success=True, cmd=cmd, output=output, error=error)
 
 # routes for science page
 @app.route('/numSections')

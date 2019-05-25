@@ -7,7 +7,8 @@ from task_handler.srv import *
 import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
-scripts = [current_dir + "RoverCommandListener.py", current_dir + "ArmCommandListener.py", current_dir + "ScienceCommandListener.py", current_dir + "start_stream.sh"]
+arm_control_dir = current_dir+'/../../arm_control/scripts/'
+scripts = [current_dir + "RoverCommandListener.py", arm_control_dir + "ArmNode.py", current_dir + "ScienceCommandListener.py", current_dir + "start_stream.sh"]
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "bash", "", 1, True)]
 known_tasks = ["rover_listener", "arm_listener", "science_listener", "camera_stream"]
 known_listeners = known_tasks[:-1]
@@ -65,6 +66,13 @@ def handle_task(task, status, args):
                         else:
                             response = "Requested port not available, is the camera properly plugged into the USB port?"
                             return response + "\n"
+                if chosen_task == "arm_listener":
+                    if args and not running_tasks[i].is_running():
+                        if args == 'usb' or args == 'uart':
+                            running_tasks[i] = Listener(scripts[i], "python", args)
+                        else:
+                            response = "Requested serial type is invalid"
+                            return response+'\n'
                 break
             i += 1
 

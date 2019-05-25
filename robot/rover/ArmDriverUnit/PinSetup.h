@@ -22,8 +22,8 @@
  * \todo I forget if I fixed this, but these angle limits need to be ignored
  * for the wrist that rotates as it shouldn't have limits
 */
-#define MIN_JOINT_ANGLE -760
-#define MAX_JOINT_ANGLE 760
+#define MIN_JOINT_ANGLE -100000
+#define MAX_JOINT_ANGLE 100000
 #define STEPPER_PID_PERIOD 25 * 1000 //!< initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 //!< 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 //!< 20ms, because typical pwm signals have 20ms periods
@@ -45,22 +45,24 @@
 
 #define TRIGGER_DELAY 10 //!< how long to wait to make sure a limit switch was pressed and ignore bouncing
 
+#define V_SENSE 39 // battery sensing pin
+
 // DC motors
 
-#define M1_DIR_PIN          5 //!< chooses the direction the motor turns in
-#define M1_PWM_PIN          6 //!< the speed of the motor is controlled by the pwm signal
+#define M1_DIR_PIN          11 //!< chooses the direction the motor turns in
+#define M1_PWM_PIN          10 //!< the speed of the motor is controlled by the pwm signal
 // 7&8 are on port D with bits 2&3 respectively
-#define M1_ENCODER_PORT    GPIOD_PDIR //!< the input register for the port connected to the encoder pins
+#define M1_ENCODER_PORT    GPIOE_PDIR //!< the input register for the port connected to the encoder pins
 //! \brief the position of the lower encoder pin bit. The encoder interrupt code expects this to function correctly.
-#define M1_ENCODER_SHIFT   CORE_PIN7_BIT
-#define M1_ENCODER_A        7 //!< encoder A pin
-#define M1_ENCODER_B        8 //!< encoder B pin
+#define M1_ENCODER_SHIFT   CORE_PIN33_BIT
+#define M1_ENCODER_A        33 //!< encoder A pin
+#define M1_ENCODER_B        34 //!< encoder B pin
 #define M1_LIMIT_SW_CW_PORT   GPIOC_PDIR
 #define M1_LIMIT_SW_CCW_PORT  GPIOC_PDIR
-#define M1_LIMIT_SW_CW_SHIFT  CORE_PIN9_BIT
-#define M1_LIMIT_SW_CCW_SHIFT CORE_PIN10_BIT
-#define M1_LIMIT_SW_CW        9
-#define M1_LIMIT_SW_CCW       10
+#define M1_LIMIT_SW_CW_SHIFT  CORE_PIN22_BIT
+#define M1_LIMIT_SW_CCW_SHIFT CORE_PIN23_BIT
+#define M1_LIMIT_SW_CW        22  // LS 2
+#define M1_LIMIT_SW_CCW       23 // LS 1
 #define M1_ENCODER_RESOLUTION 48
 #define M1_GEAR_RATIO         99.508*40.0 //!< \todo fix this based on gear reduction inside and outside motor
 #define M1_MIN_HARD_ANGLE     -175.0
@@ -68,19 +70,19 @@
 #define M1_MIN_SOFT_ANGLE     -170.0
 #define M1_MAX_SOFT_ANGLE     170.0
 
-#define M2_PWM_PIN            30
-#define M2_DIR_PIN            31
+#define M2_PWM_PIN            8
+#define M2_DIR_PIN            9
 // 26&27 are on port A with bits 14&15 respectively
-#define M2_ENCODER_PORT       GPIOA_PDIR
-#define M2_ENCODER_SHIFT      CORE_PIN26_BIT
-#define M2_ENCODER_A          26
-#define M2_ENCODER_B          27
-#define M2_LIMIT_SW_FLEX_PORT    GPIOA_PDIR //!< input register for the port associated to flex limit switch pin
-#define M2_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR //!< input register for the port associated to extend limit switch pin
-#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN28_BIT //!< position of the limit switch flex pin bit
-#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN29_BIT //!< position of the limit switch extend pin bit
-#define M2_LIMIT_SW_FLEX      28 //!< limit switch flex pin
-#define M2_LIMIT_SW_EXTEND    29 //!< limit switch extend pin
+#define M2_ENCODER_PORT       GPIOB_PDIR
+#define M2_ENCODER_SHIFT      CORE_PIN31_BIT
+#define M2_ENCODER_A          31
+#define M2_ENCODER_B          32
+#define M2_LIMIT_SW_FLEX_PORT    GPIOD_PDIR //!< input register for the port associated to flex limit switch pin
+#define M2_LIMIT_SW_EXTEND_PORT  GPIOD_PDIR //!< input register for the port associated to extend limit switch pin
+#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN20_BIT //!< position of the limit switch flex pin bit
+#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN21_BIT //!< position of the limit switch extend pin bit
+#define M2_LIMIT_SW_FLEX      20 //!LS 4
+#define M2_LIMIT_SW_EXTEND    21 //!LS 3
 #define M2_ENCODER_RESOLUTION 48
 //! planetary gear motor chained to worm gear drive
 #define M2_GEAR_RATIO         99.508*20.0*2.0
@@ -89,22 +91,19 @@
 #define M2_MIN_SOFT_ANGLE     -60.0 //!< a safety margin is added to the flexion angle to avoid ever hitting the limit switch after homing is complete
 #define M2_MAX_SOFT_ANGLE     23.0 //!< a safety margin is added to the extension angle to avoid ever hitting the limit switch after homing is complete
 
-// this used to be a stepper
-//#define M3_ENABLE_PIN      17
-//#define M3_STEP_PIN        21
-#define M3_DIR_PIN         20 // stays the same
-#define M3_PWM_PIN         21
+#define M3_DIR_PIN         7
+#define M3_PWM_PIN         6
 // 19&18 are on port B with bits 2&3 respectively
 #define M3_ENCODER_PORT    GPIOB_PDIR
-#define M3_ENCODER_SHIFT   CORE_PIN19_BIT
-#define M3_ENCODER_A       19
-#define M3_ENCODER_B       18
-#define M3_LIMIT_SW_FLEX_PORT     GPIOC_PDIR
-#define M3_LIMIT_SW_EXTEND_PORT   GPIOC_PDIR
-#define M3_LIMIT_SW_FLEX_SHIFT    CORE_PIN22_BIT
-#define M3_LIMIT_SW_EXTEND_SHIFT  CORE_PIN23_BIT
-#define M3_LIMIT_SW_FLEX          22
-#define M3_LIMIT_SW_EXTEND        23
+#define M3_ENCODER_SHIFT   CORE_PIN29_BIT
+#define M3_ENCODER_A       29
+#define M3_ENCODER_B       30
+#define M3_LIMIT_SW_FLEX_PORT     GPIOB_PDIR
+#define M3_LIMIT_SW_EXTEND_PORT   GPIOB_PDIR
+#define M3_LIMIT_SW_FLEX_SHIFT    CORE_PIN18_BIT
+#define M3_LIMIT_SW_EXTEND_SHIFT  CORE_PIN19_BIT
+#define M3_LIMIT_SW_FLEX          18 // LS 6
+#define M3_LIMIT_SW_EXTEND        19 // LS 5
 #define M3_ENCODER_RESOLUTION 48
 //! belt reduction chained to worm gear drive
 #define M3_GEAR_RATIO         99.508*(40.0/14.0)*18.0*2.0 //188.611*(40.0/14.0)*18.0
@@ -113,23 +112,19 @@
 #define M3_MIN_SOFT_ANGLE     -140.0
 #define M3_MAX_SOFT_ANGLE     60.0
 
-// stepper
-
-//#define M4_ENABLE_PIN      16 //!< controls whether power goes to stepper or not
-//#define M4_STEP_PIN        14 //!< on rising edges, stepper will take a step
-#define M4_DIR_PIN         15 //!< chooses the step direction
-#define M4_PWM_PIN        14
+#define M4_DIR_PIN        5 //!< chooses the step direction
+#define M4_PWM_PIN        4
 // 11&12 are on port C with bits 6&7 respectively
-#define M4_ENCODER_PORT    GPIOC_PDIR 
-#define M4_ENCODER_SHIFT   CORE_PIN11_BIT
-#define M4_ENCODER_A       11
-#define M4_ENCODER_B       12
-#define M4_LIMIT_SW_FLEX_PORT    GPIOA_PDIR
-#define M4_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR
-#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN25_BIT
-#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT
-#define M4_LIMIT_SW_FLEX   25
-#define M4_LIMIT_SW_EXTEND 24
+#define M4_ENCODER_PORT    GPIOA_PDIR 
+#define M4_ENCODER_SHIFT   CORE_PIN27_BIT
+#define M4_ENCODER_A       27
+#define M4_ENCODER_B       28
+#define M4_LIMIT_SW_FLEX_PORT    GPIOB_PDIR
+#define M4_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR
+#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN16_BIT
+#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN17_BIT
+#define M4_LIMIT_SW_FLEX   16 // LS 8
+#define M4_LIMIT_SW_EXTEND 17 // LS 7
 #define M4_ENCODER_RESOLUTION 2000 //!< counts per revolution of the stepper encoder
 #define M4_STEP_RESOLUTION 1.8 //!< the angle traversed by the stepper stepping once
 // the 1.3846 is a value i calculated based on the discrepancy between expected and actual angles
@@ -142,7 +137,7 @@
 
 // servos
 
-#define M5_PWM_PIN         35
+#define M5_PWM_PIN         3
 /*
   // 33&34 are on port E with bits 24&25 respectively
   #define M5_ENCODER_PORT    GPIOE_PDIR
@@ -154,16 +149,19 @@
 //#define M5_MAXIMUM_ANGLE
 // no angle limits because this one can be used as a screwdriver
 
-#define M6_PWM_PIN         36
+#define M6_PWM_PIN         2
 /*
   // 37&38 are on port C with bits 10&11 respectively
   #define M6_ENCODER_PORT    GPIOC_PDIR
   #define M6_ENCODER_A       37
   #define M6_ENCODER_B       38
 */
-#define M6_LIMIT_SW_EXTEND_PORT  GPIOE_PDIR // i need to pick a pin
-#define M6_LIMIT_SW_EXTEND_SHIFT CORE_PIN24_BIT // i need to pick a pin
-#define M6_LIMIT_SW_EXTEND 99 // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND_PORT  GPIOC_PDIR // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND_SHIFT CORC_PIN14_BIT // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND 14 // LS 10
+#define M6_LIMIT_SW_FLEX_PORT  GPIOC_PDIR // i need to pick a pin
+#define M6_LIMIT_SW_FLEX_SHIFT CORE_PIN15_BIT // i need to pick a pin
+#define M6_LIMIT_SW_FLEX 15 // LS 9
 #define M6_GEAR_RATIO      40.0/12.0 // there is a ratio here that I don't know yet
 #define M6_MIN_HARD_ANGLE   -75.0 //-120.0
 #define M6_MAX_HARD_ANGLE   75.0 // 150.0 //30.0

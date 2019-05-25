@@ -1,7 +1,10 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-lets */
 $(document).ready(() => {
   const Site = {
     init () {
+      // connect ros to the rosbridge websockets server
+      initRosWeb()
+
       this.bindEventHandlers()
     },
     bindEventHandlers () {
@@ -180,110 +183,93 @@ $(document).ready(() => {
 
   Site.init()
 
-  $('#mux-0').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '0',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 0: Rover')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
-  })
+  function isListenerOpen(){
+    return (
+      ((window.location.pathname == '/rover') && ($('#toggle-rover-listener-btn')[0].checked == true)) ||
+      ((window.location.pathname == '/') && ($('#toggle-arm-listener-btn')[0].checked == true)) //||
+      // science Listener
+      // pds Listener
+    )
+  }
 
-  $('#mux-1').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '1',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 1: Arm')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
-  })
-
-  $('#mux-2').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '2',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 2: Science')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
-  })
-
-  $('#mux-3').mouseup(function () {
-    $.ajax({
-      url: '/select_mux',
-      type: 'POST',
-      data: '3',
-      success: function (response) {
-        if (!response.output.includes('failed')) {
-          $('button#mux').text('Device 3: Lidar')
-        }
-        appendToConsole(response.output)
-        scrollToBottom()
-      }
-    })
-  })
-
-  $('#send-serial-btn').mouseup(function () {
-    let cmd = $('#serial-cmd-input').val()
-
-    $.ajax({
-      url: '/serial_cmd',
-      type: 'POST',
-      data: {
-        cmd: cmd
-      },
-      success: function (response) {
-        if (!response.output.includes('Response')) {
-          appendToConsole(response.output)
-          appendToConsole('No response from serial_cmd ROS service\n')
+  // select mux channel using mux_select service
+  $('#mux-0').mouseup(function () { // Rover
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-0', function(msgs) {
+        console.log(msgs)
+        if (msgs[0]) {
+          console.log('yeet')
         } else {
-          appendToConsole(response.output)
-          clearSerialCmd()
-        }
-        scrollToBottom()
-      }
-    })
-  })
-
-  $('#serial-cmd-input').on('keyup', function (e) {
-    // enter key
-    if (e.keyCode == 13) {
-      let cmd = $('#serial-cmd-input').val()
-
-      $.ajax({
-        url: '/serial_cmd',
-        type: 'POST',
-        data: {
-          cmd: cmd
-        },
-        success: function (response) {
-          if (!response.output.includes('Response')) {
-            appendToConsole(response.output)
-            appendToConsole('No response from serial_cmd ROS service\n')
-          } else {
-            appendToConsole(response.output)
-            clearSerialCmd()
-          }
-          scrollToBottom()
+          console.log('neet')//appendToConsole('Request failed. Received "' + msg + '"')
         }
       })
     }
   })
+
+  $('#mux-1').mouseup(function () { // Arm
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-1')
+    }
+  })
+
+  $('#mux-2').mouseup(function () { // Science
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-2')
+    }
+  })
+
+  $('#mux-3').mouseup(function () { // PDS // not lidar anymore
+    if (isListenerOpen()){
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-3')
+    }
+  })
+
+  // send serial command based on mux channel and current page
+  // beware that if choosing a different mux channel than the current page,
+  // commands will probably mess something up until this is done in a smart manner
+  $('#send-serial-btn').mouseup(function () {
+    // b
+    let cmd = $('#serial-cmd-input').val()
+    let buttonText = $('button#mux').text()
+    if (buttonText.includes('Select Device Channel')) {
+      appendToConsole('Unable to send serial command. Try opening a mux channel.')
+    } else {
+      // if the appropriate listener is open, send a command to it
+      if (buttonText.includes('Rover') && $('#toggle-rover-listener-btn')[0].checked == true) {
+        // sendRoverCommand(cmd) // rover commands not yet implemented
+      } else if (buttonText.includes('Arm') && $('#toggle-arm-listener-btn')[0].checked == true) {
+        sendArmCommand(cmd)
+      } else if (buttonText.includes('Science')) { // science buttons unknown
+        // sendScienceCommand(cmd) // science commands not yet implemented
+      } else if (buttonText.includes('PDS')) { // pds buttons unknown
+        // sendPdsCommand(cmd) // pds commands not yet implemented
+      }
+      // no listener is open, send generic request
+      else if (!buttonText.includes('Select Device Channel')) {
+        requestSerialCommand(cmd, function(msgs) {
+          console.log(msgs)
+          if (msgs[0]) {
+            console.log('nice')
+          } else {
+            console.log('not nice')
+          }
+        })
+      }
+    }
+  })
+
+  $('#serial-cmd-input').on('keyup', function (e) {
+    if (e.keyCode == 13) { // enter key
+      // copy code from above
+    }
+  })
+
 })

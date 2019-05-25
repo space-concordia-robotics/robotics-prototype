@@ -81,20 +81,20 @@ float PidController::updatePID(volatile float currentAngle, float desiredAngle) 
     // UART_PORT.print("P constant is: "); UART_PORT.println(this->kp);
     // UART_PORT.print("I constant is: "); UART_PORT.println(this->ki);
     // UART_PORT.print("D constant is: "); UART_PORT.println(this->kd);
-    UART_PORT.print("Current angle is: ");
+    UART_PORT.print("ARM Current angle is: ");
     UART_PORT.println(currentAngle);
-    UART_PORT.print("Desired angle is: ");
+    UART_PORT.print("ARM Desired angle is: ");
     UART_PORT.println(desiredAngle);
     // UART_PORT.print("Previous angle error is: "); UART_PORT.println(previousError);
-    UART_PORT.print("Current angle error is: ");
+    UART_PORT.print("ARM Current angle error is: ");
     UART_PORT.println(error);
-    UART_PORT.print("P output is: ");
+    UART_PORT.print("ARM P output is: ");
     UART_PORT.println(pTerm);
-    UART_PORT.print("I output is: ");
+    UART_PORT.print("ARM I output is: ");
     UART_PORT.println(iTerm);
-    UART_PORT.print("D output is: ");
+    UART_PORT.print("ARM D output is: ");
     UART_PORT.println(dTerm);
-    UART_PORT.print("PID output is: ");
+    UART_PORT.print("ARM PID output is: ");
     UART_PORT.println(pidSum);
 #endif
     if (pidSum > maxOutputValue)    {
@@ -169,19 +169,19 @@ float PidController::getMinOutputValue(void) {
 //! Print the PID gains using serial communication
 void PidController::printPidParameters(void) {
 #ifdef DEBUG_PID
-  UART_PORT.print("P constant is: ");
+  UART_PORT.print("ARM P constant is: ");
   UART_PORT.println(kp);
-  UART_PORT.print("I constant is: ");
+  UART_PORT.print("ARM I constant is: ");
   UART_PORT.println(ki);
-  UART_PORT.print("D constant is: ");
+  UART_PORT.print("ARM D constant is: ");
   UART_PORT.println(kd);
-  UART_PORT.print("Max output is: ");
+  UART_PORT.print("ARM Max output is: ");
   UART_PORT.println(maxOutputValue);
-  UART_PORT.print("Min output is: ");
+  UART_PORT.print("ARM Min output is: ");
   UART_PORT.println(minOutputValue);
-  UART_PORT.print("Min speed is: ");
+  UART_PORT.print("ARM Min speed is: ");
   UART_PORT.println(slowestSpeed);
-  UART_PORT.print("Joint angle tolerance is: ");
+  UART_PORT.print("ARM Joint angle tolerance is: ");
   UART_PORT.println(jointAngleTolerance);
 #endif
 }
