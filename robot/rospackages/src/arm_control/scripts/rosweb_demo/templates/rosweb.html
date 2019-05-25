@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+<script type="text/javascript" src="../static/js/eventemitter2.min.js"></script>
+<script type="text/javascript" src="../static/js/roslib.min.js"></script>
+
+<script type="text/javascript" type="text/javascript">
+  // Connecting to ROS
+
+  let ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+  });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  ros.on('error', function(error) {
+    console.log('Error connecting to websocket server: ', error);
+  });
+
+  ros.on('close', function() {
+    console.log('Connection to websocket server closed.');
+  });
+
+
+  // Subscribing to a Topic
+
+  let listener = new ROSLIB.Topic({
+    ros : ros, name : '/arm_angles', messageType : 'std_msgs/String'
+  });
+
+  listener.subscribe(function(message) {
+    val = document.getElementById("arm_angles");
+    val.innerHTML = 'Received: ' + message.data + '<br \\>';
+  });
+  
+
+  // Publishing to a topic
+
+    let talker = new ROSLIB.Topic({
+      ros : ros, name : '/arm_command', messageType : 'std_msgs/String'
+    });
+
+    function sendCommand() {
+      let val = document.getElementById("command_text");
+      let command = new ROSLIB.Message({data : val.value})
+      talker.publish(command);
+      console.log(val.value);
+    }
+
+  // Calling a service
+
+  let arm_command_client = new ROSLIB.Service({
+  	ros : ros, name : '/arm_request', serviceType : 'std_srvs/Trigger'
+  });
+
+  let request = new ROSLIB.ServiceRequest({
+  })
+
+  function sendPing() {
+  	arm_command_client.callService(request, function(result){
+	  	val = document.getElementById("arm_response");
+	  	console.log(result);
+	    val.innerHTML = 'Received: ' + '"' + result.message + '"' + '<br \\>';
+  	})
+  }
+
+//TODO: format js like Peter's js
+//TODO: implement budge command using what I found online
+</script>
+</head>
+
+<body>
+  <h1>Arm Control Demo Using ROS Over the Web</h1>
+  <p>This demo is using flask to host a webpage (port 5000). The webpage uses the roslibjs library to interact with a websockets server (port 9090) started by the rosbridge_websocket ROS package. The webpage interacts with a ROS node acting simultaneously as a publisher, subscriber and service. The idea is to have a Python script which opens a serial connection with the Arm Teensy and behaves as an interface between the Teensy and ROS. Then, using rosbridge_websocket and roslibjs, the Teensy can be controlled through a webpage and information can be retrieved on the same webpage.
+
+  <h3>This website is subscribing to the /arm_angles topic:</h3>
+  <h2 id="arm_angles"></h2>
+
+  <h3>This will send a request to the /arm_request service:</h3>
+  <button onclick="sendPing()">Ping Arm Teensy</button>
+  <h2 id="arm_response"></h2>
+
+  <h3>This will publish this command to the /arm_command topic:</h3>
+  <input type="text" id="command_text" value="budge ~ ~ ~ ~ ~ ~" onkeypress="if (event.keyCode===13) {sendCommand();}" />
+  <button onclick="sendCommand()">Send Command</button>
+</body>
+</html>

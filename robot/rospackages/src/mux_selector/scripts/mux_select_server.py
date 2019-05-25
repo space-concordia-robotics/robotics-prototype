@@ -60,6 +60,7 @@ def select_device(device):
     print(s0_state)
     print(s1_state)
 
+
     return s0_state + "\n" + s1_state
 
 def mux_select_server():

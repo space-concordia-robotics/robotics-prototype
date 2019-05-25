@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SC Robotics GUI</title>
+    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
 
     <!-- Bootstrap CSS -->
     <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
@@ -13,6 +14,11 @@
     <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
     <link href="../static/css/rover.css" rel="stylesheet">
     <script src="../static/js/jquery-3.3.1.min.js"></script>
+
+    <!-- for roslibjs stuff -->
+    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
@@ -43,11 +49,12 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
                 <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">Settings</a>
+                    aria-expanded="false">Select Device Channel</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="/">Arm</a>
-                    <a class="dropdown-item" href="/rover">Rover</a>
-                    <a class="dropdown-item" href=""javascript:void(0)"">...</a>
+                  <a id="mux-0" class="dropdown-item">0: Rover</a>
+                  <a id="mux-1" class="dropdown-item">1: Arm</a>
+                  <a id="mux-2" class="dropdown-item">2: Science</a>
+                  <a id="mux-3" class="dropdown-item">3: PDS</a>
                 </div>
                 </li>
             </ul>
@@ -60,9 +67,53 @@
     <div class="container fill">
         <div>
             <div class="row">
-                <div class="col-md-6">
-                    <h5 class="container-header">GPS Map</h5>
-                    <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
+                <div class="col-md-2">
+                  <h5>Navigation Data</h5>
+                  <div id="antenna-data">
+                    <div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">lat, long, dir (Antenna)</span><br>
+                      </div>
+                      <input type="text" id="initial-antenna-latitude">
+                      <input type="text" id="initial-antenna-longitude">
+                      <input type="text" id="initial-antenna-heading">
+                      <button type="button" id="send-antenna-pos" class="btn btn-primary">Send</button>
+                      <p>Input the data above to get recommended antenna angle and more</p>
+                    </div>
+                    <div style="display: none" id="antenna-unchanging">
+                      <h6>Antenna coords:</h6>
+                      <h5>lat: <span id="antenna-latitude">-</span></h5>
+                      <h5>long: <span id="antenna-longitude">-</span></h5>
+                      <div>
+                        <h6>Direct antenna to:</h6>
+                        <h3 id="recommended-antenna-heading">-</h3>
+                        <button type="button" id="change-antenna-pos" class="btn btn-primary">Change antenna data</button>
+                      </div>
+                    </div>
+                    <div style="display: none" id="gps-inputs" class="input-group input-group-sm">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">lat, long (Destination)</span><br>
+                      </div>
+                      <input type="text" id="desired-gps-latitude">
+                      <input type="text" id="desired-gps-longitude">
+                      <button type="button" id="send-gps-pos" class="btn btn-primary">Send</button>
+                    </div>
+                    <div style="display: none" id="gps-unchanging">
+                      <h6>Destination coords:</h6>
+                      <h5>lat: <span id="destination-latitude">-</span></h5>
+                      <h5>long: <span id="destination-longitude">-</span></h5>
+                      <div>
+                        <h6>Direct rover to:</h6>
+                        <h5>dir: <span id="recommended-rover-heading">-</span></h5>
+                        <h5>dist (m): <span id="distance-to-destination">-</span></h5>
+                        <button type="button" id="change-gps-coords" class="btn btn-primary">Change gps coords</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <h5 class="container-header">GPS Map</h5>
+                  <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
                 </div>
                 <div class="col-md-6">
                     <h5 class="container-header">Camera</h5>
@@ -80,57 +131,55 @@
                         <!--Table head-->
                         <thead>
                             <tr>
-                                <th></th>
-                                <th align="center">Status</th>
-                                <th>Speed </br>(RPM)</th>
-                                <th>Current Drawn </br>(A)</th>
+                              <th scope="col">Motor</br>(Number)</th>
+                              <th scope="col">Status</br>(Alive/Dead)</th>
+                              <th scope="col">Speed</br>(RPM)</th>
+                              <th scope="col">Current</br>(A)</th>
                             </tr>
                         </thead>
-                        <!--Table head-->
                         <!--Table body-->
                         <tbody>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                L Front Motor
-                            </th>
-                            <td>Alive</td>
-                            <td id="left-front-rpm">0</td>
-                            <td id="left-front-current">0.3</td>
+                                R Front</th>
+                            <td id="right-front-status">N/A</td>
+                            <td id="right-front-rpm">-</td>
+                            <td id="right-front-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Front Motor</th>
-                            <td>Alive</td>
-                            <td id="right-front-rpm">0</td>
-                            <td id="right-front-current">0.3</td>
+                                R Mid</th>
+                            <td id="right-mid-status">N/A</td>
+                            <td id="right-mid-rpm">-</td>
+                            <td id="right-mid-current">N</t/Ad>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                L Mid Motor</th>
-                            <td>Alive</td>
-                            <td id="left-mid-rpm">0</td>
-                            <td id="left-mid-current">0.3</td>
+                                R Back</th>
+                            <td id="right-rear-status">N/A</td>
+                            <td id="right-rear-rpm">-</td>
+                            <td id="right-rear-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Mid Motor</th>
-                            <td>Alive</td>
-                            <td id="right-mid-rpm">0</td>
-                            <td id="right-mid-current">0.3</td>
+                                L Front</th>
+                            <td id="left-front-status">N/A</td>
+                            <td id="left-front-rpm">-</td>
+                            <td id="left-front-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                L Rear Motor</th>
-                            <td>Alive</td>
-                            <td id="left-rear-rpm">0</td>
-                            <td id="left-rear-current">0.3</td>
+                                L Mid</th>
+                            <td id="left-mid-status">N/A</td>
+                            <td id="left-mid-rpm">-</td>
+                            <td id="left-mid-current">N/A</td>
                             </tr>
                             <tr>
                             <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Rear Motor</th>
-                            <td>Alive</td>
-                            <td id="right-rear-rpm">0</td>
-                            <td id="right-rear-current">0.3</td>
+                                R Back</th>
+                            <td id="left-rear-status">N/A</td>
+                            <td id="left-rear-rpm">-</td>
+                            <td id="left-rear-current">N/A</td>
                             </tr>
                         </tbody>
                         <!--Table body-->
@@ -155,7 +204,14 @@
                                 <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
                             </td>
                             <td>
-                                <input type="checkbox" id="toggle-rover-listener" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
+                              <div class="col-sm-3" align="center" style="border-style:none;">
+                                  <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                      <label>
+                                          <input id="toggle-rover-listener-btn" type="checkbox">
+                                          <span> </span>
+                                      </label>
+                                  </div>
+                              </div>
                             </td>
                             <td>
                                 <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
@@ -172,7 +228,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Ping Test</button></a>
+                                <a id="ping-rover-mcu"><button type="button" class="control-btn3">Ping Test</button></a>
                             </td>
                             <td></td>
                             <td>
@@ -190,27 +246,35 @@
                                 <tr>
                                     <td></td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-up">
+                                        <a id="rover-up">
                                             <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                         </a>
                                     </td>
                                     <td></td>
+                                    <td><h4>Throttle:</h4></td>
+                                    <td>
+                                        <h1 id="throttle-speed">-</h1>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-left">
+                                        <a id="rover-left">
                                             <button type="button" class="control-btn4 fa fa-chevron-left fa-1x"></button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-down">
+                                        <a id="rover-down">
                                             <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="javascript:void(0);" id="rover-right">
+                                        <a id="rover-right">
                                             <button type="button" class="control-btn4 fa fa-chevron-right fa-1x"></button>
                                         </a>
+                                    </td>
+                                    <td><h4>Steering:</h4></td>
+                                    <td>
+                                        <h1 id="steering-speed">-</h1>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -219,22 +283,23 @@
                             <table align="center">
                                 <tbody>
                                     <tr class="speed-throttle-control">
-                                        <td>i</td>
-                                        <td>j</td>
+                                        <td>U</td> <!--85-->
+                                        <td>I</td> <!--73-->
                                     </tr>
                                     <tr>
                                         <td>
-                                            <a href="javascript:void(0);" id="throttle-increase">
-                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a href="javascript:void(0);" id="throttle-decrease">
+                                            <a id="max-throttle-decrease">
                                                 <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
                                             </a>
                                         </td>
-                                        <td id="throttle-speed">
-                                            0
+                                        <td>
+                                            <a id="max-throttle-increase">
+                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+                                            </a>
+                                        </td>
+                                        <td><h5>Max<br>Throttle:</h5></td>
+                                        <td>
+                                            <h4 id="max-throttle-speed">25</h4><!-- in practice this shouldn't be hardcoded but anyway it gets refreshed when a button is pressed -->
                                         </td>
                                     </tr>
                                 </tbody>
@@ -243,22 +308,23 @@
                             <table align="center">
                                 <tbody>
                                     <tr class="speed-throttle-control">
-                                        <td>o</td>
-                                        <td>k</td>
+                                        <td>J</td> <!--74-->
+                                        <td>K</td> <!--75-->
                                     </tr>
                                     <tr>
-                                        <td>
-                                            <a href="javascript:void(0);" id="steering-increase">
+                                      <td>
+                                          <a id="max-steering-decrease">
+                                              <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                          </a>
+                                      </td>
+                                      <td>
+                                            <a id="max-steering-increase">
                                                 <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                             </a>
                                         </td>
+                                        <td><h5>Max<br>Steering:</h5></td>
                                         <td>
-                                            <a href="javascript:void(0);" id="steering-decrease">
-                                                <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td id="steering-speed">
-                                            0
+                                            <h4 id="max-steering-speed">39</h4><!-- in practice this shouldn't be hardcodedbut anyway it gets refreshed when a button is pressed -->
                                         </td>
                                     </tr>
                                 </tbody>
@@ -363,26 +429,11 @@
                                                 <strong>L</strong>
                                             </button>
                                         </td>
-                                        <td>
-                                            <button title="Toggle listener script" id="toggle-rover-listener-btn" type="button" class="control-btn-mid" disabled>
-                                                <strong>T</strong>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button title="Show buffered serial messages" id="show-buffered-rover-msgs" type="button" class="control-btn-mid" disabled>
-                                                <strong>B</strong>
-                                            </button>
-                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <button title="Enable motor controls" id="enable-rover-motors" type="button" class="control-btn-mid" disabled>
                                                 <strong>M</strong>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button title="Terminate listener script" id="terminate-listener-script" type="button" class="control-btn-mid" disabled>
-                                                <strong>Q</strong>
                                             </button>
                                         </td>
                                         <td>
@@ -404,13 +455,13 @@
                         <br>
                         <!--log console buttons-->
                         <div class="btn-group" role="group" id="logs-btn">
-                            <a href="javascript:void(0)" id=click_btn>
+                            <a id=click_btn>
                                 <button type="button" class="btn btn-secondary">Open Logs</button>
                             </a>
-                            <a href="javascript:void(0)" id="clear-log">
+                            <a id="clear-log">
                                 <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
                             </a>
-                            <a href="javascript:void(0)" id="test-log">
+                            <a id="test-log">
                                 <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>
                             </a>
                         </div>

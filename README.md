@@ -7,7 +7,7 @@ This repo contains the Robotics software team code, as well as some of the other
 
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
-Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy. 
+Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
 ### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
 Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
@@ -355,14 +355,16 @@ I (Josh) currently use Sublime Text to write my code, and then compile it using 
 
 ### A note on ROS for Teensy 3.5/3.6
 
-The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular are missing a conditional in one of the header files. According to [this link](https://github.com/ros-drivers/rosserial/issues/259) and [this link](https://forum.pjrc.com/threads/40418-rosserial_arduino-for-Teensy), `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` has to be added to line 44 of ArduinoHardware.h BUT I found that the correct file is actually ArduinoIncludes.h. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src`.
+The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular give compiler errors upon using the correct rosserial syntax, however, even though it seems to work on Arduino. The following instructions are a first step towards getting it to work correctly, because at the very least they get rid of the compiler errors. Further research into the library's source code is needed to figure out why it doesn't work on Teensy 3.5/3.6.
 
-This was found to be insufficient. In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, in the same file, the following two lines must be commented out:
+ For starters, add `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` to ArduinoIncludes.h to indicate that Teensy 3.5/3.6 are allowed to use the library. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src` once rosserial has been installed.
+
+In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, in the same file, the following two lines must be commented out:
 ```
 #include <usb_serial.h>  // Teensy 3.0 and 3.1
 #define SERIAL_CLASS usb_serial_class
 ```
-and the following lines must be added:
+and the following lines must be added instead:
 ```
 #ifdef USE_TEENSY_HW_SERIAL
   #include <HardwareSerial.h>
@@ -372,7 +374,7 @@ and the following lines must be added:
   #define SERIAL_CLASS usb_serial_class
 #endif
 ```
-If you want to choose a different hardware Serial port, the following block of code presented [here](https://answers.ros.org/question/198247/how-to-change-the-serial-port-in-the-rosserial-lib-for-the-arduino-side/#post-id-295159) should do the trick, though it hasn't been tested yet:
+If you want to choose a different hardware Serial port, the following block of code presented [here](https://answers.ros.org/question/198247/how-to-change-the-serial-port-in-the-rosserial-lib-for-the-arduino-side/#post-id-295159) may work, though I have never tested it. There may be another method:
 ```
 class NewHardware : public ArduinoHardware
 {
