@@ -20,19 +20,26 @@ public:
     static int numMotors; // keeps track of how many motors there are
     int encoderPinA, encoderPinB;
     int output_pwm;
+    int prev_output_pwm;
+    float acc;
+    bool accLimit = true;
     String motorName;
     volatile unsigned long  dt;
+    volatile unsigned long  dt2;
     volatile unsigned long prevTime;
+    volatile unsigned long prevTime2;
     float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
     float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
     bool isOpenLoop = true; // decides whether to use the PID or not
     volatile int rotationDirection = CCW;
+    String direction;
     // int maxSpeed;
     PidController pidController; // used for speed and angle control
     // these variables change during the main loop
     volatile long encoderCount = 0; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
     volatile long aveCount = 0; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
     volatile long prevCount = 0; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
+    volatile long prevVelocity = 0; // incremented inside encoder interrupts, keeps track of how much the motor shaft has rotated and in which direction
     volatile bool movementDone; // this variable is what allows the timer interrupts to make motors turn. can be updated within said interrupts
     // setup functions
     RobotMotor();
@@ -135,6 +142,7 @@ void RobotMotor::calcCurrentVelocity()
         currentVelocity = (float) (encoderCount * 60000000.0 * gearRatioReciprocal * encoderResolutionReciprocal / (float) (dt));
     }
 //    Serial.println(currentVelocity);
+//    Serial.println(motorName + " " + String(currentVelocity));
     encoderCount = 0;
     dt = 0 ;
     //  Serial.println(dt/1000);
@@ -209,13 +217,16 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
         switch (motorDir) {
             case CW:
                 digitalWrite(directionPin, LOW);
+                this -> direction = "CW";
                 break;
             case CCW:
                 digitalWrite(directionPin, HIGH);
+                this -> direction = "CCW";
+
                 break;
         }
         output_pwm = desiredVelocity;
-        this -> desiredVelocity = output_pwm;
+
     }
     else if (!isOpenLoop) {
         // makes sure the speed is within the limits set in the pid during setup
@@ -227,29 +238,23 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
         output_pwm = pidController.updatePID(currentVelocity, desiredVelocity);
 
     }
+    this -> desiredVelocity = output_pwm;
 
+/* Acceleration limiter */
+    if (accLimit) {
+        dt2 = micros() - prevTime2;
+        acc = ((float) output_pwm - (float) prev_output_pwm) / (float) dt2;
+
+        if (abs(acc) >
+            0.00051) {  // 0.00051 it the acceleration limit to go from 0 to full speed in 0.5 seconds. adjust this value for desired tuning
+            output_pwm = (acc < 0) ? -1 : 1 * 0.00051 * dt2 + prev_output_pwm;
+        }
+        prevTime2 = micros();
+        prev_output_pwm = output_pwm;
+    }
     analogWrite(pwmPin, output_pwm);
 }
-//
-//void DcMotor::setVelocityNoPID(int motorDir, float desiredVelocity)
-//{
-//    switch (motorDir)
-//    {
-//        case CW:
-//            digitalWrite(directionPin, LOW);
-//            //      Serial.print(/"\tDegital"); Serial.println("LOW");
-//
-//            break;
-//        case CCW:
-//            digitalWrite(directionPin, HIGH);
-//            //            Serial.print("\tDegital")/; Serial.println("HIGH");
-//
-//            break;
-//    }
-//
-//
-//    analogWrite(pwmPin, desiredVelocity);
-//
-//}
+
+
 
 #endif
