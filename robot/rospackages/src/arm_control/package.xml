@@ -2,7 +2,35 @@
 <package format="2">
   <name>arm_control</name>
   <version>0.0.0</version>
-  <description>The arm_control package</description>
+  <description>
+    The arm_control package. This also contains rover control scripts, helpers, etc.
+
+    ArmNode.py will open a UART or USB serial port based on the input arguments.
+    It can be opened directly or through the task_handler.
+    This node listens to the serial port and based on the data it will know where to send it.
+    It subscribes to the arm_command topic and to arm_request client requests and
+    then either sends back feedback through the arm_feedback topic, the arm_joint_states topic,
+    or ArmRequest.srv.
+
+    RoverNode.py will open a UART or USB serial port based on the input arguments.
+    It cannot yet be opened directly through the task_handler.
+    This node listens to the serial port and based on the data it will know where to send it.
+    More information to be written later.
+
+    AntennaNode.py subscribes to the rover_position topic.
+    It depends on the antenna_latitude, antenna_longitude and antenna_start_dir ROS params.
+    The node will do nothing until the parameters are set, at which point it will send
+    the recommended angle on the antenna rotator display to attain optimal signal strength.
+    It also sends the distance from the antenna to the rover.
+    The node uses the rover latitude and longitude to determine the results.
+
+    NavigationNode.py subscribes to the rover_position topic.
+    It depends on the gps_latitude and gps_longitude ROS params.
+    The node will do nothing until the parameters are set, at which point it will send
+    the recommended direction of the rover to reach the goal position.
+    It also sends the distance from the rover to the goal position.
+    The node uses the rover latitude, longitude and heading to determine the results.
+  </description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

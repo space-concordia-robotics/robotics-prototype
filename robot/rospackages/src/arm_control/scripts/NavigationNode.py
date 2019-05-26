@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import traceback
 import time
-import re
 
 from Nav_funs import Direction, Distance, Turning
 import rospy
@@ -13,51 +11,48 @@ def subscriber_callback(message):
     rospy.loginfo(message)
     rover['longitude'] = message.latitude
     rover['latitude'] = message.longitude
+    rover['heading'] = message.heading
 
-    if gotAntennaPos:
-        BS_to_Rover_dir = Direction(antenna['latitude'],antenna['longitude'],rover['latitude'],rover['longitude'])
-        BS_to_Rover_dis = Distance(antenna['latitude'],antenna['longitude'],rover['latitude'],rover['longitude'])
+    if gotGpsPos:
+        Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
+        gpsGoal['latitude'], gpsGoal['longitude'])
+        Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
+        gpsGoal['latitude'], gpsGoal['longitude'])
 
-        rotatorAngle = BS_to_Rover_dir - BS_ant_dir + 180
-        if rotatorAngle < 0:
-            rotatorAngle += 360
-        elif rotatorAngle > 360:
-            rotatorAngle -= 360
+        Direction_adjust = -Turning(Rov_to_des_direction, rover['heading'])
 
-        msg = AntennaGoal()
-        msg.desiredDir = rotatorAngle
-        msg.distFromBase = BS_to_Rover_dis
-        antennaPub.publish(msg)
+        msg = RoverGoal()
+        msg.desiredDir = Direction_adjust
+        msg.distToGoal = Rov_to_des_distance
+        navigationPub.publish(msg)
     return
 
 if __name__ == '__main__':
-    node_name = 'antenna_node'
+    node_name = 'navigation_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub functionality')
 
     subscribe_topic = '/rover_position'
-    #first of all, it should subscribe to Twist and decide how to send it to the rover...
-    #for now i might just have it subscribe to Strings tho
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, RoverPosition, subscriber_callback)
 
-    antenna_pub_topic = '/antenna_goal'
-    rospy.loginfo('Beginning to publish to "'+antenna_pub_topic+'" topic')
-    antennaPub = rospy.Publisher(antenna_pub_topic, AntennaGoal, queue_size=10)
+    navigation_pub_topic = '/rover_goal'
+    rospy.loginfo('Beginning to publish to "'+navigation_pub_topic+'" topic')
+    navigationPub = rospy.Publisher(navigation_pub_topic, RoverGoal, queue_size=10)
 
-    gotAntennaPos = False
-    antenna = {latitude:None, longitude:None, startDir:None, recommendedDir:None}
-    rover = {latitude:None, longitude:None, distance:None}
+    gotGpsPos = False
+    gpsGoal = {'latitude':None, 'longitude':None}
+    rover = {'latitude':None, 'longitude':None, 'heading':None, 'distance':None}
 
     rospy.loginfo('This node needs the antenna starting position and will wait until it receives that')
     try:
         while not rospy.is_shutdown():
-            if not gotAntennaPos: #
+            if not gotGpsPos:
                 try:
-                    antenna['latitude'] = rospy.get_param('antenna_latitude')
-                    antenna['longitude'] = rospy.get_param('antenna_longitude')
-                    antenna['startDir'] = rospy.get_param('antenna_start_dir')
-                    rospy.loginfo('Got antenna starting position!')
+                    gpsGoal['latitude'] = rospy.get_param('gps_latitude')
+                    gpsGoal['longitude'] = rospy.get_param('gps_longitude')
+                    gotGpsPos = True
+                    rospy.loginfo('Got GPS goal coordinates!')
                 except KeyError: # param not defined
                     pass
             else:

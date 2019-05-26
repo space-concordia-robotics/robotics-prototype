@@ -5,10 +5,11 @@ project(arm_control)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  ## all
   rospy
   std_msgs
-  sensor_msgs
   message_generation
+  sensor_msgs
 )
 
 ################################################
@@ -18,17 +19,24 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  ## arm
   ArmRequest.srv
 )
 
 add_message_files(
   FILES
+  ## arm
   IkCommand.msg
+  ## rover
+  RoverPosition.msg
+  AntennaGoal.msg
+  RoverGoal.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
+  ## all
   std_msgs
   sensor_msgs
 )

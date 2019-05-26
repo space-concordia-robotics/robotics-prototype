@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import traceback
 import time
-import re
 
 from Nav_funs import Distance, Direction
 import rospy
@@ -36,8 +34,6 @@ if __name__ == '__main__':
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub functionality')
 
     subscribe_topic = '/rover_position'
-    #first of all, it should subscribe to Twist and decide how to send it to the rover...
-    #for now i might just have it subscribe to Strings tho
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, RoverPosition, subscriber_callback)
 
@@ -46,17 +42,18 @@ if __name__ == '__main__':
     antennaPub = rospy.Publisher(antenna_pub_topic, AntennaGoal, queue_size=10)
 
     gotAntennaPos = False
-    antenna = {latitude:None, longitude:None, startDir:None, recommendedDir:None}
-    rover = {latitude:None, longitude:None, distance:None}
+    antenna = {'latitude':None, 'longitude':None, 'startDir':None, 'recommendedDir':None}
+    rover = {'latitude':None, 'longitude':None, 'distance':None}
 
     rospy.loginfo('This node needs the antenna starting position and will wait until it receives that')
     try:
         while not rospy.is_shutdown():
-            if not gotAntennaPos: #
+            if not gotAntennaPos:
                 try:
                     antenna['latitude'] = rospy.get_param('antenna_latitude')
                     antenna['longitude'] = rospy.get_param('antenna_longitude')
                     antenna['startDir'] = rospy.get_param('antenna_start_dir')
+                    gotAntennaPos = True
                     rospy.loginfo('Got antenna starting position!')
                 except KeyError: # param not defined
                     pass
