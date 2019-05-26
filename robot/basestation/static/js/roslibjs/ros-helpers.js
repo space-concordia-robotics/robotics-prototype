@@ -88,6 +88,26 @@ function initRosWeb () {
     appendToConsole(message.data)
   })
 
+  /* science commands */
+
+  // setup a client for the science_request service
+  science_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'science_request',
+    serviceType: 'ScienceRequest'
+  })
+
+  // setup a subscriber for the arm_joint_states topic
+  science_data_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_feedback',
+    messageType: 'std_msgs/String'
+  })
+
+  science_data_listener.subscribe(function (message) {
+    appendToConsole(message.data)
+  })
+
   /* rover commands */
 
   // setup a client for the rover_request service
@@ -112,7 +132,7 @@ function initRosWeb () {
   })
 
   rover_joint_states_listener.subscribe(function (message) {
-    //TODO: make sure the indices are correct... DONE?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?
+    // TODO: make sure the indices are correct... DONE?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?
     $('#right-front-rpm').text(message.velocity[0])
     $('#right-mid-rpm').text(message.velocity[1])
     $('#right-back-rpm').text(message.velocity[2])
@@ -129,7 +149,7 @@ function initRosWeb () {
   })
 
   rover_position_listener.subscribe(function (message) {
-    //TODO: place the data somewhere, call ros node, etc?
+    // TODO: place the data somewhere, call ros node, etc?
     // idk how this will work exactly, maybe a ros python node does stuff
     // this could still display the data though i guess
   })
@@ -144,7 +164,6 @@ function initRosWeb () {
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
-
 }
 
 /* functions used in main code */
@@ -162,7 +181,7 @@ function requestMuxChannel (elemID, callback) {
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -187,7 +206,7 @@ function requestSerialCommand (command, callback) {
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -203,10 +222,14 @@ function requestSerialCommand (command, callback) {
 
 function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   var request
-  if (reqArgs=='') {
+  if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
   } else {
-    request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus, args : reqArgs })
+    request = new ROSLIB.ServiceRequest({
+      task: reqTask,
+      status: reqStatus,
+      args: reqArgs
+    })
   }
   let sentTime = new Date().getTime()
 
@@ -253,10 +276,10 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   })
 }
 
-function checkTaskStatuses() {
+function checkTaskStatuses () {
   if (window.location.pathname == '/') {
     // check arm listener status
-    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function(msgs) {
+    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
       console.log(msgs)
       appendToConsole(msgs)
       if (msgs[0]) {
@@ -266,7 +289,7 @@ function checkTaskStatuses() {
       }
     })
     // check arm camera stream status
-    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function(msgs) {
+    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
       console.log(msgs)
       appendToConsole(msgs)
       if (msgs[0]) {
@@ -277,14 +300,14 @@ function checkTaskStatuses() {
     })
   } else if (window.location.pathname == '/rover') {
     console.log('rover page')
-    //do the same but for front and rear cameras
+    // do the same but for front and rear cameras
   } else if (window.location.pathname == '/science') {
     console.log('rover page')
-    //do the same but for front and rear cameras
-  } /*else if (window.location.pathname == '/rover') { //pds
+    // do the same but for front and rear cameras
+  } /* else if (window.location.pathname == '/rover') { //pds
     console.log('rover page')
     //do the same but for front and rear cameras
-  }*/
+  } */
 }
 
 function sendArmCommand (cmd) {
@@ -306,12 +329,38 @@ function sendArmRequest (command, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole('Sending request to execute command \"' + command + '\"')
+  appendToConsole('Sending request to execute command "' + command + '"')
 
-  arm_request_client.callService(request, function (result) {
+  science_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
+    if (!result.success) {
+      // how to account for a lack of response?
+      appendToConsole('Request failed. Received "' + msg + '"')
+      // return false
+      callback([false, msg])
+    } else {
+      appendToConsole(
+        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
+      )
+      // return true
+      callback([true, msg])
+    }
+  })
+}
+
+function sendScienceRequest (command, callback) {
+  let request = new ROSLIB.ServiceRequest({ msg: command })
+  let sentTime = new Date().getTime()
+
+  console.log(request)
+  appendToConsole('Sending request to execute command "' + command + '"')
+
+  science_request_client.callService(request, function (result) {
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -346,12 +395,12 @@ function sendRoverRequest (command, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole('Sending request to execute command \"' + command + '\"')
+  appendToConsole('Sending request to execute command "' + command + '"')
 
   rover_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')

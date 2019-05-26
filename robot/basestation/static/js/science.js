@@ -207,16 +207,22 @@ $(document).ready(function () {
           .text()
           .includes('Science')
       ) {
-        requestTask('science_listener', 1, '#science-listener-btn', function (
-          msgs
-        ) {
-          console.log(msgs)
-          if (msgs[0]) {
-            $('#science-listener-btn')[0].checked = true
-          } else {
-            $('#science-listener-btn')[0].checked = false
-          }
-        })
+        requestTask(
+          'science_listener',
+          1,
+          '#science-listener-btn',
+          function (msgs) {
+            console.log(msgs)
+            if (msgs.length == 2) {
+              if (msgs[1].includes('already running') || msgs[0] == true) {
+                $('#science-listener-btn')[0].checked = true
+              } else {
+                $('#science-listener-btn')[0].checked = false
+              }
+            }
+          },
+          'usb' // hardcoded usb for local testing
+        )
       } else {
         appendToConsole(
           'Cannot turn science listener on if not in science mux channel!'
@@ -241,6 +247,29 @@ $(document).ready(function () {
           } else {
             $('#science-listener-btn')[0].checked = false
           }
+        }
+      })
+    }
+  })
+
+  $('#activate-science-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#activate-science-btn').is(':checked')) {
+      sendArmRequest('activate', function (msgs) {
+        if (msgs[0]) {
+          $('#activate-science-btn')[0].checked = true
+        } else {
+          $('#activate-science-btn')[0].checked = false
+        }
+      })
+    } else {
+      // 'deactivated' needs to be handled differently since it takes 45 secconds
+      sendArmRequest('stop', function (msgs) {
+        if (msgs[0]) {
+          $('#activate-science-btn')[0].checked = false
+        } else {
+          $('#activate-science-btn')[0].checked = true
         }
       })
     }
