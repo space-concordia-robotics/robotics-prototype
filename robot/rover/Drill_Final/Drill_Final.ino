@@ -98,6 +98,13 @@ Servo table;
 void setup() {
 
   UART_PORT.begin(115200); UART_PORT.setTimeout(10);
+  // blink adn stay ON to signal this is indeed the science MCU and not another one
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(250);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(250);
+  digitalWrite(LED_BUILTIN, HIGH);
 
   table.attach(TABLE_PIN);
   pinMode(DRILL, OUTPUT);
@@ -235,7 +242,7 @@ void loop() {
       if (cmd.startsWith("elevatorfeed") && (cmd.indexOf(" ") > 0)) {
         //turns elevator at desired feed
         // needs input "elevatorfeed 100"
-        elevatorFeedPercent = getValue((cmd, ' ', 1).toInt());
+        elevatorFeedPercent = getValue(cmd, ' ', 1).toInt();
         UART_PORT.println("SCIENCE elevatorfeed");
         UART_PORT.println(elevator_feed(elevatorFeedPercent));
         analogWrite(ELEVATOR, 0);
@@ -751,4 +758,3 @@ String getValue(String data, char separator, int index) {
 
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-
