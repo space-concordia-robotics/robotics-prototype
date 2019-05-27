@@ -190,7 +190,7 @@ void loop() {
 
       if (cmd == "activate") {
         isActivated = true;
-        UART_PORT.println("SCIENCE activate");
+        UART_PORT.println("SCIENCE activated");
       }
     }
     else if (isActivated == true) {
@@ -518,6 +518,7 @@ void loop() {
         homingTimer = millis();
         turnTable (0, 0);
         deactivating = true;
+        UART_PORT.println("SCIENCE deactivated");
       }
       if (cmd == "stop" || (deactivating == true && (millis() - homingTimer > 30000))) {
         analogWrite(ELEVATOR, 0);
@@ -546,7 +547,7 @@ void loop() {
         previousElevatorState = 'n';
         isActivated = false;
         deactivating == true;
-        UART_PORT.print("deactivated");
+        UART_PORT.println("SCIENCE stopped");
       }
     }
   }
