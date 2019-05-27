@@ -1,6 +1,3 @@
-// @TODO: implement game loop for keyboard events:
-// https://stackoverflow.com/questions/12273451/how-to-fix-delay-in-javascript-keydown
-
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 39
@@ -50,6 +47,36 @@ $(document).ready(function () {
       sendRoverRequest('ping', function (msgs) {})
       lastCmdSent = new Date().getTime()
     }
+  })
+
+  $('#send-gps-pos').on('click', function (event) {
+    event.preventDefault()
+    let goodInput = true
+    if ( !($('#desired-gps-latitude').val()) ) {
+      appendToConsole('latitude field empty!')
+      goodInput = false
+    }
+    if ( !($('#desired-gps-longitude').val()) ) {
+      appendToConsole('longitude field empty!')
+      goodInput = false
+    }
+    if (goodInput) {
+      let desiredLatitude = $('#desired-gps-latitude').val()
+      let desiredLongitude = $('#desired-gps-longitude').val()
+      appendToConsole(desiredLatitude)
+      appendToConsole(desiredLongitude)
+      gps_latitude.set( parseFloat(desiredLatitude) );
+      gps_longitude.set( parseFloat(desiredLongitude) );
+      $('#destination-latitude').text(desiredLatitude)
+      $('#destination-longitude').text(desiredLongitude)
+      $('#gps-inputs').hide()
+      $('#gps-unchanging').show()
+    }
+  })
+  $('#change-gps-coords').on('click', function (event) {
+    event.preventDefault()
+    $('#gps-inputs').show()
+    $('#gps-unchanging').hide()
   })
 
   $('#toggle-rover-listener-btn').on('click', function (event) {

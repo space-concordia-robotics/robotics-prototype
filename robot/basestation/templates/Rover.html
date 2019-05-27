@@ -70,7 +70,13 @@
                 <div class="col-md-2">
                   <h5>Navigation Data</h5>
                   <div id="antenna-data">
-                    <div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
+                    <div style="display: block" id="rover-unchanging">
+                      <h6>Rover coords:</h6>
+                      <h5>lat: <span id="rover-latitude">-</span></h5>
+                      <h5>long: <span id="rover-longitude">-</span></h5>
+                      <h5>heading: <span id="rover-heading">-</span></h5>
+                    </div>
+                    <div style="display: none" id="antenna-inputs" class="input-group input-group-sm">
                       <div class="input-group-prepend">
                         <span class="input-group-text">lat, long, dir (Antenna)</span><br>
                       </div>
@@ -90,7 +96,7 @@
                         <button type="button" id="change-antenna-pos" class="btn btn-primary">Change antenna data</button>
                       </div>
                     </div>
-                    <div style="display: none" id="gps-inputs" class="input-group input-group-sm">
+                    <div style="display: block" id="gps-inputs" class="input-group input-group-sm">
                       <div class="input-group-prepend">
                         <span class="input-group-text">lat, long (Destination)</span><br>
                       </div>

@@ -83,16 +83,16 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-arm-listener-btn').is(':checked')) {
-      var serialType = 'usb' // i hardcoded this for testing
+      var serialType = 'uart' // in a perfect world this is controlled in the gui
       if ( $('button#mux').text().includes('Arm') || serialType == 'usb') {
         requestTask('arm_listener', 1, '#toggle-arm-listener-btn', function (msgs) {
-          console.log(msgs)
+          //console.log(msgs)
           if (msgs[0]) {
             $('#toggle-arm-listener-btn')[0].checked = true
           } else {
             $('#toggle-arm-listener-btn')[0].checked = false
           }
-        }, 'usb')
+        }, serialType)
         // console.log('returnVals', returnVals)
       } else {
         appendToConsole('Cannot turn arm listener on if not in arm mux channel!')

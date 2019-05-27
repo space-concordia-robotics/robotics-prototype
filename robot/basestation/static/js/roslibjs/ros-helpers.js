@@ -2,16 +2,16 @@ function initRosWeb () {
   let ros = new ROSLIB.Ros({
     url: 'ws://localhost:9090'
   })
-
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
+    if (window.location.pathname == '/rover') {
+      initNavigationPanel()
+    }
   })
-
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)
   })
-
   ros.on('close', function () {
     appendToConsole('Connection to websocket server closed.')
   })
@@ -24,14 +24,12 @@ function initRosWeb () {
     name: 'mux_select',
     serviceType: 'SelectMux'
   })
-
   // setup a client for the serial_cmd service
   serial_cmd_client = new ROSLIB.Service({
     ros: ros,
     name: 'serial_cmd',
     serviceType: 'SerialCmd'
   })
-
   // setup a client for the task_handler service
   task_handler_client = new ROSLIB.Service({
     ros: ros,
@@ -47,28 +45,24 @@ function initRosWeb () {
     name: 'arm_request',
     serviceType: 'ArmRequest'
   })
-
   // setup a publisher for the arm_command topic
   arm_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'arm_command',
     messageType: 'std_msgs/String'
   })
-
   // setup a publisher for the ik_command topic
   ik_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'ik_command',
     messageType: 'IkCommand'
   })
-
   // setup a subscriber for the arm_joint_states topic
   arm_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'arm_joint_states',
     messageType: 'sensor_msgs/JointState'
   })
-
   arm_joint_states_listener.subscribe(function (message) {
     for (var angle in message.position) {
       // let motor = angle+1;
@@ -76,14 +70,12 @@ function initRosWeb () {
       $('#m' + motor + '-angle').text(message.position[angle])
     }
   })
-
   // setup a subscriber for the arm_feedback topic
   arm_feedback_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'arm_feedback',
     messageType: 'std_msgs/String'
   })
-
   arm_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
@@ -96,23 +88,19 @@ function initRosWeb () {
     name: 'rover_request',
     serviceType: 'ArmRequest' // for now... might change
   })
-
-  // setup a publisher for the arm_command topic
+  // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_command',
     messageType: 'std_msgs/String'
   })
-
   // setup a subscriber for the rover_joint_states topic
   rover_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_joint_states',
     messageType: 'sensor_msgs/JointState'
   })
-
   rover_joint_states_listener.subscribe(function (message) {
-    //TODO: make sure the indices are correct... DONE?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?
     $('#right-front-rpm').text(message.velocity[0])
     $('#right-mid-rpm').text(message.velocity[1])
     $('#right-back-rpm').text(message.velocity[2])
@@ -120,35 +108,73 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-back-rpm').text(message.velocity[5])
   })
-
   // setup a subscriber for the rover_position topic
   rover_position_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_position',
-    messageType: 'RoverPosition'
+    messageType: 'geometry_msgs/Point'
   })
-
   rover_position_listener.subscribe(function (message) {
-    //TODO: place the data somewhere, call ros node, etc?
-    // idk how this will work exactly, maybe a ros python node does stuff
-    // this could still display the data though i guess
+    $('#rover-latitude').text(message.x)
+    $('#rover-longitude').text(message.y)
+    $('#rover-heading').text(message.z)
   })
-
   // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_feedback',
     messageType: 'std_msgs/String'
   })
-
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
+  // setup a subscriber for the antenna_goal topic
+  rover_goal_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'antenna_goal',
+    messageType: 'geometry_msgs/Point'
+  })
+  rover_goal_listener.subscribe(function (message) {
+    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
+    $('#distance-to-destination').text(parseFloat(message.y).toFixed(2))
+  })
+  // setup gps parameters for antenna directing
+  antenna_latitude = new ROSLIB.Param({
+   ros : ros,
+   name : 'antenna_latitude'
+  });
+  antenna_longitude = new ROSLIB.Param({
+   ros : ros,
+   name : 'antenna_longitude'
+  });
+  antenna_start_dir = new ROSLIB.Param({
+   ros : ros,
+   name : 'antenna_start_dir'
+  });
+
+  // setup a subscriber for the rover_goal topic
+  rover_goal_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_goal',
+    messageType: 'geometry_msgs/Point'
+  })
+  rover_goal_listener.subscribe(function (message) {
+    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
+    $('#distance-to-destination').text(parseFloat(message.y).toFixed(2))
+  })
+  // setup gps parameters for rover goals
+  gps_latitude = new ROSLIB.Param({
+   ros : ros,
+   name : 'gps_latitude'
+  });
+  gps_longitude = new ROSLIB.Param({
+   ros : ros,
+   name : 'gps_longitude'
+  });
 
 }
 
 /* functions used in main code */
-
 function requestMuxChannel (elemID, callback) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
@@ -176,7 +202,6 @@ function requestMuxChannel (elemID, callback) {
     }
   })
 }
-
 function requestSerialCommand (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command + '\n' })
   let sentTime = new Date().getTime()
@@ -200,7 +225,6 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-
 function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   var request
   if (reqArgs=='') {
@@ -253,54 +277,12 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   })
 }
 
-function checkTaskStatuses() {
-  if (window.location.pathname == '/') {
-    // check arm listener status
-    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function(msgs) {
-      console.log(msgs)
-      appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('tru')
-      } else {
-        console.log('fals')
-      }
-    })
-    // check arm camera stream status
-    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function(msgs) {
-      console.log(msgs)
-      appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('truu')
-      } else {
-        console.log('falss')
-      }
-    })
-  } else if (window.location.pathname == '/rover') {
-    console.log('rover page')
-    //do the same but for front and rear cameras
-  } else if (window.location.pathname == '/science') {
-    console.log('rover page')
-    //do the same but for front and rear cameras
-  } /*else if (window.location.pathname == '/rover') { //pds
-    console.log('rover page')
-    //do the same but for front and rear cameras
-  }*/
-}
-
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
-
-/*
-// usage
-sendArmRequest('this is a command', function (succeeded) {
-  console.log(succeeded ? 'command succeeded' : 'command failed')
-})
-*/
-
 function sendArmRequest (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
@@ -333,14 +315,6 @@ function sendRoverCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
-
-/*
-// example usage
-sendRoverRequest('this is a command', function (succeeded) {
-  console.log(succeeded ? 'command succeeded' : 'command failed')
-})
-*/
-
 function sendRoverRequest (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
@@ -363,6 +337,87 @@ function sendRoverRequest (command, callback) {
       )
       // return true
       callback([true, msg])
+    }
+  })
+}
+
+function checkTaskStatuses () {
+  if (window.location.pathname == '/') {
+    // check arm listener status
+    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function(msgs) {
+      console.log(msgs)
+      appendToConsole(msgs)
+      if (msgs[0]) {
+        console.log('tru')
+      } else {
+        console.log('fals')
+      }
+    })
+    // check arm camera stream status
+    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function(msgs) {
+      console.log(msgs)
+      appendToConsole(msgs)
+      if (msgs[0]) {
+        console.log('truu')
+      } else {
+        console.log('falss')
+      }
+    })
+  } else if (window.location.pathname == '/rover') {
+    //do the same but for front and rear cameras
+  } else if (window.location.pathname == '/science') {
+    //do the same but for front and rear cameras
+  } /*else if (window.location.pathname == '/rover') { //pds
+    //do the same but for front and rear cameras
+  }*/
+}
+function initNavigationPanel () {
+  let hasAntennaParams = true
+  antenna_latitude.get(function(val){
+    if (val!=null) {
+      antenna_longitude.get(function(val){
+        if (val!=null) {
+          antenna_start_dir.get(function(val){
+            if (val!=null) {
+              appendToConsole('Antenna goal parameters already set, displaying antenna directions')
+              $('#antenna-inputs').hide()
+              $('#antenna-unchanging').show()
+            } else {
+              appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+              $('#antenna-inputs').show()
+              $('#antenna-unchanging').hide()
+            }
+          })
+        } else {
+          appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+          $('#antenna-inputs').show()
+          $('#antenna-unchanging').hide()
+        }
+      })
+    } else {
+      appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+      $('#antenna-inputs').show()
+      $('#antenna-unchanging').hide()
+    }
+  })
+
+  gps_latitude.get(function(val){
+    if(val!=null){
+      gps_longitude.get(function(val){
+        if (val!=null) {
+          appendToConsole('GPS goal parameters already set, displaying directions to the goal')
+          $('#gps-inputs').hide()
+          $('#gps-unchanging').show()
+        } else {
+          appendToConsole('One or more GPS goal parameters is missing, if you would like directions to the goal then please input them')
+          $('#gps-inputs').show()
+          $('#gps-unchanging').hide()
+        }
+      })
+    } else {
+      appendToConsole('One or more GPS goal parameters is missing, if you would like directions to the goal then please input them')
+      $('#gps-inputs').show()
+      $('#gps-unchanging').hide()
     }
   })
 }

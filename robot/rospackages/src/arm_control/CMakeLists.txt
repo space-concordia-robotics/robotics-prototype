@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   sensor_msgs
+  geometry_msgs
 )
 
 ################################################
@@ -28,9 +29,9 @@ add_message_files(
   ## arm
   IkCommand.msg
   ## rover
-  RoverPosition.msg
+  ##RoverPosition.msg
   AntennaGoal.msg
-  RoverGoal.msg
+  ##RoverGoal.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -39,6 +40,7 @@ generate_messages(
   ## all
   std_msgs
   sensor_msgs
+  geometry_msgs
 )
 
 ###################################
