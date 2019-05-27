@@ -41,8 +41,6 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  //checkTaskStatuses()
-
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')

@@ -375,27 +375,30 @@ function initNavigationPanel () {
   let hasAntennaParams = true
   antenna_latitude.get(function(val){
     if (val!=null) {
+      $('#antenna-latitude').text(val)
       antenna_longitude.get(function(val){
         if (val!=null) {
+          $('#antenna-longitude').text(val)
           antenna_start_dir.get(function(val){
             if (val!=null) {
+              $('#antenna-start-dir').text(val)
               appendToConsole('Antenna goal parameters already set, displaying antenna directions')
               $('#antenna-inputs').hide()
               $('#antenna-unchanging').show()
             } else {
-              appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+              appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
               $('#antenna-inputs').show()
               $('#antenna-unchanging').hide()
             }
           })
         } else {
-          appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+          appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
           $('#antenna-inputs').show()
           $('#antenna-unchanging').hide()
         }
       })
     } else {
-      appendToConsole('One or more antenna parameters is missing, if you would like antenna directions please enter them')
+      appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
       $('#antenna-inputs').show()
       $('#antenna-unchanging').hide()
     }
@@ -403,9 +406,11 @@ function initNavigationPanel () {
 
   gps_latitude.get(function(val){
     if(val!=null){
+      $('#destination-latitude').text(val)
       gps_longitude.get(function(val){
         if (val!=null) {
           appendToConsole('GPS goal parameters already set, displaying directions to the goal')
+          $('#destination-longitude').text(val)
           $('#gps-inputs').hide()
           $('#gps-unchanging').show()
         } else {

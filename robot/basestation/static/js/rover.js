@@ -49,6 +49,41 @@ $(document).ready(function () {
     }
   })
 
+  $('#send-antenna-pos').on('click', function (event) {
+    event.preventDefault()
+    let goodInput = true
+    if ( !($('#initial-antenna-latitude').val()) ) {
+      appendToConsole('latitude field empty!')
+      goodInput = false
+    }
+    if ( !($('#initial-antenna-longitude').val()) ) {
+      appendToConsole('longitude field empty!')
+      goodInput = false
+    }
+    if ( !($('#initial-antenna-bearing').val()) ) {
+      appendToConsole('bearing field empty!')
+      goodInput = false
+    }
+    if (goodInput) {
+      let initialLatitude = $('#initial-antenna-latitude').val()
+      let initialLongitude = $('#initial-antenna-longitude').val()
+      let initialBearing = $('#initial-antenna-bearing').val()
+      antenna_latitude.set( parseFloat(initialLatitude) );
+      antenna_longitude.set( parseFloat(initialLongitude) );
+      antenna_start_dir.set( parseFloat(initialBearing) );
+      $('#antenna-latitude').text(initialLatitude)
+      $('#antenna-longitude').text(initialLongitude)
+      $('#antenna-start-dir').text(initialBearing)
+      $('#antenna-inputs').hide()
+      $('#antenna-unchanging').show()
+    }
+  })
+  $('#change-antenna-data').on('click', function (event) {
+    event.preventDefault()
+    $('#antenna-inputs').show()
+    $('#antenna-unchanging').hide()
+  })
+
   $('#send-gps-pos').on('click', function (event) {
     event.preventDefault()
     let goodInput = true
@@ -63,8 +98,6 @@ $(document).ready(function () {
     if (goodInput) {
       let desiredLatitude = $('#desired-gps-latitude').val()
       let desiredLongitude = $('#desired-gps-longitude').val()
-      appendToConsole(desiredLatitude)
-      appendToConsole(desiredLongitude)
       gps_latitude.set( parseFloat(desiredLatitude) );
       gps_longitude.set( parseFloat(desiredLongitude) );
       $('#destination-latitude').text(desiredLatitude)
