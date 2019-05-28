@@ -181,9 +181,11 @@ function requestMuxChannel (elemID, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole(
-    'Sending request to switch to channel ' + $('a' + elemID).text()
-  )
+  if (dev != '?') {
+    appendToConsole(
+      'Sending request to switch to channel ' + $('a' + elemID).text()
+    )
+  }
 
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
@@ -193,6 +195,9 @@ function requestMuxChannel (elemID, callback) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
       callback([false, msg])
+    } else if (msg.includes('Current:')) {
+      // -2 since last character is newline, second last is actual channel
+      $('button#mux').text('Device ' + $('a#mux-' + msg[msg.length - 2]).text())
     } else {
       $('button#mux').text('Device ' + $('a' + elemID).text())
       appendToConsole(
@@ -284,6 +289,11 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
 }
 
 function checkTaskStatuses () {
+  // regardless of page we're on
+  requestMuxChannel('?', function (currentChannel) {
+    console.log('currentChannel', currentChannel)
+  })
+
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {

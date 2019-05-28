@@ -8,7 +8,7 @@ current_channel = 0
 def handle_mux_select(req):
     if req.device == '?':
         global current_channel
-        return str(current_channel) + '\n'
+        return "Current: " + str(current_channel) + '\n'
 
     response = "Switched MUX select to device {:s}".format(req.device)
 
@@ -57,13 +57,11 @@ def select_device(device):
 
 # consider removing following lines to make given "test" argument flag present
 # or better: user ros params as per tatums suggestion
-    """
     with open(gpio_dir + "/gpio18/value", "w") as f:
         f.write(str(s0_val))
 
     with open(gpio_dir + "/gpio21/value", "w") as f:
         f.write(str(s1_val))
-    """
 
     s0_state = "s0: " + str(s0_val)
     s1_state = "s1: " + str(s1_val)

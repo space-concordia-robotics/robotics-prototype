@@ -190,7 +190,7 @@ $(document).ready(() => {
       (window.location.pathname == '/' &&
         $('#toggle-arm-listener-btn')[0].checked == true) ||
       (window.location.pathname == '/science' &&
-      $('#activate-science-listener-btn')[0].checked == true
+        $('#activate-science-listener-btn')[0].checked == true)
       // pds Listener
     )
   }
@@ -198,7 +198,7 @@ $(document).ready(() => {
   // select mux channel using mux_select service
   $('#mux-0').mouseup(function () {
     // Rover
-    if (isListenerOpen()) {)
+    if (isListenerOpen()) {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
