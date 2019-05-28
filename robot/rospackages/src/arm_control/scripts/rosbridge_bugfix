@@ -1,0 +1,36 @@
+
+
+
+https://github.com/RobotWebTools/rosbridge_suite/issues/249
+With both Jade/Ubuntu 14.04 and Kinetic/16.04, we see this as soon as a JS client abruptly disconnects from the socket.
+
+We were working from a fork of this repo for some time now and found that commenting out the following lines was an effective workaround:
+
+https://github.com/RobotWebTools/rosbridge_suite/blob/develop/rosbridge_library/src/rosbridge_library/internal/publishers.py#L313
+https://github.com/RobotWebTools/rosbridge_suite/blob/develop/rosbridge_library/src/rosbridge_library/internal/publishers.py#L322-L324
+
+We're naturally concerned about what unsafe things might be happening as a result, but our system stays online, so it's hard to argue with those results.
+
+
+
+
+
+
+https://github.com/ros/ros_comm/issues/111
+This issue affects the ROS bridge http://wiki.ros.org/rosbridge_suite , RobotWebTools/rosbridge_suite#138 (and the many related issues) and is mitigated by using a very long timeout to avoid unregistering the closed connections RobotWebTools/rosbridge_suite#322 which is not a very a stable solution.
+
+
+
+
+https://github.com/RobotWebTools/rosbridge_suite/issues/138
+A quick hack to prevent the problem is commenting out topic unregistration in rosbridge_library/pulibsher.py
+
+311# if not self._publishers[topic].has_clients():
+312#           self._publishers[topic].unregister()
+313#            del self._publishers[topic]
+
+Since several forks have adopted this "quick hack", and it doesn't look like rospy is going to fix the root cause any time soon (assuming it's possible to do so), how about a nicer solution?
+
+I'm thinking a timeout for unregistering topics with no clients, so the publisher survives quick page reloads, but rosbridge doesn't leak publishers. This is particularly important in connection with the service-based tf2_web_republisher, as that will generate new topics for each new client (and as such, for each page reload).
+
+If you think a timeout is an acceptable solution, I'll implement it :)

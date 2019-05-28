@@ -1,17 +1,14 @@
-# this class will be used to test if client can connect to the raover
 import os
 import socket
 
 
 class ClientConnection:
+    com_port = 5000
 
-    def __init__(self, status, base_ip, base_port, rover_ip, rover_port, serial_port):
+    def __init__(self, base_port, rover_ip, rover_port, status=False):
         self.status = status
-        self.base_ip = base_ip
-        self.base_port = base_port
-        self.rover_ip = rover_ip
-        self.rover_port = rover_port
-        self.serial_port = serial_port
+        self.base_ip = self.get_base_ip()
+        self.set_rover_ip(rover_ip)
 
     def set_status(self, status):
         self.status = status
@@ -23,7 +20,13 @@ class ClientConnection:
         self.base_ip = base_ip
 
     def get_base_ip(self):
-        return self.base_ip
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        base_ip = s.getsockname()[0]
+        print("base_ip: " + base_ip)
+        s.close()
+
+        return base_ip
 
     def set_base_port(self, base_port):
         self.base_port = base_port
@@ -31,8 +34,29 @@ class ClientConnection:
     def get_base_port(self):
         return self.base_port
 
+    @classmethod
+    def validate_ip(cls, rover_ip: str) -> bool:
+        """
+        Validate for correct IPv4 format
+
+        @param ip: IP address
+
+        :returns: True if valid IP address format
+        """
+        try:
+            # legal
+            socket.inet_aton(rover_ip)
+            return True
+        except socket.error:
+            # illegal
+            print("Invalid IP format")
+            return False
+
     def set_rover_ip(self, rover_ip):
-        self.rover_ip = rover_ip
+        rover_ip = str(rover_ip)
+
+        if self.validate_ip(rover_ip):
+            self.rover_ip = rover_ip
 
     def get_rover_ip(self):
         return self.rover_ip
@@ -49,26 +73,40 @@ class ClientConnection:
     def get_serial_port(self):
         return self.serial_port
 
-    # the ping test method is to check if a connection can be returned from to rover
-    def ping_test(self):
+    def ping_test(self, test=False) -> bool:
         """
-        This is a test implementation of the ping_test method with the socket module
-        after some quick research it was observed that the socket manual is what needs
-        to be used for tcp/ip network communication
-        :return: status
+        Sends one ping request to given IP address
+
+        @param test: if set to true, method will ask user to input IP to ping
+        and the status attribute will not be modified
+
+        :return: boolean for ping success status
         """
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP/IP socket
-        server_ip = raw_input("Enter serverIP: ")
-        rep = os.system("ping " + server_ip)
-        if rep == 0:
-            # the server is up so return true
-            self.status = True
-            return self.status
+        if test:
+            server_ip = input("Enter server IP: ")
+            response = os.system("ping " + server_ip + " -c 1")
+
         else:
-            # the server is down so return false
-            self.status = False
+            try:
+                response = os.system("ping " + self.rover_ip + " -c 1")
+            except AttributeError:
+                print("Rover IP not initialized yet")
+                return False
+
+        if response == 0:
+            # the server is up so return true
+            if not test:
+                self.status = True
+
+            print("connection established")
             return self.status
+        # the server is down so return false
+        if not test:
+            self.status = False
+
+        print("no response from server")
+        return self.status
 
     def send_drive_cmd(self):
         """

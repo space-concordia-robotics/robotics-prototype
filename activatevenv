@@ -1,0 +1,86 @@
+# Use this file to activate the dev environment by executing this command in the project's root directory:
+#   $ source activatevenv
+# If a venv folder is not detected, the script will attempt to create one provided that
+# it can locate a valid Python executable path. If none are found, the script aborts.
+# If for some reason you have a different alias, pass it as a parameter like this:
+#   $ source activatevenv "/usr/bin/python"
+
+for _ in once; do # One pass loop to allow breaking out of script early
+    if [ ! -d "./venv" ]; then # Create the venv directory
+        printf "No venv directory found, creating it now.."
+
+        # Check the usual aliases such as python3 or python or the provided path
+        if [[ ! $1 == "" ]]; then
+            python_exec_path=$1
+        elif [[ ! `which python3` == *"not found"* ]]; then
+            python_exec_path=`which python3`
+        elif [[ ! `which python` == *"not found"* ]]; then
+            python_exec_path=`which python`
+        else
+            printf "\nError: Python executable path not found. Exiting now..." >&2
+            break
+        fi
+        printf "\nPython executable path found: $python_exec_path" 
+
+        python_exec_ver=`$python_exec_path -c 'import platform; print(platform.python_version())'`
+        python_exec_ver_major=`printf $python_exec_ver | cut -d. -f1`
+        python_exec_ver_minor=`printf $python_exec_ver | cut -d. -f2`
+
+        # Ensure at least Python 3.6
+        if [[ ${python_exec_ver_major} -lt 3 ]] || [[ ${python_exec_ver_major} -eq 3 && ${python_exec_ver_minor} -lt 6 ]]; then
+            printf "\nPython version $python_exec_ver detected."
+            printf "Error: Python 3.6.0 or newer required. Exiting now..." >&2
+            break
+        else 
+            printf "\nPython version $python_exec_ver detected."
+        fi
+
+        # Install the virtual environment directory using the path found
+        virtualenv -p "$python_exec_path" venv
+    fi
+
+    # Activate venv script and ensure it worked by validating environment variable
+    source venv/bin/activate
+    if [[ "$VIRTUAL_ENV" == "" ]]; then
+        printf "\nError: unable to activate venv. Exiting now..." >&2 
+        break
+    fi
+    
+    # Setup the egg-info and install all required modules
+    python setup.py develop
+    pip install -r requirements.txt -r requirements-dev.txt
+
+    # Load the environment variables defined in .envrc using direnv
+    if ! [ -x "$(command -v direnv)" ]; then
+        printf "\nError: direnv is not installed. Install direnv 'sudo apt-get install direnv' to enable loading of environment variables defined inside .envrc" >&2
+        printf "Sourcing environment variables manually into global shell profile. Don't forget to unexport them when finished working on project."
+        source ./.envrc
+        break
+    else
+        direnv allow .
+    fi
+
+    which_shell=`ps -p $$ -oargs=` # https://stackoverflow.com/questions/3327013/how-to-determine-the-current-shell-im-working-on
+    ros_setup_script_path="robot/rospackages/devel" # Where all setup.* scripts are located
+    if [[ $which_shell == *"zsh"* ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.zsh"
+    elif [[ $which_shell == *"bash"* ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.bash"
+    elif [[ $which_shell == "sh" ]]; then
+        ros_setup_script_path=$ros_setup_script_path"/setup.sh"
+    else
+        printf "\nError: Unknown shell environment detected. Manually find your respective setup.* script inside robot/rospackages/devel and activate it by entering 'source robot/rospackages/setup.*'." >&2 
+        printf "ROS source environment not activated. Exiting now...\n" >&2 
+        break
+    fi
+
+    printf "Shell environment found. "
+    if [ -f $ros_setup_script_path ]; then # Check if script path exists
+        printf "\nActivating $ros_setup_script_path...\n"
+        source $ros_setup_script_path
+    else
+        printf "\nError: ROS setup script path not found, make sure to run 'catkin_make' in robot/rospackages directory to build packages." >&2 
+        printf "ROS source environment not activated. Exiting now...\n" >&2 
+        break
+    fi
+done

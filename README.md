@@ -1,17 +1,28 @@
+[![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
+
 # robotics-prototype
 This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
 
 ## Contributing and Development Environment Instructions
-Firstly, this project is built in Python 3.3+. You need to have a version of Python installed that is 3.3+. Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
 
-Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project. 
+Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+
+Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
+
+### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
+Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
+```
+$ npm install
+```
+
+This command will install all of the required dependencies (mostly just ESLint stuff at the time of writing) as depicted in the `package.json` file.
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
 ```
-$ virtualenv -p <path/to/python3.x> venv
+$ virtualenv -p <path/to/python3.6.x+> venv
 ```
-Make sure you supply a path to a Python 3.x binary. In my case, I just supplied it like this:
+Make sure you supply a path to a Python 3.6.x+ binary. In my case, I just supplied it like this:
 ```
 $ virtualenv -p `which python3` venv
 ```
@@ -54,12 +65,12 @@ However, this GUI will soon be replaced by a new one using flask, so unless your
 #### Install and configure `pygobject3`
 If you ran into issues installing `pygobject` when trying to `pip install -r requirements.txt`, then here are possible reasons:
 
-**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as: 
+**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as:
 ```
 (venv) $ brew install pygobject3 gtk+3
 ```
 
-**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again: 
+**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again:
 ```
 (venv) $ brew install libffi
 ```
@@ -75,7 +86,7 @@ Now you should be able to retry installing the requirements:
 Which should produce no errors!
 
 ### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
-When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`). 
+When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`).
 
 In other words, this means all imports of modules inside the `robot` directory should be imported with absolute path, e.g. inside `"tests/unit/motor_test.py"`, the `Motor` class can be imported using:
 ```
@@ -88,7 +99,7 @@ First we have to install `setuptools`, but our `virtualenv` installs this by def
 
 Still in root project directory (which contains `setup.py`):
 ```
-(venv) $ pip install -e .
+(venv) $ python setup.py develop
 ```
 
 You should now be able to execute tests without `ModuleNotFoundError` thrown:
@@ -103,6 +114,38 @@ To remove the package you just installed using:
 
 **DISCLAIMER:** This issue with module imports via `pytest` was the motivating factor to change the project directory structure. For this technique to work, the 'source' code must live inside (nested) a main directory (usually named the same as project directory name or other suitable representative identifier such as **robot** in this case). The `src` subdirectory was renamed because it made no sense when importing a package module by name like `import src.basestation.Motor`, which has no meaning/place in a module semantic context (`import robot.basestation.Motor` is much more appropriate). Most Python projects do not use a `src` directory unless it's for storing their source code that eventually gets compiled to binary (i.e. such as `.c`, `.h`, etc.. files). Also, `base-station` was renamed to `basestation` because Python no-likey dashes in import statements.
 
+### Setup environment variable loader [[`direnv`](https://github.com/direnv/direnv)]
+This tool will be used to take care of managing loading and unloading of environment variables defined in a `.envrc` file in the root. This avoids polluting the global environment.
+
+If using debian, to install:
+
+```
+$ sudo apt-get install direnv
+```
+
+Make sure to then append the following line to your `~/.bashrc`: `eval "$(direnv hook bash)"`
+
+Otherwise, see the link in title for instructions on how to install and setup.
+
+### Activate venv script [`activatevenv`]
+This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
+- Checks to make sure the `venv` directory is present and if not tries to install it (i.e. `virtualenv -p $python_exec_path venv`)
+- Activates the virtual environment script (i.e. `source venv/bin/activate`)
+- Installs required python modules specified in `requirements.txt` and `requirements-dev.txt`
+- Loads the environment variables with those defined in `.envrc` using `direnv` tool (i.e. `direnv allow .`)
+
+See `activatevenv` for more details and to see how to pass a custom Python path as an argument.
+
+To use it, in the project root directory, simply source it in your shell as follows:
+```
+source activatevenv
+```
+
+Tip: You can `source activatevenv` whenever you need to:
+- Reinstall modules defined in `requirements-*.txt`
+- Reactivate the `venv` environment
+- Reload newly defined variables in `.envrc` as environment variables
+
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
 ![VSCode putting `pylint` and `pytest` to work!](docs/media/pylint-pytest-vscode.png)
@@ -114,10 +157,10 @@ All in all, by using these tools, we will ensure that the codebase is consistent
 Although most of the syntax/format will be handled by `pylint`/`yapf`, some things that aren't are briefly outlined here (namely regarding source file naming guidelines):
 - As stated [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3163-file-naming-s3163-file-naming), file names shouldn't include dashes since they need to be importable.
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
-- Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery). 
+- Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
 #### Atom (tested on ubuntu 16.04, Windows 7)
-If you're using atom-editor setting up should be fairly easy.
+If you're using Atom, setting up should be fairly easy.
 
 ##### Windows
 **NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
@@ -211,7 +254,7 @@ For further details on these images please see the [Custom Odroid Images wiki pa
 
 ### How to upload Arduino scripts from the odroid
 
-1. Make sure the arduino is plugged into the odroid
+1. Make sure the Arduino is plugged into the odroid
 
 2. Copy your Arduino source(s) into platformio/src/
 
@@ -269,3 +312,76 @@ ssh net_name@login.encs.concordia.ca
 ssh odroid@ip_address
 ```
 - It should ask you for a password, which will be `odroid`
+
+### Video Streaming Procedure
+
+This will explain the steps necessary to setup the odroid with rocket M900 radios and the GUI to view a video stream from the odroid.
+
+#### Hardware setup:
+
+1. Setup the rocket M900 radios
+
+- Use the rocket labeled `192.168.1.45` for the odroid, and the one labeled `192.168.1.40` for the basestation.
+Connect the power adapter to a power socket, use ethernet cables to connect `POE` (power over ethernet) to the `LAN` port on the radio.
+Make sure that you connect some omni-directional antennas to `Chain0` or `Chain1` connectors on the radios. Make sure to use the same for both.
+DO NOT connect `LAN` to `LAN`, this can cause issues. After having done the last step, connect the `LAN` port from the power adapter to either the odroid or basestation ethernet port.
+When both LEDs on the radios are on (green, red, yellow/orange) as opposed to the first two green ones then both radios are connected to each other.
+For an example diagram of the connections see the description of [this](https://github.com/space-concordia-robotics/robotics-prototype/pull/80) pull request.
+The only difference is that the ip addresses start with `172.16` vs `192.168`, and that if you are using the laptop I donated the IP address should end with `25` rather than `20`.
+- Power up the Odroid using it's power adapter. You should see a solid blue LED at first which then will begin to flash (this indicates normal boot behavior).
+- Insert the USB connection for the webcam to the odroid (preferably 3.0 USB hub) _after_ it has booted up.
+- Unfortunately this step is not automated: When the camera powers up it will show two options.
+Select `PC Camera` using the up/down navigation buttons on the side and click OK (on the top) to select it.
+
+2. Run corresponding software
+
+- After logging in to the basesation computer, select the correct ethernet configuration by clicking on the wifi logo button in the top right corner and clicking (if using the donated laptop) `Base station direct 1`. This will properly set the computers IP for competition mode.
+- Open a terminal run `base` which will take you to the basestation folder.
+- Run `./app.py` which will run the GUI on `localhost:5000`
+- Open chrome and go visit the link `localhost:5000`
+- Hover over the buttons to see a description of what they should do. Currently `B` is for enable stream and `N` is for disable.
+- Enable the stream with `B`, wait for the response to appear in the console log. If in the response you see a succesful message like: "started stream", you should see the video stream appear.
+
+## TEENSY
+### Flashing the Teensy from a PC
+
+Flashing code to a Teensy is very similar to flashing to Arduino, but the Teensyduino add-on is required. [This link](https://www.pjrc.com/teensy/td_download.html) explains how to set up the Arduino IDE and Teensyduino on Windows, Linux and Mac. I (Josh) use Arduino 1.8.5 with Teensyduino 1.42 on Windows 10 x64. In the case of Linux, make sure that the installer is executable: `chmod +x TeensyduinoInstall.linux64` or replace it with whatever the installer's name is.
+
+[This link](https://www.pjrc.com/teensy/td_usage.html) explains how to flash the sketch.
+
+Teensy programming has all of the Arduino functions, as well as extra features described on [the pjrc website](https://www.pjrc.com/teensy/td_libs.html). Currently used features are digitalWriteFast(), IntervalTimer and ellapsedMillis.
+
+I (Josh) currently use Sublime Text to write my code, and then compile it using the Arduino IDE and use the Serial Monitor to communicate with the Teensy. The recommended editors are Atom or VS Code as the rest of this project has configuration files for those text editors.
+
+### A note on ROS for Teensy 3.5/3.6
+
+The Rosserial library must be installed to communicate with a ROS network. The Teensy 3.5 and 3.6 in particular give compiler errors upon using the correct rosserial syntax, however, even though it seems to work on Arduino. The following instructions are a first step towards getting it to work correctly, because at the very least they get rid of the compiler errors. Further research into the library's source code is needed to figure out why it doesn't work on Teensy 3.5/3.6.
+
+ For starters, add `|| defined(__MK65FX512__) || defined(__MK66FX1M0__)` to ArduinoIncludes.h to indicate that Teensy 3.5/3.6 are allowed to use the library. On Windows, this file is located in `Documents\Arduino\libraries\Rosserial_Arduino_Library\src` once rosserial has been installed.
+
+In order to fully be able to control whether Serial (usb) or Serial1 to Serial6 (hardware serial) is being used, in the same file, the following two lines must be commented out:
+```
+#include <usb_serial.h>  // Teensy 3.0 and 3.1
+#define SERIAL_CLASS usb_serial_class
+```
+and the following lines must be added instead:
+```
+#ifdef USE_TEENSY_HW_SERIAL
+  #include <HardwareSerial.h>
+  #define SERIAL_CLASS HardwareSerial
+#else
+  #include <usb_serial.h>
+  #define SERIAL_CLASS usb_serial_class
+#endif
+```
+If you want to choose a different hardware Serial port, the following block of code presented [here](https://answers.ros.org/question/198247/how-to-change-the-serial-port-in-the-rosserial-lib-for-the-arduino-side/#post-id-295159) may work, though I have never tested it. There may be another method:
+```
+class NewHardware : public ArduinoHardware
+{
+  public:
+  NewHardware():ArduinoHardware(&Serial1, 57600){};
+};
+
+ros::NodeHandle_<NewHardware>  nh;
+```
+Where Serial1 can be anything from Serial1 to Serial6.

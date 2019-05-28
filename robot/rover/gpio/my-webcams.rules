@@ -1,0 +1,4 @@
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1:1.0", SYMLINK+="ttyArmScienceCam"
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-xhci-hcd.2.auto-usb-0:1.2:1.0", SYMLINK+="ttyFrontCam"
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-xhci-hcd.2.auto-usb-0:1.1:1.0", SYMLINK+="ttyRearCam"
+

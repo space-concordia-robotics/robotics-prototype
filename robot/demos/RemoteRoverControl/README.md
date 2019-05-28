@@ -21,12 +21,19 @@ Then plug your arduino into your rover computer via USB.
 Both computers need to be connected to the same network.
 
 ## Running the demo
+
+### Multiple machines
+
 Always run the scripts in this order:
 1. On the rover computer run `./ServerListener.py`
 2. On the base-station computer run `./ClientSender.py <ip base station computer>`
 
 After step 2, wait until you see "Ready for sending drive commands!"
 Now you may use 'w' for moving the motor forward, 's' for back, 'q' to terminate the connection.
+
+### Single machine
+
+Same procedure as above, just use `ServerListenerLocal.py` and `ClientSenderLocal.py` instead.
 
 ## Known Issues
 - If your basestation and rover computers are both connected to `ConcordiaUniversity`, then you will not be able to run this

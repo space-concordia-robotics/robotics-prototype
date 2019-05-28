@@ -222,7 +222,7 @@ void loop() {
     else if (bluetooth.available()) {
       Commands.bleHandler();
     }
-    
+
     if (Commands.isActivated) {
       velocityHandler(throttle, steering);
       if (Commands.isEnc) {
@@ -269,9 +269,9 @@ void loop() {
     else if (bluetooth.available() && Commands.bluetoothMode) {
       Commands.bleHandler();
     }
-    
+
     velocityHandler(throttle, steering);
-    
+
     if (Commands.isEnc) {
       // roverVelocityCalculator();
       RF.calcCurrentVelocity();
@@ -290,7 +290,7 @@ void loop() {
     prevRead = millis(); // reset the timer for listening to commands
   } // end of isActivated
   */
-  
+
   if (millis() - prevReadNav > 200) {
     navHandler();
     prevReadNav = millis();
