@@ -273,17 +273,18 @@ $(document).ready(function () {
     if (!$('#science-listener-btn').is(':checked')) {
       appendToConsole('Science listener not yet activated!')
     } else if ($('#activate-science-btn').is(':checked')) {
-      sendArmRequest('activate', function (msgs) {
+      sendScienceRequest('activate', function (msgs) {
         console.log('msgs', msgs)
         if (msgs[0]) {
           $('#activate-science-btn')[0].checked = true
+          checkButtonStates()
         } else {
           $('#activate-science-btn')[0].checked = false
         }
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendArmRequest('stop', function (msgs) {
+      sendScienceRequest('stop', function (msgs) {
         console.log('msgs', msgs)
         if (msgs[0]) {
           $('#activate-science-btn')[0].checked = false
@@ -330,4 +331,23 @@ function isScienceActivated () {
     return false
   }
   return true
+}
+
+// check all button states that are query-able from the science MCU
+function checkButtonStates () {
+  // check if drill cw/ccw (dd = drill direction)
+  sendScienceRequest('dd', function (msgs) {
+    appendToConsole(msgs)
+    // would also check if msgs[0] was true but science MCU responds
+    // with the same message too many times so it is always false
+    // this is not the case with the 'activated0' response which only appears once
+    if (msgs[1].includes('CCW')) {
+      lightUp('#ccw-btn')
+      greyOut('#cw-btn')
+    } else if (msgs[1].includes('CW')) {
+      console.log('true')
+      lightUp('#cw-btn')
+      greyOut('#ccw-btn')
+    }
+  })
 }

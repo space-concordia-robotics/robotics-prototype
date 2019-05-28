@@ -64,6 +64,7 @@ bool drillInUse = false;
 bool elevatorInUse = false;
 bool deactivating = false;
 int drillDuration = 0;
+int drillDirection = 0; // 0 --> CW, 1 --> CCW
 int elevatorDuration = 0;
 int maxVelocity = 255;
 int drillSpeed;
@@ -97,7 +98,7 @@ Servo table;
 
 void setup() {
 
-  UART_PORT.begin(115200); UART_PORT.setTimeout(10);
+  UART_PORT.begin(115200); UART_PORT.setTimeout(20);
   // blink adn stay ON to signal this is indeed the science MCU and not another one
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -141,7 +142,7 @@ void setup() {
 
   analogWrite(DRILL, 0);
   analogWrite(ELEVATOR, 0);
-  digitalWrite(DRILL_DIRECTION, LOW);
+  digitalWrite(DRILL_DIRECTION, drillDirection); // init LOW
   digitalWrite(ELEVATOR_DIRECTION, LOW);
   digitalWrite(S0, LOW);
   digitalWrite(S1, LOW);
@@ -186,6 +187,10 @@ void loop() {
     if (cmd == "who") {
       UART_PORT.println("SCIENCE science");
     }
+    if (cmd == "active") { // query the status
+      UART_PORT.print("SCIENCE activated");
+      UART_PORT.println(isActivated);
+    }
     if (isActivated == false) {
 
       if (cmd == "activate") {
@@ -195,7 +200,11 @@ void loop() {
     }
     else if (isActivated == true) {
 
-      if (cmd.startsWith("drillspeed") && (cmd.indexOf(" ") > 0)) {
+      if (cmd == "active") { // query the status
+        UART_PORT.print("SCIENCE activated");
+        UART_PORT.println(isActivated);
+      }
+      else if (cmd.startsWith("drillspeed") && (cmd.indexOf(" ") > 0)) {
         //turns drill at desired speed
         // needs input "drillspeed 100"
         int drillSpeedPercent = 0;
@@ -218,13 +227,19 @@ void loop() {
       }
       else if (cmd == "dccw") {
         //turns drill counter-clockwise
-        digitalWrite(DRILL_DIRECTION, HIGH);
+        drillDirection = 1;
+        digitalWrite(DRILL_DIRECTION, drillDirection);
         UART_PORT.println("SCIENCE dccw done");
       }
       else if (cmd == "dcw") {
         //turns drill clockwise
-        digitalWrite(DRILL_DIRECTION, LOW);
+        drillDirection = 0;
+        digitalWrite(DRILL_DIRECTION, drillDirection);
         UART_PORT.println("SCIENCE dcw done");
+      }
+      else if (cmd == "dd") { // drill direction query
+        UART_PORT.print("SCIENCE ");
+        UART_PORT.println((drillDirection) ? "CCW" : "CW");
       }
       else if (cmd == "dgo") {
         //turns drill clockwise

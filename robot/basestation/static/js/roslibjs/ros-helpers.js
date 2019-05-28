@@ -308,7 +308,6 @@ function checkTaskStatuses () {
     })
     // check arm camera stream status
     requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
-      console.log(msgs)
       appendToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -322,6 +321,27 @@ function checkTaskStatuses () {
     console.log('rover page')
   } else if (window.location.pathname == '/science') {
     console.log('science page')
+    requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
+      appendToConsole('msgs', msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#science-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#science-listener-btn')[0].checked = true
+          // check if activated
+          sendScienceRequest('active', function (msgs) {
+            appendToConsole(msgs)
+
+            // would also check if msgs[0] was true but science MCU responds
+            // with the same message too many times so it is always false
+            // this is not the case with the 'activated0' response which only appears once
+            if (msgs[1].includes('activated1')) {
+              $('#activate-science-btn')[0].checked = true
+            }
+          })
+        }
+      }
+    })
   } /* else if (window.location.pathname == '/rover') { //pds
     console.log('rover page')
   } */

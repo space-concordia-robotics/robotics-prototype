@@ -125,7 +125,11 @@ requests = {
     'deactivate' : 'deactivated',
     'stop' : 'stopped',
     'dccw' : 'dccw done',
-    'dcw' : 'dcw done'
+    'dcw' : 'dcw done',
+    'active' : 'activated1',
+    'active' : 'activated0',
+    'dd' : 'dcw',
+    'dd' : 'dccw'
 }
 
 def handle_client(req):
