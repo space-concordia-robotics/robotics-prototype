@@ -335,26 +335,7 @@ void Commands::bleHandler(void) {
     }
 
 }
-//
-//void Commands::blePrint(String cmd){
-//    if (bluetoothMode) {
-//        bluetooth.print(cmd);
-//        delay(50);
-//    }
-//}
-//
-//void Commands::blePrintln(String cmd){
-//    if (bluetoothMode) {
-//        bluetooth.print(cmd);
-//        delay(50);
-//    }
-//}
-//void Commands::blePrintres(float a, float b){
-//    if (bluetoothMode) {
-//        bluetooth.print(a, b);
-//        delay(50);
-//    }
-//}
+
 void Commands::systemStatus(void) {
     PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 //    delay(10);

@@ -31,6 +31,7 @@ void toggleLed();
 void toggleLed2();
 String getValue(String data, char separator, int index);
 
+// Bluetooth connection TX of bluetooth goes to pin 9 and RX of bluetooth goes to pin 10
 SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
 
@@ -67,8 +68,15 @@ ArduinoBlue phone(bluetooth);
 
 #define V_SENSE_PIN 39 // for reading battery voltage
 
-/* motors */
+/* camera servos */
+#define FS_SERVO 22
+#define FB_SERVO 23
+#define TS_SERVO 16
+#define TB_SERVO 17
+Servo frontSide; Servo frontBase;
+Servo topSide; Servo topBase;
 
+/* wheel motors */
 #define PULSES_PER_REV      14
 #define maxRpm              30
 #define GEAR_RATIO         188.61
@@ -76,9 +84,8 @@ ArduinoBlue phone(bluetooth);
 // F -> Front, B -> Back,  M -> Middle, L -> Left, R -> Right,
 // DIR -> Direction pin, PWM -> Signal Pin, EA ->Encoder A, EB -> Encoder B
 // DC Motor naming: Positing_purpose-pin, eg RF_PWM or LM_DIR
-// Types of Pins: DIR, PWM, Enc_A, Enc_B
 
-// Bluetooth connection TX of bluetooth goes to pin 9 and RX of bluetooth goes to pin 10
+// drivers
 #define RF_DIR   2
 #define RM_DIR   11
 #define RB_DIR   12
@@ -95,42 +102,42 @@ ArduinoBlue phone(bluetooth);
 #define LM_PWM   7
 #define LB_PWM   8
 
-//#define RF_EA    37
-//#define RF_EB    38
-//
-//#define RM_EA    35
-//#define RM_EB    36
-//
-//#define RB_EA    33
-//#define RB_EB    34
-//
-//#define LF_EA    31
-//#define LF_EB    32
-//
-//#define LM_EA    29
-//#define LM_EB    30
-//
-//#define LB_EA    27
-//#define LB_EB    28
+// encoders
+/*
+#define RF_EA    37
+#define RF_EB    38
+
+#define RM_EA    35
+#define RM_EB    36
+
+#define RB_EA    33
+#define RB_EB    34
+
+#define LF_EA    31
+#define LF_EB    32
+
+#define LM_EA    29
+#define LM_EB    30
+
+#define LB_EA    27
+#define LB_EB    28
+*/
 
 #define RF_EA    27
 #define RF_EB    28
-
 #define RM_EA    31
 #define RM_EB    32
-
 #define RB_EA    29
 #define RB_EB    30
 
 #define LF_EA    37
 #define LF_EB    38
-
 #define LM_EA    36
 #define LM_EB    35
-
 #define LB_EA    33
 #define LB_EB    34
 
+// constructors
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
 DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor");
 DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO, "Rear Right Motor");
@@ -139,14 +146,9 @@ DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor");
 DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor");
 DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
-#define FS_SERVO 22
-#define FB_SERVO 23
-#define TS_SERVO 16
-#define TB_SERVO 17
-Servo frontSide; Servo frontBase;
-Servo topSide; Servo topBase;
-
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
+
+/* more variables */
 float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
 int loop_state, button, i; // Input values for set velocity functions
 float deg = 0;  // steering ratio between left and right wheel
@@ -164,22 +166,26 @@ float radius = 14;
 float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
 
+/* more functions */
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
+void initPins(void); // Initiate pinMode for direction and pwm pins for cytron drivers
+void initEncoders(void);    // Encoder initiation (attach interrups and pinModes for wheel encoders
+void initPids(void);    // Initiate PID for DMotor
+void initNav(void);
+
+void displayGpsInfo(void);
+void navHandler(void);
+
+void velocityHandler(float throttle, float steering);
+void roverVelocityCalculator(void);
 void motor_encoder_interrupt(int motorNumber);
+
 void rf_encoder_interrupt(void);
 void rm_encoder_interrupt(void);
 void rb_encoder_interrupt(void);
 void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
-void initPins(void); // Initiate pinMode for direction and pwm pins for cytron drivers
-void initEncoders(void);    // Encoder initiation (attach interrups and pinModes for wheel encoders
-void initPids(void);    // Initiate PID for DMotor
-void velocityHandler(float throttle, float steering);
-void initNav(void);
-void displayGpsInfo(void);
-void navHandler(void);
-void roverVelocityCalculator(void);
 
 /* more comms */
 #include "Vsense.h"
@@ -203,7 +209,42 @@ void setup() {
 }
 
 void loop() {
-
+  if (millis() - prevRead > 30) {
+    // incoming format example: "5:7"
+    // this represents the speed for throttle:steering
+    // as well as direction by the positive/negative sign
+    // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    String cmd = "";
+    if (UART_PORT.available()) {
+      cmd = UART_PORT.readStringUntil('\n');
+      ser_flush();
+      Commands.handler(cmd, "Serial");
+    }
+    else if (bluetooth.available()) {
+      Commands.bleHandler();
+    }
+    
+    if (Commands.isActivated) {
+      velocityHandler(throttle, steering);
+      if (Commands.isEnc) {
+        // roverVelocityCalculator();
+        RF.calcCurrentVelocity();
+        RM.calcCurrentVelocity();
+        RB.calcCurrentVelocity();
+        LF.calcCurrentVelocity();
+        LM.calcCurrentVelocity();
+        LB.calcCurrentVelocity();
+        PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+        PRINT("ASTRO left: " + String(desiredVelocityLeft));
+        PRINTln(" - right: " + String(desiredVelocityRight));
+//      for (i = 0; i <= 5; i++) {
+//        PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
+//      }
+      }
+    }
+    prevRead = millis();
+  } // end of command listening
+  /*
   if (!Commands.isActivated) {
     if (UART_PORT.available()) {
       cmd = UART_PORT.readStringUntil('\n');
@@ -214,15 +255,14 @@ void loop() {
       Commands.bleHandler();
     }
   }
-
-  if ((millis() - prevRead > 30) && Commands.isActivated) {
+  else if ((millis() - prevRead > 30) && Commands.isActivated) {
     // incoming format example: "5:7"
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     String cmd = "";
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
-      toggleLed2();
+      //toggleLed2();
       cmd = UART_PORT.readStringUntil('\n');
       ser_flush();
       Commands.handler(cmd, "Serial");
@@ -230,14 +270,11 @@ void loop() {
     else if (bluetooth.available() && Commands.bluetoothMode) {
       Commands.bleHandler();
     }
-    //        else if (!Commands.bluetoothMode){
-    //
-    //        }
     
     velocityHandler(throttle, steering);
     
     if (Commands.isEnc) {
-      //            roverVelocityCalculator();
+      // roverVelocityCalculator();
       RF.calcCurrentVelocity();
       RM.calcCurrentVelocity();
       RB.calcCurrentVelocity();
@@ -247,25 +284,21 @@ void loop() {
       PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
       PRINT("ASTRO left: " + String(desiredVelocityLeft));
       PRINTln(" - right: " + String(desiredVelocityRight));
-      /*
-        for (i = 0; i <= 5; i++) {
-          PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
-        }
-      */
+//      for (i = 0; i <= 5; i++) {
+//        PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
+//      }
     }
-    prevRead = millis();
+    prevRead = millis(); // reset the timer for listening to commands
   } // end of isActivated
+  */
   
   if (millis() - prevReadNav > 200) {
-    //        toggleLed();
     navHandler();
     prevReadNav = millis();
-    //        PRINTln(1);
   }
   if (millis() - prevReadTime > 1000) {
     toggleLed();
     prevReadTime = millis();
-    //        PRINTln(1);
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
     PRINT("ASTRO Motor Speeds: ");
@@ -300,19 +333,11 @@ void velocityHandler(float throttle, float steering) {
     desiredVelocityLeft = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
     rotation = "CCW";
   }
-  if (desiredVelocityLeft < 0 ) {
-    leftMotorDirection = 1;
-  }
-  else {
-    leftMotorDirection = -1;
-  }
+  if (desiredVelocityLeft < 0 ) { leftMotorDirection = 1; }
+  else { leftMotorDirection = -1; }
 
-  if (desiredVelocityRight < 0 ) {
-    rightMotorDirection = -1;
-  }
-  else {
-    rightMotorDirection = 1;
-  }
+  if (desiredVelocityRight < 0 ) { rightMotorDirection = -1; }
+  else { rightMotorDirection = 1; }
 
   RF.calcCurrentVelocity();
   RM.calcCurrentVelocity();
@@ -328,33 +353,37 @@ void velocityHandler(float throttle, float steering) {
   LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
   LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
 }
+void roverVelocityCalculator(void) {
+  rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
+  leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
+
+  forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
+  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
+}
 
 void ser_flush(void) {
   while (UART_PORT.available()) {
     UART_PORT.read();
   }
 }
-
-void toggleLed() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+void blePrint(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(cmd);
+    delay(50);
+  }
 }
-
-void toggleLed2() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(350);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(250);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(150);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+void blePrintln(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.println(cmd);
+    delay(50);
+  }
 }
-
+void blePrintres(float a, float b) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(a, b);
+    delay(50);
+  }
+}
 //! Parse data for throttle and steering variables
 String getValue(String data, char separator, int index) {
   int found = 0;
@@ -369,6 +398,24 @@ String getValue(String data, char separator, int index) {
     }
   }
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+void toggleLed() {
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+}
+void toggleLed2() {
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(350);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(250);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(150);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
 void initPins(void) {
@@ -394,7 +441,6 @@ void initPins(void) {
   topSide.attach(TS_SERVO);
   topBase.attach(TB_SERVO);
 }
-
 //! Initiate encoder for dcMotor objects and pinModes
 void initEncoders(void) {
   RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
@@ -439,7 +485,6 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
   RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
-
 //! Initiate PID objects for Dc Motors
 void initPids(void) {
   /*
@@ -460,34 +505,6 @@ void initPids(void) {
   LB.pidController.setOutputLimits(-50, 50, 5.0);
   */
 }
-
-void roverVelocityCalculator(void) {
-  rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
-  leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
-
-  forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
-  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
-}
-
-void blePrint(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(cmd);
-    delay(50);
-  }
-}
-void blePrintln(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.println(cmd);
-    delay(50);
-  }
-}
-void blePrintres(float a, float b) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(a, b);
-    delay(50);
-  }
-}
-
 void initNav(void) {
   if (myI2CGPS.begin(Wire , 400000) == false) {       // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     //        while (1);
