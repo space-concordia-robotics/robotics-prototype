@@ -90,6 +90,7 @@ public:
     void accOff(void);
     void status(void);
     void stop(void);
+    void errorMsg(void);
 
 
 
@@ -656,6 +657,18 @@ void Commands::stop(void){
 
     }
 //    PRINTln(String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getDesiredVelocity()) + String(" PWM ") + String(motorList[i].direction));
+
+}
+void Commands::errorMsg(void){
+    PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+
+    PRINT("ASTRO " + String((error) ? "ERROR:":"No Error\n"));
+//    delay(10);
+    PRINT(errorMessage ? (String("ASTRO ")+ String(errorMessage)) : "");
+//    delay(10);
+
+
+    PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n");
 
 }
 

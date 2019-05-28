@@ -130,7 +130,7 @@ Servo topBase;
 //Commands cmd;
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
-float throttle = 0, steering = 0; // Input values for set velocity functions
+float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
 int loop_state, button, i; // Input values for set velocity functions
 float deg = 0;  // steering ratio between left and right wheel
 int maxInputSignal = 49;  // maximum speed signal from controller
@@ -497,7 +497,9 @@ void initNav(void) {
     }
     else if (!Commands.error) {
         compass.init();
+
         compass.enableDefault();
+        compass.setTimeout(100);
         compass.m_min = (LSM303::vector <int16_t>) {
                 -1794, +1681, -2947
         };
@@ -529,9 +531,15 @@ void navHandler(void) {
     if (!Commands.error) {
         compass.read();
 
-        float heading = compass.heading(LSM303::vector < int > {-1, 0, 0});
+        heading = compass.heading(LSM303::vector < int > {-1, 0, 0});
 //    float heading = compass.heading();
 
+        if (compass.timeoutOccurred()) {
+            Commands.error = true;
+            Commands.errorMessage = "ASTRO No signal from IMU, check wiring or reset system\n";
+
+            Commands.errorMsg();
+        }
 
         if (myI2CGPS.available())          // returns the number of available bytes from the GPS module
         {
