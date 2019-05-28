@@ -337,6 +337,7 @@ function checkTaskStatuses () {
             // this is not the case with the 'activated0' response which only appears once
             if (msgs[1].includes('activated1')) {
               $('#activate-science-btn')[0].checked = true
+              checkButtonStates()
             }
           })
         }

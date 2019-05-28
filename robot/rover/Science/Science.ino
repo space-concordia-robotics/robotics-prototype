@@ -66,6 +66,7 @@ bool deactivating = false;
 int drillDuration = 0;
 int drillDirection = 0; // 0 --> CW, 1 --> CCW
 int elevatorDuration = 0;
+int elevatorDirection = 0; // 0 --> UP, 1 --> DOWN
 int maxVelocity = 255;
 int drillSpeed;
 int elevatorFeedPercent = 0;
@@ -98,7 +99,7 @@ Servo table;
 
 void setup() {
 
-  UART_PORT.begin(115200); UART_PORT.setTimeout(20);
+  UART_PORT.begin(115200); UART_PORT.setTimeout(10);
   // blink adn stay ON to signal this is indeed the science MCU and not another one
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
@@ -277,13 +278,19 @@ void loop() {
       }
       else if (cmd == "eup") {
         //turns elevator clockwise
-        digitalWrite(ELEVATOR_DIRECTION, HIGH);
-        UART_PORT.println("SCIENCE eup");
+        elevatorDirection = 0;
+        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        UART_PORT.println("SCIENCE eup done");
       }
       else if (cmd == "edown") {
         //turns elevator counter-clockwise
-        digitalWrite(ELEVATOR_DIRECTION, LOW);
-        UART_PORT.println("SCIENCE edown");
+        elevatorDirection = 1;
+        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        UART_PORT.println("SCIENCE edown done");
+      }
+      else if (cmd == "ed") {
+        UART_PORT.print("SCIENCE ");
+        UART_PORT.println((elevatorDirection) ? "DOWN" : "UP");
       }
       else if (cmd == "ego") {
         analogWrite(ELEVATOR, 0);

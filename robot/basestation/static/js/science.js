@@ -320,6 +320,32 @@ $(document).ready(function () {
       }
     })
   })
+
+  $('#elevator-up-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendScienceRequest('eup', function (msgs) {
+      console.log('msgs', msgs)
+      if (msgs[1].includes('eup done')) {
+        lightUp('#elevator-up-btn')
+        greyOut('#elevator-down-btn')
+      }
+    })
+  })
+
+  $('#elevator-down-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendScienceRequest('edown', function (msgs) {
+      console.log('msgs', msgs)
+      if (msgs[1].includes('edown done')) {
+        greyOut('#elevator-up-btn')
+        lightUp('#elevator-down-btn')
+      }
+    })
+  })
 })
 
 function isScienceActivated () {
@@ -337,7 +363,7 @@ function isScienceActivated () {
 function checkButtonStates () {
   // check if drill cw/ccw (dd = drill direction)
   sendScienceRequest('dd', function (msgs) {
-    appendToConsole(msgs)
+    appendToConsole('dd msgs:', msgs)
     // would also check if msgs[0] was true but science MCU responds
     // with the same message too many times so it is always false
     // this is not the case with the 'activated0' response which only appears once
@@ -348,6 +374,17 @@ function checkButtonStates () {
       console.log('true')
       lightUp('#cw-btn')
       greyOut('#ccw-btn')
+    }
+  })
+
+  sendScienceRequest('ed', function (msgs) {
+    appendToConsole('ed msgs:', msgs)
+    if (msgs[1].includes('UP')) {
+      lightUp('#elevator-up-btn')
+      greyOut('#elevator-down-btn')
+    } else if (msgs[1].includes('DOWN')) {
+      lightUp('#elevator-down-btn')
+      greyOut('#elevator-up-btn')
     }
   })
 }
