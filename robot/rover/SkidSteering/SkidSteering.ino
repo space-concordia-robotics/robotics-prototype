@@ -126,6 +126,8 @@ Servo frontBase;
 Servo topSide;
 Servo topBase;
 
+#define FEEDBACK_PRINT_INTERVAL 50
+elapsedMillis sinceFeedbackPrint;
 
 //Commands cmd;
 
@@ -180,167 +182,180 @@ void displayGpsInfo(void);
 void navHandler(void);
 void roverVelocityCalculator(void);
 
-
 #include "commands.h"
 
 Commands Commands;
 
-void blePrint(String cmd){
-    if (Commands.bluetoothMode) {
-        bluetooth.print(cmd);
-        delay(50);
-    }
+void blePrint(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(cmd);
+    delay(50);
+  }
 }
 
-void blePrintln(String cmd){
-    if (Commands.bluetoothMode) {
-        bluetooth.println(cmd);
-        delay(50);
-    }
+void blePrintln(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.println(cmd);
+    delay(50);
+  }
 }
-void blePrintres(float a, float b){
-    if (Commands.bluetoothMode) {
-        bluetooth.print(a, b);
-        delay(50);
-    }
+void blePrintres(float a, float b) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(a, b);
+    delay(50);
+  }
 }
+
+#include "Vsense.h"
 
 void setup() {
-    // initialize serial communications at 115200 bps:
-    UART_PORT.begin(115200); // switched from 9600 as suggested to conform with the given gps library
-    UART_PORT.setTimeout(50);
-    bluetooth.begin(9600);
-    bluetooth.setTimeout(50);
+  // initialize serial communications at 115200 bps:
+  UART_PORT.begin(115200); // switched from 9600 as suggested to conform with the given gps library
+  UART_PORT.setTimeout(20);
+  bluetooth.begin(9600);
+  bluetooth.setTimeout(50);
 
-    delay(50);  // do not print too fast!
+  delay(50);  // do not print too fast!
 
-    ser_flush();
-    initPins();
-    initEncoders();
-    initPids();
-    initNav();
+  ser_flush();
+  initPins();
+  initEncoders();
+  initPids();
+  initNav();
 
 
-    Commands.setupMessage();
+  Commands.setupMessage();
 }
 
 void loop() {
 
-    if (!Commands.isActivated) {
-        if (UART_PORT.available() ) {
+  if (!Commands.isActivated) {
+    if (UART_PORT.available() ) {
 
-            cmd = UART_PORT.readStringUntil('\n');
-            ser_flush();
-            Commands.handler(cmd, "Serial");
-        } else if (bluetooth.available()) {
-            Commands.bleHandler();
-        }
+      cmd = UART_PORT.readStringUntil('\n');
+      ser_flush();
+      Commands.handler(cmd, "Serial");
+    } else if (bluetooth.available()) {
+      Commands.bleHandler();
     }
+  }
 
-    if ((millis() - prevRead > 30)  && Commands.isActivated ) {
-        // incoming format example: "5:7"
-        // this represents the speed for throttle:steering
-        // as well as direction by the positive/negative sign
-        String cmd = "";
-        // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-        if (UART_PORT.available()) {
-            toggleLed2();
-            cmd = UART_PORT.readStringUntil('\n');
-            ser_flush();
-            Commands.handler(cmd,"Serial");
-        }
-        else if (bluetooth.available() && Commands.bluetoothMode) {
-            Commands.bleHandler();
-        }
-//        else if (!Commands.bluetoothMode){
-//
-//        }
-        velocityHandler(throttle, steering);
-//
-        if (Commands.isEnc){
-//            roverVelocityCalculator();
-            RF.calcCurrentVelocity();
-            RM.calcCurrentVelocity();
-            RB.calcCurrentVelocity();
-            LF.calcCurrentVelocity();
-            LM.calcCurrentVelocity();
-            LB.calcCurrentVelocity();
-            PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+  if ((millis() - prevRead > 30)  && Commands.isActivated ) {
+    // incoming format example: "5:7"
+    // this represents the speed for throttle:steering
+    // as well as direction by the positive/negative sign
+    String cmd = "";
+    // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
+    if (UART_PORT.available()) {
+      toggleLed2();
+      cmd = UART_PORT.readStringUntil('\n');
+      ser_flush();
+      Commands.handler(cmd, "Serial");
+    }
+    else if (bluetooth.available() && Commands.bluetoothMode) {
+      Commands.bleHandler();
+    }
+    //        else if (!Commands.bluetoothMode){
+    //
+    //        }
+    velocityHandler(throttle, steering);
+    //
+    if (Commands.isEnc) {
+      //            roverVelocityCalculator();
+      RF.calcCurrentVelocity();
+      RM.calcCurrentVelocity();
+      RB.calcCurrentVelocity();
+      LF.calcCurrentVelocity();
+      LM.calcCurrentVelocity();
+      LB.calcCurrentVelocity();
+      PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 
-            PRINT("ASTRO left: " + String(desiredVelocityLeft));
-            PRINTln(" - right: " + String(desiredVelocityRight));
-            for (i = 0; i <= 5; i++) {
-                PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
+      PRINT("ASTRO left: " + String(desiredVelocityLeft));
+      PRINTln(" - right: " + String(desiredVelocityRight));
 
-            }
-
-        }
-        prevRead = millis();
+      /*
+        for (i = 0; i <= 5; i++) {
+          PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
+        }*/
 
     }
-    if (millis() - prevReadNav > 200) {
-//        toggleLed();
+    prevRead = millis();
 
-        navHandler();
-        prevReadNav = millis();
-//        PRINTln(1);
+  }
+  if (millis() - prevReadNav > 200) {
+    //        toggleLed();
 
-    }
-    if (millis() - prevReadTime > 1000) {
-        toggleLed();
-        prevReadTime = millis();
-//        PRINTln(1);
+    navHandler();
+    prevReadNav = millis();
+    //        PRINTln(1);
 
-    }
+  }
+  if (millis() - prevReadTime > 1000) {
+    toggleLed();
+    prevReadTime = millis();
+    //        PRINTln(1);
+  }
+
+  if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
+    PRINT("ASTRO Motor Speeds: ");
+    for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+      PRINT(motorList[i].getCurrentVelocity());
+      if (i != 5) PRINT(", ");
+    } PRINTln("");
+
+    vbatt_read();
+
+    sinceFeedbackPrint = 0;
+  }
 }
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void velocityHandler(float throttle, float steering) {
-    // If statement for CASE 1: steering toward the RIGHT
+  // If statement for CASE 1: steering toward the RIGHT
 
-    if (steering > 0 ) {
-        deg = mapFloat(steering, 0, maxInputSignal, 1, -1);
-        desiredVelocityRight = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-        desiredVelocityLeft = mapFloat(throttle, minInputSignal, maxInputSignal,  minOutputSignal, maxOutputSignal);
-        rotation = "CW";
-    }
-    // If statement for CASE 2: steering toward the LEFT or not steering
-    if (steering <= 0 ) {
-        deg = mapFloat(steering, minInputSignal, 0, -1, 1);
-        desiredVelocityRight = mapFloat(throttle, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-        desiredVelocityLeft = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-        rotation = "CCW";
-    }
-    if (desiredVelocityLeft < 0 ) {
-        leftMotorDirection = 1;
-    }
-    else {
-        leftMotorDirection = -1;
-    }
+  if (steering > 0 ) {
+    deg = mapFloat(steering, 0, maxInputSignal, 1, -1);
+    desiredVelocityRight = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
+    desiredVelocityLeft = mapFloat(throttle, minInputSignal, maxInputSignal,  minOutputSignal, maxOutputSignal);
+    rotation = "CW";
+  }
+  // If statement for CASE 2: steering toward the LEFT or not steering
+  if (steering <= 0 ) {
+    deg = mapFloat(steering, minInputSignal, 0, -1, 1);
+    desiredVelocityRight = mapFloat(throttle, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
+    desiredVelocityLeft = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
+    rotation = "CCW";
+  }
+  if (desiredVelocityLeft < 0 ) {
+    leftMotorDirection = 1;
+  }
+  else {
+    leftMotorDirection = -1;
+  }
 
-    if (desiredVelocityRight < 0 ) {
-        rightMotorDirection = -1;
-    }
-    else {
-        rightMotorDirection = 1;
-    }
+  if (desiredVelocityRight < 0 ) {
+    rightMotorDirection = -1;
+  }
+  else {
+    rightMotorDirection = 1;
+  }
 
-    RF.calcCurrentVelocity();
-    RM.calcCurrentVelocity();
-    RB.calcCurrentVelocity();
-    LF.calcCurrentVelocity();
-    LM.calcCurrentVelocity();
-    LB.calcCurrentVelocity();
+  RF.calcCurrentVelocity();
+  RM.calcCurrentVelocity();
+  RB.calcCurrentVelocity();
+  LF.calcCurrentVelocity();
+  LM.calcCurrentVelocity();
+  LB.calcCurrentVelocity();
 
-    RF.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RF.getCurrentVelocity());
-    RM.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RM.getCurrentVelocity());
-    RB.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RB.getCurrentVelocity());
-    LF.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LF.getCurrentVelocity());
-    LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
-    LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
+  RF.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RF.getCurrentVelocity());
+  RM.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RM.getCurrentVelocity());
+  RB.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RB.getCurrentVelocity());
+  LF.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LF.getCurrentVelocity());
+  LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
+  LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
 
 
 
@@ -348,249 +363,242 @@ void velocityHandler(float throttle, float steering) {
 }
 
 void ser_flush(void) {
-    while (UART_PORT.available()) {
-        UART_PORT.read();
-    }
+  while (UART_PORT.available()) {
+    UART_PORT.read();
+  }
 }
 
 void toggleLed() {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
 void toggleLed2() {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(350);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(250);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(150);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(350);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(250);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(150);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 
 }
 
 String getValue(String data, char separator, int index) {
-    int found = 0;
-    int strIndex[] = {0, -1};
-    int maxIndex = data.length() - 1;
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length() - 1;
 
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
-        if (data.charAt(i) == separator || i == maxIndex) {
-            found++;
-            strIndex[0] = strIndex[1] + 1;
-            strIndex[1] = (i == maxIndex) ? i + 1 : i;
-        }
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
     }
+  }
 
-    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }        // Parse data for throttle and steering variables
 
 void initPins(void) {
-    pinMode(RF_DIR, OUTPUT);
-    pinMode(RF_PWM, OUTPUT);
-    pinMode(RM_DIR, OUTPUT);
-    pinMode(RM_PWM, OUTPUT);
-    pinMode(RB_DIR, OUTPUT);
-    pinMode(RB_PWM, OUTPUT);
+  pinMode(RF_DIR, OUTPUT);
+  pinMode(RF_PWM, OUTPUT);
+  pinMode(RM_DIR, OUTPUT);
+  pinMode(RM_PWM, OUTPUT);
+  pinMode(RB_DIR, OUTPUT);
+  pinMode(RB_PWM, OUTPUT);
 
-    pinMode(LF_DIR, OUTPUT);
-    pinMode(LF_PWM, OUTPUT);
-    pinMode(LM_DIR, OUTPUT);
-    pinMode(LM_PWM, OUTPUT);
-    pinMode(LB_DIR, OUTPUT);
-    pinMode(LB_PWM, OUTPUT);
+  pinMode(LF_DIR, OUTPUT);
+  pinMode(LF_PWM, OUTPUT);
+  pinMode(LM_DIR, OUTPUT);
+  pinMode(LM_PWM, OUTPUT);
+  pinMode(LB_DIR, OUTPUT);
+  pinMode(LB_PWM, OUTPUT);
 
-    pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(39, INPUT);
 
-    frontBase.attach(23);
-    frontSide.attach(22);
-    topBase.attach(17);
-    topSide.attach(16);
+  frontBase.attach(23);
+  frontSide.attach(22);
+  topBase.attach(17);
+  topSide.attach(16);
 
 
 }                                           // Initiate pinModes
 
 void initEncoders(void) {
-    RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
-    pinMode(RF.encoderPinB, INPUT_PULLUP);
-    pinMode(RF.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
+  pinMode(RF.encoderPinB, INPUT_PULLUP);
+  pinMode(RF.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
-    RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
-    pinMode(RM.encoderPinB, INPUT_PULLUP);
-    pinMode(RM.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
+  pinMode(RM.encoderPinB, INPUT_PULLUP);
+  pinMode(RM.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
-    RB.attachEncoder(RB_EA, RB_EB, PULSES_PER_REV);
-    pinMode(RB.encoderPinB, INPUT_PULLUP);
-    pinMode(RB.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  RB.attachEncoder(RB_EA, RB_EB, PULSES_PER_REV);
+  pinMode(RB.encoderPinB, INPUT_PULLUP);
+  pinMode(RB.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
-    LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
-    pinMode(LF.encoderPinB, INPUT_PULLUP);
-    pinMode(LF.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
+  pinMode(LF.encoderPinB, INPUT_PULLUP);
+  pinMode(LF.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
-    LM.attachEncoder(LM_EA, LM_EB, PULSES_PER_REV);
-    pinMode(LM.encoderPinB, INPUT_PULLUP);
-    pinMode(LM.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  LM.attachEncoder(LM_EA, LM_EB, PULSES_PER_REV);
+  pinMode(LM.encoderPinB, INPUT_PULLUP);
+  pinMode(LM.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
-    LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
-    pinMode(LB.encoderPinB, INPUT_PULLUP);
-    pinMode(LB.encoderPinA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+  LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
+  pinMode(LB.encoderPinB, INPUT_PULLUP);
+  pinMode(LB.encoderPinA, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
+  RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }                                       // Initiate encoder for dcMotor objects and pinModes
 
 void initPids(void) {
-    //    RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
-    //    RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-    //    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
-    //
-    //    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
-    //    LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
-    //    LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
-    //
-    //    RF.pidController.setOutputLimits(-50, 50, 5.0);
-    //    RM.pidController.setOutputLimits(-50, 50, 5.0);
-    //    RB.pidController.setOutputLimits(-50, 50, 5.0);
-    //
-    //    LF.pidController.setOutputLimits(-50, 50, 5.0);
-    //    LM.pidController.setOutputLimits(-50, 50, 5.0);
-    //    LB.pidController.setOutputLimits(-50, 50, 5.0);
+  //    RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
+  //    RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
+  //    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
+  //
+  //    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
+  //    LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
+  //    LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
+  //
+  //    RF.pidController.setOutputLimits(-50, 50, 5.0);
+  //    RM.pidController.setOutputLimits(-50, 50, 5.0);
+  //    RB.pidController.setOutputLimits(-50, 50, 5.0);
+  //
+  //    LF.pidController.setOutputLimits(-50, 50, 5.0);
+  //    LM.pidController.setOutputLimits(-50, 50, 5.0);
+  //    LB.pidController.setOutputLimits(-50, 50, 5.0);
 }                                           // Initiate PID objects for Dc Motors
 
 
 void roverVelocityCalculator(void) {
-    rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
-    leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
+  rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
+  leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
 
-    forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
-    rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
+  forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
+  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
 
 
 }
 void initNav(void) {
-    if (myI2CGPS.begin(Wire , 400000) == false)        // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
-    {
-//        while (1);
-// This will freeze the code to have the user check wiring
-        Commands.error = true;
-        Commands.errorMessage = "ASTRO GPS wires aren't connected properly\n";
-    }
-    else if (!Commands.error) {
-        compass.init();
+  if (myI2CGPS.begin(Wire , 400000) == false)        // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
+  {
+    //        while (1);
+    // This will freeze the code to have the user check wiring
+    Commands.error = true;
+    Commands.errorMessage = "ASTRO GPS wires aren't connected properly\n";
+  }
+  else if (!Commands.error) {
+    compass.init();
 
-        compass.enableDefault();
-        compass.setTimeout(100);
-        compass.m_min = (LSM303::vector <int16_t>) {
-                -1794, +1681, -2947
-        };
-        compass.m_max = (LSM303::vector <int16_t>) {
-                +3359, +6531, +2016
-        };
-    }
+    compass.enableDefault();
+    compass.setTimeout(100);
+    compass.m_min = (LSM303::vector <int16_t>) {
+      -1794, +1681, -2947
+    };
+    compass.m_max = (LSM303::vector <int16_t>) {
+      +3359, +6531, +2016
+    };
+  }
 }
 //min: { -1794,  +1681,  -2947}    max: { +3359,  +6531,  +2016}
 
 
 void displayGpsInfo(void) {                     // The function that prints the info
-    if (gps.location.isValid() && Commands.isGpsImu)      // checks if valid location data is available
-    {
-        PRINT("GPS-OK");          // string initials to allow the Pyhton code to pickup
-        PRINT(" ");            // space
-        PRINTRES(gps.location.lat(), 6);   // print the latitude with 6 digits after the point
-        PRINT(" ");           // space
-        PRINTRES(gps.location.lng(), 6);   // print the longitude with 6 digits after the point
-        PRINT("--");             // new line
-    }
-    else if (Commands.isGpsImu)
-    {
-        PRINT(F("GPS-N/A"));
-        PRINT("--");
-    }
+  if (gps.location.isValid() && Commands.isGpsImu)      // checks if valid location data is available
+  {
+    PRINT("ASTRO GPS-OK ");          // string initials to allow the Pyhton code to pickup
+    PRINTRES(gps.location.lat(), 6);   // print the latitude with 6 digits after the point
+    PRINT(" ");           // space
+    PRINTRES(gps.location.lng(), 6);   // print the longitude with 6 digits after the point
+    PRINTln("");             // new line
+  }
+  else if (Commands.isGpsImu)
+  {
+    PRINTln("ASTRO GPS-N/A");
+  }
 }
 void navHandler(void) {
-    if (!Commands.error) {
-        compass.read();
+  if (!Commands.error) {
+    compass.read();
 
-        heading = compass.heading(LSM303::vector < int > {-1, 0, 0});
-//    float heading = compass.heading();
+    heading = compass.heading(LSM303::vector<int> { -1, 0, 0});
+    //    float heading = compass.heading();
 
-        if (compass.timeoutOccurred()) {
-            Commands.error = true;
-            Commands.errorMessage = "ASTRO No signal from IMU, check wiring or reset system\n";
+    if (compass.timeoutOccurred()) {
+      Commands.error = true;
+      Commands.errorMessage = "ASTRO HEADING-N/A No signal from IMU, check wiring or reset system\n";
 
-            Commands.errorMsg();
-        }
-
-        if (myI2CGPS.available())          // returns the number of available bytes from the GPS module
-        {
-
-            gps.encode(myI2CGPS.read());       // Feeds the GPS parser
-        }
-
-        if (gps.time.isUpdated())         // Checks to see if new GPS info is available
-        {
-
-            displayGpsInfo();                  // Print the info on the serial monitor
-        }
-
-        if (Commands.isGpsImu) {
-            PRINT("Heading");
-            PRINT(" ");
-            PRINT(heading);
-            PRINT("\n");
-        }
+      Commands.errorMsg();
     }
+
+    if (myI2CGPS.available()) {         // returns the number of available bytes from the GPS module
+      gps.encode(myI2CGPS.read());       // Feeds the GPS parser
+    }
+
+    if (gps.time.isUpdated()) {        // Checks to see if new GPS info is available
+      displayGpsInfo();                  // Print the info on the serial monitor
+    }
+
+    if (Commands.isGpsImu) {
+      PRINT("ASTRO HEADING-OK ");
+      PRINTln(heading);
+    }
+  }
 }
 void rf_encoder_interrupt(void) {
-    RF.dt += micros() - RF.prevTime;
-    RF.prevTime = micros();
-    RF.encoderCount++;
-//    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
+  RF.dt += micros() - RF.prevTime;
+  RF.prevTime = micros();
+  RF.encoderCount++;
+  //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
 
 }
 
 void rm_encoder_interrupt(void) {
-    RM.dt += micros() - RM.prevTime;
-    RM.prevTime = micros();
-    RM.encoderCount++;
+  RM.dt += micros() - RM.prevTime;
+  RM.prevTime = micros();
+  RM.encoderCount++;
 }
 void rb_encoder_interrupt(void) {
-    RB.dt += micros() - RB.prevTime;
-    RB.prevTime = micros();
-    RB.encoderCount++;
+  RB.dt += micros() - RB.prevTime;
+  RB.prevTime = micros();
+  RB.encoderCount++;
 }
 void lf_encoder_interrupt(void) {
-    LF.dt += micros() - LF.prevTime;
-    LF.prevTime = micros();
-    LF.encoderCount++;
+  LF.dt += micros() - LF.prevTime;
+  LF.prevTime = micros();
+  LF.encoderCount++;
 }
 void lm_encoder_interrupt(void) {
-    LM.dt += micros() - LM.prevTime;
-    LM.prevTime = micros();
-    LM.encoderCount++;
+  LM.dt += micros() - LM.prevTime;
+  LM.prevTime = micros();
+  LM.encoderCount++;
 }
 void lb_encoder_interrupt(void) {
-    LB.dt += micros() - LB.prevTime;
-    LB.prevTime = micros();
-    LB.encoderCount++;
+  LB.dt += micros() - LB.prevTime;
+  LB.prevTime = micros();
+  LB.encoderCount++;
 }
