@@ -56,8 +56,8 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             if not gotGpsPos:
                 try:
-                    gpsGoal['latitude'] = rospy.get_param('gps_latitude')
-                    gpsGoal['longitude'] = rospy.get_param('gps_longitude')
+                    gpsGoal['latitude'] = rospy.get_param('goal_latitude')
+                    gpsGoal['longitude'] = rospy.get_param('goal_longitude')
                     gotGpsPos = True
                     rospy.loginfo('Got GPS goal coordinates!')
                 except KeyError: # param not defined

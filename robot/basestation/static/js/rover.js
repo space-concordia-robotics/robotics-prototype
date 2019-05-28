@@ -49,25 +49,25 @@ $(document).ready(function () {
     }
   })
 
-  $('#send-antenna-pos').on('click', function (event) {
+  $('#send-antenna-data-btn').on('click', function (event) {
     event.preventDefault()
     let goodInput = true
-    if ( !($('#initial-antenna-latitude').val()) ) {
+    if ( !($('#antenna-latitude-input').val()) ) {
       appendToConsole('latitude field empty!')
       goodInput = false
     }
-    if ( !($('#initial-antenna-longitude').val()) ) {
+    if ( !($('#antenna-longitude-input').val()) ) {
       appendToConsole('longitude field empty!')
       goodInput = false
     }
-    if ( !($('#initial-antenna-bearing').val()) ) {
+    if ( !($('#antenna-start-dir-input').val()) ) {
       appendToConsole('bearing field empty!')
       goodInput = false
     }
     if (goodInput) {
-      let initialLatitude = $('#initial-antenna-latitude').val()
-      let initialLongitude = $('#initial-antenna-longitude').val()
-      let initialBearing = $('#initial-antenna-bearing').val()
+      let initialLatitude = $('#antenna-latitude-input').val()
+      let initialLongitude = $('#antenna-longitude-input').val()
+      let initialBearing = $('#antenna-start-dir-input').val()
       antenna_latitude.set( parseFloat(initialLatitude) );
       antenna_longitude.set( parseFloat(initialLongitude) );
       antenna_start_dir.set( parseFloat(initialBearing) );
@@ -78,80 +78,60 @@ $(document).ready(function () {
       $('#antenna-unchanging').show()
     }
   })
-  $('#change-antenna-data').on('click', function (event) {
+  $('#change-antenna-data-btn').on('click', function (event) {
     event.preventDefault()
     $('#antenna-inputs').show()
     $('#antenna-unchanging').hide()
   })
 
-  $('#send-gps-pos').on('click', function (event) {
+  $('#send-goal-pos-btn').on('click', function (event) {
     event.preventDefault()
     let goodInput = true
-    if ( !($('#desired-gps-latitude').val()) ) {
+    if ( !($('#goal-latitude-input').val()) ) {
       appendToConsole('latitude field empty!')
       goodInput = false
     }
-    if ( !($('#desired-gps-longitude').val()) ) {
+    if ( !($('#goal-longitude-input').val()) ) {
       appendToConsole('longitude field empty!')
       goodInput = false
     }
     if (goodInput) {
-      let desiredLatitude = $('#desired-gps-latitude').val()
-      let desiredLongitude = $('#desired-gps-longitude').val()
-      gps_latitude.set( parseFloat(desiredLatitude) );
-      gps_longitude.set( parseFloat(desiredLongitude) );
-      $('#destination-latitude').text(desiredLatitude)
-      $('#destination-longitude').text(desiredLongitude)
-      $('#gps-inputs').hide()
-      $('#gps-unchanging').show()
+      let desiredLatitude = $('#goal-latitude-input').val()
+      let desiredLongitude = $('#goal-longitude-input').val()
+      goal_latitude.set( parseFloat(desiredLatitude) );
+      goal_longitude.set( parseFloat(desiredLongitude) );
+      $('#goal-latitude').text(desiredLatitude)
+      $('#goal-longitude').text(desiredLongitude)
+      $('#goal-inputs').hide()
+      $('#goal-unchanging').show()
     }
   })
-  $('#change-gps-coords').on('click', function (event) {
+  $('#change-goal-pos-btn').on('click', function (event) {
     event.preventDefault()
-    $('#gps-inputs').show()
-    $('#gps-unchanging').hide()
+    $('#goal-inputs').show()
+    $('#goal-unchanging').hide()
   })
 
   $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-rover-listener-btn').is(':checked')) {
-      if (
-        $('button#mux')
-          .text()
-          .includes('Rover')
-      ) {
-        requestTask('rover_listener', 1, '#toggle-rover-listener-btn', function (
-          msgs
-        ) {
-          console.log('msgs[0]', msgs[0])
-          if (msgs.length == 2) {
-            console.log('msgs[1]', msgs[1])
-            // if already running
-            if (msgs[1].includes('already running')) {
-              $('#toggle-rover-listener-btn')[0].checked = true
+      let serialType = 'uart' // in a perfect world this is controlled in the gui
+      if ( $('button#mux').text().includes('Rover') || serialType == 'usb') {
+        requestTask('rover_listener', 1, '#toggle-rover-listener-btn', function (msgs) {
+          if (msgs[0]) {
+            $('#toggle-rover-listener-btn')[0].checked = true
             } else {
               $('#toggle-rover-listener-btn')[0].checked = false
             }
-          } else {
-            if (msgs[0]) {
-              $('#toggle-rover-listener-btn')[0].checked = false
-            } else {
-              $('#toggle-rover-listener-btn')[0].checked = true
-            }
-          }
-        })
-        // console.log('returnVals', returnVals)
-      } else {
+          }, serialType)
+        } else {
         appendToConsole(
-          'Cannot turn rover listener on if not in rover mux channel!'
-        )
+          'Cannot turn rover listener on if not in rover mux channel!')
       }
     } else {
       // closing rover listener
-      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (
-        msgs
-      ) {
+      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (msgs) {
         console.log('msgs[0]', msgs[0])
         if (msgs.length == 2) {
           console.log('msgs[1]', msgs[1])
