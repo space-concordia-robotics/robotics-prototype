@@ -5,6 +5,11 @@ $(document).ready(() => {
       // connect ros to the rosbridge websockets server
       initRosWeb()
 
+      if (getCookie('serialType')) {
+        appendToConsole('Found cookie!')
+        $('#serial-type').text(getCookie('serialType'))
+      }
+
       this.bindEventHandlers()
     },
     bindEventHandlers () {
@@ -242,10 +247,14 @@ $(document).ready(() => {
 
   $('#uart').mouseup(function () {
     $('#serial-type').text('uart')
+    setCookie('serialType', 'uart', 3)
+    appendToConsole('setting cookie to uart')
   })
 
   $('#usb').mouseup(function () {
     $('#serial-type').text('usb')
+    setCookie('serialType', 'usb', 3)
+    appendToConsole('setting cookie to usb')
   })
 
   // send serial command based on mux channel and current page
