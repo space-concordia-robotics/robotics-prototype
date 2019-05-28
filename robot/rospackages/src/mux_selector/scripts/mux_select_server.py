@@ -3,15 +3,22 @@
 import rospy
 from mux_selector.srv import *
 
+current_channel = 0
+
 def handle_mux_select(req):
+    if req.device == '?':
+        global current_channel
+        return str(current_channel) + '\n'
+
     response = "Switched MUX select to device {:s}".format(req.device)
 
     # call bash function to do the select
-    response += "\n" + select_device(req.device)
+    response += "\n" + str(select_device(req.device))
 
     return response
 
 def select_device(device):
+    global current_channel
     s0_val = 0
     s1_val = 0
 
@@ -41,19 +48,22 @@ def select_device(device):
             s0_val = 1
             s1_val = 0
         elif device == 3:
-            print("Selecting device 3: Lidar")
+            print("Selecting device 3: PDS")
             s0_val = 0
             s1_val = 0
 
+    current_channel = device
     gpio_dir = "/sys/class/gpio"
 
 # consider removing following lines to make given "test" argument flag present
 # or better: user ros params as per tatums suggestion
+    """
     with open(gpio_dir + "/gpio18/value", "w") as f:
         f.write(str(s0_val))
 
     with open(gpio_dir + "/gpio21/value", "w") as f:
         f.write(str(s1_val))
+    """
 
     s0_state = "s0: " + str(s0_val)
     s1_state = "s1: " + str(s1_val)

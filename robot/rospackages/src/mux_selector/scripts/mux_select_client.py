@@ -20,6 +20,9 @@ def is_valid_request(device):
 
     device = str(device)
 
+    if device == '?':
+        return True
+
     if device.isnumeric():
         device = int(device)
     else:
