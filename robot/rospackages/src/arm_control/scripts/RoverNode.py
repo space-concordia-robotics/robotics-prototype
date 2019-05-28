@@ -12,7 +12,7 @@ import serial.tools.list_ports # pyserial
 
 import rospy
 from std_msgs.msg import String, Header
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
@@ -121,43 +121,51 @@ def init_serial():
 
 requests = {
     'ping' : 'pong',
-    'who' : 'Astro',
-    'open-loop' : 'open',
-    'close-loop' : 'closed',
-    'reboot' : 'rebooting'
+    'who' : 'Happy Astro',
+    'who' : 'Paralyzed Astro',
+    'activate', 'ACTIVATED',
+    'activate', 'Active',
+    'deactivate' : 'Inactive',
+    'open-loop' : 'loop status is: Open',
+    'close-loop' : 'loop status is: CLose',
+    'steer-off' : 'Wheel Control is Activated',
+    'steer-on' : 'Skid Steering is Activated',
+    'acc-on', 'Limiter: Open',
+    'acc-off' : 'Limiter: CLose'#,
+    #'reboot' : 'rebooting'
 }
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
     global reqFeedback
     global reqInWaiting
-    armResponse = ArmRequestResponse()
+    roverResponse = ArmRequestResponse()
     timeout = 0.1 # 100ms timeout
     reqInWaiting=True
     sinceRequest = time.time()
-    rospy.loginfo('received '+req.msg+' request from GUI, sending to arm Teensy')
+    rospy.loginfo('received '+req.msg+' request from GUI, sending to rover Teensy')
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
-    while armResponse.success is False and (time.time()-sinceRequest < timeout):
+    while roverResponse.success is False and (time.time()-sinceRequest < timeout):
         if reqFeedback is not '':
             print(reqFeedback)
             for request in requests:
                 if request in req.msg and requests[request] in reqFeedback:
-                    armResponse.response = reqFeedback
-                    armResponse.success = True #a valid request and a valid response from the
+                    roverResponse.response = reqFeedback
+                    roverResponse.success = True #a valid request and a valid response from the
                     break
-            if armResponse.success:
+            if roverResponse.success:
                 break
             else:
-                armResponse.response += reqFeedback
+                roverResponse.response += reqFeedback
         rospy.Rate(100).sleep()
     rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
-    rospy.loginfo(armResponse)
+    rospy.loginfo(roverResponse)
     reqFeedback=''
     reqInWaiting=False
-    return armResponse
+    return roverResponse
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo('received: '+message.data+' command from GUI, sending to arm Teensy')
+    rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
     return
@@ -183,6 +191,16 @@ def publish_joint_states(message):
 
 def publish_nav_states(message):
     #base this off of function above
+    #split up message into gps data and place in following variables...
+    #should check if data is available... how do i account for if heading or gps not working?
+    roverLatitude = None
+    roverLongitude = None
+    roverHeading = None
+    msg = Point();
+    msg.x = roverLatitude
+    msg.y = roverLongitude
+    msg.z = roverHeading
+    navPub.publish(msg)
     return
 
 def stripFeedback(data):
@@ -206,10 +224,10 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')
     speedPub = rospy.Publisher(speed_pub_topic, JointState, queue_size=10)
 
-    nav_pub_topic = '/rover_nav'
+    nav_pub_topic = '/rover_position'
     rospy.loginfo('Beginning to publish to "'+nav_pub_topic+'" topic')
     # will either make my own message type or use a standard one
-    navPub = rospy.Publisher(nav_pub_topic, JointState, queue_size=10)
+    navPub = rospy.Publisher(nav_pub_topic, Point, queue_size=10)
 
     feedback_pub_topic = '/rover_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
@@ -220,6 +238,8 @@ if __name__ == '__main__':
     #for now i might just have it subscribe to Strings tho
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+    # the long way is for the gui to publish a twist and the node to convert it to throttle:steering
+    # the short way is for the gui to send the command string directly. no Twist.
 
     service_name = '/rover_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')

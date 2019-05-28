@@ -55,7 +55,7 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
             if not gotGpsPos:
-                try:
+                try: #rospy.has_param(param) works but requires code rethinking
                     gpsGoal['latitude'] = rospy.get_param('goal_latitude')
                     gpsGoal['longitude'] = rospy.get_param('goal_longitude')
                     gotGpsPos = True

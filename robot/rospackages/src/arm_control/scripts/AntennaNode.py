@@ -53,7 +53,7 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
             if not gotAntennaPos:
-                try:
+                try: #rospy.has_param(param) works but requires code rethinking
                     antenna['latitude'] = rospy.get_param('antenna_latitude')
                     antenna['longitude'] = rospy.get_param('antenna_longitude')
                     antenna['startDir'] = rospy.get_param('antenna_start_dir')
