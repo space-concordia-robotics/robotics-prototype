@@ -219,12 +219,12 @@ void loop() {
       else if (cmd == "dccw") {
         //turns drill counter-clockwise
         digitalWrite(DRILL_DIRECTION, HIGH);
-        UART_PORT.println("SCIENCE dccw");
+        UART_PORT.println("SCIENCE dccw done");
       }
       else if (cmd == "dcw") {
         //turns drill clockwise
         digitalWrite(DRILL_DIRECTION, LOW);
-        UART_PORT.println("SCIENCE dcw");
+        UART_PORT.println("SCIENCE dcw done");
       }
       else if (cmd == "dgo") {
         //turns drill clockwise

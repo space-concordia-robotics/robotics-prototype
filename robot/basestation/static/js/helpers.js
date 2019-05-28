@@ -6,6 +6,7 @@ const serialCmd = '#serial-cmd-input'
 function appendToConsole (msg) {
   $(logConsole).append(msg + '\n')
   $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+  console.log(msg + '\n')
 }
 
 // Rover log
@@ -96,6 +97,10 @@ function lightUp (selector) {
 
 function dim (selector) {
   $(selector).css('background-color', 'rgb(74, 0, 0)')
+}
+
+function greyOut (selector) {
+  $(selector).css('background-color', '#6c757d')
 }
 
 // AJAX

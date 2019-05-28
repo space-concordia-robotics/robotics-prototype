@@ -1,3 +1,4 @@
+// turn table graphics
 const twopi = 2 * Math.PI
 const pi = Math.PI
 
@@ -202,11 +203,21 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#science-listener-btn').is(':checked')) {
+      let serialType = 'uart'
       if (
+        $('#serial-type')
+          .text()
+          .includes('Serial')
+      ) {
+        appendToConsole('Select a serial type!')
+      } else if (
         $('button#mux')
           .text()
           .includes('Science')
       ) {
+        serialType = $('#serial-type')
+          .text()
+          .trim()
         requestTask(
           'science_listener',
           1,
@@ -221,7 +232,7 @@ $(document).ready(function () {
               }
             }
           },
-          'usb' // hardcoded usb for local testing
+          serialType
         )
       } else {
         appendToConsole(
@@ -229,6 +240,10 @@ $(document).ready(function () {
         )
       }
     } else {
+      if ($('#activate-science-btn').is(':checked')) {
+        appendToConsole('Deactivate the science MCU before closing listener!')
+        return
+      }
       // closing arm listener
       requestTask('science_listener', 0, '#science-listener-btn', function (
         msgs
@@ -255,8 +270,11 @@ $(document).ready(function () {
   $('#activate-science-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
-    if ($('#activate-science-btn').is(':checked')) {
+    if (!$('#science-listener-btn').is(':checked')) {
+      appendToConsole('Science listener not yet activated!')
+    } else if ($('#activate-science-btn').is(':checked')) {
       sendArmRequest('activate', function (msgs) {
+        console.log('msgs', msgs)
         if (msgs[0]) {
           $('#activate-science-btn')[0].checked = true
         } else {
@@ -266,6 +284,7 @@ $(document).ready(function () {
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
       sendArmRequest('stop', function (msgs) {
+        console.log('msgs', msgs)
         if (msgs[0]) {
           $('#activate-science-btn')[0].checked = false
         } else {
@@ -274,4 +293,41 @@ $(document).ready(function () {
       })
     }
   })
+
+  $('#ccw-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendScienceRequest('dccw', function (msgs) {
+      console.log('msgs', msgs)
+      if (msgs && msgs[1].trim() == 'dccw done') {
+        lightUp('#ccw-btn')
+        greyOut('#cw-btn')
+      }
+    })
+  })
+
+  $('#cw-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendScienceRequest('dcw', function (msgs) {
+      console.log('msgs', msgs)
+      if (msgs && msgs[1].trim() == 'dcw done') {
+        greyOut('#ccw-btn')
+        lightUp('#cw-btn')
+      }
+    })
+  })
 })
+
+function isScienceActivated () {
+  if (!$('#science-listener-btn').is(':checked')) {
+    appendToConsole('Science listener not yet activated!')
+    return false
+  } else if (!$('#activate-science-btn').is(':checked')) {
+    appendToConsole('Science MCU is not yet activated!')
+    return false
+  }
+  return true
+}

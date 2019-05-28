@@ -96,9 +96,10 @@ $(document).ready(function () {
           .text()
           .includes('Arm')
       ) {
-        serialType = $('#serialType')
+        serialType = $('#serial-type')
           .text()
           .trim()
+        console.log('setting serialType:', serialType)
         requestTask(
           'arm_listener',
           1,

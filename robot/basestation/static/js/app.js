@@ -190,7 +190,7 @@ $(document).ready(() => {
       (window.location.pathname == '/' &&
         $('#toggle-arm-listener-btn')[0].checked == true) ||
       (window.location.pathname == '/science' &&
-        $('#activate-science-listener-btn')[0].checked == true)
+        $('#science-listener-btn')[0].checked == true)
       // pds Listener
     )
   }
@@ -240,13 +240,12 @@ $(document).ready(() => {
     }
   })
 
-  // TODO: TELL JOSH use mousup because let go (once at a time) vs mousedwon (press and hold)
   $('#uart').mouseup(function () {
-    $('#serialType').text('uart')
+    $('#serial-type').text('uart')
   })
 
   $('#usb').mouseup(function () {
-    $('#serialType').text('usb')
+    $('#serial-type').text('usb')
   })
 
   // send serial command based on mux channel and current page

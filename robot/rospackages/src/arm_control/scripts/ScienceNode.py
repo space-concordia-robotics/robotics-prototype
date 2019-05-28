@@ -123,7 +123,9 @@ requests = {
     'who' : 'science',
     'activate' : 'activated',
     'deactivate' : 'deactivated',
-    'stop' : 'stopped'
+    'stop' : 'stopped',
+    'dccw' : 'dccw done',
+    'dcw' : 'dcw done'
 }
 
 def handle_client(req):
