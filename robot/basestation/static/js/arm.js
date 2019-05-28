@@ -41,7 +41,7 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  //checkTaskStatuses()
+  // checkTaskStatuses()
 
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -81,21 +81,43 @@ $(document).ready(function () {
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
+    let serialType = 'uart'
+    if (
+      $('#serialType')
+        .text()
+        .includes('Serial')
+    ) {
+      appendToConsole('Select a serial type!')
+    }
     // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-listener-btn').is(':checked')) {
-      var serialType = 'usb' // i hardcoded this for testing
-      if ( $('button#mux').text().includes('Arm') || serialType == 'usb') {
-        requestTask('arm_listener', 1, '#toggle-arm-listener-btn', function (msgs) {
-          console.log(msgs)
-          if (msgs[0]) {
-            $('#toggle-arm-listener-btn')[0].checked = true
-          } else {
-            $('#toggle-arm-listener-btn')[0].checked = false
-          }
-        }, 'usb')
+    else if ($('#toggle-arm-listener-btn').is(':checked')) {
+      if (
+        $('button#mux')
+          .text()
+          .includes('Arm')
+      ) {
+        serialType = $('#serialType')
+          .text()
+          .trim()
+        requestTask(
+          'arm_listener',
+          1,
+          '#toggle-arm-listener-btn',
+          function (msgs) {
+            console.log(msgs)
+            if (msgs[0]) {
+              $('#toggle-arm-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-arm-listener-btn')[0].checked = false
+            }
+          },
+          serialType
+        )
         // console.log('returnVals', returnVals)
       } else {
-        appendToConsole('Cannot turn arm listener on if not in arm mux channel!')
+        appendToConsole(
+          'Cannot turn arm listener on if not in arm mux channel!'
+        )
       }
     } else {
       // closing arm listener
@@ -126,22 +148,18 @@ $(document).ready(function () {
     if ($('#toggle-arm-stream-btn').is(':checked')) {
       requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
         if (msgs[0]) {
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        } else {
-          // failed to open stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          console.log('activating stream window')
+          getRoverIP(function (ip) {
+            console.log('ip', ip)
+            $('img#camera-feed')[0].src = ip + ':8090/?action=stream'
+          })
         }
-      }, '/dev/ttyArmScienceCam')
+      }) //, '/dev/ttyArmScienceCam')
     } else {
       requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
         if (msgs[0]) {
           // succeeded to close stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        } else {
-          // failed to close stream
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
         }
       })
     }
@@ -150,16 +168,23 @@ $(document).ready(function () {
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()
     let maxMultiplier = 5.0
-    if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
+    if (
+      parseFloat(multiplier) >= 0 &&
+      parseFloat(multiplier) <= maxMultiplier
+    ) {
       let cmd = 'armspeed ' + multiplier
       sendArmRequest(cmd, function (msgs) {})
     }
   })
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
-    if (e.keyCode == 13) { // enter key
+    if (e.keyCode == 13) {
+      // enter key
       let multiplier = $('#arm-speed-multiplier-input').val()
       let maxMultiplier = 5.0
-      if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
+      if (
+        parseFloat(multiplier) >= 0 &&
+        parseFloat(multiplier) <= maxMultiplier
+      ) {
         let cmd = 'armspeed ' + multiplier
         sendArmRequest(cmd, function (msgs) {})
       }
@@ -173,20 +198,16 @@ $(document).ready(function () {
       sendArmRequest('motor 1 loop closed', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
         }
       })
     } else {
       sendArmRequest('motor 1 loop open', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
         }
       })
     }
@@ -484,9 +505,7 @@ function gameLoop () {
       $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
-    }
-
-    else if (toBudge) {
+    } else if (toBudge) {
       let cmd = 'budge '
       for (var motor in budgeArray) {
         cmd += budgeArray[motor]

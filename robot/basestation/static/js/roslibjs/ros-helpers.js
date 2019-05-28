@@ -18,6 +18,13 @@ function initRosWeb () {
 
   /* general controls */
 
+  // setup a client for the ping service
+  ping_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'ping_response',
+    serviceType: 'PingResponse'
+  })
+
   // setup a client for the mux_select service
   mux_select_client = new ROSLIB.Service({
     ros: ros,
@@ -280,33 +287,33 @@ function checkTaskStatuses () {
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
-      console.log(msgs)
       appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('tru')
-      } else {
-        console.log('fals')
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-arm-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-arm-listener-btn')[0].checked = true
+        }
       }
     })
     // check arm camera stream status
     requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
       console.log(msgs)
       appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('truu')
-      } else {
-        console.log('falss')
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-arm-stream-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-arm-stream-btn')[0].checked = true
+        }
       }
     })
   } else if (window.location.pathname == '/rover') {
     console.log('rover page')
-    // do the same but for front and rear cameras
   } else if (window.location.pathname == '/science') {
-    console.log('rover page')
-    // do the same but for front and rear cameras
+    console.log('science page')
   } /* else if (window.location.pathname == '/rover') { //pds
     console.log('rover page')
-    //do the same but for front and rear cameras
   } */
 }
 
@@ -412,6 +419,23 @@ function sendRoverRequest (command, callback) {
       )
       // return true
       callback([true, msg])
+    }
+  })
+}
+
+/*
+returns the currently set ROS_MASTER_URI value
+
+usage:
+getRoverIP(function(callback) {})
+*/
+function getRoverIP (callback) {
+  let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
+  console.log('request', request)
+  ping_client.callService(request, function (result) {
+    let msg = result.response
+    if (result.response) {
+      callback(result.response)
     }
   })
 }

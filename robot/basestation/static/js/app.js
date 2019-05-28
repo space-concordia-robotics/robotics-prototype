@@ -183,53 +183,70 @@ $(document).ready(() => {
 
   Site.init()
 
-  function isListenerOpen(){
+  function isListenerOpen () {
     return (
-      ((window.location.pathname == '/rover') && ($('#toggle-rover-listener-btn')[0].checked == true)) ||
-      ((window.location.pathname == '/') && ($('#toggle-arm-listener-btn')[0].checked == true)) //||
-      // science Listener
+      (window.location.pathname == '/rover' &&
+        $('#toggle-rover-listener-btn')[0].checked == true) ||
+      (window.location.pathname == '/' &&
+        $('#toggle-arm-listener-btn')[0].checked == true) ||
+      (window.location.pathname == '/science' &&
+      $('#activate-science-listener-btn')[0].checked == true
       // pds Listener
     )
   }
 
   // select mux channel using mux_select service
-  $('#mux-0').mouseup(function () { // Rover
-    if (isListenerOpen()){
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
+  $('#mux-0').mouseup(function () {
+    // Rover
+    if (isListenerOpen()) {)
+      appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
-      requestMuxChannel('#mux-0', function(msgs) {
-        console.log(msgs)
-        if (msgs[0]) {
-          console.log('yeet')
-        } else {
-          console.log('neet')//appendToConsole('Request failed. Received "' + msg + '"')
-        }
+      requestMuxChannel('#mux-0', function (msgs) {
+        console.log('msgs', msgs)
       })
     }
   })
 
-  $('#mux-1').mouseup(function () { // Arm
-    if (isListenerOpen()){
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
+  $('#mux-1').mouseup(function () {
+    // Arm
+    if (isListenerOpen()) {
+      appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
-      requestMuxChannel('#mux-1')
+      requestMuxChannel('#mux-1', function (msgs) {
+        console.log('msgs', msgs)
+      })
     }
   })
 
-  $('#mux-2').mouseup(function () { // Science
-    if (isListenerOpen()){
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
+  $('#mux-2').mouseup(function () {
+    // Science
+    if (isListenerOpen()) {
+      appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
-      requestMuxChannel('#mux-2')
+      requestMuxChannel('#mux-2', function (msgs) {
+        console.log('msgs', msgs)
+      })
     }
   })
 
-  $('#mux-3').mouseup(function () { // PDS // not lidar anymore
-    if (isListenerOpen()){
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
+  $('#mux-3').mouseup(function () {
+    // PDS
+    if (isListenerOpen()) {
+      appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
-      requestMuxChannel('#mux-3')
+      requestMuxChannel('#mux-3', function (msgs) {
+        console.log('msgs', msgs)
+      })
     }
+  })
+
+  // TODO: TELL JOSH use mousup because let go (once at a time) vs mousedwon (press and hold)
+  $('#uart').mouseup(function () {
+    $('#serialType').text('uart')
+  })
+
+  $('#usb').mouseup(function () {
+    $('#serialType').text('usb')
   })
 
   // send serial command based on mux channel and current page
@@ -240,21 +257,31 @@ $(document).ready(() => {
     let cmd = $('#serial-cmd-input').val()
     let buttonText = $('button#mux').text()
     if (buttonText.includes('Select Device Channel')) {
-      appendToConsole('Unable to send serial command. Try opening a mux channel.')
+      appendToConsole(
+        'Unable to send serial command. Try opening a mux channel.'
+      )
     } else {
       // if the appropriate listener is open, send a command to it
-      if (buttonText.includes('Rover') && $('#toggle-rover-listener-btn')[0].checked == true) {
+      if (
+        buttonText.includes('Rover') &&
+        $('#toggle-rover-listener-btn')[0].checked == true
+      ) {
         // sendRoverCommand(cmd) // rover commands not yet implemented
-      } else if (buttonText.includes('Arm') && $('#toggle-arm-listener-btn')[0].checked == true) {
+      } else if (
+        buttonText.includes('Arm') &&
+        $('#toggle-arm-listener-btn')[0].checked == true
+      ) {
         sendArmCommand(cmd)
-      } else if (buttonText.includes('Science')) { // science buttons unknown
+      } else if (buttonText.includes('Science')) {
+        // science buttons unknown
         // sendScienceCommand(cmd) // science commands not yet implemented
-      } else if (buttonText.includes('PDS')) { // pds buttons unknown
+      } else if (buttonText.includes('PDS')) {
+        // pds buttons unknown
         // sendPdsCommand(cmd) // pds commands not yet implemented
       }
       // no listener is open, send generic request
       else if (!buttonText.includes('Select Device Channel')) {
-        requestSerialCommand(cmd, function(msgs) {
+        requestSerialCommand(cmd, function (msgs) {
           console.log(msgs)
           if (msgs[0]) {
             console.log('nice')
@@ -267,9 +294,9 @@ $(document).ready(() => {
   })
 
   $('#serial-cmd-input').on('keyup', function (e) {
-    if (e.keyCode == 13) { // enter key
+    if (e.keyCode == 13) {
+      // enter key
       // copy code from above
     }
   })
-
 })

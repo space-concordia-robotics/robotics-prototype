@@ -45,7 +45,7 @@
 
       <div class="dropdown col-md-2">
         <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Select Device Channel
+          Device Channel
         </button>
         <div class="dropdown-menu">
           <a id="mux-0" class="dropdown-item">0: Rover</a>
@@ -55,7 +55,17 @@
         </div>
       </div>
 
-      <div class="col-md-8">
+      <div class="dropdown col-md-2">
+        <button id="serialType" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          Serial Type
+        </button>
+        <div class="dropdown-menu">
+          <a id="uart" class="dropdown-item">uart</a>
+          <a id="usb" class="dropdown-item">usb</a>
+        </div>
+      </div>
+
+      <div class="col-md-6">
         <input type="text" id="serial-cmd-input">
       </div>
       <div class="col-md-1">
@@ -72,8 +82,7 @@
         <div class="row" >
           <div class="col-md-6" align="center">
             <h5 class="container-header">Arm Postion</h5>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgMpGJQ3yHkyjG7epebqUD8_Zw4y-ynp7GRZhbl1XITo0IFu2u3Q" class="img-fluid"/>
-<!--                    <img src="../static/images/robotic-arm.jpg" class="mx-auto d-block" id="arm-position"/>-->
+            <img src="../static/images/robotic-arm.jpg" class="mx-auto d-block" id="arm-position"/>
           </div>
           <div class="col-md-6" align="center">
             <h5 class="container-header">Arm Vision</h5>
