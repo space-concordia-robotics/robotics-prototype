@@ -14,10 +14,35 @@ TinyGPSPlus gps;   // GPS object
 LSM303 compass;
 //#define TEST 1
 
+/* comms */
 
-#define PULSES_PER_REV      14
-#define maxRpm              30
-#define GEAR_RATIO         188.61
+#define FEEDBACK_PRINT_INTERVAL 50
+elapsedMillis sinceFeedbackPrint;
+unsigned long prevRead = millis(); // Loop Timer
+unsigned long prevReadNav = millis(); // Loop Timer for nav
+unsigned long prevReadTime = millis(); // Loop Timer for nav
+String cmd;
+
+void blePrint(String cmd);
+void blePrintln(String cmd);
+void blePrintres(String cmd);
+void ser_flush(void);
+void toggleLed();
+void toggleLed2();
+String getValue(String data, char separator, int index);
+
+SoftwareSerial bluetooth(9, 10);
+ArduinoBlue phone(bluetooth);
+
+// Modes of operation
+// Bluetooth control - basestation control - PID - Open Loop
+
+//boolean isActivated = false;
+//boolean isActivated = false;
+//boolean isOpenloop = true; // No PID controller
+//boolean bluetoothMode = true;
+//boolean joystickMode = true;
+
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -40,24 +65,18 @@ LSM303 compass;
 #define PRINTRES(a,b) Serial1.print(a, b); blePrintres(a ,b);
 #endif
 
-#if defined(DEBUG_MODE) || defined(USER_MODE)
-#define USE_TEENSY_HW_SERIAL 0 // this will make ArduinoHardware.h use hardware serial instead of usb serial
-#endif
+#define V_SENSE_PIN 39 // for reading battery voltage
 
+/* motors */
 
-
-SoftwareSerial bluetooth(9, 10);
-
-ArduinoBlue phone(bluetooth);
-
-
-
+#define PULSES_PER_REV      14
+#define maxRpm              30
+#define GEAR_RATIO         188.61
 
 // F -> Front, B -> Back,  M -> Middle, L -> Left, R -> Right,
 // DIR -> Direction pin, PWM -> Signal Pin, EA ->Encoder A, EB -> Encoder B
 // DC Motor naming: Positing_purpose-pin, eg RF_PWM or LM_DIR
 // Types of Pins: DIR, PWM, Enc_A, Enc_B
-
 
 // Bluetooth connection TX of bluetooth goes to pin 9 and RX of bluetooth goes to pin 10
 #define RF_DIR   2
@@ -112,7 +131,6 @@ ArduinoBlue phone(bluetooth);
 #define LB_EA    33
 #define LB_EB    34
 
-
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
 DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor");
 DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO, "Rear Right Motor");
@@ -121,15 +139,12 @@ DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor");
 DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor");
 DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
-Servo frontSide;
-Servo frontBase;
-Servo topSide;
-Servo topBase;
-
-#define FEEDBACK_PRINT_INTERVAL 50
-elapsedMillis sinceFeedbackPrint;
-
-//Commands cmd;
+#define FS_SERVO 22
+#define FB_SERVO 23
+#define TS_SERVO 16
+#define TB_SERVO 17
+Servo frontSide; Servo frontBase;
+Servo topSide; Servo topBase;
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
@@ -144,23 +159,11 @@ int leftMotorDirection; // CCW =1 or CW =-1
 int rightMotorDirection; // CCW =1 or CW =-1
 float desiredVelocityRight = 0;
 float desiredVelocityLeft = 0;
-unsigned int prevRead = millis(); // Loop Timer
-unsigned int prevReadNav = millis(); // Loop Timer for nav
-unsigned int prevReadTime = millis(); // Loop Timer for nav
 float d = 0.33; //distance between left and right wheels
 float radius = 14;
 float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
-String cmd;
 String rotation; // Rotation direction of the whole rover
 
-// Modes of operation
-// Bluetooth control - basestation control - PID - Open Loop
-
-//boolean isActivated = false;
-//boolean isActivated = false;
-//boolean isOpenloop = true; // No PID controller
-//boolean bluetoothMode = true;
-//boolean joystickMode = true;
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
 void motor_encoder_interrupt(int motorNumber);
 void rf_encoder_interrupt(void);
@@ -169,10 +172,6 @@ void rb_encoder_interrupt(void);
 void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
-void ser_flush(void);
-void toggleLed();
-void toggleLed2();
-String getValue(String data, char separator, int index);
 void initPins(void); // Initiate pinMode for direction and pwm pins for cytron drivers
 void initEncoders(void);    // Encoder initiation (attach interrups and pinModes for wheel encoders
 void initPids(void);    // Initiate PID for DMotor
@@ -182,31 +181,10 @@ void displayGpsInfo(void);
 void navHandler(void);
 void roverVelocityCalculator(void);
 
-#include "commands.h"
-
-Commands Commands;
-
-void blePrint(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(cmd);
-    delay(50);
-  }
-}
-
-void blePrintln(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.println(cmd);
-    delay(50);
-  }
-}
-void blePrintres(float a, float b) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(a, b);
-    delay(50);
-  }
-}
-
+/* more comms */
 #include "Vsense.h"
+#include "commands.h"
+Commands Commands;
 
 void setup() {
   // initialize serial communications at 115200 bps:
@@ -216,31 +194,28 @@ void setup() {
   bluetooth.setTimeout(50);
 
   delay(50);  // do not print too fast!
-
   ser_flush();
   initPins();
   initEncoders();
   initPids();
   initNav();
-
-
   Commands.setupMessage();
 }
 
 void loop() {
 
   if (!Commands.isActivated) {
-    if (UART_PORT.available() ) {
-
+    if (UART_PORT.available()) {
       cmd = UART_PORT.readStringUntil('\n');
       ser_flush();
       Commands.handler(cmd, "Serial");
-    } else if (bluetooth.available()) {
+    }
+    else if (bluetooth.available()) {
       Commands.bleHandler();
     }
   }
 
-  if ((millis() - prevRead > 30)  && Commands.isActivated ) {
+  if ((millis() - prevRead > 30) && Commands.isActivated) {
     // incoming format example: "5:7"
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
@@ -258,8 +233,9 @@ void loop() {
     //        else if (!Commands.bluetoothMode){
     //
     //        }
+    
     velocityHandler(throttle, steering);
-    //
+    
     if (Commands.isEnc) {
       //            roverVelocityCalculator();
       RF.calcCurrentVelocity();
@@ -269,45 +245,41 @@ void loop() {
       LM.calcCurrentVelocity();
       LB.calcCurrentVelocity();
       PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-
       PRINT("ASTRO left: " + String(desiredVelocityLeft));
       PRINTln(" - right: " + String(desiredVelocityRight));
-
       /*
         for (i = 0; i <= 5; i++) {
           PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
-        }*/
-
+        }
+      */
     }
     prevRead = millis();
-
-  }
+  } // end of isActivated
+  
   if (millis() - prevReadNav > 200) {
     //        toggleLed();
-
     navHandler();
     prevReadNav = millis();
     //        PRINTln(1);
-
   }
   if (millis() - prevReadTime > 1000) {
     toggleLed();
     prevReadTime = millis();
     //        PRINTln(1);
   }
-
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
     PRINT("ASTRO Motor Speeds: ");
     for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
       PRINT(motorList[i].getCurrentVelocity());
       if (i != 5) PRINT(", ");
-    } PRINTln("");
+    }
+    PRINTln("");
 
     vbatt_read();
 
     sinceFeedbackPrint = 0;
   }
-}
+} // end of loop
 
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -315,7 +287,6 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
 
 void velocityHandler(float throttle, float steering) {
   // If statement for CASE 1: steering toward the RIGHT
-
   if (steering > 0 ) {
     deg = mapFloat(steering, 0, maxInputSignal, 1, -1);
     desiredVelocityRight = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
@@ -356,10 +327,6 @@ void velocityHandler(float throttle, float steering) {
   LF.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LF.getCurrentVelocity());
   LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
   LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
-
-
-
-
 }
 
 void ser_flush(void) {
@@ -386,9 +353,9 @@ void toggleLed2() {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   delay(100);
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-
 }
 
+//! Parse data for throttle and steering variables
 String getValue(String data, char separator, int index) {
   int found = 0;
   int strIndex[] = {0, -1};
@@ -401,9 +368,8 @@ String getValue(String data, char separator, int index) {
       strIndex[1] = (i == maxIndex) ? i + 1 : i;
     }
   }
-
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}        // Parse data for throttle and steering variables
+}
 
 void initPins(void) {
   pinMode(RF_DIR, OUTPUT);
@@ -421,16 +387,15 @@ void initPins(void) {
   pinMode(LB_PWM, OUTPUT);
 
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(39, INPUT);
+  pinMode(V_SENSE_PIN, INPUT);
 
-  frontBase.attach(23);
-  frontSide.attach(22);
-  topBase.attach(17);
-  topSide.attach(16);
+  frontSide.attach(FS_SERVO);
+  frontBase.attach(FB_SERVO);
+  topSide.attach(TS_SERVO);
+  topBase.attach(TB_SERVO);
+}
 
-
-}                                           // Initiate pinModes
-
+//! Initiate encoder for dcMotor objects and pinModes
 void initEncoders(void) {
   RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
   pinMode(RF.encoderPinB, INPUT_PULLUP);
@@ -473,26 +438,28 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
   RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
-}                                       // Initiate encoder for dcMotor objects and pinModes
+}
 
+//! Initiate PID objects for Dc Motors
 void initPids(void) {
-  //    RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
-  //    RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-  //    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
-  //
-  //    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
-  //    LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
-  //    LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
-  //
-  //    RF.pidController.setOutputLimits(-50, 50, 5.0);
-  //    RM.pidController.setOutputLimits(-50, 50, 5.0);
-  //    RB.pidController.setOutputLimits(-50, 50, 5.0);
-  //
-  //    LF.pidController.setOutputLimits(-50, 50, 5.0);
-  //    LM.pidController.setOutputLimits(-50, 50, 5.0);
-  //    LB.pidController.setOutputLimits(-50, 50, 5.0);
-}                                           // Initiate PID objects for Dc Motors
+  /*
+  RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
+  RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
+  RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
 
+  LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
+  LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
+  LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
+
+  RF.pidController.setOutputLimits(-50, 50, 5.0);
+  RM.pidController.setOutputLimits(-50, 50, 5.0);
+  RB.pidController.setOutputLimits(-50, 50, 5.0);
+
+  LF.pidController.setOutputLimits(-50, 50, 5.0);
+  LM.pidController.setOutputLimits(-50, 50, 5.0);
+  LB.pidController.setOutputLimits(-50, 50, 5.0);
+  */
+}
 
 void roverVelocityCalculator(void) {
   rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
@@ -500,12 +467,29 @@ void roverVelocityCalculator(void) {
 
   forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
   rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
-
-
 }
+
+void blePrint(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(cmd);
+    delay(50);
+  }
+}
+void blePrintln(String cmd) {
+  if (Commands.bluetoothMode) {
+    bluetooth.println(cmd);
+    delay(50);
+  }
+}
+void blePrintres(float a, float b) {
+  if (Commands.bluetoothMode) {
+    bluetooth.print(a, b);
+    delay(50);
+  }
+}
+
 void initNav(void) {
-  if (myI2CGPS.begin(Wire , 400000) == false)        // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
-  {
+  if (myI2CGPS.begin(Wire , 400000) == false) {       // Wire1 corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     //        while (1);
     // This will freeze the code to have the user check wiring
     Commands.error = true;
@@ -513,7 +497,6 @@ void initNav(void) {
   }
   else if (!Commands.error) {
     compass.init();
-
     compass.enableDefault();
     compass.setTimeout(100);
     compass.m_min = (LSM303::vector <int16_t>) {
@@ -526,21 +509,22 @@ void initNav(void) {
 }
 //min: { -1794,  +1681,  -2947}    max: { +3359,  +6531,  +2016}
 
-
-void displayGpsInfo(void) {                     // The function that prints the info
-  if (gps.location.isValid() && Commands.isGpsImu)      // checks if valid location data is available
-  {
-    PRINT("ASTRO GPS-OK ");          // string initials to allow the Pyhton code to pickup
-    PRINTRES(gps.location.lat(), 6);   // print the latitude with 6 digits after the point
-    PRINT(" ");           // space
-    PRINTRES(gps.location.lng(), 6);   // print the longitude with 6 digits after the point
-    PRINTln("");             // new line
-  }
-  else if (Commands.isGpsImu)
-  {
-    PRINTln("ASTRO GPS-N/A");
+void displayGpsInfo(void) {
+  if (Commands.isGpsImu) {
+    PRINT("ASTRO GPS-");
+    if (gps.location.isValid()) { // checks if valid location data is available
+      PRINT("OK ");
+      PRINTRES(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
+      PRINT(" "); // space
+      PRINTRES(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
+      PRINTln(""); // new line
+    }
+    else {
+      PRINTln("N/A");
+    }
   }
 }
+
 void navHandler(void) {
   if (!Commands.error) {
     compass.read();
@@ -569,14 +553,13 @@ void navHandler(void) {
     }
   }
 }
+
 void rf_encoder_interrupt(void) {
   RF.dt += micros() - RF.prevTime;
   RF.prevTime = micros();
   RF.encoderCount++;
   //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
-
 }
-
 void rm_encoder_interrupt(void) {
   RM.dt += micros() - RM.prevTime;
   RM.prevTime = micros();
