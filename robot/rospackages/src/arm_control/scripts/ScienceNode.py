@@ -133,7 +133,18 @@ requests = {
     'eup' : 'eup done',
     'edown' : 'edown done',
     'ed' : 'UP',
-    'ed' : 'DOWN'
+    'ed' : 'DOWN',
+    'p1in' : 'p1in done',
+    'p1out' : 'p1out done',
+    'p2in' : 'p2in done',
+    'p2out' : 'p2out done',
+    'p3in' : 'p3in done',
+    'p3out' : 'p3out done',
+    'p4in' : 'p4in done',
+    'p4out' : 'p4out done',
+    'p5in' : 'p5in done',
+    'p5out' : 'p5out done',
+
 }
 
 def handle_client(req):

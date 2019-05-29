@@ -346,6 +346,191 @@ $(document).ready(function () {
       }
     })
   })
+
+  $('#pump1-drive-toggle').on('click', function (event) {
+    event.preventDefault()
+    let isDirOUT = $('#pump1-dir-toggle').is(':checked')
+    let cmd = ''
+
+    if (isDirOUT) {
+      cmd = 'p1out'
+    } else {
+      cmd = 'p1in'
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump1-drive-toggle').is(':checked')) {
+      console.log('turning ON P1CCW')
+      sendScienceRequest(cmd, function (msgs) {
+        console.log('msgs', msgs)
+        if (msgs[1].includes(cmd + ' done')) {
+          $('#pump1-drive-toggle')[0].checked = true
+        } else {
+          $('#pump1-drive-toggle')[0].checked = false
+        }
+      })
+    } else {
+      // stop all pumps
+      sendScienceRequest('ps', function (msgs) {
+        if (msgs[1].includes('ps done')) {
+          toggleOffAllPumps()
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
+
+  $('#pump2-drive-toggle').on('click', function (event) {
+    event.preventDefault()
+    let isDirOUT = $('#pump2-dir-toggle').is(':checked')
+    let cmd = ''
+
+    if (isDirOUT) {
+      cmd = 'p2out'
+    } else {
+      cmd = 'p2in'
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump2-drive-toggle').is(':checked')) {
+      sendScienceRequest(cmd, function (msgs) {
+        if (msgs[1].includes(cmd + ' done')) {
+          $('#pump2-drive-toggle')[0].checked = true
+        } else {
+          $('#pump2-drive-toggle')[0].checked = false
+        }
+      })
+    } else {
+      // stop all pumps
+      sendScienceRequest('ps', function (msgs) {
+        if (msgs[1].includes('ps done')) {
+          toggleOffAllPumps()
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
+
+  $('#pump3-drive-toggle').on('click', function (event) {
+    event.preventDefault()
+    let isDirOUT = $('#pump3-dir-toggle').is(':checked')
+    let cmd = ''
+
+    if (isDirOUT) {
+      cmd = 'p3out'
+    } else {
+      cmd = 'p3in'
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump3-drive-toggle').is(':checked')) {
+      sendScienceRequest(cmd, function (msgs) {
+        if (msgs[1].includes(cmd + ' done')) {
+          $('#pump3-drive-toggle')[0].checked = true
+        } else {
+          $('#pump3-drive-toggle')[0].checked = false
+        }
+      })
+    } else {
+      // stop all pumps
+      sendScienceRequest('ps', function (msgs) {
+        if (msgs[1].includes('ps done')) {
+          toggleOffAllPumps()
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
+
+  $('#pump4-drive-toggle').on('click', function (event) {
+    event.preventDefault()
+    let isDirOUT = $('#pump4-dir-toggle').is(':checked')
+    let cmd = ''
+
+    if (isDirOUT) {
+      cmd = 'p4out'
+    } else {
+      cmd = 'p4in'
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump4-drive-toggle').is(':checked')) {
+      sendScienceRequest(cmd, function (msgs) {
+        if (msgs[1].includes(cmd + ' done')) {
+          $('#pump4-drive-toggle')[0].checked = true
+        } else {
+          $('#pump4-drive-toggle')[0].checked = false
+        }
+      })
+    } else {
+      // stop all pumps
+      sendScienceRequest('ps', function (msgs) {
+        if (msgs[1].includes('ps done')) {
+          toggleOffAllPumps()
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
+
+  $('#pump5-drive-toggle').on('click', function (event) {
+    event.preventDefault()
+    let isDirOUT = $('#pump3-dir-toggle').is(':checked')
+    let cmd = ''
+
+    if (isDirOUT) {
+      cmd = 'p5out'
+    } else {
+      cmd = 'p5in'
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump5-drive-toggle').is(':checked')) {
+      sendScienceRequest(cmd, function (msgs) {
+        if (msgs[1].includes(cmd + ' done')) {
+          $('#pump5-drive-toggle')[0].checked = true
+        } else {
+          $('#pump5-drive-toggle')[0].checked = false
+        }
+      })
+    } else {
+      // stop all pumps
+      sendScienceRequest('ps', function (msgs) {
+        if (msgs[1].includes('ps done')) {
+          toggleOffAllPumps()
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
+
+  let dirToggleBtns = [
+    '#pump1-dir-toggle',
+    '#pump2-dir-toggle',
+    '#pump3-dir-toggle',
+    '#pump4-dir-toggle',
+    '#pump5-dir-toggle'
+  ]
+  for (let i = 0; i < dirToggleBtns.length; i++) {
+    $(dirToggleBtns[i]).click(function () {
+      // click makes it checked during this time, so trying to enable
+      if ($(dirToggleBtns[i]).is(':checked')) {
+        $(dirToggleBtns[i])
+          .parent()
+          .parent()
+          .parent()
+          .find('strong')
+          .text('P' + (i + 1) + ' DIR: OUT')
+      } else {
+        $(dirToggleBtns[i])
+          .parent()
+          .parent()
+          .parent()
+          .find('strong')
+          .text('P' + (i + 1) + ' DIR: IN')
+      }
+    })
+  }
 })
 
 function isScienceActivated () {
@@ -387,4 +572,11 @@ function checkButtonStates () {
       greyOut('#elevator-up-btn')
     }
   })
+}
+
+// sets all toggles OFF
+function toggleOffAllPumps () {
+  for (let i = 0; i < 5; i++) {
+    $('#pump' + (i + 1) + '-drive-toggle')[0].checked = false
+  }
 }

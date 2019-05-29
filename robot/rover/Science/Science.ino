@@ -1,4 +1,4 @@
-#include <Arduino.h>
+  #include <Arduino.h>
 #include <Servo.h>
 //#include <SoftwareSerial.h>
 
@@ -368,75 +368,75 @@ void loop() {
         turnTableFree = true;
         UART_PORT.println("SCIENCE ts");
       }
-      else if (cmd == "p1ccw") {               //pump1
+      else if (cmd == "p1out") {               //pump1
         //turns pump1 counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
-        digitalWrite(PUMP1_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p1ccw");
+        digitalWrite(PUMP1_SPEED, HIGH);  
+        //delay(100);
+        UART_PORT.println("SCIENCE p1out done");
       }
-      else if (cmd == "p1cw") {               //pump1
+      else if (cmd == "p1in") {               //pump1
         //turns pump1 clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP1_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p1cw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p1in done");
       }
-      else if (cmd == "p2ccw") {               //pump2
+      else if (cmd == "p2out") {               //pump2
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP2_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p2ccw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p2out done");
       }
-      else if (cmd == "p2cw") {               //pump2
+      else if (cmd == "p2in") {               //pump2
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP2_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p2cw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p2in done");
       }
-      else if (cmd == "p3ccw") {               //pump3
+      else if (cmd == "p3out") {               //pump3
         //turns pump1 counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP3_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p3ccw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p3out done");
       }
-      else if (cmd == "p3cw") {               //pump3
+      else if (cmd == "p3in") {               //pump3
         //turns pump1 clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP3_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p3cw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p3in done");
       }
-      else if (cmd == "p4ccw") {               //pump4
+      else if (cmd == "p4out") {               //pump4
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP4_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p4ccw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p4out done");
       }
-      else if (cmd == "p4cw") {               //pump4
+      else if (cmd == "p4in") {               //pump4
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP4_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p4cw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p4in done");
       }
-      else if (cmd == "p5ccw") {               //pump5
+      else if (cmd == "p5out") {               //pump5
         //turns drill counter-clockwise
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP5_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p5ccw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p5out done");
       }
-      else if (cmd == "p5cw") {               //pump5
+      else if (cmd == "p5in") {               //pump5
         //turns drill clockwise
         digitalWrite(PUMPS_LEGA, HIGH);
         digitalWrite(PUMP5_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p5cw");
+        //delay(100);
+        UART_PORT.println("SCIENCE p5in done");
       }
       else if (cmd == "ps") {
         //stops pumps
@@ -446,31 +446,31 @@ void loop() {
         digitalWrite(PUMP4_SPEED, LOW);
         digitalWrite(PUMP5_SPEED, LOW);
         digitalWrite(PUMPS_LEGA, LOW);
-        UART_PORT.println("SCIENCE ps");
-      }
+        UART_PORT.println("SCIENCE ps done");
+      } 
       else if (cmd == "v1") {
         digitalWrite(VIBRATOR1, HIGH);
-        UART_PORT.println("SCIENCE v1");
+        UART_PORT.println("SCIENCE v1 ON");
       }
       else if (cmd == "v2") {
         digitalWrite(VIBRATOR2, HIGH);
-        UART_PORT.println("SCIENCE v2");
+        UART_PORT.println("SCIENCE v2 ON");
       }
       else if (cmd == "v3") {
         digitalWrite(VIBRATOR3, HIGH);
-        UART_PORT.println("SCIENCE v3");
+        UART_PORT.println("SCIENCE v3 ON");
       }
       else if (cmd == "v4") {
         digitalWrite(VIBRATOR4, HIGH);
-        UART_PORT.println("SCIENCE v4");
+        UART_PORT.println("SCIENCE v4 ON");
       }
       else if (cmd == "v5") {
         digitalWrite(VIBRATOR5, HIGH);
-        UART_PORT.println("SCIENCE v5");
+        UART_PORT.println("SCIENCE v5 ON");
       }
       else if (cmd == "v6") {
         digitalWrite(VIBRATOR6, HIGH);
-        UART_PORT.println("SCIENCE v6");
+        UART_PORT.println("SCIENCE v6 ON");
       }
       else if (cmd == "vs") {
         digitalWrite(VIBRATOR1, LOW);
