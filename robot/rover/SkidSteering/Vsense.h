@@ -11,7 +11,7 @@ void vbatt_read() {
   // = vsense * 6 )
 
   PRINT("ASTRO Battery voltage: ");
-  PRINT(vbatt);
+  PRINTln(vbatt);
 
   if (vbatt < 12) {
     PRINTln("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");

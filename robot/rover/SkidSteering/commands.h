@@ -33,7 +33,7 @@ class Commands {
     //    String op[] = [String(UART_PORT)];
     bool isActivated = false;
     bool isOpenloop = true; // No PID controller
-    bool bluetoothMode = true;
+    bool bluetoothMode = false;//true;
     bool isJoystickMode = true;
     bool isSteering = true;
     bool error = false;
@@ -71,19 +71,18 @@ class Commands {
     void errorMsg(void);
 };
 void Commands::setupMessage(void) {
-  delay(50);
+  /*delay(50);
   toggleLed2();
   delay(50);
   toggleLed();
-  delay(70);
+  delay(70);*/
   PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
   PRINTln("ASTRO setup complete");
   systemStatus();
 }
 
 void Commands::handler(String cmd, String sender) {
-  PRINT("ASTRO cmd: ");
-  PRINTln(cmd);
+  PRINTln("ASTRO GOT: " + cmd);
   if (cmd == activate_cmd) {
     activate(sender);
   }
@@ -94,7 +93,7 @@ void Commands::handler(String cmd, String sender) {
     who();
   }
   else if (cmd == bleOn_cmd ) {
-    bleOff(sender);
+    bleOn(sender);
   }
   else if (cmd == bleOff_cmd) {
     bleOff(sender);
@@ -164,7 +163,7 @@ void Commands::handler(String cmd, String sender) {
     }
     motorList[motorNumber].calcCurrentVelocity();
     motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
-    PRINTln("ASTRO" + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
+    PRINTln("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
   }
   else if ((cmd.indexOf("!") == 0)) {
     cmd.remove(0, 1);
@@ -267,7 +266,7 @@ void Commands::bleHandler(void) {
     PRINTln("serial app, then activate this mode first (btn id=3)");
   }
   else if (button == -3) {
-    PRINTln("ASTRO Disable bluetooth serial to drive Rover")
+    PRINTln("ASTRO Disable bluetooth serial to drive Rover");
   }
   else if (button == -2) {
     //        PRINT("throttle: ");
@@ -296,35 +295,39 @@ void Commands::systemStatus(void) {
   PRINTln(String((isActivated) ? "ACTIVE" : "INACTIVE"));
   PRINTln("ASTRO Ble-Mode: " + String((bluetoothMode) ? "ON" : "OFF"));
   PRINTln("ASTRO Control: " + String((isJoystickMode) ? "ArduinoBlue Joystick" : "Bluetooth Serial"));
-  PRINTln("ASTRO Nav " + String((error) ? "ERROR:" : "Success"));
-  PRINTln(errorMessage ? (String("ASTRO ") + String(errorMessage)) : "");
-
+  PRINTln("ASTRO Steering: " + String((isSteering) ? "Steering Control" : "Motor Control"));
+  PRINTln("ASTRO Encoders: " + String((isEnc) ? "ON" : "OFF"));
+  PRINT("ASTRO Nav " + (error ? "ERROR: " + errorMessage : "Success\n"));
+  PRINTln("ASTRO Nav Stream: " + String((isGpsImu) ? "ON" : "OFF"));
   PRINT("ASTRO Motor loop statuses: ");
-    for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
-      PRINT((motorList[i].isOpenLoop) ? "Open" : "CLose");
-      if (i != 5) PRINT(", ");
-    }
-    PRINTln("");
-    /*
-    for (i = 0; i < 6; i++) { // 6 should be a macro
-    String msg = "ASTRO " + String(i) + String(": ") + String(motorList[i].motorName) + String(" loop status is: ") + String((motorList[i].isOpenLoop) ? "Open" : "CLose");
-    PRINTln(msg);
-    */
-  PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n");
+  for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+    PRINT((motorList[i].isOpenLoop) ? "Open" : "CLose");
+    if (i != 5) PRINT(", ");
+  }
+  PRINTln("");
+
+  PRINT("ASTRO Motor accel: ");
+  for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+    PRINT((motorList[i].accLimit) ? "ON" : "OFF");
+    if (i != 5) PRINT(", ");
+  }
+  PRINTln("");
+  
+  PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
 void Commands::activate(String sender) {
   if (isActivated) {
-    PRINTln("ASTRO Rover is Already ACTIVATED")
+    PRINTln("ASTRO Rover is Already ACTIVATED");
   }
   else if (!isActivated) {
     isActivated = true;
     if (sender == "Serial") {
       bluetoothMode = false;
     }
-    toggleLed2();
     PRINTln("ASTRO Rover Wheels are Active");
     PRINTln((bluetoothMode) ? "ASTRO BLE-Mode is ON" : "ASTRO BLE-Mode is OFF");
+    //toggleLed2();
   }
 }
 void Commands::deactivate(String sender) {
@@ -334,9 +337,9 @@ void Commands::deactivate(String sender) {
     if (sender == "Serial") {
       bluetoothMode = true;
     }
-    toggleLed2();
     PRINTln("ASTRO Rover Wheels are Inactive");
     PRINTln((bluetoothMode) ? "ASTRO BLE-Mode is ON" : "ASTRO LE-Mode is OFF");
+    //toggleLed2();
   }
   else if (!isActivated) {
     isActivated = false;
@@ -344,9 +347,9 @@ void Commands::deactivate(String sender) {
       bluetoothMode = true;
 
     }
-    toggleLed2();
     PRINTln("ASTRO Rover Wheels are Inactive");
     PRINTln((bluetoothMode) ? "ASTRO BLE-Mode is ON" : "ASTRO BLE-Mode is OFF");
+    //toggleLed2();
   }
 }
 
@@ -357,7 +360,7 @@ void Commands::who(void) {
   }
   else if (!isActivated) {
     PRINTln("ASTRO Paralyzed Astro");
-    toggleLed2();
+    //toggleLed2();
   }
 }
 
@@ -400,7 +403,7 @@ void Commands::closeLoop(void) {
     stop();
     minOutputSignal = -30;
     maxOutputSignal = 30;
-    PRINTln("Bo!")
+    PRINTln("Bo!");
     for (i = 0; i <= 5; i++) {
       motorList[i].isOpenLoop = false;
       String msg = "ASTRO Motor " + String(i) + String(" loop status is: ") + String((motorList[i].isOpenLoop) ? "Open" : "CLose");
@@ -410,7 +413,7 @@ void Commands::closeLoop(void) {
   else if (!isActivated) {
     minOutputSignal = -30;
     maxOutputSignal = 30;
-    PRINTln("ASTRO Bo!")
+    PRINTln("ASTRO Bo!");
     for (i = 0; i <= 5; i++) {
       motorList[i].isOpenLoop = false;
       String msg = "ASTRO Motor " + String(i) + String(" loop status is: ") + String((motorList[i].isOpenLoop) ? "Open" : "CLose");
@@ -479,14 +482,13 @@ void Commands::steerOff(void) {
     PRINTln("ASTRO Individual Wheel Control is Activated");
   }
   if (isOpenloop) {
-    PRINTln("ASTRO Speed range is -255 to 255")
+    PRINTln("ASTRO Speed range is -255 to 255");
     PRINTln("ASTRO motorNumber:PWM");
   }
   else if (!isOpenloop) {
-    PRINTln("ASTRO Speed range is -30 to 30")
-    PRINTln("ASTRO motorNumber:RPM");
+    PRINTln("ASTRO Speed range is -30 to 30");
+    PRINTln("ASTRO commands are now: motorNumber:RPM");
   }
-
 }
 void Commands::steerOn(void) {
   if (isActivated) {
@@ -499,16 +501,15 @@ void Commands::steerOn(void) {
     PRINTln("ASTRO Manual Skid Steering is Activated");
   }
   if (isOpenloop) {
-    PRINTln("ASTRO Speed range is -49 to 49")
-    PRINTln("ASTRO throttle:steering");
+    PRINTln("ASTRO Speed range is -49 to 49");
+    PRINTln("ASTRO commands are now: throttle:steering");
   }
   else if (!isOpenloop) {
-    PRINTln("ASTRO Speed range is -30 to 30")
-    PRINTln("ASTRO Steering range is -49 to 49")
+    PRINTln("ASTRO Speed range is -30 to 30");
+    PRINTln("ASTRO Steering range is -49 to 49");
     PRINTln("ASTRO throttle:steering");
   }
 }
-
 
 void Commands::gpsOff(void) {
   isGpsImu = false;
@@ -518,21 +519,21 @@ void Commands::gpsOn(void) {
   isGpsImu = true;
   PRINTln("ASTRO GPS and IMU Serial Stream is now Enabled");
 }
+
 void Commands::encOn(void) {
   if (isActivated) {
     isEnc = true;
-    PRINTln("ASTRO Velocity Readings Stream from Motor Encoders is ON")
-
+    PRINTln("ASTRO Velocity Readings Stream from Motor Encoders is ON");
   }
   else if (!isActivated) {
     isEnc = true;
-    PRINTln("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated")
-    for (i = 0; i <= 5; i++) {
+    PRINTln("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
+    for (i = 0; i < 6; i++) {
       PRINT("ASTRO Motor ");
       PRINT(i);
       PRINT(" current velocity: ");
       PRINTln(motorList[i].getCurrentVelocity());
-      delay(80);
+      //delay(80);
     }
   }
 }
@@ -544,31 +545,19 @@ void Commands::encOff(void) {
 void Commands::accOn(void) {
   for (i = 0; i <= 5; i++) {
     motorList[i].accLimit = true;
-    String msg = "ASTRO Motor " + String(i) + String(" Acceleration Limiter: ") + String((motorList[i].isOpenLoop) ? "Open" : "CLose");
+    String msg = "ASTRO Motor " + String(i) +" Acceleration Limiter: " + String((motorList[i].accLimit) ? "Open" : "CLose");
     PRINTln(msg);
   }
 }
 void Commands::accOff(void) {
   for (i = 0; i <= 5; i++) {
     motorList[i].accLimit = false;
-    String msg = "ASTRO Motor " + String(i) + String(" Acceleration Limiter: ") + String((motorList[i].isOpenLoop) ? "Open" : "CLose");
+    String msg = "ASTRO Motor " + String(i) + " Acceleration Limiter: " + String((motorList[i].accLimit) ? "Open" : "CLose");
     PRINTln(msg);
   }
 }
 
 void Commands::status(void) {
-  //    PRINTln("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-  //    PRINTln("Rover Wheels are " + String((isActivated) ? "ACTIVE":"INACTIVE"));
-  //    PRINTln("Ble-Mode: " + String((bluetoothMode) ? "ON":"OFF"));
-  //    PRINTln("Control: " + String((isJoystickMode) ? "ArduinoBlue Joystick":"Bluetooth Serial"));
-  //    PRINT("Nav " + String((error) ? "ERROR:":"Success\n"));
-  //    PRINT((errorMessage) ? errorMessage : "");
-  //
-  //    for (i = 0; i <= 5; i++) {
-  //        String msg = String(i) + String(": ") + String(motorList[i].motorName) + String(" loop status is: ") + String((motorList[i].isOpenLoop) ? "Open":"CLose");
-  //        PRINTln(msg);
-  //    }
-  //    PRINTln("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n");
   systemStatus();
 }
 
@@ -581,9 +570,8 @@ void Commands::stop(void) {
 }
 void Commands::errorMsg(void) {
   PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-  PRINT("ASTRO " + String((error) ? "ERROR: " : "No Error\n"));
-  PRINT(errorMessage ? /*(String("ASTRO ") +*/ String(errorMessage)/*)*/ : "");
-  PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n");
+  PRINT("ASTRO " + String((error) ? "ERROR: " + String(errorMessage) : "No Error\n"));
+  PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
 #endif

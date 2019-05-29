@@ -16,7 +16,7 @@ LSM303 compass;
 
 /* comms */
 
-#define FEEDBACK_PRINT_INTERVAL 50
+#define FEEDBACK_PRINT_INTERVAL 1000
 #define LED_BLINK_INTERVAL 1000
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -42,7 +42,7 @@ ArduinoBlue phone(bluetooth);
 //boolean isActivated = false;
 //boolean isActivated = false;
 //boolean isOpenloop = true; // No PID controller
-//boolean bluetoothMode = true;
+//boolean bluetoothMode = true; // changed to false - JOSH
 //boolean joystickMode = true;
 
 /*
@@ -50,21 +50,30 @@ ArduinoBlue phone(bluetooth);
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
   should work.
 */
-//#define DEVEL_MODE_1 1
-#define DEVEL_MODE_2 2
+#define DEVEL_MODE_1 1
+//#define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
 // serial communication over uart with odroid, teensy plugged into pcb and odroid
 #define UART_PORT Serial
-#define PRINT(a) Serial.print(a);  blePrint(a);
-#define PRINTln(a) Serial.println(a); blePrintln(a);
-#define PRINTRES(a,b) Serial.print(a, b);  blePrintres(a, b);
-
+#define PRINT(a) Serial.print(a)
+#define PRINTln(a) Serial.println(a)
+#define PRINTRES(a,b) Serial.print(a, b)
+/*
+  #define PRINT(a) Serial.print(a);  blePrint(a);
+  #define PRINTln(a) Serial.println(a); blePrintln(a);
+  #define PRINTRES(a,b) Serial.print(a, b);  blePrintres(a, b);
+*/
 #elif defined(DEVEL_MODE_2)
 #define UART_PORT Serial1
-#define PRINT(a) Serial1.print(a);  blePrint(a);
-#define PRINTln(a) Serial1.println(a); blePrintln(a);
-#define PRINTRES(a,b) Serial1.print(a, b); blePrintres(a ,b);
+#define PRINT(a) Serial1.print(a)
+#define PRINTln(a) Serial1.println(a)
+#define PRINTRES(a,b) Serial1.print(a, b)
+/*
+  #define PRINT(a) Serial1.print(a);  blePrint(a);
+  #define PRINTln(a) Serial1.println(a); blePrintln(a);
+  #define PRINTRES(a,b) Serial1.print(a, b); blePrintres(a ,b);
+*/
 #endif
 
 #define V_SENSE_PIN 39 // for reading battery voltage
@@ -90,7 +99,6 @@ Servo topSide; Servo topBase;
 #define RF_DIR   2
 #define RM_DIR   11
 #define RB_DIR   12
-
 #define LF_DIR   24
 #define LM_DIR   25
 #define LB_DIR   26
@@ -98,32 +106,11 @@ Servo topSide; Servo topBase;
 #define RF_PWM   3
 #define RM_PWM   4
 #define RB_PWM   5
-
 #define LF_PWM   6
 #define LM_PWM   7
 #define LB_PWM   8
 
 // encoders
-/*
-#define RF_EA    37
-#define RF_EB    38
-
-#define RM_EA    35
-#define RM_EB    36
-
-#define RB_EA    33
-#define RB_EB    34
-
-#define LF_EA    31
-#define LF_EB    32
-
-#define LM_EA    29
-#define LM_EB    30
-
-#define LB_EA    27
-#define LB_EB    28
-*/
-
 #define RF_EA    27
 #define RF_EB    28
 #define RM_EA    31
@@ -199,11 +186,12 @@ void setup() {
   bluetooth.setTimeout(50);
 
   delay(50);  // do not print too fast!
-  ser_flush();
+  //ser_flush();
   initPins();
   initEncoders();
   initPids();
   initNav();
+  delay(300);
   Commands.setupMessage();
 }
 
@@ -213,17 +201,18 @@ void loop() {
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-    String cmd = "";
     if (UART_PORT.available()) {
-      cmd = UART_PORT.readStringUntil('\n');
+      String cmd = UART_PORT.readStringUntil('\n');
+      if (cmd[cmd.length() - 1] == '\r') cmd.replace('\r', "");
       ser_flush();
       Commands.handler(cmd, "Serial");
     }
-    else if (bluetooth.available()) {
+    /*
+      else if (bluetooth.available()) {
       Commands.bleHandler();
-    }
+      }*/
 
-    if (Commands.isActivated) {
+    if (Commands.isActivated && Commands.bluetoothMode) {
       velocityHandler(throttle, steering);
       if (Commands.isEnc) {
         // roverVelocityCalculator();
@@ -236,60 +225,10 @@ void loop() {
         PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
         PRINT("ASTRO left: " + String(desiredVelocityLeft));
         PRINTln(" - right: " + String(desiredVelocityRight));
-//      for (i = 0; i <= 5; i++) {
-//        PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
-//      }
       }
     }
     prevRead = millis();
   } // end of command listening
-  /*
-  if (!Commands.isActivated) {
-    if (UART_PORT.available()) {
-      cmd = UART_PORT.readStringUntil('\n');
-      ser_flush();
-      Commands.handler(cmd, "Serial");
-    }
-    else if (bluetooth.available()) {
-      Commands.bleHandler();
-    }
-  }
-  else if ((millis() - prevRead > 30) && Commands.isActivated) {
-    // incoming format example: "5:7"
-    // this represents the speed for throttle:steering
-    // as well as direction by the positive/negative sign
-    String cmd = "";
-    // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-    if (UART_PORT.available()) {
-      //toggleLed2();
-      cmd = UART_PORT.readStringUntil('\n');
-      ser_flush();
-      Commands.handler(cmd, "Serial");
-    }
-    else if (bluetooth.available() && Commands.bluetoothMode) {
-      Commands.bleHandler();
-    }
-
-    velocityHandler(throttle, steering);
-
-    if (Commands.isEnc) {
-      // roverVelocityCalculator();
-      RF.calcCurrentVelocity();
-      RM.calcCurrentVelocity();
-      RB.calcCurrentVelocity();
-      LF.calcCurrentVelocity();
-      LM.calcCurrentVelocity();
-      LB.calcCurrentVelocity();
-      PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-      PRINT("ASTRO left: " + String(desiredVelocityLeft));
-      PRINTln(" - right: " + String(desiredVelocityRight));
-//      for (i = 0; i <= 5; i++) {
-//        PRINTln("ASTRO Motor " + String(i) + String(" current velocity: ") + String(motorList[i].getCurrentVelocity()));
-//      }
-    }
-    prevRead = millis(); // reset the timer for listening to commands
-  } // end of isActivated
-  */
 
   if (millis() - prevReadNav > 200) {
     navHandler();
@@ -297,6 +236,7 @@ void loop() {
   }
   if (sinceLedToggle > LED_BLINK_INTERVAL) {
     toggleLed();
+    vbatt_read();
     sinceLedToggle = 0;
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
@@ -306,9 +246,6 @@ void loop() {
       if (i != 5) PRINT(", ");
     }
     PRINTln("");
-
-    vbatt_read();
-
     sinceFeedbackPrint = 0;
   }
 } // end of loop
@@ -332,11 +269,19 @@ void velocityHandler(float throttle, float steering) {
     desiredVelocityLeft = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
     rotation = "CCW";
   }
-  if (desiredVelocityLeft < 0 ) { leftMotorDirection = 1; }
-  else { leftMotorDirection = -1; }
+  if (desiredVelocityLeft < 0 ) {
+    leftMotorDirection = 1;
+  }
+  else {
+    leftMotorDirection = -1;
+  }
 
-  if (desiredVelocityRight < 0 ) { rightMotorDirection = -1; }
-  else { rightMotorDirection = 1; }
+  if (desiredVelocityRight < 0 ) {
+    rightMotorDirection = -1;
+  }
+  else {
+    rightMotorDirection = 1;
+  }
 
   RF.calcCurrentVelocity();
   RM.calcCurrentVelocity();
@@ -402,6 +347,7 @@ void toggleLed() {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 void toggleLed2() {
+  /*
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   delay(350);
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
@@ -415,6 +361,7 @@ void toggleLed2() {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   delay(100);
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  */
 }
 
 void initPins(void) {
@@ -487,21 +434,21 @@ void initEncoders(void) {
 //! Initiate PID objects for Dc Motors
 void initPids(void) {
   /*
-  RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
-  RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-  RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
+    RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
+    RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
+    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
 
-  LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
-  LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
-  LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
+    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
+    LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
+    LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
 
-  RF.pidController.setOutputLimits(-50, 50, 5.0);
-  RM.pidController.setOutputLimits(-50, 50, 5.0);
-  RB.pidController.setOutputLimits(-50, 50, 5.0);
+    RF.pidController.setOutputLimits(-50, 50, 5.0);
+    RM.pidController.setOutputLimits(-50, 50, 5.0);
+    RB.pidController.setOutputLimits(-50, 50, 5.0);
 
-  LF.pidController.setOutputLimits(-50, 50, 5.0);
-  LM.pidController.setOutputLimits(-50, 50, 5.0);
-  LB.pidController.setOutputLimits(-50, 50, 5.0);
+    LF.pidController.setOutputLimits(-50, 50, 5.0);
+    LM.pidController.setOutputLimits(-50, 50, 5.0);
+    LB.pidController.setOutputLimits(-50, 50, 5.0);
   */
 }
 void initNav(void) {
@@ -514,8 +461,12 @@ void initNav(void) {
     compass.init();
     compass.enableDefault();
     compass.setTimeout(100);
-    compass.m_min = (LSM303::vector <int16_t>) { -1794, +1681, -2947 };
-    compass.m_max = (LSM303::vector <int16_t>) { +3359, +6531, +2016 };
+    compass.m_min = (LSM303::vector <int16_t>) {
+      -1794, +1681, -2947
+    };
+    compass.m_max = (LSM303::vector <int16_t>) {
+      +3359, +6531, +2016
+    };
   }
 }
 //min: { -1794,  +1681,  -2947}    max: { +3359,  +6531,  +2016}
