@@ -348,19 +348,19 @@ void toggleLed() {
 }
 void toggleLed2() {
   /*
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(350);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(250);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(150);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(350);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(100);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(250);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(100);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(150);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    delay(100);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   */
 }
 
@@ -452,12 +452,15 @@ void initPids(void) {
   */
 }
 void initNav(void) {
-  if (myI2CGPS.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
+  myI2CGPS.begin(Wire, 400000);
+  /*
+    if (myI2CGPS.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     Commands.error = true;
     Commands.errorMessage = "ASTRO GPS wires aren't connected properly, please reboot\n";
     Commands.errorMsg();
-  }
-  else if (!Commands.error) {
+    }
+
+    else*/ if (!Commands.error) {
     compass.init();
     compass.enableDefault();
     compass.setTimeout(100);
@@ -469,36 +472,41 @@ void initNav(void) {
     };
   }
 }
-//min: { -1794,  +1681,  -2947}    max: { +3359,  +6531,  +2016}
+//min: { -1794,  +1681,  -2947 }    max: { +3359,  +6531,  +2016 }
 
 void navHandler(void) {
   if (!Commands.error && Commands.isGpsImu) {
+    bool gotGps = false;
     if (myI2CGPS.available()) {         // returns the number of available bytes from the GPS module
       gps.encode(myI2CGPS.read());       // Feeds the GPS parser
-    }
-    if (gps.time.isUpdated()) {        // Checks to see if new GPS info is available
-      PRINT("ASTRO GPS-");
-      if (gps.location.isValid()) { // checks if valid location data is available
-        PRINT("OK ");
-        PRINTRES(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
-        PRINT(" "); // space
-        PRINTRES(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
-        PRINTln(""); // new line
-      }
-      else {
-        PRINTln("N/A");
+      if (gps.time.isUpdated()) {        // Checks to see if new GPS info is available
+        if (gps.location.isValid()) { // checks if valid location data is available
+          gotGps = true;
+        }
       }
     }
 
     compass.read();
-    heading = compass.heading(LSM303::vector<int> { -1, 0, 0});
+    heading = compass.heading(LSM303::vector<int> { -1, 0, 0 });
     if (compass.timeoutOccurred()) {
-      Commands.error = true;
-      Commands.errorMessage = "ASTRO HEADING-N/A No signal from IMU, check wiring or reset system\n";
-      Commands.errorMsg();
+      PRINT("ASTRO HEADING-N/A");
     }
-    PRINT("ASTRO HEADING-OK ");
-    PRINTln(heading);
+    else {
+      PRINT("ASTRO HEADING-OK ");
+      PRINT(heading);
+    }
+    PRINT(" -- ");
+    
+    if (!gotGps) {
+      PRINTln("GPS-N/A");
+    }
+    else {
+      PRINT("GPS-OK ");
+      PRINTRES(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
+      PRINT(" "); // space
+      PRINTRES(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
+      PRINTln("");
+    }
   }
 }
 

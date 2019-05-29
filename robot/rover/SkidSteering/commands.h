@@ -589,7 +589,7 @@ void Commands::status(void) {
 void Commands::stop(void) {
   velocityHandler(0, 0);
   for (int i = 0; i <= 5; i++) {
-    PRINTln(String("ASTRO") + String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getCurrentVelocity()) + String(" PWM ") + String(motorList[i].direction));
+    PRINTln(String("ASTRO ") + String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getCurrentVelocity()) + String(" PWM ") + String(motorList[i].direction));
   }
   //    PRINTln(String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getDesiredVelocity()) + String(" PWM ") + String(motorList[i].direction));
 }

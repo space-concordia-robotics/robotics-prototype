@@ -10,6 +10,8 @@ from arm_control.msg import RoverPosition, AntennaGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
+    if message.x < -900 or message.y < -900:
+        return
     rover['latitude'] = message.x
     rover['longitude'] = message.y
 

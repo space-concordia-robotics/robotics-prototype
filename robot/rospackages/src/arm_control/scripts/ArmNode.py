@@ -11,7 +11,7 @@ import serial.tools.list_ports # pyserial
 #import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
-from std_msgs.msg import String, Header
+from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
@@ -19,6 +19,7 @@ global ser # make global so it can be used in other parts of the code
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
+mcuName = 'arm'
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -71,10 +72,10 @@ def init_serial():
                         if ser.in_waiting: # if there is data in the serial buffer
                             response = ser.readline().decode()
                             rospy.loginfo('response: '+response)
-                            if "arm" in response:
-                                rospy.loginfo("Arm MCU idenified!")
+                            if mcuName in response:
+                                rospy.loginfo(mcuName+" MCU identified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                                rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                                rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
                                 return
         else:
             rospy.logerr("No USB devices recognized, exiting")
@@ -107,10 +108,10 @@ def init_serial():
                     except:
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
-                        if "arm" in response:
-                            rospy.loginfo("Arm MCU idenified!")
+                        if mcuName in response:
+                            rospy.loginfo(mcuName+" MCU identified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the Arm MCU', (time.time()-startConnecting)*1000)
+                            rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
                             return
                     else:
                         rospy.loginfo('got raw message: '+dat)
@@ -119,13 +120,12 @@ def init_serial():
     sys.exit(0)
 
 requests = {
-    'ping' : 'pong',
-    'who' : 'arm',
-    'loop open' : 'open',
-    'loop closed' : 'closed',
-    'armspeed' : 'Alert',
-    'armspeed' : 'Success',
-    'reboot' : 'rebooting'
+    'ping' : ['pong'],
+    'who' : ['arm'],
+    'loop open' : ['open'],
+    'loop closed' : ['closed'],
+    'armspeed' : ['Alert', 'Success'],
+    'reboot' : ['rebooting']
 }
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
@@ -141,10 +141,11 @@ def handle_client(req):
         if reqFeedback is not '':
             print(reqFeedback)
             for request in requests:
-                if request in req.msg and requests[request] in reqFeedback:
-                    armResponse.response = reqFeedback
-                    armResponse.success = True #a valid request and a valid response from the
-                    break
+                for response in requests[request]:
+                    if request == req.msg and response in reqFeedback:
+                        armResponse.response = reqFeedback
+                        armResponse.success = True #a valid request and a valid response from the
+                        break
             if armResponse.success:
                 break
             else:
@@ -202,6 +203,10 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
     anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
 
+    v_bat_topic = '/battery_voltage'
+    rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
+    vBatPub = rospy.Publisher(v_bat_topic, Float32, queue_size=10)
+
     feedback_pub_topic = '/arm_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
@@ -238,11 +243,16 @@ if __name__ == '__main__':
                     if 'Motor Angles' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
+                    elif 'Battery voltage' in feedback:
+                        left,voltage = feedback.split('Battery voltage: ')
+                        vBatPub.publish(float(voltage))
                     else:
                         #rospy.loginfo(feedback)
                         if reqInWaiting:
                             reqFeedback += feedback+'\r\n' #pass data to request handler
                         else:
+                            if 'WARNING' in feedback:
+                                rospy.logwarn(feedback)
                             #rospy.loginfo(feedback)
                             feedbackPub.publish(feedback)
                 else:

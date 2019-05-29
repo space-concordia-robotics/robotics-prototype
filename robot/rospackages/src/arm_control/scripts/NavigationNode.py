@@ -10,9 +10,14 @@ from arm_control.msg import RoverPosition, RoverGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
+    if message.x < -900 or message.y < -900:
+        return
     rover['latitude'] = message.x
     rover['longitude'] = message.y
-    rover['heading'] = message.z
+    hasHeading = False
+    if message.z > -900:
+        rover['heading'] = message.z
+        hasHeading = True
 
     if gotGpsPos:
         Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
@@ -20,7 +25,10 @@ def subscriber_callback(message):
         Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
         gpsGoal['latitude'], gpsGoal['longitude'])
 
-        Direction_adjust = Turning(Rov_to_des_direction, rover['heading'])
+        if hasHeading:
+            Direction_adjust = Turning(Rov_to_des_direction, rover['heading'])
+        else:
+            Direction_adjust = -999 # no heading, give invalid number
 
         msg = Point()
         # note that direction is based on compass directions where E is 90 and W is -90
