@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "${workspaceFolder}/venv/bin/python",
+    "python.pythonPath": "venv/bin/python",
     "python.unitTest.pyTestEnabled": true,
     "python.formatting.provider": "yapf",
     "editor.formatOnSave": true,

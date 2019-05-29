@@ -1,0 +1,11 @@
+<launch>
+    <node pkg="joy" type="joy_node" name="teleop_joy_driver" output="screen" >
+        <param name="dev" value="/dev/input/js0" />
+    </node>
+
+    <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy" output="screen" >
+        <param name="scale_linear" value="1" />
+        <param name="scale_angular" value="1" />
+        <remap from="cmd_vel" to="rover/cmd_vel" />
+    </node>
+</launch>

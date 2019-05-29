@@ -1,0 +1,58 @@
+/*
+Tests spline library
+After this prints import data into excel file and plot it.
+*/
+
+#include <spline.h>
+
+const double STEP = 0.25;
+
+const int LENGTH = 11;
+float pathX[LENGTH] = { 0,1,2,3,4,5,6,7,8,9,0.5 };
+float pathY[LENGTH] = { 0,0,5,5,0,0,3,4,5,6,3 };
+float * x;
+float * y;
+
+Spline catmullsSpline;
+
+void printActualSpline() {
+	Serial.println("______________________________________________________________________________________________________________________________________");
+	Serial.println("ACTUAL SPLINE\n");
+
+	for (int i = 0; i < LENGTH; i++) {
+		Serial.print(x[i]); Serial.print("\t"); Serial.println(y[i]);
+	}
+}
+
+void printInterpolatedSpline() {
+	Serial.println("______________________________________________________________________________________________________________________________________");
+	Serial.println("INTERPOLATED SPLINE\n");
+
+	for (double xVal = x[0]; xVal < x[LENGTH - 1]; xVal += STEP) {
+		Serial.print(xVal); Serial.print("\t"); Serial.println(catmullsSpline.value(xVal));
+	}
+}
+
+void setup() {
+	Serial.begin(9600);
+	Serial.println("SETUP COMPLETE");
+	Serial.println("Spline Test");
+
+	delete[] x;
+	delete[] y;
+	x = new float[LENGTH];
+	y = new float[LENGTH];
+	for (int i = 0; i < LENGTH; i++) {
+		x[i] = pathX[i];
+		y[i] = pathY[i];
+	}
+
+	catmullsSpline.initialize(x, y, LENGTH, Catmull);
+
+	printActualSpline();
+	printInterpolatedSpline();
+}
+
+void loop() {
+
+}
