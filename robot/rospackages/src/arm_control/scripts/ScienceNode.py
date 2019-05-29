@@ -19,6 +19,7 @@ global ser # make global so it can be used in other parts of the code
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
+mcuName = 'science'
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -71,10 +72,10 @@ def init_serial():
                         if ser.in_waiting: # if there is data in the serial buffer
                             response = ser.readline().decode()
                             rospy.loginfo('response: ' + response)
-                            if "science" in response:
-                                rospy.loginfo("Science MCU idenified!")
+                            if mcuName in response:
+                                rospy.loginfo(mcuName + " MCU idenified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                                rospy.loginfo('took %f ms to find the Science MCU', (time.time()-startConnecting)*1000)
+                                rospy.loginfo('took %f ms to find the " + mcuName +  " MCU', (time.time()-startConnecting)*1000)
                                 return
         else:
             rospy.logerr("No USB devices recognized, exiting")
@@ -107,10 +108,10 @@ def init_serial():
                     except:
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
-                        if "science" in response:
-                            rospy.loginfo("Science MCU idenified!")
+                        if mcuName in response:
+                            rospy.loginfo(mcuName + " MCU idenified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the Science MCU', (time.time()-startConnecting)*1000)
+                            rospy.loginfo('took %f ms to find the " + mcuName + " MCU', (time.time()-startConnecting)*1000)
                             return
                     else:
                         rospy.loginfo('got raw message: ' + dat)
@@ -118,32 +119,30 @@ def init_serial():
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
+# it may cause issues to have responses that are so similar
 requests = {
-    'ping' : 'pong',
-    'who' : 'science',
-    'activate' : 'activated',
-    'deactivate' : 'deactivated',
-    'stop' : 'stopped',
-    'active' : 'activated1',
-    'active' : 'activated0',
-    'dccw' : 'dccw done',
-    'dcw' : 'dcw done',
-    'dd' : 'CW',
-    'dd' : 'CCW',
-    'eup' : 'eup done',
-    'edown' : 'edown done',
-    'ed' : 'UP',
-    'ed' : 'DOWN',
-    'p1in' : 'p1in done',
-    'p1out' : 'p1out done',
-    'p2in' : 'p2in done',
-    'p2out' : 'p2out done',
-    'p3in' : 'p3in done',
-    'p3out' : 'p3out done',
-    'p4in' : 'p4in done',
-    'p4out' : 'p4out done',
-    'p5in' : 'p5in done',
-    'p5out' : 'p5out done',
+    'ping' : ['pong'],
+    'who' : ['science'],
+    'activate' : ['activated'],
+    'deactivate' : ['deactivated'],
+    'stop' : ['stopped'],
+    'active' : ['activated1', 'activated0'],
+    'dccw' : ['dccw done'],
+    'dcw' : ['dcw done'],
+    'dd' : ['CW', 'CCW'],
+    'eup' : ['eup done'],
+    'edown' : ['edown done'],
+    'ed' : ['UP', 'DOWN'],
+    'p1in' : ['p1in done'],
+    'p1out' : ['p1out done'],
+    'p2in' : ['p2in done'],
+    'p2out' : ['p2out done'],
+    'p3in' : ['p3in done'],
+    'p3out' : ['p3out done'],
+    'p4in' : ['p4in done'],
+    'p4out' : ['p4out done'],
+    'p5in' : ['p5in done'],
+    'p5out' : ['p5out done'],
 
 }
 
@@ -155,16 +154,17 @@ def handle_client(req):
     timeout = 0.1 # 100ms timeout
     reqInWaiting=True
     sinceRequest = time.time()
-    rospy.loginfo('received ' + req.msg + ' request from GUI, sending to science Teensy')
+    rospy.loginfo('received ' + req.msg + ' request from GUI, sending to " + mcuName + " MCU')
     ser.write(str.encode(req.msg + '\n')) # ping the teensy
     while scienceResponse.success is False and (time.time()-sinceRequest < timeout):
         if reqFeedback is not '':
             print('reqFeedback', reqFeedback)
             for request in requests:
-                if request in req.msg and requests[request] in reqFeedback:
-                    scienceResponse.response = reqFeedback
-                    scienceResponse.success = True # a valid request and a valid response from the
-                    break
+                for response in requests[request]:
+                    if request == req.msg and response in reqFeedback:
+                        scienceResponse.response = reqFeedback
+                        scienceResponse.success = True # a valid request and a valid response from the
+                        break
             if scienceResponse.success:
                 break
             else:
@@ -178,7 +178,7 @@ def handle_client(req):
 
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo('received: ' + message.data + ' command from GUI, sending to arm Teensy')
+    rospy.loginfo('received: ' + message.data + ' command from GUI, sending to ' + mcuName + ' Teensy')
     command = str.encode(message.data + '\n')
     ser.write(command) # send command to teensy
     return
@@ -204,7 +204,7 @@ def publish_joint_states(message):
 """
 
 def stripFeedback(data):
-    startStrip='SCIENCE '
+    startStrip=mcuName.upper() + ' '
     endStrip='\r\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
