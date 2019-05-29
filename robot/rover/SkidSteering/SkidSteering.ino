@@ -10,7 +10,7 @@ I2CGPS myI2CGPS;  // I2C object
 #include "TinyGPS++.h"
 TinyGPSPlus gps;   // GPS object
 #include <Wire.h>
-#include <LSM303.h>  // download this to calibrate gps bitch
+#include <LSM303.h>  // contains a sketch for calibrating
 LSM303 compass;
 //#define TEST 1
 
