@@ -203,7 +203,7 @@ void loop() {
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
       String cmd = UART_PORT.readStringUntil('\n');
-      if (cmd[cmd.length() - 1] == '\r') cmd.replace('\r', "");
+      cmd.trim();//if (cmd[cmd.length() - 1] == '\r') cmd.replace('\r', "");
       ser_flush();
       Commands.handler(cmd, "Serial");
     }

@@ -12,7 +12,9 @@ class Commands {
     String s[3] = {"Serial", "Ble-Serial", "Ble"};
     String activate_cmd = "activate";
     String deactivate_cmd = "deactivate";
+    String ping_cmd = "ping";
     String who_cmd = "who";
+    String reboot_cmd = "reboot";
     String bleOn_cmd = "ble-on";
     String bleOff_cmd = "ble-off";
     String closeLoop_cmd = "close-loop";
@@ -51,7 +53,9 @@ class Commands {
 
     void activate(String sender);
     void deactivate(String sender);
+    void ping(void);
     void who(void);
+    void rebootTeensy(void); //!< reboots the teensy using the watchdog timer
     void bleOn(String sender);
     void bleOff(String sender);
     void closeLoop(void);
@@ -89,8 +93,14 @@ void Commands::handler(String cmd, String sender) {
   else if (cmd == deactivate_cmd) {
     deactivate(sender);
   }
+  else if (cmd == ping_cmd) {
+    ping();
+  }
   else if (cmd == who_cmd) {
     who();
+  }
+  else if (cmd == reboot_cmd) {
+    rebootTeensy();
   }
   else if (cmd == bleOn_cmd ) {
     bleOn(sender);
@@ -353,6 +363,9 @@ void Commands::deactivate(String sender) {
   }
 }
 
+void Commands::ping(void) {
+  PRINTln("ASTRO pong");
+}
 void Commands::who(void) {
   if (isActivated) {
     PRINTln("ASTRO Happy Astro");
@@ -362,6 +375,18 @@ void Commands::who(void) {
     PRINTln("ASTRO Paralyzed Astro");
     //toggleLed2();
   }
+}
+void Commands::rebootTeensy(void) {
+  PRINTln("ASTRO rebooting wheel teensy... hang on a sec");
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
+  WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+  // The next 2 lines set the time-out value.
+  WDOG_TOVALL = 15; // This is the value (ms) that the watchdog timer compare itself to.
+  WDOG_TOVALH = 0; // End value (ms) WDT compares itself to.
+  WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
+                  WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
+  WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
+  while (1); // infinite do nothing loop -- wait for the countdown
 }
 
 void Commands::bleOn(String sender) {
