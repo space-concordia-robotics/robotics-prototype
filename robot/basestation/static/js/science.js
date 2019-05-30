@@ -240,10 +240,6 @@ $(document).ready(function () {
         )
       }
     } else {
-      if ($('#activate-science-btn').is(':checked')) {
-        appendToConsole('Deactivate the science MCU before closing listener!')
-        return
-      }
       // closing arm listener
       requestTask('science_listener', 0, '#science-listener-btn', function (
         msgs
