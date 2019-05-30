@@ -635,6 +635,7 @@ usage:
 getRoverIP(function(callback) {})
 */
 function getRoverIP (callback) {
+  /*
   let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
   console.log('request', request)
   ping_client.callService(request, function (result) {
@@ -643,4 +644,6 @@ function getRoverIP (callback) {
       callback(result.response)
     }
   })
+  */
+    return "172.16.1.30"
 }
