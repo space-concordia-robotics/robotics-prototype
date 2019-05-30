@@ -433,6 +433,7 @@ function isScienceActivated () {
 
 // check all button states that are query-able from the science MCU
 function checkButtonStates () {
+  appendToConsole('checking button states')
   // check if drill cw/ccw (dd = drill direction)
   sendScienceRequest('dd', function (msgs) {
     appendToConsole('dd msgs:', msgs)
@@ -447,17 +448,20 @@ function checkButtonStates () {
       lightUp('#cw-btn')
       greyOut('#ccw-btn')
     }
-  })
 
-  sendScienceRequest('ed', function (msgs) {
-    appendToConsole('ed msgs:', msgs)
-    if (msgs[1].includes('UP')) {
-      lightUp('#elevator-up-btn')
-      greyOut('#elevator-down-btn')
-    } else if (msgs[1].includes('DOWN')) {
-      lightUp('#elevator-down-btn')
-      greyOut('#elevator-up-btn')
-    }
+    // need to nest this because othewise too many requests sent too quickly
+    sendScienceRequest('ed', function (msgs) {
+      appendToConsole('ed msgs:', msgs)
+      if (msgs[1].includes('UP')) {
+        console.log('asdfasdfasdf')
+        lightUp('#elevator-up-btn')
+        greyOut('#elevator-down-btn')
+      } else if (msgs[1].includes('DOWN')) {
+        console.log('poooooo')
+        lightUp('#elevator-down-btn')
+        greyOut('#elevator-up-btn')
+      }
+    })
   })
 }
 
