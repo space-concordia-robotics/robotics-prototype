@@ -19,28 +19,10 @@ var maxSteeringIncrement = 1
 var movementCommanded = false
 
 
-// for updating the toggle buttons if user pressed keyboard events triggered enabling/disabling
-function enableRoverMotorsBtn () {
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
-    'btn-success'
-  )
-  $('#enable-rover-motors-btn')[0].checked = true
-}
-
-function disableRoverMotorsBtn () {
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).addClass(
-    'btn-danger off'
-  )
-  $($('.toggle > #enable-rover-motors-btn')[0].parentNode).removeClass(
-    'btn-success'
-  )
-  $('#enable-rover-motors-btn')[0].checked = false
-}
-
 $(document).ready(function () {
+  $('#enable-rover-motors-btn').on('click', function (event) {
+    console.log(5)
+  })
   $('#ping-rover-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
