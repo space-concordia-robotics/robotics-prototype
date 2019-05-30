@@ -76,10 +76,10 @@ class Commands {
 };
 void Commands::setupMessage(void) {
   /*delay(50);
-  toggleLed2();
-  delay(50);
-  toggleLed();
-  delay(70);*/
+    toggleLed2();
+    delay(50);
+    toggleLed();
+    delay(70);*/
   PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
   PRINTln("ASTRO setup complete");
   systemStatus();
@@ -151,68 +151,98 @@ void Commands::handler(String cmd, String sender) {
     status();
   }
   else if ((cmd.indexOf(":") > 0) && isSteering) {
-    throttle = getValue(cmd, ':', 0).toFloat();
-    steering = getValue(cmd, ':', 1).toFloat();
-    PRINTln("ASTRO Throttle: " + String(throttle) + String(" Steering: ") + String(steering));
-    //        if (!isOpenloop){
-    //            throttle = map(throttle, -30, 30, -49, 49);
-    //            PRINTln("ASTRO Desired Speed: " + String(throttle) + String("RPM ") + String(" Steering: ") + String(steering));
-    //        }
-    velocityHandler(throttle, steering);
-    PRINT("ASTRO left: " + String(desiredVelocityLeft));
-    PRINT(" - right: " + String(desiredVelocityRight));
-    PRINTln(" maxOutput: " + String(maxOutputSignal));
-  }
-  else if ((cmd.indexOf(":") > 0) && !isSteering) {
-    motorNumber = getValue(cmd, ':', 0).toFloat();
-    int speed = getValue(cmd, ':', 1).toFloat();
-    steering = 0;
-    int dir = 1;
-    if (throttle < 0 ) {
-      dir = - 1;
-    }
-    motorList[motorNumber].calcCurrentVelocity();
-    motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
-    PRINTln("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
-  }
-  else if ((cmd.indexOf("!") == 0)) {
-    cmd.remove(0, 1);
-    if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-      PRINTln("ASTRO Front camera continuous base is moving at rate: " + String(cmd.toInt()));
-      frontBase.write(cmd.toInt());
+    if (isActivated) {
+      throttle = getValue(cmd, ':', 0).toFloat();
+      steering = getValue(cmd, ':', 1).toFloat();
+      PRINTln("ASTRO Throttle: " + String(throttle) + String(" Steering: ") + String(steering));
+      //        if (!isOpenloop){
+      //            throttle = map(throttle, -30, 30, -49, 49);
+      //            PRINTln("ASTRO Desired Speed: " + String(throttle) + String("RPM ") + String(" Steering: ") + String(steering));
+      //        }
+      velocityHandler(throttle, steering);
+      PRINT("ASTRO left: " + String(desiredVelocityLeft));
+      PRINT(" - right: " + String(desiredVelocityRight));
+      PRINTln(" maxOutput: " + String(maxOutputSignal));
     }
     else {
-      PRINTln("ASTRO Front camera continuous base: choose values from 0 to 180");
+      PRINTln("ASTRO Astro isn't activated yet!!!");
+    }
+  }
+  else if ((cmd.indexOf(":") > 0) && !isSteering) {
+    if (isActivated) {
+      motorNumber = getValue(cmd, ':', 0).toFloat();
+      int speed = getValue(cmd, ':', 1).toFloat();
+      steering = 0;
+      int dir = 1;
+      if (throttle < 0 ) {
+        dir = - 1;
+      }
+      motorList[motorNumber].calcCurrentVelocity();
+      motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
+      PRINTln("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
+    }
+    else {
+      PRINTln("ASTRO Astro isn't activated yet!!!");
+    }
+  }
+  else if ((cmd.indexOf("!") == 0)) {
+    if (isActivated) {
+      cmd.remove(0, 1);
+      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+        PRINTln("ASTRO Front camera continuous base is moving at rate: " + String(cmd.toInt()));
+        frontBase.write(cmd.toInt());
+      }
+      else {
+        PRINTln("ASTRO Front camera continuous base: choose values from 0 to 180");
+      }
+    }
+    else {
+      PRINTln("ASTRO Astro isn't activated yet!!!");
     }
   }
   else if ((cmd.indexOf("@") == 0)) {
-    cmd.remove(0, 1);
-    if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-      PRINTln("ASTRO Front camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-      frontSide.write(cmd.toInt());
+    if (isActivated) {
+      cmd.remove(0, 1);
+      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+        PRINTln("ASTRO Front camera Side positional servo is moving to angle: " + String(cmd.toInt()));
+        frontSide.write(cmd.toInt());
+      }
+      else {
+        PRINTln("ASTRO Front camera Side positional servo: choose values from 0 to 180");
+      }
     }
     else {
-      PRINTln("ASTRO Front camera Side positional servo: choose values from 0 to 180");
+      PRINTln("ASTRO Astro isn't activated yet!!!");
     }
   }
   else if ((cmd.indexOf("#") == 0)) {
-    cmd.remove(0, 1);
-    if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-      PRINTln("ASTRO Top camera continuous base is moving at rate: " + String(cmd.toInt()));
-      topBase.write(cmd.toInt());
+    if (isActivated) {
+      cmd.remove(0, 1);
+      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+        PRINTln("ASTRO Top camera continuous base is moving at rate: " + String(cmd.toInt()));
+        topBase.write(cmd.toInt());
+      }
+      else {
+        PRINTln("ASTRO Top camera continuous base: choose values from 0 to 180");
+      }
     }
     else {
-      PRINTln("ASTRO Top camera continuous base: choose values from 0 to 180");
+      PRINTln("ASTRO Astro isn't activated yet!!!");
     }
   }
   else if ((cmd.indexOf("$") == 0)) {
-    cmd.remove(0, 1);
-    if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-      PRINTln("ASTRO Top camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-      topSide.write(cmd.toInt());
+    if (isActivated) {
+      cmd.remove(0, 1);
+      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+        PRINTln("ASTRO Top camera Side positional servo is moving to angle: " + String(cmd.toInt()));
+        topSide.write(cmd.toInt());
+      }
+      else {
+        PRINTln("ASTRO Top camera Side positional servo: choose values from 0 to 180");
+      }
     }
     else {
-      PRINTln("ASTRO Top camera Side positional servo: choose values from 0 to 180");
+      PRINTln("ASTRO Astro isn't activated yet!!!");
     }
   }
   else if (sender == s[2]) {
@@ -322,7 +352,7 @@ void Commands::systemStatus(void) {
     if (i != 5) PRINT(", ");
   }
   PRINTln("");
-  
+
   PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
@@ -570,7 +600,7 @@ void Commands::encOff(void) {
 void Commands::accOn(void) {
   for (i = 0; i <= 5; i++) {
     motorList[i].accLimit = true;
-    String msg = "ASTRO Motor " + String(i) +" Acceleration Limiter: " + String((motorList[i].accLimit) ? "Open" : "CLose");
+    String msg = "ASTRO Motor " + String(i) + " Acceleration Limiter: " + String((motorList[i].accLimit) ? "Open" : "CLose");
     PRINTln(msg);
   }
 }

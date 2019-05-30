@@ -70,70 +70,76 @@
     <div class="container fill">
         <div class="row"> <!-- nav, map, camera -->
           <div class="col-md-3"> <!-- rover position and antenna goal stuff -->
-            <h5 class="container-header">Motor Table</h5>
-            <!--Table-->
-            <table id="motor-table" class="table table-hover table-sm table-bordered" style="font-size:12px; background:rgba(255, 255, 255, 0.8); text-align: left">
-              <!--Table head-->
-              <thead>
-                <tr>
-                  <th scope="col">Motor</br>(Number)</th>
-                  <th scope="col">Status</br>(Alive/Dead)</th>
-                  <th scope="col">Speed</br>(RPM)</th>
-                  <th scope="col">Current</br>(A)</th>
-                </tr>
-              </thead>
-              <!--Table body-->
-              <tbody>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    R Front
-                  </th>
-                  <td id="right-front-status">N/A</td>
-                  <td id="right-front-rpm">-</td>
-                  <td id="right-front-current">N/A</td>
-                </tr>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    R Mid
-                  </th>
-                  <td id="right-mid-status">N/A</td>
-                  <td id="right-mid-rpm">-</td>
-                  <td id="right-mid-current">N</t/Ad>
-                </tr>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    R Back
-                  </th>
-                  <td id="right-rear-status">N/A</td>
-                  <td id="right-rear-rpm">-</td>
-                  <td id="right-rear-current">N/A</td>
-                </tr>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    L Front
-                  </th>
-                  <td id="left-front-status">N/A</td>
-                  <td id="left-front-rpm">-</td>
-                  <td id="left-front-current">N/A</td>
-                </tr>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    L Mid
-                  </th>
-                  <td id="left-mid-status">N/A</td>
-                  <td id="left-mid-rpm">-</td>
-                  <td id="left-mid-current">N/A</td>
-                </tr>
-                <tr>
-                  <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                    R Back
-                  </th>
-                  <td id="left-rear-status">N/A</td>
-                  <td id="left-rear-rpm">-</td>
-                  <td id="left-rear-current">N/A</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="row">
+              <h5 class="container-header">Motor Table</h5>
+              <!--Table-->
+              <table id="motor-table" class="table table-hover table-sm table-bordered" style="font-size:12px; background:rgba(255, 255, 255, 0.8); text-align: left">
+                <!--Table head-->
+                <thead>
+                  <tr>
+                    <th scope="col">Motor</br>(Number)</th>
+                    <th scope="col">Status</br>(Alive/Dead)</th>
+                    <th scope="col">Speed</br>(RPM)</th>
+                    <th scope="col">Current</br>(A)</th>
+                  </tr>
+                </thead>
+                <!--Table body-->
+                <tbody>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      R Front
+                    </th>
+                    <td id="right-front-status">N/A</td>
+                    <td id="right-front-rpm">-</td>
+                    <td id="right-front-current">N/A</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      R Mid
+                    </th>
+                    <td id="right-mid-status">N/A</td>
+                    <td id="right-mid-rpm">-</td>
+                    <td id="right-mid-current">N</t/Ad>
+                  </tr>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      R Back
+                    </th>
+                    <td id="right-rear-status">N/A</td>
+                    <td id="right-rear-rpm">-</td>
+                    <td id="right-rear-current">N/A</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      L Front
+                    </th>
+                    <td id="left-front-status">N/A</td>
+                    <td id="left-front-rpm">-</td>
+                    <td id="left-front-current">N/A</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      L Mid
+                    </th>
+                    <td id="left-mid-status">N/A</td>
+                    <td id="left-mid-rpm">-</td>
+                    <td id="left-mid-current">N/A</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                      R Back
+                    </th>
+                    <td id="left-rear-status">N/A</td>
+                    <td id="left-rear-rpm">-</td>
+                    <td id="left-rear-current">N/A</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="row">
+              <div class="col-md-9">BATTERY VOLTAGE: </div>
+              <div class="col-md-1" id="battery-voltage">-</div>
+            </div>
           </div>
           <div class="col-md-4"> <!-- GPS Map -->
             <h5 class="container-header">GPS Map</h5>
@@ -210,14 +216,14 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-5">Motor Controls</div>
+              <div class="col-sm-5">Activate Rover</div>
               <div class="col-sm-5">Command Listener</div>
             </div>
             <div class="row">
               <div class="col-sm-5" align="center" style="border-style:none;">
                   <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
                       <label>
-                          <input id="enable-rover-motors-btn" type="checkbox">
+                          <input id="activate-rover-btn" type="checkbox">
                           <span> </span>
                       </label>
                   </div>
@@ -441,6 +447,13 @@
                 <button title="List all commands" id="list-all-rover-cmds" type="button" class="control-btn-mid" disabled>
                   <strong>L</strong>
                 </button>
+              </td>
+              <td>
+                <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
+                    <button type="button" id="reboot-button" class="btn btn-primary btn-lg fa fa-retweet fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+                        <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Reboot MCU</span>
+                    </button>
+                </div>
               </td>
             </tr>
           </table>

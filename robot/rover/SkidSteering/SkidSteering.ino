@@ -16,7 +16,7 @@ LSM303 compass;
 
 /* comms */
 
-#define FEEDBACK_PRINT_INTERVAL 1000
+#define FEEDBACK_PRINT_INTERVAL 50
 #define LED_BLINK_INTERVAL 1000
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -196,14 +196,14 @@ void setup() {
 }
 
 void loop() {
-  if (millis() - prevRead > 30) {
+  //if (millis() - prevRead > 30) {
     // incoming format example: "5:7"
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
       String cmd = UART_PORT.readStringUntil('\n');
-      cmd.trim();//if (cmd[cmd.length() - 1] == '\r') cmd.replace('\r', "");
+      cmd.trim();
       ser_flush();
       Commands.handler(cmd, "Serial");
     }
@@ -228,7 +228,7 @@ void loop() {
       }
     }
     prevRead = millis();
-  } // end of command listening
+  //} // end of command listening
 
   if (millis() - prevReadNav > 200) {
     navHandler();

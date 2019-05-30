@@ -36,6 +36,15 @@ function initRosWeb () {
     name: 'task_handler',
     serviceType: 'HandleTask'
   })
+  // setup a subscriber for the battery_voltage topic
+  battery_voltage_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_voltage',
+    messageType: 'std_msgs/Float32'
+  })
+  battery_voltage_listener.subscribe(function (message) {
+    $('#battery-voltage').text(message.data.toFixed(2))
+  })
 
   /* arm controls */
 
