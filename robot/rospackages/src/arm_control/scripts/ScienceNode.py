@@ -140,6 +140,10 @@ requests = {
     'p3' : ['p3 done'],
     'p4' : ['p4 done'],
     'p5' : ['p5 done'],
+    'led1' : ['led1 done'],
+    'led1s' : ['led1s done'],
+    'led2' : ['led2 done'],
+    'led2s' : ['led2s done']
 }
 
 def handle_client(req):

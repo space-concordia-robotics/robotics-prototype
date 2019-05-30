@@ -154,6 +154,23 @@ function initRosWeb () {
       $('#pump-dir-label').text('DIR: IN')
       $('#pump-dir-toggle')[0].checked = true
     }
+
+    // photo resistor Voltage
+    $('#photo-resistor-voltage').val(values[4])
+
+    // LED 1 ON
+    if (values[5] == '0') {
+      $('#led1-toggle')[0].checked = false
+    } else if (values[5] == '1') {
+      $('#led1-toggle')[0].checked = true
+    }
+
+    // LED 2 ON
+    if (values[6] == '0') {
+      $('#led2-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#led2-toggle')[0].checked = true
+    }
   })
 
   /* rover commands */

@@ -385,6 +385,41 @@ $(document).ready(function () {
       })
     }
   })
+
+  for (let i = 0; i < 2; i++) {
+    $('#led' + (i + 1) + '-toggle').click(function (event) {
+      event.preventDefault()
+
+      if (!isScienceActivated()) {
+        return
+      }
+
+      let cmd = 'led' + (i + 1)
+
+      if ($('#led' + (i + 1) + '-toggle').is(':checked')) {
+        sendScienceRequest(cmd, function (msgs) {
+          console.log('msgs', msgs)
+
+          if (msgs[1].includes(cmd + ' done')) {
+            appendToConsole('Success')
+          } else {
+            appendToConsole('Something went wrong')
+          }
+        })
+      } else {
+        cmd += 's'
+        sendScienceRequest(cmd, function (msgs) {
+          console.log('msgs', msgs)
+
+          if (msgs[1].includes(cmd + ' done')) {
+            appendToConsole('Success')
+          } else {
+            appendToConsole('Something went wrong')
+          }
+        })
+      }
+    })
+  }
 })
 
 function isScienceActivated () {
@@ -398,9 +433,15 @@ function isScienceActivated () {
   return true
 }
 
-// sets all toggles OFF
+// convenience UI functions
 function toggleOffAllPumps () {
   for (let i = 0; i < 5; i++) {
     $('#pump' + (i + 1) + '-drive-toggle')[0].checked = false
+  }
+}
+
+function toggleOffAllVibrators () {
+  for (let i = 0; i < 6; i++) {
+    $('#vibrator' + (i + 1) + '-toggle')[0].checked = false
   }
 }

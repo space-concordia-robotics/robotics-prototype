@@ -176,13 +176,17 @@ void setup() {
 }
 
 void loop() {
+  // print relevant data for pub/sub nodes
   if (millis() - lastPrintTime > 200) {
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
     UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
     UART_PORT.print("drillDirection:");UART_PORT.print(drillDirection);UART_PORT.print(",");
     UART_PORT.print("elevatorDirection:");UART_PORT.print(elevatorDirection);UART_PORT.print(",");
-    UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);
+    UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);UART_PORT.print(",");
+    UART_PORT.print("photoResistorVoltage:");UART_PORT.print(voltage);UART_PORT.print(",");
+    UART_PORT.print("LED1_ON:");UART_PORT.print(digitalRead(LED1));UART_PORT.print(",");
+    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));
     UART_PORT.println();
   }
   if (UART_PORT.available()) {
@@ -421,27 +425,27 @@ void loop() {
       } 
       else if (cmd == "v1") {
         digitalWrite(VIBRATOR1, HIGH);
-        UART_PORT.println("SCIENCE v1 ON");
+        UART_PORT.println("SCIENCE v1 done");
       }
       else if (cmd == "v2") {
         digitalWrite(VIBRATOR2, HIGH);
-        UART_PORT.println("SCIENCE v2 ON");
+        UART_PORT.println("SCIENCE v2 done");
       }
       else if (cmd == "v3") {
         digitalWrite(VIBRATOR3, HIGH);
-        UART_PORT.println("SCIENCE v3 ON");
+        UART_PORT.println("SCIENCE v3 done");
       }
       else if (cmd == "v4") {
         digitalWrite(VIBRATOR4, HIGH);
-        UART_PORT.println("SCIENCE v4 ON");
+        UART_PORT.println("SCIENCE v4 done");
       }
       else if (cmd == "v5") {
         digitalWrite(VIBRATOR5, HIGH);
-        UART_PORT.println("SCIENCE v5 ON");
+        UART_PORT.println("SCIENCE v5 done");
       }
       else if (cmd == "v6") {
         digitalWrite(VIBRATOR6, HIGH);
-        UART_PORT.println("SCIENCE v6 ON");
+        UART_PORT.println("SCIENCE v6 done");
       }
       else if (cmd == "vs") {
         digitalWrite(VIBRATOR1, LOW);
@@ -450,57 +454,50 @@ void loop() {
         digitalWrite(VIBRATOR4, LOW);
         digitalWrite(VIBRATOR5, LOW);
         digitalWrite(VIBRATOR6, LOW);
-        UART_PORT.println("SCIENCE vs");
+        UART_PORT.println("SCIENCE vs done");
       }
       else if (cmd == "led1") {
         digitalWrite(LED1, HIGH);
         photoChoice(1);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        UART_PORT.print("SCIENCE voltageon");
-        UART_PORT.print(voltage);
-        UART_PORT.println("SCIENCE led1");
+        UART_PORT.println("SCIENCE led1 done");
       }
       else if (cmd == "led1s") {
         digitalWrite(LED1, LOW);
         photoChoice(1);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        UART_PORT.print("SCIENCE voltageoff");
-        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        UART_PORT.println("SCIENCE led1s");
+        UART_PORT.println("SCIENCE led1s done");
       }
       else if (cmd == "led2") {
         digitalWrite(LED2, HIGH);
         photoChoice(2);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        UART_PORT.print("SCIENCE voltageon");
-        UART_PORT.print(voltage);
-        UART_PORT.println("SCIENCE led2");
+        UART_PORT.println("SCIENCE led2 done");
       }
       else if (cmd == "led2s") {
         digitalWrite(LED2, LOW);
         photoChoice(2);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        UART_PORT.print("SCIENCE voltageoff");
-        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        UART_PORT.println("SCIENCE led2s");
+        
+        UART_PORT.println("SCIENCE led2s done");
       }
 
       else if (cmd == "deactivate") {
