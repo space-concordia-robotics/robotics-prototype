@@ -1,6 +1,6 @@
 /* still in idea phase */
-#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
-//#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
+//#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
+#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
 //#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
 //#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
 //#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case

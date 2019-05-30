@@ -50,8 +50,8 @@ ArduinoBlue phone(bluetooth);
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
   should work.
 */
-#define DEVEL_MODE_1 1
-//#define DEVEL_MODE_2 2
+//#define DEVEL_MODE_1 1
+#define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
 // serial communication over uart with odroid, teensy plugged into pcb and odroid
