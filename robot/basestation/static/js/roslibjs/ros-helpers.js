@@ -18,6 +18,13 @@ function initRosWeb () {
 
   /* general controls */
 
+  // setup a client for the ping service
+  ping_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'ping_response',
+    serviceType: 'PingResponse'
+  })
+
   // setup a client for the mux_select service
   mux_select_client = new ROSLIB.Service({
     ros: ros,
@@ -87,6 +94,121 @@ function initRosWeb () {
   })
   arm_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
+  })
+
+  /* science commands */
+
+  // setup a client for the science_request service
+  science_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'science_request',
+    serviceType: 'ScienceRequest'
+  })
+
+  // setup a subscriber for the arm_joint_states topic
+  science_data_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_feedback',
+    messageType: 'std_msgs/String'
+  })
+
+  science_data_listener.subscribe(function (message) {
+    appendToConsole(message.data, true, false)
+    // isActivated, drillDirection, elevatorDirection
+    let dataKeyValues = message.data.replace('Science data:', '').split(',')
+    let keys = dataKeyValues.map(i => {
+      return i.split(':')[0]
+    })
+    let values = dataKeyValues.map(i => {
+      return i.split(':')[1]
+    })
+
+    // isActivated
+    if (values[0] == '0') {
+      $('#activate-science-btn')[0].checked = false
+    } else if (values[0] == '1') {
+      $('#activate-science-btn')[0].checked = true
+    }
+
+    // drillDirection
+    if (values[1] == '0') {
+      lightUp('#cw-btn')
+      greyOut('#ccw-btn')
+    } else if (values[1] == '1') {
+      lightUp('#ccw-btn')
+      greyOut('#cw-btn')
+    }
+
+    // elevatorDirection
+    if (values[2] == '0') {
+      lightUp('#elevator-up-btn')
+      greyOut('#elevator-down-btn')
+    } else if (values[2] == '1') {
+      lightUp('#elevator-down-btn')
+      greyOut('#elevator-up-btn')
+    }
+
+    if (values[3] == '0') {
+      $('#pump-dir-label').text('DIR: OUT')
+      $('#pump-dir-toggle')[0].checked = false
+    } else if (values[3] == '1') {
+      $('#pump-dir-label').text('DIR: IN')
+      $('#pump-dir-toggle')[0].checked = true
+    }
+
+    // photo resistor Voltage
+    $('#photo-resistor-voltage').val(values[4])
+
+    // LED 1 ON
+    if (values[5] == '0') {
+      $('#led1-toggle')[0].checked = false
+    } else if (values[5] == '1') {
+      $('#led1-toggle')[0].checked = true
+    }
+
+    // LED 2 ON
+    if (values[6] == '0') {
+      $('#led2-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#led2-toggle')[0].checked = true
+    }
+
+    // Vibrator ON statuses
+    if (values[7] == '0') {
+      $('#vibrator1-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator1-toggle')[0].checked = true
+    }
+
+    if (values[8] == '0') {
+      $('#vibrator2-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator2-toggle')[0].checked = true
+    }
+
+    if (values[9] == '0') {
+      $('#vibrator3-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator3-toggle')[0].checked = true
+    }
+
+    if (values[10] == '0') {
+      $('#vibrator4-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator4-toggle')[0].checked = true
+    }
+
+    if (values[11] == '0') {
+      $('#vibrator5-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator5-toggle')[0].checked = true
+    }
+
+    if (values[12] == '0') {
+      $('#vibrator6-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator6-toggle')[0].checked = true
+    }
   })
 
   /* rover commands */
@@ -191,18 +313,23 @@ function requestMuxChannel (elemID, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole(
-    'Sending request to switch to channel ' + $('a' + elemID).text()
-  )
+  if (dev != '?') {
+    appendToConsole(
+      'Sending request to switch to channel ' + $('a' + elemID).text()
+    )
+  }
 
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
       callback([false, msg])
+    } else if (msg.includes('Current:')) {
+      // -2 since last character is newline, second last is actual channel
+      $('button#mux').text('Device ' + $('a#mux-' + msg[msg.length - 2]).text())
     } else {
       $('button#mux').text('Device ' + $('a' + elemID).text())
       appendToConsole(
@@ -222,7 +349,7 @@ function requestSerialCommand (command, callback) {
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -237,10 +364,14 @@ function requestSerialCommand (command, callback) {
 }
 function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   var request
-  if (reqArgs=='') {
+  if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
   } else {
-    request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus, args : reqArgs })
+    request = new ROSLIB.ServiceRequest({
+      task: reqTask,
+      status: reqStatus,
+      args: reqArgs
+    })
   }
   let sentTime = new Date().getTime()
 
@@ -287,6 +418,54 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   })
 }
 
+function checkTaskStatuses () {
+  // regardless of page we're on
+  requestMuxChannel('?', function (currentChannel) {
+    console.log('currentChannel', currentChannel)
+  })
+
+  if (window.location.pathname == '/') {
+    // check arm listener status
+    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
+      appendToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-arm-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-arm-listener-btn')[0].checked = true
+        }
+      }
+    })
+    // check arm camera stream status
+    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
+      appendToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-arm-stream-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-arm-stream-btn')[0].checked = true
+        }
+      }
+    })
+  } else if (window.location.pathname == '/rover') {
+    console.log('rover page')
+  } else if (window.location.pathname == '/science') {
+    console.log('science page')
+    requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
+      appendToConsole('msgs', msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#science-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#science-listener-btn')[0].checked = true
+        }
+      }
+    })
+  } /* else if (window.location.pathname == '/rover') { //pds
+    console.log('rover page')
+  } */
+}
+
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
@@ -298,12 +477,38 @@ function sendArmRequest (command, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole('Sending request to execute command \"' + command + '\"')
+  appendToConsole('Sending request to execute command "' + command + '"')
 
-  arm_request_client.callService(request, function (result) {
+  science_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
+    if (!result.success) {
+      // how to account for a lack of response?
+      appendToConsole('Request failed. Received "' + msg + '"')
+      // return false
+      callback([false, msg])
+    } else {
+      appendToConsole(
+        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
+      )
+      // return true
+      callback([true, msg])
+    }
+  })
+}
+
+function sendScienceRequest (command, callback) {
+  let request = new ROSLIB.ServiceRequest({ msg: command })
+  let sentTime = new Date().getTime()
+
+  console.log(request)
+  appendToConsole('Sending request to execute command "' + command + '"')
+
+  science_request_client.callService(request, function (result) {
+    let latency = millisSince(sentTime)
+    console.log(result)
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -332,12 +537,12 @@ function sendRoverRequest (command, callback) {
   let sentTime = new Date().getTime()
 
   console.log(request)
-  appendToConsole('Sending request to execute command \"' + command + '\"')
+  appendToConsole('Sending request to execute command "' + command + '"')
 
   rover_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response//.slice(0, result.response.length - 1) // remove newline character
+    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
@@ -353,36 +558,6 @@ function sendRoverRequest (command, callback) {
   })
 }
 
-function checkTaskStatuses () {
-  if (window.location.pathname == '/') {
-    // check arm listener status
-    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function(msgs) {
-      console.log(msgs)
-      appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('tru')
-      } else {
-        console.log('fals')
-      }
-    })
-    // check arm camera stream status
-    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function(msgs) {
-      console.log(msgs)
-      appendToConsole(msgs)
-      if (msgs[0]) {
-        console.log('truu')
-      } else {
-        console.log('falss')
-      }
-    })
-  } else if (window.location.pathname == '/rover') {
-    //do the same but for front and rear cameras
-  } else if (window.location.pathname == '/science') {
-    //do the same but for front and rear cameras
-  } /*else if (window.location.pathname == '/rover') { //pds
-    //do the same but for front and rear cameras
-  }*/
-}
 function initNavigationPanel () {
   let hasAntennaParams = true
   antenna_latitude.get(function(val){
@@ -435,6 +610,20 @@ function initNavigationPanel () {
       appendToConsole('One or more GPS goal parameters is missing, if you would like directions to the goal then please input them')
       $('#goal-inputs').show()
       $('#goal-unchanging').hide()
+
+/*
+returns the currently set ROS_MASTER_URI value
+
+usage:
+getRoverIP(function(callback) {})
+*/
+function getRoverIP (callback) {
+  let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
+  console.log('request', request)
+  ping_client.callService(request, function (result) {
+    let msg = result.response
+    if (result.response) {
+      callback(result.response)
     }
   })
 }

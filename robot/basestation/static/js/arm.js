@@ -79,21 +79,44 @@ $(document).ready(function () {
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
+    let serialType = 'uart'
+    if (
+      $('#serialType')
+        .text()
+        .includes('Serial')
+    ) {
+      appendToConsole('Select a serial type!')
+    }
     // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-listener-btn').is(':checked')) {
-      var serialType = 'uart' // in a perfect world this is controlled in the gui
-      if ( $('button#mux').text().includes('Arm') || serialType == 'usb') {
-        requestTask('arm_listener', 1, '#toggle-arm-listener-btn', function (msgs) {
-          //console.log(msgs)
-          if (msgs[0]) {
-            $('#toggle-arm-listener-btn')[0].checked = true
-          } else {
-            $('#toggle-arm-listener-btn')[0].checked = false
-          }
-        }, serialType)
+    else if ($('#toggle-arm-listener-btn').is(':checked')) {
+      if (
+        $('button#mux')
+          .text()
+          .includes('Arm')
+      ) {
+        serialType = $('#serial-type')
+          .text()
+          .trim()
+        console.log('setting serialType:', serialType)
+        requestTask(
+          'arm_listener',
+          1,
+          '#toggle-arm-listener-btn',
+          function (msgs) {
+            console.log(msgs)
+            if (msgs[0]) {
+              $('#toggle-arm-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-arm-listener-btn')[0].checked = false
+            }
+          },
+          serialType
+        )
         // console.log('returnVals', returnVals)
       } else {
-        appendToConsole('Cannot turn arm listener on if not in arm mux channel!')
+        appendToConsole(
+          'Cannot turn arm listener on if not in arm mux channel!'
+        )
       }
     } else {
       // closing arm listener
@@ -124,22 +147,18 @@ $(document).ready(function () {
     if ($('#toggle-arm-stream-btn').is(':checked')) {
       requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
         if (msgs[0]) {
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        } else {
-          // failed to open stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          console.log('activating stream window')
+          getRoverIP(function (ip) {
+            console.log('ip', ip)
+            $('img#camera-feed')[0].src = ip + ':8090/?action=stream'
+          })
         }
-      }, '/dev/ttyArmScienceCam')
+      }) //, '/dev/ttyArmScienceCam')
     } else {
       requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
         if (msgs[0]) {
           // succeeded to close stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        } else {
-          // failed to close stream
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
         }
       })
     }
@@ -148,16 +167,23 @@ $(document).ready(function () {
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()
     let maxMultiplier = 5.0
-    if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
+    if (
+      parseFloat(multiplier) >= 0 &&
+      parseFloat(multiplier) <= maxMultiplier
+    ) {
       let cmd = 'armspeed ' + multiplier
       sendArmRequest(cmd, function (msgs) {})
     }
   })
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
-    if (e.keyCode == 13) { // enter key
+    if (e.keyCode == 13) {
+      // enter key
       let multiplier = $('#arm-speed-multiplier-input').val()
       let maxMultiplier = 5.0
-      if (parseFloat(multiplier) >= 0 && parseFloat(multiplier) <= maxMultiplier) {
+      if (
+        parseFloat(multiplier) >= 0 &&
+        parseFloat(multiplier) <= maxMultiplier
+      ) {
         let cmd = 'armspeed ' + multiplier
         sendArmRequest(cmd, function (msgs) {})
       }
@@ -171,20 +197,16 @@ $(document).ready(function () {
       sendArmRequest('motor 1 loop closed', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
         }
       })
     } else {
       sendArmRequest('motor 1 loop open', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
         }
       })
     }
@@ -283,7 +305,7 @@ document.addEventListener('keydown', function (event) {
 // arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
+    !$('#serial-cmd-input').is(':focus') &&
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -477,15 +499,12 @@ function gameLoop () {
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
-
     // 'z' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
       $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
-    }
-
-    else if (toBudge) {
+    } else if (toBudge) {
       let cmd = 'budge '
       for (var motor in budgeArray) {
         cmd += budgeArray[motor]
@@ -517,79 +536,78 @@ gameLoop()
 let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyW') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
     $('#click_btn_motor1_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyS') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
     $('#click_btn_motor1_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyE') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyE') {
     $('#click_btn_motor2_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyD') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
     $('#click_btn_motor2_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyR') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyR') {
     $('#click_btn_motor3_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyF') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyF') {
     $('#click_btn_motor3_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyT') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyT') {
     $('#click_btn_motor4_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyG') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyG') {
     $('#click_btn_motor4_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyY') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyY') {
     $('#click_btn_motor5_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyH') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyH') {
     $('#click_btn_motor5_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyU') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
     $('#click_btn_motor6_ccw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyJ') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
     $('#click_btn_motor6_cw > button').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 // EXTRA CONTROLS
-
 document.addEventListener('keyup', function (event) {
   if (!$serialCmdInput.is(':focus') && event.code === 'KeyQ') {
     $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
@@ -597,19 +615,19 @@ document.addEventListener('keyup', function (event) {
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyO') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyO') {
     $('button#reset-motor-angles').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyL') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyL') {
     $('button#list-all-cmds').css('background-color', 'rgb(74, 0, 0)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyA') {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
   }
 })

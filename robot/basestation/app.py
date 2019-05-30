@@ -10,8 +10,10 @@ from urllib.parse import urlparse, unquote
 import flask
 from flask import jsonify, request
 from robot.comms.connection import Connection
+import time
 
 app = flask.Flask(__name__)
+
 
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
@@ -73,6 +75,7 @@ def get_pid(keyword):
             return words[1]
 
     return -1
+
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
@@ -85,6 +88,12 @@ def index():
 def rover():
     """Rover control panel."""
     return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
+
+
+@app.route("/science")
+def science():
+    """Science page."""
+    return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route("/ping_rover")
@@ -143,7 +152,6 @@ def odroid_rx():
 
     return jsonify(success=True, odroid_rx=output)
 
-
 # Rover controls
 @app.route("/rover_drive", methods=["POST"])
 def rover_drive():
@@ -195,13 +203,31 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
+# routes for science page
+@app.route('/numSections')
+def numSections():
+    return '26'
+
+@app.route('/initialSection')
+def initialSection():
+    return '0'
+
+@app.route('/rotatePos')
+def rotatePos():
+    time.sleep(1) # wait 1 second
+    return 'done'
+
+@app.route('/rotateNeg')
+def rotateNeg():
+    time.sleep(1)
+    return 'done'
 
 if __name__ == "__main__":
 
     # feature toggles
     # the following two are used for UDP based communication with the Connection class
     global local
-    local = True
+    local = False
     # print("fetch_ros_master_ip:", fetch_ros_master_ip())
     #
     # # either local or competition

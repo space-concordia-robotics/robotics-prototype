@@ -22,6 +22,7 @@ add_service_files(
   FILES
   ## arm
   ArmRequest.srv
+  ScienceRequest.srv
 )
 
 add_message_files(
