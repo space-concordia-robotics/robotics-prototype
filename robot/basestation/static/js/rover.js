@@ -134,11 +134,11 @@ $(document).ready(function () {
       })
     }
   })
-  $('#toggle-arm-stream-btn').on('click', function (event) {
+  $('#front-camera-stream-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
+    if ($('#front-camera-stream-btn').is(':checked')) {
+      requestTask('camera_stream', 1, '#front-camera-stream-btn', function (msgs) {
         if (msgs[0]) {
           $('img#camera-feed')[0].src =
             'http://' + getRoverIP() + ':8090/?action=stream'
@@ -146,9 +146,35 @@ $(document).ready(function () {
           // failed to open stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
         }
-      }, '/dev/ttyArmScienceCam')
+      }, '/dev/ttyFrontCam')
     } else {
-      requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
+      requestTask('camera_stream', 0, '#front-camera-stream-btn', function (msgs) {
+        if (msgs[0]) {
+          // succeeded to close stream
+          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+        } else {
+          // failed to close stream
+          $('img#camera-feed')[0].src =
+            'http://' + getRoverIP() + ':8090/?action=stream'
+        }
+      })
+    }
+  })
+  $('#rear-camera-stream-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#rear-camera-stream-btn').is(':checked')) {
+      requestTask('camera_stream', 1, '#rear-camera-stream-btn', function (msgs) {
+        if (msgs[0]) {
+          $('img#camera-feed')[0].src =
+            'http://' + getRoverIP() + ':8090/?action=stream'
+        } else {
+          // failed to open stream
+          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+        }
+      }, '/dev/ttyRearCam')
+    } else {
+      requestTask('camera_stream', 0, '#rear-camera-stream-btn', function (msgs) {
         if (msgs[0]) {
           // succeeded to close stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
@@ -277,21 +303,19 @@ document.addEventListener('keydown', function (event) {
     lastCmdSent = new Date().getTime()
   }
 })
-// arm mcu ping
+// rover mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    sendArmRequest('ping', function (msgs) {})
+    sendRoverRequest('ping', function (msgs) {})
     lastCmdSent = new Date().getTime()
   }
 })
 // print commands list
 document.addEventListener('keydown', function (event) {
   if (
-    !$serialCmdInput.is(':focus') &&
     event.code === 'KeyL' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -341,74 +365,6 @@ $(document).keydown(function (e) {
       lastCmdSent = new Date().getTime()
       break
 
-    case 66: // 'b' --> get buffered serial messages
-      if (millisSince(lastCmdSent) > MCU_FEEDBACK_THROTTLE) {
-        lightUp('button#show-buffered-rover-msgs')
-
-        $.ajax({
-          url: '/rover_drive',
-          type: 'POST',
-          data: {
-            cmd: 'b'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback:\n' + response.feedback)
-            if (response.error != 'None') {
-              appendToConsole('error:\n' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
-        lastCmdSent = new Date().getTime()
-      }
-      break
-    case 77: // 'm' --> enable motor control
-      lightUp('button#enable-rover-motors')
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'm'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (!response.feedback.includes('limit exceeded')) {
-            enableRoverMotorsBtn()
-          }
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
-      lastCmdSent = new Date().getTime()
-      break
-    case 78: // 'n' --> disable motor control
-      lightUp('button#disable-rover-motors')
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'n'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (!response.feedback.includes('limit exceeded')) {
-            disableRoverMotorsBtn()
-          }
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
-      lastCmdSent = new Date().getTime()
-      break
     case 76: // 'l' --> list all commands
       lightUp('button#list-all-rover-cmds')
 
@@ -423,72 +379,6 @@ $(document).keydown(function (e) {
           appendToConsole('feedback:\n' + response.feedback)
           if (!response.feedback.includes('limit exceeded')) {
             disableRoverMotorsBtn()
-          }
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
-        }
-      })
-      lastCmdSent = new Date().getTime()
-      break
-    case 84: // 't' --> toggle listener proxy script
-      if (millisSince(lastCmdSent) > LISTENER_TOGGLE_THROTTLE) {
-        lightUp('button#toggle-rover-listener-btn')
-
-        let request = ''
-
-        if ($('#toggle-rover-listener').is(':checked')) {
-          request = 'disable-rover-listener'
-        } else {
-          request = 'enable-rover-listener'
-        }
-
-        $.ajax({
-          url: '/task_handler',
-          type: 'POST',
-          data: {
-            cmd: request
-          },
-          success: function (response) {
-            console.log(response)
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('output: ' + response.output)
-            if (
-              !response.output.includes('Failed') &&
-              !response.output.includes('shutdown request') &&
-              !response.output.includes('unavailable')
-            ) {
-              if ($('#toggle-rover-listener').is(':checked')) {
-                disableRoverListenerBtn()
-              } else {
-                enableRoverListenerBtn()
-              }
-            }
-
-            if (response.error != 'None') {
-              appendToConsole('error:\n' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
-        lastCmdSent = new Date().getTime()
-      }
-      break
-    case 81: // 'q' --> terminate (quit) listener script
-      lightUp('button#terminate-listener-script')
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'q'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (!response.feedback.includes('limit exceeded')) {
-            disableRoverListenerBtn()
           }
           if (response.error != 'None') {
             appendToConsole('error:\n' + response.error)
@@ -534,23 +424,8 @@ $(document).keyup(function (e) {
       dim('#max-steering-decrease > button')
       break
 
-    case 77: // enable rover motors
-      dim('button#enable-rover-motors')
-      break
-    case 78: // disable rover motors
-      dim('button#disable-rover-motors')
-      break
-    case 66: // show buffered serial messages from the MCU
-      dim('button#show-buffered-rover-msgs')
-      break
     case 76: // list all rover cmds
       dim('button#list-all-rover-cmds')
-      break
-    case 84: // toggle rover listener proxy script
-      dim('button#toggle-rover-listener-btn')
-      break
-    case 81: // terminate listener script (quit)
-      dim('button#terminate-listener-script')
       break
 
     default:

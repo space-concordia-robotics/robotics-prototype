@@ -241,11 +241,22 @@ void loop() {
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
     PRINT("ASTRO Motor Speeds: ");
-    for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
-      PRINT(motorList[i].getCurrentVelocity());
-      if (i != 5) PRINT(", ");
+    if(Commands.isEnc) {
+      for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+          PRINT(motorList[i].getCurrentVelocity());
+          if (i != 5) PRINT(", ");
+      }
+      PRINTln("");
     }
-    PRINTln("");
+    else {
+      PRINT(String(desiredVelocityRight)+", ");
+      PRINT(String(desiredVelocityRight)+", ");
+      PRINT(String(desiredVelocityRight)+", ");
+      PRINT(String(desiredVelocityLeft)+", ");
+      PRINT(String(desiredVelocityLeft)+", ");
+      PRINT(String(desiredVelocityLeft));
+      PRINTln("");
+    }
     sinceFeedbackPrint = 0;
   }
 } // end of loop
@@ -453,14 +464,13 @@ void initPids(void) {
 }
 void initNav(void) {
   myI2CGPS.begin(Wire, 400000);
-  /*
     if (myI2CGPS.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     Commands.error = true;
     Commands.errorMessage = "ASTRO GPS wires aren't connected properly, please reboot\n";
     Commands.errorMsg();
     }
 
-    else*/ if (!Commands.error) {
+    else if (!Commands.error) {
     compass.init();
     compass.enableDefault();
     compass.setTimeout(100);

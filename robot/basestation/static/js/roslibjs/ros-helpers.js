@@ -112,10 +112,10 @@ function initRosWeb () {
   rover_joint_states_listener.subscribe(function (message) {
     $('#right-front-rpm').text(message.velocity[0])
     $('#right-mid-rpm').text(message.velocity[1])
-    $('#right-back-rpm').text(message.velocity[2])
+    $('#right-rear-rpm').text(message.velocity[2])
     $('#left-front-rpm').text(message.velocity[3])
     $('#left-mid-rpm').text(message.velocity[4])
-    $('#left-back-rpm').text(message.velocity[5])
+    $('#left-rear-rpm').text(message.velocity[5])
   })
   // setup a subscriber for the rover_position topic
   rover_position_listener = new ROSLIB.Topic({
