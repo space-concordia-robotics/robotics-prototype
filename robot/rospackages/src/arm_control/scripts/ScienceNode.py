@@ -111,7 +111,7 @@ def init_serial():
                         if mcuName in response:
                             rospy.loginfo(mcuName + " MCU idenified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the " + mcuName + " MCU', (time.time()-startConnecting)*1000)
+                            rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time()-startConnecting)*1000)
                             return
                     else:
                         rospy.loginfo('got raw message: ' + dat)
@@ -133,17 +133,13 @@ requests = {
     'eup' : ['eup done'],
     'edown' : ['edown done'],
     'ed' : ['UP', 'DOWN'],
-    'p1in' : ['p1in done'],
-    'p1out' : ['p1out done'],
-    'p2in' : ['p2in done'],
-    'p2out' : ['p2out done'],
-    'p3in' : ['p3in done'],
-    'p3out' : ['p3out done'],
-    'p4in' : ['p4in done'],
-    'p4out' : ['p4out done'],
-    'p5in' : ['p5in done'],
-    'p5out' : ['p5out done'],
-
+    'pd0' : ['OUT'],
+    'pd1' : ['IN'],
+    'p1' : ['p1 done'],
+    'p2' : ['p2 done'],
+    'p3' : ['p3 done'],
+    'p4' : ['p4 done'],
+    'p5' : ['p5 done'],
 }
 
 def handle_client(req):

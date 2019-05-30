@@ -146,6 +146,14 @@ function initRosWeb () {
       lightUp('#elevator-down-btn')
       greyOut('#elevator-up-btn')
     }
+
+    if (values[3] == '0') {
+      $('#pump-dir-label').text('DIR: OUT')
+      $('#pump-dir-toggle')[0].checked = false
+    } else if (values[3] == '1') {
+      $('#pump-dir-label').text('DIR: IN')
+      $('#pump-dir-toggle')[0].checked = true
+    }
   })
 
   /* rover commands */

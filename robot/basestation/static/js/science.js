@@ -328,28 +328,17 @@ $(document).ready(function () {
     '#pump5-drive-toggle'
   ]
 
-  let pumpDirToggles = [
-    '#pump1-dir-toggle',
-    '#pump2-dir-toggle',
-    '#pump3-dir-toggle',
-    '#pump4-dir-toggle',
-    '#pump5-dir-toggle'
-  ]
-
   for (let i = 0; i < pumpDriveToggles.length; i++) {
     $(pumpDriveToggles[i]).on('click', function (event) {
       event.preventDefault()
-      let isDirOUT = $(pumpDirToggles[i]).is(':checked')
-      let cmd = ''
+      let cmd = 'p' + (i + 1)
 
-      if (isDirOUT) {
-        cmd = 'p' + (i + 1) + 'out'
-      } else {
-        cmd = 'p' + (i + 1) + 'in'
+      if (!isScienceActivated()) {
+        return
       }
+
       // click makes it checked during this time, so trying to enable
       if ($(pumpDriveToggles[i]).is(':checked')) {
-        console.log('turning ON P1CCW')
         sendScienceRequest(cmd, function (msgs) {
           console.log('msgs', msgs)
           if (msgs[1].includes(cmd + ' done')) {
@@ -371,26 +360,31 @@ $(document).ready(function () {
     })
   }
 
-  for (let i = 0; i < pumpDirToggles.length; i++) {
-    $(pumpDirToggles[i]).click(function () {
-      // click makes it checked during this time, so trying to enable
-      if ($(pumpDirToggles[i]).is(':checked')) {
-        $(pumpDirToggles[i])
-          .parent()
-          .parent()
-          .parent()
-          .find('strong')
-          .text('P' + (i + 1) + ' DIR: OUT')
-      } else {
-        $(pumpDirToggles[i])
-          .parent()
-          .parent()
-          .parent()
-          .find('strong')
-          .text('P' + (i + 1) + ' DIR: IN')
-      }
-    })
-  }
+  $('#pump-dir-toggle').click(function (event) {
+    event.preventDefault()
+
+    if (!isScienceActivated()) {
+      return
+    }
+    // click makes it checked during this time, so trying to enable
+    if ($('#pump-dir-toggle').is(':checked')) {
+      sendScienceRequest('pd1', function (msgs) {
+        if (msgs[1].includes('OUT')) {
+          appendToConsole('Success')
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    } else {
+      sendScienceRequest('pd0', function (msgs) {
+        if (msgs[1].includes('IN')) {
+          appendToConsole('Success')
+        } else {
+          appendToConsole('Something went wrong')
+        }
+      })
+    }
+  })
 })
 
 function isScienceActivated () {
@@ -402,38 +396,6 @@ function isScienceActivated () {
     return false
   }
   return true
-}
-
-// check all button states that are query-able from the science MCU
-function checkButtonStates () {
-  appendToConsole('checking button states')
-  // check if drill cw/ccw (dd = drill direction)
-  sendScienceRequest('dd', function (msgs) {
-    appendToConsole('dd msgs:', msgs)
-    // would also check if msgs[0] was true but science MCU responds
-    // with the same message too many times so it is always false
-    // this is not the case with the 'activated0' response which only appears once
-    if (msgs[1].includes('CCW')) {
-      lightUp('#ccw-btn')
-      greyOut('#cw-btn')
-    } else if (msgs[1].includes('CW')) {
-      console.log('true')
-      lightUp('#cw-btn')
-      greyOut('#ccw-btn')
-    }
-
-    // need to nest this because othewise too many requests sent too quickly
-    sendScienceRequest('ed', function (msgs) {
-      appendToConsole('ed msgs:', msgs)
-      if (msgs[1].includes('UP')) {
-        lightUp('#elevator-up-btn')
-        greyOut('#elevator-down-btn')
-      } else if (msgs[1].includes('DOWN')) {
-        lightUp('#elevator-down-btn')
-        greyOut('#elevator-up-btn')
-      }
-    })
-  })
 }
 
 // sets all toggles OFF
