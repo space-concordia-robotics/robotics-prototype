@@ -14,26 +14,29 @@
     <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
     <link href="../static/css/rover.css" rel="stylesheet">
     <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/helpers.js"></script>
 
     <!-- for roslibjs stuff -->
     <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
     <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
+    <!-- all for ros3d -->
+    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
+    <!-- homemade -->
     <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
+    <script src="../static/js/app.js"></script>
+    <script src="../static/js/rover.js"></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
     <script src="../static/js/popper-1.14.3.min.js"></script>
     <script src="../static/js/bootstrap-4.1.2.min.js"></script>
-
     <!-- Bootstrap Toggle Buttons -->
     <link href="../static/css/bootstrap-toggle-2.2.2.min.css" rel="stylesheet">
     <script src="../static/css/bootstrap-toggle-2.2.2.min.js"></script>
-
-    <!-- JS -->
-    <script src="../static/js/helpers.js"></script>
-    <script src="../static/js/app.js"></script>
-    <script src="../static/js/rover.js"></script>
-
 </head>
 
 <body>
@@ -65,420 +68,421 @@
     <div style="margin-bottom:10px"></div>
 
     <div class="container fill">
-        <div>
-            <div class="row">
-                <div class="col-md-2">
-                  <h5>Navigation Data</h5>
-                  <div id="antenna-data">
-                    <div style="display: block" id="rover-unchanging">
-                      <h6>Rover coords:</h6>
-                      <h5>lat: <span id="rover-latitude">-</span></h5>
-                      <h5>long: <span id="rover-longitude">-</span></h5>
-                      <h5>heading: <span id="rover-heading">-</span></h5>
-                    </div>
-                    <div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">lat, long, bearing (Antenna)</span><br>
-                      </div>
-                      <input type="text" id="antenna-latitude-input">
-                      <input type="text" id="antenna-longitude-input">
-                      <input type="text" id="antenna-start-dir-input">
-                      <button type="button" id="send-antenna-data-btn" class="btn btn-primary">Send antenna data</button>
-                      <p>Input the data above to get recommended antenna angle and more</p>
-                    </div>
-                    <div style="display: none" id="antenna-unchanging">
-                      <h6>Antenna coords:</h6>
-                      <h5>lat: <span id="antenna-latitude">-</span></h5>
-                      <h5>long: <span id="antenna-longitude">-</span></h5>
-                      <h5>bearing: <span id="antenna-start-dir">-</span></h5>
-                      <div>
-                        <h6>Direct antenna to:</h6>
-                        <h5>angle: <span id="recommended-antenna-angle">-</span></h3>
-                        <h5>dist (m): <span id="distance-to-rover">-</span></h3>
-                        <button type="button" id="change-antenna-data-btn" class="btn btn-primary">Change antenna data</button>
-                      </div>
-                    </div>
-                    <div style="display: block" id="goal-inputs" class="input-group input-group-sm">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">lat, long (Destination)</span><br>
-                      </div>
-                      <input type="text" id="goal-latitude-input">
-                      <input type="text" id="goal-longitude-input">
-                      <button type="button" id="send-goal-pos-btn" class="btn btn-primary">Send</button>
-                    </div>
-                    <div style="display: none" id="goal-unchanging">
-                      <h6>Destination coords:</h6>
-                      <h5>lat: <span id="goal-latitude">-</span></h5>
-                      <h5>long: <span id="goal-longitude">-</span></h5>
-                      <div>
-                        <h6>Direct rover to:</h6>
-                        <h5>dir: <span id="recommended-rover-heading">-</span></h5>
-                        <h5>dist (m): <span id="distance-to-goal">-</span></h5>
-                        <button type="button" id="change-goal-pos-btn" class="btn btn-primary">Change goal coords</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <h5 class="container-header">GPS Map</h5>
-                  <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
-                </div>
-                <div class="col-md-6">
-                    <h5 class="container-header">Camera</h5>
-                    <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
-                    <!--<img src="http://{{ roverIP }}:8095/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>-->
-                    <img src="http://localhost:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
-                </div>
+      <div>
+        <div class="row"> <!-- nav, map, camera -->
+          <div class="col-md-3"> <!-- rover position and antenna goal stuff -->
+            <h5>Navigation Data</h5>
+            <div style="display: block" id="rover-unchanging">
+              <h6>Rover coords:</h6>
+              <h5>lat: <span id="rover-latitude">-</span></h5>
+              <h5>long: <span id="rover-longitude">-</span></h5>
+              <h5>heading: <span id="rover-heading">-</span></h5>
             </div>
+            <div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text">lat, long, bearing (Antenna)</span><br>
+              </div>
+              <input type="text" id="antenna-latitude-input">
+              <input type="text" id="antenna-longitude-input">
+              <input type="text" id="antenna-start-dir-input">
+              <br>
+              <button type="button" id="send-antenna-data-btn" class="btn btn-primary">Send antenna data</button>
+            </div>
+            <div style="display: none" id="antenna-unchanging">
+              <h6>Antenna coords:</h6>
+              <h5>lat: <span id="antenna-latitude">-</span></h5>
+              <h5>long: <span id="antenna-longitude">-</span></h5>
+              <h5>bearing: <span id="antenna-start-dir">-</span></h5>
+              <div>
+                <h6>Direct antenna to:</h6>
+                <h5>angle: <span id="recommended-antenna-angle">-</span></h3>
+                <h5>dist (m): <span id="distance-to-rover">-</span></h3>
+                <!-- <br> -->
+                <button type="button" id="change-antenna-data-btn" class="btn btn-primary">Change antenna data</button>
+              </div>
+            </div>
+            <div style="display: block" id="goal-inputs" class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text">lat, long (Destination)</span><br>
+              </div>
+              <input type="text" id="goal-latitude-input">
+              <input type="text" id="goal-longitude-input">
+              <br>
+              <button type="button" id="send-goal-pos-btn" class="btn btn-primary">Send</button>
+            </div>
+            <div style="display: none" id="goal-unchanging">
+              <h6>Destination coords:</h6>
+              <h5>lat: <span id="goal-latitude">-</span></h5>
+              <h5>long: <span id="goal-longitude">-</span></h5>
+              <div>
+                <h6>Direct rover to:</h6>
+                <h5>dir: <span id="recommended-rover-heading">-</span></h5>
+                <h5>dist (m): <span id="distance-to-goal">-</span></h5>
+                <!-- <br> -->
+                <button type="button" id="change-goal-pos-btn" class="btn btn-primary">Change goal coords</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4"> <!-- GPS Map -->
+            <h5 class="container-header">GPS Map</h5>
+            <img src="../static/images/gps_map.jpg" class="mx-auto d-block" id="arm-position"/>
+          </div>
+          <div class="col-md-5"> <!-- Camera Feed -->
+                <h5 class="container-header">Camera</h5>
+                <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
+                <!--<img src="http://{{ roverIP }}:8095/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>-->
+                <img src="http://localhost:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+            </div>
+        </div>
 
-            <div class="row">
-                <!-- MOTOR TABLE -->
-                <div class="col-md">
-                    <h5 class="container-header">Motor Table</h5>
-                    <!--Table-->
-                    <table id="motor-table" class="table table-hover table-sm table-bordered" style="font-size:12px; background:rgba(255, 255, 255, 0.8); text-align: left">
-                        <!--Table head-->
-                        <thead>
-                            <tr>
-                              <th scope="col">Motor</br>(Number)</th>
-                              <th scope="col">Status</br>(Alive/Dead)</th>
-                              <th scope="col">Speed</br>(RPM)</th>
-                              <th scope="col">Current</br>(A)</th>
-                            </tr>
-                        </thead>
-                        <!--Table body-->
-                        <tbody>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Front</th>
-                            <td id="right-front-status">N/A</td>
-                            <td id="right-front-rpm">-</td>
-                            <td id="right-front-current">N/A</td>
-                            </tr>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Mid</th>
-                            <td id="right-mid-status">N/A</td>
-                            <td id="right-mid-rpm">-</td>
-                            <td id="right-mid-current">N</t/Ad>
-                            </tr>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Back</th>
-                            <td id="right-rear-status">N/A</td>
-                            <td id="right-rear-rpm">-</td>
-                            <td id="right-rear-current">N/A</td>
-                            </tr>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                L Front</th>
-                            <td id="left-front-status">N/A</td>
-                            <td id="left-front-rpm">-</td>
-                            <td id="left-front-current">N/A</td>
-                            </tr>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                L Mid</th>
-                            <td id="left-mid-status">N/A</td>
-                            <td id="left-mid-rpm">-</td>
-                            <td id="left-mid-current">N/A</td>
-                            </tr>
-                            <tr>
-                            <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
-                                R Back</th>
-                            <td id="left-rear-status">N/A</td>
-                            <td id="left-rear-rpm">-</td>
-                            <td id="left-rear-current">N/A</td>
-                            </tr>
-                        </tbody>
-                        <!--Table body-->
-                        </table>
-                        <!--Table-->
+        <div class="row"> <!-- motor table, rover+camera controls, console -->
+          <!-- LOG CONSOLE -->
+          <div class="col-md-3">
+              <h5 class="container-header">Log Console</h5>
+              <div class="form-group">
+                <textarea id="write-to-log" rows="8" readonly></textarea>
+                <br>
+                <!--log console buttons-->
+                <div class="btn-group" role="group" id="logs-btn">
+                  <a id="click_btn">
+                    <button type="button" class="btn btn-secondary">Open Logs</button>
+                  </a>
+                  <a id="clear-log">
+                    <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
+                  </a>
+                  <a id="test-log">
+                    <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');">Test</button>
+                  </a>
                 </div>
-                <!-- CONTROLS & ROVER DRIVE & CAMERA TILT/PAN -->
-                <div class="col-md">
-                    <h5 class="container-header">Controls</h5>
-                    <table align="center">
-                        <tr>
-                            <td>
-                                Motor Controls
-                            </td>
-                            <td>
-                                Command Listener
-                            </td>
-                            <td style="text-align: center;">Front Camera</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
-                            </td>
-                            <td>
-                              <div class="col-sm-3" align="center" style="border-style:none;">
-                                  <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                                      <label>
-                                          <input id="toggle-rover-listener-btn" type="checkbox">
-                                          <span> </span>
-                                      </label>
-                                  </div>
+              </div>
+          </div>
+          <!-- CONTROLS & ROVER DRIVE & CAMERA TILT/PAN -->
+          <div class="col-md">
+                <h5 class="container-header">Controls</h5>
+                <table align="center">
+                    <tr>
+                        <td>
+                            Motor Controls
+                        </td>
+                        <td>
+                            Command Listener
+                        </td>
+                        <td style="text-align: center;">Front Camera</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" id="enable-rover-motors-btn" not-checked data-toggle="toggle" data-on="Enabled" data-off="Disabled" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10" disabled="true">
+                        </td>
+                        <td>
+                          <div class="col-sm-3" align="center" style="border-style:none;">
+                              <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                  <label>
+                                      <input id="toggle-rover-listener-btn" type="checkbox">
+                                      <span> </span>
+                                  </label>
                               </div>
-                            </td>
-                            <td>
-                                <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
-                            </td>
-                            <td>
-                                <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Photo</button></a>
-                            </td>
-                            <td style="text-align: center;">Back Camera</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a id="ping-rover-mcu"><button type="button" class="control-btn3">Ping Test</button></a>
-                            </td>
-                            <td></td>
-                            <td>
-                                <input type="checkbox" not-checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="row">
-                        <div class="col-md" style="text-align: center">
-                            <h5 class="container-header">Rover Drive</h5>
-                            <!--Table-->
-                            <table align="center">
-                                <!--Table body-->
-                                <tbody>
-                                <tr>
-                                    <td></td>
-                                    <td>
-                                        <a id="rover-up">
-                                            <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
-                                        </a>
-                                    </td>
-                                    <td></td>
-                                    <td><h4>Throttle:</h4></td>
-                                    <td>
-                                        <h1 id="throttle-speed">-</h1>
-                                    </td>
+                          </div>
+                        </td>
+                        <td>
+                            <input type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Panorama</button></a>
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" id="click_btn_motor3_cw"><button type="button" class="control-btn3">Photo</button></a>
+                        </td>
+                        <td style="text-align: center;">Back Camera</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a id="ping-rover-mcu"><button type="button" class="control-btn3">Ping Test</button></a>
+                        </td>
+                        <td></td>
+                        <td>
+                            <input type="checkbox" not-checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-width="120" data-height="10">
+                        </td>
+                    </tr>
+                </table>
+                <div class="row">
+                    <div class="col-md" style="text-align: center">
+                        <h5 class="container-header">Rover Drive</h5>
+                        <!--Table-->
+                        <table align="center">
+                            <!--Table body-->
+                            <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a id="rover-up">
+                                        <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td><h4>Throttle:</h4></td>
+                                <td>
+                                    <h1 id="throttle-speed">-</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a id="rover-left">
+                                        <button type="button" class="control-btn4 fa fa-chevron-left fa-1x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a id="rover-down">
+                                        <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a id="rover-right">
+                                        <button type="button" class="control-btn4 fa fa-chevron-right fa-1x"></button>
+                                    </a>
+                                </td>
+                                <td><h4>Steering:</h4></td>
+                                <td>
+                                    <h1 id="steering-speed">-</h1>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <h5 class="container-header">Throttle speed</h5>
+                        <table align="center">
+                            <tbody>
+                                <tr class="speed-throttle-control">
+                                    <td>U</td> <!--85-->
+                                    <td>I</td> <!--73-->
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a id="rover-left">
-                                            <button type="button" class="control-btn4 fa fa-chevron-left fa-1x"></button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a id="rover-down">
+                                        <a id="max-throttle-decrease">
                                             <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
                                         </a>
                                     </td>
                                     <td>
-                                        <a id="rover-right">
-                                            <button type="button" class="control-btn4 fa fa-chevron-right fa-1x"></button>
+                                        <a id="max-throttle-increase">
+                                            <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                         </a>
                                     </td>
-                                    <td><h4>Steering:</h4></td>
+                                    <td><h5>Max<br>Throttle:</h5></td>
                                     <td>
-                                        <h1 id="steering-speed">-</h1>
+                                        <h4 id="max-throttle-speed">25</h4><!-- in practice this shouldn't be hardcoded but anyway it gets refreshed when a button is pressed -->
                                     </td>
                                 </tr>
-                                </tbody>
-                            </table>
-                            <h5 class="container-header">Throttle speed</h5>
-                            <table align="center">
-                                <tbody>
-                                    <tr class="speed-throttle-control">
-                                        <td>U</td> <!--85-->
-                                        <td>I</td> <!--73-->
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a id="max-throttle-decrease">
-                                                <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a id="max-throttle-increase">
-                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td><h5>Max<br>Throttle:</h5></td>
-                                        <td>
-                                            <h4 id="max-throttle-speed">25</h4><!-- in practice this shouldn't be hardcoded but anyway it gets refreshed when a button is pressed -->
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <h5 class="container-header">Steering speed</h5>
-                            <table align="center">
-                                <tbody>
-                                    <tr class="speed-throttle-control">
-                                        <td>J</td> <!--74-->
-                                        <td>K</td> <!--75-->
-                                    </tr>
-                                    <tr>
-                                      <td>
-                                          <a id="max-steering-decrease">
-                                              <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
-                                          </a>
-                                      </td>
-                                      <td>
-                                            <a id="max-steering-increase">
-                                                <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
-                                            </a>
-                                        </td>
-                                        <td><h5>Max<br>Steering:</h5></td>
-                                        <td>
-                                            <h4 id="max-steering-speed">39</h4><!-- in practice this shouldn't be hardcodedbut anyway it gets refreshed when a button is pressed -->
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <!--Table body-->
-                            </table>
-                            <!--Table-->
-                        </div>
-                        <div class="col-md">
-                            <h5 class="container-header">Camera Tilt/Pan</h5>
-                            <div class="row">
-                                <table align="center">
-                                <tr>
-                                    <td><strong>Front</strong></td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_home">
-                                            <button type="button" class="control-btn2">
-                                                Home
-                                            </button>
-                                        </a>
-                                    </td>
+                            </tbody>
+                        </table>
+                        <h5 class="container-header">Steering speed</h5>
+                        <table align="center">
+                            <tbody>
+                                <tr class="speed-throttle-control">
+                                    <td>J</td> <!--74-->
+                                    <td>K</td> <!--75-->
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
-                                            <button type="button" class="control-btn2">
-                                                LPan
-                                            </button>
+                                  <td>
+                                      <a id="max-steering-decrease">
+                                          <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+                                      </a>
+                                  </td>
+                                  <td>
+                                        <a id="max-steering-increase">
+                                            <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
                                         </a>
                                     </td>
+                                    <td><h5>Max<br>Steering:</h5></td>
                                     <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
-                                            <button type="button" class="control-btn2">
-                                                RPan
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
-                                            <button type="button" class="control-btn2">
-                                                &#8593;Tilt
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
-                                            <button type="button" class="control-btn2">
-                                                &#8595;Tilt
-                                            </button>
-                                        </a>
+                                        <h4 id="max-steering-speed">39</h4><!-- in practice this shouldn't be hardcodedbut anyway it gets refreshed when a button is pressed -->
                                     </td>
                                 </tr>
-                                </table>
-                            </div>
-                            <div class="row">
-                                <table align="center">
-                                <tr>
-                                    <td><strong>Back</strong></td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_home">
-                                            <button type="button" class="control-btn2">
-                                                Home
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
-                                            <button type="button" class="control-btn2">
-                                                LPan
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
-                                            <button type="button" class="control-btn2">
-                                                RPan
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
-                                            <button type="button" class="control-btn2">
-                                                &#8593;Tilt
-                                            </button>
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
-                                            <button type="button" class="control-btn2">
-                                                &#8595;Tilt
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                </table>
-                                <h5 class="container-header">EXTRA CONTROLS</h5>
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <button title="List all commands" id="list-all-rover-cmds" type="button" class="control-btn-mid" disabled>
-                                                <strong>L</strong>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <button title="Enable motor controls" id="enable-rover-motors" type="button" class="control-btn-mid" disabled>
-                                                <strong>M</strong>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button title="Disable motor controls" id="disable-rover-motors" type="button" class="control-btn-mid" disabled>
-                                                <strong>N</strong>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+                            </tbody>
+                            <!--Table body-->
+                        </table>
+                        <!--Table-->
                     </div>
-                </div>
-                <!-- LOG CONSOLE -->
-                <div class="col-md">
-                    <h5 class="container-header">Log Console</h5>
-                    <div class="form-group">
-                        <textarea id="write-to-log" rows="8" readonly></textarea>
-                        <br>
-                        <!--log console buttons-->
-                        <div class="btn-group" role="group" id="logs-btn">
-                            <a id=click_btn>
-                                <button type="button" class="btn btn-secondary">Open Logs</button>
-                            </a>
-                            <a id="clear-log">
-                                <button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear Logs</button>
-                            </a>
-                            <a id="test-log">
-                                <button type="button" class="btn btn-secondary" onclick="appendToConsole('Simple test.');scrollToBottom();">Test</button>
-                            </a>
+                    <div class="col-md">
+                        <h5 class="container-header">Camera Tilt/Pan</h5>
+                        <div class="row">
+                            <table align="center">
+                            <tr>
+                                <td><strong>Front</strong></td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_home">
+                                        <button type="button" class="control-btn2">
+                                            Home
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
+                                        <button type="button" class="control-btn2">
+                                            LPan
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
+                                        <button type="button" class="control-btn2">
+                                            RPan
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
+                                        <button type="button" class="control-btn2">
+                                            &#8593;Tilt
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
+                                        <button type="button" class="control-btn2">
+                                            &#8595;Tilt
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <table align="center">
+                            <tr>
+                                <td><strong>Back</strong></td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_home">
+                                        <button type="button" class="control-btn2">
+                                            Home
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_lpan">
+                                        <button type="button" class="control-btn2">
+                                            LPan
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_rpan">
+                                        <button type="button" class="control-btn2">
+                                            RPan
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_tilt_up">
+                                        <button type="button" class="control-btn2">
+                                            &#8593;Tilt
+                                        </button>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)" id="click_btn_camera_back_tilt_down">
+                                        <button type="button" class="control-btn2">
+                                            &#8595;Tilt
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </table>
+                            <h5 class="container-header">EXTRA CONTROLS</h5>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <button title="List all commands" id="list-all-rover-cmds" type="button" class="control-btn-mid" disabled>
+                                            <strong>L</strong>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button title="Enable motor controls" id="enable-rover-motors" type="button" class="control-btn-mid" disabled>
+                                            <strong>M</strong>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button title="Disable motor controls" id="disable-rover-motors" type="button" class="control-btn-mid" disabled>
+                                            <strong>N</strong>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
+          <!-- MOTOR TABLE -->
+          <div class="col-md-4">
+              <h5 class="container-header">Motor Table</h5>
+              <!--Table-->
+              <table id="motor-table" class="table table-hover table-sm table-bordered" style="font-size:12px; background:rgba(255, 255, 255, 0.8); text-align: left">
+                  <!--Table head-->
+                  <thead>
+                      <tr>
+                        <th scope="col">Motor</br>(Number)</th>
+                        <th scope="col">Status</br>(Alive/Dead)</th>
+                        <th scope="col">Speed</br>(RPM)</th>
+                        <th scope="col">Current</br>(A)</th>
+                      </tr>
+                  </thead>
+                  <!--Table body-->
+                  <tbody>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          R Front</th>
+                      <td id="right-front-status">N/A</td>
+                      <td id="right-front-rpm">-</td>
+                      <td id="right-front-current">N/A</td>
+                      </tr>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          R Mid</th>
+                      <td id="right-mid-status">N/A</td>
+                      <td id="right-mid-rpm">-</td>
+                      <td id="right-mid-current">N</t/Ad>
+                      </tr>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          R Back</th>
+                      <td id="right-rear-status">N/A</td>
+                      <td id="right-rear-rpm">-</td>
+                      <td id="right-rear-current">N/A</td>
+                      </tr>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          L Front</th>
+                      <td id="left-front-status">N/A</td>
+                      <td id="left-front-rpm">-</td>
+                      <td id="left-front-current">N/A</td>
+                      </tr>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          L Mid</th>
+                      <td id="left-mid-status">N/A</td>
+                      <td id="left-mid-rpm">-</td>
+                      <td id="left-mid-current">N/A</td>
+                      </tr>
+                      <tr>
+                      <th scope="row"><button type="button" class="btn btn-success btn-circle"><i class="fa"></i></button>
+                          R Back</th>
+                      <td id="left-rear-status">N/A</td>
+                      <td id="left-rear-rpm">-</td>
+                      <td id="left-rear-current">N/A</td>
+                      </tr>
+                  </tbody>
+                  <!--Table body-->
+                  </table>
+                  <!--Table-->
+          </div>
 
         </div>
+      </div>
     </div>
 
 </body>

@@ -427,12 +427,12 @@ window.addEventListener(
   },
   true
 )
-
+sentZero = true
 function gameLoop () {
   if (millisSince(lastCmdSent) > DRIVE_THROTTLE_TIME) {
-    // 'a' --> rover turn left
-    if (keyState[65]) {
-      lightUp('#rover-left > button')
+    // 'd' --> rover right
+    if (keyState[68]) {
+      lightUp('#rover-right > button')
       if (steering < 0) {
         steering += 3*steeringIncrement
       } else {
@@ -443,9 +443,9 @@ function gameLoop () {
       }
       lastCmdSent = new Date().getTime()
     }
-    // 'd' --> rover right
-    else if (keyState[68]) {
-      lightUp('#rover-right > button')
+    // 'a' --> rover turn left
+    else if (keyState[65]) {
+      lightUp('#rover-left > button')
 
       if (steering > 0) {
         steering -= 3*steeringIncrement
@@ -499,8 +499,19 @@ function gameLoop () {
         throttle -= throttleIncrement
       }
     }
-    $('#throttle-speed').text(throttle)
     $('#steering-speed').text(steering)
+    if (throttle == 0 && sentZero) {
+      ; // do nothing
+    } else {
+      $('#throttle-speed').text(throttle)
+      let cmd = throttle.toString()+':'+steering.toString()
+      sendRoverCommand(cmd)
+      if (throttle != 0) {
+        sentZero = false
+      } else {
+        sentZero = true
+      }
+    }
   }
   setTimeout(gameLoop, 10)
 }

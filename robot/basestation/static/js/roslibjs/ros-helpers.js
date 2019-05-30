@@ -3,7 +3,7 @@ function initRosWeb () {
     url: 'ws://localhost:9090'
   })
   ros.on('connection', function () {
-    appendToConsole('Connected to websocket server.')
+    //appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
     if (window.location.pathname == '/rover') {
       initNavigationPanel()
@@ -173,6 +173,8 @@ function initRosWeb () {
   });
 }
 
+initRosWeb()
+
 /* functions used in main code */
 function requestMuxChannel (elemID, callback) {
   let dev = elemID[elemID.length - 1]
@@ -311,9 +313,11 @@ function sendArmRequest (command, callback) {
 function sendRoverCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
+  appendToConsole('Sending \"' + cmd + '\" to rover Teensy')
   rover_command_publisher.publish(command)
+  //arm_command_publisher.publish(command)
 }
+
 function sendRoverRequest (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
