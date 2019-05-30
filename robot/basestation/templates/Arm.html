@@ -5,7 +5,7 @@
     <!-- Required meta and other tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>SC Robotics GUI</title>
+    <title>SC Robotics GUI - Arm</title>
     <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
 
     <!-- Bootstrap CSS -->
@@ -15,7 +15,7 @@
     <link href="../static/css/arm.css" rel="stylesheet">
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/helpers.js"></script>
-    
+
     <!-- for roslibjs stuff -->
     <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
     <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
@@ -39,13 +39,13 @@
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
       <div class="col-md-1">
           <a class="navbar-brand" href="'javascript:void(0)'">
-              <img src="https://spaceconcordia.github.io/img/sclogo_header.png">
+              <img src="../static/img/sclogo_header.png">
           </a>
       </div>
 
       <div class="dropdown col-md-2">
         <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Select Device Channel
+          Device Channel
         </button>
         <div class="dropdown-menu">
           <a id="mux-0" class="dropdown-item">0: Rover</a>
@@ -55,7 +55,17 @@
         </div>
       </div>
 
-      <div class="col-md-8">
+      <div class="dropdown col-md-2">
+        <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          Serial Type
+        </button>
+        <div class="dropdown-menu">
+          <a id="uart" class="dropdown-item">uart</a>
+          <a id="usb" class="dropdown-item">usb</a>
+        </div>
+      </div>
+
+      <div class="col-md-6">
         <input type="text" id="serial-cmd-input">
       </div>
       <div class="col-md-1">
@@ -72,8 +82,7 @@
         <div class="row" >
           <div class="col-md-6" align="center">
             <h5 class="container-header">Arm Postion</h5>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgMpGJQ3yHkyjG7epebqUD8_Zw4y-ynp7GRZhbl1XITo0IFu2u3Q" class="img-fluid"/>
-<!--                    <img src="../static/images/robotic-arm.jpg" class="mx-auto d-block" id="arm-position"/>-->
+            <img src="../static/images/robotic-arm.jpg" class="mx-auto d-block" id="arm-position"/>
           </div>
           <div class="col-md-6" align="center">
             <h5 class="container-header">Arm Vision</h5>

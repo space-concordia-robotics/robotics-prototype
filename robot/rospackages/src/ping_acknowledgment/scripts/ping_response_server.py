@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
+import os
 from ping_acknowledgment.srv import *
 import rospy
 
 def handle_ping(req):
-    response = "To your '{:s}', I say 'suh dude'".format(req.ping)
+    if req.ping == "rover_ip":
+        response = os.environ["ROS_MASTER_URI"].split(":")
+        response = response[0] + ":" + response[1]
+    else:
+        response = "To your '{:s}', I say 'suh dude'".format(req.ping)
+
     print("Returning '" + response + "'")
     return response
 

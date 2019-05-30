@@ -3,9 +3,14 @@ const logConsole = '#write-to-log'
 const serialCmd = '#serial-cmd-input'
 
 // Console Log
-function appendToConsole (msg) {
-  $(logConsole).append(msg + '\n')
-  $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+function appendToConsole (msg, devConsole = true, guiConsole = true) {
+  if (guiConsole) {
+    $(logConsole).append(msg + '\n')
+    $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+  }
+  if (devConsole) {
+    console.log(msg + '\n')
+  }
 }
 
 // Rover log
@@ -13,6 +18,11 @@ function appendToConsole (msg) {
 function appendToRoverLog (msg) {
   $('#rover-log').append(msg)
   $('#rover-log').scrollTop($('#rover-log')[0].scrollHeight)
+}
+
+function appendToScienceLog (msg) {
+  $('#science-log').append(msg)
+  $('#science-log').scrollTop($('#science-log')[0].scrollHeight)
 }
 
 function clearLogConsole () {
@@ -93,16 +103,33 @@ function dim (selector) {
   $(selector).css('background-color', 'rgb(74, 0, 0)')
 }
 
-function getRoverIP () {
-  let local = false
-
-  if (local) {
-    return '127.0.0.1' // localhost
-  }
-
-  return '172.16.1.30' // competition IP
+function greyOut (selector) {
+  $(selector).css('background-color', '#6c757d')
 }
 
+// convenience functions for setting/getting cookies
+function setCookie (cname, cvalue, exdays) {
+  var d = new Date()
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
+  var expires = 'expires=' + d.toUTCString()
+  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
+}
+
+function getCookie (cname) {
+  var name = cname + '='
+  var decodedCookie = decodeURIComponent(document.cookie)
+  var ca = decodedCookie.split(';')
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i]
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1)
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length)
+    }
+  }
+  return ''
+}
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest (msg) {

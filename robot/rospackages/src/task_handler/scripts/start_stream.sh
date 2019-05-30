@@ -21,7 +21,7 @@ if [ $# -eq 0 ]
     port=$1
 fi
 
-
+# for inspiron 15 7000 gaming laptop built in webcam resolution: 1280/720 (848/480 works too), for our c920 cameras: 640/480
 /usr/local/bin/mjpg_streamer  -i "input_uvc.so -r 640x480 -m 50000 -n -f 1 -d $port" -o "output_http.so -p 8090 -w /usr/local/share/mjpg-streamer/www/"
 
 # to install dependencies:

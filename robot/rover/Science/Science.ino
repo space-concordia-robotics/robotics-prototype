@@ -1,4 +1,4 @@
-#include <Arduino.h>
+  #include <Arduino.h>
 #include <Servo.h>
 //#include <SoftwareSerial.h>
 
@@ -64,7 +64,10 @@ bool drillInUse = false;
 bool elevatorInUse = false;
 bool deactivating = false;
 int drillDuration = 0;
+int drillDirection = 0; // 0 --> CW, 1 --> CCW
+int pumpDirection = 0; // 0 --> OUT, 1 --> IN
 int elevatorDuration = 0;
+int elevatorDirection = 0; // 0 --> UP, 1 --> DOWN
 int maxVelocity = 255;
 int drillSpeed;
 int elevatorFeedPercent = 0;
@@ -141,7 +144,7 @@ void setup() {
 
   analogWrite(DRILL, 0);
   analogWrite(ELEVATOR, 0);
-  digitalWrite(DRILL_DIRECTION, LOW);
+  digitalWrite(DRILL_DIRECTION, drillDirection); // init LOW
   digitalWrite(ELEVATOR_DIRECTION, LOW);
   digitalWrite(S0, LOW);
   digitalWrite(S1, LOW);
@@ -173,18 +176,37 @@ void setup() {
 }
 
 void loop() {
-  if (millis() - lastPrintTime > 1000) {
+  // print relevant data for pub/sub nodes
+  if (millis() - lastPrintTime > 200) {
     lastPrintTime = millis();
-    UART_PORT.println("SCIENCE Science data:1,2,3");
+    UART_PORT.print("SCIENCE Science data:");
+    UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
+    UART_PORT.print("drillDirection:");UART_PORT.print(drillDirection);UART_PORT.print(",");
+    UART_PORT.print("elevatorDirection:");UART_PORT.print(elevatorDirection);UART_PORT.print(",");
+    UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);UART_PORT.print(",");
+    UART_PORT.print("photoResistorVoltage:");UART_PORT.print(voltage);UART_PORT.print(",");
+    UART_PORT.print("LED1_ON:");UART_PORT.print(digitalRead(LED1));UART_PORT.print(",");
+    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));UART_PORT.print(",");
+    UART_PORT.print("v1:");UART_PORT.print(digitalRead(VIBRATOR1));UART_PORT.print(",");
+    UART_PORT.print("v2:");UART_PORT.print(digitalRead(VIBRATOR2));UART_PORT.print(",");
+    UART_PORT.print("v3:");UART_PORT.print(digitalRead(VIBRATOR3));UART_PORT.print(",");
+    UART_PORT.print("v4:");UART_PORT.print(digitalRead(VIBRATOR4));UART_PORT.print(",");
+    UART_PORT.print("v5:");UART_PORT.print(digitalRead(VIBRATOR5));UART_PORT.print(",");
+    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));
+    UART_PORT.println();
   }
   if (UART_PORT.available()) {
-    String cmd = UART_PORT.readStringUntil('\n');
+    String cmd = UART_PORT.readStringUntil('\n'); 
 
     if (cmd == "ping") {
       UART_PORT.println("SCIENCE pong");
     }
     if (cmd == "who") {
       UART_PORT.println("SCIENCE science");
+    }
+    if (cmd == "active") { // query the status
+      UART_PORT.print("SCIENCE activated");
+      UART_PORT.println(isActivated);
     }
     if (isActivated == false) {
 
@@ -195,7 +217,11 @@ void loop() {
     }
     else if (isActivated == true) {
 
-      if (cmd.startsWith("drillspeed") && (cmd.indexOf(" ") > 0)) {
+      if (cmd == "active") { // query the status
+        UART_PORT.print("SCIENCE activated");
+        UART_PORT.println(isActivated);
+      }
+      else if (cmd.startsWith("drillspeed") && (cmd.indexOf(" ") > 0)) {
         //turns drill at desired speed
         // needs input "drillspeed 100"
         int drillSpeedPercent = 0;
@@ -218,26 +244,32 @@ void loop() {
       }
       else if (cmd == "dccw") {
         //turns drill counter-clockwise
-        digitalWrite(DRILL_DIRECTION, HIGH);
-        UART_PORT.println("SCIENCE dccw");
+        drillDirection = 1;
+        digitalWrite(DRILL_DIRECTION, drillDirection);
+        UART_PORT.println("SCIENCE dccw done");
       }
       else if (cmd == "dcw") {
         //turns drill clockwise
-        digitalWrite(DRILL_DIRECTION, LOW);
-        UART_PORT.println("SCIENCE dcw");
+        drillDirection = 0;
+        digitalWrite(DRILL_DIRECTION, drillDirection);
+        UART_PORT.println("SCIENCE dcw done");
+      }
+      else if (cmd == "dd") { // drill direction query
+        UART_PORT.print("SCIENCE ");
+        UART_PORT.println((drillDirection) ? "CCW" : "CW");
       }
       else if (cmd == "dgo") {
         //turns drill clockwise
         analogWrite(DRILL, 0);
-        delay(100);
+        //delay(100);
         analogWrite(DRILL, maxVelocity);
-        UART_PORT.println("SCIENCE dgo");
+        UART_PORT.println("SCIENCE dgo done");
       }
       else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration)) ) {
         //stops drill
         analogWrite(DRILL, 0);
         drillInUse = false;
-        UART_PORT.println("SCIENCE ds");
+        UART_PORT.println("SCIENCE ds done");
       }
       if (cmd.startsWith("elevatorfeed") && (cmd.indexOf(" ") > 0)) {
         //turns elevator at desired feed
@@ -262,13 +294,19 @@ void loop() {
       }
       else if (cmd == "eup") {
         //turns elevator clockwise
-        digitalWrite(ELEVATOR_DIRECTION, HIGH);
-        UART_PORT.println("SCIENCE eup");
+        elevatorDirection = 0;
+        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        UART_PORT.println("SCIENCE eup done");
       }
       else if (cmd == "edown") {
         //turns elevator counter-clockwise
-        digitalWrite(ELEVATOR_DIRECTION, LOW);
-        UART_PORT.println("SCIENCE edown");
+        elevatorDirection = 1;
+        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        UART_PORT.println("SCIENCE edown done");
+      }
+      else if (cmd == "ed") {
+        UART_PORT.print("SCIENCE ");
+        UART_PORT.println((elevatorDirection) ? "DOWN" : "UP");
       }
       else if (cmd == "ego") {
         analogWrite(ELEVATOR, 0);
@@ -346,109 +384,74 @@ void loop() {
         turnTableFree = true;
         UART_PORT.println("SCIENCE ts");
       }
-      else if (cmd == "p1ccw") {               //pump1
-        //turns pump1 counter-clockwise
-        digitalWrite(PUMPS_LEGA, LOW);
+      else if (cmd == "pd0") {
+        pumpDirection = 0;
+        digitalWrite(PUMPS_LEGA, pumpDirection);
+        UART_PORT.println("SCIENCE OUT");
+      }
+      else if (cmd == "pd1") {
+        pumpDirection = 1;
+        digitalWrite(PUMPS_LEGA, pumpDirection);
+        UART_PORT.println("SCIENCE IN");
+      }
+      else if (cmd == "p1") {
+        // actuate pump 1
+        digitalWrite(PUMP1_SPEED, HIGH);  
+        UART_PORT.println("SCIENCE p1 done");
+      }
+      else if (cmd == "p2") {
+        // actuate pump 2
         digitalWrite(PUMP1_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p1ccw");
+        UART_PORT.println("SCIENCE p2 done");
       }
-      else if (cmd == "p1cw") {               //pump1
-        //turns pump1 clockwise
-        digitalWrite(PUMPS_LEGA, HIGH);
-        digitalWrite(PUMP1_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p1cw");
-      }
-      else if (cmd == "p2ccw") {               //pump2
-        //turns drill counter-clockwise
-        digitalWrite(PUMPS_LEGA, LOW);
+      else if (cmd == "p3") {
+        // actuate pump 3
         digitalWrite(PUMP2_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p2ccw");
+        UART_PORT.println("SCIENCE p3 done");
       }
-      else if (cmd == "p2cw") {               //pump2
-        //turns drill clockwise
-        digitalWrite(PUMPS_LEGA, HIGH);
+      else if (cmd == "p4") {
+        // actuate pump 4
         digitalWrite(PUMP2_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p2cw");
+        UART_PORT.println("SCIENCE p4 done");
       }
-      else if (cmd == "p3ccw") {               //pump3
-        //turns pump1 counter-clockwise
-        digitalWrite(PUMPS_LEGA, LOW);
+      else if (cmd == "p5") {
+        // actuate pump 5;
         digitalWrite(PUMP3_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p3ccw");
-      }
-      else if (cmd == "p3cw") {               //pump3
-        //turns pump1 clockwise
-        digitalWrite(PUMPS_LEGA, HIGH);
-        digitalWrite(PUMP3_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p3cw");
-      }
-      else if (cmd == "p4ccw") {               //pump4
-        //turns drill counter-clockwise
-        digitalWrite(PUMPS_LEGA, LOW);
-        digitalWrite(PUMP4_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p4ccw");
-      }
-      else if (cmd == "p4cw") {               //pump4
-        //turns drill clockwise
-        digitalWrite(PUMPS_LEGA, HIGH);
-        digitalWrite(PUMP4_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p4cw");
-      }
-      else if (cmd == "p5ccw") {               //pump5
-        //turns drill counter-clockwise
-        digitalWrite(PUMPS_LEGA, LOW);
-        digitalWrite(PUMP5_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p5ccw");
-      }
-      else if (cmd == "p5cw") {               //pump5
-        //turns drill clockwise
-        digitalWrite(PUMPS_LEGA, HIGH);
-        digitalWrite(PUMP5_SPEED, HIGH);
-        delay(100);
-        UART_PORT.println("SCIENCE p5cw");
+        UART_PORT.println("SCIENCE p5 done");
       }
       else if (cmd == "ps") {
-        //stops pumps
+        // stop all pumps
         digitalWrite(PUMP1_SPEED, LOW);
         digitalWrite(PUMP2_SPEED, LOW);
         digitalWrite(PUMP3_SPEED, LOW);
         digitalWrite(PUMP4_SPEED, LOW);
         digitalWrite(PUMP5_SPEED, LOW);
         digitalWrite(PUMPS_LEGA, LOW);
-        UART_PORT.println("SCIENCE ps");
-      }
+        UART_PORT.println("SCIENCE ps done");
+      } 
       else if (cmd == "v1") {
         digitalWrite(VIBRATOR1, HIGH);
-        UART_PORT.println("SCIENCE v1");
+        UART_PORT.println("SCIENCE v1 done");
       }
       else if (cmd == "v2") {
         digitalWrite(VIBRATOR2, HIGH);
-        UART_PORT.println("SCIENCE v2");
+        UART_PORT.println("SCIENCE v2 done");
       }
       else if (cmd == "v3") {
         digitalWrite(VIBRATOR3, HIGH);
-        UART_PORT.println("SCIENCE v3");
+        UART_PORT.println("SCIENCE v3 done");
       }
       else if (cmd == "v4") {
         digitalWrite(VIBRATOR4, HIGH);
-        UART_PORT.println("SCIENCE v4");
+        UART_PORT.println("SCIENCE v4 done");
       }
       else if (cmd == "v5") {
         digitalWrite(VIBRATOR5, HIGH);
-        UART_PORT.println("SCIENCE v5");
+        UART_PORT.println("SCIENCE v5 done");
       }
       else if (cmd == "v6") {
         digitalWrite(VIBRATOR6, HIGH);
-        UART_PORT.println("SCIENCE v6");
+        UART_PORT.println("SCIENCE v6 done");
       }
       else if (cmd == "vs") {
         digitalWrite(VIBRATOR1, LOW);
@@ -457,57 +460,50 @@ void loop() {
         digitalWrite(VIBRATOR4, LOW);
         digitalWrite(VIBRATOR5, LOW);
         digitalWrite(VIBRATOR6, LOW);
-        UART_PORT.println("SCIENCE vs");
+        UART_PORT.println("SCIENCE vs done");
       }
       else if (cmd == "led1") {
         digitalWrite(LED1, HIGH);
         photoChoice(1);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        UART_PORT.print("SCIENCE voltageon");
-        UART_PORT.print(voltage);
-        UART_PORT.println("SCIENCE led1");
+        UART_PORT.println("SCIENCE led1 done");
       }
       else if (cmd == "led1s") {
         digitalWrite(LED1, LOW);
         photoChoice(1);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        UART_PORT.print("SCIENCE voltageoff");
-        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        UART_PORT.println("SCIENCE led1s");
+        UART_PORT.println("SCIENCE led1s done");
       }
       else if (cmd == "led2") {
         digitalWrite(LED2, HIGH);
         photoChoice(2);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
 
-        UART_PORT.print("SCIENCE voltageon");
-        UART_PORT.print(voltage);
-        UART_PORT.println("SCIENCE led2");
+        UART_PORT.println("SCIENCE led2 done");
       }
       else if (cmd == "led2s") {
         digitalWrite(LED2, LOW);
         photoChoice(2);
-        delay(100);
+        //delay(100);
         val = analogRead(PHOTORESISTOR);
         voltage = val * (5.0 / 1023.0);
-        UART_PORT.print("SCIENCE voltageoff");
-        UART_PORT.print(voltage);
         digitalWrite(S0, 0);
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        UART_PORT.println("SCIENCE led2s");
+        
+        UART_PORT.println("SCIENCE led2s done");
       }
 
       else if (cmd == "deactivate") {

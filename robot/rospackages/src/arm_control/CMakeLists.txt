@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   ArmRequest.srv
+  ScienceRequest.srv
 )
 
 add_message_files(

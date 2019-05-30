@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>SC Robotics GUI - Science</title>
+    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
+
+
+    <!-- Bootstrap CSS -->
+    <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
+    <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
+    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
+    <!-- TODO: eventually abstract common css to app.css -->
+    <link href="../static/css/arm.css" rel="stylesheet">
+    <link href="../static/css/science.css" rel="stylesheet">
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/popper-1.14.3.min.js"></script>
+    <script src="../static/js/bootstrap-4.1.2.min.js"></script>
+
+    <!-- for roslibjs stuff -->
+    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
+    <!-- all for ros3d -->
+    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
+    <!-- homemade -->
+    <script src="../static/js/helpers.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
+    <script src="../static/js/app.js"></script>
+    <script src="../static/js/science.js"></script>
+
+</head>
+
+<body onload="run()">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
+      <div class="col-md-1">
+          <a class="navbar-brand" href="'javascript:void(0)'">
+              <img src="../static/img/sclogo_header.png">
+          </a>
+      </div>
+
+      <div class="dropdown col-md-2">
+        <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          Select Device Channel
+        </button>
+        <div class="dropdown-menu">
+          <a id="mux-0" class="dropdown-item">0: Rover</a>
+          <a id="mux-1" class="dropdown-item">1: Arm</a>
+          <a id="mux-2" class="dropdown-item">2: Science</a>
+          <a id="mux-3" class="dropdown-item">3: PDS</a>
+        </div>
+      </div>
+
+      <div class="dropdown col-md-2">
+        <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+          Serial Type
+        </button>
+        <div class="dropdown-menu">
+          <a id="uart" class="dropdown-item">uart</a>
+          <a id="usb" class="dropdown-item">usb</a>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <input type="text" id="serial-cmd-input">
+      </div>
+      <div class="col-md-1">
+        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
+      </div>
+    </nav>
+	<br>
+	<br>
+	<div style="margin-bottom:10px"></div>
+
+	<div class="container fill">
+		<div>
+			<div class="row">
+				<!-- MOTOR TABLE -->
+				<div class="col-md">
+                    <h5 class="container-header">Drill Control</h5>
+							<div class="row">
+								<div class="col-md-4">
+									<a href="javascript:void(0)">
+										<button id="drill-max-speed-go-btn" type="button" class="btn btn-secondary">MAX SPEED GO</button>
+									</a>
+								</div>
+                                <div class="col-md-4">
+                                    <a href="javascript:void(0)">
+                                        <button id="drill-stop-btn" type="button" class="btn btn-secondary">DRILL STOP</button>
+                                    </a>
+                                </div>
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="cw-btn" type="button" class="btn btn-secondary">CW</button>
+									</a>
+									<a href="javascript:void(0)">
+										<button id="ccw-btn" type="button" class="btn btn-secondary">CCW</button>
+									</a>
+								</div>
+							</div>
+							<div class="row">
+                                <div class="col-md-3">
+                                    <label id="drill-speed-label" for="usr"><strong>Speed:</strong></label>
+                                    <input id="drill-speed" type="text" class="form-control">
+								</div>
+								<div class="col-md-3">
+									<div class="form-group">
+                                        <label id="drill-time-label" for="usr"><strong>Time:</strong></label>
+                                        <input id="drill-time" type="text" class="form-control">
+									</div>
+								</div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="usr"><strong>Drill RPM</strong></label>
+                                        <input type="text" class="form-control" id="usr">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                        <span>
+                                            <strong>Activate Listener</strong>
+                                        </span>
+                                        <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                            <label>
+                                                <input id="science-listener-btn" type="checkbox">
+                                                <span> </span>
+                                            </label>
+                                        </div>
+                                </div>
+							</div>
+							<div class="row">
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="set-speed-go-btn" type="button" class="btn btn-secondary">SET SPEED GO</button>
+									</a>
+								</div>
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="set-time-go" type="button" class="btn btn-secondary">SET TIME GO</button>
+									</a>
+								</div>
+							</div>
+                            <h5 class="container-header">Elevator</h5>
+                            <div class="row">
+								<div class="col-md-4">
+									<a href="javascript:void(0)">
+										<button id="elevator-max-speed-go-btn" type="button" class="btn btn-secondary">MAX SPEED GO</button>
+									</a>
+								</div>
+                                <div class="col-md-4">
+                                    <a href="javascript:void(0)">
+                                        <button id="elevator-stop-btn" type="button" class="btn btn-secondary">ELEVATOR STOP</button>
+                                    </a>
+                                </div>
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="elevator-up-btn" type="button" class="btn btn-secondary">UP</button>
+									</a>
+									<a href="javascript:void(0)">
+										<button id="elevator-down-btn" type="button" class="btn btn-secondary">DOWN</button>
+									</a>
+								</div>
+							</div>
+							<div class="row">
+                                <div class="col-md-3">
+                                    <label id="elevator-feed-label" for="usr"><strong>Feed:</strong></label>
+                                    <input id="elevator-feed" type="text" class="form-control">
+								</div>
+								<div class="col-md-3">
+									<div class="form-group">
+                                        <label id="elevator-distance-label" for="usr"><strong>Distance:</strong></label>
+                                        <input id="elevator-distance" type="text" class="form-control">
+									</div>
+								</div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label id="drill" for="usr"><strong>Drill RPM</strong></label>
+                                        <input type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                        <span>
+                                            <strong>Activate Controls</strong>
+                                        </span>
+                                        <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                                            <label>
+                                                <input id="activate-science-btn" type="checkbox">
+                                                <span> </span>
+                                            </label>
+                                        </div>
+                                </div>
+							</div>
+							<div class="row">
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="set-feed-go-btn" type="button" class="btn btn-secondary">SET FEED GO</button>
+									</a>
+								</div>
+								<div class="col-md-3">
+									<a href="javascript:void(0)">
+										<button id="set-distance-go" type="button" class="btn btn-secondary">SET DISTANCE GO</button>
+									</a>
+								</div>
+							</div>
+
+				</div>
+
+                <div>
+                    <canvas id="myCanvas" width="500" height="500" style="border:2px solid #000;"></canvas>
+                    <div>
+                        <input type="button" id="button_rpos" class="button" value="ROTATE &#x27F2"/>
+                        <input type="button" id="button_rneg" class="button" value="ROTATE &#x27F3"/>
+                    </div>
+                </div>
+
+				<!-- CONTROLS & ROVER DRIVE & CAMERA TILT/PAN -->
+				<div class="col-md">
+					<h5 class="container-header">Science Experiment</h5>
+                    <h4 class="container-header">Pump Control</h4>
+					<table class="table table-sm">
+						<tbody>
+							<tr>
+								<td>
+                                    <span>
+                                        <strong>PUMP 1</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump1-drive-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+								</td>
+                                <td>
+                                    <span>
+                                        <strong>PUMP 2</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump2-drive-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+								</td>
+                                <td>
+                                    <span>
+                                        <strong>PUMP 3</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump3-drive-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>
+                                        <strong>PUMP 4</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump4-drive-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>
+                                        <strong>PUMP 5</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump5-drive-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </td>
+							</tr>
+                            <tr>
+								<td>
+                                    <span>
+                                        <strong id="pump-dir-label">DIR: -</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+                                        <label>
+                                            <input id="pump-dir-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+								</td>
+                        </tbody>
+                    </table>
+                    <h4 class="container-header">LEDs & Vibrators</h4>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>LED 1</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="led1-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>LED 2</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="led2-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label id="photo-resistor-voltage-label" for="usr"><strong>PR Voltage:</strong></label>
+                                        <input id="photo-resistor-voltage" type="text" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 1</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator1-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 2</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator2-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 3</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator3-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 4</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator4-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 5</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator5-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span>
+                                        <strong>VIBRATOR 6</strong>
+                                    </span>
+                                    <div class="form-check checkbox-slider--a checkbox-slider-md" align="right">
+                                        <label>
+                                            <input id="vibrator6-toggle" type="checkbox">
+                                            <span> </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+
+                <div class="col-md-6" align="center">
+                    <h5 class="container-header">Science Vision</h5>
+                    <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
+                    <img id="camera-feed" src="http://{{ roverIP }}:8090/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+                </div>
+
+				<!-- LOG CONSOLE -->
+				<div class="col-md">
+					<h5 class="container-header">Log Console</h5>
+					<div class="form-group">
+						<textarea id="write-to-log" rows="8" readonly></textarea>
+						<br>
+						<!--log console buttons-->
+						<div class="btn-group" role="group" id="logs-btn">
+							<a href=# id=click_btn>
+								<button type="button" class="btn btn-secondary">Open Logs</button>
+							</a>
+							<a href="javascript:void(0)" id="clear-log">
+								<button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear
+									Logs</button>
+							</a>
+							<a href="javascript:void(0)" id="test-log">
+								<button type="button" class="btn btn-secondary"
+									onclick="appendToScienceLog('Simple test.');">Test</button>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+
+</html>

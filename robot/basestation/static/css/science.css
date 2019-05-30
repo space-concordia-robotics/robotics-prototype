@@ -1,0 +1,11 @@
+.button {
+  display:          inline-block;
+  width:            200px;
+  height:           44px;
+  background-color: black;
+  color:            white;
+  font-family:      helvetica, sans-serif;
+  font-size:        1.5em;
+  text-align:       center;
+  margin:           25px;
+}
