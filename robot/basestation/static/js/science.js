@@ -275,22 +275,11 @@ $(document).ready(function () {
     } else if ($('#activate-science-btn').is(':checked')) {
       sendScienceRequest('activate', function (msgs) {
         console.log('msgs', msgs)
-        if (msgs[0]) {
-          $('#activate-science-btn')[0].checked = true
-          checkButtonStates()
-        } else {
-          $('#activate-science-btn')[0].checked = false
-        }
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
       sendScienceRequest('stop', function (msgs) {
         console.log('msgs', msgs)
-        if (msgs[0]) {
-          $('#activate-science-btn')[0].checked = false
-        } else {
-          $('#activate-science-btn')[0].checked = true
-        }
       })
     }
   })
@@ -301,10 +290,6 @@ $(document).ready(function () {
     }
     sendScienceRequest('dccw', function (msgs) {
       console.log('msgs', msgs)
-      if (msgs && msgs[1].trim() == 'dccw done') {
-        lightUp('#ccw-btn')
-        greyOut('#cw-btn')
-      }
     })
   })
 
@@ -314,10 +299,6 @@ $(document).ready(function () {
     }
     sendScienceRequest('dcw', function (msgs) {
       console.log('msgs', msgs)
-      if (msgs && msgs[1].trim() == 'dcw done') {
-        greyOut('#ccw-btn')
-        lightUp('#cw-btn')
-      }
     })
   })
 
@@ -327,10 +308,6 @@ $(document).ready(function () {
     }
     sendScienceRequest('eup', function (msgs) {
       console.log('msgs', msgs)
-      if (msgs[1].includes('eup done')) {
-        lightUp('#elevator-up-btn')
-        greyOut('#elevator-down-btn')
-      }
     })
   })
 
@@ -340,10 +317,6 @@ $(document).ready(function () {
     }
     sendScienceRequest('edown', function (msgs) {
       console.log('msgs', msgs)
-      if (msgs[1].includes('edown done')) {
-        greyOut('#elevator-up-btn')
-        lightUp('#elevator-down-btn')
-      }
     })
   })
 
@@ -453,11 +426,9 @@ function checkButtonStates () {
     sendScienceRequest('ed', function (msgs) {
       appendToConsole('ed msgs:', msgs)
       if (msgs[1].includes('UP')) {
-        console.log('asdfasdfasdf')
         lightUp('#elevator-up-btn')
         greyOut('#elevator-down-btn')
       } else if (msgs[1].includes('DOWN')) {
-        console.log('poooooo')
         lightUp('#elevator-down-btn')
         greyOut('#elevator-up-btn')
       }

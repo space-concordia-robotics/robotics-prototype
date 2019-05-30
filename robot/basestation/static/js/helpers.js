@@ -3,10 +3,14 @@ const logConsole = '#write-to-log'
 const serialCmd = '#serial-cmd-input'
 
 // Console Log
-function appendToConsole (msg) {
-  $(logConsole).append(msg + '\n')
-  $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
-  console.log(msg + '\n')
+function appendToConsole (msg, devConsole = true, guiConsole = true) {
+  if (guiConsole) {
+    $(logConsole).append(msg + '\n')
+    $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+  }
+  if (devConsole) {
+    console.log(msg + '\n')
+  }
 }
 
 // Rover log

@@ -112,7 +112,40 @@ function initRosWeb () {
   })
 
   science_data_listener.subscribe(function (message) {
-    appendToConsole(message.data)
+    appendToConsole(message.data, true, false)
+    // isActivated, drillDirection, elevatorDirection
+    let dataKeyValues = message.data.replace('Science data:', '').split(',')
+    let keys = dataKeyValues.map(i => {
+      return i.split(':')[0]
+    })
+    let values = dataKeyValues.map(i => {
+      return i.split(':')[1]
+    })
+
+    // isActivated
+    if (values[0] == '0') {
+      $('#activate-science-btn')[0].checked = false
+    } else if (values[0] == '1') {
+      $('#activate-science-btn')[0].checked = true
+    }
+
+    // drillDirection
+    if (values[1] == '0') {
+      lightUp('#cw-btn')
+      greyOut('#ccw-btn')
+    } else if (values[1] == '1') {
+      lightUp('#ccw-btn')
+      greyOut('#cw-btn')
+    }
+
+    // elevatorDirection
+    if (values[2] == '0') {
+      lightUp('#elevator-up-btn')
+      greyOut('#elevator-down-btn')
+    } else if (values[2] == '1') {
+      lightUp('#elevator-down-btn')
+      greyOut('#elevator-up-btn')
+    }
   })
 
   /* rover commands */
@@ -328,18 +361,6 @@ function checkTaskStatuses () {
           $('#science-listener-btn')[0].checked = false
         } else if (msgs[1].includes('running')) {
           $('#science-listener-btn')[0].checked = true
-          // check if activated
-          sendScienceRequest('active', function (msgs) {
-            appendToConsole(msgs)
-
-            // would also check if msgs[0] was true but science MCU responds
-            // with the same message too many times so it is always false
-            // this is not the case with the 'activated0' response which only appears once
-            if (msgs[1].includes('activated1')) {
-              $('#activate-science-btn')[0].checked = true
-              checkButtonStates()
-            }
-          })
         }
       }
     })

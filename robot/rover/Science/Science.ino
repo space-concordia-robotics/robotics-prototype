@@ -175,12 +175,16 @@ void setup() {
 }
 
 void loop() {
-  if (millis() - lastPrintTime > 1000) {
+  if (millis() - lastPrintTime > 100) {
     lastPrintTime = millis();
-    UART_PORT.println("SCIENCE Science data:1,2,3");
+    UART_PORT.print("SCIENCE Science data:");
+    UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
+    UART_PORT.print("drillDirection:");UART_PORT.print(drillDirection);UART_PORT.print(",");
+    UART_PORT.print("elevatorDirection:");UART_PORT.print(elevatorDirection);
+    UART_PORT.println();
   }
   if (UART_PORT.available()) {
-    String cmd = UART_PORT.readStringUntil('\n');
+    String cmd = UART_PORT.readStringUntil('\n'); 
 
     if (cmd == "ping") {
       UART_PORT.println("SCIENCE pong");
@@ -369,7 +373,7 @@ void loop() {
         UART_PORT.println("SCIENCE ts");
       }
       else if (cmd == "p1out") {               //pump1
-        //turns pump1 counter-clockwise
+        //turns pump1 counter-clockwise 
         digitalWrite(PUMPS_LEGA, LOW);
         digitalWrite(PUMP1_SPEED, HIGH);  
         //delay(100);
