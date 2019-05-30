@@ -186,7 +186,13 @@ void loop() {
     UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);UART_PORT.print(",");
     UART_PORT.print("photoResistorVoltage:");UART_PORT.print(voltage);UART_PORT.print(",");
     UART_PORT.print("LED1_ON:");UART_PORT.print(digitalRead(LED1));UART_PORT.print(",");
-    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));
+    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));UART_PORT.print(",");
+    UART_PORT.print("v1:");UART_PORT.print(digitalRead(VIBRATOR1));UART_PORT.print(",");
+    UART_PORT.print("v2:");UART_PORT.print(digitalRead(VIBRATOR2));UART_PORT.print(",");
+    UART_PORT.print("v3:");UART_PORT.print(digitalRead(VIBRATOR3));UART_PORT.print(",");
+    UART_PORT.print("v4:");UART_PORT.print(digitalRead(VIBRATOR4));UART_PORT.print(",");
+    UART_PORT.print("v5:");UART_PORT.print(digitalRead(VIBRATOR5));UART_PORT.print(",");
+    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));
     UART_PORT.println();
   }
   if (UART_PORT.available()) {

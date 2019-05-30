@@ -171,6 +171,43 @@ function initRosWeb () {
     } else if (values[6] == '1') {
       $('#led2-toggle')[0].checked = true
     }
+
+    // Vibrator ON statuses
+    if (values[7] == '0') {
+      $('#vibrator1-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator1-toggle')[0].checked = true
+    }
+
+    if (values[8] == '0') {
+      $('#vibrator2-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator2-toggle')[0].checked = true
+    }
+
+    if (values[9] == '0') {
+      $('#vibrator3-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator3-toggle')[0].checked = true
+    }
+
+    if (values[10] == '0') {
+      $('#vibrator4-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator4-toggle')[0].checked = true
+    }
+
+    if (values[11] == '0') {
+      $('#vibrator5-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator5-toggle')[0].checked = true
+    }
+
+    if (values[12] == '0') {
+      $('#vibrator6-toggle')[0].checked = false
+    } else if (values[6] == '1') {
+      $('#vibrator6-toggle')[0].checked = true
+    }
   })
 
   /* rover commands */
