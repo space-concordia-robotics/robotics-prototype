@@ -261,15 +261,15 @@ void loop() {
       else if (cmd == "dgo") {
         //turns drill clockwise
         analogWrite(DRILL, 0);
-        delay(100);
+        //delay(100);
         analogWrite(DRILL, maxVelocity);
-        UART_PORT.println("SCIENCE dgo");
+        UART_PORT.println("SCIENCE dgo done");
       }
       else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration)) ) {
         //stops drill
         analogWrite(DRILL, 0);
         drillInUse = false;
-        UART_PORT.println("SCIENCE ds");
+        UART_PORT.println("SCIENCE ds done");
       }
       if (cmd.startsWith("elevatorfeed") && (cmd.indexOf(" ") > 0)) {
         //turns elevator at desired feed

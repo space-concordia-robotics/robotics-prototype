@@ -451,6 +451,42 @@ $(document).ready(function () {
       }
     })
   }
+
+  $('#drill-max-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    sendScienceRequest('dgo', function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('dgo done')) {
+        appendToConsole('Success')
+        lightUp('#drill-max-speed-go-btn')
+        greyOut('#drill-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
+  $('#drill-stop-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    sendScienceRequest('ds', function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('ds done')) {
+        appendToConsole('Success')
+        lightUp('#drill-stop-btn')
+        greyOut('#drill-max-speed-go-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
 })
 
 function isScienceActivated () {
