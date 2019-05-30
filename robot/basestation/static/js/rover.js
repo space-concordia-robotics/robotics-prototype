@@ -85,7 +85,7 @@ $(document).ready(function () {
     if (!$('#rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#activate-rover-btn').is(':checked')) {
-      sendScienceRequest('activate', function (msgs) {
+      sendRoverRequest('activate', function (msgs) {
         console.log('msgs', msgs)
       })
     } else {
