@@ -1,19 +1,11 @@
-#include "DcMotor.h"
+#include "pins.h"
+#include "motors.h"
 #include <Servo.h>
-
-//GPS & IMU Includes
-#include <SparkFun_I2C_GPS_Arduino_Library.h>
-I2CGPS myI2CGPS;  // I2C object
-#include "TinyGPS++.h"
-TinyGPSPlus gps;   // GPS object
-#include <Wire.h>
-#include <LSM303.h>  // contains a sketch for calibrating
-LSM303 compass;
 
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 50
+#define FEEDBACK_PRINT_INTERVAL 1000//50
 #define LED_BLINK_INTERVAL 1000
 
 /*
@@ -21,8 +13,8 @@ LSM303 compass;
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
   should work.
 */
-//#define DEVEL_MODE_1 1
-#define DEVEL_MODE_2 2
+#define DEVEL_MODE_1 1
+//#define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
 // serial communication over usb
@@ -32,61 +24,13 @@ LSM303 compass;
 #define UART_PORT Serial1
 #endif
 
-/* wheel motors */
-#define PULSES_PER_REV     14
-#define GEAR_RATIO         188.61
-#define MAX_RPM            30
-
-#define V_SENSE_PIN 39 // for reading battery voltage
-
-// motor driver pins (cytron)
-// R/L (right/left)
-// F/M/B (forward, middle, back)
-// direction pins
-#define RF_DIR   2
-#define RM_DIR   11
-#define RB_DIR   12
-#define LF_DIR   24
-#define LM_DIR   25
-#define LB_DIR   26
-// pwm pins
-#define RF_PWM   3
-#define RM_PWM   4
-#define RB_PWM   5
-#define LF_PWM   6
-#define LM_PWM   7
-#define LB_PWM   8
-
-// encoder pins
-
-// right side encoders
-#define RF_EA    27
-#define RF_EB    28
-#define RM_EA    31
-#define RM_EB    32
-#define RB_EA    29
-#define RB_EB    30
-// left side encoders
-#define LF_EA    37
-#define LF_EB    38
-#define LM_EA    36
-#define LM_EB    35
-#define LB_EA    33
-#define LB_EB    34
-
-// camera servo pins
-#define FS_SERVO 22
-#define FB_SERVO 23
-#define TS_SERVO 16
-#define TB_SERVO 17
-
 /* more variables */
 #define MAX_INPUT_VALUE 49  // maximum speed signal from controller
 #define MIN_INPUT_VALUE -MAX_INPUT_VALUE // minimum speed signal from controller
 #define MAX_PWM_VALUE 255
 #define MIN_PWM_VALUE -MAX_PWM_VALUE
-#define MAX_RPM_VALUE 30
-#define MIN_RPM_VALUE -MAX_RPM_VALUE
+#define MAX_RPM_VALUE MAX_RPM
+#define MIN_RPM_VALUE -MAX_RPM
 
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -111,43 +55,40 @@ int loop_state, button, i; // Input values for set velocity functions
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
 DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor");
 DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO, "Rear Right Motor");
-
 DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor");
 DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor");
 DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 
-Servo frontSide;
-Servo frontBase;
-Servo topSide;
-Servo topBase;
-
+/* function declarations */
+// helpers
 void toggleLed(void);
 String getValue(String data, char separator, int index);
-/* more functions */
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
-void initPins(void); // Initiate pinMode for direction and pwm pins for cytron drivers
-void initEncoders(void);    // Encoder initiation (attach interrups and pinModes for wheel encoders
-void initPids(void);    // Initiate PID for DMotor
-void initNav(void);
-
-void navHandler(void);
+// initializers
+Servo frontSide, frontBase, topSide, topBase;
+void attachServos(void); // attach pins to servo objects
+void initEncoders(void); // Encoder initiation (attach interrups and pinModes for wheel encoders
+void initPids(void); // Initiate PID for DMotor
+// during operation
 void velocityHandler(float throttle, float steering);
 void roverVelocityCalculator(void);
 void motor_encoder_interrupt(int motorNumber);
 
+// these includes must be placed exactly where and how they are in the code
+#include "Vsense.h"
+#include "commands.h"
+Commands Cmds;
+#include "navigation.h"
+
+// encoder interrupts
 void rf_encoder_interrupt(void);
 void rm_encoder_interrupt(void);
 void rb_encoder_interrupt(void);
 void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
-
-/* more comms */
-#include "Vsense.h"
-#include "commands.h"
-Commands Commands;
 
 void setup() {
   // initialize serial communications at 115200 bps:
@@ -158,10 +99,10 @@ void setup() {
   initPins();
   initEncoders();
   initPids();
-  initNav();
+  initNav(Cmds);
   delay(300);
   
-  if (Commands.isOpenLoop){ 
+  if (Cmds.isOpenLoop){ 
     maxOutputSignal = MAX_PWM_VALUE;
     minOutputSignal = MIN_PWM_VALUE;
   }
@@ -170,7 +111,7 @@ void setup() {
     minOutputSignal = MIN_RPM_VALUE;
   }
   
-  Commands.setupMessage();
+  Cmds.setupMessage();
 }
 
 void loop() {
@@ -181,13 +122,13 @@ void loop() {
     if (UART_PORT.available()) {
       cmd = UART_PORT.readStringUntil('\n');
       cmd.trim();
-      ser_flush();
-      Commands.handler(cmd, "Serial");
+      //ser_flush();
+      Cmds.handler(cmd, "Serial");
     }
     prevRead = millis();
 
   if (millis() - prevReadNav > 200) {
-    navHandler();
+    navHandler(Cmds);
     prevReadNav = millis();
   }
   if (sinceLedToggle > LED_BLINK_INTERVAL) {
@@ -197,10 +138,10 @@ void loop() {
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
     UART_PORT.print("ASTRO Motor Speeds: ");
-    if(Commands.isEnc) {
-      for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+    if(Cmds.isEnc) {
+      for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
           UART_PORT.print(motorList[i].getCurrentVelocity());
-          if (i != 5) UART_PORT.print(", ");
+          if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
       }
       UART_PORT.println("");
     }
@@ -318,25 +259,8 @@ void toggleLed2() {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   */
 }
-
-void initPins(void) {
-  pinMode(RF_DIR, OUTPUT);
-  pinMode(RF_PWM, OUTPUT);
-  pinMode(RM_DIR, OUTPUT);
-  pinMode(RM_PWM, OUTPUT);
-  pinMode(RB_DIR, OUTPUT);
-  pinMode(RB_PWM, OUTPUT);
-
-  pinMode(LF_DIR, OUTPUT);
-  pinMode(LF_PWM, OUTPUT);
-  pinMode(LM_DIR, OUTPUT);
-  pinMode(LM_PWM, OUTPUT);
-  pinMode(LB_DIR, OUTPUT);
-  pinMode(LB_PWM, OUTPUT);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(V_SENSE_PIN, INPUT);
-
+//! attach the servos to pins
+void attachServos(){
   frontSide.attach(FS_SERVO);
   frontBase.attach(FB_SERVO);
   topSide.attach(TS_SERVO);
@@ -405,63 +329,6 @@ void initPids(void) {
     LM.pidController.setOutputLimits(-50, 50, 5.0);
     LB.pidController.setOutputLimits(-50, 50, 5.0);
   */
-}
-void initNav(void) {
-  myI2CGPS.begin(Wire, 400000);
-    if (myI2CGPS.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
-    Commands.error = true;
-    Commands.errorMessage = "ASTRO GPS wires aren't connected properly, please reboot\n";
-    Commands.errorMsg();
-    }
-
-    else if (!Commands.error) {
-    compass.init();
-    compass.enableDefault();
-    compass.setTimeout(100);
-    compass.m_min = (LSM303::vector <int16_t>) {
-      -1794, +1681, -2947
-    };
-    compass.m_max = (LSM303::vector <int16_t>) {
-      +3359, +6531, +2016
-    };
-  }
-}
-//min: { -1794,  +1681,  -2947 }    max: { +3359,  +6531,  +2016 }
-
-void navHandler(void) {
-  if (!Commands.error && Commands.isGpsImu) {
-    bool gotGps = false;
-    if (myI2CGPS.available()) {         // returns the number of available bytes from the GPS module
-      gps.encode(myI2CGPS.read());       // Feeds the GPS parser
-      if (gps.time.isUpdated()) {        // Checks to see if new GPS info is available
-        if (gps.location.isValid()) { // checks if valid location data is available
-          gotGps = true;
-        }
-      }
-    }
-
-    compass.read();
-    heading = compass.heading(LSM303::vector<int> { -1, 0, 0 });
-    if (compass.timeoutOccurred()) {
-      UART_PORT.print("ASTRO HEADING-N/A");
-    }
-    else {
-      UART_PORT.print("ASTRO HEADING-OK ");
-      UART_PORT.print(heading);
-    }
-    UART_PORT.print(" -- ");
-    
-    if (!gotGps) {
-      UART_PORT.println("GPS-N/A");
-    }
-    else {
-      UART_PORT.print("GPS-OK ");
-      UART_PORT.print(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
-      UART_PORT.print(" "); // space
-      UART_PORT.print(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
-      UART_PORT.println("");
-    }
-  }
 }
 
 void rf_encoder_interrupt(void) {

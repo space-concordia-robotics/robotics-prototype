@@ -6,7 +6,7 @@
 // Bluetooth removed to simplify code and reduce sources of error by Josh Glazer on 2019-05-30.
 //
 
-#include "DcMotor.h"
+#include "motors.h"
 
 class Commands {
   public:
@@ -120,7 +120,7 @@ void Commands::handler(String cmd, String sender) {
     stop();
   }
   else if (cmd == status_cmd) {
-    status();
+    systemStatus();
   }
   // this is not safe enough, needs much stricter verification
   else if (cmd.indexOf(":") > 0) {
@@ -223,6 +223,7 @@ void Commands::handler(String cmd, String sender) {
 
 void Commands::systemStatus(void) {
   UART_PORT.println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+  UART_PORT.println("ASTRO Astro has " + String(RobotMotor::numMotors) + " motors");
   UART_PORT.print("ASTRO Wheels: ");
   UART_PORT.println(String((isActivated) ? "ACTIVE" : "INACTIVE"));
   UART_PORT.println("ASTRO Steering: " + String((isSteering) ? "Steering Control" : "Motor Control"));
@@ -230,16 +231,16 @@ void Commands::systemStatus(void) {
   UART_PORT.print("ASTRO Nav " + (error ? "ERROR: " + errorMessage : "Success\n"));
   UART_PORT.println("ASTRO Nav Stream: " + String((isGpsImu) ? "ON" : "OFF"));
   UART_PORT.print("ASTRO Motor loop statuses: ");
-  for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+  for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
     UART_PORT.print((motorList[i].isOpenLoop) ? "Open" : "CLose");
-    if (i != 5) UART_PORT.print(", ");
+    if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
   }
   UART_PORT.println("");
 
   UART_PORT.print("ASTRO Motor accel: ");
-  for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
+  for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
     UART_PORT.print((motorList[i].accLimit) ? "ON" : "OFF");
-    if (i != 5) UART_PORT.print(", ");
+    if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
   }
   UART_PORT.println("");
 
@@ -250,7 +251,7 @@ void Commands::activate(String sender) {
   if (isActivated) {
     UART_PORT.println("ASTRO Rover is Already ACTIVATED");
   }
-  else if (!isActivated) {
+  else {
     isActivated = true;
     UART_PORT.println("ASTRO Rover Wheels are Active");
   }
@@ -258,13 +259,9 @@ void Commands::activate(String sender) {
 void Commands::deactivate(String sender) {
   if (isActivated) {
     stop();
-    isActivated = false;
-    UART_PORT.println("ASTRO Rover Wheels are Inactive");
   }
-  else if (!isActivated) {
-    isActivated = false;
-    UART_PORT.println("ASTRO Rover Wheels are Inactive");
-  }
+  isActivated = false;
+  UART_PORT.println("ASTRO Rover Wheels are Inactive");
 }
 
 void Commands::ping(void) {
@@ -273,13 +270,12 @@ void Commands::ping(void) {
 void Commands::who(void) {
   if (isActivated) {
     UART_PORT.println("ASTRO Happy Astro");
-    //toggleLed2();
   }
-  else if (!isActivated) {
+  else {
     UART_PORT.println("ASTRO Paralyzed Astro");
-    //toggleLed2();
   }
 }
+
 void Commands::rebootTeensy(void) {
   UART_PORT.println("ASTRO rebooting wheel teensy... hang on a sec");
   WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
@@ -290,7 +286,7 @@ void Commands::rebootTeensy(void) {
   WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
                   WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
   WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
-  while (1); // infinite do nothing loop -- wait for the countdown
+  while (true); // infinite do nothing loop -- wait for the countdown
 }
 
 void Commands::closeLoop(void) {
@@ -299,7 +295,7 @@ void Commands::closeLoop(void) {
   }
   maxOutputSignal = MAX_RPM_VALUE; minOutputSignal = MIN_RPM_VALUE;
   UART_PORT.println("Bo!");
-  for (i = 0; i < 6; i++) {
+  for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].isOpenLoop = false;
     String msg = "ASTRO Motor " + String(i+1);
     msg += String(" loop status is: ");
@@ -312,7 +308,7 @@ void Commands::openLoop(void) {
     stop();
   }
   maxOutputSignal = MAX_PWM_VALUE; minOutputSignal = MIN_PWM_VALUE;
-  for (i = 0; i <= 5; i++) {
+  for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].isOpenLoop = true;
     String msg = "ASTRO Motor " + String(i+1);
     msg += String(" loop status is: ");
@@ -324,46 +320,38 @@ void Commands::openLoop(void) {
 void Commands::steerOff(void) {
   if (isActivated ) {
     stop();
-    isSteering = false;
-    UART_PORT.println("ASTRO Individual Wheel Control is Activated");
   }
-  else if (!isActivated) {
-    isSteering = false;
-    UART_PORT.println("ASTRO Individual Wheel Control is Activated");
-  }
+  isSteering = false;
+  UART_PORT.println("ASTRO Individual Wheel Control is Activated");
   if (isOpenLoop) {
-    UART_PORT.println("ASTRO Speed range is -255 to 255");
-    UART_PORT.println("ASTRO motorNumber:PWM");
+    UART_PORT.println("ASTRO Speed range is -255 to 255 (open loop)");
+    UART_PORT.println("ASTRO commands are now: motorNumber:PWM");
   }
-  else if (!isOpenLoop) {
-    UART_PORT.println("ASTRO Speed range is -30 to 30");
+  else {
+    UART_PORT.println("ASTRO Speed range is -30 to 30 (closed loop)");
     UART_PORT.println("ASTRO commands are now: motorNumber:RPM");
   }
 }
 void Commands::steerOn(void) {
   if (isActivated) {
     stop();
-    isSteering = true;
-    UART_PORT.println("ASTRO Manual Skid Steering is Activated");
   }
-  else if (!isActivated) {
-    isSteering = true;
-    UART_PORT.println("ASTRO Manual Skid Steering is Activated");
-  }
+  isSteering = true;
+  UART_PORT.println("ASTRO Skid Steering is Activated");
   if (isOpenLoop) {
-    UART_PORT.println("ASTRO Speed range is -49 to 49");
+    UART_PORT.println("ASTRO Throttle and Steering ranges are -49 to 49 (open loop)");
     UART_PORT.println("ASTRO commands are now: throttle:steering");
   }
-  else if (!isOpenLoop) {
-    UART_PORT.println("ASTRO Speed range is -30 to 30");
+  else {
+    UART_PORT.println("ASTRO Throttle range is -30 to 30 (closed loop)");
     UART_PORT.println("ASTRO Steering range is -49 to 49");
-    UART_PORT.println("ASTRO throttle:steering");
+    UART_PORT.println("ASTRO commands are now: RPM:steering");
   }
 }
 
 void Commands::gpsOff(void) {
   isGpsImu = false;
-  UART_PORT.println("GPS and IMU Serial Stream is now Disabled");
+  UART_PORT.println("ASTRO GPS and IMU Serial Stream is now Disabled");
 }
 void Commands::gpsOn(void) {
   isGpsImu = true;
@@ -378,7 +366,7 @@ void Commands::encOn(void) {
   else if (!isActivated) {
     isEnc = true;
     UART_PORT.println("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
       UART_PORT.print("ASTRO Motor ");
       UART_PORT.print(i);
       UART_PORT.print(" current velocity: ");
@@ -393,7 +381,7 @@ void Commands::encOff(void) {
 }
 
 void Commands::accOn(void) {
-  for (i = 0; i <= 5; i++) {
+  for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].accLimit = true;
     String msg = "ASTRO Motor " + String(i+1);
     msg += " Acceleration Limiter: ";
@@ -402,7 +390,7 @@ void Commands::accOn(void) {
   }
 }
 void Commands::accOff(void) {
-  for (i = 0; i <= 5; i++) {
+  for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].accLimit = false;
     String msg = "ASTRO Motor " + String(i+1);
     msg += " Acceleration Limiter: ";
@@ -411,13 +399,9 @@ void Commands::accOff(void) {
   }
 }
 
-void Commands::status(void) {
-  systemStatus();
-}
-
 void Commands::stop(void) {
   velocityHandler(0, 0);
-  for (int i = 0; i <= 5; i++) {
+  for (int i = 0; i < RobotMotor::numMotors; i++) {
     UART_PORT.println(String("ASTRO ") + String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getCurrentVelocity()) + String(" PWM ") + String(motorList[i].direction));
   }
 }

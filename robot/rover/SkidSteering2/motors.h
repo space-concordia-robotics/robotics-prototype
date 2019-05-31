@@ -3,6 +3,11 @@
 #include <Arduino.h>
 #include "PidController.h"
 
+/* wheel motors */
+#define PULSES_PER_REV     14
+#define GEAR_RATIO         188.61
+#define MAX_RPM            30
+
 // defines motor directions, CW CLOCKWISE, CCW COUNTER_CLOCKWISE
 enum motor_direction { CW = -1, CCW = 1 };
 // defines whether motor control is open loop or closed loop
@@ -66,8 +71,10 @@ class RobotMotor {
     int desiredDirection;
 };
 
+int RobotMotor::numMotors = 0;
+
 RobotMotor::RobotMotor() {
-  ;
+  numMotors++;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, int encRes) // :
@@ -221,5 +228,7 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
   }
   analogWrite(pwmPin, output_pwm);
 }
+
+
 
 #endif
