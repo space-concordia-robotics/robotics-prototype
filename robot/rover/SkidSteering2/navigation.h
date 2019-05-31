@@ -23,7 +23,7 @@ void initNav(Commands & cmdObj) {
 
   compass.init();
   compass.enableDefault();
-  compass.setTimeout(SERIAL_TIMEOUT); // maybe not the best value, but needs to be at least smaller than print interval
+  compass.setTimeout(SENSOR_TIMEOUT); // maybe not the best value, but needs to be at least smaller than print interval
   compass.m_min = (LSM303::vector <int16_t>) {
     -1794, +1681, -2947
   };

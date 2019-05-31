@@ -7,6 +7,8 @@
 #define SERIAL_TIMEOUT 20
 #define FEEDBACK_PRINT_INTERVAL 1000//50
 #define LED_BLINK_INTERVAL 1000
+#define SENSOR_READ_INTERVAL 1000//200
+#define SENSOR_TIMEOUT 20
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -34,8 +36,7 @@
 
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
-unsigned long prevRead = millis(); // timer for reading commands
-unsigned long prevReadNav = millis(); // timer for reading nav data
+elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 String cmd;
 
 float maxOutputSignal, minOutputSignal;
@@ -61,13 +62,11 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 
-/* function declarations */
-// helpers
-void toggleLed(void);
-String getValue(String data, char separator, int index);
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
-// initializers
 Servo frontSide, frontBase, topSide, topBase;
+Servo servoList[] = {frontSide, frontBase, topSide, topBase};
+
+/* function declarations */
+// initializers
 void attachServos(void); // attach pins to servo objects
 void initEncoders(void); // Encoder initiation (attach interrups and pinModes for wheel encoders
 void initPids(void); // Initiate PID for DMotor
@@ -77,6 +76,7 @@ void roverVelocityCalculator(void);
 void motor_encoder_interrupt(int motorNumber);
 
 // these includes must be placed exactly where and how they are in the code
+#include "helpers.h"
 #include "Vsense.h"
 #include "commands.h"
 Commands Cmds;
@@ -99,10 +99,10 @@ void setup() {
   initPins();
   initEncoders();
   initPids();
+  attachServos();
   initNav(Cmds);
-  delay(300);
-  
-  if (Cmds.isOpenLoop){ 
+
+  if (Cmds.isOpenLoop) {
     maxOutputSignal = MAX_PWM_VALUE;
     minOutputSignal = MIN_PWM_VALUE;
   }
@@ -110,56 +110,49 @@ void setup() {
     maxOutputSignal = MAX_RPM_VALUE;
     minOutputSignal = MIN_RPM_VALUE;
   }
-  
+  delay(200); // needs this to actually print the following stuff
   Cmds.setupMessage();
 }
 
 void loop() {
-    // incoming format example: "5:7"
-    // this represents the speed for throttle:steering
-    // as well as direction by the positive/negative sign
-    // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
-    if (UART_PORT.available()) {
-      cmd = UART_PORT.readStringUntil('\n');
-      cmd.trim();
-      //ser_flush();
-      Cmds.handler(cmd, "Serial");
-    }
-    prevRead = millis();
-
-  if (millis() - prevReadNav > 200) {
+  // incoming format example: "5:7"
+  // this represents the speed for throttle:steering
+  // as well as direction by the positive/negative sign
+  if (UART_PORT.available()) {
+    cmd = UART_PORT.readStringUntil('\n');
+    cmd.trim();
+    //ser_flush();
+    Cmds.handler(cmd, "Serial");
+  }
+  if (sinceSensorRead > SENSOR_READ_INTERVAL) {
+    vbatt_read();
     navHandler(Cmds);
-    prevReadNav = millis();
+    sinceSensorRead = 0;
   }
   if (sinceLedToggle > LED_BLINK_INTERVAL) {
     toggleLed();
-    vbatt_read();
     sinceLedToggle = 0;
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
     UART_PORT.print("ASTRO Motor Speeds: ");
-    if(Cmds.isEnc) {
+    if (Cmds.isEnc) {
       for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-          UART_PORT.print(motorList[i].getCurrentVelocity());
-          if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
+        UART_PORT.print(motorList[i].getCurrentVelocity());
+        if (i != RobotMotor::numMotors - 1) UART_PORT.print(", ");
       }
       UART_PORT.println("");
     }
     else {
-      UART_PORT.print(String(desiredVelocityRight)+", ");
-      UART_PORT.print(String(desiredVelocityRight)+", ");
-      UART_PORT.print(String(desiredVelocityRight)+", ");
-      UART_PORT.print(String(desiredVelocityLeft)+", ");
-      UART_PORT.print(String(desiredVelocityLeft)+", ");
+      UART_PORT.print(String(desiredVelocityRight) + ", ");
+      UART_PORT.print(String(desiredVelocityRight) + ", ");
+      UART_PORT.print(String(desiredVelocityRight) + ", ");
+      UART_PORT.print(String(desiredVelocityLeft) + ", ");
+      UART_PORT.print(String(desiredVelocityLeft) + ", ");
       UART_PORT.print(String(desiredVelocityLeft));
       UART_PORT.println("");
     }
     sinceFeedbackPrint = 0;
   }
-} // end of loop
-
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void velocityHandler(float throttle, float steering) {
@@ -210,6 +203,7 @@ void velocityHandler(float throttle, float steering) {
   LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
   LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
 }
+
 void roverVelocityCalculator(void) {
   rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
   leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
@@ -218,49 +212,8 @@ void roverVelocityCalculator(void) {
   rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
 }
 
-void ser_flush(void) {
-  while (UART_PORT.available()) {
-    UART_PORT.read();
-  }
-}
-
-//! Parse data for throttle and steering variables
-String getValue(String data, char separator, int index) {
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-void toggleLed() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-}
-void toggleLed2() {
-  /*
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(350);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(250);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(150);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    delay(100);
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  */
-}
 //! attach the servos to pins
-void attachServos(){
+void attachServos() {
   frontSide.attach(FS_SERVO);
   frontBase.attach(FB_SERVO);
   topSide.attach(TS_SERVO);

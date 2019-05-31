@@ -7,6 +7,7 @@
 //
 
 #include "motors.h"
+#include "helpers.h"
 
 class Commands {
   public:
@@ -38,7 +39,7 @@ class Commands {
     String imuErrorMsg = "ASTRO IMU may be malfunctioning, timeout reached";
     bool gpsError = false;
     String gpsErrorMsg = "ASTRO GPS could not be initialized";
-    
+
     int prevThrottle = 0;
     int prevSteering = 0;
 
@@ -63,6 +64,8 @@ class Commands {
     void accOff(void);
     void status(void);
     void stop(void);
+    void controlWheelMotors(String cmd);
+    void controlCameraMotors(String cmd);
 };
 
 void Commands::setupMessage(void) {
@@ -126,97 +129,10 @@ void Commands::handler(String cmd, String sender) {
   }
   // this is not safe enough, needs much stricter verification
   else if (cmd.indexOf(":") > 0) {
-    if (!isActivated) {
-      UART_PORT.println("ASTRO Astro isn't activated yet!!!");
-    }
-    else {
-      if (isSteering) {
-        throttle = getValue(cmd, ':', 0).toFloat();
-        steering = getValue(cmd, ':', 1).toFloat();
-        UART_PORT.println("ASTRO Throttle: " + String(throttle) + String(" Steering: ") + String(steering));
-        //        if (!isOpenLoop){
-        //            throttle = map(throttle, -30, 30, -49, 49);
-        //            UART_PORT.println("ASTRO Desired Speed: " + String(throttle) + String("RPM ") + String(" Steering: ") + String(steering));
-        //        }
-        velocityHandler(throttle, steering);
-        String msg = "ASTRO left: " + String(desiredVelocityLeft);
-        msg += " -- right: " + String(desiredVelocityRight);
-        msg += " maxOutput: " + String(MAX_PWM_VALUE);
-        UART_PORT.println(msg);
-      }
-      else {
-        motorNumber = getValue(cmd, ':', 0).toFloat();
-        int speed = getValue(cmd, ':', 1).toFloat();
-        steering = 0;
-        int dir = 1;
-        if (throttle < 0 ) {
-          dir = - 1;
-        }
-        motorList[motorNumber].calcCurrentVelocity();
-        motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
-        UART_PORT.println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
-      }
-    }
+    controlWheelMotors(cmd);
   }
-  else if (cmd[0]=='!') {
-    if (isActivated) {
-      cmd.remove(0, 1);
-      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-        UART_PORT.println("ASTRO Front camera continuous base is moving at rate: " + String(cmd.toInt()));
-        frontBase.write(cmd.toInt());
-      }
-      else {
-        UART_PORT.println("ASTRO Front camera continuous base: choose values from 0 to 180");
-      }
-    }
-    else {
-      UART_PORT.println("ASTRO Astro isn't activated yet!!!");
-    }
-  }
-  else if (cmd[0]=='@') {
-    if (isActivated) {
-      cmd.remove(0, 1);
-      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-        UART_PORT.println("ASTRO Front camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-        frontSide.write(cmd.toInt());
-      }
-      else {
-        UART_PORT.println("ASTRO Front camera Side positional servo: choose values from 0 to 180");
-      }
-    }
-    else {
-      UART_PORT.println("ASTRO Astro isn't activated yet!!!");
-    }
-  }
-  else if (cmd[0]=='#') {
-    if (isActivated) {
-      cmd.remove(0, 1);
-      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-        UART_PORT.println("ASTRO Top camera continuous base is moving at rate: " + String(cmd.toInt()));
-        topBase.write(cmd.toInt());
-      }
-      else {
-        UART_PORT.println("ASTRO Top camera continuous base: choose values from 0 to 180");
-      }
-    }
-    else {
-      UART_PORT.println("ASTRO Astro isn't activated yet!!!");
-    }
-  }
-  else if (cmd[0]=='$') {
-    if (isActivated) {
-      cmd.remove(0, 1);
-      if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-        UART_PORT.println("ASTRO Top camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-        topSide.write(cmd.toInt());
-      }
-      else {
-        UART_PORT.println("ASTRO Top camera Side positional servo: choose values from 0 to 180");
-      }
-    }
-    else {
-      UART_PORT.println("ASTRO Astro isn't activated yet!!!");
-    }
+  else if (cmd[0] == '!' || cmd[0] == '@' || cmd[0] == '#' || cmd[0] == '$') {
+    controlCameraMotors (cmd);
   }
   else {
     UART_PORT.println("ASTRO BOOOOOOO!!! Wrong command, try a different one, BIAAAAAA");
@@ -226,24 +142,23 @@ void Commands::handler(String cmd, String sender) {
 void Commands::systemStatus(void) {
   UART_PORT.println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
   UART_PORT.println("ASTRO Astro has " + String(RobotMotor::numMotors) + " motors");
-  UART_PORT.print("ASTRO Wheels: ");
-  UART_PORT.println(String((isActivated) ? "ACTIVE" : "INACTIVE"));
-  UART_PORT.println("ASTRO Steering: " + String((isSteering) ? "Steering Control" : "Motor Control"));
-  UART_PORT.println("ASTRO Encoders: " + String((isEnc) ? "ON" : "OFF"));
-  UART_PORT.println("ASTRO GPS " + (gpsError ? "ERROR: " + gpsErrorMsg : "Success"));
-  UART_PORT.println("ASTRO IMU " + (imuError ? "ERROR: " + imuErrorMsg : "Success"));
-  UART_PORT.println("ASTRO Nav Stream: " + String((isGpsImu) ? "ON" : "OFF"));
+  UART_PORT.println("ASTRO Wheels: " + String(isActivated ? "ACTIVE" : "INACTIVE"));
+  UART_PORT.println("ASTRO Steering: " + String(isSteering ? "Steering Control" : "Motor Control"));
+  UART_PORT.println("ASTRO Encoders: " + String(isEnc ? "ON" : "OFF"));
+  UART_PORT.println("ASTRO GPS " + String(gpsError ? "ERROR: " + gpsErrorMsg : "Success"));
+  UART_PORT.println("ASTRO IMU " + String(imuError ? "ERROR: " + imuErrorMsg : "Success"));
+  UART_PORT.println("ASTRO Nav Stream: " + String(isGpsImu ? "ON" : "OFF"));
   UART_PORT.print("ASTRO Motor loop statuses: ");
   for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-    UART_PORT.print((motorList[i].isOpenLoop) ? "Open" : "CLose");
-    if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
+    UART_PORT.print(String(motorList[i].isOpenLoop ? "Open" : "CLose"));
+    if (i != RobotMotor::numMotors - 1) UART_PORT.print(", ");
   }
   UART_PORT.println("");
 
   UART_PORT.print("ASTRO Motor accel: ");
   for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
     UART_PORT.print((motorList[i].accLimit) ? "ON" : "OFF");
-    if (i != RobotMotor::numMotors-1) UART_PORT.print(", ");
+    if (i != RobotMotor::numMotors - 1) UART_PORT.print(", ");
   }
   UART_PORT.println("");
 
@@ -300,9 +215,9 @@ void Commands::closeLoop(void) {
   UART_PORT.println("Bo!");
   for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].isOpenLoop = false;
-    String msg = "ASTRO Motor " + String(i+1);
+    String msg = "ASTRO Motor " + String(i + 1);
     msg += String(" loop status is: ");
-    msg += (motorList[i].isOpenLoop ? "Open" : "CLose");
+    msg += String(motorList[i].isOpenLoop ? "Open" : "CLose");
     UART_PORT.println(msg);
   }
 }
@@ -313,9 +228,9 @@ void Commands::openLoop(void) {
   maxOutputSignal = MAX_PWM_VALUE; minOutputSignal = MIN_PWM_VALUE;
   for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].isOpenLoop = true;
-    String msg = "ASTRO Motor " + String(i+1);
+    String msg = "ASTRO Motor " + String(i + 1);
     msg += String(" loop status is: ");
-    msg += (motorList[i].isOpenLoop ? "Open" : "CLose");
+    msg += String(motorList[i].isOpenLoop ? "Open" : "CLose");
     UART_PORT.println(msg);
   }
 }
@@ -386,26 +301,110 @@ void Commands::encOff(void) {
 void Commands::accOn(void) {
   for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].accLimit = true;
-    String msg = "ASTRO Motor " + String(i+1);
+    String msg = "ASTRO Motor " + String(i + 1);
     msg += " Acceleration Limiter: ";
-    msg += ((motorList[i].accLimit) ? "Open" : "CLose");
+    msg += String(motorList[i].accLimit ? "Open" : "CLose");
     UART_PORT.println(msg);
   }
 }
 void Commands::accOff(void) {
   for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].accLimit = false;
-    String msg = "ASTRO Motor " + String(i+1);
+    String msg = "ASTRO Motor " + String(i + 1);
     msg += " Acceleration Limiter: ";
-    msg += ((motorList[i].accLimit) ? "Open" : "CLose");
+    msg += String(motorList[i].accLimit ? "Open" : "CLose");
     UART_PORT.println(msg);
+  }
+}
+
+void Commands::controlWheelMotors(String cmd) {
+  if (!isActivated) {
+    UART_PORT.println("ASTRO Astro isn't activated yet!!!");
+  }
+  else {
+    if (isSteering) {
+      throttle = getValue(cmd, ':', 0).toFloat();
+      steering = getValue(cmd, ':', 1).toFloat();
+      UART_PORT.println("ASTRO Throttle: " + String(throttle) + String(" Steering: ") + String(steering));
+      //        if (!isOpenLoop){
+      //            throttle = map(throttle, -30, 30, -49, 49);
+      //            UART_PORT.println("ASTRO Desired Speed: " + String(throttle) + String("RPM ") + String(" Steering: ") + String(steering));
+      //        }
+      velocityHandler(throttle, steering);
+      String msg = "ASTRO left: " + String(desiredVelocityLeft);
+      msg += " -- right: " + String(desiredVelocityRight);
+      msg += " maxOutput: " + String(MAX_PWM_VALUE);
+      UART_PORT.println(msg);
+    }
+    else {
+      motorNumber = getValue(cmd, ':', 0).toFloat();
+      int speed = getValue(cmd, ':', 1).toFloat();
+      steering = 0;
+      int dir = 1;
+      if (throttle < 0 ) {
+        dir = - 1;
+      }
+      motorList[motorNumber].calcCurrentVelocity();
+      motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
+      UART_PORT.println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
+    }
+  }
+}
+
+void Commands::controlCameraMotors(String cmd) {
+  if (!isActivated) {
+    UART_PORT.println("ASTRO Astro isn't activated yet!!!");
+  }
+  else {
+    // this can be refactored with servoList[]
+    switch (cmd[0]) {
+      case '!':
+        cmd.remove(0, 1);
+        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+          UART_PORT.println("ASTRO Front camera continuous base is moving at rate: " + String(cmd.toInt()));
+          frontBase.write(cmd.toInt());
+        }
+        else {
+          UART_PORT.println("ASTRO Front camera continuous base: choose values from 0 to 180");
+        }
+      case '@':
+        cmd.remove(0, 1);
+        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+          UART_PORT.println("ASTRO Front camera Side positional servo is moving to angle: " + String(cmd.toInt()));
+          frontSide.write(cmd.toInt());
+        }
+        else {
+          UART_PORT.println("ASTRO Front camera Side positional servo: choose values from 0 to 180");
+        }
+      case '#':
+        cmd.remove(0, 1);
+        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+          UART_PORT.println("ASTRO Top camera continuous base is moving at rate: " + String(cmd.toInt()));
+          topBase.write(cmd.toInt());
+        }
+        else {
+          UART_PORT.println("ASTRO Top camera continuous base: choose values from 0 to 180");
+        }
+      case '$':
+        cmd.remove(0, 1);
+        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
+          UART_PORT.println("ASTRO Top camera Side positional servo is moving to angle: " + String(cmd.toInt()));
+          topSide.write(cmd.toInt());
+        }
+        else {
+          UART_PORT.println("ASTRO Top camera Side positional servo: choose values from 0 to 180");
+        }
+    }
   }
 }
 
 void Commands::stop(void) {
   velocityHandler(0, 0);
   for (int i = 0; i < RobotMotor::numMotors; i++) {
-    UART_PORT.println(String("ASTRO ") + String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getCurrentVelocity()) + String(" PWM ") + String(motorList[i].direction));
+    String msg = "ASTRO " + String(motorList[i].motorName);
+    msg += "'s desired speed: " + String(motorList[i].getCurrentVelocity());
+    msg += " PWM " + String(motorList[i].direction);
+    UART_PORT.println(msg);
   }
 }
 
