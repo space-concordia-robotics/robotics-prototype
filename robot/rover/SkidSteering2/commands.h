@@ -335,7 +335,7 @@ void Commands::controlWheelMotors(String cmd) {
       velocityHandler(throttle, steering);
       String msg = "ASTRO left: " + String(desiredVelocityLeft);
       msg += " -- right: " + String(desiredVelocityRight);
-      msg += " maxOutput: " + String(MAX_PWM_VALUE);
+      msg += " maxOutput: " + String(maxOutputSignal);
       UART_PORT.println(msg);
     }
     else {
@@ -348,7 +348,7 @@ void Commands::controlWheelMotors(String cmd) {
       }
       motorList[motorNumber].calcCurrentVelocity();
       motorList[motorNumber].setVelocity(dir , abs(motorSpeed), motorList[motorNumber].getCurrentVelocity());
-      UART_PORT.println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
+      UART_PORT.println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getCurrentVelocity()) + String(" PWM "));
     }
   }
 }
@@ -374,6 +374,7 @@ void Commands::controlCameraMotors(String cmd) {
         else {
           UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
+        break;
       case '@':
         servoName = "Front camera Side continuous servo";
         if ( (0 <= angleInt) && (angleInt <= 180)) {
@@ -383,6 +384,7 @@ void Commands::controlCameraMotors(String cmd) {
         else {
           UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
+        break;
       case '#':
         servoName = "Rear camera positional tilt base";
         if ( (0 <= angleInt) && (angleInt <= 180) ) {
@@ -392,6 +394,7 @@ void Commands::controlCameraMotors(String cmd) {
         else {
           UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
+        break;
       case '$':
         servoName = "Rear camera Side continuous servo";
         if ( (0 <= angleInt) && (angleInt <= 180)) {
@@ -401,6 +404,7 @@ void Commands::controlCameraMotors(String cmd) {
         else {
           UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
+        break;
     }
   }
 }
@@ -409,8 +413,7 @@ void Commands::stop(void) {
   velocityHandler(0, 0);
   for (int i = 0; i < RobotMotor::numMotors; i++) {
     String msg = "ASTRO " + String(motorList[i].motorName);
-    msg += "'s desired speed: " + String(motorList[i].getCurrentVelocity());
-    msg += " PWM " + String(motorList[i].direction);
+    msg += "'s desired speed: " + String(motorList[i].getCurrentVelocity()) + " PWM ";
     UART_PORT.println(msg);
   }
 }

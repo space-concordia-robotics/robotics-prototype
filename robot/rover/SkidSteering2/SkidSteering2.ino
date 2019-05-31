@@ -5,7 +5,7 @@
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 50
+#define FEEDBACK_PRINT_INTERVAL 1000//50
 #define LED_BLINK_INTERVAL 1000
 #define SENSOR_READ_INTERVAL 200
 #define SENSOR_TIMEOUT 20
@@ -15,8 +15,8 @@
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
   should work.
 */
-//#define DEVEL_MODE_1 1
-#define DEVEL_MODE_2 2
+#define DEVEL_MODE_1 1
+//#define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
 // serial communication over usb
@@ -94,14 +94,13 @@ void setup() {
   // initialize serial communications at 115200 bps:
   UART_PORT.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
   UART_PORT.setTimeout(SERIAL_TIMEOUT);
+  delay(300); // NECSSARY. Give time for serial port to set up
 
-  //ser_flush();
   initPins();
   initEncoders();
   initPids();
   attachServos();
   initNav(Cmds);
-
   if (Cmds.isOpenLoop) {
     maxOutputSignal = MAX_PWM_VALUE;
     minOutputSignal = MIN_PWM_VALUE;
@@ -110,7 +109,6 @@ void setup() {
     maxOutputSignal = MAX_RPM_VALUE;
     minOutputSignal = MIN_RPM_VALUE;
   }
-  delay(200); // needs this to actually print the following stuff
   Cmds.setupMessage();
 }
 
@@ -121,7 +119,6 @@ void loop() {
   if (UART_PORT.available()) {
     cmd = UART_PORT.readStringUntil('\n');
     cmd.trim();
-    //ser_flush();
     Cmds.handler(cmd, "Serial");
   }
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
@@ -137,7 +134,8 @@ void loop() {
     UART_PORT.print("ASTRO Motor Speeds: ");
     if (Cmds.isEnc) {
       for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-        UART_PORT.print(motorList[i].getCurrentVelocity());
+        //UART_PORT.print(motorList[i].getCurrentVelocity());
+        UART_PORT.print(motorList[i].encoderCount);
         if (i != RobotMotor::numMotors - 1) UART_PORT.print(", ");
       }
       UART_PORT.println("");
@@ -196,14 +194,6 @@ void velocityHandler(float throttle, float steering) {
   LF.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LF.getCurrentVelocity());
   LM.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LM.getCurrentVelocity());
   LB.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LB.getCurrentVelocity());
-}
-
-void roverVelocityCalculator(void) {
-  rightLinearVelocity = (RF.getDirection() * RF.getCurrentVelocity() + RM.getDirection() * RM.getCurrentVelocity() + RB.getDirection() * RB.getCurrentVelocity()) * radius * 0.10472;
-  leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
-
-  forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
-  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / wheelBase;
 }
 
 //! attach the servos to pins
