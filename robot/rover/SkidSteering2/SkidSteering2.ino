@@ -1,7 +1,4 @@
-
-#include "ArduinoBlue.h"
 #include "DcMotor.h"
-#include <SoftwareSerial.h>
 #include <Servo.h>
 
 //GPS & IMU Includes
@@ -12,38 +9,12 @@ TinyGPSPlus gps;   // GPS object
 #include <Wire.h>
 #include <LSM303.h>  // contains a sketch for calibrating
 LSM303 compass;
-//#define TEST 1
 
 /* comms */
-
+#define SERIAL_BAUD 115200
+#define SERIAL_TIMEOUT 20
 #define FEEDBACK_PRINT_INTERVAL 50
 #define LED_BLINK_INTERVAL 1000
-elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
-elapsedMillis sinceLedToggle; // timer for heartbeat
-unsigned long prevRead = millis(); // timer for reading commands
-unsigned long prevReadNav = millis(); // timer for reading nav data
-String cmd;
-
-void blePrint(String cmd);
-void blePrintln(String cmd);
-void blePrintres(String cmd);
-void ser_flush(void);
-void toggleLed();
-void toggleLed2();
-String getValue(String data, char separator, int index);
-
-// Bluetooth connection TX of bluetooth goes to pin 9 and RX of bluetooth goes to pin 10
-SoftwareSerial bluetooth(9, 10);
-ArduinoBlue phone(bluetooth);
-
-// Modes of operation
-// Bluetooth control - basestation control - PID - Open Loop
-
-//boolean isActivated = false;
-//boolean isActivated = false;
-//boolean isOpenloop = true; // No PID controller
-//boolean bluetoothMode = true; // changed to false - JOSH
-//boolean joystickMode = true;
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -54,55 +25,31 @@ ArduinoBlue phone(bluetooth);
 #define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
-// serial communication over uart with odroid, teensy plugged into pcb and odroid
+// serial communication over usb
 #define UART_PORT Serial
-#define PRINT(a) Serial.print(a)
-#define PRINTln(a) Serial.println(a)
-#define PRINTRES(a,b) Serial.print(a, b)
-/*
-  #define PRINT(a) Serial.print(a);  blePrint(a);
-  #define PRINTln(a) Serial.println(a); blePrintln(a);
-  #define PRINTRES(a,b) Serial.print(a, b);  blePrintres(a, b);
-*/
 #elif defined(DEVEL_MODE_2)
+// serial communication over uart with odroid, teensy plugged into pcb and odroid
 #define UART_PORT Serial1
-#define PRINT(a) Serial1.print(a)
-#define PRINTln(a) Serial1.println(a)
-#define PRINTRES(a,b) Serial1.print(a, b)
-/*
-  #define PRINT(a) Serial1.print(a);  blePrint(a);
-  #define PRINTln(a) Serial1.println(a); blePrintln(a);
-  #define PRINTRES(a,b) Serial1.print(a, b); blePrintres(a ,b);
-*/
 #endif
+
+/* wheel motors */
+#define PULSES_PER_REV     14
+#define GEAR_RATIO         188.61
+#define MAX_RPM            30
 
 #define V_SENSE_PIN 39 // for reading battery voltage
 
-/* camera servos */
-#define FS_SERVO 22
-#define FB_SERVO 23
-#define TS_SERVO 16
-#define TB_SERVO 17
-Servo frontSide; Servo frontBase;
-Servo topSide; Servo topBase;
-
-/* wheel motors */
-#define PULSES_PER_REV      14
-#define maxRpm              30
-#define GEAR_RATIO         188.61
-
-// F -> Front, B -> Back,  M -> Middle, L -> Left, R -> Right,
-// DIR -> Direction pin, PWM -> Signal Pin, EA ->Encoder A, EB -> Encoder B
-// DC Motor naming: Positing_purpose-pin, eg RF_PWM or LM_DIR
-
-// drivers
+// motor driver pins (cytron)
+// R/L (right/left)
+// F/M/B (forward, middle, back)
+// direction pins
 #define RF_DIR   2
 #define RM_DIR   11
 #define RB_DIR   12
 #define LF_DIR   24
 #define LM_DIR   25
 #define LB_DIR   26
-
+// pwm pins
 #define RF_PWM   3
 #define RM_PWM   4
 #define RB_PWM   5
@@ -110,20 +57,55 @@ Servo topSide; Servo topBase;
 #define LM_PWM   7
 #define LB_PWM   8
 
-// encoders
+// encoder pins
+
+// right side encoders
 #define RF_EA    27
 #define RF_EB    28
 #define RM_EA    31
 #define RM_EB    32
 #define RB_EA    29
 #define RB_EB    30
-
+// left side encoders
 #define LF_EA    37
 #define LF_EB    38
 #define LM_EA    36
 #define LM_EB    35
 #define LB_EA    33
 #define LB_EB    34
+
+// camera servo pins
+#define FS_SERVO 22
+#define FB_SERVO 23
+#define TS_SERVO 16
+#define TB_SERVO 17
+
+/* more variables */
+#define MAX_INPUT_VALUE 49  // maximum speed signal from controller
+#define MIN_INPUT_VALUE -MAX_INPUT_VALUE // minimum speed signal from controller
+#define MAX_PWM_VALUE 255
+#define MIN_PWM_VALUE -MAX_PWM_VALUE
+#define MAX_RPM_VALUE 30
+#define MIN_RPM_VALUE -MAX_RPM_VALUE
+
+elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
+elapsedMillis sinceLedToggle; // timer for heartbeat
+unsigned long prevRead = millis(); // timer for reading commands
+unsigned long prevReadNav = millis(); // timer for reading nav data
+String cmd;
+
+float maxOutputSignal, minOutputSignal;
+int motorNumber;
+int leftMotorDirection; // CCW =1 or CW =-1
+int rightMotorDirection; // CCW =1 or CW =-1
+float desiredVelocityRight = 0;
+float desiredVelocityLeft = 0;
+float d = 0.33; //distance between left and right wheels
+float radius = 14;
+float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
+String rotation; // Rotation direction of the whole rover
+float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
+int loop_state, button, i; // Input values for set velocity functions
 
 // constructors
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
@@ -136,24 +118,13 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 
-/* more variables */
-float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
-int loop_state, button, i; // Input values for set velocity functions
-float deg = 0;  // steering ratio between left and right wheel
-int maxInputSignal = 49;  // maximum speed signal from controller
-int minInputSignal = -49; // minimum speed signal from controller
-int maxOutputSignal = 255;
-int minOutputSignal = -255;
-int motorNumber;
-int leftMotorDirection; // CCW =1 or CW =-1
-int rightMotorDirection; // CCW =1 or CW =-1
-float desiredVelocityRight = 0;
-float desiredVelocityLeft = 0;
-float d = 0.33; //distance between left and right wheels
-float radius = 14;
-float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
-String rotation; // Rotation direction of the whole rover
+Servo frontSide;
+Servo frontBase;
+Servo topSide;
+Servo topBase;
 
+void toggleLed(void);
+String getValue(String data, char separator, int index);
 /* more functions */
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max);
 void initPins(void); // Initiate pinMode for direction and pwm pins for cytron drivers
@@ -180,55 +151,40 @@ Commands Commands;
 
 void setup() {
   // initialize serial communications at 115200 bps:
-  UART_PORT.begin(115200); // switched from 9600 as suggested to conform with the given gps library
-  UART_PORT.setTimeout(20);
-  bluetooth.begin(9600);
-  bluetooth.setTimeout(50);
+  UART_PORT.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
+  UART_PORT.setTimeout(SERIAL_TIMEOUT);
 
-  delay(50);  // do not print too fast!
   //ser_flush();
   initPins();
   initEncoders();
   initPids();
   initNav();
   delay(300);
+  
+  if (Commands.isOpenLoop){ 
+    maxOutputSignal = MAX_PWM_VALUE;
+    minOutputSignal = MIN_PWM_VALUE;
+  }
+  else {
+    maxOutputSignal = MAX_RPM_VALUE;
+    minOutputSignal = MIN_RPM_VALUE;
+  }
+  
   Commands.setupMessage();
 }
 
 void loop() {
-  //if (millis() - prevRead > 30) {
     // incoming format example: "5:7"
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     // Steering Value from bluetooth controller. Values range from 0 to 99 for this specific controller
     if (UART_PORT.available()) {
-      String cmd = UART_PORT.readStringUntil('\n');
+      cmd = UART_PORT.readStringUntil('\n');
       cmd.trim();
       ser_flush();
       Commands.handler(cmd, "Serial");
     }
-    /*
-      else if (bluetooth.available()) {
-      Commands.bleHandler();
-      }*/
-
-    if (Commands.isActivated && Commands.bluetoothMode) {
-      velocityHandler(throttle, steering);
-      if (Commands.isEnc) {
-        // roverVelocityCalculator();
-        RF.calcCurrentVelocity();
-        RM.calcCurrentVelocity();
-        RB.calcCurrentVelocity();
-        LF.calcCurrentVelocity();
-        LM.calcCurrentVelocity();
-        LB.calcCurrentVelocity();
-        PRINTln("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-        PRINT("ASTRO left: " + String(desiredVelocityLeft));
-        PRINTln(" - right: " + String(desiredVelocityRight));
-      }
-    }
     prevRead = millis();
-  //} // end of command listening
 
   if (millis() - prevReadNav > 200) {
     navHandler();
@@ -240,22 +196,22 @@ void loop() {
     sinceLedToggle = 0;
   }
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
-    PRINT("ASTRO Motor Speeds: ");
+    UART_PORT.print("ASTRO Motor Speeds: ");
     if(Commands.isEnc) {
       for (int i = 0; i < 6; i++) { //6 is hardcoded, should be using a macro
-          PRINT(motorList[i].getCurrentVelocity());
-          if (i != 5) PRINT(", ");
+          UART_PORT.print(motorList[i].getCurrentVelocity());
+          if (i != 5) UART_PORT.print(", ");
       }
-      PRINTln("");
+      UART_PORT.println("");
     }
     else {
-      PRINT(String(desiredVelocityRight)+", ");
-      PRINT(String(desiredVelocityRight)+", ");
-      PRINT(String(desiredVelocityRight)+", ");
-      PRINT(String(desiredVelocityLeft)+", ");
-      PRINT(String(desiredVelocityLeft)+", ");
-      PRINT(String(desiredVelocityLeft));
-      PRINTln("");
+      UART_PORT.print(String(desiredVelocityRight)+", ");
+      UART_PORT.print(String(desiredVelocityRight)+", ");
+      UART_PORT.print(String(desiredVelocityRight)+", ");
+      UART_PORT.print(String(desiredVelocityLeft)+", ");
+      UART_PORT.print(String(desiredVelocityLeft)+", ");
+      UART_PORT.print(String(desiredVelocityLeft));
+      UART_PORT.println("");
     }
     sinceFeedbackPrint = 0;
   }
@@ -266,21 +222,26 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
 }
 
 void velocityHandler(float throttle, float steering) {
+  // steering of 0 means both motors at throttle.
+  // as steering moves away from 0, one motor keeps throttle.
+  // the other slows down or even reverses based on the steering value.
+  // deg is mapped between -1 and 1 so 0 means no speed and the extremes mean full throttle in either direction.
+  float multiplier;
   // If statement for CASE 1: steering toward the RIGHT
   if (steering > 0 ) {
-    deg = mapFloat(steering, 0, maxInputSignal, 1, -1);
-    desiredVelocityRight = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-    desiredVelocityLeft = mapFloat(throttle, minInputSignal, maxInputSignal,  minOutputSignal, maxOutputSignal);
-    rotation = "CW";
+    multiplier = mapFloat(steering, 0, MAX_INPUT_VALUE, 1, -1);
+    desiredVelocityRight = mapFloat(throttle * multiplier, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
+    desiredVelocityLeft = mapFloat(throttle, MIN_INPUT_VALUE, MAX_INPUT_VALUE,  minOutputSignal, maxOutputSignal);
+    //rotation = "CW";
   }
   // If statement for CASE 2: steering toward the LEFT or not steering
   if (steering <= 0 ) {
-    deg = mapFloat(steering, minInputSignal, 0, -1, 1);
-    desiredVelocityRight = mapFloat(throttle, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-    desiredVelocityLeft = mapFloat(throttle * deg, minInputSignal, maxInputSignal, minOutputSignal, maxOutputSignal);
-    rotation = "CCW";
+    multiplier = mapFloat(steering, MIN_INPUT_VALUE, 0, -1, 1);
+    desiredVelocityRight = mapFloat(throttle, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
+    desiredVelocityLeft = mapFloat(throttle * multiplier, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
+    //rotation = "CCW";
   }
-  if (desiredVelocityLeft < 0 ) {
+  if (desiredVelocityLeft > 0 ) {
     leftMotorDirection = 1;
   }
   else {
@@ -321,24 +282,7 @@ void ser_flush(void) {
     UART_PORT.read();
   }
 }
-void blePrint(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(cmd);
-    delay(50);
-  }
-}
-void blePrintln(String cmd) {
-  if (Commands.bluetoothMode) {
-    bluetooth.println(cmd);
-    delay(50);
-  }
-}
-void blePrintres(float a, float b) {
-  if (Commands.bluetoothMode) {
-    bluetooth.print(a, b);
-    delay(50);
-  }
-}
+
 //! Parse data for throttle and steering variables
 String getValue(String data, char separator, int index) {
   int found = 0;
@@ -499,23 +443,23 @@ void navHandler(void) {
     compass.read();
     heading = compass.heading(LSM303::vector<int> { -1, 0, 0 });
     if (compass.timeoutOccurred()) {
-      PRINT("ASTRO HEADING-N/A");
+      UART_PORT.print("ASTRO HEADING-N/A");
     }
     else {
-      PRINT("ASTRO HEADING-OK ");
-      PRINT(heading);
+      UART_PORT.print("ASTRO HEADING-OK ");
+      UART_PORT.print(heading);
     }
-    PRINT(" -- ");
-
+    UART_PORT.print(" -- ");
+    
     if (!gotGps) {
-      PRINTln("GPS-N/A");
+      UART_PORT.println("GPS-N/A");
     }
     else {
-      PRINT("GPS-OK ");
-      PRINTRES(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
-      PRINT(" "); // space
-      PRINTRES(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
-      PRINTln("");
+      UART_PORT.print("GPS-OK ");
+      UART_PORT.print(gps.location.lat(), 6); // print the latitude with 6 digits after the decimal
+      UART_PORT.print(" "); // space
+      UART_PORT.print(gps.location.lng(), 6); // print the longitude with 6 digits after the decimal
+      UART_PORT.println("");
     }
   }
 }
