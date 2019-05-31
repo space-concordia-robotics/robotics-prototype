@@ -44,10 +44,11 @@
 #define LB_EB    34
 
 /* camera servo pins */
+// F/R (front/rear), S/B (side/base)
 #define FS_SERVO 22
 #define FB_SERVO 23
-#define TS_SERVO 16
-#define TB_SERVO 17
+#define RS_SERVO 16
+#define RB_SERVO 17
 
 void initPins(void) {
   pinMode(RF_DIR, OUTPUT);

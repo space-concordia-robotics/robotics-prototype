@@ -211,8 +211,10 @@ void Commands::closeLoop(void) {
   if (isActivated) {
     stop();
   }
+  UART_PORT.println("ASTRO Turning encoders on first...");
+  encOn();
   maxOutputSignal = MAX_RPM_VALUE; minOutputSignal = MIN_RPM_VALUE;
-  UART_PORT.println("Bo!");
+  UART_PORT.println("ASTRO Bo!");
   for (i = 0; i < RobotMotor::numMotors; i++) {
     motorList[i].isOpenLoop = false;
     String msg = "ASTRO Motor " + String(i + 1);
@@ -325,7 +327,7 @@ void Commands::controlWheelMotors(String cmd) {
     if (isSteering) {
       throttle = getValue(cmd, ':', 0).toFloat();
       steering = getValue(cmd, ':', 1).toFloat();
-      UART_PORT.println("ASTRO Throttle: " + String(throttle) + String(" Steering: ") + String(steering));
+      UART_PORT.println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
       //        if (!isOpenLoop){
       //            throttle = map(throttle, -30, 30, -49, 49);
       //            UART_PORT.println("ASTRO Desired Speed: " + String(throttle) + String("RPM ") + String(" Steering: ") + String(steering));
@@ -338,61 +340,66 @@ void Commands::controlWheelMotors(String cmd) {
     }
     else {
       motorNumber = getValue(cmd, ':', 0).toFloat();
-      int speed = getValue(cmd, ':', 1).toFloat();
+      int motorSpeed = getValue(cmd, ':', 1).toFloat();
       steering = 0;
       int dir = 1;
       if (throttle < 0 ) {
         dir = - 1;
       }
       motorList[motorNumber].calcCurrentVelocity();
-      motorList[motorNumber].setVelocity(dir , abs(speed), motorList[motorNumber].getCurrentVelocity());
+      motorList[motorNumber].setVelocity(dir , abs(motorSpeed), motorList[motorNumber].getCurrentVelocity());
       UART_PORT.println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getDesiredVelocity()) + String(" PWM ") + String(motorList[motorNumber].direction));
     }
   }
 }
 
+//! !FB, @FS, #RB, $RS
 void Commands::controlCameraMotors(String cmd) {
   if (!isActivated) {
     UART_PORT.println("ASTRO Astro isn't activated yet!!!");
   }
   else {
-    // this can be refactored with servoList[]
-    switch (cmd[0]) {
+    // this can be refactored with servoList[] - and more, probably
+    char servoSymbol = cmd[0];
+    String angleStr = cmd.remove(0, 1);
+    int angleInt = cmd.toInt();
+    String servoName;
+    switch (servoSymbol) {
       case '!':
-        cmd.remove(0, 1);
-        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-          UART_PORT.println("ASTRO Front camera continuous base is moving at rate: " + String(cmd.toInt()));
-          frontBase.write(cmd.toInt());
+        servoName = "Front camera positional tilt base";
+        if ( (0 <= angleInt) && (angleInt <= 180) ) {
+          UART_PORT.println("ASTRO "+servoName+" is moving is moving to angle " + angleStr);
+          frontBase.write(angleInt);
         }
         else {
-          UART_PORT.println("ASTRO Front camera continuous base: choose values from 0 to 180");
+          UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
       case '@':
-        cmd.remove(0, 1);
-        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-          UART_PORT.println("ASTRO Front camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-          frontSide.write(cmd.toInt());
+        servoName = "Front camera Side continuous servo";
+        if ( (0 <= angleInt) && (angleInt <= 180)) {
+          UART_PORT.println("ASTRO "+servoName+" is moving at rate: " + angleStr);
+          frontSide.write(angleInt);
         }
         else {
-          UART_PORT.println("ASTRO Front camera Side positional servo: choose values from 0 to 180");
+          UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
       case '#':
-        cmd.remove(0, 1);
-        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-          UART_PORT.println("ASTRO Top camera continuous base is moving at rate: " + String(cmd.toInt()));
-          topBase.write(cmd.toInt());
+        servoName = "Rear camera positional tilt base";
+        if ( (0 <= angleInt) && (angleInt <= 180) ) {
+          UART_PORT.println("ASTRO "+servoName+" is moving is moving to angle " + angleStr);
+          rearBase.write(angleInt);
         }
         else {
-          UART_PORT.println("ASTRO Top camera continuous base: choose values from 0 to 180");
+          UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
       case '$':
-        cmd.remove(0, 1);
-        if ( (0 <= cmd.toInt()) && (cmd.toInt() <= 180)) {
-          UART_PORT.println("ASTRO Top camera Side positional servo is moving to angle: " + String(cmd.toInt()));
-          topSide.write(cmd.toInt());
+        servoName = "Rear camera Side continuous servo";
+        if ( (0 <= angleInt) && (angleInt <= 180)) {
+          UART_PORT.println("ASTRO "+servoName+" is moving at rate: " + angleStr);
+          frontSide.write(angleInt);
         }
         else {
-          UART_PORT.println("ASTRO Top camera Side positional servo: choose values from 0 to 180");
+          UART_PORT.println("ASTRO "+servoName+": choose values from 0 to 180");
         }
     }
   }

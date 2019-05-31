@@ -5,9 +5,9 @@
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 1000//50
+#define FEEDBACK_PRINT_INTERVAL 50
 #define LED_BLINK_INTERVAL 1000
-#define SENSOR_READ_INTERVAL 1000//200
+#define SENSOR_READ_INTERVAL 200
 #define SENSOR_TIMEOUT 20
 
 /*
@@ -15,8 +15,8 @@
   the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
   should work.
 */
-#define DEVEL_MODE_1 1
-//#define DEVEL_MODE_2 2
+//#define DEVEL_MODE_1 1
+#define DEVEL_MODE_2 2
 
 #if defined(DEVEL_MODE_1)
 // serial communication over usb
@@ -45,7 +45,7 @@ int leftMotorDirection; // CCW =1 or CW =-1
 int rightMotorDirection; // CCW =1 or CW =-1
 float desiredVelocityRight = 0;
 float desiredVelocityLeft = 0;
-float d = 0.33; //distance between left and right wheels
+float wheelBase = 0.33; //distance between left and right wheels
 float radius = 14;
 float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
@@ -62,8 +62,8 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
 
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 
-Servo frontSide, frontBase, topSide, topBase;
-Servo servoList[] = {frontSide, frontBase, topSide, topBase};
+Servo frontSide, frontBase, rearSide, rearBase;
+Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
 
 /* function declarations */
 // initializers
@@ -159,35 +159,29 @@ void velocityHandler(float throttle, float steering) {
   // steering of 0 means both motors at throttle.
   // as steering moves away from 0, one motor keeps throttle.
   // the other slows down or even reverses based on the steering value.
-  // deg is mapped between -1 and 1 so 0 means no speed and the extremes mean full throttle in either direction.
-  float multiplier;
-  // If statement for CASE 1: steering toward the RIGHT
-  if (steering > 0 ) {
-    multiplier = mapFloat(steering, 0, MAX_INPUT_VALUE, 1, -1);
-    desiredVelocityRight = mapFloat(throttle * multiplier, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
-    desiredVelocityLeft = mapFloat(throttle, MIN_INPUT_VALUE, MAX_INPUT_VALUE,  minOutputSignal, maxOutputSignal);
-    //rotation = "CW";
+  // multiplier is mapped between -1 and 1 so 0 means no speed and the extremes mean full throttle in either direction.
+  
+  float multiplier = mapFloat(fabs(steering), 0, MAX_INPUT_VALUE, 1, -1);
+  float leadingSideAbs = mapFloat(fabs(throttle), 0, MAX_INPUT_VALUE, 0, maxOutputSignal);
+  float trailingSideAbs = leadingSideAbs*multiplier;
+  
+  int dir;
+  if (throttle > 0) dir = 1;
+  else dir = -1;
+  
+  if (steering < 0) { // turning left
+    desiredVelocityRight = leadingSideAbs*dir;
+    desiredVelocityLeft = trailingSideAbs*dir;
   }
-  // If statement for CASE 2: steering toward the LEFT or not steering
-  if (steering <= 0 ) {
-    multiplier = mapFloat(steering, MIN_INPUT_VALUE, 0, -1, 1);
-    desiredVelocityRight = mapFloat(throttle, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
-    desiredVelocityLeft = mapFloat(throttle * multiplier, MIN_INPUT_VALUE, MAX_INPUT_VALUE, minOutputSignal, maxOutputSignal);
-    //rotation = "CCW";
-  }
-  if (desiredVelocityLeft > 0 ) {
-    leftMotorDirection = 1;
-  }
-  else {
-    leftMotorDirection = -1;
+  else { // turning right
+    desiredVelocityRight = trailingSideAbs*dir;
+    desiredVelocityLeft = leadingSideAbs*dir;
   }
 
-  if (desiredVelocityRight < 0 ) {
-    rightMotorDirection = -1;
-  }
-  else {
-    rightMotorDirection = 1;
-  }
+  if (desiredVelocityLeft > 0) leftMotorDirection = CCW;
+  else leftMotorDirection = CW;
+  if (desiredVelocityRight < 0) rightMotorDirection = CCW;
+  else rightMotorDirection = CW;
 
   RF.calcCurrentVelocity();
   RM.calcCurrentVelocity();
@@ -196,12 +190,12 @@ void velocityHandler(float throttle, float steering) {
   LM.calcCurrentVelocity();
   LB.calcCurrentVelocity();
 
-  RF.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RF.getCurrentVelocity());
-  RM.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RM.getCurrentVelocity());
-  RB.setVelocity(rightMotorDirection, abs(desiredVelocityRight), RB.getCurrentVelocity());
-  LF.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LF.getCurrentVelocity());
-  LM.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LM.getCurrentVelocity());
-  LB.setVelocity(rightMotorDirection, abs(desiredVelocityLeft), LB.getCurrentVelocity());
+  RF.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RF.getCurrentVelocity());
+  RM.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RM.getCurrentVelocity());
+  RB.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RB.getCurrentVelocity());
+  LF.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LF.getCurrentVelocity());
+  LM.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LM.getCurrentVelocity());
+  LB.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LB.getCurrentVelocity());
 }
 
 void roverVelocityCalculator(void) {
@@ -209,15 +203,15 @@ void roverVelocityCalculator(void) {
   leftLinearVelocity = (LF.getDirection() * LF.getCurrentVelocity() + LM.getDirection() * LM.getCurrentVelocity() + LB.getDirection() * LB.getCurrentVelocity()) * radius * 0.10472;
 
   forwardVelocity = (rightLinearVelocity + leftLinearVelocity)  / 6;
-  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / d;
+  rotationalVelocity = (leftLinearVelocity - rightLinearVelocity) / wheelBase;
 }
 
 //! attach the servos to pins
 void attachServos() {
   frontSide.attach(FS_SERVO);
   frontBase.attach(FB_SERVO);
-  topSide.attach(TS_SERVO);
-  topBase.attach(TB_SERVO);
+  rearSide.attach(RS_SERVO);
+  rearBase.attach(RB_SERVO);
 }
 //! Initiate encoder for dcMotor objects and pinModes
 void initEncoders(void) {
