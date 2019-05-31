@@ -145,22 +145,34 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-arm-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          console.log('activating stream window')
-          getRoverIP(function (ip) {
-            console.log('ip', ip)
-            $('img#camera-feed')[0].src = ip + ':8090/?action=stream'
-          })
-        }
-      }) //, '/dev/ttyArmScienceCam')
+      requestTask(
+        'camera_stream',
+        1,
+        '#toggle-arm-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            console.log('activating stream window')
+            $('img#camera-feed')[0].src =
+              'http://' +
+              getRoverIP() +
+              ':8080/stream?topic=/cv_camera/image_raw'
+          }
+        },
+        '/dev/ttyArmScienceCam'
+      )
     } else {
-      requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        }
-      })
+      requestTask(
+        'camera_stream',
+        0,
+        '#toggle-arm-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            // succeeded to close stream
+            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          }
+        },
+        '/dev/ttyArmScienceCam'
+      )
     }
   })
 

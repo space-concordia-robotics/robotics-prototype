@@ -158,7 +158,9 @@ $(document).ready(function () {
         function (msgs) {
           if (msgs[0]) {
             $('img#camera-feed')[0].src =
-              'http://' + getRoverIP() + ':8090/?action=stream'
+              'http://' +
+              getRoverIP() +
+              ':8080/stream?topic=/cv_camera/image_raw'
           } else {
             // failed to open stream
             $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
@@ -167,18 +169,23 @@ $(document).ready(function () {
         '/dev/ttyFrontCam'
       )
     } else {
-      requestTask('camera_stream', 0, '#front-camera-stream-btn', function (
-        msgs
-      ) {
-        if (msgs[0]) {
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        } else {
-          // failed to close stream
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        }
-      })
+      requestTask(
+        'camera_stream',
+        0,
+        '#front-camera-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            // succeeded to close stream
+            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          } else {
+            // failed to close stream
+            // $('img#camera-feed')[0].src =
+            // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
+            appendToConsole('Failed to close stream')
+          }
+        },
+        '/dev/ttyFrontCam'
+      )
     }
   })
   $('#rear-camera-stream-btn').on('click', function (event) {
@@ -192,7 +199,9 @@ $(document).ready(function () {
         function (msgs) {
           if (msgs[0]) {
             $('img#camera-feed')[0].src =
-              'http://' + getRoverIP() + ':8090/?action=stream'
+              'http://' +
+              getRoverIP() +
+              ':8080/stream?topic=/cv_camera/image_raw'
           } else {
             // failed to open stream
             $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
@@ -201,18 +210,23 @@ $(document).ready(function () {
         '/dev/ttyRearCam'
       )
     } else {
-      requestTask('camera_stream', 0, '#rear-camera-stream-btn', function (
-        msgs
-      ) {
-        if (msgs[0]) {
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        } else {
-          // failed to close stream
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        }
-      })
+      requestTask(
+        'camera_stream',
+        0,
+        '#rear-camera-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            // succeeded to close stream
+            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          } else {
+            // failed to close stream
+            appendToConsole('Failed to close stream')
+            // $('img#camera-feed')[0].src =
+            // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
+          }
+        },
+        '/dev/ttyRearCam'
+      )
     }
   })
 
