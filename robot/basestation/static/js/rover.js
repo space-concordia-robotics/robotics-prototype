@@ -21,8 +21,8 @@ function printCommandsList () {
   appendToConsole("'p': ping arm mcu")
   appendToConsole("'q': emergency stop all motors")
   appendToConsole("'l': view key commands")
-  //appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
-  //appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
+  // appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
+  // appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
 // Manual control
@@ -47,7 +47,6 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')
@@ -86,7 +85,7 @@ $(document).ready(function () {
     if (!$('#rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#activate-rover-btn').is(':checked')) {
-      sendScienceRequest('activate', function (msgs) {
+      sendRoverRequest('activate', function (msgs) {
         console.log('msgs', msgs)
       })
     } else {
@@ -101,21 +100,35 @@ $(document).ready(function () {
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-rover-listener-btn').is(':checked')) {
       let serialType = 'uart' // in a perfect world this is controlled in the gui
-      if ( $('button#mux').text().includes('Rover') || serialType == 'usb') {
-        requestTask('rover_listener', 1, '#toggle-rover-listener-btn', function (msgs) {
-          if (msgs[0]) {
-            $('#toggle-rover-listener-btn')[0].checked = true
+      if (
+        $('button#mux')
+          .text()
+          .includes('Rover') ||
+        serialType == 'usb'
+      ) {
+        requestTask(
+          'rover_listener',
+          1,
+          '#toggle-rover-listener-btn',
+          function (msgs) {
+            if (msgs[0]) {
+              $('#toggle-rover-listener-btn')[0].checked = true
             } else {
               $('#toggle-rover-listener-btn')[0].checked = false
             }
-          }, serialType)
-        } else {
+          },
+          serialType
+        )
+      } else {
         appendToConsole(
-          'Cannot turn rover listener on if not in rover mux channel!')
+          'Cannot turn rover listener on if not in rover mux channel!'
+        )
       }
     } else {
       // closing rover listener
-      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (msgs) {
+      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (
+        msgs
+      ) {
         console.log('msgs[0]', msgs[0])
         if (msgs.length == 2) {
           console.log('msgs[1]', msgs[1])
@@ -138,17 +151,25 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#front-camera-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#front-camera-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        } else {
-          // failed to open stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        }
-      }, '/dev/ttyFrontCam')
+      requestTask(
+        'camera_stream',
+        1,
+        '#front-camera-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            $('img#camera-feed')[0].src =
+              'http://' + getRoverIP() + ':8090/?action=stream'
+          } else {
+            // failed to open stream
+            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          }
+        },
+        '/dev/ttyFrontCam'
+      )
     } else {
-      requestTask('camera_stream', 0, '#front-camera-stream-btn', function (msgs) {
+      requestTask('camera_stream', 0, '#front-camera-stream-btn', function (
+        msgs
+      ) {
         if (msgs[0]) {
           // succeeded to close stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
@@ -164,17 +185,25 @@ $(document).ready(function () {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
     if ($('#rear-camera-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#rear-camera-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          $('img#camera-feed')[0].src =
-            'http://' + getRoverIP() + ':8090/?action=stream'
-        } else {
-          // failed to open stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        }
-      }, '/dev/ttyRearCam')
+      requestTask(
+        'camera_stream',
+        1,
+        '#rear-camera-stream-btn',
+        function (msgs) {
+          if (msgs[0]) {
+            $('img#camera-feed')[0].src =
+              'http://' + getRoverIP() + ':8090/?action=stream'
+          } else {
+            // failed to open stream
+            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
+          }
+        },
+        '/dev/ttyRearCam'
+      )
     } else {
-      requestTask('camera_stream', 0, '#rear-camera-stream-btn', function (msgs) {
+      requestTask('camera_stream', 0, '#rear-camera-stream-btn', function (
+        msgs
+      ) {
         if (msgs[0]) {
           // succeeded to close stream
           $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
@@ -194,20 +223,20 @@ $(document).ready(function () {
       sendArmRequest('motor 1 loop closed', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
+          // console.log('trueee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
+          // console.log('falseeee')
         }
       })
     } else {
       sendArmRequest('motor 1 loop open', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = false
-          //console.log('falseeee')
+          // console.log('falseeee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = true
-          //console.log('trueee')
+          // console.log('trueee')
         }
       })
     }
@@ -216,15 +245,15 @@ $(document).ready(function () {
   $('#send-antenna-data-btn').on('click', function (event) {
     event.preventDefault()
     let goodInput = true
-    if ( !($('#antenna-latitude-input').val()) ) {
+    if (!$('#antenna-latitude-input').val()) {
       appendToConsole('latitude field empty!')
       goodInput = false
     }
-    if ( !($('#antenna-longitude-input').val()) ) {
+    if (!$('#antenna-longitude-input').val()) {
       appendToConsole('longitude field empty!')
       goodInput = false
     }
-    if ( !($('#antenna-start-dir-input').val()) ) {
+    if (!$('#antenna-start-dir-input').val()) {
       appendToConsole('bearing field empty!')
       goodInput = false
     }
@@ -232,9 +261,9 @@ $(document).ready(function () {
       let initialLatitude = $('#antenna-latitude-input').val()
       let initialLongitude = $('#antenna-longitude-input').val()
       let initialBearing = $('#antenna-start-dir-input').val()
-      antenna_latitude.set( parseFloat(initialLatitude) );
-      antenna_longitude.set( parseFloat(initialLongitude) );
-      antenna_start_dir.set( parseFloat(initialBearing) );
+      antenna_latitude.set(parseFloat(initialLatitude))
+      antenna_longitude.set(parseFloat(initialLongitude))
+      antenna_start_dir.set(parseFloat(initialBearing))
       $('#antenna-latitude').text(initialLatitude)
       $('#antenna-longitude').text(initialLongitude)
       $('#antenna-start-dir').text(initialBearing)
@@ -251,19 +280,19 @@ $(document).ready(function () {
   $('#send-goal-pos-btn').on('click', function (event) {
     event.preventDefault()
     let goodInput = true
-    if ( !($('#goal-latitude-input').val()) ) {
+    if (!$('#goal-latitude-input').val()) {
       appendToConsole('latitude field empty!')
       goodInput = false
     }
-    if ( !($('#goal-longitude-input').val()) ) {
+    if (!$('#goal-longitude-input').val()) {
       appendToConsole('longitude field empty!')
       goodInput = false
     }
     if (goodInput) {
       let desiredLatitude = $('#goal-latitude-input').val()
       let desiredLongitude = $('#goal-longitude-input').val()
-      goal_latitude.set( parseFloat(desiredLatitude) );
-      goal_longitude.set( parseFloat(desiredLongitude) );
+      goal_latitude.set(parseFloat(desiredLatitude))
+      goal_longitude.set(parseFloat(desiredLongitude))
       $('#goal-latitude').text(desiredLatitude)
       $('#goal-longitude').text(desiredLongitude)
       $('#goal-inputs').hide()
@@ -305,22 +334,26 @@ document.addEventListener('keydown', function (event) {
 })
 // rover mcu ping
 document.addEventListener('keydown', function (event) {
-  if (
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
+  if (event.code === 'KeyP' && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
     sendRoverRequest('ping', function (msgs) {})
     lastCmdSent = new Date().getTime()
   }
 })
 // print commands list
 document.addEventListener('keydown', function (event) {
-  if (
-    event.code === 'KeyL' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
+  if (event.code === 'KeyL' && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
     $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
+    lastCmdSent = new Date().getTime()
+  }
+})
+
+// rover mcu ping
+document.addEventListener('keydown', function (event) {
+  if (event.code === 'KeyO') {
+    sendRoverRequest('stop', function (msgs) {
+      console.log('msgs', msgs)
+    })
     lastCmdSent = new Date().getTime()
   }
 })
@@ -328,6 +361,9 @@ document.addEventListener('keydown', function (event) {
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
   switch (e.which) {
+    case 79:
+      lightUp('#stop-motors-btn')
+      break
     case 73: // 'i' --> increase max throttle
       lightUp('#max-throttle-increase > button')
       maxSoftThrottle += maxThrottleIncrement
@@ -340,7 +376,7 @@ $(document).keydown(function (e) {
     case 85: // 'u' --> decrease max throttle
       lightUp('#max-throttle-decrease > button')
       maxSoftThrottle -= maxThrottleIncrement
-      if (maxSoftThrottle < 0 ) {
+      if (maxSoftThrottle < 0) {
         maxSoftThrottle = 0
       }
       $('#max-throttle-speed').text(maxSoftThrottle)
@@ -398,6 +434,9 @@ $(document).keydown(function (e) {
 // those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function (e) {
   switch (e.which) {
+    case 79:
+      dim('#stop-motors-btn')
+      break
     case 65: // left
       dim('#rover-left > button')
       break
@@ -458,7 +497,7 @@ function gameLoop () {
     if (keyState[68]) {
       lightUp('#rover-right > button')
       if (steering < 0) {
-        steering += 3*steeringIncrement
+        steering += 3 * steeringIncrement
       } else {
         steering += steeringIncrement
       }
@@ -472,7 +511,7 @@ function gameLoop () {
       lightUp('#rover-left > button')
 
       if (steering > 0) {
-        steering -= 3*steeringIncrement
+        steering -= 3 * steeringIncrement
       } else {
         steering -= steeringIncrement
       }
@@ -493,7 +532,7 @@ function gameLoop () {
     if (keyState[87]) {
       lightUp('#rover-up > button')
       if (throttle < 0) {
-        throttle += 3*throttleIncrement
+        throttle += 3 * throttleIncrement
       } else {
         throttle += throttleIncrement
       }
@@ -506,7 +545,7 @@ function gameLoop () {
     else if (keyState[83]) {
       lightUp('#rover-down > button')
       if (throttle > 0) {
-        throttle -= 3*throttleIncrement
+        throttle -= 3 * throttleIncrement
       } else {
         throttle -= throttleIncrement
       }
@@ -525,10 +564,10 @@ function gameLoop () {
     }
     $('#steering-speed').text(steering)
     if (throttle == 0 && sentZero) {
-      ; // do nothing
+      // do nothing
     } else {
       $('#throttle-speed').text(throttle)
-      let cmd = throttle.toString()+':'+steering.toString()
+      let cmd = throttle.toString() + ':' + steering.toString()
       sendRoverCommand(cmd)
       lastCmdSent = new Date().getTime()
       if (throttle != 0) {

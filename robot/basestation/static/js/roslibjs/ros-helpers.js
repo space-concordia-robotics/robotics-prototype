@@ -3,7 +3,7 @@ function initRosWeb () {
     url: 'ws://localhost:9090'
   })
   ros.on('connection', function () {
-    //appendToConsole('Connected to websocket server.')
+    // appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
     if (window.location.pathname == '/rover') {
       initNavigationPanel()
@@ -271,17 +271,17 @@ function initRosWeb () {
   })
   // setup gps parameters for antenna directing
   antenna_latitude = new ROSLIB.Param({
-   ros : ros,
-   name : 'antenna_latitude'
-  });
+    ros: ros,
+    name: 'antenna_latitude'
+  })
   antenna_longitude = new ROSLIB.Param({
-   ros : ros,
-   name : 'antenna_longitude'
-  });
+    ros: ros,
+    name: 'antenna_longitude'
+  })
   antenna_start_dir = new ROSLIB.Param({
-   ros : ros,
-   name : 'antenna_start_dir'
-  });
+    ros: ros,
+    name: 'antenna_start_dir'
+  })
 
   // setup a subscriber for the rover_goal topic
   rover_goal_listener = new ROSLIB.Topic({
@@ -295,13 +295,13 @@ function initRosWeb () {
   })
   // setup gps parameters for rover goals
   goal_latitude = new ROSLIB.Param({
-   ros : ros,
-   name : 'goal_latitude'
-  });
+    ros: ros,
+    name: 'goal_latitude'
+  })
   goal_longitude = new ROSLIB.Param({
-   ros : ros,
-   name : 'goal_longitude'
-  });
+    ros: ros,
+    name: 'goal_longitude'
+  })
 }
 
 initRosWeb()
@@ -527,9 +527,9 @@ function sendScienceRequest (command, callback) {
 function sendRoverCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending \"' + cmd + '\" to rover Teensy')
+  appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  //arm_command_publisher.publish(command)
+  // arm_command_publisher.publish(command)
 }
 
 function sendRoverRequest (command, callback) {
@@ -560,56 +560,73 @@ function sendRoverRequest (command, callback) {
 
 function initNavigationPanel () {
   let hasAntennaParams = true
-  antenna_latitude.get(function(val){
-    if (val!=null) {
+  antenna_latitude.get(function (val) {
+    if (val != null) {
       $('#antenna-latitude').text(val)
-      antenna_longitude.get(function(val){
-        if (val!=null) {
+      antenna_longitude.get(function (val) {
+        if (val != null) {
           $('#antenna-longitude').text(val)
-          antenna_start_dir.get(function(val){
-            if (val!=null) {
+          antenna_start_dir.get(function (val) {
+            if (val != null) {
               $('#antenna-start-dir').text(val)
-              appendToConsole('Antenna goal parameters already set, displaying antenna directions')
+              appendToConsole(
+                'Antenna goal parameters already set, displaying antenna directions'
+              )
               $('#antenna-inputs').hide()
               $('#antenna-unchanging').show()
             } else {
-              appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
+              appendToConsole(
+                'One or more antenna parameters is missing, if you would like antenna directions then please input them'
+              )
               $('#antenna-inputs').show()
               $('#antenna-unchanging').hide()
             }
           })
         } else {
-          appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
+          appendToConsole(
+            'One or more antenna parameters is missing, if you would like antenna directions then please input them'
+          )
           $('#antenna-inputs').show()
           $('#antenna-unchanging').hide()
         }
       })
     } else {
-      appendToConsole('One or more antenna parameters is missing, if you would like antenna directions then please input them')
+      appendToConsole(
+        'One or more antenna parameters is missing, if you would like antenna directions then please input them'
+      )
       $('#antenna-inputs').show()
       $('#antenna-unchanging').hide()
     }
   })
 
-  goal_latitude.get(function(val){
-    if(val!=null){
+  goal_latitude.get(function (val) {
+    if (val != null) {
       $('#goal-latitude').text(val)
-      goal_longitude.get(function(val){
-        if (val!=null) {
-          appendToConsole('GPS goal parameters already set, displaying directions to the goal')
+      goal_longitude.get(function (val) {
+        if (val != null) {
+          appendToConsole(
+            'GPS goal parameters already set, displaying directions to the goal'
+          )
           $('#goal-longitude').text(val)
           $('#goal-inputs').hide()
           $('#goal-unchanging').show()
         } else {
-          appendToConsole('One or more GPS goal parameters is missing, if you would like directions to the goal then please input them')
+          appendToConsole(
+            'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
+          )
           $('#goal-inputs').show()
           $('#goal-unchanging').hide()
         }
       })
     } else {
-      appendToConsole('One or more GPS goal parameters is missing, if you would like directions to the goal then please input them')
+      appendToConsole(
+        'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
+      )
       $('#goal-inputs').show()
       $('#goal-unchanging').hide()
+    }
+  })
+}
 
 /*
 returns the currently set ROS_MASTER_URI value
@@ -618,6 +635,7 @@ usage:
 getRoverIP(function(callback) {})
 */
 function getRoverIP (callback) {
+  /*
   let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
   console.log('request', request)
   ping_client.callService(request, function (result) {
@@ -626,4 +644,6 @@ function getRoverIP (callback) {
       callback(result.response)
     }
   })
+  */
+    return "172.16.1.30"
 }
