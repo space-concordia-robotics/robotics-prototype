@@ -475,6 +475,7 @@ $(document).ready(function () {
       return
     }
 
+    // drill stop
     sendScienceRequest('ds', function (msgs) {
       console.log('msgs', msgs)
 
@@ -486,6 +487,38 @@ $(document).ready(function () {
         appendToConsole('Something went wrong')
       }
     })
+  })
+
+  $('#set-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    console.log('msgs', msgs)
+
+    if (msgs[1].includes('drillspeed done')) {
+      appendToConsole('Success')
+      lightUp('#set-speed-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else {
+      appendToConsole('Something went wrong')
+    }
+  })
+
+  $('#set-time-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    console.log('msgs', msgs)
+
+    if (msgs[1].includes('drillspeed done')) {
+      appendToConsole('Success')
+      lightUp('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else {
+      appendToConsole('Something went wrong')
+    }
   })
 })
 

@@ -145,7 +145,8 @@ requests = {
     'led2' : ['led2 done'],
     'led2s' : ['led2s done'],
     'dgo' : ['dgo done'],
-    'ds' : ['ds done']
+    'ds' : ['ds done'],
+    'drillspeed' : ['drillspeed done']
 }
 
 def handle_client(req):
@@ -171,7 +172,7 @@ def handle_client(req):
                 break
             else:
                 scienceResponse.response += reqFeedback
-        rospy.Rate(100).sleep()
+        rospy.Rate(100).sleep() # test with 50? / 50ms timeout above
     rospy.loginfo('took ' + str(time.time()-sinceRequest) + ' seconds, sending this back to GUI: ')
     rospy.loginfo(scienceResponse)
     reqFeedback=''
@@ -258,7 +259,7 @@ if __name__ == '__main__':
                         feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: '+ data)
-            rospy.Rate(100).sleep()
+            rospy.Rate(50).sleep()
     except rospy.ROSInterruptException:
         pass
 

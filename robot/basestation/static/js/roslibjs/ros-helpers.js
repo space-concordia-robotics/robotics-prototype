@@ -209,6 +209,8 @@ function initRosWeb () {
     } else if (values[6] == '1') {
       $('#vibrator6-toggle')[0].checked = true
     }
+
+    $('#drill-rpm').val(values[13])
   })
 
   /* rover commands */
@@ -632,7 +634,7 @@ function initNavigationPanel () {
 returns the currently set ROS_MASTER_URI value
 
 usage:
-getRoverIP(function(callback) {})
+getRoverIP(function(callback) { // do something with the response })
 */
 function getRoverIP (callback) {
   /*
