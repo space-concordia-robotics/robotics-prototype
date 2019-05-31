@@ -8,7 +8,7 @@ import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 arm_control_dir = current_dir+'/../../arm_control/scripts/'
-scripts = [arm_control_dir + "RoverNode.py", arm_control_dir + "ArmNode.py", arm_control_dir + "ScienceNode.py", current_dir + "start_stream.sh"]
+scripts = [arm_control_dir + "RoverNode.py", arm_control_dir + "ArmNode.py", arm_control_dir + "ScienceNode.py", current_dir + "start_ros_stream.sh"]
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "bash", "", 1, True)]
 known_tasks = ["rover_listener", "arm_listener", "science_listener", "camera_stream"]
 known_listeners = known_tasks[:-1]

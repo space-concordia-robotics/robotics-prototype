@@ -69,8 +69,8 @@ class Listener:
 
             if self.force_kill:
                 # edge case due to current implementation of video streamer
-                if "start_stream" in self.script:
-                    real_pid = get_pid("mjpg_streamer")
+                if "start_ros_stream" in self.script:
+                    real_pid = get_pid("cv_camera_node")
 
                     if real_pid != -1:
                         output, error = run_shell("kill -9", str(real_pid))

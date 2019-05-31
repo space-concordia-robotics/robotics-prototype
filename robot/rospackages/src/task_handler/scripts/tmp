@@ -1,1 +1,8 @@
+Integrated_Webcam_HD: Integrate (usb-0000:00:14.0-12):
+	/dev/video0
 
+HD Pro Webcam C920 (usb-0000:00:14.0-2):
+	/dev/video1
+
+HD Pro Webcam C920 (usb-0000:00:14.0-3):
+	/dev/video2
