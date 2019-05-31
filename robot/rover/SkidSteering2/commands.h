@@ -31,11 +31,14 @@ class Commands {
     bool isActivated = false;
     bool isOpenLoop = true; // No PID controller
     bool isSteering = true;
-    bool error = false;
     bool isGpsImu = true;
     bool isEnc = true;
-    String errorMessage;
 
+    bool imuError = false;
+    String imuErrorMsg = "ASTRO IMU may be malfunctioning, timeout reached";
+    bool gpsError = false;
+    String gpsErrorMsg = "ASTRO GPS could not be initialized";
+    
     int prevThrottle = 0;
     int prevSteering = 0;
 
@@ -60,7 +63,6 @@ class Commands {
     void accOff(void);
     void status(void);
     void stop(void);
-    void errorMsg(void);
 };
 
 void Commands::setupMessage(void) {
@@ -228,7 +230,8 @@ void Commands::systemStatus(void) {
   UART_PORT.println(String((isActivated) ? "ACTIVE" : "INACTIVE"));
   UART_PORT.println("ASTRO Steering: " + String((isSteering) ? "Steering Control" : "Motor Control"));
   UART_PORT.println("ASTRO Encoders: " + String((isEnc) ? "ON" : "OFF"));
-  UART_PORT.print("ASTRO Nav " + (error ? "ERROR: " + errorMessage : "Success\n"));
+  UART_PORT.println("ASTRO GPS " + (gpsError ? "ERROR: " + gpsErrorMsg : "Success"));
+  UART_PORT.println("ASTRO IMU " + (imuError ? "ERROR: " + imuErrorMsg : "Success"));
   UART_PORT.println("ASTRO Nav Stream: " + String((isGpsImu) ? "ON" : "OFF"));
   UART_PORT.print("ASTRO Motor loop statuses: ");
   for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
@@ -404,11 +407,6 @@ void Commands::stop(void) {
   for (int i = 0; i < RobotMotor::numMotors; i++) {
     UART_PORT.println(String("ASTRO ") + String(motorList[i].motorName) + String("'s desired speed: ") + String(motorList[i].getCurrentVelocity()) + String(" PWM ") + String(motorList[i].direction));
   }
-}
-void Commands::errorMsg(void) {
-  UART_PORT.println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
-  UART_PORT.print("ASTRO " + String((error) ? "ERROR: " + String(errorMessage) : "No Error\n"));
-  UART_PORT.println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
 #endif
