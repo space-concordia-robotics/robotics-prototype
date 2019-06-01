@@ -1,5 +1,5 @@
 // for command thoughput limiting
-const DRIVE_THROTTLE_TIME = 75
+const DRIVE_THROTTLE_TIME = 200
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
