@@ -109,7 +109,7 @@ def init_serial():
                     except:
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
-                        if mcuName in response:
+                        if mcuName in data:
                             rospy.loginfo(mcuName+" MCU idenified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                             rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time()-startConnecting)*1000)

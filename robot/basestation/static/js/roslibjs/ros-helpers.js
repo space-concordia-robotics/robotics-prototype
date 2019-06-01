@@ -77,7 +77,7 @@ function initRosWeb () {
   gripper_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'gripper_position',
-    messageType: 'std_msgs/Point'
+    messageType: 'geometry_msgs/Point'
   })
 
   gripper_listener.subscribe(function (msg) {
@@ -495,6 +495,15 @@ function checkTaskStatuses () {
         } else if (msgs[1].includes('running')) {
           $('#toggle-rover-listener-btn')[0].checked = true
         }
+      }
+    })
+
+    sendRoverRequest('who', function (msgs) {
+      console.log('!!!!msgs!!!!', msgs)
+      if (msgs[1].includes('Happy')) {
+        $('#activate-rover-btn')[0].checked = true
+      } else {
+        $('#activate-rover-btn')[0].checked = false
       }
     })
 
