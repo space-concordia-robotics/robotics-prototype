@@ -500,6 +500,41 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
 
+    // numpad8 --> ARM UP
+    if (!$serialCmdInput.is(':focus') && keyState[104]) {
+      console.log('ARM UP')
+      lightUp('#arm-up-btn > button')
+    }
+
+    // numpad4 --> ARM LEFT
+    if (!$serialCmdInput.is(':focus') && keyState[100]) {
+      console.log('ARM LEFT')
+      lightUp('#arm-left-btn > button')
+    }
+
+    // numpad6 --> ARM RIGHT
+    if (!$serialCmdInput.is(':focus') && keyState[102]) {
+      console.log('ARM RIGHT')
+      lightUp('#arm-right-btn > button')
+    }
+
+    // numpad5 --> ARM DOWN
+    if (!$serialCmdInput.is(':focus') && keyState[101]) {
+      console.log('ARM DOWN')
+      lightUp('#arm-down-btn > button')
+    }
+
+    // numpad1 --> ARM BACK
+    if (!$serialCmdInput.is(':focus') && keyState[97]) {
+      console.log('ARM BACK')
+      lightUp('#arm-back-btn > button')
+    }
+
+    // numpad3 --> ARM FWD
+    if (!$serialCmdInput.is(':focus') && keyState[99]) {
+      console.log('ARM FWD')
+      lightUp('#arm-fwd-btn > button')
+    }
     // redraw/reposition your object here
     // also redraw/animate any objects not controlled by the user
   }
@@ -607,5 +642,42 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  console.log('event.code:', event.code)
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad8') {
+    dim('#arm-up-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad4') {
+    dim('#arm-left-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad6') {
+    dim('#arm-right-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad5') {
+    dim('#arm-down-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad1') {
+    dim('#arm-back-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad3') {
+    dim('#arm-fwd-btn > button')
   }
 })

@@ -73,6 +73,17 @@ function initRosWeb () {
     name: 'ik_command',
     messageType: 'IkCommand'
   })
+
+  gripper_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'gripper_position',
+    messageType: 'std_msgs/Point'
+  })
+
+  gripper_listener.subscribe(function (msg) {
+    console.log('gripper_postion:', msg)
+  })
+
   // setup a subscriber for the arm_joint_states topic
   arm_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
@@ -529,6 +540,13 @@ function checkTaskStatuses () {
   } /* else if (window.location.pathname == '/rover') { //pds
     console.log('rover page')
   } */
+}
+
+function sendIKCommand () {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to IK node')
+  ik_command_publisher.publish(cmd)
 }
 
 function sendArmCommand (cmd) {
