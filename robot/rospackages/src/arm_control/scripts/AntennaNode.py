@@ -6,7 +6,7 @@ import time
 from Nav_funs import Distance, Direction
 import rospy
 from geometry_msgs.msg import Point
-from arm_control.msg import RoverPosition, AntennaGoal
+#from arm_control.msg import RoverPosition, AntennaGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
@@ -26,8 +26,8 @@ def subscriber_callback(message):
             rotatorAngle -= 360
 
         msg = Point()
-        msg.desiredDir = rotatorAngle
-        msg.distFromBase = BS_to_Rover_dis
+        msg.x = rotatorAngle/10
+        msg.y = BS_to_Rover_dis
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
