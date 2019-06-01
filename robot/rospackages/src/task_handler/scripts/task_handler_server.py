@@ -42,7 +42,12 @@ def handle_task(task, status, args):
                 if status == 2:
                     response = chosen_task
                     is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
-                    return response + is_running_str + "\n"
+                    args_str = ""
+
+                    if running_tasks[i].is_running() and running_tasks[i].get_args():
+                        args_str = " with args: " + running_tasks[i].get_args()
+
+                    return response + is_running_str + args_str + "\n"
 
                 if chosen_task in known_listeners:
                     other_listeners = [x for x in known_listeners if x != chosen_task]
