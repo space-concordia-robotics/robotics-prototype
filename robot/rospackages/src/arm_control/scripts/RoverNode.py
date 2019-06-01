@@ -78,6 +78,7 @@ def init_serial():
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                                 rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
                                 return
+        else:
             rospy.logerr("No USB devices recognized, exiting")
             sys.exit(0)
 
@@ -111,7 +112,7 @@ def init_serial():
                         if mcuName in response:
                             rospy.loginfo(mcuName+" MCU idenified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
+                            rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time()-startConnecting)*1000)
                             return
                     else:
                         rospy.loginfo('got raw message: '+dat)

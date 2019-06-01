@@ -97,14 +97,15 @@ $(document).ready(function () {
   })
   $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
+    let serialType = $('#serial-type')
+      .text()
+      .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-rover-listener-btn').is(':checked')) {
-      let serialType = 'uart' // in a perfect world this is controlled in the gui
       if (
         $('button#mux')
           .text()
-          .includes('Rover') ||
-        serialType == 'usb'
+          .includes('Rover')
       ) {
         requestTask(
           'rover_listener',
@@ -126,25 +127,29 @@ $(document).ready(function () {
       }
     } else {
       // closing rover listener
-      requestTask('rover_listener', 0, '#toggle-rover-listener-btn', function (
-        msgs
-      ) {
-        console.log('msgs[0]', msgs[0])
-        if (msgs.length == 2) {
-          console.log('msgs[1]', msgs[1])
-          if (msgs[1].includes('already running')) {
-            $('#toggle-rover-listener-btn')[0].checked = true
+      requestTask(
+        'rover_listener',
+        0,
+        '#toggle-rover-listener-btn',
+        function (msgs) {
+          console.log('msgs[0]', msgs[0])
+          if (msgs.length == 2) {
+            console.log('msgs[1]', msgs[1])
+            if (msgs[1].includes('already running')) {
+              $('#toggle-rover-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-rover-listener-btn')[0].checked = false
+            }
           } else {
-            $('#toggle-rover-listener-btn')[0].checked = false
+            if (msgs[0]) {
+              $('#toggle-rover-listener-btn')[0].checked = true
+            } else {
+              $('#toggle-rover-listener-btn')[0].checked = false
+            }
           }
-        } else {
-          if (msgs[0]) {
-            $('#toggle-rover-listener-btn')[0].checked = true
-          } else {
-            $('#toggle-rover-listener-btn')[0].checked = false
-          }
-        }
-      })
+        },
+        serialType
+      )
     }
   })
   $('#front-camera-stream-btn').on('click', function (event) {
@@ -237,20 +242,16 @@ $(document).ready(function () {
       sendArmRequest('motor 1 loop closed', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = true
-          // console.log('trueee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = false
-          // console.log('falseeee')
         }
       })
     } else {
       sendArmRequest('motor 1 loop open', function (msgs) {
         if (msgs[0]) {
           $('#m1-closed-loop-btn')[0].checked = false
-          // console.log('falseeee')
         } else {
           $('#m1-closed-loop-btn')[0].checked = true
-          // console.log('trueee')
         }
       })
     }
