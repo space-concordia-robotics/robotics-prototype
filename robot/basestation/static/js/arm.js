@@ -141,40 +141,6 @@ $(document).ready(function () {
       })
     }
   })
-  $('#toggle-arm-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-stream-btn').is(':checked')) {
-      requestTask(
-        'camera_stream',
-        1,
-        '#toggle-arm-stream-btn',
-        function (msgs) {
-          if (msgs[0]) {
-            console.log('activating stream window')
-            $('img#camera-feed')[0].src =
-              'http://' +
-              getRoverIP() +
-              ':8080/stream?topic=/cv_camera/image_raw'
-          }
-        },
-        '/dev/ttyArmScienceCam'
-      )
-    } else {
-      requestTask(
-        'camera_stream',
-        0,
-        '#toggle-arm-stream-btn',
-        function (msgs) {
-          if (msgs[0]) {
-            // succeeded to close stream
-            $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-          }
-        },
-        '/dev/ttyArmScienceCam'
-      )
-    }
-  })
 
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()

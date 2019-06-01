@@ -404,6 +404,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
       appendToConsole(
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
+
       if (reqStatus == 0) {
         $(buttonID)[0].checked = false
       } else if (reqStatus == 1) {
@@ -439,13 +440,15 @@ function checkTaskStatuses () {
       }
     })
     // check arm camera stream status
-    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
+    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
+      msgs
+    ) {
       appendToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
-          $('#toggle-arm-stream-btn')[0].checked = false
+          $('#arm-science-camera-stream-btn')[0].checked = false
         } else if (msgs[1].includes('running')) {
-          $('#toggle-arm-stream-btn')[0].checked = true
+          $('#arm-science-camera-stream-btn')[0].checked = true
         }
       }
     })
@@ -474,7 +477,7 @@ function checkTaskStatuses () {
     //       }
     //     }
     //   })
-    // } else if (window.location.pathname == '/science') {
+  } else if (window.location.pathname == '/science') {
     console.log('science page')
     requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
       appendToConsole('msgs', msgs)
