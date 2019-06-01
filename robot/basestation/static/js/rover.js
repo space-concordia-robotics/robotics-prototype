@@ -47,6 +47,63 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
+  // camera servos
+
+  // servo name: "Front camera positional tilt base"
+  $('#camera-front-lpan-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand(
+        // TODO: add more validation for input box
+        '!' + $('#servo-val').val()
+      )
+    }
+  })
+
+  $('#camera-front-rpan-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('!' + $('#servo-val').val())
+    }
+  })
+
+  // servo name: "Front camera Side continuous servo"
+  $('#camera-front-tilt-up-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('@' + $('#servo-val').val())
+    }
+  })
+
+  $('#camera-front-tilt-down-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('@' + $('#servo-val').val())
+    }
+  })
+
+  // servo name: "Rear camera positional tilt base"
+  $('#camera-back-lpan-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('#' + $('#servo-val').val())
+    }
+  })
+
+  $('#camera-back-rpan-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('#' + $('#servo-val').val())
+    }
+  })
+
+  // servo name: "Rear camera Side continuous servo"
+  $('#camera-back-tilt-up-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('$' + $('#servo-val').val())
+    }
+  })
+
+  $('#camera-back-tilt-down-btn').click(function () {
+    if ($('#servo-val').val() != '') {
+      sendRoverCommand('$' + $('#servo-val').val())
+    }
+  })
+
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')
@@ -82,16 +139,22 @@ $(document).ready(function () {
   $('#activate-rover-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
-    if (!$('#rover-listener-btn').is(':checked')) {
+    if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#activate-rover-btn').is(':checked')) {
       sendRoverRequest('activate', function (msgs) {
         console.log('msgs', msgs)
+        if (msgs[0]) {
+          $('#activate-rover-btn')[0].checked = true
+        }
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
       sendRoverRequest('deactivate', function (msgs) {
         console.log('msgs', msgs)
+        if (msgs[0]) {
+          $('#activate-rover-btn')[0].checked = false
+        }
       })
     }
   })
@@ -246,7 +309,8 @@ document.addEventListener('keydown', function (event) {
     event.ctrlKey &&
     event.altKey &&
     event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
+    !$('#servo-val').is(':focus')
   ) {
     appendToConsole('pinging odroid')
     $.ajax('/ping_rover', {
@@ -267,14 +331,22 @@ document.addEventListener('keydown', function (event) {
 })
 // rover mcu ping
 document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyP' && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+  if (
+    event.code === 'KeyP' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
+    !$('#servo-val').is(':focus')
+  ) {
     sendRoverRequest('ping', function (msgs) {})
     lastCmdSent = new Date().getTime()
   }
 })
 // print commands list
 document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyL' && millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+  if (
+    event.code === 'KeyL' &&
+    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
+    !$('#servo-val').is(':focus')
+  ) {
     $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
     lastCmdSent = new Date().getTime()
@@ -283,7 +355,7 @@ document.addEventListener('keydown', function (event) {
 
 // rover mcu ping
 document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyO') {
+  if (event.code === 'KeyO' && !$('#servo-val').is(':focus')) {
     sendRoverRequest('stop', function (msgs) {
       console.log('msgs', msgs)
     })
@@ -293,74 +365,76 @@ document.addEventListener('keydown', function (event) {
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  switch (e.which) {
-    case 79:
-      lightUp('#stop-motors-btn')
-      break
-    case 73: // 'i' --> increase max throttle
-      lightUp('#max-throttle-increase > button')
-      maxSoftThrottle += maxThrottleIncrement
-      if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
-        maxSoftThrottle = MAX_THROTTLE_SPEED
-      }
-      $('#max-throttle-speed').text(maxSoftThrottle)
-      lastCmdSent = new Date().getTime()
-      break
-    case 85: // 'u' --> decrease max throttle
-      lightUp('#max-throttle-decrease > button')
-      maxSoftThrottle -= maxThrottleIncrement
-      if (maxSoftThrottle < 0) {
-        maxSoftThrottle = 0
-      }
-      $('#max-throttle-speed').text(maxSoftThrottle)
-      lastCmdSent = new Date().getTime()
-      break
-    case 75: // 'k' --> increase max steering
-      lightUp('#max-steering-increase > button')
-      maxSoftSteering += maxSteeringIncrement
-      if (maxSoftSteering > MAX_STEERING_SPEED) {
-        maxSoftSteering = MAX_STEERING_SPEED
-      }
-      $('#max-steering-speed').text(maxSoftSteering)
-      lastCmdSent = new Date().getTime()
-      break
-    case 74: // 'j' --> decrease max steering
-      lightUp('#max-steering-decrease > button')
-      maxSoftSteering -= maxSteeringIncrement
-      if (maxSoftSteering < 0) {
-        maxSoftSteering = 0
-      }
-      $('#max-steering-speed').text(maxSoftSteering)
-      lastCmdSent = new Date().getTime()
-      break
-
-    case 76: // 'l' --> list all commands
-      lightUp('button#list-all-rover-cmds')
-
-      $.ajax({
-        url: '/rover_drive',
-        type: 'POST',
-        data: {
-          cmd: 'l'
-        },
-        success: function (response) {
-          appendToConsole('cmd: ' + response.cmd)
-          appendToConsole('feedback:\n' + response.feedback)
-          if (!response.feedback.includes('limit exceeded')) {
-            disableRoverMotorsBtn()
-          }
-          if (response.error != 'None') {
-            appendToConsole('error:\n' + response.error)
-          }
-          scrollToBottom()
+  if (!$('#servo-val').is(':focus')) {
+    switch (e.which) {
+      case 79:
+        lightUp('#stop-motors-btn')
+        break
+      case 73: // 'i' --> increase max throttle
+        lightUp('#max-throttle-increase > button')
+        maxSoftThrottle += maxThrottleIncrement
+        if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
+          maxSoftThrottle = MAX_THROTTLE_SPEED
         }
-      })
-      lastCmdSent = new Date().getTime()
-      break
-    default:
-      return // exit this handler for other keys
+        $('#max-throttle-speed').text(maxSoftThrottle)
+        lastCmdSent = new Date().getTime()
+        break
+      case 85: // 'u' --> decrease max throttle
+        lightUp('#max-throttle-decrease > button')
+        maxSoftThrottle -= maxThrottleIncrement
+        if (maxSoftThrottle < 0) {
+          maxSoftThrottle = 0
+        }
+        $('#max-throttle-speed').text(maxSoftThrottle)
+        lastCmdSent = new Date().getTime()
+        break
+      case 75: // 'k' --> increase max steering
+        lightUp('#max-steering-increase > button')
+        maxSoftSteering += maxSteeringIncrement
+        if (maxSoftSteering > MAX_STEERING_SPEED) {
+          maxSoftSteering = MAX_STEERING_SPEED
+        }
+        $('#max-steering-speed').text(maxSoftSteering)
+        lastCmdSent = new Date().getTime()
+        break
+      case 74: // 'j' --> decrease max steering
+        lightUp('#max-steering-decrease > button')
+        maxSoftSteering -= maxSteeringIncrement
+        if (maxSoftSteering < 0) {
+          maxSoftSteering = 0
+        }
+        $('#max-steering-speed').text(maxSoftSteering)
+        lastCmdSent = new Date().getTime()
+        break
+
+      case 76: // 'l' --> list all commands
+        lightUp('button#list-all-rover-cmds')
+
+        $.ajax({
+          url: '/rover_drive',
+          type: 'POST',
+          data: {
+            cmd: 'l'
+          },
+          success: function (response) {
+            appendToConsole('cmd: ' + response.cmd)
+            appendToConsole('feedback:\n' + response.feedback)
+            if (!response.feedback.includes('limit exceeded')) {
+              disableRoverMotorsBtn()
+            }
+            if (response.error != 'None') {
+              appendToConsole('error:\n' + response.error)
+            }
+            scrollToBottom()
+          }
+        })
+        lastCmdSent = new Date().getTime()
+        break
+      default:
+        return // exit this handler for other keys
+    }
+    e.preventDefault() // prevent the default action (scroll / move caret)
   }
-  e.preventDefault() // prevent the default action (scroll / move caret)
 })
 
 // no throttling necessary as since keydown events are throttled
@@ -427,7 +501,7 @@ sentZero = true
 function gameLoop () {
   if (millisSince(lastCmdSent) > DRIVE_THROTTLE_TIME) {
     // 'd' --> rover right
-    if (keyState[68]) {
+    if (keyState[68] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-right > button')
       if (steering < 0) {
         steering += 3 * steeringIncrement
@@ -440,7 +514,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'a' --> rover turn left
-    else if (keyState[65]) {
+    else if (keyState[65] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-left > button')
 
       if (steering > 0) {
@@ -462,7 +536,7 @@ function gameLoop () {
       }
     }
     // 'w' --> rover forward
-    if (keyState[87]) {
+    if (keyState[87] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-up > button')
       if (throttle < 0) {
         throttle += 3 * throttleIncrement
@@ -475,7 +549,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 's' --> rover back
-    else if (keyState[83]) {
+    else if (keyState[83] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-down > button')
       if (throttle > 0) {
         throttle -= 3 * throttleIncrement
