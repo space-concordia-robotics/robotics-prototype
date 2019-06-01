@@ -10,6 +10,7 @@ $(document).ready(() => {
         $('#serial-type').text(getCookie('serialType'))
       }
 
+      // only for ARM and ROVER (for now)
       if (window.location.pathname != '/science') {
         $('#front-camera-stream-btn').on('click', function (event) {
           event.preventDefault()
@@ -26,6 +27,7 @@ $(document).ready(() => {
                     'http://' +
                     getRoverIP() +
                     ':8080/stream?topic=/cv_camera/image_raw'
+                  $('#front-camera-stream-btn').addClass('rotateimg180')
                 } else {
                   appendToConsole('Failed to open stream')
                   $('#front-camera-stream-btn')[0].checked = false
@@ -44,6 +46,7 @@ $(document).ready(() => {
                   // succeeded to close stream
                   $('img#camera-feed')[0].src =
                     '../static/images/stream-offline.jpg'
+                  $('#front-camera-stream-btn').removeClass('rotateimg180')
                 } else {
                   // failed to close stream
                   // $('img#camera-feed')[0].src =

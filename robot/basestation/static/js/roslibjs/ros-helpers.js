@@ -460,6 +460,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyArmScienceCam')
         ) {
+          $('#front-camera-stream-btn').removeClass('rotateimg180')
           $('#arm-science-camera-stream-btn')[0].checked = true
           $('#rear-camera-stream-btn')[0].checked = false
           $('#front-camera-stream-btn')[0].checked = false
@@ -467,6 +468,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyFrontCam')
         ) {
+          $('#front-camera-stream-btn').addClass('rotateimg180')
           $('#front-camera-stream-btn')[0].checked = true
           $('#arm-science-camera-stream-btn')[0].checked = false
           $('#rear-camera-stream-btn')[0].checked = false
@@ -474,6 +476,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyRearCam')
         ) {
+          $('#front-camera-stream-btn').addClass('rotateimg180')
           $('#rear-camera-stream-btn')[0].checked = true
           $('#front-camera-stream-btn')[0].checked = false
           $('#arm-science-camera-stream-btn')[0].checked = false
@@ -505,6 +508,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyArmScienceCam')
         ) {
+          $('#front-camera-stream-btn').removeClass('rotateimg180')
           $('#arm-science-camera-stream-btn')[0].checked = true
           $('#rear-camera-stream-btn')[0].checked = false
           $('#front-camera-stream-btn')[0].checked = false
@@ -512,6 +516,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyFrontCam')
         ) {
+          $('#front-camera-stream-btn').addClass('rotateimg180')
           $('#front-camera-stream-btn')[0].checked = true
           $('#arm-science-camera-stream-btn')[0].checked = false
           $('#rear-camera-stream-btn')[0].checked = false
@@ -519,6 +524,7 @@ function checkTaskStatuses () {
           msgs[1].includes('running') &&
           msgs[1].includes('/dev/ttyRearCam')
         ) {
+          $('#front-camera-stream-btn').removeClass('rotateimg180')
           $('#rear-camera-stream-btn')[0].checked = true
           $('#front-camera-stream-btn')[0].checked = false
           $('#arm-science-camera-stream-btn')[0].checked = false
