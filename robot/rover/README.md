@@ -95,6 +95,10 @@ This method installs it in your arduino libraries folder.
 
 If you wish to refer the `include` statements to set your relative path to the libraries, you must surround the libary name with double quotes.
 
+## test.py
+
+Simple but useful python script for quickly testing serial comms.
+
 ## StreamDispatcher.py
 Currently this starts a stream via `start_stream.sh` which uses mjpgstreamer, more details are documented in the bash script itself.
 To start the stream, assuming you already have a usb web camera connected, run `./StreamDispatcher.py`. Use `Ctrl + C` to stop the stream.
