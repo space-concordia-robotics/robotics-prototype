@@ -202,3 +202,22 @@ textarea#rover-log {
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
 }
+
+.imageWrapper {
+  position: relative;
+}
+.overlayImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.overlayGpsDot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 15px;
+  width: 15px;
+  background-color: green;
+  border-radius: 50%;
+  display: inline-block;
+}
