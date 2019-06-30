@@ -105,6 +105,24 @@ $(document).ready(() => {
           }
         })
 
+        $('#capture-image-btn').on('click', function (event) {
+          $.ajax('/capture_image', {
+            success: function (data) {
+              appendToConsole(data.msg)
+              if (!data.msg.includes('success')) {
+                appendToConsole(
+                  'No response from ROS ping_acknowledgment service'
+                )
+              } else {
+                appendToConsole(data.msg)
+              }
+            },
+            error: function () {
+              console.log('An error occured')
+            }
+          })
+        })
+
         $('#arm-science-camera-stream-btn').on('click', function (event) {
           event.preventDefault()
           // click makes it checked during this time, so trying to enable

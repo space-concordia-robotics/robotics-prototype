@@ -60,6 +60,7 @@ $(document).ready(function () {
       lastCmdSent = new Date().getTime()
     }
   })
+
   $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -68,10 +69,27 @@ $(document).ready(function () {
     }
   })
 
+  $('#save-image').on('click', function (event) {
+    $.ajax('/capture_image', {
+      success: function (data) {
+        appendToConsole(data.msg)
+        if (!data.msg.includes('success')) {
+          appendToConsole('Something went wrong, got', data.msg)
+        } else {
+          appendToConsole(data.msg)
+        }
+      },
+      error: function () {
+        console.log('An error occured')
+      }
+    })
+  })
+
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
+
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('reboot')

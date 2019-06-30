@@ -94,6 +94,7 @@
             <h5 class="container-header">Arm Vision</h5>
             <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
             <img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+            <button type="button" id="save-image" class="btn btn-primary" aria-hidden="true">Save Image</button>
           </div>
         </div>
 
