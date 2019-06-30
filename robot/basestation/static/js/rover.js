@@ -578,7 +578,6 @@ function gameLoop () {
         ; // do nothing, you're at 0
       }
     }
-    $('#steering-speed').text(steering)
     if (throttle == 0 && sentZero) { // the rover is stopped
       if (steering == 0) { ; } // do nothing
       else { // turn rover in place
@@ -615,6 +614,7 @@ function gameLoop () {
           steering = 0
           spinning = 0
         }
+        $('#throttle-speed').text(spinning)
         let cmd = spinning.toString() + ':' + steering.toString()
         sendRoverCommand(cmd)
         lastCmdSent = new Date().getTime()
@@ -631,6 +631,7 @@ function gameLoop () {
         sentZero = true
       }
     }
+    $('#steering-speed').text(steering)
   }
   setTimeout(gameLoop, 5)
 }
