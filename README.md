@@ -89,25 +89,11 @@ To remove the package you just installed using:
 
 **DISCLAIMER:** This issue with module imports via `pytest` was the motivating factor to change the project directory structure. For this technique to work, the 'source' code must live inside (nested) a main directory (usually named the same as project directory name or other suitable representative identifier such as **robot** in this case). The `src` subdirectory was renamed because it made no sense when importing a package module by name like `import src.basestation.Motor`, which has no meaning/place in a module semantic context (`import robot.basestation.Motor` is much more appropriate). Most Python projects do not use a `src` directory unless it's for storing their source code that eventually gets compiled to binary (i.e. such as `.c`, `.h`, etc.. files). Also, `base-station` was renamed to `basestation` because Python no-likey dashes in import statements.
 
-### Setup environment variable loader [[`direnv`](https://github.com/direnv/direnv)]
-This tool will be used to take care of managing loading and unloading of environment variables defined in a `.envrc` file in the root. This avoids polluting the global environment.
-
-If using debian, to install:
-
-```
-$ sudo apt-get install direnv
-```
-
-Make sure to then append the following line to your `~/.bashrc`: `eval "$(direnv hook bash)"`
-
-Otherwise, see the link in title for instructions on how to install and setup.
-
 ### Activate venv script [`activatevenv`]
 This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
 - Checks to make sure the `venv` directory is present and if not tries to install it (i.e. `virtualenv -p $python_exec_path venv`)
 - Activates the virtual environment script (i.e. `source venv/bin/activate`)
 - Installs required python modules specified in `requirements.txt` and `requirements-dev.txt`
-- Loads the environment variables with those defined in `.envrc` using `direnv` tool (i.e. `direnv allow .`)
 
 See `activatevenv` for more details and to see how to pass a custom Python path as an argument.
 
@@ -120,6 +106,28 @@ Tip: You can `source activatevenv` whenever you need to:
 - Reinstall modules defined in `requirements-*.txt`
 - Reactivate the `venv` environment
 - Reload newly defined variables in `.envrc` as environment variables
+
+Finally, to link ROS to our webpage we need to install rosbridge: `sudo apt install ros-kinetic-rosbridge-suite`.
+Before running the GUI with `./app.py`, you need to run in a separate terminal: `roslaunch rosbridge_server rosbridge_websocket.launch`. Make sure to deactivate the `venv` for this terminal (otherwise it will crash).
+
+### .bashrc edits
+You should edit your `~/.bashrc` file so that it looks like this:
+
+```
+source /opt/ros/kinetic/setup.bash
+source ~/catkin_ws/devel/setup.bash
+# local mode
+#export ROS_MASTER_URI=http://localhost:11311
+#export ROS_HOSTNAME=localhost
+# competition mode
+export ROS_MASTER_URI=http://172.16.1.30:11311 # competition mode
+export ROS_HOSTNAME=beep
+. /home/beep/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+. /home/beep/Programming/robotics-prototype/venv/bin/activate
+```
+
+Note that the first 4 lines are there by default when you do the ROS full install,
+and that you will have to change the paths in the last two lines to reflect where your files are installed on your computer.
 
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
