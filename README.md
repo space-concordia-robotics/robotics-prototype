@@ -9,7 +9,7 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
-### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
+### [Optional] Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
 Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
 ```
 $ npm install
@@ -26,7 +26,7 @@ Make sure you supply a path to a Python 3.6.x+ binary. In my case, I just suppli
 ```
 $ virtualenv -p `which python3` venv
 ```
-**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3+ by typing `which python` in Linux/Mac (bash/zsh) or `where py` in Windows (cmd.exe).
+**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3.6+ by typing `which python` in Linux/Mac (bash/zsh) or `where py` in Windows (cmd.exe).
 
 You should see a new directory named `venv` inside the root directory. We can now activate this virtual environment:
 Linux/Mac (bash/zsh):
@@ -59,31 +59,6 @@ First, ensure you activated your `venv` and you are in the root project director
 ```
 (venv) $ pip install -r requirements.txt -r requirements-dev.txt
 ```
-**Note**: If you want to run the "legacy" GUI (AsimovOperation.py) you'll need to install the `pygobject` module (which is needed for running GTK GUI)
-However, this GUI will soon be replaced by a new one using flask, so unless your hellbent on running the old GUI, **feel free to skip the next section** (and keep in mind that the pygobject line in `requirements.txt` is commented out.
-
-#### Install and configure `pygobject3`
-If you ran into issues installing `pygobject` when trying to `pip install -r requirements.txt`, then here are possible reasons:
-
-**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as:
-```
-(venv) $ brew install pygobject3 gtk+3
-```
-
-**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again:
-```
-(venv) $ brew install libffi
-```
-
-Confirm its whereabouts with `locate libffi.pc` (you might be prompted  to built the locate database for which the command for doing so is included in the output message). The output you see should be something along the lines of `/usr/local/Cellar/libffi/3.2.1/lib/pkgconfig/libffi.pc` when you type `locate libffi.pc`. For the virtual Python environment to locate it, simply export the environment variable `PKG_CONFIG_PATH` with the directory where `libffi.pc` is located in:
-```
-export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.2.1/lib/pkgconfig
-```
-Now you should be able to retry installing the requirements:
-```
-(venv) $ pip install -r requirements.txt
-```
-Which should produce no errors!
 
 ### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
 When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`).
