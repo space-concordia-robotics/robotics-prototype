@@ -16,7 +16,7 @@ from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
-global ser # make global so it can be used in other parts of the code
+#global ser # make global so it can be used in other parts of the code
 mcuName = 'Astro'
 
 # 300 ms timeout... could potentially be even less, needs testing
@@ -305,6 +305,9 @@ if __name__ == '__main__':
                             if 'WARNING' in feedback:
                                 rospy.logwarn(feedback)
                             #rospy.loginfo(feedback)
+                            #else:
+                            #    feedbackPub.publish(feedback)
+                            #this next line is annoying, should be filtered somehow like the above commented code
                             feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: '+data)

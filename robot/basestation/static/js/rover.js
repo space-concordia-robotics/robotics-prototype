@@ -1,15 +1,16 @@
 // for command thoughput limiting
-const DRIVE_THROTTLE_TIME = 200
+const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
-const MAX_STEERING_SPEED = 39
+const MAX_STEERING_SPEED = 45
 var lastCmdSent = 0
 var maxSoftThrottle = 25
 var maxSoftSteering = 39
-var throttle = 0
-var steering = 0
+var throttle = 0 // how fast are the wheels turning in general
+var steering = 0 // values further from 0 mean sharper turning radius
+var spinning = 0 // for rotating around its centre
 var throttleIncrement = 1
 var steeringIncrement = 1
 var maxThrottleIncrement = 1
@@ -353,7 +354,7 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
-// rover mcu ping
+// rover stop command
 document.addEventListener('keydown', function (event) {
   if (event.code === 'KeyO' && !$('#servo-val').is(':focus')) {
     sendRoverRequest('stop', function (msgs) {
@@ -497,8 +498,15 @@ window.addEventListener(
   },
   true
 )
-sentZero = true
+sentZero = true // used to prevent the gui from sending commands
 function gameLoop () {
+  /*
+  gameloop thought: what if we want more fine control on how fast the
+  steering or the throttle ramps up? What if we want the rate of one
+  to be different from that of the other? To me the solution is to
+  have the rate (time) at which the commands are actually sent to be
+  decoupled from the rate at which the steering or throttle changes
+  */
   if (millisSince(lastCmdSent) > DRIVE_THROTTLE_TIME) {
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {
@@ -511,12 +519,11 @@ function gameLoop () {
       if (steering > maxSoftSteering) {
         steering = maxSoftSteering
       }
-      lastCmdSent = new Date().getTime()
+      //lastCmdSent = new Date().getTime()
     }
     // 'a' --> rover turn left
     else if (keyState[65] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-left > button')
-
       if (steering > 0) {
         steering -= 3 * steeringIncrement
       } else {
@@ -525,7 +532,7 @@ function gameLoop () {
       if (steering < -maxSoftSteering) {
         steering = -maxSoftSteering
       }
-      lastCmdSent = new Date().getTime()
+      //lastCmdSent = new Date().getTime()
     }
     // return to no steering angle
     else {
@@ -546,7 +553,7 @@ function gameLoop () {
       if (throttle > maxSoftThrottle) {
         throttle = maxSoftThrottle
       }
-      lastCmdSent = new Date().getTime()
+      //lastCmdSent = new Date().getTime()
     }
     // 's' --> rover back
     else if (keyState[83] && !$('#servo-val').is(':focus')) {
@@ -559,7 +566,7 @@ function gameLoop () {
       if (throttle < -maxSoftThrottle) {
         throttle = -maxSoftThrottle
       }
-      lastCmdSent = new Date().getTime()
+      //lastCmdSent = new Date().getTime()
     }
     // decelerate
     else {
@@ -567,13 +574,54 @@ function gameLoop () {
         throttle += throttleIncrement
       } else if (throttle > 0) {
         throttle -= throttleIncrement
+      } else {
+        ; // do nothing, you're at 0
       }
     }
     $('#steering-speed').text(steering)
-    if (throttle == 0 && sentZero) {
-      // do nothing
+    if (throttle == 0 && sentZero) { // the rover is stopped
+      if (steering == 0) { ; } // do nothing
+      else { // turn rover in place
+        /*
+        The trick here is that we want `throttle` to be 0 to not
+        interfere with previously written code. My idea was to therefore
+        have a variable called `spinning` which does the same thing
+        but for turning on itself when the w/s keys aren't being pressed.
+
+        BUT, in a perfect world, `spinning` will accelerate the exact
+        same way that throttle does.
+
+        PLUS, ideally we can easily switch in and out of turning on
+        ourselves and moving while turning because otherwise as soon
+        as the switch happens, we'll jump back to 0 throttle/spinning...
+        Unless the two variables are somehow swapped when the GUI
+        realizes there's a change in modes.
+
+        Last comment is that if thottle is negative does that reverse
+        the direction that the rover spins compared to if it was positive?
+        */
+        spinning = maxSoftThrottle // perhaps needs to be commented when above is solved
+        if (keyState[68]) { // 'd' --> rover right
+          steering = MAX_STEERING_SPEED
+          //do stuff with `spinning`
+          //lastCmdSent = new Date().getTime()
+        }
+        else if (keyState[65]) { // 'a' --> rover turn left
+          steering = -MAX_STEERING_SPEED
+          //do stuff with `spinning`
+          //lastCmdSent = new Date().getTime()
+        }
+        else {
+          steering = 0
+          spinning = 0
+        }
+        let cmd = spinning.toString() + ':' + steering.toString()
+        sendRoverCommand(cmd)
+        lastCmdSent = new Date().getTime()
+      }
     } else {
       $('#throttle-speed').text(throttle)
+      // the following stops sending commands if it already sent 0 throttle
       let cmd = throttle.toString() + ':' + steering.toString()
       sendRoverCommand(cmd)
       lastCmdSent = new Date().getTime()
@@ -584,7 +632,7 @@ function gameLoop () {
       }
     }
   }
-  setTimeout(gameLoop, 10)
+  setTimeout(gameLoop, 5)
 }
 
 gameLoop()

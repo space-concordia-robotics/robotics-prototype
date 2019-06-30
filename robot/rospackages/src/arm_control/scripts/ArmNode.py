@@ -16,10 +16,10 @@ from sensor_msgs.msg import JointState
 from arm_control.srv import *
 
 global ser # make global so it can be used in other parts of the code
+mcuName = 'arm'
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
-mcuName = 'arm'
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
