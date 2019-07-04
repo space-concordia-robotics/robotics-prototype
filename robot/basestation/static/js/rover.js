@@ -48,6 +48,15 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
+  // MCU ping
+  $('#ping-rover-mcu').on('click', function (event) {
+    event.preventDefault()
+    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+      sendRoverRequest('ping', function (msgs) {})
+      lastCmdSent = new Date().getTime()
+    }
+  })
+
   // camera servos
 
   // servo name: "Front camera positional tilt base"
@@ -519,7 +528,7 @@ function gameLoop () {
       if (steering > maxSoftSteering) {
         steering = maxSoftSteering
       }
-      //lastCmdSent = new Date().getTime()
+      // lastCmdSent = new Date().getTime()
     }
     // 'a' --> rover turn left
     else if (keyState[65] && !$('#servo-val').is(':focus')) {
@@ -532,7 +541,7 @@ function gameLoop () {
       if (steering < -maxSoftSteering) {
         steering = -maxSoftSteering
       }
-      //lastCmdSent = new Date().getTime()
+      // lastCmdSent = new Date().getTime()
     }
     // return to no steering angle
     else {
@@ -553,7 +562,7 @@ function gameLoop () {
       if (throttle > maxSoftThrottle) {
         throttle = maxSoftThrottle
       }
-      //lastCmdSent = new Date().getTime()
+      // lastCmdSent = new Date().getTime()
     }
     // 's' --> rover back
     else if (keyState[83] && !$('#servo-val').is(':focus')) {
@@ -566,7 +575,7 @@ function gameLoop () {
       if (throttle < -maxSoftThrottle) {
         throttle = -maxSoftThrottle
       }
-      //lastCmdSent = new Date().getTime()
+      // lastCmdSent = new Date().getTime()
     }
     // decelerate
     else {
@@ -575,12 +584,15 @@ function gameLoop () {
       } else if (throttle > 0) {
         throttle -= throttleIncrement
       } else {
-        ; // do nothing, you're at 0
+        // do nothing, you're at 0
       }
     }
-    if (throttle == 0 && sentZero) { // the rover is stopped
-      if (steering == 0) { ; } // do nothing
-      else { // turn rover in place
+    if (throttle == 0 && sentZero) {
+      // the rover is stopped
+      if (steering == 0) {
+      } // do nothing
+      else {
+        // turn rover in place
         /*
         The trick here is that we want `throttle` to be 0 to not
         interfere with previously written code. My idea was to therefore
@@ -600,17 +612,17 @@ function gameLoop () {
         the direction that the rover spins compared to if it was positive?
         */
         spinning = maxSoftThrottle // perhaps needs to be commented when above is solved
-        if (keyState[68]) { // 'd' --> rover right
+        if (keyState[68]) {
+          // 'd' --> rover right
           steering = MAX_STEERING_SPEED
-          //do stuff with `spinning`
-          //lastCmdSent = new Date().getTime()
-        }
-        else if (keyState[65]) { // 'a' --> rover turn left
+          // do stuff with `spinning`
+          // lastCmdSent = new Date().getTime()
+        } else if (keyState[65]) {
+          // 'a' --> rover turn left
           steering = -MAX_STEERING_SPEED
-          //do stuff with `spinning`
-          //lastCmdSent = new Date().getTime()
-        }
-        else {
+          // do stuff with `spinning`
+          // lastCmdSent = new Date().getTime()
+        } else {
           steering = 0
           spinning = 0
         }
