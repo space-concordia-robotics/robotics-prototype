@@ -146,6 +146,11 @@ Tip: You can `source activatevenv` whenever you need to:
 - Reactivate the `venv` environment
 - Reload newly defined variables in `.envrc` as environment variables
 
+### ffmpeg
+
+For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
+- sudo apt-get install ffmpeg
+
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
 ![VSCode putting `pylint` and `pytest` to work!](docs/media/pylint-pytest-vscode.png)
