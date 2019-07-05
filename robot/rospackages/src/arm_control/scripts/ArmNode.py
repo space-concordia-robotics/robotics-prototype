@@ -244,7 +244,7 @@ if __name__ == '__main__':
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
                     elif 'Battery voltage' in feedback:
-                        left,voltage = feedback.split('Battery voltage: ')
+                        left,voltage = feedback.split('battery voltage: ')
                         vBatPub.publish(float(voltage))
                     else:
                         #rospy.loginfo(feedback)
