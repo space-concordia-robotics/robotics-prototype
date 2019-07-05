@@ -499,7 +499,7 @@ function checkTaskStatuses () {
     })
 
     sendRoverRequest('who', function (msgs) {
-      console.log('!!!!msgs!!!!', msgs)
+      console.log('msgs', msgs)
       if (msgs[1].includes('Happy')) {
         $('#activate-rover-btn')[0].checked = true
       } else {
@@ -605,7 +605,7 @@ function sendScienceRequest (command, callback) {
 
   science_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
-    console.log(result)
+    console.log('result', result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?

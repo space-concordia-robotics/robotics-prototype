@@ -48,15 +48,6 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  // MCU ping
-  $('#ping-rover-mcu').on('click', function (event) {
-    event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendRoverRequest('ping', function (msgs) {})
-      lastCmdSent = new Date().getTime()
-    }
-  })
-
   // camera servos
 
   // servo name: "Front camera positional tilt base"
