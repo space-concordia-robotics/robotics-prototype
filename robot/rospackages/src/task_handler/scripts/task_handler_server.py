@@ -61,7 +61,7 @@ def handle_task(task, status, args):
                 if chosen_task == "camera_stream":
                     if running_tasks[i].is_running() and args != running_tasks[i].get_args():
                         response = "Camera stream already running on port " + running_tasks[i].get_args()
-                        response += "\nTurn this stream of before starting or stopping a new one\n"
+                        response += "\nTurn this stream off before starting or stopping a new one\n"
                         return response
                     # set appropriate usb port in args
                     elif args and not running_tasks[i].is_running():
@@ -82,6 +82,7 @@ def handle_task(task, status, args):
             i += 1
 
 
+        # request start
         if status == 1:
 
             if running_tasks[i].start():
@@ -94,7 +95,8 @@ def handle_task(task, status, args):
                 else: # in this case it is worth trying to start the chosen_task
                     if running_tasks[i].start():
                         response = "Started " + chosen_task
-        else:
+        # request stop
+        elif status == 0:
             if len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = "Stopped " + chosen_task

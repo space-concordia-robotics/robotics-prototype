@@ -743,5 +743,6 @@ function getRoverIP (callback) {
     }
   })
   */
-  return '172.16.1.30'
+  return '172.16.1.30' // competition
+  // return '127.0.0.1' // local
 }
