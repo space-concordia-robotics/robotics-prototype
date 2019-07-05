@@ -577,7 +577,7 @@ function sendArmRequest (command, callback) {
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  science_request_client.callService(request, function (result) {
+  arm_request_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character

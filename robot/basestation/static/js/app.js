@@ -368,6 +368,29 @@ $(document).ready(() => {
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
         console.log('msgs', msgs)
+
+        if (msgs[0] == true) {
+          console.log('Activating Rover Listener Node')
+          let serialType = $('#serial-type')
+            .text()
+            .trim()
+
+          requestTask(
+            'rover_listener',
+            1,
+            '#toggle-rover-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#toggle-rover-listener-btn')[0].checked = true
+                // try pinging MCU
+                sendRoverRequest('ping', function (msgs) {})
+              } else {
+                $('#toggle-rover-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
@@ -379,6 +402,29 @@ $(document).ready(() => {
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
         console.log('msgs', msgs)
+
+        if (msgs[0] == true) {
+          console.log('Activating Arm Listener Node')
+          let serialType = $('#serial-type')
+            .text()
+            .trim()
+
+          requestTask(
+            'arm_listener',
+            1,
+            '#toggle-arm-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#toggle-arm-listener-btn')[0].checked = true
+                // try pinging MCU
+                sendArmRequest('ping', function (msgs) {})
+              } else {
+                $('#toggle-arm-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
@@ -390,6 +436,29 @@ $(document).ready(() => {
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
         console.log('msgs', msgs)
+
+        if (msgs[0] == true) {
+          console.log('Activating Science Listener Node')
+          let serialType = $('#serial-type')
+            .text()
+            .trim()
+
+          requestTask(
+            'science_listener',
+            1,
+            '#science-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#science-listener-btn')[0].checked = true
+                // try pinging MCU
+                sendScienceRequest('ping', function (msgs) {})
+              } else {
+                $('#science-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
