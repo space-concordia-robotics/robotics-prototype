@@ -371,9 +371,13 @@ $(document).ready(() => {
 
         if (msgs[0] == true && window.location.pathname == '/rover') {
           console.log('Activating Rover Listener Node')
-          let serialType = $('#serial-type')
-            .text()
-            .trim()
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
 
           requestTask(
             'rover_listener',
@@ -405,9 +409,13 @@ $(document).ready(() => {
 
         if (msgs[0] == true && window.location.pathname == '/') {
           console.log('Activating Arm Listener Node')
-          let serialType = $('#serial-type')
-            .text()
-            .trim()
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
 
           requestTask(
             'arm_listener',
@@ -439,9 +447,13 @@ $(document).ready(() => {
 
         if (msgs[0] == true && window.location.pathname == '/science') {
           console.log('Activating Science Listener Node')
-          let serialType = $('#serial-type')
-            .text()
-            .trim()
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
 
           requestTask(
             'science_listener',
