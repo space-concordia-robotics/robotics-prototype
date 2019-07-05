@@ -243,7 +243,7 @@ if __name__ == '__main__':
                     if 'Motor Angles' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
-                    elif 'Battery voltage' in feedback:
+                    elif 'battery voltage' in feedback:
                         left,voltage = feedback.split('battery voltage: ')
                         vBatPub.publish(float(voltage))
                     else:
