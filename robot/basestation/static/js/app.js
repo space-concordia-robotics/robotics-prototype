@@ -369,7 +369,7 @@ $(document).ready(() => {
       requestMuxChannel('#mux-0', function (msgs) {
         console.log('msgs', msgs)
 
-        if (msgs[0] == true) {
+        if (msgs[0] == true && window.location.pathname == '/rover') {
           console.log('Activating Rover Listener Node')
           let serialType = $('#serial-type')
             .text()
@@ -403,7 +403,7 @@ $(document).ready(() => {
       requestMuxChannel('#mux-1', function (msgs) {
         console.log('msgs', msgs)
 
-        if (msgs[0] == true) {
+        if (msgs[0] == true && window.location.pathname == '/') {
           console.log('Activating Arm Listener Node')
           let serialType = $('#serial-type')
             .text()
@@ -437,7 +437,7 @@ $(document).ready(() => {
       requestMuxChannel('#mux-2', function (msgs) {
         console.log('msgs', msgs)
 
-        if (msgs[0] == true) {
+        if (msgs[0] == true && window.location.pathname == '/science') {
           console.log('Activating Science Listener Node')
           let serialType = $('#serial-type')
             .text()
