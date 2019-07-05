@@ -207,7 +207,7 @@ def rover_drive():
 # capture image
 @app.route("/capture_image", methods=["POST", "GET"])
 def capture_image():
-    stream_url = "http://localhost:8080/stream?topic=/cv_camera/image_raw"
+    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
     #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
     # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
     # p2 = subprocess.Popen(split("wc -l"), stdin=p1.stdout)
