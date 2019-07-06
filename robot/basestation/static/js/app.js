@@ -387,6 +387,7 @@ $(document).ready(() => {
               if (msgs[0]) {
                 $('#toggle-rover-listener-btn')[0].checked = true
                 // try pinging MCU
+                wait(1000)
                 sendRoverRequest('ping', function (msgs) {})
               } else {
                 $('#toggle-rover-listener-btn')[0].checked = false
@@ -425,6 +426,7 @@ $(document).ready(() => {
               if (msgs[0]) {
                 $('#toggle-arm-listener-btn')[0].checked = true
                 // try pinging MCU
+                wait(1000)
                 sendArmRequest('ping', function (msgs) {})
               } else {
                 $('#toggle-arm-listener-btn')[0].checked = false
@@ -463,6 +465,7 @@ $(document).ready(() => {
               if (msgs[0]) {
                 $('#science-listener-btn')[0].checked = true
                 // try pinging MCU
+                wait(1000)
                 sendScienceRequest('ping', function (msgs) {})
               } else {
                 $('#science-listener-btn')[0].checked = false
