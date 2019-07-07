@@ -385,21 +385,34 @@
           <tr>
             <td><strong>Front</strong></td>
             <td>
-              <a id="camera-front-home-btn">
+              <a id="camera-front-tilt-up-btn">
                 <button type="button" class="control-btn2">
-                  Home
+                  &#8593;Tilt
                 </button>
               </a>
             </td>
             <td>
-                <input id="servo-val" type="text" size="4"/>
+              <span class="col-md-3" id="front-tilt-pwm">-</span>
             </td>
+            <td>
+              <span class="col-md-3" id="front-pan-pwm">-</span>
+            </td>
+            <!--<td>
+                <input id="servo-val" type="text" size="4"/>
+            </td>-->
           </tr>
           <tr>
               <td>
                 <a id="camera-front-lpan-btn">
                   <button type="button" class="control-btn2">
                     LPan
+                  </button>
+                </a>
+              </td>
+              <td>
+                <a id="camera-front-tilt-down-btn">
+                  <button type="button" class="control-btn2">
+                    &#8595;Tilt
                   </button>
                 </a>
               </td>
@@ -411,16 +424,9 @@
                 </a>
               </td>
               <td>
-                <a id="camera-front-tilt-up-btn">
+                <a id="camera-front-home-btn">
                   <button type="button" class="control-btn2">
-                    &#8593;Tilt
-                  </button>
-                </a>
-              </td>
-              <td>
-                <a id="camera-front-tilt-down-btn">
-                  <button type="button" class="control-btn2">
-                    &#8595;Tilt
+                    Home
                   </button>
                 </a>
               </td>

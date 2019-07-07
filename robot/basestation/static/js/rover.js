@@ -1,4 +1,10 @@
 // for command thoughput limiting
+const GAME_LOOP_PERIOD = 50
+const CONTINUOUS_SERVO_PERIOD = 100
+const POSITION_SERVO_PERIOD = 100
+const SERVO_STOP = 90
+const MAX_CONTINUOUS_SERVO_OFFSET = 30
+
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
@@ -6,24 +12,40 @@ const MCU_FEEDBACK_THROTTLE = 1000
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
 var lastCmdSent = 0
+var lastFrontPosServoCmd = 0
+var lastFrontContServoCmd = 0
+
 var maxSoftThrottle = 25
 var maxSoftSteering = 39
+var maxFrontTiltPwm = 130
+var minFrontTiltPwm = 50
+var maxRearTiltPwm = 130
+var minRearTiltPwm = 50
+
 var throttle = 0 // how fast are the wheels turning in general
 var steering = 0 // values further from 0 mean sharper turning radius
 var spinning = 0 // for rotating around its centre
+var frontTiltPwm = 90
+var frontPanPwm = 90
+
 var throttleIncrement = 1
 var steeringIncrement = 1
+var positionServoIncrement = 1
+var continuousServoIncrement = 1
+var continuousServoOffset = 20
+
 var maxThrottleIncrement = 1
 var maxSteeringIncrement = 1
 var movementCommanded = false
+
+sentZero = true // used to prevent the gui from sending wheel commands
+sentServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'p': ping arm mcu")
   appendToConsole("'q': emergency stop all motors")
   appendToConsole("'l': view key commands")
-  // appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
-  // appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
 // Manual control
@@ -498,7 +520,7 @@ window.addEventListener(
   },
   true
 )
-sentZero = true // used to prevent the gui from sending commands
+
 function gameLoop () {
   /*
   gameloop thought: what if we want more fine control on how fast the
@@ -507,7 +529,83 @@ function gameLoop () {
   have the rate (time) at which the commands are actually sent to be
   decoupled from the rate at which the steering or throttle changes
   */
-  if (millisSince(lastCmdSent) > DRIVE_THROTTLE_TIME) {
+  if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
+    /* CAMERA SERVO CONTROL */
+    //TODO: determine if the directions are correct
+    //WARNING: currently I assume that 90 deg is the home position but this may not be the case
+    //WARNING: I believe the current implementation allows a command for front pan servo to be sent immediately after front tilt.
+    // This is bad and should be addressed.
+
+    // Front camera position servo
+    if ( (millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
+      var newCommand = false
+      if (keyState[111]) { // numpad '/' --> tilt servo up
+        lightUp('#camera-front-tilt-up-btn')
+        if (frontTiltPwm < maxFrontTiltPwm) {
+          frontTiltPwm += positionServoIncrement
+        }
+        newCommand = true
+        //$('#front-tilt-pwm').text(frontTiltPwm)
+        //console.log('front tilt:',frontTiltPwm)
+        //lastFrontPosServoCmd = new Date().getTime()
+      }
+      else if (keyState[104]) { // numpad '8' --> tilt servo down
+        lightUp('#camera-front-tilt-down-btn')
+        if (frontTiltPwm > minFrontTiltPwm) {
+          frontTiltPwm -= positionServoIncrement
+        }
+        newCommand = true
+        //$('#front-tilt-pwm').text(frontTiltPwm)
+        //console.log('front tilt:',frontTiltPwm)
+        //lastFrontPosServoCmd = new Date().getTime()
+      }
+      if (newCommand) {
+        $('#front-tilt-pwm').text(frontTiltPwm)
+        console.log('front tilt:',frontTiltPwm)
+        lastFrontPosServoCmd = new Date().getTime()
+        sendRoverCommand('@' + frontTiltPwm.toString())
+      }
+    }
+    // Front camera continuous servo
+    if ( (millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
+      if (keyState[103] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
+        lightUp('#camera-front-lpan-btn')
+        if (frontPanPwm < SERVO_STOP + continuousServoOffset) {
+          frontPanPwm += continuousServoIncrement
+        }
+      }
+      else if (keyState[105] && !$('#servo-val').is(':focus')) { // numpad '9' --> tilt servo right
+        lightUp('#camera-front-rpan-btn')
+        if (frontPanPwm > SERVO_STOP - continuousServoOffset) {
+          frontPanPwm -= continuousServoIncrement
+        }
+      }
+      else {
+        if (frontPanPwm < SERVO_STOP) {
+          frontPanPwm += continuousServoIncrement
+        } else if (frontPanPwm > SERVO_STOP) {
+          frontPanPwm -= continuousServoIncrement
+        } else {
+          ; // do nothing, you've stopped
+        }
+      }
+      // check whether or not to send a new command for the continuous servo
+      if (frontPanPwm == SERVO_STOP && sentServoStop) {
+        ;
+      } else {
+        $('#front-pan-pwm').text(frontPanPwm)
+        sendRoverCommand('!' + frontPanPwm.toString())
+        //console.log('front pan:',frontPanPwm)
+        lastFrontContServoCmd = new Date().getTime()
+        if (frontPanPwm != SERVO_STOP) {
+          sentServoStop = false
+        } else {
+          sentServoStop = true
+        }
+      }
+    }
+
+    /*ROVER WHEEL CONTROL*/
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-right > button')
