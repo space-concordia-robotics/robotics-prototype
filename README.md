@@ -128,6 +128,8 @@ export ROS_HOSTNAME=beep
 
 Note that the first 4 lines are there by default when you do the ROS full install,
 and that you will have to change the paths in the last two lines to reflect where your files are installed on your computer.
+Additionally you need to build the packages in the rospackages folder.
+`cd` into `rospackages` and run `catkin_make`, otherwise the second last line in the above snippet will fail (as the folder devel will not have yet been generated).
 
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
