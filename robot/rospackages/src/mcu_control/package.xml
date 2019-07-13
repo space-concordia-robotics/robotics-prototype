@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>arm_control</name>
+  <name>mcu_control</name>
   <version>0.0.0</version>
   <description>
-    The arm_control package. This also contains rover control scripts, helpers, etc.
+    The mcu_control package. This contains arm/rover/science/pds mcu scripts, helpers, etc.
 
     ArmNode.py will open a UART or USB serial port based on the input arguments.
     It can be opened directly or through the task_handler.

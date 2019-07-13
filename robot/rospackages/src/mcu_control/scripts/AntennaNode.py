@@ -6,7 +6,7 @@ import time
 from Nav_funs import Distance, Direction
 import rospy
 from geometry_msgs.msg import Point
-#from arm_control.msg import RoverPosition, AntennaGoal
+#from mcu_control.msg import RoverPosition, AntennaGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)

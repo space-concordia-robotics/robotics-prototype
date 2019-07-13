@@ -11,11 +11,13 @@ import serial.tools.list_ports # pyserial
 #import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
-from std_msgs.msg import String, Float32
-from arm_control.srv import *
+from std_msgs.msg import String, Header, Float32
+from geometry_msgs.msg import Twist, Point
+from sensor_msgs.msg import JointState
+from mcu_control.srv import *
 
-global ser # make global so it can be used in other parts of the code
-mcuName = 'arm'
+#global ser # make global so it can be used in other parts of the code
+mcuName = 'Astro'
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
@@ -26,7 +28,7 @@ timeout = 0.3 # to wait for a response from the MCU
 
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 def init_serial():
-    baudrate = 9600
+    baudrate = 115200
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
@@ -108,9 +110,9 @@ def init_serial():
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
                         if mcuName in data:
-                            rospy.loginfo(mcuName+" MCU identified!")
+                            rospy.loginfo(mcuName+" MCU idenified!")
                             rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
+                            rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time()-startConnecting)*1000)
                             return
                     else:
                         rospy.loginfo('got raw message: '+dat)
@@ -118,38 +120,108 @@ def init_serial():
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
+requests = {
+    'ping' : ['pong'],
+    'who' : ['Happy Astro','Paralyzed Astro'],
+    'activate' : ['ACTIVATED', 'Active'],
+    'deactivate' : ['Inactive'],
+    'open-loop' : ['loop status is: Open'],
+    'close-loop' : ['loop status is: CLose'],
+    'steer-off' : ['Wheel Control is Activated'],
+    'steer-on' : ['Skid Steering is Activated'],
+    'acc-on' : ['Limiter: Open'],
+    'acc-off' : ['Limiter: CLose'],
+    'reboot' : ['rebooting']
+}
+def handle_client(req):
+    global ser # specify that it's global so it can be used properly
+    global reqFeedback
+    global reqInWaiting
+    roverResponse = ArmRequestResponse()
+    timeout = 0.2 # 200ms timeout
+    reqInWaiting=True
+    sinceRequest = time.time()
+    rospy.loginfo('received '+req.msg+' request from GUI, sending to rover Teensy')
+    ser.write(str.encode(req.msg+'\n')) # ping the teensy
+    while roverResponse.success is False and (time.time()-sinceRequest < timeout):
+        if reqFeedback is not '':
+            rospy.loginfo(reqFeedback)
+            for request in requests:
+                for response in requests[request]:
+                    if request == req.msg and response in reqFeedback:
+                        roverResponse.response = reqFeedback
+                        roverResponse.success = True #a valid request and a valid response from the mcu
+                        break
+            if roverResponse.success:
+                break
+            else:
+                roverResponse.response += reqFeedback
+        rospy.Rate(100).sleep()
+    rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
+    rospy.loginfo(roverResponse)
+    reqFeedback=''
+    reqInWaiting=False
+    return roverResponse
+
 def subscriber_callback(message):
     global ser # specify that it's global so it can be used properly
-    rospy.loginfo('received: '+message.data+' command from GUI, sending to arm Teensy')
+    rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
     return
 
-### currently the pds gives 3 types of feedback in one message
-### so this needs to publish to 3 different topics:
-### battery voltage, wheel motor current, battery temp
-### currently the format is: "PDS,val,val,...,val\n"
-### but 'PDS,' is stripped by stripFeedback()
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,message = message.split('Motor Angles: ')
-    angles = message.split(', ')
+    lhs,message = message.split('Motor Speeds: ')
+    speeds = message.split(', ')
     # create the message to be published
     msg = JointState()
     msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
     try:
-        for angle in angles:
-            msg.position.append(float(angle))
+        for speed in speeds:
+            #TODO: convert speed to SI units?
+            msg.velocity.append(float(speed))
     except:
-        rospy.logwarn('trouble parsing motor angles')
+        rospy.logwarn('trouble parsing motor speeds')
         return
     # publish it
-    anglePub.publish(msg)
+    speedPub.publish(msg)
     rospy.logdebug(msg.position)
     return
 
+def publish_nav_states(message):
+    heading,gps = message.split(' -- ')
+    # parse heading, give -999 if invalid heading
+    if 'OK' in heading:
+        left,heading = heading.split(' ')
+        roverHeading = float(heading)
+    else:
+        if 'N/A' in heading:
+            rospy.logwarn('IMU heading data unavailable')
+        else:
+            rospy.logwarn('bad string, got: '+heading)
+        roverHeading = -999
+    # parse gps, give -999 for lat and long if invalid coords
+    if 'OK' in gps:
+        left,tempLat,tempLong = gps.split(' ')
+        roverLatitude = float(tempLat)
+        roverLongitude = float(tempLong)
+    else:
+        if 'N/A' in gps:
+            rospy.logwarn('GPS data unavailable')
+        else:
+            rospy.logwarn('bad string, got: '+left)
+        roverLatitude = roverLongitude = -999
+
+    msg = Point();
+    msg.x = roverLatitude
+    msg.y = roverLongitude
+    msg.z = roverHeading
+    navPub.publish(msg)
+    return
+
 def stripFeedback(data):
-    startStrip='ARM ' ## it will be 'PDS,'
+    startStrip='ASTRO '
     endStrip='\r\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
@@ -159,31 +231,48 @@ def stripFeedback(data):
     return None
 
 if __name__ == '__main__':
-    node_name = 'arm_node'
+    node_name = 'rover_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
     init_serial()
 
-    angle_pub_topic = '/arm_joint_states'
-    rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
-    anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
+    speed_pub_topic = '/rover_joint_states'
+    rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')
+    speedPub = rospy.Publisher(speed_pub_topic, JointState, queue_size=10)
+
+    nav_pub_topic = '/rover_position'
+    rospy.loginfo('Beginning to publish to "'+nav_pub_topic+'" topic')
+    # will either make my own message type or use a standard one
+    navPub = rospy.Publisher(nav_pub_topic, Point, queue_size=10)
 
     v_bat_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
     vBatPub = rospy.Publisher(v_bat_topic, Float32, queue_size=10)
 
-    feedback_pub_topic = '/arm_feedback'
+    feedback_pub_topic = '/rover_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    subscribe_topic = '/arm_command'
+    subscribe_topic = '/rover_command'
+    #first of all, it should subscribe to Twist and decide how to send it to the rover...
+    #for now i might just have it subscribe to Strings tho
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    #I could have a topic that listens for JointStateso and constructs the message here...
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+    # the long way is for the gui to publish a twist and the node to convert it to throttle:steering
+    # the short way is for the gui to send the command string directly. no Twist.
+
+    service_name = '/rover_request'
+    rospy.loginfo('Waiting for "'+service_name+'" service request from client')
+    #TODO: change to RoverRequest? or just McuRequest? meaning change arm and mcu_control etc?
+    serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser
+    global reqFeedback
+    reqFeedback=''
+    global reqInWaiting
+    reqInWaiting=False
     try:
         while not rospy.is_shutdown():
             #if I try reading from the serial port inside callbacks, bad things happen
@@ -198,18 +287,28 @@ if __name__ == '__main__':
                 except:
                     rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
-                    if 'Motor Angles' in feedback:
+                    if 'Motor Speeds' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
-                    elif 'battery voltage' in feedback:
-                        left,voltage = feedback.split('battery voltage: ')
+                    elif 'Battery voltage' in feedback:
+                        left,voltage = feedback.split('Battery voltage: ')
                         vBatPub.publish(float(voltage))
+                    elif 'GPS' in feedback: #use a better string? longer?
+                        publish_nav_states(feedback)
                     else:
                         #rospy.loginfo(feedback)
-                        if 'WARNING' in feedback:
-                            rospy.logwarn(feedback)
-                        #rospy.loginfo(feedback)
-                        feedbackPub.publish(feedback)
+                        if reqInWaiting:
+                            reqFeedback += feedback+'\r\n' #pass data to request handler
+                            #print(feedback)
+                            #print(reqFeedback)
+                        else:
+                            if 'WARNING' in feedback:
+                                rospy.logwarn(feedback)
+                            #rospy.loginfo(feedback)
+                            #else:
+                            #    feedbackPub.publish(feedback)
+                            #this next line is annoying, should be filtered somehow like the above commented code
+                            feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: '+data)
             rospy.Rate(100).sleep()

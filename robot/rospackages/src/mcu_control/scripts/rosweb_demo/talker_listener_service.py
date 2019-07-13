@@ -2,7 +2,7 @@
 
 import rospy
 from std_msgs.msg import String
-from arm_control.srv import *
+from mcu_control.srv import *
 
 # todo: implement a timeout
 # todo: maybe publish/parse the string if it's not ping? this might cause errors but it's worth a shot

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from arm_control.srv import *
+from mcu_control.srv import *
 
 def handle_client(req):
     rospy.loginfo("received "+req.msg)

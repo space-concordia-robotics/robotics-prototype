@@ -11,7 +11,7 @@ import math #imported by ik_calculator but repeated just in case
 import rospy
 from std_msgs.msg import String, Header
 from sensor_msgs.msg import JointState
-from arm_control.msg import IkCommand
+from mcu_control.msg import IkCommand
 
 joint_angles = [0.0, 0.0, 0.0, 0.0]
 desired_position = [0.0, 0.0, 0.0]
