@@ -19,10 +19,7 @@ This command will install all of the required dependencies (mostly just ESLint s
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
-```
-$ virtualenv -p <path/to/python3.6.x+> venv
-```
-Make sure you supply a path to a Python 3.6.x+ binary. In my case, I just supplied it like this:
+Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3`:
 ```
 $ virtualenv -p `which python3` venv
 ```
