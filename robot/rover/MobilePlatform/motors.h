@@ -19,9 +19,10 @@ class RobotMotor {
     static int numMotors; // keeps track of how many motors there are
     int encoderPinA, encoderPinB;
     int output_pwm;
+    int final_output_pwm;
     int prev_output_pwm;
     float acc;
-    bool accLimit = true;
+    bool accLimit = false;
     String motorName;
     volatile unsigned long  dt;
     volatile unsigned long  dt2;
@@ -45,6 +46,7 @@ class RobotMotor {
     bool hasEncoder;
     void calcCurrentVelocity(void);
     float getCurrentVelocity(void);
+
   private:
     // doesn't really make sense to have any private variables for this parent class.
     // note that virtual functions must be public in order for them to be accessible from motorArray[]
@@ -135,7 +137,9 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
 
   /* Acceleration limiter */
   if (accLimit) {
+    final_output_pwm = output_pwm;
     dt2 = micros() - prevTime2;
+
     acc = ((float) output_pwm - (float) prev_output_pwm) / (float) dt2;
 
     if (abs(acc) > 0.00051) {  // 0.00051 it the acceleration limit to go from 0 to full speed in 0.5 seconds. adjust this value for desired tuning
@@ -143,8 +147,11 @@ void DcMotor::setVelocity(int motorDir, float desiredVelocity, volatile float cu
     }
     prevTime2 = micros();
     prev_output_pwm = output_pwm;
+    analogWrite(pwmPin, output_pwm);
   }
-  analogWrite(pwmPin, output_pwm);
+  else analogWrite(pwmPin, output_pwm);
+
+
 }
 
 #endif

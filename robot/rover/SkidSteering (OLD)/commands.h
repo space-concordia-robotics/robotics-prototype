@@ -367,7 +367,6 @@ void Commands::activate(String sender) {
     }
     PRINTln("ASTRO Rover Wheels are Active");
     PRINTln((bluetoothMode) ? "ASTRO BLE-Mode is ON" : "ASTRO BLE-Mode is OFF");
-    //toggleLed2();
   }
 }
 void Commands::deactivate(String sender) {
