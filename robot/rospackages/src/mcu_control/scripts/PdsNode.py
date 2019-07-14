@@ -11,11 +11,11 @@ import serial.tools.list_ports # pyserial
 #import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
-from std_msgs.msg import String, Float32
-from mcu_control.srv import *
+from std_msgs.msg import String, Float32, Float32MultiArray
+from arm_control.srv import *
 
 global ser # make global so it can be used in other parts of the code
-mcuName = 'arm'
+mcuName = 'PDS'
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
@@ -37,10 +37,10 @@ def init_serial():
     if len(myargv) > 1:
         if myargv[1] == 'uart':
             usb=False; uart=True
-            rospy.loginfo('Using UART and 115200 baud by default')
+            rospy.loginfo('Using UART and 9600 baud by default')
         elif myargv[1] == 'usb':
             usb=True; uart=False
-            rospy.loginfo('Using USB and 115200 baud by default')
+            rospy.loginfo('Using USB and 9600 baud by default')
         else:
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
             sys.exit(0)
@@ -130,26 +130,37 @@ def subscriber_callback(message):
 ### battery voltage, wheel motor current, battery temp
 ### currently the format is: "PDS,val,val,...,val\n"
 ### but 'PDS,' is stripped by stripFeedback()
+
+### create a publish for each ex: currentPub.publish(msg) etc.
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,message = message.split('Motor Angles: ')
-    angles = message.split(', ')
+    lhs,message = message.split('PDS,')
+    voltages = message.split(',')
+    currents = message.split('%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,')
+    temperatures = message.split('%.3f,%.3f,%.3f')
     # create the message to be published
-    msg = JointState()
-    msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
+    msg = JointState() ###
+    msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work ##sets a timestamp
     try:
-        for angle in angles:
-            msg.position.append(float(angle))
+        for voltage in voltages:
+            msg.position.append(float(voltage))
+        for current in currents:
+            msg.position.append(float(current))
+        for temperature in temperatures:
+            msg.position.append(float(temprature))
     except:
-        rospy.logwarn('trouble parsing motor angles')
+        rospy.logwarn('trouble parsing PDS data')
         return
     # publish it
-    anglePub.publish(msg)
+    ##anglePub.publish(msg)
+    voltagePub.publish(msg)
+    currentPub.publish(msg)
+    temperaturePub.publish(msg)
     rospy.logdebug(msg.position)
     return
 
 def stripFeedback(data):
-    startStrip='ARM ' ## it will be 'PDS,'
+    startStrip='PDS,' 
     endStrip='\r\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
@@ -223,3 +234,4 @@ if __name__ == '__main__':
         time.sleep(1) # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)
+
