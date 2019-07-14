@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pygame
 import time
 
@@ -85,13 +87,14 @@ class Astro_Joy():
         return msg
 
 
-my_joy = Astro_Joy(45,25,True)
+if __name__ == '__main__':
+    my_joy = Astro_Joy(45,25,True)
 
-try:
-    while True:
-        print(my_joy.wheels())
+    try:
+        while True:
+            print(my_joy.wheels())
 
-        # time.sleep(0.05)
+            # time.sleep(0.05)
 
-except KeyboardInterrupt:
-    print("Exiting now")
+    except KeyboardInterrupt:
+        print("Exiting now")
