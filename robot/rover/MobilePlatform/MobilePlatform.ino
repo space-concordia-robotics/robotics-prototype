@@ -103,8 +103,12 @@ void lb_encoder_interrupt(void);
 
 void setup() {
     // initialize serial communications at 115200 bps:
-    UART_PORT.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
-    UART_PORT.setTimeout(SERIAL_TIMEOUT);
+    Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
+    Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
+    Serial.setTimeout(SERIAL_TIMEOUT);
+    Serial1.setTimeout(SERIAL_TIMEOUT);
+    bluetooth.begin(9600);
+    bluetooth.setTimeout(50);
     delay(300); // NECSSARY. Give time for serial port to set up
 
     initPins();
