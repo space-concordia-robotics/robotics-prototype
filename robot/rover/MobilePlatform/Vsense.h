@@ -9,14 +9,14 @@ void vbatt_read() {
   //voltage divider backwards (vsense *(r1+r2)/r2 = vsense * (10k+2k)/2k = vsense*6)
   float vbatt = vsense * 6.0;     
 
-  UART_PORT.print("ASTRO Battery voltage: ");
-  UART_PORT.println(vbatt);
+  print("ASTRO Battery voltage: ");
+  println(vbatt);
 
   if (vbatt < 12.0) {
-    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
+    println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
   }
   else if (vbatt > 16.8) {
-    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
+    println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
   }
 };
 

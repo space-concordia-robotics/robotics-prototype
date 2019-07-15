@@ -6,9 +6,17 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
 }
 
 void ser_flush(void) {
-  while (UART_PORT.available()) {
-    UART_PORT.read();
-  }
+    if (devMode) {
+        while (Serial.available()) {
+            Serial.read();
+        }
+    }
+    else {
+        while (Serial1.available()) {
+            Serial1.read();
+        }
+    }
+
 }
 
 void toggleLed() {

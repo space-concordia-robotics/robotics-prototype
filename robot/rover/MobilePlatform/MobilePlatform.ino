@@ -85,6 +85,7 @@ void roverVelocityCalculator(void);
 
 void print(String msg);
 void println(String msg);
+void printres(float msg, int a);
 
 // these includes must be placed exactly where and how they are in the code
 #include "helpers.h"
@@ -132,15 +133,15 @@ void loop() {
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     serialHandler();
-    if (UART_PORT.available()) {
-        cmd = readStringUntil(void);
-//        cmd = UART_PORT.readStringUntil('\n');
-        cmd.trim();
-        Cmds.handler(cmd, "Serial");
-    }
-    else if (Cmds.bluetoothMode){
-        Cmds.bleHandler();
-    }
+//    if (UART_PORT.available()) {
+//        cmd = readStringUntil(void);
+////        cmd = UART_PORT.readStringUntil('\n');
+//        cmd.trim();
+//        Cmds.handler(cmd, "Serial");
+//    }
+//    else if (Cmds.bluetoothMode){
+//        Cmds.bleHandler();
+//    }
     if (sinceSensorRead > SENSOR_READ_INTERVAL) {
         vbatt_read();
         navHandler(Cmds);
@@ -251,11 +252,27 @@ void println(String msg){
         }
     }
 }
+void printres(float msg, int a){
+    if (devMode) {
+        Serial.print(msg, a);
+        if (Cmds.bluetoothMode) {
+            bluetooth.print(msg);
+            delay(50);
+        }
+    }
+    else {
+        Serial1.print(msg, a);
+        if (Cmds.bluetoothMode) {
+            bluetooth.print(msg);
+            delay(50);
+        }
+    }
+}
 
 //! Figures out which serial being used
 void serialHandler(void){
     if (devMode) {
-        if (Serial1.availble()) {
+        if (Serial1.available()) {
             cmd = Serial1.readStringUntil('\n');
             cmd.trim();
             if (cmd == "who") {
@@ -263,7 +280,7 @@ void serialHandler(void){
             }
             Cmds.handler(cmd, "UART");
         }
-        else if (Serial.availble()) {
+        else if (Serial.available()) {
             cmd = Serial.readStringUntil('\n');
             cmd.trim();
             Cmds.handler(cmd, "USB");
@@ -273,7 +290,7 @@ void serialHandler(void){
         }
     }
     else {
-        if (Serial1.availble()) {
+        if (Serial1.available()) {
             cmd = Serial1.readStringUntil('\n');
             cmd.trim();
             Cmds.handler(cmd, "UART");
