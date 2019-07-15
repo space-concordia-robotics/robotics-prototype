@@ -528,6 +528,60 @@ window.addEventListener(
   true
 )
 
+function handlePositionServo (
+  pwmVal, minPwm, maxPwm,
+  upKey, downKey,
+  upBtn, downBtn,
+) {
+    let newCommand = false
+    if (keyState[upKey]) { // numpad '/' --> tilt servo up
+      lightUp(upBtn)
+      if (pwmVal > minPwm) {
+        pwmVal -= positionServoIncrement
+      }
+      newCommand = true
+    }
+    else if (keyState[downKey]) { // numpad '8' --> tilt servo down
+      lightUp(downBtn)
+      if (pwmVal < maxPwm) {
+        pwmVal += positionServoIncrement
+      }
+      newCommand = true
+    }
+    return [newCommand, pwmVal]
+}
+
+function handleContinuousServo (
+  pwmVal,
+  leftKey, rightKey,
+  leftBtn, rightBtn
+) {
+  if (keyState[leftKey] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
+    lightUp(leftBtn)
+    if (pwmVal < SERVO_STOP + continuousServoOffset) {
+      pwmVal += continuousServoIncrement
+    }
+  }
+  else if (keyState[rightKey] && !$('#servo-val').is(':focus')) { // numpad '9' --> tilt servo right
+    lightUp(rightBtn)
+    if (pwmVal > SERVO_STOP - continuousServoOffset) {
+      pwmVal -= continuousServoIncrement
+    }
+  }
+  else { // decelerate
+    if (pwmVal < SERVO_STOP) {
+      pwmVal += continuousServoIncrement
+    }
+    else if (pwmVal > SERVO_STOP) {
+      pwmVal -= continuousServoIncrement
+    }
+    else {
+      ; // do nothing, you've stopped
+    }
+  }
+  return pwmVal
+}
+
 function gameLoop () {
   /*
   gameloop thought: what if we want more fine control on how fast the
@@ -543,39 +597,54 @@ function gameLoop () {
     //WARNING: I believe the current implementation allows a command for front pan servo to be sent immediately after front tilt.
     // This is bad and should be addressed.
 
-    // Front camera position servo
     if ( (millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
-      var newCommand = false
-      if (keyState[111]) { // numpad '/' --> tilt servo up
-        lightUp('#camera-front-tilt-up-btn')
-        if (frontTiltPwm > minFrontTiltPwm) {
-          frontTiltPwm -= positionServoIncrement
-        }
-        newCommand = true
-        //$('#front-tilt-pwm').text(frontTiltPwm)
-        //console.log('front tilt:',frontTiltPwm)
-        //lastFrontPosServoCmd = new Date().getTime()
-      }
-      else if (keyState[104]) { // numpad '8' --> tilt servo down
-        lightUp('#camera-front-tilt-down-btn')
-        if (frontTiltPwm < maxFrontTiltPwm) {
-          frontTiltPwm += positionServoIncrement
-        }
-        newCommand = true
-        //$('#front-tilt-pwm').text(frontTiltPwm)
-        //console.log('front tilt:',frontTiltPwm)
-        //lastFrontPosServoCmd = new Date().getTime()
-      }
-      if (newCommand) {
+      let returnVals = handlePositionServo (
+        frontTiltPwm, minFrontTiltPwm, maxFrontTiltPwm,
+        111, 104,
+        '#camera-front-tilt-up-btn', '#camera-front-tilt-down-btn'
+      )
+      if (returnVals[0]) {
+        frontTiltPwm = returnVals[1]
         $('#front-tilt-pwm').text(frontTiltPwm)
-        console.log('front tilt:',frontTiltPwm)
         lastFrontPosServoCmd = new Date().getTime()
         sendRoverCommand('@' + frontTiltPwm.toString())
       }
     }
     // Front camera continuous servo
     if ( (millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
-
+      frontPanPwm = handleContinuousServo (
+        frontPanPwm,
+        103, 105,
+        '#camera-front-lpan-btn', '#camera-front-rpan-btn'
+      )
+      //frontPanPwm = returnVal
+      // check whether or not to send a new command for the continuous servo
+      if (frontPanPwm == SERVO_STOP && sentServoStop) {
+        ;
+      }
+      else {
+        let frontPan = SERVO_STOP
+        if (frontPanPwm > SERVO_STOP && frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET) {
+          frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else if (frontPanPwm < SERVO_STOP && frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET) {
+          frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else {
+          frontPan = frontPanPwm
+        }
+        $('#front-pan-pwm').text(frontPan)
+        sendRoverCommand('!' + frontPan.toString())
+        //console.log('front pan:',frontPanPwm)
+        lastFrontContServoCmd = new Date().getTime()
+        if (frontPanPwm != SERVO_STOP) {
+          sentServoStop = false
+        }
+        else {
+          sentServoStop = true
+        }
+      }
+      /*
       if (keyState[103] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
         lightUp('#camera-front-lpan-btn')
         if (frontPanPwm < SERVO_STOP + continuousServoOffset) {
@@ -625,6 +694,7 @@ function gameLoop () {
           sentServoStop = true
         }
       }
+      */
     }
 
     /*ROVER WHEEL CONTROL*/
