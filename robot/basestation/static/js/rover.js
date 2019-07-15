@@ -1,9 +1,10 @@
 // for command thoughput limiting
 const GAME_LOOP_PERIOD = 50
 const CONTINUOUS_SERVO_PERIOD = 100
-const POSITION_SERVO_PERIOD = 100
-const SERVO_STOP = 90
-const MAX_CONTINUOUS_SERVO_OFFSET = 30
+const POSITION_SERVO_PERIOD = 60
+const SERVO_STOP = 93 // tested with front servos
+const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
+const MAX_CONTINUOUS_SERVO_OFFSET = 20//30
 
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
@@ -26,12 +27,12 @@ var throttle = 0 // how fast are the wheels turning in general
 var steering = 0 // values further from 0 mean sharper turning radius
 var spinning = 0 // for rotating around its centre
 var frontTiltPwm = 90
-var frontPanPwm = 90
+var frontPanPwm = SERVO_STOP
 
 var throttleIncrement = 1
 var steeringIncrement = 1
 var positionServoIncrement = 1
-var continuousServoIncrement = 1
+var continuousServoIncrement = 2
 var continuousServoOffset = 20
 
 var maxThrottleIncrement = 1
@@ -71,6 +72,12 @@ function toggleToManual () {
 
 $(document).ready(function () {
   // camera servos
+
+  // init camera servos
+  let frontContServo = '!' + SERVO_STOP.toString()
+  let rearContServo = '#' + SERVO_STOP.toString()
+  sendRoverCommand(frontContServo)
+  sendRoverCommand(rearContServo)
 
   // servo name: "Front camera positional tilt base"
   $('#camera-front-lpan-btn').click(function () {
@@ -541,8 +548,8 @@ function gameLoop () {
       var newCommand = false
       if (keyState[111]) { // numpad '/' --> tilt servo up
         lightUp('#camera-front-tilt-up-btn')
-        if (frontTiltPwm < maxFrontTiltPwm) {
-          frontTiltPwm += positionServoIncrement
+        if (frontTiltPwm > minFrontTiltPwm) {
+          frontTiltPwm -= positionServoIncrement
         }
         newCommand = true
         //$('#front-tilt-pwm').text(frontTiltPwm)
@@ -551,8 +558,8 @@ function gameLoop () {
       }
       else if (keyState[104]) { // numpad '8' --> tilt servo down
         lightUp('#camera-front-tilt-down-btn')
-        if (frontTiltPwm > minFrontTiltPwm) {
-          frontTiltPwm -= positionServoIncrement
+        if (frontTiltPwm < maxFrontTiltPwm) {
+          frontTiltPwm += positionServoIncrement
         }
         newCommand = true
         //$('#front-tilt-pwm').text(frontTiltPwm)
@@ -568,6 +575,7 @@ function gameLoop () {
     }
     // Front camera continuous servo
     if ( (millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
+
       if (keyState[103] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
         lightUp('#camera-front-lpan-btn')
         if (frontPanPwm < SERVO_STOP + continuousServoOffset) {
@@ -580,26 +588,40 @@ function gameLoop () {
           frontPanPwm -= continuousServoIncrement
         }
       }
-      else {
+      else { // decelerate
         if (frontPanPwm < SERVO_STOP) {
           frontPanPwm += continuousServoIncrement
-        } else if (frontPanPwm > SERVO_STOP) {
+        }
+        else if (frontPanPwm > SERVO_STOP) {
           frontPanPwm -= continuousServoIncrement
-        } else {
+        }
+        else {
           ; // do nothing, you've stopped
         }
       }
       // check whether or not to send a new command for the continuous servo
       if (frontPanPwm == SERVO_STOP && sentServoStop) {
         ;
-      } else {
-        $('#front-pan-pwm').text(frontPanPwm)
-        sendRoverCommand('!' + frontPanPwm.toString())
+      }
+      else {
+        let frontPan = SERVO_STOP
+        if (frontPanPwm > SERVO_STOP && frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET) {
+          frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else if (frontPanPwm < SERVO_STOP && frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET) {
+          frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else {
+          frontPan = frontPanPwm
+        }
+        $('#front-pan-pwm').text(frontPan)
+        sendRoverCommand('!' + frontPan.toString())
         //console.log('front pan:',frontPanPwm)
         lastFrontContServoCmd = new Date().getTime()
         if (frontPanPwm != SERVO_STOP) {
           sentServoStop = false
-        } else {
+        }
+        else {
           sentServoStop = true
         }
       }
@@ -706,12 +728,14 @@ function gameLoop () {
           steering = MAX_STEERING_SPEED
           // do stuff with `spinning`
           // lastCmdSent = new Date().getTime()
-        } else if (keyState[65]) {
+        }
+        else if (keyState[65]) {
           // 'a' --> rover turn left
           steering = -MAX_STEERING_SPEED
           // do stuff with `spinning`
           // lastCmdSent = new Date().getTime()
-        } else {
+        }
+        else {
           steering = 0
           spinning = 0
         }
@@ -720,7 +744,8 @@ function gameLoop () {
         sendRoverCommand(cmd)
         lastCmdSent = new Date().getTime()
       }
-    } else {
+    }
+    else {
       $('#throttle-speed').text(throttle)
       // the following stops sending commands if it already sent 0 throttle
       let cmd = throttle.toString() + ':' + steering.toString()
@@ -728,7 +753,8 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
       if (throttle != 0) {
         sentZero = false
-      } else {
+      }
+      else {
         sentZero = true
       }
     }
