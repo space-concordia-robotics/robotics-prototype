@@ -40,7 +40,8 @@ var maxSteeringIncrement = 1
 var movementCommanded = false
 
 sentZero = true // used to prevent the gui from sending wheel commands
-sentServoStop = true // used to prevent the gui from sending servo commands
+sentFrontServoStop = true // used to prevent the gui from sending servo commands
+sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
@@ -534,14 +535,14 @@ function handlePositionServo (
   upBtn, downBtn,
 ) {
     let newCommand = false
-    if (keyState[upKey]) { // numpad '/' --> tilt servo up
+    if (keyState[upKey]) {
       lightUp(upBtn)
       if (pwmVal > minPwm) {
         pwmVal -= positionServoIncrement
       }
       newCommand = true
     }
-    else if (keyState[downKey]) { // numpad '8' --> tilt servo down
+    else if (keyState[downKey]) {
       lightUp(downBtn)
       if (pwmVal < maxPwm) {
         pwmVal += positionServoIncrement
@@ -556,13 +557,13 @@ function handleContinuousServo (
   leftKey, rightKey,
   leftBtn, rightBtn
 ) {
-  if (keyState[leftKey] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
+  if (keyState[leftKey] && !$('#servo-val').is(':focus')) {
     lightUp(leftBtn)
     if (pwmVal < SERVO_STOP + continuousServoOffset) {
       pwmVal += continuousServoIncrement
     }
   }
-  else if (keyState[rightKey] && !$('#servo-val').is(':focus')) { // numpad '9' --> tilt servo right
+  else if (keyState[rightKey] && !$('#servo-val').is(':focus')) {
     lightUp(rightBtn)
     if (pwmVal > SERVO_STOP - continuousServoOffset) {
       pwmVal -= continuousServoIncrement
@@ -592,15 +593,19 @@ function gameLoop () {
   */
   if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
     /* CAMERA SERVO CONTROL */
-    //TODO: determine if the directions are correct
+    //TODO: check if the position servo code is the same for rear servo or if
+    // the directions must be reversed, because that may be annoying
+    //TODO: same thing but for the continuous servo code
+    //WARNING: the position servo limits are probably off
     //WARNING: currently I assume that 90 deg is the home position but this may not be the case
-    //WARNING: I believe the current implementation allows a command for front pan servo to be sent immediately after front tilt.
-    // This is bad and should be addressed.
+    //WARNING: the current implementation allows commands to two different servos to occur back-to-back
+    //with no delay. this may be bad, consider something that only allows one command per x ms
 
+    // front camera position servo (up/down, servo 1)
     if ( (millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
       let returnVals = handlePositionServo (
         frontTiltPwm, minFrontTiltPwm, maxFrontTiltPwm,
-        111, 104,
+        111, 104, // numpad '/' and '8'
         '#camera-front-tilt-up-btn', '#camera-front-tilt-down-btn'
       )
       if (returnVals[0]) {
@@ -610,16 +615,15 @@ function gameLoop () {
         sendRoverCommand('@' + frontTiltPwm.toString())
       }
     }
-    // Front camera continuous servo
+    // Front camera continuous servo (left/right, servo 2)
     if ( (millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
       frontPanPwm = handleContinuousServo (
         frontPanPwm,
-        103, 105,
+        103, 105, // numpad '7' and '9'
         '#camera-front-lpan-btn', '#camera-front-rpan-btn'
       )
-      //frontPanPwm = returnVal
       // check whether or not to send a new command for the continuous servo
-      if (frontPanPwm == SERVO_STOP && sentServoStop) {
+      if (frontPanPwm == SERVO_STOP && sentFrontServoStop) {
         ;
       }
       else {
@@ -634,67 +638,15 @@ function gameLoop () {
           frontPan = frontPanPwm
         }
         $('#front-pan-pwm').text(frontPan)
-        sendRoverCommand('!' + frontPan.toString())
-        //console.log('front pan:',frontPanPwm)
         lastFrontContServoCmd = new Date().getTime()
-        if (frontPanPwm != SERVO_STOP) {
-          sentServoStop = false
-        }
-        else {
-          sentServoStop = true
-        }
-      }
-      /*
-      if (keyState[103] && !$('#servo-val').is(':focus')) { // numpad '7' --> tilt servo left
-        lightUp('#camera-front-lpan-btn')
-        if (frontPanPwm < SERVO_STOP + continuousServoOffset) {
-          frontPanPwm += continuousServoIncrement
-        }
-      }
-      else if (keyState[105] && !$('#servo-val').is(':focus')) { // numpad '9' --> tilt servo right
-        lightUp('#camera-front-rpan-btn')
-        if (frontPanPwm > SERVO_STOP - continuousServoOffset) {
-          frontPanPwm -= continuousServoIncrement
-        }
-      }
-      else { // decelerate
-        if (frontPanPwm < SERVO_STOP) {
-          frontPanPwm += continuousServoIncrement
-        }
-        else if (frontPanPwm > SERVO_STOP) {
-          frontPanPwm -= continuousServoIncrement
-        }
-        else {
-          ; // do nothing, you've stopped
-        }
-      }
-      // check whether or not to send a new command for the continuous servo
-      if (frontPanPwm == SERVO_STOP && sentServoStop) {
-        ;
-      }
-      else {
-        let frontPan = SERVO_STOP
-        if (frontPanPwm > SERVO_STOP && frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET) {
-          frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        }
-        else if (frontPanPwm < SERVO_STOP && frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET) {
-          frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        }
-        else {
-          frontPan = frontPanPwm
-        }
-        $('#front-pan-pwm').text(frontPan)
         sendRoverCommand('!' + frontPan.toString())
-        //console.log('front pan:',frontPanPwm)
-        lastFrontContServoCmd = new Date().getTime()
         if (frontPanPwm != SERVO_STOP) {
-          sentServoStop = false
+          sentFrontServoStop = false
         }
         else {
-          sentServoStop = true
+          sentFrontServoStop = true
         }
       }
-      */
     }
 
     /*ROVER WHEEL CONTROL*/
