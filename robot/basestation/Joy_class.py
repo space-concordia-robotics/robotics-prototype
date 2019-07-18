@@ -20,7 +20,8 @@ class Astro_Joy():
     moving_forward = False
     moving_backward = False
 
-
+    timeout_max = 50
+    timeout = 0
 
     long_lapse = 0.08
     short_lapse = 0.04
@@ -107,7 +108,10 @@ class Astro_Joy():
                 elif self.throttle_target < 0:
                     self.throttle_actual -= self.notch_r + self.notch_f
                 else:
-                    time.sleep(self.short_lapse)
+                    if self.timeout != 0:
+                        time.sleep(self.short_lapse)
+                    else:
+                        pass
 
 
         if self.rotating_right:
@@ -173,8 +177,16 @@ class Astro_Joy():
 
         if self.throttle_actual == 0:
             self.steer_actual = 0
+            if self.timeout > 0:
+                self.timeout -= 1
+        else:
+            self.timeout = self.timeout_max
 
-        msg = str(self.throttle_actual) + ':' + str(self.steer_actual) + '\n'
+        if self.timeout != 0:
+            msg = str(self.throttle_actual) + ':' + str(self.steer_actual) + '\n'
+        else:
+            msg = None
+        print(self.timeout)
         return msg
 
 
@@ -194,7 +206,9 @@ if __name__ == '__main__':
 
     try:
         while True:
-            print(my_joy.wheels())
+            data = my_joy.wheels()
+            if data != None:
+                print(data)
 
             # time.sleep(0.05)
 
