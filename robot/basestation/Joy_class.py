@@ -186,7 +186,7 @@ class Astro_Joy():
             msg = str(self.throttle_actual) + ':' + str(self.steer_actual) + '\n'
         else:
             msg = None
-        print(self.timeout)
+        
         return msg
 
 
