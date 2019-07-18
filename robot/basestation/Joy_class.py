@@ -28,6 +28,18 @@ class Astro_Joy():
 
     front_camera_position = 90
     top_camera_position = 90
+
+    arm_forward = 'fwd'
+    arm_backward = 'back'
+    arm_halt = '~'
+
+    arm_motor1 = '~'
+    arm_motor2 = '~'
+    arm_motor3 = '~'
+    arm_motor4 = '~'
+    arm_motor5 = '~'
+    arm_motor6 = '~'
+
     def __init__(self, T, S, C):
         pygame.init()
         self.controls = pygame.joystick.Joystick(0)
@@ -186,7 +198,7 @@ class Astro_Joy():
             msg = str(self.throttle_actual) + ':' + str(self.steer_actual) + '\n'
         else:
             msg = None
-        
+
         return msg
 
 
@@ -200,13 +212,88 @@ class Astro_Joy():
 
         #if self.joy_hat != (0,0) and top_camera_ctr =(0,0,0,0):
 
+    def arm(self):
+        pygame.event.pump()
+        self.joy_hat = self.controls.get_hat(0)
+
+        for i in range(6):
+            self.joy_axis[i] = self.controls.get_axis(i)
+
+        self.joy_axis[1] *= -1
+        self.joy_axis[4] *= -1
+
+        for j in range(13):
+            self.joy_buttons[j] = self.controls.get_button(j)
+
+        twist = (self.joy_buttons[4],self.joy_buttons[5])
+        clutch = (self.joy_buttons[2],self.joy_buttons[3])
+
+        if self.joy_hat[0] == int(0):
+            self.arm_motor1 = self.arm_halt
+        elif self.joy_hat[0] == int(1):
+            self.arm_motor1 = self.arm_forward
+        elif self.joy_hat[0] == int(-1):
+            self.arm_motor1 = self.arm_backward
+
+        if self.joy_hat[1] == int(0):
+            self.arm_motor2 = self.arm_halt
+        elif self.joy_hat[1] == int(1):
+            self.arm_motor2 = self.arm_forward
+        elif self.joy_hat[1] == int(-1):
+            self.arm_motor2 = self.arm_backward
+
+        if self.joy_axis[1] > 0.4:
+            self.arm_motor3 = self.arm_forward
+        elif self.joy_axis[1] < -0.4:
+            self.arm_motor3 = self.arm_backward
+        else:
+            self.arm_motor3 = self.arm_halt
+
+        if self.joy_axis[4] > 0.4:
+            self.arm_motor4 = self.arm_forward
+        elif self.joy_axis[4] < -0.4:
+            self.arm_motor4 = self.arm_backward
+        else:
+            self.arm_motor4 = self.arm_halt
+
+        if twist == (0,1):
+            self.arm_motor5 = self.arm_forward
+        elif twist == (1,0):
+            self.arm_motor5 = self.arm_backward
+        else:
+            self.arm_motor5 = self.arm_halt
+
+        if clutch == (0,1):
+            self.arm_motor6 = self.arm_forward
+        elif clutch == (1,0):
+            self.arm_motor6 = self.arm_backward
+        else:
+            self.arm_motor6 = self.arm_halt
+
+
+        time.sleep(self.long_lapse)
+
+        msg = "budge " + self.arm_motor1 + " " + self.arm_motor2 + " " + self.arm_motor3 + " " + self.arm_motor4 + " " + self.arm_motor5 + " " + self.arm_motor6
+
+        if msg == "budge ~ ~ ~ ~ ~ ~":
+            if self.timeout > 0:
+                self.timeout -= 1
+        else:
+            self.timeout = self.timeout_max
+
+        if self.timeout == 0:
+            return None
+        else:
+            return msg
+
 
 if __name__ == '__main__':
     my_joy = Astro_Joy(45, 25, True)
 
     try:
         while True:
-            data = my_joy.wheels()
+            #data = my_joy.wheels()
+            data = my_joy.arm()
             if data != None:
                 print(data)
 
