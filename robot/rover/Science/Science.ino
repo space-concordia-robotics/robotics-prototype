@@ -1,4 +1,4 @@
-  #include <Arduino.h>
+#include <Arduino.h>
 #include <Servo.h>
 //#include <SoftwareSerial.h>
 
@@ -177,7 +177,7 @@ void setup() {
 
 void loop() {
   // print relevant data for pub/sub nodes
-  if (millis() - lastPrintTime > 200) {
+  if (millis() - lastPrintTime > 1000) {
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
     UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
@@ -196,7 +196,13 @@ void loop() {
     UART_PORT.println();
   }
   if (UART_PORT.available()) {
-    String cmd = UART_PORT.readStringUntil('\n'); 
+    String cmd = UART_PORT.readStringUntil('\n');
+    cmd.trim();
+    
+    /*UART_PORT.print("cmd:");
+    UART_PORT.println(cmd);
+    UART_PORT.print("cmd == who --> ");
+    UART_PORT.println((cmd == "who"));*/
 
     if (cmd == "ping") {
       UART_PORT.println("SCIENCE pong");
