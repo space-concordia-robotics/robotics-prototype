@@ -133,6 +133,7 @@ requests = {
     'eup' : ['eup done'],
     'edown' : ['edown done'],
     'ed' : ['UP', 'DOWN'],
+    'es' : ['es done'],
     'pd0' : ['OUT'],
     'pd1' : ['IN'],
     'p1' : ['p1 done'],

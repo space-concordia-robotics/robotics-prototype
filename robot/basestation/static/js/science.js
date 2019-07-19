@@ -487,6 +487,51 @@ $(document).ready(function () {
       }
     })
   })
+
+  $('#elevator-max-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let cmd = ''
+
+    if (isLit('#elevator-up-btn')) {
+        cmd = 'eup'
+    } else if (isLit('#elevator-down-btn')) {
+        cmd = 'edown'
+    }
+
+    sendScienceRequest(cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('eup done') || msgs[1].includes('edown done')) {
+        appendToConsole('Success')
+        lightUp('#elevator-max-speed-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
+  $('#elevator-stop-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    sendScienceRequest('es', function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('es done')) {
+        appendToConsole('Success')
+        lightUp('#elevator-stop-btn')
+        greyOut('#elevator-max-speed-go-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
 })
 
 function isScienceActivated () {

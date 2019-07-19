@@ -172,7 +172,7 @@ void setup() {
 
   delay(1000);
 
-  UART_PORT.print("\nsetup complete");
+  UART_PORT.println("\nsetup complete");
 }
 
 void loop() {
@@ -327,7 +327,7 @@ void loop() {
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';
         elevatorInUse == false;
-        UART_PORT.println("SCIENCE es");
+        UART_PORT.println("SCIENCE es done");
       }
       else if (cmd.endsWith("goto") && (cmd.indexOf(" ") > 0)) {
         //sends table to wanted position
