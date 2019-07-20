@@ -5,10 +5,18 @@ import time
 
 
 class Astro_Joy():
+
+    # General Attributes :
     controls = None
     joy_axis = [None] * 6
     joy_buttons = [None] * 13
     joy_hat = None
+    timeout_max = 10
+    timeout = 0
+    long_lapse = 0.08
+    short_lapse = 0.04
+
+    # Wheels related attributes :
     throttle_target = 0
     throttle_actual = 0
     steer_max = 45
@@ -20,25 +28,30 @@ class Astro_Joy():
     moving_forward = False
     moving_backward = False
 
-    timeout_max = 50
-    timeout = 0
+    # Cameras related attributes :
+    front_cam_position_actual = 90
+    top_cam_position_actual = 90
 
-    long_lapse = 0.08
-    short_lapse = 0.04
+    front_cam_contiuous = 90
+    top_cam_continuous = 90
 
-    front_camera_position = 90
-    top_camera_position = 90
+    continuous_motion = 25
 
+    cameras_halt = True
+    cameras_timeout_max = 10
+    cameras_timeout = 0
+
+    # Arm related attributes :
     arm_forward = 'fwd'
     arm_backward = 'back'
     arm_halt = '~'
 
-    arm_motor1 = '~'
-    arm_motor2 = '~'
-    arm_motor3 = '~'
-    arm_motor4 = '~'
-    arm_motor5 = '~'
-    arm_motor6 = '~'
+    arm_motor1 = arm_halt
+    arm_motor2 = arm_halt
+    arm_motor3 = arm_halt
+    arm_motor4 = arm_halt
+    arm_motor5 = arm_halt
+    arm_motor6 = arm_halt
 
     def __init__(self, T, S, C):
         pygame.init()
@@ -210,7 +223,55 @@ class Astro_Joy():
 
         top_camera_ctr = (self.joy_buttons[0],self.joy_buttons[1],self.joy_buttons[2],self.joy_buttons[3])
 
-        #if self.joy_hat != (0,0) and top_camera_ctr =(0,0,0,0):
+        if self.joy_hat == (0,0) and top_camera_ctr == (0,0,0,0):
+            self.cameras_halt = True
+        else:
+            self.cameras_halt = False
+
+        if self.joy_hat == (1,0) and top_camera_ctr == (0,0,0,0):
+            msg = "!" + str(self.front_cam_contiuous + self.continuous_motion)
+        elif self.joy_hat == (-1,0) and top_camera_ctr == (0,0,0,0):
+            msg = "!" + str(self.front_cam_contiuous - self.continuous_motion)
+        elif self.joy_hat == (0,1) and top_camera_ctr == (0,0,0,0):
+            if self.front_cam_position_actual < 180:
+                self.front_cam_position_actual += 1
+            msg = "@" + str(self.front_cam_position_actual)
+        elif self.joy_hat == (0,-1) and top_camera_ctr == (0,0,0,0):
+            if self.front_cam_position_actual > 0:
+                self.front_cam_position_actual -= 1
+            msg = "@" + str(self.front_cam_position_actual)
+        elif self.joy_hat == (0,0) and top_camera_ctr == (0,1,0,0):
+            msg = "#" + str(self.top_cam_continuous + self.continuous_motion)
+        elif self.joy_hat == (0,0) and top_camera_ctr == (0,0,0,1):
+            msg = "#" + str(self.top_cam_continuous - self.continuous_motion)
+        elif self.joy_hat == (0,0) and top_camera_ctr == (0,0,1,0):
+            if self.top_cam_position_actual < 180:
+                self.top_cam_position_actual += 1
+            msg = "$" + str(self.top_cam_position_actual)
+        elif self.joy_hat == (0,0) and top_camera_ctr == (1,0,0,0):
+            if self.top_cam_position_actual > 0:
+                self.top_cam_position_actual -= 1
+            msg = "$" + str(self.top_cam_position_actual)
+        else:
+            msg = None
+
+        if self.cameras_halt == False:
+            self.cameras_timeout = self.cameras_timeout_max
+            time.sleep(self.long_lapse)
+            return msg
+        else:
+            if self.cameras_timeout > 0:
+                self.cameras_timeout -= 1
+                if self.cameras_timeout %2 == 0:
+                    msg = "!" + str(self.front_cam_contiuous)
+                else:
+                    msg = "#" + str(self.top_cam_continuous)
+                time.sleep(self.long_lapse)
+                return msg
+            else:
+                return None
+
+
 
     def arm(self):
         pygame.event.pump()
@@ -231,9 +292,9 @@ class Astro_Joy():
         if self.joy_hat[0] == int(0):
             self.arm_motor1 = self.arm_halt
         elif self.joy_hat[0] == int(1):
-            self.arm_motor1 = self.arm_forward
-        elif self.joy_hat[0] == int(-1):
             self.arm_motor1 = self.arm_backward
+        elif self.joy_hat[0] == int(-1):
+            self.arm_motor1 = self.arm_forward
 
         if self.joy_hat[1] == int(0):
             self.arm_motor2 = self.arm_halt
@@ -257,16 +318,16 @@ class Astro_Joy():
             self.arm_motor4 = self.arm_halt
 
         if twist == (0,1):
-            self.arm_motor5 = self.arm_forward
-        elif twist == (1,0):
             self.arm_motor5 = self.arm_backward
+        elif twist == (1,0):
+            self.arm_motor5 = self.arm_forward
         else:
             self.arm_motor5 = self.arm_halt
 
         if clutch == (0,1):
-            self.arm_motor6 = self.arm_forward
-        elif clutch == (1,0):
             self.arm_motor6 = self.arm_backward
+        elif clutch == (1,0):
+            self.arm_motor6 = self.arm_forward
         else:
             self.arm_motor6 = self.arm_halt
 
@@ -293,7 +354,8 @@ if __name__ == '__main__':
     try:
         while True:
             #data = my_joy.wheels()
-            data = my_joy.arm()
+            #data = my_joy.arm()
+            data = my_joy.camera()
             if data != None:
                 print(data)
 
