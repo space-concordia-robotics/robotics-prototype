@@ -15,6 +15,9 @@ class Astro_Joy():
     timeout = 0
     long_lapse = 0.08
     short_lapse = 0.04
+    isRover = True
+    isArm = False
+    switch_button = False
 
     # Wheels related attributes :
     throttle_target = 0
@@ -32,8 +35,8 @@ class Astro_Joy():
     front_cam_position_actual = 90
     top_cam_position_actual = 90
 
-    front_cam_contiuous = 90
-    top_cam_continuous = 90
+    front_cam_contiuous = 93
+    top_cam_continuous = 93
 
     continuous_motion = 25
 
@@ -347,6 +350,25 @@ class Astro_Joy():
         else:
             return msg
 
+    def switch(self):
+        pygame.event.pump()
+        temp = self.controls.get_button(9)
+
+        if self.switch_button == False and temp == 1:
+            self.switch_button = True
+        elif self.switch_button == True and temp == 0:
+            if self.isRover:
+                self.isRover = False
+                self.isArm = True
+            else:
+                self.isRover = True
+                self.isArm = False
+            self.switch_button = False
+        else:
+            pass
+
+
+
 
 if __name__ == '__main__':
     my_joy = Astro_Joy(45, 25, True)
@@ -355,11 +377,18 @@ if __name__ == '__main__':
         while True:
             #data = my_joy.wheels()
             #data = my_joy.arm()
-            data = my_joy.camera()
-            if data != None:
-                print(data)
+            #data = my_joy.camera()
 
+            #if data != None:
+             #   print(data)
+            my_joy.switch()
+            time.sleep(0.01)
             # time.sleep(0.05)
-
+            #print("Rover mode : {}".format(my_joy.isRover))
+            #print("Arm mode : {}".format(my_joy.isArm))
+            if my_joy.isRover:
+                print(my_joy.wheels())
+            else:
+                print(my_joy.arm())
     except KeyboardInterrupt:
         print("Exiting now")

@@ -21,15 +21,15 @@ if __name__ == '__main__':
 
     try:
         while not rospy.is_shutdown():
-            #if my_joy.isArm:
-            message = my_joy.arm()
-            if message is not None:
-                armPub.publish(message)
-            #elif my_joy.isWheels:
-                #message = my_joy.wheels()
-                #if message is not None:
-                    #elif my_joy.isWheels:
-                    #wheelPub.publish(message)
+            my_joy.switch()
+            if my_joy.isArm:
+                message = my_joy.arm()
+                if message is not None:
+                    armPub.publish(message)
+            elif my_joy.isRover:
+                message = my_joy.wheels()
+                if message is not None:
+                    wheelPub.publish(message)
             rospy.sleep(.001)  # suitable delays are already in the wheels method
     except rospy.ROSInterruptException:
         pass
