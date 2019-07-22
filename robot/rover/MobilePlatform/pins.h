@@ -26,22 +26,38 @@
 #define LB_PWM   8
 
 /* encoder pins */
+//
+//// right side encoders
+//#define RF_EA    27
+//#define RF_EB    28
+//#define RM_EA    31
+//#define RM_EB    32
+//#define RB_EA    29
+//#define RB_EB    30
+//
+//// left side encoders
+//#define LF_EA    37
+//#define LF_EB    38
+//#define LM_EA    36
+//#define LM_EB    35
+//#define LB_EA    33
+//#define LB_EB    34
 
 // right side encoders
-#define RF_EA    27
-#define RF_EB    28
-#define RM_EA    31
-#define RM_EB    32
-#define RB_EA    29
-#define RB_EB    30
+#define RF_EA    33
+#define RF_EB    34
+#define RM_EA    37
+#define RM_EB    38
+#define RB_EA    36
+#define RB_EB    35
 
 // left side encoders
-#define LF_EA    37
-#define LF_EB    38
-#define LM_EA    36
-#define LM_EB    35
-#define LB_EA    33
-#define LB_EB    34
+#define LF_EA    31
+#define LF_EB    32
+#define LM_EA    29
+#define LM_EB    30
+#define LB_EA    27
+#define LB_EB    28
 
 /* camera servo pins */
 // F/R (front/rear), S/B (side/base)

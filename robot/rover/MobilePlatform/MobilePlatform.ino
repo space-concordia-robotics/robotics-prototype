@@ -9,11 +9,12 @@
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 1000//50
+#define FEEDBACK_PRINT_INTERVAL 10//50
 #define LED_BLINK_INTERVAL 1000
 #define SENSOR_READ_INTERVAL 200
 #define SENSOR_TIMEOUT 20
 #define THROTTLE_TIMEOUT 200
+#define MOTOR_CONTROL_INTERVAL 10
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -45,6 +46,7 @@ ArduinoBlue phone(bluetooth);
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
+elapsedMillis sinceMC; // timer for reading battery, gps and imu data
 String cmd;
 
 float maxOutputSignal, minOutputSignal;
@@ -54,8 +56,16 @@ int rightMotorDirection; // CCW =1 or CW =-1
 float desiredVelocityRight = 0;
 float desiredVelocityLeft = 0;
 float wheelBase = 0.33; //distance between left and right wheels
-float radius = 14;
-float forwardVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
+float radius = 0.14; // in m
+float piRad = 0.10472; // Pi in radians
+//float kp = 23.5;
+float kp = 14.1;
+float ki = 0.282;
+float kd = 40.625;
+//float kp = 10.0;
+//float ki = 0.02;
+//float kd = 0.05;
+float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
 float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
 int loop_state, button, i; // Input values for set velocity functions
@@ -133,15 +143,6 @@ void loop() {
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
     serialHandler();
-//    if (UART_PORT.available()) {
-//        cmd = readStringUntil(void);
-////        cmd = UART_PORT.readStringUntil('\n');
-//        cmd.trim();
-//        Cmds.handler(cmd, "Serial");
-//    }
-//    else if (Cmds.bluetoothMode){
-//        Cmds.bleHandler();
-//    }
     if (sinceSensorRead > SENSOR_READ_INTERVAL) {
         vbatt_read();
         navHandler(Cmds);
@@ -151,27 +152,77 @@ void loop() {
         toggleLed();
         sinceLedToggle = 0;
     }
-    if (Cmds.sinceThrottle > THROTTLE_TIMEOUT){
-        Cmds.stop(true);
+    if (Cmds.sinceThrottle > THROTTLE_TIMEOUT && Cmds.throttleTimeOut) Cmds.stop(true);
+
+    if (sinceMC > MOTOR_CONTROL_INTERVAL){
+        RF.calcCurrentVelocity();
+        RM.calcCurrentVelocity();
+        RB.calcCurrentVelocity();
+        LF.calcCurrentVelocity();
+        LM.calcCurrentVelocity();
+        LB.calcCurrentVelocity();
+
+
+        RF.setVelocity(RF.desiredDirection, fabs(RF.desiredVelocity), RF.getCurrentVelocity());
+        RM.setVelocity(RM.desiredDirection, fabs(RM.desiredVelocity), RM.getCurrentVelocity());
+        RB.setVelocity(RB.desiredDirection, fabs(RB.desiredVelocity), RB.getCurrentVelocity());
+        LF.setVelocity(LF.desiredDirection, fabs(LF.desiredVelocity), LF.getCurrentVelocity());
+        LM.setVelocity(LM.desiredDirection, fabs(LM.desiredVelocity), LM.getCurrentVelocity());
+        LB.setVelocity(LB.desiredDirection, fabs(LB.desiredVelocity), LB.getCurrentVelocity());
+
+//        for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
+//            motorList[i].calcCurrentVelocity();
+//            motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
+//        }
+        sinceMC = 0;
     }
-    if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL) {
-        print("ASTRO Motor Speeds: ");
+
+    if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
-            for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-                //print(motorList[i].getCurrentVelocity());
-                print(motorList[i].encoderCount);
-                if (i != RobotMotor::numMotors - 1) print(", ");
-            }
-            println("");
+//
+            print("ASTRO Motor Speeds: ");
+
+            print(RF.getCurrentVelocity());
+            print(" ");
+            print(RM.getCurrentVelocity());
+            print(" ");
+            print(RB.getCurrentVelocity());
+            print(" ");
+            print(LF.getCurrentVelocity());
+            print(" ");
+            print(LM.getCurrentVelocity());
+            print(" ");
+            println(LB.getCurrentVelocity());
+
+            roverVelocityCalculator();
+
+            print("ASTRO");
+            print(" Desired Velocities");
+
+            print(RF.desiredVelocity);
+            print(" ");
+            print(RM.desiredVelocity);
+            print(" ");
+            print(RB.desiredVelocity);
+            print(" ");
+            print(LF.desiredVelocity);
+            print(" ");
+            print(LM.desiredVelocity);
+            print(" ");
+            println(LB.desiredVelocity);
+
+
+
+
         }
         else {
-            print(String(desiredVelocityRight) + ", ");
-            print(String(desiredVelocityRight) + ", ");
-            print(String(desiredVelocityRight) + ", ");
-            print(String(desiredVelocityLeft) + ", ");
-            print(String(desiredVelocityLeft) + ", ");
-            print(String(desiredVelocityLeft));
-            println("");
+
+            print(String(RF.desiredVelocity) + ", ");
+            print(String(RM.desiredVelocity) + ", ");
+            print(String(RB.desiredVelocity) + ", ");
+            print(String(LF.desiredVelocity) + ", ");
+            print(String(LM.desiredVelocity) + ", ");
+            println(String(LB.desiredVelocity));
         }
         sinceFeedbackPrint = 0;
     }
@@ -187,9 +238,9 @@ void velocityHandler(float throttle, float steering) {
     float leadingSideAbs = mapFloat(fabs(throttle), 0, MAX_INPUT_VALUE, 0, maxOutputSignal);
     float trailingSideAbs = leadingSideAbs*multiplier;
 
-    int dir;
-    if (throttle > 0) dir = 1;
-    else dir = -1;
+    int dir = 1;
+    if (throttle >= 0) dir = 1;
+    else if (throttle < 0) dir = -1;
 
     if (steering < 0) { // turning left
         desiredVelocityRight = leadingSideAbs*dir;
@@ -205,13 +256,28 @@ void velocityHandler(float throttle, float steering) {
     if (desiredVelocityRight < 0) rightMotorDirection = CCW;
     else rightMotorDirection = CW;
 
-    RF.calcCurrentVelocity();
-    RM.calcCurrentVelocity();
-    RB.calcCurrentVelocity();
-    LF.calcCurrentVelocity();
-    LM.calcCurrentVelocity();
-    LB.calcCurrentVelocity();
-
+//    RF.desiredVelocity = desiredVelocityRight;
+//    RM.desiredVelocity = desiredVelocityRight;
+//    RB.desiredVelocity = desiredVelocityRight;
+//    LF.desiredVelocity = desiredVelocityLeft;
+//    LM.desiredVelocity = desiredVelocityLeft;
+//    LB.desiredVelocity = desiredVelocityLeft;
+//    RF.desiredDirection = rightMotorDirection;
+//    RM.desiredDirection = rightMotorDirection;
+//    RB.desiredDirection = rightMotorDirection;
+//    LF.desiredDirection = leftMotorDirection;
+//    LM.desiredDirection = leftMotorDirection;
+//    LB.desiredDirection = leftMotorDirection;
+//    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
+//        motorList[i].calcCurrentVelocity();
+//        motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
+//    }
+//    RF.calcCurrentVelocity();
+//    RM.calcCurrentVelocity();
+//    RB.calcCurrentVelocity();
+//    LF.calcCurrentVelocity();
+//    LM.calcCurrentVelocity();
+//    LB.calcCurrentVelocity();
     RF.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RF.getCurrentVelocity());
     RM.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RM.getCurrentVelocity());
     RB.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RB.getCurrentVelocity());
@@ -220,19 +286,38 @@ void velocityHandler(float throttle, float steering) {
     LB.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LB.getCurrentVelocity());
 }
 
+void roverVelocityCalculator(void) {
+    rightLinearVelocity = (RF.desiredDirection * RF.getCurrentVelocity() + RM.desiredDirection * RM.getCurrentVelocity() + RB.desiredDirection * RB.getCurrentVelocity()) * radius * piRad;
+    leftLinearVelocity = (LF.desiredDirection * LF.getCurrentVelocity() + LM.desiredDirection * LM.getCurrentVelocity() + LB.desiredDirection * LB.getCurrentVelocity()) * radius * piRad;
+
+    linearVelocity = (rightLinearVelocity - leftLinearVelocity)  / 6;
+    rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
+
+    print("ASTRO ");
+    print("Linear velocity ");
+    print(linearVelocity);
+    print(" m/s ");
+
+    print(" Rotational Velocity ");
+    print(rotationalVelocity);
+    println(" m^2/6 ");
+
+
+}
+
 void print(String msg){
     if (devMode) {
         Serial.print(msg);
         if (Cmds.bluetoothMode) {
             bluetooth.print(msg);
-            delay(50);
+//            delay(50);
         }
     }
     else {
         Serial1.print(msg);
         if (Cmds.bluetoothMode) {
             bluetooth.print(msg);
-            delay(50);
+//            delay(50);
         }
     }
 }
@@ -241,14 +326,14 @@ void println(String msg){
         Serial.println(msg);
         if (Cmds.bluetoothMode) {
             bluetooth.println(msg);
-            delay(50);
+//            delay(50);
         }
     }
     else {
         Serial1.println(msg);
         if (Cmds.bluetoothMode) {
             bluetooth.println(msg);
-            delay(50);
+//            delay(50);
         }
     }
 }
@@ -257,14 +342,14 @@ void printres(float msg, int a){
         Serial.print(msg, a);
         if (Cmds.bluetoothMode) {
             bluetooth.print(msg);
-            delay(50);
+//            delay(50);
         }
     }
     else {
         Serial1.print(msg, a);
         if (Cmds.bluetoothMode) {
             bluetooth.print(msg);
-            delay(50);
+//            delay(50);
         }
     }
 }
@@ -275,6 +360,7 @@ void serialHandler(void){
         if (Serial1.available()) {
             cmd = Serial1.readStringUntil('\n');
             cmd.trim();
+            ser_flush();
             if (cmd == "who") {
                 devMode = false;
             }
@@ -283,9 +369,12 @@ void serialHandler(void){
         else if (Serial.available()) {
             cmd = Serial.readStringUntil('\n');
             cmd.trim();
+            if (cmd == "who") {
+                devMode = true;
+            }
             Cmds.handler(cmd, "USB");
         }
-        else if (Cmds.bluetoothMode){
+        else if (bluetooth.available() && Cmds.bluetoothMode){
             Cmds.bleHandler();
         }
     }
@@ -293,6 +382,7 @@ void serialHandler(void){
         if (Serial1.available()) {
             cmd = Serial1.readStringUntil('\n');
             cmd.trim();
+            ser_flush();
             Cmds.handler(cmd, "UART");
         }
         else if (Cmds.bluetoothMode){
@@ -304,8 +394,11 @@ void serialHandler(void){
 //! attach the servos to pins
 void attachServos() {
     frontSide.attach(FS_SERVO);
+    frontSide.write(93);
     frontBase.attach(FB_SERVO);
+
     rearSide.attach(RS_SERVO);
+    frontSide.write(93);
     rearBase.attach(RB_SERVO);
 }
 //! Initiate encoder for dcMotor objects and pinModes
@@ -315,42 +408,48 @@ void initEncoders(void) {
     pinMode(RF.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    RF.pidController.setGainConstants(kp, ki, kd);
+//    RF.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
     pinMode(RM.encoderPinB, INPUT_PULLUP);
     pinMode(RM.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+//    RM.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    RM.pidController.setGainConstants(kp, ki, kd);
 
     RB.attachEncoder(RB_EA, RB_EB, PULSES_PER_REV);
     pinMode(RB.encoderPinB, INPUT_PULLUP);
     pinMode(RB.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    RB.pidController.setGainConstants(kp, ki, kd);
+//    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
     pinMode(LF.encoderPinB, INPUT_PULLUP);
     pinMode(LF.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    LF.pidController.setGainConstants(kp, ki, kd);
+//    LF.pidController.setGainConstants(kp, 0.0002, 0.0);
 
     LM.attachEncoder(LM_EA, LM_EB, PULSES_PER_REV);
     pinMode(LM.encoderPinB, INPUT_PULLUP);
     pinMode(LM.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    LM.pidController.setGainConstants(kp, ki, kd);
+//    LM.pidController.setGainConstants(3.15, 0.0002, 0.0);
 
     LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
     pinMode(LB.encoderPinB, INPUT_PULLUP);
     pinMode(LB.encoderPinA, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
-    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+    LB.pidController.setGainConstants(kp, ki, kd);
+//    LB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 //! Initiate PID objects for Dc Motors
 void initPids(void) {
@@ -378,6 +477,7 @@ void rf_encoder_interrupt(void) {
     RF.prevTime = micros();
     RF.encoderCount++;
     //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
+
 }
 void rm_encoder_interrupt(void) {
     RM.dt += micros() - RM.prevTime;

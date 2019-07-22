@@ -17,6 +17,8 @@ public:
     String ping_cmd = "ping";
     String who_cmd = "who";
     String reboot_cmd = "reboot";
+    String bleOn_cmd = "ble-on";
+    String bleOff_cmd = "ble-off";
     String closeLoop_cmd = "close-loop";
     String openLoop_cmd = "open-loop";
     String joystickOn_cmd = "joystick-on";
@@ -29,6 +31,8 @@ public:
     String encOff_cmd = "enc-off";
     String accOn_cmd = "acc-on";
     String accOff_cmd = "acc-off";
+    String ttoOn_cmd = "tto-on";
+    String ttoOff_cmd = "tto-off";
     String status_cmd = "status";
     String stop_cmd = "stop";
 
@@ -36,12 +40,13 @@ public:
 
 
     bool isActivated = false;
-    bool isOpenLoop = true; // No PID controller
+    bool isOpenLoop = false; //  PID controller
     bool bluetoothMode = true;//true;
     bool isJoystickMode = true;
     bool isSteering = true;
     bool isGpsImu = true;
     bool isEnc = true;
+    bool throttleTimeOut = true;
 
     bool imuError = false;
     String imuErrorMsg = "ASTRO IMU may be malfunctioning, timeout reached";
@@ -75,6 +80,8 @@ public:
     void encOff(void);
     void accOn(void);
     void accOff(void);
+    void ttoOn(void);
+    void ttoOff(void);
     void status(void);
     void stop(bool timeout = false);
     void controlWheelMotors(String cmd);
@@ -104,6 +111,12 @@ void Commands::handler(String cmd, String sender) {
     }
     else if (cmd == reboot_cmd) {
         rebootTeensy();
+    }
+    else if (cmd == bleOn_cmd ) {
+        bleOn(sender);
+    }
+    else if (cmd == bleOff_cmd) {
+        bleOff(sender);
     }
     else if (cmd == closeLoop_cmd) {
         closeLoop();
@@ -135,6 +148,12 @@ void Commands::handler(String cmd, String sender) {
     else if (cmd == accOff_cmd) {
         accOff();
     }
+    else if (cmd == ttoOn_cmd) {
+        ttoOn();
+    }
+    else if (cmd == ttoOff_cmd) {
+        ttoOff();
+    }
     else if (cmd == stop_cmd) {
         stop();
     }
@@ -163,6 +182,8 @@ void Commands::bleHandler(void) {
             throttle -= 49.5;
             steering -= 49.5;
             velocityHandler(throttle, steering);
+            println(String(sinceThrottle));
+            sinceThrottle = 0;
         }
         else if (!isActivated && button == -1) {
             throttle = 0;
@@ -342,6 +363,13 @@ void Commands::closeLoop(void) {
     encOn();
     maxOutputSignal = MAX_RPM_VALUE; minOutputSignal = MIN_RPM_VALUE;
     println("ASTRO Bo!");
+    RF.isOpenLoop = false;
+    RM.isOpenLoop = false;
+    RB.isOpenLoop = false;
+    LF.isOpenLoop = false;
+    LM.isOpenLoop = false;
+    LB.isOpenLoop = false;
+
     for (i = 0; i < RobotMotor::numMotors; i++) {
         motorList[i].isOpenLoop = false;
         String msg = "ASTRO Motor " + String(i + 1);
@@ -355,6 +383,13 @@ void Commands::openLoop(void) {
         stop();
     }
     maxOutputSignal = MAX_PWM_VALUE; minOutputSignal = MIN_PWM_VALUE;
+
+    RF.isOpenLoop = true;
+    RM.isOpenLoop = true;
+    RB.isOpenLoop = true;
+    LF.isOpenLoop = true;
+    LM.isOpenLoop = true;
+    LB.isOpenLoop = true;
     for (i = 0; i < RobotMotor::numMotors; i++) {
         motorList[i].isOpenLoop = true;
         String msg = "ASTRO Motor " + String(i + 1);
@@ -418,7 +453,7 @@ void Commands::steerOn(void) {
         println("ASTRO commands are now: throttle:steering");
     }
     else {
-        println("ASTRO Throttle range is -30 to 30 (closed loop)");
+        println("ASTRO Throttle range is -49 to 49 (closed loop)");
         println("ASTRO Steering range is -49 to 49");
         println("ASTRO commands are now: RPM:steering");
     }
@@ -455,24 +490,37 @@ void Commands::encOff(void) {
     println("ASTRO Velocity Readings Stream from Motor Encoders is OFF");
 }
 
-//void Commands::accOn(void) {
-//    for (i = 0; i < RobotMotor::numMotors; i++) {
-//        motorList[i].accLimit = true;
-//        String msg = "ASTRO Motor " + String(i + 1);
-//        msg += " Acceleration Limiter: ";
-//        msg += String(motorList[i].accLimit ? "Open" : "CLose");
-//        println(msg);
-//    }
-//}
-//void Commands::accOff(void) {
-//    for (i = 0; i < RobotMotor::numMotors; i++) {
-//        motorList[i].accLimit = false;
-//        String msg = "ASTRO Motor " + String(i + 1);
-//        msg += " Acceleration Limiter: ";
-//        msg += String(motorList[i].accLimit ? "Open" : "CLose");
-//        println(msg);
-//    }
-//}
+void Commands::accOn(void) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = true;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
+}
+void Commands::accOff(void) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = false;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
+}
+
+void Commands::ttoOn(void) {
+    throttleTimeOut = true;
+    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
+    println(msg);
+
+}
+void Commands::ttoOff(void) {
+    throttleTimeOut = false;
+    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
+    println(msg);
+
+}
 
 void Commands::controlWheelMotors(String cmd) {
     if (!isActivated) {
@@ -502,9 +550,49 @@ void Commands::controlWheelMotors(String cmd) {
             if (throttle < 0 ) {
                 dir = - 1;
             }
-            motorList[motorNumber].calcCurrentVelocity();
-            motorList[motorNumber].setVelocity(dir , abs(motorSpeed), motorList[motorNumber].getCurrentVelocity());
-            println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].getCurrentVelocity()) + String(" PWM "));
+            sinceThrottle = 0;
+
+            if (motorNumber == 0){
+                RF.calcCurrentVelocity();
+                RF.setVelocity(dir , abs(motorSpeed), RF.getCurrentVelocity());
+                println("ASTRO " + String(RF.motorName) + String("'s desired speed: ") + String(RF.desiredVelocity) + String(" PWM "));
+
+            }
+            if (motorNumber == 1){
+                RM.calcCurrentVelocity();
+                RM.setVelocity(dir , abs(motorSpeed), RM.getCurrentVelocity());
+                println("ASTRO " + String(RM.motorName) + String("'s desired speed: ") + String(RM.desiredVelocity) + String(" PWM "));
+
+            }
+            if (motorNumber == 2){
+                RB.calcCurrentVelocity();
+                RB.setVelocity(dir , abs(motorSpeed), RB.getCurrentVelocity());
+                println("ASTRO " + String(RB.motorName) + String("'s desired speed: ") + String(RB.desiredVelocity) + String(" PWM "));
+
+            }
+            if (motorNumber == 3){
+                LF.calcCurrentVelocity();
+                LF.setVelocity(dir , abs(motorSpeed), LF.getCurrentVelocity());
+                println("ASTRO " + String(LF.motorName) + String("'s desired speed: ") + String(LF.desiredVelocity) + String(" PWM "));
+
+            }
+            if (motorNumber == 4){
+                LM.calcCurrentVelocity();
+                LM.setVelocity(dir , abs(motorSpeed), LM.getCurrentVelocity());
+                println("ASTRO " + String(LM.motorName) + String("'s desired speed: ") + String(LM.desiredVelocity) + String(" PWM "));
+
+            }
+            if (motorNumber == 5){
+                LB.calcCurrentVelocity();
+                LB.setVelocity(dir , abs(motorSpeed), LB.getCurrentVelocity());
+                println("ASTRO " + String(LB.motorName) + String("'s desired speed: ") + String(LB.desiredVelocity) + String(" PWM "));
+
+            }
+//            motorList[motorNumber].desiredVelocity = motorSpeed;
+//            motorList[motorNumber].desiredDirection = dir;
+//            motorList[motorNumber].calcCurrentVelocity();
+//            motorList[motorNumber].setVelocity(dir , abs(motorSpeed), motorList[motorNumber].getCurrentVelocity());
+//            println("ASTRO " + String(motorList[motorNumber].motorName) + String("'s desired speed: ") + String(motorList[motorNumber].desiredVelocity) + String(" PWM "));
         }
     }
 }
@@ -566,13 +654,13 @@ void Commands::controlCameraMotors(String cmd) {
 }
 
 void Commands::stop(bool timeout) {
-    if (timeout) println("ASTRO Throttle Timeout");
+//    if (timeout) println("ASTRO Throttle Timeout");
     velocityHandler(0, 0);
-    for (int i = 0; i < RobotMotor::numMotors; i++) {
-        String msg = "ASTRO " + String(motorList[i].motorName);
-        msg += "'s desired speed: " + String(motorList[i].getCurrentVelocity()) + " PWM ";
-        println(msg);
-    }
+//    for (int i = 0; i < RobotMotor::numMotors; i++) {
+//        String msg = "ASTRO " + String(motorList[i].motorName);
+//        msg += "'s desired speed: " + String(motorList[i].getCurrentVelocity()) + " PWM ";
+//        println(msg);
+
 }
 
 #endif
