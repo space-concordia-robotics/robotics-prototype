@@ -34,6 +34,7 @@
     <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
     <script src="../static/js/app.js"></script>
     <script src="../static/js/science.js"></script>
+    <script src="../static/js/themes.js"></script>
 
 </head>
 
@@ -44,6 +45,17 @@
               <img src="../static/img/sclogo_header.png">
           </a>
       </div>
+
+        <div class="dropdown col-md-1">
+            <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Theme
+            </button>
+            <div class="dropdown-menu">
+            <a id="theme-red" class="dropdown-item">Red</a>
+            <a id="theme-green" class="dropdown-item">Green</a>
+            <a id="theme-blue" class="dropdown-item">Blue</a>
+            </div>
+        </div>
 
       <div class="dropdown col-md-2">
         <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
