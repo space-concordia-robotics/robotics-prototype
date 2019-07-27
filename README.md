@@ -19,9 +19,9 @@ This command will install all of the required dependencies (mostly just ESLint s
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
-Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3`:
+Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3.6`:
 ```
-$ virtualenv -p `which python3` venv
+$ virtualenv -p `which python3.6` venv
 ```
 **Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3.6+ by typing `which python` in Linux/Mac (bash/zsh) or `where py` in Windows (cmd.exe).
 
@@ -106,6 +106,7 @@ Tip: You can `source activatevenv` whenever you need to:
 
 Finally, to link ROS to our webpage we need to install rosbridge: `sudo apt install ros-kinetic-rosbridge-suite`.
 Before running the GUI with `./app.py`, you need to run in a separate terminal: `roslaunch rosbridge_server rosbridge_websocket.launch`. Make sure to deactivate the `venv` for this terminal (otherwise it will crash).
+Make sure it works fine: after running the `./app.py` go visit `localhost:5000` in your browser (recommended browser: Google Chrome).
 
 ### .bashrc edits
 You should edit your `~/.bashrc` file so that it looks like this:
@@ -127,6 +128,28 @@ Note that the first 4 lines are there by default when you do the ROS full instal
 and that you will have to change the paths in the last two lines to reflect where your files are installed on your computer.
 Additionally you need to build the packages in the rospackages folder.
 `cd` into `rospackages` and run `catkin_make`, otherwise the second last line in the above snippet will fail (as the folder devel will not have yet been generated).
+
+### Bash hook to prepend branch name
+
+This explains how to use and setup a git hook that will prepend the issue number
+to a commit message. Git hooks are used to automate git commands and functions. There are a number of different options, but this particular hook will add the issue number to your ```git commit-m``` message once it is pushed to the repository. Git hooks live in a local git/hooks file of each repo, so initializing this hook in the robotics-prototype repo will not change any other repos you might have.
+
+#### Setting up a git hook
+
+If you're in Linux run the following command. If you're on windows, install [Git Bash](https://git-scm.com/downloads) if you haven't already and run the following command.
+
+From the root of the repository:
+```
+cp commit-message-hook.sh .git/hooks/prepare-commit-msg
+```
+
+#### Using the commit hook prepender
+
+Now, when ever you using `git commit -m` the hook will prepend the issue number to your message. This will show up in the repo as [#\<issue number\>], so there is no longer a need to add this to your commit message. This will work as long as your branches are named using our branch naming standards defind in our wiki, otherwise the commit will be aborted.
+
+In order to write a long commit message using `git commit -m`, write a concise title and then press enter twice. Then, type as long a message as is appropriate and close the quotation mark. This ensures it will be formatted nicely on github.
+
+Finish the commit and `git push` as usual. For more information on our conventions check [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Workflow-and-Conventions).
 
 ### Formatting Guide
 When you install the `requirements-dev.txt.` dependencies, you will have `pylint` and `yapf` installed. Both of these packages allow for set guidelines on how code should behave (`pylint`) and how it should look (`yapf`). In other words, `pylint` is the project's linter and `yapf` is the auto-formatter. You can read more about these online but the basic principle is that we should all have code that looks alike and behaves properly based on some established set of heuristics. The `.pylint` file (based entirely on Google's very own one) contains the configurations that `pylint` uses to validate the code. If you configure your IDE properly, both the linter (`pylint`) and autoformatter (`yapf`) should work without prompting any action. Here is an example of the project opened in VSCode (which has it's configurations outlined in `.vscode/settings.json`) showing how `pylint` indicates things (also shown clickable `pytest` actions right inside the source!):
