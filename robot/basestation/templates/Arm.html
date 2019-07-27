@@ -6,73 +6,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SC Robotics GUI - Arm</title>
-    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
 
-    <!-- Bootstrap CSS -->
-    <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
-    <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
-    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
-    <link href="../static/css/arm.css" rel="stylesheet">
-    <script src="../static/js/jquery-3.3.1.min.js"></script>
-    <script src="../static/js/helpers.js"></script>
-
-    <!-- for roslibjs stuff -->
-    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
-    <!-- all for ros3d -->
-    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
-    <!-- homemade -->
-    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
-    <script src="../static/js/app.js"></script>
-    <script src="../static/js/arm.js"></script>
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
-    <script src="../static/js/popper-1.14.3.min.js"></script>
-    <script src="../static/js/bootstrap-4.1.2.min.js"></script>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-      <div class="col-md-1">
-          <a class="navbar-brand" href="'javascript:void(0)'">
-              <img src="../static/img/sclogo_header.png">
-          </a>
-      </div>
-
-      <div class="dropdown col-md-2">
-        <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Device Channel
-        </button>
-        <div class="dropdown-menu">
-          <a id="mux-0" class="dropdown-item">0: Rover</a>
-          <a id="mux-1" class="dropdown-item">1: Arm</a>
-          <a id="mux-2" class="dropdown-item">2: Science</a>
-          <a id="mux-3" class="dropdown-item">3: PDS</a>
-        </div>
-      </div>
-
-      <div class="dropdown col-md-2">
-        <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Serial Type
-        </button>
-        <div class="dropdown-menu">
-          <a id="uart" class="dropdown-item">uart</a>
-          <a id="usb" class="dropdown-item">usb</a>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <input type="text" id="serial-cmd-input">
-      </div>
-      <div class="col-md-1">
-        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
-      </div>
-    </nav>
-
     <br>
     <br>
     <div style="margin-bottom:10px"></div>
