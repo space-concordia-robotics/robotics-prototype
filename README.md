@@ -1,15 +1,15 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
+This repo contains the Robotics software team code.
 
 ## Contributing and Development Environment Instructions
 
-Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
-### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
+### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
 Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3.6`:
 ```
@@ -244,12 +244,12 @@ This was accomplished by running `syncEmailer.sh` and setting up a systemd start
 
 Let Peter know if you want to be added to this mailing list.
 
-#### Ros Rover Startup service
+#### ROS Rover Startup service
 
 This service follows the IP-emailer service and executes a roslaunch file `rover.launch`, which will allow developers to easily add nodes to be launched on startup without having to create
 a new systemd service each time. It automatically starts the rosmaster on the odroid.
 
-This was accomplished by running `syncRosRoverSync.sh` and setting up a systemd startup service to run `runRosRoverStart.sh`.
+This was accomplished by setting up a systemd startup service to run `runRosRoverStart.sh`.
 
 ### Remote connect from home
 
