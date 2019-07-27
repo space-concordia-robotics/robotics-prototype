@@ -9,30 +9,18 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
-### [Optional] Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
-Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
-```
-$ npm install
-```
-
-This command will install all of the required dependencies (mostly just ESLint stuff at the time of writing) as depicted in the `package.json` file.
-
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
 Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3.6`:
 ```
 $ virtualenv -p `which python3.6` venv
 ```
-**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3.6+ by typing `which python` in Linux/Mac (bash/zsh) or `where py` in Windows (cmd.exe).
+**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3.6+ by typing `which python` in Linux/Mac (bash/zsh).
 
 You should see a new directory named `venv` inside the root directory. We can now activate this virtual environment:
 Linux/Mac (bash/zsh):
 ```
 $ source venv/bin/activate
-```
-Windows (cmd.exe):
-```
-C:\> venv\Scripts\activate.bat
 ```
 
 You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
@@ -45,10 +33,6 @@ To leave the virtual environment run:
 Linux/Mac (bash/zsh):
 ```
 (venv) $ deactivate
-```
-Windows (cmd.exe):
-```
-C:\> deactivate.bat
 ```
 
 ### Install [dependencies](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
@@ -85,24 +69,6 @@ To remove the package you just installed using:
 ```
 
 **DISCLAIMER:** This issue with module imports via `pytest` was the motivating factor to change the project directory structure. For this technique to work, the 'source' code must live inside (nested) a main directory (usually named the same as project directory name or other suitable representative identifier such as **robot** in this case). The `src` subdirectory was renamed because it made no sense when importing a package module by name like `import src.basestation.Motor`, which has no meaning/place in a module semantic context (`import robot.basestation.Motor` is much more appropriate). Most Python projects do not use a `src` directory unless it's for storing their source code that eventually gets compiled to binary (i.e. such as `.c`, `.h`, etc.. files). Also, `base-station` was renamed to `basestation` because Python no-likey dashes in import statements.
-
-### Activate venv script [`activatevenv`]
-This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
-- Checks to make sure the `venv` directory is present and if not tries to install it (i.e. `virtualenv -p $python_exec_path venv`)
-- Activates the virtual environment script (i.e. `source venv/bin/activate`)
-- Installs required python modules specified in `requirements.txt` and `requirements-dev.txt`
-
-See `activatevenv` for more details and to see how to pass a custom Python path as an argument.
-
-To use it, in the project root directory, simply source it in your shell as follows:
-```
-source activatevenv
-```
-
-Tip: You can `source activatevenv` whenever you need to:
-- Reinstall modules defined in `requirements-*.txt`
-- Reactivate the `venv` environment
-- Reload newly defined variables in `.envrc` as environment variables
 
 Finally, to link ROS to our webpage we need to install rosbridge: `sudo apt install ros-kinetic-rosbridge-suite`.
 Before running the GUI with `./app.py`, you need to run in a separate terminal: `roslaunch rosbridge_server rosbridge_websocket.launch`. Make sure to deactivate the `venv` for this terminal (otherwise it will crash).
@@ -164,26 +130,9 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
 - Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
-#### Atom (tested on ubuntu 16.04, Windows 7)
+#### Atom
 If you're using Atom, setting up should be fairly easy.
 
-##### Windows
-**NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
-
-**NOTE:** Because the `.atom/config.cson` works for OSX and Linux, we aren't versioning the Windows equivalent configuration file.
-However, if you have issues such as `failed to spawn command pylint` or similar complaining about yapf, you may open the package settings and fix the paths yourself. \
-For example, change every `/` to `\`, and change the `venv/bin/whatever` to `venv\Scripts\whatever`.
-Make sure to apply these changes in the _atom package settings_, they will automatically take care of your system `config.cson` and take care of details (such as escaping the `\`s in the actual config file).
-
-- Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
-If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
-If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
-- If `bin` folder is *not* missing, and `apm --version` returns something along the lines of `command not found`, make sure to [add the path to your bin for atom to your path](https://www.java.com/en/download/help/path.xml).
-- Run `pylint --version`. If it fails with `RuntimeError: Inconsistent hierarchy` then go to the last python file in the stack trace (for me it was `functools.py`) and change `if not candidate` to `if candidate == None`.
-See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1388) on github.
-- If you've made it past the last two steps, proceed to run the commands listed under **Ubuntu** section underneath.
-
-##### Ubuntu
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
 - Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
