@@ -5,11 +5,9 @@
 {% endblock %}
 {% block content %}
 <div class="row">
- <div class="col-sm-4">{% include 'Console.html' %}</div>
- <div class="col-sm-8">{% include 'CameraFeed.html' %}</div>
+ <div class="col-md-3">{% include 'Console.html' %}</div>
+ <div class="col-md-3">{% include 'ArmPosition.html' %}{% include 'MotorTable.html' %}</div>
+ <div class="col-md-6">{% include 'CameraFeed.html' %}</div>
 </div>
-
-
-    {% include 'ArmPosition.html' %}
     {% include 'ControlPanel.html' %}
 {% endblock %}

@@ -1,12 +1,20 @@
-<h5 class="container-header">Arm Vision</h5>
-<!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
-<img id="camera-feed" src="http://{{ roverIP }}:8090/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
-<span>
-    <strong>Arm Stream</strong>
-</span>
-<div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-    <label>
-        <input id="toggle-arm-stream-btn" type="checkbox">
-        <span> </span>
-    </label>
+<div>
+  <h5 class="container-header">Arm Vision</h5>
+  <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
+  <img id="camera-feed" src="http://{{ roverIP }}:8090/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <strong>Arm Stream</strong>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-5 offset-md-5 text-center">
+        <div class="form-check checkbox-slider--a checkbox-slider-lg">
+	          <label>
+		            <input type="checkbox" id="toggle-arm-stream-btn"><span></span>
+	          </label>
+        </div>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
 </div>

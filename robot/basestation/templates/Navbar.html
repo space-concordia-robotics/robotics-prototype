@@ -1,5 +1,5 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-  <div class="col-md-1">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <div class="col-md-2">
       <a class="navbar-brand" href="{{ url_for('index') }}">
           <img src="../static/img/sclogo_header.png">
       </a>
@@ -22,15 +22,15 @@
       Serial Type
     </button>
     <div class="dropdown-menu">
-      <a id="uart" class="dropdown-item">UART</a>
-      <a id="usb" class="dropdown-item">USB</a>
+      <a id="uart" class="dropdown-item">uart</a>
+      <a id="usb" class="dropdown-item">usb</a>
     </div>
   </div>
 
-  <div class="col-md-6">
+  <div class="col-md-2">
     <input type="text" id="serial-cmd-input">
   </div>
-  <div class="col-md-1">
+  <div class="col-md-2">
     <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
   </div>
 </nav>
