@@ -1,41 +1,26 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code, as well as some of the other subteams code/documentation.
+This repo contains the Robotics software team code.
 
 ## Contributing and Development Environment Instructions
 
-Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+ and Node + NPM (see [here](https://nodejs.org/en/download/)). Make sure that whenever you use `python` or `python3` or whatever later on meets this requirement.
+Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
-### Setup [NodeJS](https://nodejs.org/en/download/) and install dependencies
-Pull the latest version of the project repo and run this command in the root directory (make sure to have NodeJS and NPM installed):
-```
-$ npm install
-```
-
-This command will install all of the required dependencies (mostly just ESLint stuff at the time of writing) as depicted in the `package.json` file.
-
-### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#module-venvhttps://virtualenv.pypa.io/en/stable/userguide/)
+### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
+Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3.6`:
 ```
-$ virtualenv -p <path/to/python3.6.x+> venv
+$ virtualenv -p `which python3.6` venv
 ```
-Make sure you supply a path to a Python 3.6.x+ binary. In my case, I just supplied it like this:
-```
-$ virtualenv -p `which python3` venv
-```
-**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3+ by typing `which python` in Linux/Mac (bash/zsh) or `where py` in Windows (cmd.exe).
+**Note**: Your actual alias for calling Python might be different (e.g. `python`, `py`, `py3`, etc). You can ensure whichever it might be is version 3.6+ by typing `which python` in Linux/Mac (bash/zsh).
 
 You should see a new directory named `venv` inside the root directory. We can now activate this virtual environment:
 Linux/Mac (bash/zsh):
 ```
 $ source venv/bin/activate
-```
-Windows (cmd.exe):
-```
-C:\> venv\Scripts\activate.bat
 ```
 
 You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
@@ -49,41 +34,12 @@ Linux/Mac (bash/zsh):
 ```
 (venv) $ deactivate
 ```
-Windows (cmd.exe):
-```
-C:\> deactivate.bat
-```
 
 ### Install [dependencies](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
 First, ensure you activated your `venv` and you are in the root project directory. Then, install the required packages:
 ```
 (venv) $ pip install -r requirements.txt -r requirements-dev.txt
 ```
-**Note**: If you want to run the "legacy" GUI (AsimovOperation.py) you'll need to install the `pygobject` module (which is needed for running GTK GUI)
-However, this GUI will soon be replaced by a new one using flask, so unless your hellbent on running the old GUI, **feel free to skip the next section** (and keep in mind that the pygobject line in `requirements.txt` is commented out.
-
-#### Install and configure `pygobject3`
-If you ran into issues installing `pygobject` when trying to `pip install -r requirements.txt`, then here are possible reasons:
-
-**(A)** You might not have the pyobject installed on your system, in which case you need to install it via your package manager. For MacOS this was as simple as:
-```
-(venv) $ brew install pygobject3 gtk+3
-```
-
-**(B)** If you get something along the lines of not being able to find `libffi`, you might need to install it via your package manager. For MacOS again:
-```
-(venv) $ brew install libffi
-```
-
-Confirm its whereabouts with `locate libffi.pc` (you might be prompted  to built the locate database for which the command for doing so is included in the output message). The output you see should be something along the lines of `/usr/local/Cellar/libffi/3.2.1/lib/pkgconfig/libffi.pc` when you type `locate libffi.pc`. For the virtual Python environment to locate it, simply export the environment variable `PKG_CONFIG_PATH` with the directory where `libffi.pc` is located in:
-```
-export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.2.1/lib/pkgconfig
-```
-Now you should be able to retry installing the requirements:
-```
-(venv) $ pip install -r requirements.txt
-```
-Which should produce no errors!
 
 ### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
 When you try to run `pytest` from anywhere inside the project, there's a very good chance you'll get `ModuleNotFoundError` thrown. This is because absolute imports inside each test file won't work if the test is being executed by `pytest` inside the test's own directory (i.e. the `sys.path` variable will only contain the directory where the test file lives, not the root directory). To encourage best practices, and avoid doing dirty/hacky `sys.path` manipulation within each python file, using `setuptools`'s **develop** feature will allow the virtual environment to create temporary dev package installs using "hooks" (eggs) to each path inside package directory as defined by the "name" attribute in `setup.py` (i.e. `robot` module will be available as though it was installed through `pip`).
@@ -114,37 +70,52 @@ To remove the package you just installed using:
 
 **DISCLAIMER:** This issue with module imports via `pytest` was the motivating factor to change the project directory structure. For this technique to work, the 'source' code must live inside (nested) a main directory (usually named the same as project directory name or other suitable representative identifier such as **robot** in this case). The `src` subdirectory was renamed because it made no sense when importing a package module by name like `import src.basestation.Motor`, which has no meaning/place in a module semantic context (`import robot.basestation.Motor` is much more appropriate). Most Python projects do not use a `src` directory unless it's for storing their source code that eventually gets compiled to binary (i.e. such as `.c`, `.h`, etc.. files). Also, `base-station` was renamed to `basestation` because Python no-likey dashes in import statements.
 
-### Setup environment variable loader [[`direnv`](https://github.com/direnv/direnv)]
-This tool will be used to take care of managing loading and unloading of environment variables defined in a `.envrc` file in the root. This avoids polluting the global environment.
+Finally, to link ROS to our webpage we need to install rosbridge: `sudo apt install ros-kinetic-rosbridge-suite`.
+Before running the GUI with `./app.py`, you need to run in a separate terminal: `roslaunch rosbridge_server rosbridge_websocket.launch`. Make sure to deactivate the `venv` for this terminal (otherwise it will crash).
+Make sure it works fine: after running the `./app.py` go visit `localhost:5000` in your browser (recommended browser: Google Chrome).
 
-If using debian, to install:
+### .bashrc edits
+You should edit your `~/.bashrc` file so that it looks like this:
 
 ```
-$ sudo apt-get install direnv
+source /opt/ros/kinetic/setup.bash
+source ~/catkin_ws/devel/setup.bash
+# local mode
+#export ROS_MASTER_URI=http://localhost:11311
+#export ROS_HOSTNAME=localhost
+# competition mode
+export ROS_MASTER_URI=http://172.16.1.30:11311 # competition mode
+export ROS_HOSTNAME=beep
+. /home/beep/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+. /home/beep/Programming/robotics-prototype/venv/bin/activate
 ```
 
-Make sure to then append the following line to your `~/.bashrc`: `eval "$(direnv hook bash)"`
+Note that the first 4 lines are there by default when you do the ROS full install,
+and that you will have to change the paths in the last two lines to reflect where your files are installed on your computer.
+Additionally you need to build the packages in the rospackages folder.
+`cd` into `rospackages` and run `catkin_make`, otherwise the second last line in the above snippet will fail (as the folder devel will not have yet been generated).
 
-Otherwise, see the link in title for instructions on how to install and setup.
+### Bash hook to prepend branch name
 
-### Activate venv script [`activatevenv`]
-This script is to be used whenever the dev environment needs to be installed or activated. It does the following:
-- Checks to make sure the `venv` directory is present and if not tries to install it (i.e. `virtualenv -p $python_exec_path venv`)
-- Activates the virtual environment script (i.e. `source venv/bin/activate`)
-- Installs required python modules specified in `requirements.txt` and `requirements-dev.txt`
-- Loads the environment variables with those defined in `.envrc` using `direnv` tool (i.e. `direnv allow .`)
+This explains how to use and setup a git hook that will prepend the issue number
+to a commit message. Git hooks are used to automate git commands and functions. There are a number of different options, but this particular hook will add the issue number to your ```git commit-m``` message once it is pushed to the repository. Git hooks live in a local git/hooks file of each repo, so initializing this hook in the robotics-prototype repo will not change any other repos you might have.
 
-See `activatevenv` for more details and to see how to pass a custom Python path as an argument.
+#### Setting up a git hook
 
-To use it, in the project root directory, simply source it in your shell as follows:
+If you're in Linux run the following command. If you're on windows, install [Git Bash](https://git-scm.com/downloads) if you haven't already and run the following command.
+
+From the root of the repository:
 ```
-source activatevenv
+cp commit-message-hook.sh .git/hooks/prepare-commit-msg
 ```
 
-Tip: You can `source activatevenv` whenever you need to:
-- Reinstall modules defined in `requirements-*.txt`
-- Reactivate the `venv` environment
-- Reload newly defined variables in `.envrc` as environment variables
+#### Using the commit hook prepender
+
+Now, when ever you using `git commit -m` the hook will prepend the issue number to your message. This will show up in the repo as [#\<issue number\>], so there is no longer a need to add this to your commit message. This will work as long as your branches are named using our branch naming standards defind in our wiki, otherwise the commit will be aborted.
+
+In order to write a long commit message using `git commit -m`, write a concise title and then press enter twice. Then, type as long a message as is appropriate and close the quotation mark. This ensures it will be formatted nicely on github.
+
+Finish the commit and `git push` as usual. For more information on our conventions check [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Workflow-and-Conventions).
 
 ### ffmpeg
 
@@ -164,26 +135,9 @@ Although most of the syntax/format will be handled by `pylint`/`yapf`, some thin
 - Although class names use `CapWords`, modules should have `lower_with_under.py` names. This is to prevent confusing with imports on whether or not the module itself or the class was imported as described [here](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#3162-naming-convention). This means even if you file contains only one class like `Motor`, the filename (i.e. module name -- each Python file is considered a module) should be `motor.py` and **not** ~~`Motor.py`~~.
 - Test files should be named `modulename_test.py` (note the `_test` appearing as a suffix, not prefix) with the class inside named `TestModuleName` (here `Test` needs to be a prefix, blame `pytest` for that). This class should encapsulate the methods that test various functionality or states named `test_<functionality_or_state>(self)` (same for functions). Note that these guidelines will ensure that your tests will be recognized by [`pytest`'s test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
-#### Atom (tested on ubuntu 16.04, Windows 7)
+#### Atom
 If you're using Atom, setting up should be fairly easy.
 
-##### Windows
-**NOTE:** It is assumed you have already set up virtualenv along with having installed all the pip dependencies, and the atom text editor itself.
-
-**NOTE:** Because the `.atom/config.cson` works for OSX and Linux, we aren't versioning the Windows equivalent configuration file.
-However, if you have issues such as `failed to spawn command pylint` or similar complaining about yapf, you may open the package settings and fix the paths yourself. \
-For example, change every `/` to `\`, and change the `venv/bin/whatever` to `venv\Scripts\whatever`.
-Make sure to apply these changes in the _atom package settings_, they will automatically take care of your system `config.cson` and take care of details (such as escaping the `\`s in the actual config file).
-
-- Check to see if atom installed properly (this is a [known issue](https://github.com/atom/atom/issues/5869)). Open up `cmd.exe`, run `apm --version`.
-If the command fails then check to see if you have a bin folder in your atom install directory (`where atom`).
-If `bin` folder is missing, try [deleting your `%LOCALAPPDATA%\Temp` folder and reinstalling Atom](https://discuss.atom.io/t/atom-installation-error-on-windows-8-1/15050/11), that worked for me.
-- If `bin` folder is *not* missing, and `apm --version` returns something along the lines of `command not found`, make sure to [add the path to your bin for atom to your path](https://www.java.com/en/download/help/path.xml).
-- Run `pylint --version`. If it fails with `RuntimeError: Inconsistent hierarchy` then go to the last python file in the stack trace (for me it was `functools.py`) and change `if not candidate` to `if candidate == None`.
-See the issue and its discussion [here](https://github.com/PyCQA/pylint/issues/1388) on github.
-- If you've made it past the last two steps, proceed to run the commands listed under **Ubuntu** section underneath.
-
-##### Ubuntu
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
 - Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
 
@@ -295,12 +249,12 @@ This was accomplished by running `syncEmailer.sh` and setting up a systemd start
 
 Let Peter know if you want to be added to this mailing list.
 
-#### Ros Rover Startup service
+#### ROS Rover Startup service
 
 This service follows the IP-emailer service and executes a roslaunch file `rover.launch`, which will allow developers to easily add nodes to be launched on startup without having to create
 a new systemd service each time. It automatically starts the rosmaster on the odroid.
 
-This was accomplished by running `syncRosRoverSync.sh` and setting up a systemd startup service to run `runRosRoverStart.sh`.
+This was accomplished by setting up a systemd startup service to run `runRosRoverStart.sh`.
 
 ### Remote connect from home
 
