@@ -15,7 +15,6 @@ alias arm="cd $ROVER/ArmDriverUnit"
 alias wheels="cd $ROVER/MobilePlatform"
 alias rostings="cd $ROSPACKAGES"
 alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"
-
 alias roverenv=". $ROBOTICS_WS/venv/bin/activate"
 
 # edit thyself
@@ -25,6 +24,6 @@ alias editnani="nano $NANORC"
 alias nani=". $NANORC"
 
 # to start the gui
-alias startgui="roverenv && cd $BASE && ./app.py"
-#we have to deactivate venv for this launch file to not break, bug to be resolved eventually
-alias rosgui="deactivate && roslaunch rosbridge_server rosbridge_websocket.launch"
+alias startgui="roverenv && cd $BASE && python app.py"
+# we have to deactivate venv for this launch file to not break, bug to be resolved eventually
+alias rosgui="roverenv && deactivate && roslaunch rosbridge_server rosbridge_websocket.launch"
