@@ -1,6 +1,6 @@
 /* still in idea phase */
-//#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
-#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
+#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
+//#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
 //#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
 //#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
 //#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case
@@ -12,7 +12,7 @@
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
 //#define DEBUG_PID 14 //!< debug messages during pid loop calculations
-//#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
+#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
 #define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
@@ -53,11 +53,11 @@
 
 #include "PinSetup.h"
 #include "Parser.h"
+#include "Vsense.h"
 // #include "Notes.h" // holds todo info
 // #include "Ideas.h" // holds bits of code that haven't been implemented
 #include "PidController.h"
 #include "RobotMotor.h"
-#include "StepperMotor.h"
 #include "DcMotor.h"
 #include "ServoMotor.h"
 /* interrupt priorities */

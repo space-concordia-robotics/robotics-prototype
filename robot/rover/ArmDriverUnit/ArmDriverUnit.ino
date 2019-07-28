@@ -113,8 +113,8 @@ void m3ExtendISR(void);
 void m4FlexISR(void);
 void m4ExtendISR(void);
 //void m5CwISR(void);
-//void m5CcwISR(void);
-//void m6OpenISR(void);
+void m6FlexISR(void);
+void m6ExtendISR(void);
 
 // declare timer interrupt service routines, where the motors actually get controlled
 void dcInterrupt(void); //!< manages motors 1-4
@@ -152,7 +152,7 @@ void setup() {
   initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
   motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
-  motor6.switchDirectionLogic(); // positive angles now mean opening
+  motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
   initMotorTimers();
 
   // reset the elapsedMillis variables so that they're fresh upon entering the loop()
@@ -480,6 +480,7 @@ void loop() {
   } // end of message parsing
   if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
     printMotorAngles();
+    vbatt_read();
     sinceAnglePrint = 0; // reset the timer
   }
 
@@ -538,10 +539,10 @@ void initEncoders(void) {
   attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
   // set activate PIDs
-  //motor1.isOpenLoop = false;
-  //motor2.isOpenLoop = false;
-  //motor3.isOpenLoop = false;
-  //motor4.isOpenLoop = false;
+  motor1.isOpenLoop = false; motor1.encoderModifier=-1;
+  motor2.isOpenLoop = false;
+  motor3.isOpenLoop = false;
+  motor4.isOpenLoop = false; motor4.encoderModifier=-1;
 
   // set pid gains
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
@@ -571,7 +572,7 @@ void initLimitSwitches(void) {
   motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
   motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
   //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  //motor6.attachLimitSwitches(GRIPPER_SWITCH, 0, M6_LIMIT_SW_EXTEND); // only checks for gripper opening
+  motor6.attachLimitSwitches(FLEXION_SWITCH, M6_LIMIT_SW_FLEX, M6_LIMIT_SW_EXTEND);
 
   attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
   attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
@@ -582,8 +583,8 @@ void initLimitSwitches(void) {
   attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
   attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
   //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor5.limSwitchCcw, m5CcwISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor6.limSwitchOpen, m6OpenISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor6.limSwitchFlex, m6FlexISR, LIM_SWITCH_DIR);
+  attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
 
   // set motor joint angle limits
   motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
@@ -607,12 +608,12 @@ void initSpeedParams(void) {
   UART_PORT.println("ARM Setting motor speeds and open loop gains.");
 #endif
 
-  motor1.setMotorSpeed(30); // 60 rpm
+  motor1.setMotorSpeed(50); // 60 rpm
   motor2.setMotorSpeed(42); // 32 rpm
   motor3.setMotorSpeed(65); // 45 rpm
   motor4.setMotorSpeed(30); // 60 rpm
-  motor5.setMotorSpeed(50); // probably done tuning
-  motor6.setMotorSpeed(50); // probably done tuning
+  motor5.setMotorSpeed(100);
+  motor6.setMotorSpeed(100);
 
   // set pid slowest speed before it cuts power, to avoid noise and energy drain
   motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
@@ -630,9 +631,9 @@ void initSpeedParams(void) {
   motor1.setOpenLoopGain(0.001); // needs to be tuned
   motor2.setOpenLoopGain(0.0012); // needs to be tuned
   motor3.setOpenLoopGain(0.004); // more or less tuned
-  motor4.setOpenLoopGain(0.004); // needs to be tuned
-  motor5.setOpenLoopGain(0.32); // for 5V, probably done tuning
-  motor6.setOpenLoopGain(0.35); // for 5V, probably done tuning
+  motor4.setOpenLoopGain(0.04); // needs to be tuned
+  motor5.setOpenLoopGain(0.32);
+  motor6.setOpenLoopGain(0.25);
 }
 //! Attaches interrupt functions to motor timers. Also sets interrupt priorities.
 void initMotorTimers(void) {
@@ -730,11 +731,37 @@ void respondToLimitSwitches(void) {
       UART_PORT.print("ARM motor "); UART_PORT.print(i + 1);
       UART_PORT.println(" hit limit switch");
 #endif
-      motorArray[i]->atSafeAngle = false;
-      if (isHoming) {
-        motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+      if (i == 5) { // gripper switches
+        motorArray[i]->stopRotation(); // stop turning of course
+        if (motorArray[i]->limitSwitchState == CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+          UART_PORT.println("ARM gripper hit a switch");
+          UART_PORT.print("ARM motor is at hard angle ");
+          UART_PORT.print(motorArray[i]->minSoftAngle);
+#endif
+          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
+        }
+        if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
+#ifdef DEBUG_SWITCHES
+          UART_PORT.println("ARM gripper hit a switch");
+          UART_PORT.print("ARM motor is at hard angle ");
+          UART_PORT.print(motorArray[i]->maxSoftAngle);
+#endif
+          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
+        }
+        motorArray[i]->actualPress = false;
+        motorArray[i]->limitSwitchState = 0;
+        if (isHoming) {
+          motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+        }
       }
-      motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
+      else {
+        motorArray[i]->atSafeAngle = false;
+        if (isHoming) {
+          motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+        }
+        motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
+      }
     }
     /*! \todo put code here to check if the motor should be at the end of its path but isn't?
        well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
@@ -831,16 +858,18 @@ void rebootTeensy(void) { //!< software reset function using watchdog timer
   while (1); // infinite do nothing loop -- wait for the countdown
 }
 /*! This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
-This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
-Calling the kickDog() function will reset the time-out counter.
+  This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
+  Calling the kickDog() function will reset the time-out counter.
 
-\todo Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().
+  \todo Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().
 */
-void kickDog(void) {  
-  noInterrupts();
-  WDOG_REFRESH = 0xA602;
-  WDOG_REFRESH = 0xB480;
-  interrupts();
+void kickDog(void) {
+  /*
+    noInterrupts();
+    WDOG_REFRESH = 0xA602;
+    WDOG_REFRESH = 0xB480;
+    interrupts();
+  */
 }
 
 /* timer interrupts */
@@ -860,10 +889,10 @@ void servoInterrupt(void) {
 #define M1_DUAL_CHANNEL 2
 #ifdef M1_ENCODER_PORT
 /*! encoder interrupt service routine
- * 
- * \todo can I make a skeleton function that gets called in these interrupts
+
+   \todo can I make a skeleton function that gets called in these interrupts
      that I can just pass the appropriate registers etc into?
- */
+*/
 void m1_encoder_interrupt(void) {
 #ifdef M1_DUAL_CHANNEL
   /*! encoder states are 4 bit values. Top 2 bits are the previous states
@@ -883,7 +912,7 @@ void m1_encoder_interrupt(void) {
      The & operation ensures that anything above the lowest 4 bits
      is cleared before accessing the array.
   */
-  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor1.encoderModifier;
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("ARM motor 1 "); UART_PORT.println(motor1.encoderCount);
 #endif
@@ -904,7 +933,7 @@ void m2_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
-  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor2.encoderModifier;
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("ARM motor 2 "); UART_PORT.println(motor2.encoderCount);
 #endif
@@ -915,7 +944,7 @@ void m3_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   oldEncoderState <<= 2;
   oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
-  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor3.encoderModifier;
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("ARM motor 3 "); UART_PORT.println(motor3.encoderCount);
 #endif
@@ -926,7 +955,7 @@ void m4_encoder_interrupt(void) {
   static unsigned int oldEncoderState = 0;
   oldEncoderState <<= 2;
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
-  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor4.encoderModifier;
 #ifdef DEBUG_ENCODERS
   UART_PORT.print("ARM motor 4 "); UART_PORT.println(motor4.encoderCount);
 #endif
@@ -957,7 +986,7 @@ void m6_encoder_interrupt(void) {
 
 /* limit switch interrupts */
 /* //! limit switch interrupt service routine
-\todo can I make a skeleton function that gets called in these interrupts
+  \todo can I make a skeleton function that gets called in these interrupts
      that I can just pass the appropriate registers etc into?
 */
 void m1CwISR(void) {
@@ -1099,15 +1128,14 @@ void m4ExtendISR(void) {
     ;
   }
 */
-/* todo finish rewriting for gripper, also put different logic for the gripper, also check what open and close means for cw ccw
-void m6OpenISR(void) {
+void m6FlexISR(void) {
   // if the switch wasn't previously triggered then it starts a counter
   if (!(motor6.triggered) && motor6.triggerState == 0) {
     motor6.triggered = true;
     motor6.sinceTrigger = 0;
   }
   // grab the state of the pin for the cw switch
-  int pinState = (M1_LIMIT_SW_CW_PORT >> M1_LIMIT_SW_CW_SHIFT ) & 1;
+  int pinState = (M6_LIMIT_SW_FLEX_PORT >> M6_LIMIT_SW_FLEX_SHIFT ) & 1;
   // since we care about falling edges, when it reads 0 it's a hit
   // a hit is +1 or -1 depending on which switch was hit
   if (pinState == 0) {
@@ -1121,12 +1149,12 @@ void m6OpenISR(void) {
     motor6.triggerState = 0;
   }
 }
-void m6CloseISR(void) {
+void m6ExtendISR(void) {
   if (!(motor6.triggered) && motor6.triggerState == 0) {
     motor6.triggered = true;
     motor6.sinceTrigger = 0;
   }
-  int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
+  int pinState = (M6_LIMIT_SW_EXTEND_PORT >> M6_LIMIT_SW_EXTEND_SHIFT ) & 1;
   if (pinState == 0) {
     motor6.triggerState = COUNTER_CLOCKWISE;
 #ifdef DEBUG_SWITCHES
@@ -1137,4 +1165,3 @@ void m6CloseISR(void) {
     motor6.triggerState = 0;
   }
 }
-*/

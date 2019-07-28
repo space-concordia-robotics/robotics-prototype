@@ -13,8 +13,7 @@ void vbatt_read() {
   float vbatt = vsense * 6.0; 
 
   UART_PORT.print("ARM battery voltage: ");
-  UART_PORT.print(vbatt);
-  UART_PORT.println(" V");
+  UART_PORT.println(vbatt);
 
   if (vbatt < 12) {
     UART_PORT.println("ARM WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY!");

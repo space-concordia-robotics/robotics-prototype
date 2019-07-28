@@ -2,8 +2,9 @@
 #include "PinSetup.h"
 
 void pinSetup(void) {
-  pinMode(LED_BUILTIN, OUTPUT); // pin 13
+  pinMode(LED_BUILTIN, OUTPUT); // pin 13, heartbeat
   digitalWrite(LED_BUILTIN, HIGH);
+
   pinMode(V_SENSE, INPUT); // battery sensing
   
   // DC motors
@@ -47,9 +48,12 @@ void pinSetup(void) {
 
   pinMode(M6_PWM_PIN, OUTPUT);
   analogWrite(M6_PWM_PIN, SERVO_STOP);
+  pinMode(M6_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
+  pinMode(M6_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
+
   /*
-    pinMode(M6_ENCODER_A, LIM_SWITCH_PULLSTATE);
-    pinMode(M6_ENCODER_B, LIM_SWITCH_PULLSTATE);
+    pinMode(M6_ENCODER_A, INPUT_PULLUP);
+    pinMode(M6_ENCODER_B, INPUT_PULLUP);
   */
 
 }

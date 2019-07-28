@@ -26,6 +26,7 @@ class RobotMotor {
   public:
     // these variables are set at start and normally don't change during the main loop
     int motorType;
+    int encoderModifier; //!< flips encoder directionality in the case of flipped wires
     static int numMotors; //!< keeps track of how many motors there are
     int encoderPinA, encoderPinB;
     // for limit switch interrupts and homing
@@ -130,6 +131,7 @@ RobotMotor::RobotMotor() {
   homingPass = 0;
   atSafeAngle = true;
   startedZeroing = false;
+  encoderModifier = 1;
 }
 
 void RobotMotor::attachEncoder(int encA, int encB, uint32_t port, int shift, int encRes) // :
@@ -287,7 +289,8 @@ void RobotMotor::goToSafeAngle(void) {
 #ifdef DEBUG_SWITCHES
     UART_PORT.print("ARM motor is at hard angle ");
     UART_PORT.print(maxHardAngle);
-    UART_PORT.println("and turning ccw to soft angle");
+    UART_PORT.print(" and turning cw to soft angle ");
+    UART_PORT.println(maxSoftAngle);
 #endif
     setSoftwareAngle(maxHardAngle);
     forceToAngle(maxSoftAngle);
@@ -296,7 +299,8 @@ void RobotMotor::goToSafeAngle(void) {
 #ifdef DEBUG_SWITCHES
     UART_PORT.print("ARM motor is at hard angle ");
     UART_PORT.print(minHardAngle);
-    UART_PORT.println("and turning cw to soft angle");
+    UART_PORT.print(" and turning ccw to soft angle ");
+    UART_PORT.println(minSoftAngle);
 #endif
     setSoftwareAngle(minHardAngle);
     forceToAngle(minSoftAngle);

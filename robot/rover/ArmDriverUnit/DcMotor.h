@@ -8,7 +8,7 @@
 class DcMotor: public RobotMotor {
   public:
     static int numDcMotors;
-
+    
     DcMotor(int dirPin, int pwmPin, float gearRatio);
     void motorTimerInterrupt(void);
     /* movement helper functions */
@@ -223,7 +223,7 @@ void DcMotor::forceToAngle(float angle) {
     startAngle = getSoftwareAngle();
     openLoopError = getDesiredAngle() - getSoftwareAngle(); // find the angle difference
     calcDirection(openLoopError);
-    // calculates how many steps to take to get to the desired position, assuming no slipping
+    // calculates how many milliseconds it will take to get to the desired position, assuming no slipping
     numMillis = (fabs(openLoopError) * gearRatio / openLoopSpeed) * 1000.0 * openLoopGain;
     timeCount = 0;
     movementDone = false;
