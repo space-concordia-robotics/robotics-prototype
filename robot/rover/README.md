@@ -1,29 +1,37 @@
 # Rover
 The code running on the rover
 
-## ArmDriverUnit (ADU)
-### Code Structure
+## config
+This folder contains some configuration stuff for the Odroid and a sample .bash_aliases file for it as well. See the README inside the folder for more info.
 
-The Teensy code for the ADU is abstracted into classes to aid in code modularity. Currently there is the RobotMotor class with the DcMotor, StepperMotor and ServoMotor subclasses. There are also the PidController and Parser classes, and pinSetup which is not a class but is separated into its own .cpp and .h files. In the future, these classes could be turned into Arduino libraries. At the very least, a similar structure can be used on the rover Teensy.
+## Arm
+### Classes
+
+The Teensy code for the Arm is abstracted into classes to aid in code modularity. Currently there is the RobotMotor class with the DcMotor, StepperMotor (not used anymore) and ServoMotor subclasses. There are also the PidController and Parser classes, and pinSetup which is not a class but is separated into its own .cpp and .h files. In the future, these classes could be turned into Arduino libraries. At the very least, a similar structure can be used on the rover Teensy.
+
+### Header files
+
+Includes.h holds many of the macros and include directives so that the code in Arm.ino is less bloated
+Vsense.h holds battery voltage sensing functionality
+Notes.h and Ideas.h hold sample code and ideas for future improvements.
 
 ### Hardware and Wiring
 
-The current iteration of the rover arm has m1 and m2 being DC motors, m3 and m4 being stepper motors, and m5 and m6 being continuous rotation servos. Currently the DC motors are driven with Cytron drivers, the stepper motors with A4988 or DRV8825 drivers, and the servos do not need external drivers.
+The current iteration of the rover arm has m1 to m4 being DC motors and m5 and m6 being continuous rotation servos. Currently the DC motors are driven with Cytron drivers and the servos do not need external drivers. The DC motors have quadrature encoders. There are also 10 limit switches for m1 to m4 as well as m6.
 
-For prototyping purposes: there is a .docx file in `/robot/rover/ArmDriverUnit` which shows wiring diagrams for the different drivers and steppers. Note that in all cases but the servos, the power supply ground and the logic-level ground are independent. In the case of the servos, the ground will be isolated in the final design, but for testing purposes it can share a common ground. The 8-wire stepper motor coils are in series configuration.
+#### Wiring While Connected to Rover
+On the rover, there is a dedicated PCB that the Teensy plugs into. There are 5 cables which connect the arm to the electronics bay and therefore to the arm PCB: one for power to the 4 DC motors, two for the DC motor encoders, one for the two servos, and one for all the limit switches.
+
+#### Wiring While NOT Connected to Rover (OLD)
+For prototyping purposes: there is a .docx file in `/robot/rover/Arm` which shows wiring diagrams for the different drivers and steppers FROM A PREVIOUS DESIGN ITERATION. Note that in all cases but the servos, the power supply ground and the logic-level ground are independent. In the case of the servos, the ground will be isolated in the final design, but for testing purposes it can share a common ground. The 8-wire stepper motor coils are in series configuration.
 
 In short, the Teensy is connected to the drivers (and the servos). The drivers (and the servos) are powered by power supplies (7.4V for the servos, 12V for the DC motors and steppers) and connect to the motors (aside from the servos).
-
-On the rover, there will be a dedicated board with (probably) a d-sub connector that the Teensy plugs into. A cable plugged into the d-sub connector will branch out and connect to the respective motors and driver circuits.
 
 ### Doxygen
 This folder contains files related to the Doxygen auto-generated documentation.
 "Doxyfile" is what my laptop uses to generate the documentation, including where on my laptop to place it.
 "index.html - Shortcut" links to the most recently generated documentation on my laptop.
 "ArmDriverUnit- Main Page" is a link to the most recently uploaded version of the documentation to my personal ENCS website.
-
-### Odroid
-This folder contains preliminary code to be run on the Odroid which will communicate with the arm Teensy.
 
 ### Examples
 This folder contains example sketches for using the classes built in ArmDriverUnit. In the future, once the classes are turned into actual libraries, these sketches will come with the library.
@@ -39,14 +47,24 @@ This example demonstrates open or closed loop of two DC motors. It's the next st
 #### RosCommunication
 This example demonstrates how the Teensy can communicate with ROS over the serial port. It hasn't been tested yet but you should be able to choose either USB serial or hardware serial. Please note that you will need to modify one of the rosserial header files to make it work. Instructions are in `robotics-prototype/README.md`.
 
-## RoverDriverUnit (RDU)
+## MobilePlatform
 ### Code Structure
 
-The RDU code structure is to be decided but will probably follow a similar structure to the ADU.
+The Mobile Platform code follows a similar structure to the Arm code. It still uses RobotMotor and DcMotor, however it implements its own class for handling commands. It is capable of being controlled via USB, UART or bluetooth.
 
 ### Hardware and Wiring
 
-The current iteration of the rover has 6 DC motors, all controlled by Cytron drivers.
+The current iteration of the mobile platform has 6 DC motors, all controlled by Cytron drivers. It also has two position servos and two continuous servos for aiming the front and rear cameras. Finally, it has a GPS module, an IMU, and a connector for a bluetooth module.
+
+#### Wiring While Connected to Rover
+
+On the rover, there is a dedicated PCB that the Teensy, GPS module and IMU plug into, and optionally a bluetooth module as well. There are 5 cables which connect the mobile platform to the electronics bay and therefore to the mobile platform PCB: one for power to the 6 DC motors, two for the DC motor encoders, and two for the four servos. There is also a connector on the electronics bay for an extension to the GPS antenna which is fixed to the top of the electronics bay. 
+
+## Science
+
+
+## PDS
+
 
 ## Demos
 This folder contains short demo sketches to test simple Arduino/Teensy features.
