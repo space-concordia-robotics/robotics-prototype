@@ -3,7 +3,7 @@ function initRosWeb () {
     url: 'ws://localhost:9090'
   })
   ros.on('connection', function () {
-    // appendToConsole('Connected to websocket server.')
+    appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
     if (window.location.pathname == '/rover') {
       initNavigationPanel()

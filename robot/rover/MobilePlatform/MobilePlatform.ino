@@ -5,7 +5,6 @@
 
 #include <SoftwareSerial.h>
 
-
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
@@ -142,26 +141,29 @@ void loop() {
     // incoming format example: "5:7"
     // this represents the speed for throttle:steering
     // as well as direction by the positive/negative sign
+
     serialHandler();
+
     if (sinceSensorRead > SENSOR_READ_INTERVAL) {
         vbatt_read();
         navHandler(Cmds);
         sinceSensorRead = 0;
     }
+
     if (sinceLedToggle > LED_BLINK_INTERVAL) {
         toggleLed();
         sinceLedToggle = 0;
     }
+
     if (Cmds.sinceThrottle > THROTTLE_TIMEOUT && Cmds.throttleTimeOut) Cmds.stop(true);
 
-    if (sinceMC > MOTOR_CONTROL_INTERVAL){
+    if (sinceMC > MOTOR_CONTROL_INTERVAL) {
         RF.calcCurrentVelocity();
         RM.calcCurrentVelocity();
         RB.calcCurrentVelocity();
         LF.calcCurrentVelocity();
         LM.calcCurrentVelocity();
         LB.calcCurrentVelocity();
-
 
         RF.setVelocity(RF.desiredDirection, fabs(RF.desiredVelocity), RF.getCurrentVelocity());
         RM.setVelocity(RM.desiredDirection, fabs(RM.desiredVelocity), RM.getCurrentVelocity());
@@ -170,16 +172,10 @@ void loop() {
         LM.setVelocity(LM.desiredDirection, fabs(LM.desiredVelocity), LM.getCurrentVelocity());
         LB.setVelocity(LB.desiredDirection, fabs(LB.desiredVelocity), LB.getCurrentVelocity());
 
-//        for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-//            motorList[i].calcCurrentVelocity();
-//            motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
-//        }
-        sinceMC = 0;
     }
 
     if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
-//
             print("ASTRO Motor Speeds: ");
 
             print(RF.getCurrentVelocity());
@@ -211,12 +207,8 @@ void loop() {
             print(" ");
             println(LB.desiredVelocity);
 
-
-
-
         }
         else {
-
             print(String(RF.desiredVelocity) + ", ");
             print(String(RM.desiredVelocity) + ", ");
             print(String(RB.desiredVelocity) + ", ");
@@ -256,28 +248,6 @@ void velocityHandler(float throttle, float steering) {
     if (desiredVelocityRight < 0) rightMotorDirection = CCW;
     else rightMotorDirection = CW;
 
-//    RF.desiredVelocity = desiredVelocityRight;
-//    RM.desiredVelocity = desiredVelocityRight;
-//    RB.desiredVelocity = desiredVelocityRight;
-//    LF.desiredVelocity = desiredVelocityLeft;
-//    LM.desiredVelocity = desiredVelocityLeft;
-//    LB.desiredVelocity = desiredVelocityLeft;
-//    RF.desiredDirection = rightMotorDirection;
-//    RM.desiredDirection = rightMotorDirection;
-//    RB.desiredDirection = rightMotorDirection;
-//    LF.desiredDirection = leftMotorDirection;
-//    LM.desiredDirection = leftMotorDirection;
-//    LB.desiredDirection = leftMotorDirection;
-//    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-//        motorList[i].calcCurrentVelocity();
-//        motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
-//    }
-//    RF.calcCurrentVelocity();
-//    RM.calcCurrentVelocity();
-//    RB.calcCurrentVelocity();
-//    LF.calcCurrentVelocity();
-//    LM.calcCurrentVelocity();
-//    LB.calcCurrentVelocity();
     RF.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RF.getCurrentVelocity());
     RM.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RM.getCurrentVelocity());
     RB.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RB.getCurrentVelocity());
@@ -301,11 +271,9 @@ void roverVelocityCalculator(void) {
     print(" Rotational Velocity ");
     print(rotationalVelocity);
     println(" m^2/6 ");
-
-
 }
 
-void print(String msg){
+void print(String msg) {
     if (devMode) {
         Serial.print(msg);
         if (Cmds.bluetoothMode) {
@@ -321,7 +289,7 @@ void print(String msg){
         }
     }
 }
-void println(String msg){
+void println(String msg) {
     if (devMode) {
         Serial.println(msg);
         if (Cmds.bluetoothMode) {
@@ -337,7 +305,7 @@ void println(String msg){
         }
     }
 }
-void printres(float msg, int a){
+void printres(float msg, int a) {
     if (devMode) {
         Serial.print(msg, a);
         if (Cmds.bluetoothMode) {
@@ -355,7 +323,7 @@ void printres(float msg, int a){
 }
 
 //! Figures out which serial being used
-void serialHandler(void){
+void serialHandler(void) {
     if (devMode) {
         if (Serial1.available()) {
             cmd = Serial1.readStringUntil('\n');
@@ -391,6 +359,7 @@ void serialHandler(void){
     }
 
 }
+
 //! attach the servos to pins
 void attachServos() {
     frontSide.attach(FS_SERVO);
@@ -401,6 +370,7 @@ void attachServos() {
     frontSide.write(93);
     rearBase.attach(RB_SERVO);
 }
+
 //! Initiate encoder for dcMotor objects and pinModes
 void initEncoders(void) {
     RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
@@ -451,6 +421,7 @@ void initEncoders(void) {
     LB.pidController.setGainConstants(kp, ki, kd);
 //    LB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
+
 //! Initiate PID objects for Dc Motors
 void initPids(void) {
     /*
@@ -479,26 +450,31 @@ void rf_encoder_interrupt(void) {
     //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
 
 }
+
 void rm_encoder_interrupt(void) {
     RM.dt += micros() - RM.prevTime;
     RM.prevTime = micros();
     RM.encoderCount++;
 }
+
 void rb_encoder_interrupt(void) {
     RB.dt += micros() - RB.prevTime;
     RB.prevTime = micros();
     RB.encoderCount++;
 }
+
 void lf_encoder_interrupt(void) {
     LF.dt += micros() - LF.prevTime;
     LF.prevTime = micros();
     LF.encoderCount++;
 }
+
 void lm_encoder_interrupt(void) {
     LM.dt += micros() - LM.prevTime;
     LM.prevTime = micros();
     LM.encoderCount++;
 }
+
 void lb_encoder_interrupt(void) {
     LB.dt += micros() - LB.prevTime;
     LB.prevTime = micros();
