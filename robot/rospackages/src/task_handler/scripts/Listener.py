@@ -41,9 +41,7 @@ class Listener:
             self.p1_pid = self.p1.pid
 
             # allow some time to pass
-            # specifically waiting for 3 seconds since command listener scripts
-            # take an extra 2-3 seconds time to identify if the correct MCU is connected
-            time.sleep(3)
+            time.sleep(0.5)
 
             poll = self.p1.poll()
 
@@ -69,8 +67,8 @@ class Listener:
 
             if self.force_kill:
                 # edge case due to current implementation of video streamer
-                if "start_stream" in self.script:
-                    real_pid = get_pid("mjpg_streamer")
+                if "start_ros_stream" in self.script:
+                    real_pid = get_pid("cv_camera_node")
 
                     if real_pid != -1:
                         output, error = run_shell("kill -9", str(real_pid))

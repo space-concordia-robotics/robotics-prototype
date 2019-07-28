@@ -48,7 +48,7 @@ This package contains a server to be run on the Odroid and a client to be run an
 
 This package contains a server to be run on the Odroid and a client to be run anywhere. One can call it to select a desired multiplexer channel on the Odroid PCB. This package was created because communications to microcontrollers is done over UART. Howevere, since only one UART is available, a multiplexer allows the same UART to communicate with multiple devices. This package's service will raise or lower two of the Odroid's digital logic pins in order to choose one of four mux channels. It can be called either with the client node or through the `app.py` GUI when `rosbridge_websockets` is active.
 
-## arm_control
+## mcu_control
 
 ### Description
 

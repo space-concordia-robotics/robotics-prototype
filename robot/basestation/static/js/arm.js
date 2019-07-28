@@ -41,8 +41,6 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  // checkTaskStatuses()
-
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')
@@ -62,6 +60,7 @@ $(document).ready(function () {
       lastCmdSent = new Date().getTime()
     }
   })
+
   $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -70,10 +69,27 @@ $(document).ready(function () {
     }
   })
 
+  $('#save-image').on('click', function (event) {
+    $.ajax('/capture_image', {
+      success: function (data) {
+        appendToConsole(data.msg)
+        if (!data.msg.includes('success')) {
+          appendToConsole('Something went wrong, got', data.msg)
+        } else {
+          appendToConsole(data.msg)
+        }
+      },
+      error: function () {
+        console.log('An error occured')
+      }
+    })
+  })
+
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
+
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('reboot')
@@ -139,28 +155,6 @@ $(document).ready(function () {
           } else {
             $('#toggle-arm-listener-btn')[0].checked = false
           }
-        }
-      })
-    }
-  })
-  $('#toggle-arm-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          console.log('activating stream window')
-          getRoverIP(function (ip) {
-            console.log('ip', ip)
-            $('img#camera-feed')[0].src = ip + ':8090/?action=stream'
-          })
-        }
-      }) //, '/dev/ttyArmScienceCam')
-    } else {
-      requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
         }
       })
     }
@@ -524,6 +518,41 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
 
+    // numpad8 --> ARM UP
+    if (!$serialCmdInput.is(':focus') && keyState[104]) {
+      console.log('ARM UP')
+      lightUp('#arm-up-btn > button')
+    }
+
+    // numpad4 --> ARM LEFT
+    if (!$serialCmdInput.is(':focus') && keyState[100]) {
+      console.log('ARM LEFT')
+      lightUp('#arm-left-btn > button')
+    }
+
+    // numpad6 --> ARM RIGHT
+    if (!$serialCmdInput.is(':focus') && keyState[102]) {
+      console.log('ARM RIGHT')
+      lightUp('#arm-right-btn > button')
+    }
+
+    // numpad5 --> ARM DOWN
+    if (!$serialCmdInput.is(':focus') && keyState[101]) {
+      console.log('ARM DOWN')
+      lightUp('#arm-down-btn > button')
+    }
+
+    // numpad1 --> ARM BACK
+    if (!$serialCmdInput.is(':focus') && keyState[97]) {
+      console.log('ARM BACK')
+      lightUp('#arm-back-btn > button')
+    }
+
+    // numpad3 --> ARM FWD
+    if (!$serialCmdInput.is(':focus') && keyState[99]) {
+      console.log('ARM FWD')
+      lightUp('#arm-fwd-btn > button')
+    }
     // redraw/reposition your object here
     // also redraw/animate any objects not controlled by the user
   }
@@ -631,5 +660,42 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  console.log('event.code:', event.code)
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad8') {
+    dim('#arm-up-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad4') {
+    dim('#arm-left-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad6') {
+    dim('#arm-right-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad5') {
+    dim('#arm-down-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad1') {
+    dim('#arm-back-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad3') {
+    dim('#arm-fwd-btn > button')
   }
 })

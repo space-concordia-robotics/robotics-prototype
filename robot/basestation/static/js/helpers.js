@@ -148,3 +148,11 @@ function sendRequest (msg) {
   xhr.open('GET', msg, true)
   xhr.send(null)
 }
+
+function wait (ms) {
+  var d = new Date()
+  var d2 = null
+  do {
+    d2 = new Date()
+  } while (d2 - d < ms)
+}
