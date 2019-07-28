@@ -198,6 +198,30 @@ const timer = delay => {
 }
 
 $(document).ready(function () {
+  // MCU ping
+  $('#ping-science-mcu').on('click', function (event) {
+    event.preventDefault()
+    sendScienceRequest('ping', function (msgs) {})
+  })
+
+  $('#ping-odroid').on('click', function (event) {
+    appendToConsole('pinging odroid')
+    $.ajax('/ping_rover', {
+      success: function (data) {
+        appendToConsole(data.ping_msg)
+        if (!data.ros_msg.includes('Response')) {
+          appendToConsole('No response from ROS ping_acknowledgment service')
+        } else {
+          appendToConsole(data.ros_msg)
+        }
+      },
+      error: function () {
+        console.log('An error occured')
+      }
+    })
+    lastCmdSent = new Date().getTime()
+  })
+
   // ROS related stuff
   $('#science-listener-btn').on('click', function (event) {
     event.preventDefault()
@@ -475,6 +499,7 @@ $(document).ready(function () {
       return
     }
 
+    // drill stop
     sendScienceRequest('ds', function (msgs) {
       console.log('msgs', msgs)
 
@@ -486,6 +511,38 @@ $(document).ready(function () {
         appendToConsole('Something went wrong')
       }
     })
+  })
+
+  $('#set-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    console.log('msgs', msgs)
+
+    if (msgs[1].includes('drillspeed done')) {
+      appendToConsole('Success')
+      lightUp('#set-speed-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else {
+      appendToConsole('Something went wrong')
+    }
+  })
+
+  $('#set-time-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    console.log('msgs', msgs)
+
+    if (msgs[1].includes('drillspeed done')) {
+      appendToConsole('Success')
+      lightUp('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else {
+      appendToConsole('Something went wrong')
+    }
   })
 })
 

@@ -69,7 +69,14 @@ if __name__ == "__main__":
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
-    print("Running" if status == 1 else "Terminating", str(task))
+    action = ""
+    if status == 0:
+        action = "Terminating"
+    elif status == 1:
+        action = "Running"
+    elif status == 2:
+        action = "Checking"
+    print(action, str(task))
     print(sent_ts)
     print("---")
 

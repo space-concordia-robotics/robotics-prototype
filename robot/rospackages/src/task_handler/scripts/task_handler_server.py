@@ -7,8 +7,8 @@ from task_handler.srv import *
 import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
-arm_control_dir = current_dir+'/../../arm_control/scripts/'
-scripts = [current_dir + "RoverCommandListener.py", arm_control_dir + "ArmNode.py", arm_control_dir + "ScienceNode.py", current_dir + "start_stream.sh"]
+mcu_control_dir = current_dir + '../../mcu_control/scripts/'
+scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", current_dir + "start_ros_stream.sh"]
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "bash", "", 1, True)]
 known_tasks = ["rover_listener", "arm_listener", "science_listener", "camera_stream"]
 known_listeners = known_tasks[:-1]
@@ -42,7 +42,12 @@ def handle_task(task, status, args):
                 if status == 2:
                     response = chosen_task
                     is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
-                    return response + is_running_str + "\n"
+                    args_str = ""
+
+                    if running_tasks[i].is_running() and running_tasks[i].get_args():
+                        args_str = " with args: " + running_tasks[i].get_args()
+
+                    return response + is_running_str + args_str + "\n"
 
                 if chosen_task in known_listeners:
                     other_listeners = [x for x in known_listeners if x != chosen_task]
@@ -56,7 +61,7 @@ def handle_task(task, status, args):
                 if chosen_task == "camera_stream":
                     if running_tasks[i].is_running() and args != running_tasks[i].get_args():
                         response = "Camera stream already running on port " + running_tasks[i].get_args()
-                        response += "\nTurn this stream of before starting or stopping a new one\n"
+                        response += "\nTurn this stream off before starting or stopping a new one\n"
                         return response
                     # set appropriate usb port in args
                     elif args and not running_tasks[i].is_running():
@@ -66,14 +71,7 @@ def handle_task(task, status, args):
                         else:
                             response = "Requested port not available, is the camera properly plugged into the USB port?"
                             return response + "\n"
-                elif chosen_task == "arm_listener":
-                    if args and not running_tasks[i].is_running():
-                        if args == 'usb' or args == 'uart':
-                            running_tasks[i] = Listener(scripts[i], "python", args)
-                        else:
-                            response = "Requested serial type is invalid"
-                            return response+'\n'
-                elif chosen_task == "science_listener":
+                elif chosen_task in known_listeners:
                     if args and not running_tasks[i].is_running():
                         if args == 'usb' or args == 'uart':
                             running_tasks[i] = Listener(scripts[i], "python", args)
@@ -84,6 +82,7 @@ def handle_task(task, status, args):
             i += 1
 
 
+        # request start
         if status == 1:
 
             if running_tasks[i].start():
@@ -96,7 +95,8 @@ def handle_task(task, status, args):
                 else: # in this case it is worth trying to start the chosen_task
                     if running_tasks[i].start():
                         response = "Started " + chosen_task
-        else:
+        # request stop
+        elif status == 0:
             if len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = "Stopped " + chosen_task

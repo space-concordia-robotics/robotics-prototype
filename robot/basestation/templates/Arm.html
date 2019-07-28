@@ -12,6 +12,7 @@
     <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
     <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
     <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
+    <link href="../static/css/app.css" rel="stylesheet">
     <link href="../static/css/arm.css" rel="stylesheet">
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/helpers.js"></script>
@@ -65,34 +66,42 @@
         </div>
       </div>
 
-      <div class="col-md-6">
+      <!-- <div class="col-md-6">
         <input type="text" id="serial-cmd-input">
       </div>
       <div class="col-md-1">
         <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
+      </div> -->
+
+      <div class="col-md-7">
+        <div class="row" style="color:white">
+          <div class="col-md-3">BATTERY VOLTAGE: </div>
+          <div class="col-md-1" id="battery-voltage">-</div>
+        </div>
       </div>
     </nav>
-
     <br>
     <br>
     <div style="margin-bottom:10px"></div>
 
     <div class="container fill">
       <div>
-        <div class="row" >
-          <div class="col-md-6" align="center">
+        <div class="row" > <!-- arm sim, camera stream -->
+          <div class="col-md-6" align="center"> <!-- Arm simulation -->
             <h5 class="container-header">Arm Postion</h5>
             <img src="../static/images/robotic-arm.jpg" class="mx-auto d-block" id="arm-position"/>
           </div>
-          <div class="col-md-6" align="center">
+          <div class="col-md-6" align="center"> <!-- Camera stream -->
             <h5 class="container-header">Arm Vision</h5>
             <!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
-            <img id="camera-feed" src="http://{{ roverIP }}:8090/?action=stream" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+            <img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+            <button type="button" id="save-image" class="btn btn-primary" aria-hidden="true">Save Image</button>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" align="center"> <!-- log console -->
+        <div class="row"> <!-- console, motor conrols, motor table -->
+          <!-- log console -->
+          <div class="col-md-3" align="center">
             <h5 class="container-header">Log Console</h5>
             <div class="form-group">
               <textarea id="write-to-log" rows="8" readonly></textarea>
@@ -116,13 +125,13 @@
               </div>
             </div>
           </div>
-
-          <div class="col-md"> <!-- control panel -->
+          <!-- control panel -->
+          <div class="col-md">
             <h5 class="container-header">Control Panel</h5>
             <div class="row control-main-btn">
               <div class="row control-main-toggles">
                 <div class="row">
-                  <div class="col-sm" align="center" style="border-style:none;">
+                  <div class="col-sm-8" align="center" style="border-style:none;">
                       <span>
                           <strong>Command Listener</strong>
                       </span>
@@ -148,11 +157,33 @@
                 <div class="row">
                   <div class="col-sm" align="center" style="border-style:none;">
                       <span>
-                          <strong>Arm Stream</strong>
+                          <strong>Arm/Science Stream</strong>
                       </span>
                       <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
                           <label>
-                              <input id="toggle-arm-stream-btn" type="checkbox">
+                              <input id="arm-science-camera-stream-btn" type="checkbox">
+                              <span> </span>
+                          </label>
+                      </div>
+                  </div>
+                  <div class="col-sm" align="center" style="border-style:none;">
+                      <span>
+                          <strong>Front Rover Stream</strong>
+                      </span>
+                      <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                          <label>
+                              <input id="front-camera-stream-btn" type="checkbox">
+                              <span> </span>
+                          </label>
+                      </div>
+                  </div>
+                  <div class="col-sm" align="center" style="border-style:none;">
+                      <span>
+                          <strong>Rear Rover Stream</strong>
+                      </span>
+                      <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                          <label>
+                              <input id="rear-camera-stream-btn" type="checkbox">
                               <span> </span>
                           </label>
                       </div>
@@ -185,7 +216,7 @@
                     <td style="width:30px"></td>
                     <td></td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_up">
+                      <a href="javascript:void(0)" id="arm-up-btn">
                         <button type="button" class="control-btn">
                           <strong>Arm<br>Up</strong>
                         </button>
@@ -217,21 +248,21 @@
                     </td>
                     <td></td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_left">
+                      <a href="javascript:void(0)" id="arm-left-btn">
                         <button type="button" class="control-btn">
                           <strong>Arm<br>Left</strong>
                         </button>
                       </a>
                     </td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_down">
+                      <a href="javascript:void(0)" id="arm-down-btn">
                         <button type="button" class="control-btn">
                           <strong>Arm<br>Down</strong>
                         </button>
                       </a>
                     </td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_right">
+                      <a href="javascript:void(0)" id="arm-right-btn">
                         <button type="button" class="control-btn">
                           <strong>Arm<br>Right</strong>
                         </button>
@@ -256,7 +287,7 @@
                     </td>
                     <td></td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_back">
+                      <a href="javascript:void(0)" id="arm-back-btn">
                         <button type="button" class="control-btn" style="margin-bottom:6px">
                           <strong>Arm<br>Back</strong>
                         </button>
@@ -264,7 +295,7 @@
                     </td>
                     <td></td>
                     <td>
-                      <a href="javascript:void(0)" id="click_btn_arm_forward">
+                      <a href="javascript:void(0)" id="arm-fwd-btn">
                         <button type="button" class="control-btn" style="margin-bottom:6px">
                           <strong>Arm<br>Fwd</strong>
                         </button>
@@ -454,8 +485,8 @@
               </div>
             </div>
           </div>
-
-          <div class="col-md-4" align="center"> <!-- motor table and extras -->
+          <!-- motor table and extras -->
+          <div class="col-md-4" align="center">
             <div class="row"> <!-- motor table -->
               <h5 class="container-header">Motor Table</h5>
               <table class="table table-sm table-bordered" id="motor-table" style="font-size:12px; background:#FDD3DF; text-align: left">
