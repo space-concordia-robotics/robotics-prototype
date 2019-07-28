@@ -88,8 +88,8 @@ unsigned long elevatorTimer;
 
 int drill_speed(int input_drill_speed);//takes percentage returns RPM, max 165RPM
 float elevator_feed(int input_elevator_feed);//takes percentage returns inch/s, max 0.107inch/s
-void elevatorTopInterrupt (void); //limit switch
-void elevatorBottomInterrupt (void); //limit switch
+/*void elevatorTopInterrupt (void); //limit switch
+  void elevatorBottomInterrupt (void); //limit switch*/
 void cuvettePosition (void); //tracks the position of the cuvettes 0-25 relative to the table positions 0-25
 void turnTable (int cuvette, int desiredPosition);// sends the wanted cuvette to the wanted position
 void debouncing(void); //pure magic
@@ -138,9 +138,9 @@ void setup() {
   pinMode(LIMIT_BOTTOM, INPUT_PULLUP);
   pinMode(PHOTORESISTOR, INPUT_PULLUP);
   pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
-  attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);
+  /*  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
+    attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
+    attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);*/
 
   analogWrite(DRILL, 0);
   analogWrite(ELEVATOR, 0);
@@ -180,29 +180,30 @@ void loop() {
   if (millis() - lastPrintTime > 1000) {
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
-    UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
-    UART_PORT.print("drillDirection:");UART_PORT.print(drillDirection);UART_PORT.print(",");
-    UART_PORT.print("elevatorDirection:");UART_PORT.print(elevatorDirection);UART_PORT.print(",");
-    UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);UART_PORT.print(",");
-    UART_PORT.print("photoResistorVoltage:");UART_PORT.print(voltage);UART_PORT.print(",");
-    UART_PORT.print("LED1_ON:");UART_PORT.print(digitalRead(LED1));UART_PORT.print(",");
-    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));UART_PORT.print(",");
-    UART_PORT.print("v1:");UART_PORT.print(digitalRead(VIBRATOR1));UART_PORT.print(",");
-    UART_PORT.print("v2:");UART_PORT.print(digitalRead(VIBRATOR2));UART_PORT.print(",");
-    UART_PORT.print("v3:");UART_PORT.print(digitalRead(VIBRATOR3));UART_PORT.print(",");
-    UART_PORT.print("v4:");UART_PORT.print(digitalRead(VIBRATOR4));UART_PORT.print(",");
-    UART_PORT.print("v5:");UART_PORT.print(digitalRead(VIBRATOR5));UART_PORT.print(",");
-    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));
+    UART_PORT.print("isActivated:"); UART_PORT.print(isActivated); UART_PORT.print(",");
+    UART_PORT.print("drillDirection:"); UART_PORT.print(drillDirection); UART_PORT.print(",");
+    UART_PORT.print("elevatorDirection:"); UART_PORT.print(elevatorDirection);
+    UART_PORT.print(",");
+    UART_PORT.print("pumpDirection:"); UART_PORT.print(pumpDirection); UART_PORT.print(",");
+    UART_PORT.print("photoResistorVoltage:"); UART_PORT.print(voltage); UART_PORT.print(",");
+    UART_PORT.print("LED1_ON:"); UART_PORT.print(digitalRead(LED1)); UART_PORT.print(",");
+    UART_PORT.print("LED2_ON:"); UART_PORT.print(digitalRead(LED2)); UART_PORT.print(",");
+    UART_PORT.print("v1:"); UART_PORT.print(digitalRead(VIBRATOR1)); UART_PORT.print(",");
+    UART_PORT.print("v2:"); UART_PORT.print(digitalRead(VIBRATOR2)); UART_PORT.print(",");
+    UART_PORT.print("v3:"); UART_PORT.print(digitalRead(VIBRATOR3)); UART_PORT.print(",");
+    UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
+    UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
+    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6));
     UART_PORT.println();
   }
   if (UART_PORT.available()) {
     String cmd = UART_PORT.readStringUntil('\n');
     cmd.trim();
-    
+
     /*UART_PORT.print("cmd:");
-    UART_PORT.println(cmd);
-    UART_PORT.print("cmd == who --> ");
-    UART_PORT.println((cmd == "who"));*/
+      UART_PORT.println(cmd);
+      UART_PORT.print("cmd == who --> ");
+      UART_PORT.println((cmd == "who"));*/
 
     if (cmd == "ping") {
       UART_PORT.println("SCIENCE pong");
@@ -271,7 +272,8 @@ void loop() {
         analogWrite(DRILL, maxVelocity);
         UART_PORT.println("SCIENCE dgo done");
       }
-      else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration)) ) {
+      else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration))
+              ) {
         //stops drill
         analogWrite(DRILL, 0);
         drillInUse = false;
@@ -322,7 +324,8 @@ void loop() {
         else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'd';
         UART_PORT.println("SCIENCE ego");
       }
-      else if (cmd == "es" || (elevatorInUse == true && (millis() - elevatorTimer >= elevatorDuration))) {
+      else if (cmd == "es" || (elevatorInUse == true && (millis() - elevatorTimer >=
+                               elevatorDuration))) {
         //stops elevator
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';
@@ -402,7 +405,7 @@ void loop() {
       }
       else if (cmd == "p1") {
         // actuate pump 1
-        digitalWrite(PUMP1_SPEED, HIGH);  
+        digitalWrite(PUMP1_SPEED, HIGH);
         UART_PORT.println("SCIENCE p1 done");
       }
       else if (cmd == "p2") {
@@ -434,7 +437,7 @@ void loop() {
         digitalWrite(PUMP5_SPEED, LOW);
         digitalWrite(PUMPS_LEGA, LOW);
         UART_PORT.println("SCIENCE ps done");
-      } 
+      }
       else if (cmd == "v1") {
         digitalWrite(VIBRATOR1, HIGH);
         UART_PORT.println("SCIENCE v1 done");
@@ -508,7 +511,7 @@ void loop() {
         digitalWrite(S1, 0);
         digitalWrite(S2, 0);
         digitalWrite(S3, 0);
-        
+
         UART_PORT.println("SCIENCE led2s done");
       }
 
@@ -568,20 +571,20 @@ void loop() {
   }
   if (isActualPress) {
     if (previousElevatorState == 'n')cuvettePosition();
-    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
-    else if (previousElevatorState == 'd')elevatorBottomInterrupt();
-  }
-  // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
-  isActualPress = false;
+    /*    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
+        else if (previousElevatorState == 'd')elevatorBottomInterrupt();*/
+    // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
+    isActualPress = false;
 
-  if ((turnTableFree == false) && (tablePosition[desiredPosition] == cuvette)) {
-    table.writeMicroseconds(SERVO_STOP);
-    tableDirection = 'n';
-    turnTableFree = true;
+    if ((turnTableFree == false) && (tablePosition[desiredPosition] == cuvette)) {
+      table.writeMicroseconds(SERVO_STOP);
+      tableDirection = 'n';
+      turnTableFree = true;
+    }
   }
 }
-
-void elevatorTopInterrupt () {
+/*
+  void elevatorTopInterrupt () {
   //stops elevator
   unsigned long timer = millis();
 
@@ -594,9 +597,9 @@ void elevatorTopInterrupt () {
   analogWrite(ELEVATOR, 0);
   UART_PORT.println("Elevator Top Limit");
   previousElevatorState = 'n';
-}
+  }
 
-void elevatorBottomInterrupt () {
+  void elevatorBottomInterrupt () {
   //stops elevator
   unsigned long timer = millis();
 
@@ -609,8 +612,8 @@ void elevatorBottomInterrupt () {
   analogWrite(ELEVATOR, 0);
   UART_PORT.println("SCIENCE Elevator Bottom Limit");
   previousElevatorState = 'n';
-}
-
+  }
+*/
 void cuvettePosition() {
   //gives the integer value of the cuvette of the table 1 to 25, cuvettes are only on even numbers, chute is cuvettePosition 0
   if (tableDirection == 'n') {
