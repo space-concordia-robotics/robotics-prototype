@@ -1,3 +1,14 @@
+# task_handler/scripts
+
+## Listener.py
+A convenience class made for spawning listener-type processes.
+
+## task_handler_server.py
+ROS node which listens for requests to start, stop and check the status of a set of processes (camera streams, MCU nodes, anything else to be added later).
+
+## task_handler_client.py
+ROS node which can be used to send requests to `task_handler_server`. Currently the GUI (app.py) sends requests using javascript, so this is not actually used besides in testing/debugging. 
+
 ## start_stream.sh
 This uses mjpgstreamer, more details are documented in the bash script itself.
 To start the stream, assuming you already have a usb web camera connected, run `./start_stream.sh`. Use `Ctrl + C` to stop the stream.

@@ -6,10 +6,13 @@ The code running on the rover
 ### test.py
 Simple but useful python script for quickly testing serial comms.
 
+### Logger.py
+Skeleton class for logging. Unfinished.
+
 ## Config folders
 
 ### config
-This folder contains some configuration stuff for the Odroid and a sample .bash_aliases file for it as well. See the README inside the folder for more info.
+This folder contains some configuration files for the Odroid and a sample .bash_aliases file for it as well.
 
 ### systemd
 This folder contains startup services, more is explained in the README [here](https://github.com/space-concordia-robotics/robotics-prototype/tree/master#systemd-services).
