@@ -74,7 +74,8 @@ int elevatorFeedPercent = 0;
 int cuvette = 0;
 int desiredPosition = 0;
 int i = 0; // Used in all the for loops, don't worry no nested loops
-volatile int tablePosition[26];
+int numberTablePositions = 4;
+volatile int tablePosition[50];
 float val = 0; // Photoresistor
 float voltage = 0;  // Photoresistor
 volatile char tableDirection = 'n'; // n for neutral, i for increasing, d for decreasing
@@ -166,7 +167,7 @@ void setup() {
   digitalWrite(LED2, LOW);
   table.writeMicroseconds(SERVO_STOP);
 
-  for (i = 0; i <= 12; i++) {
+  for (i = 0; i < numberTablePositions; i++) {
     tablePosition[i] = i;
   }
 
@@ -374,7 +375,7 @@ void loop() {
         delay(10);
         turnTableFree = false;
         tableDirection = 'i';
-        turnTable(tablePosition[0], 25);
+        turnTable(tablePosition[0], (numberTablePositions - 1));
         UART_PORT.println("SCIENCE tccwstep");
       }
       else if (cmd == "tcwstep") {
@@ -615,22 +616,22 @@ void loop() {
   }
 */
 void cuvettePosition() {
-  //gives the integer value of the cuvette of the table 1 to 25, cuvettes are only on even numbers, chute is cuvettePosition 0
+  //gives the integer value of the cuvette of the table 1 to "numberTablePositions" , cuvettes are only on even numbers, chute is cuvettePosition 0
   if (tableDirection == 'n') {
   }
   else if (tableDirection == 'i') {
-    for (i = 0; i <= 25; i++) {
-      tablePosition[i] = (tablePosition[i] + 1) % 26;
+    for (i = 0; i < (numberTablePositions - 1); i++) {
+      tablePosition[i] = (tablePosition[i] + 1) % numberTablePositions;
     }
     UART_PORT.print("SCIENCE tablePosition[0]");
     UART_PORT.println(tablePosition[0]);
   }
   else if (tableDirection == 'd') {
     int temp = tablePosition[0];
-    for (i = 0; i <= 25; i++) {
-      tablePosition[i] = (tablePosition[i] - 1) % 26;
+    for (i = 0; i <= (numberTablePositions - 1); i++) {
+      tablePosition[i] = (tablePosition[i] - 1) % numberTablePositions;
       if (tablePosition[i] == -1) {
-        tablePosition[i] = 25;
+        tablePosition[i] = (numberTablePositions - 1);
       }
     }
     UART_PORT.print("SCIENCE tablePosition[0]");
@@ -642,7 +643,7 @@ void turnTable (int cuvette, int desiredPosition) {
   int initialPosition = 0;
   int difference = 0;
 
-  for (i = 0; i <= 25; i++) {
+  for (i = 0; i <= (numberTablePositions - 1); i++) {
     initialPosition = i;
     if (tablePosition[i] == cuvette)break;
   }
@@ -655,11 +656,11 @@ void turnTable (int cuvette, int desiredPosition) {
   //  UART_PORT.print("difference: ");
   //  UART_PORT.println(difference);
 
-  if ( (difference > -13 && difference < 0) || (difference > 13 && difference < 26)) {
+  if ( (difference > -(numberTablePositions / 2) && difference < 0) || (difference > (numberTablePositions / 2) && difference < numberTablePositions)) {
     tableDirection = 'i';
     table.writeMicroseconds(SERVO_MAX_CCW);
   }
-  else if ( (difference > -26 && difference < -13) || (difference > 0 && difference < 13)) {
+  else if ( (difference > -numberTablePositions && difference < -(numberTablePositions / 2)) || (difference > 0 && difference < (numberTablePositions / 2))) {
     tableDirection = 'd';
     table.writeMicroseconds(SERVO_MAX_CW);
   }
