@@ -518,18 +518,10 @@ $(document).ready(function () {
       return
     }
 
-    let cmd = ''
-
-    if (isLit('#elevator-up-btn')) {
-        cmd = 'eup'
-    } else if (isLit('#elevator-down-btn')) {
-        cmd = 'edown'
-    }
-
-    sendScienceRequest(cmd, function (msgs) {
+    sendScienceRequest('ego', function (msgs) {
       console.log('msgs', msgs)
 
-      if (msgs[1].includes('eup done') || msgs[1].includes('edown done')) {
+      if (msgs[1].includes('ego done')) {
         appendToConsole('Success')
         lightUp('#elevator-max-speed-go-btn')
         greyOut('#elevator-stop-btn')

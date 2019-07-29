@@ -2,13 +2,13 @@
 #include <Servo.h>
 //#include <SoftwareSerial.h>
 
-//#define DEVEL_MODE_1       1     //Use with USB
-#define DEVEL_MODE_2       2   //Use with UART4
+#define DEVEL_MODE_1       1     //Use with USB
+//#define DEVEL_MODE_2       2   //Use with UART4
 
 #if defined(DEVEL_MODE_1)
 #define UART_PORT Serial
 #elif defined(DEVEL_MODE_2)
-#define UART_PORT Serial4
+//#define UART_PORT Serial4
 #endif
 
 #define SERVO_STOP     1500
@@ -106,10 +106,6 @@ void setup() {
   // blink adn stay ON to signal this is indeed the science MCU and not another one
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(250);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(250);
-  digitalWrite(LED_BUILTIN, HIGH);
 
   table.attach(TABLE_PIN);
   pinMode(DRILL, OUTPUT);
@@ -172,7 +168,7 @@ void setup() {
     tablePosition[i] = i;
   }
 
-  delay(1000);
+  //delay(1000); // commenting out because causing issues with ScienceNode initSerial()
 
   UART_PORT.println("\nsetup complete");
 }
@@ -182,20 +178,20 @@ void loop() {
   if (millis() - lastPrintTime > 1000) {
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
-    UART_PORT.print("isActivated:");UART_PORT.print(isActivated);UART_PORT.print(",");
-    UART_PORT.print("drillDirection:");UART_PORT.print(drillDirection);UART_PORT.print(",");
-    UART_PORT.print("elevatorDirection:");UART_PORT.print(elevatorDirection);UART_PORT.print(",");
-    UART_PORT.print("pumpDirection:");UART_PORT.print(pumpDirection);UART_PORT.print(",");
-    UART_PORT.print("photoResistorVoltage:");UART_PORT.print(voltage);UART_PORT.print(",");
-    UART_PORT.print("LED1_ON:");UART_PORT.print(digitalRead(LED1));UART_PORT.print(",");
-    UART_PORT.print("LED2_ON:");UART_PORT.print(digitalRead(LED2));UART_PORT.print(",");
-    UART_PORT.print("v1:");UART_PORT.print(digitalRead(VIBRATOR1));UART_PORT.print(",");
-    UART_PORT.print("v2:");UART_PORT.print(digitalRead(VIBRATOR2));UART_PORT.print(",");
-    UART_PORT.print("v3:");UART_PORT.print(digitalRead(VIBRATOR3));UART_PORT.print(",");
-    UART_PORT.print("v4:");UART_PORT.print(digitalRead(VIBRATOR4));UART_PORT.print(",");
-    UART_PORT.print("v5:");UART_PORT.print(digitalRead(VIBRATOR5));UART_PORT.print(",");
-    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));UART_PORT.print(",");
-    UART_PORT.print("drillSpeed:");UART_PORT.print(drillSpeed);
+    UART_PORT.print("isActivated:"); UART_PORT.print(isActivated); UART_PORT.print(",");
+    UART_PORT.print("drillDirection:"); UART_PORT.print(drillDirection); UART_PORT.print(",");
+    UART_PORT.print("elevatorDirection:"); UART_PORT.print(elevatorDirection); UART_PORT.print(",");
+    UART_PORT.print("pumpDirection:"); UART_PORT.print(pumpDirection); UART_PORT.print(",");
+    UART_PORT.print("photoResistorVoltage:"); UART_PORT.print(voltage); UART_PORT.print(",");
+    UART_PORT.print("LED1_ON:"); UART_PORT.print(digitalRead(LED1)); UART_PORT.print(",");
+    UART_PORT.print("LED2_ON:"); UART_PORT.print(digitalRead(LED2)); UART_PORT.print(",");
+    UART_PORT.print("v1:"); UART_PORT.print(digitalRead(VIBRATOR1)); UART_PORT.print(",");
+    UART_PORT.print("v2:"); UART_PORT.print(digitalRead(VIBRATOR2)); UART_PORT.print(",");
+    UART_PORT.print("v3:"); UART_PORT.print(digitalRead(VIBRATOR3)); UART_PORT.print(",");
+    UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
+    UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
+    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
+    UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed);
     UART_PORT.println();
   }
   if (UART_PORT.available()) {
@@ -304,13 +300,13 @@ void loop() {
         elevatorInUse = true;
       }
       else if (cmd == "eup") {
-        //turns elevator clockwise
+        // sets elevator direction clockwise
         elevatorDirection = 0;
         digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
         UART_PORT.println("SCIENCE eup done");
       }
       else if (cmd == "edown") {
-        //turns elevator counter-clockwise
+        // sets elevator direction counter-clockwise
         elevatorDirection = 1;
         digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
         UART_PORT.println("SCIENCE edown done");
@@ -320,15 +316,21 @@ void loop() {
         UART_PORT.println((elevatorDirection) ? "DOWN" : "UP");
       }
       else if (cmd == "ego") {
-        analogWrite(ELEVATOR, 0);
-        delay(100);
         analogWrite(ELEVATOR, maxVelocity);
-        if (digitalRead(ELEVATOR_DIRECTION) == HIGH)previousElevatorState = 'u';
-        else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'd';
-        UART_PORT.println("SCIENCE ego");
+        if (digitalRead(ELEVATOR_DIRECTION) == HIGH) {
+          previousElevatorState = 'u';
+        }
+        else if (digitalRead(ELEVATOR_DIRECTION) == LOW) {
+          previousElevatorState = 'd';
+        }
+
+        UART_PORT.println("SCIENCE ego done");
       }
       else if (cmd == "es" || (elevatorInUse == true && (millis() - elevatorTimer >=
                                elevatorDuration))) {
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(50);
+        digitalWrite(LED_BUILTIN, HIGH);
         //stops elevator
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';
