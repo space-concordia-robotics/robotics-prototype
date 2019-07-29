@@ -31,12 +31,6 @@ This folder contains MCU code for the science payload.
 ### PDS
 This folder contains MCU code for the PDS.
 
-### Demos
-This folder contains short demo sketches to test simple Arduino/Teensy features.
-
-### Utilities
-This folder contains sketches used for testing or measuring data. Due to their nature, some may use older code and may require refactoring in the future.
-
 ### TestCode
 This directory contains test code which may or may not go into the main code being developed.
 
