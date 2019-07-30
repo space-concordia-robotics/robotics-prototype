@@ -19,6 +19,7 @@ def handle_mux_select(req):
 
 def select_device(device):
     global current_channel
+    global local
     s0_val = 0
     s1_val = 0
 
@@ -57,13 +58,14 @@ def select_device(device):
 
 # consider removing following lines to make given "test" argument flag present
 # or better: user ros params as per tatums suggestion
-    '''
-    with open(gpio_dir + "/gpio18/value", "w") as f:
-        f.write(str(s0_val))
+    if not local:
+        # s0
+        with open(gpio_dir + "/gpio18/value", "w") as f:
+            f.write(str(s0_val))
+        # s1
+        with open(gpio_dir + "/gpio21/value", "w") as f:
+            f.write(str(s1_val))
 
-    with open(gpio_dir + "/gpio21/value", "w") as f:
-        f.write(str(s1_val))
-    '''
     s0_state = "s0: " + str(s0_val)
     s1_state = "s1: " + str(s1_val)
     print(s0_state)
@@ -73,6 +75,12 @@ def select_device(device):
     return s0_state + "\n" + s1_state
 
 def mux_select_server():
+    global local
+    local = False
+    if len(sys.argv) == 2:
+        if sys.argv[1] == "local":
+            local = True
+
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
     print("Ready to respond to mux select commands")
