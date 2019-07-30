@@ -41,7 +41,7 @@
                   </div>
               </div>
             </div>
-	    <div class="row">
+	           <div class="row">
                   <div class="col-sm" align="center" style="border-style:none;">
                       <span>
                           <strong>Arm/Science Stream</strong>
@@ -324,55 +324,9 @@
                 </tr>
             </table>
           </div>
-          <div class="row closed-loop-toggles"> <!-- closed loop toggles -->
-            <!-- m1 closed loop -->
-            <div class="col-sm-3" align="center" style="border-style:none;">
-              <span>
-                <strong>M1 PID</strong>
-              </span>
-              <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                <label>
-                  <input id="m1-closed-loop-btn" type="checkbox">
-                  <span></span>
-                </label>
-              </div>
-            </div>
-            <!-- m2 closed loop -->
-            <div class="col-sm-3" align="center" style="border-style:none;">
-              <span>
-                <strong>M2 PID</strong>
-              </span>
-              <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                <label>
-                  <input id="m2-closed-loop-btn" type="checkbox">
-                  <span></span>
-                </label>
-              </div>
-            </div>
-           <!-- m3closed loop -->
-            <div class="col-sm-3" align="center" style="border-style:none;">
-              <span>
-                <strong>M3 PID</strong>
-              </span>
-              <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                <label>
-                  <input id="m3-closed-loop-btn" type="checkbox">
-                  <span></span>
-                </label>
-              </div>
-            </div>
-            <!-- m4 closed loop -->
-            <div class="col-sm-3" align="center" style="border-style:none;">
-              <span>
-                <strong>M4 PID</strong>
-              </span>
-              <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                <label>
-                  <input id="m4-closed-loop-btn" type="checkbox">
-                  <span></span>
-                </label>
-              </div>
-            </div>
+
+          <div class="row closed-loop-toggles">
+          {% include 'MotorPID.html' %}
           </div>
         </div>
       </div>

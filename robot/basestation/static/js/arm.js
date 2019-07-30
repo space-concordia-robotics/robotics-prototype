@@ -186,86 +186,31 @@ $(document).ready(function () {
     }
   })
 
-  $('#m1-closed-loop-btn').on('click', function (event) {
+  $('[id$=-closed-loop-btn]').on('change', function (event) {
     event.preventDefault()
+    console.log(this.id)
+    num = this.id[1]
+    console.log(num)
     // click makes it checked during this time, so trying to enable
-    if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (msgs) {
+    if ($(this.id).is(':checked')) {
+      console.log('checked')
+      sendArmRequest('motor ' + num + ' loop closed', function (msgs) {
+
+        console.log(msgs)
         if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = true
+          $(this.id)[0].checked = true
         } else {
-          $('#m1-closed-loop-btn')[0].checked = false
+          $(this.id)[0].checked = false
         }
       })
     } else {
-      sendArmRequest('motor 1 loop open', function (msgs) {
+      console.log('unchecked')
+      sendArmRequest('motor ' + num + ' loop open', function (msgs) {
+      console.log(msgs)
         if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = false
+          $(this.id)[0].checked = false
         } else {
-          $('#m1-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m2-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m2-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 2 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 2 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m3-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m3-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 3 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 3 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m4-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m4-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 4 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 4 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = true
+          $(this.id)[0].checked = true
         }
       })
     }
