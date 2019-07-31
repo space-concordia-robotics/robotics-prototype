@@ -23,6 +23,9 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             my_joy.switch()
             if my_joy.isArm:
+                message = my_joy.arm_reset()
+                if message is not None:
+                    armPub.publish(message)
                 message = my_joy.arm()
                 if message is not None:
                     armPub.publish(message)

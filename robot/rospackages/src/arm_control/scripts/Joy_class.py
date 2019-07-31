@@ -4,8 +4,8 @@ import pygame
 import time
 
 
-class Astro_Joy():
 
+class Astro_Joy():
     # General Attributes :
     controls = None
     joy_axis = [None] * 6
@@ -56,6 +56,9 @@ class Astro_Joy():
     arm_motor5 = arm_halt
     arm_motor6 = arm_halt
 
+    arm_reset_button = False
+
+
     def __init__(self, T, S, C):
         pygame.init()
         self.controls = pygame.joystick.Joystick(0)
@@ -89,7 +92,6 @@ class Astro_Joy():
         else:
             self.throttle_target = int(0)
 
-
         if self.steer_actual == self.steer_max and self.throttle_actual > 0:
             self.rotating_right = True
             self.rotating_left = False
@@ -116,18 +118,16 @@ class Astro_Joy():
             self.moving_forward = False
             self.moving_backward = False
 
-
-
         if not (self.moving_forward or self.moving_backward or self.rotating_right or self.rotating_left):
-            if rotation == (0,1):
+            if rotation == (0, 1):
                 self.steer_actual = self.steer_max
                 self.throttle_actual += self.notch_r
                 time.sleep(self.short_lapse)
-            elif rotation == (1,0):
+            elif rotation == (1, 0):
                 self.steer_actual = (-1) * self.steer_max
                 self.throttle_actual += self.notch_r
                 time.sleep(self.short_lapse)
-            elif rotation == (1,1):
+            elif rotation == (1, 1):
                 time.sleep(self.short_lapse)
             else:
                 if self.throttle_target > 0:
@@ -141,9 +141,8 @@ class Astro_Joy():
                     else:
                         pass
 
-
         if self.rotating_right:
-            if rotation == (0,1):
+            if rotation == (0, 1):
                 self.throttle_actual += self.notch_r
                 time.sleep(self.short_lapse)
             else:
@@ -152,7 +151,7 @@ class Astro_Joy():
                     time.sleep(self.short_lapse)
 
         if self.rotating_left:
-            if rotation == (1,0):
+            if rotation == (1, 0):
                 self.throttle_actual += self.notch_r
                 time.sleep(self.short_lapse)
             else:
@@ -196,11 +195,11 @@ class Astro_Joy():
             while self.throttle_actual < self.throttle_max * (-1):
                 self.throttle_actual += 1
 
-        if rotation == (0,0) and abs(self.throttle_actual) <= self.notch_r:
+        if rotation == (0, 0) and abs(self.throttle_actual) <= self.notch_r:
             self.throttle_actual = int(0)
-        if self.rotating_right and rotation == (1,0) and self.throttle_actual <= self.notch_r:
+        if self.rotating_right and rotation == (1, 0) and self.throttle_actual <= self.notch_r:
             self.throttle_actual = int(0)
-        if self.rotating_left and rotation == (0,1) and self.throttle_actual <= self.notch_r:
+        if self.rotating_left and rotation == (0, 1) and self.throttle_actual <= self.notch_r:
             self.throttle_actual = int(0)
 
         if self.throttle_actual == 0:
@@ -217,41 +216,40 @@ class Astro_Joy():
 
         return msg
 
-
     def camera(self):
         pygame.event.pump()
         self.joy_hat = self.controls.get_hat(0)
         for j in range(13):
             self.joy_buttons[j] = self.controls.get_button(j)
 
-        top_camera_ctr = (self.joy_buttons[0],self.joy_buttons[1],self.joy_buttons[2],self.joy_buttons[3])
+        top_camera_ctr = (self.joy_buttons[0], self.joy_buttons[1], self.joy_buttons[2], self.joy_buttons[3])
 
-        if self.joy_hat == (0,0) and top_camera_ctr == (0,0,0,0):
+        if self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 0, 0):
             self.cameras_halt = True
         else:
             self.cameras_halt = False
 
-        if self.joy_hat == (1,0) and top_camera_ctr == (0,0,0,0):
+        if self.joy_hat == (1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous + self.continuous_motion)
-        elif self.joy_hat == (-1,0) and top_camera_ctr == (0,0,0,0):
+        elif self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous - self.continuous_motion)
-        elif self.joy_hat == (0,1) and top_camera_ctr == (0,0,0,0):
+        elif self.joy_hat == (0, 1) and top_camera_ctr == (0, 0, 0, 0):
             if self.front_cam_position_actual < 180:
                 self.front_cam_position_actual += 1
             msg = "@" + str(self.front_cam_position_actual)
-        elif self.joy_hat == (0,-1) and top_camera_ctr == (0,0,0,0):
+        elif self.joy_hat == (0, -1) and top_camera_ctr == (0, 0, 0, 0):
             if self.front_cam_position_actual > 0:
                 self.front_cam_position_actual -= 1
             msg = "@" + str(self.front_cam_position_actual)
-        elif self.joy_hat == (0,0) and top_camera_ctr == (0,1,0,0):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 1, 0, 0):
             msg = "#" + str(self.top_cam_continuous + self.continuous_motion)
-        elif self.joy_hat == (0,0) and top_camera_ctr == (0,0,0,1):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 0, 1):
             msg = "#" + str(self.top_cam_continuous - self.continuous_motion)
-        elif self.joy_hat == (0,0) and top_camera_ctr == (0,0,1,0):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 1, 0):
             if self.top_cam_position_actual < 180:
                 self.top_cam_position_actual += 1
             msg = "$" + str(self.top_cam_position_actual)
-        elif self.joy_hat == (0,0) and top_camera_ctr == (1,0,0,0):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (1, 0, 0, 0):
             if self.top_cam_position_actual > 0:
                 self.top_cam_position_actual -= 1
             msg = "$" + str(self.top_cam_position_actual)
@@ -265,7 +263,7 @@ class Astro_Joy():
         else:
             if self.cameras_timeout > 0:
                 self.cameras_timeout -= 1
-                if self.cameras_timeout %2 == 0:
+                if self.cameras_timeout % 2 == 0:
                     msg = "!" + str(self.front_cam_contiuous)
                 else:
                     msg = "#" + str(self.top_cam_continuous)
@@ -273,8 +271,6 @@ class Astro_Joy():
                 return msg
             else:
                 return None
-
-
 
     def arm(self):
         pygame.event.pump()
@@ -289,8 +285,8 @@ class Astro_Joy():
         for j in range(13):
             self.joy_buttons[j] = self.controls.get_button(j)
 
-        twist = (self.joy_buttons[4],self.joy_buttons[5])
-        clutch = (self.joy_buttons[2],self.joy_buttons[3])
+        twist = (self.joy_buttons[4], self.joy_buttons[5])
+        clutch = (self.joy_buttons[2], self.joy_buttons[3])
 
         if self.joy_hat[0] == int(0):
             self.arm_motor1 = self.arm_halt
@@ -320,22 +316,21 @@ class Astro_Joy():
         else:
             self.arm_motor4 = self.arm_halt
 
-        if twist == (0,1):
+        if twist == (0, 1):
             self.arm_motor5 = self.arm_backward
-        elif twist == (1,0):
+        elif twist == (1, 0):
             self.arm_motor5 = self.arm_forward
         else:
             self.arm_motor5 = self.arm_halt
 
-        if clutch == (0,1):
+        if clutch == (0, 1):
             self.arm_motor6 = self.arm_backward
-        elif clutch == (1,0):
+        elif clutch == (1, 0):
             self.arm_motor6 = self.arm_forward
         else:
             self.arm_motor6 = self.arm_halt
 
-
-        time.sleep(self.long_lapse)
+        #time.sleep(self.long_lapse)
 
         msg = "budge " + self.arm_motor1 + " " + self.arm_motor2 + " " + self.arm_motor3 + " " + self.arm_motor4 + " " + self.arm_motor5 + " " + self.arm_motor6
 
@@ -348,7 +343,21 @@ class Astro_Joy():
         if self.timeout == 0:
             return None
         else:
+            time.sleep(self.long_lapse)
             return msg
+
+    def arm_reset(self):
+        pygame.event.pump()
+        temp = self.controls.get_button(11)
+        if self.arm_reset_button == False and temp == 1:
+            self.arm_reset_button = True
+        elif self.arm_reset_button == True and temp == 0:
+            self.arm_reset_button = False
+            return "reset"
+        else:
+            return None
+
+
 
     def switch(self):
         pygame.event.pump()
@@ -368,27 +377,33 @@ class Astro_Joy():
             pass
 
 
-
-
 if __name__ == '__main__':
     my_joy = Astro_Joy(45, 25, True)
 
     try:
         while True:
-            #data = my_joy.wheels()
-            #data = my_joy.arm()
-            #data = my_joy.camera()
 
-            #if data != None:
-             #   print(data)
+            # data = my_joy.wheels()
+            # data = my_joy.arm()
+            # data = my_joy.camera()
+
+            # if data != None:
+            #   print(data)
             my_joy.switch()
             time.sleep(0.01)
             # time.sleep(0.05)
-            #print("Rover mode : {}".format(my_joy.isRover))
-            #print("Arm mode : {}".format(my_joy.isArm))
+            # print("Rover mode : {}".format(my_joy.isRover))
+            # print("Arm mode : {}".format(my_joy.isArm))
             if my_joy.isRover:
                 print(my_joy.wheels())
+                print("currently controlling : Rover")
             else:
+                temp = my_joy.arm_reset()
+                if temp is not None:
+                    print(temp)
                 print(my_joy.arm())
+                print("currently controlling : Arm")
+
+
     except KeyboardInterrupt:
         print("Exiting now")
