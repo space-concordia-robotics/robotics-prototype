@@ -351,6 +351,7 @@ class Astro_Joy():
         temp = self.controls.get_button(11)
         if self.arm_reset_button == False and temp == 1:
             self.arm_reset_button = True
+            return None
         elif self.arm_reset_button == True and temp == 0:
             self.arm_reset_button = False
             return "reset"
