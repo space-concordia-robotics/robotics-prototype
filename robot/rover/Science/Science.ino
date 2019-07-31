@@ -106,9 +106,11 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  table.attach(TABLE_PIN);
+  // THIS MESSES UP PWM PINS 45/44 AND POSSIBLY OTHERS
+  //table.attach(TABLE_PIN);
   pinMode(DRILL, OUTPUT);
   pinMode(DRILL_DIRECTION, OUTPUT);
+  analogWrite(DRILL, 35);
   pinMode(ELEVATOR, OUTPUT);
   pinMode(ELEVATOR_DIRECTION, OUTPUT);
   //photoresistor choice
@@ -139,7 +141,7 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
     attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);*/
 
-  analogWrite(DRILL, 45);
+  analogWrite(DRILL, 0);
   analogWrite(ELEVATOR, 0);
   digitalWrite(DRILL_DIRECTION, drillDirection); // init LOW
   digitalWrite(ELEVATOR_DIRECTION, LOW);
