@@ -494,6 +494,27 @@ $(document).ready(function () {
     })
   })
 
+  $('#set-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    // @TODO: add validation (must be number between 0 - 100)
+    let cmd = 'drillspeed ' + $('#drill-speed').val()
+
+    sendScienceRequest(cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('drillspeed done')) {
+        appendToConsole('Success')
+        lightUp('#set-speed-go-btn')
+        greyOut('#drill-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
   $('#drill-stop-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return

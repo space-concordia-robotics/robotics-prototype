@@ -45,19 +45,19 @@
 #define LED1               33
 #define LED2               34
 
-#define DRILL              36 //PWM
+#define DRILL              44 //PWM // 36 for TEENSY
 #define DRILL_DIRECTION    35
-#define ELEVATOR           38 //PWM
+#define ELEVATOR           45 //PWM // 38 FOR TEENSY
 #define ELEVATOR_DIRECTION 37
 
-//debouncing variables
+// debouncing variables
 volatile bool isTriggered = false;
 volatile bool isContacted = false;
 bool isActualPress = false;
 bool isPushed = false;
 unsigned long triggerTime;
 
-//Other variables
+// other variables
 bool isActivated = false;
 bool turnTableFree = true;
 bool drillInUse = false;
@@ -86,8 +86,7 @@ unsigned long lastPrintTime;
 unsigned long drillTimer;
 unsigned long elevatorTimer;
 
-//Functions
-
+// forward declarations
 int drill_speed(int input_drill_speed);//takes percentage returns RPM, max 165RPM
 float elevator_feed(int input_elevator_feed);//takes percentage returns inch/s, max 0.107inch/s
 /*void elevatorTopInterrupt (void); //limit switch
@@ -140,7 +139,7 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
     attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);*/
 
-  analogWrite(DRILL, 0);
+  analogWrite(DRILL, 45);
   analogWrite(ELEVATOR, 0);
   digitalWrite(DRILL_DIRECTION, drillDirection); // init LOW
   digitalWrite(ELEVATOR_DIRECTION, LOW);
@@ -176,6 +175,8 @@ void setup() {
 void loop() {
   // print relevant data for pub/sub nodes
   if (millis() - lastPrintTime > 1000) {
+    // update variables
+    
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
     UART_PORT.print("isActivated:"); UART_PORT.print(isActivated); UART_PORT.print(",");
@@ -190,7 +191,7 @@ void loop() {
     UART_PORT.print("v3:"); UART_PORT.print(digitalRead(VIBRATOR3)); UART_PORT.print(",");
     UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
     UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
-    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
+    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.println(",");
     UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed);
     UART_PORT.println();
   }
@@ -230,12 +231,16 @@ void loop() {
         //turns drill at desired speed
         // needs input "drillspeed 100"
         drillSpeedPercent = getValue(cmd, ' ', 1).toInt();
+        UART_PORT.print("DrillSpeedPercent: ");
+        UART_PORT.println(drillSpeedPercent);
         drillSpeed = drill_speed(drillSpeedPercent);
-        UART_PORT.print("SCIENCE drillspeed");
+        UART_PORT.print("drillSpeed: ");
         UART_PORT.println(drillSpeed);
-        analogWrite(DRILL, 0);
-        delay(50);
-        analogWrite(DRILL, drillSpeedPercent * 255 / 100);
+        UART_PORT.print("writing: ");
+        int analogVal = drillSpeedPercent * 255 / 100;
+        UART_PORT.println(analogVal);
+        analogWrite(DRILL, analogVal);
+        UART_PORT.println("SCIENCE drillspeed done");
         drillTimer = millis();
       }
       else if (cmd.startsWith("drilltime") && (cmd.indexOf(" ") > 0)) {
@@ -264,10 +269,11 @@ void loop() {
         UART_PORT.println((drillDirection) ? "CCW" : "CW");
       }
       else if (cmd == "dgo") {
-        //turns drill clockwise
-        analogWrite(DRILL, 0);
-        //delay(100);
+        //turns drill in whatever direction is currently set
         analogWrite(DRILL, maxVelocity);
+        drillInUse = true;
+        drillSpeed = maxVelocity;
+        drillSpeedPercent = 100;
         UART_PORT.println("SCIENCE dgo done");
       }
       else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration))
@@ -711,6 +717,10 @@ void debouncing(void) {
 }
 
 
+/*
+ * Defaults input values to 0 or 100 if out of those bounds
+ * Converts percentage value into estimate RPM
+ */
 int drill_speed(int input_drill_speed) {
   if (input_drill_speed < 0) {
     input_drill_speed = 0;
