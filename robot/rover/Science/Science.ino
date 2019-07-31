@@ -193,7 +193,7 @@ void loop() {
     UART_PORT.print("v3:"); UART_PORT.print(digitalRead(VIBRATOR3)); UART_PORT.print(",");
     UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
     UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
-    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.println(",");
+    UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
     UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed);
     UART_PORT.println();
   }
@@ -233,14 +233,8 @@ void loop() {
         //turns drill at desired speed
         // needs input "drillspeed 100"
         drillSpeedPercent = getValue(cmd, ' ', 1).toInt();
-        UART_PORT.print("DrillSpeedPercent: ");
-        UART_PORT.println(drillSpeedPercent);
         drillSpeed = drill_speed(drillSpeedPercent);
-        UART_PORT.print("drillSpeed: ");
-        UART_PORT.println(drillSpeed);
-        UART_PORT.print("writing: ");
         int analogVal = drillSpeedPercent * 255 / 100;
-        UART_PORT.println(analogVal);
         analogWrite(DRILL, analogVal);
         UART_PORT.println("SCIENCE drillspeed done");
         drillTimer = millis();
@@ -274,7 +268,7 @@ void loop() {
         //turns drill in whatever direction is currently set
         analogWrite(DRILL, maxVelocity);
         drillInUse = true;
-        drillSpeed = maxVelocity;
+        drillSpeed = drill_speed(maxVelocity);
         drillSpeedPercent = 100;
         UART_PORT.println("SCIENCE dgo done");
       }

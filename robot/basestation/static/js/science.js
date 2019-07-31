@@ -501,6 +501,17 @@ $(document).ready(function () {
 
     // @TODO: add validation (must be number between 0 - 100)
     let cmd = 'drillspeed ' + $('#drill-speed').val()
+    let requestedSpeed = Number($('#drill-speed').val())
+
+    // invalid range check
+    // values under 6% don't actually rotate the drill
+    if (requestedSpeed < 6 || requestedSpeed > 100) {
+        color('#drill-speed', 'orange')
+        appendToConsole('Valid ranges for drill speed: [7, 100]')
+        return
+    }
+
+    color('#drill-speed', 'white')
 
     sendScienceRequest(cmd, function (msgs) {
       console.log('msgs', msgs)
@@ -528,6 +539,7 @@ $(document).ready(function () {
         appendToConsole('Success')
         lightUp('#drill-stop-btn')
         greyOut('#drill-max-speed-go-btn')
+        greyOut('#set-speed-go-btn')
       } else {
         appendToConsole('Something went wrong')
       }

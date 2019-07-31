@@ -95,20 +95,24 @@ function millisSince (start) {
 }
 
 // convenience function for UI Buttons
+function color (selector, color) {
+  $(selector).css('background-color', color)
+}
+
 function lightUp (selector) {
-  $(selector).css('background-color', 'rgb(255, 0, 0)')
+  color(selector, 'rgb(255, 0, 0)')
 }
 
 function dim (selector) {
-  $(selector).css('background-color', 'rgb(74, 0, 0)')
+  color(selector, 'rgb(74, 0, 0)')
 }
 
-function isLit(selector) {
-    return ($(selector).css('background-color').toLowerCase() == 'rgb(255, 0, 0)')
+function isLit (selector,) {
+  return ($(selector).css('background-color').toLowerCase() == 'rgb(255, 0, 0)')
 }
 
 function greyOut (selector) {
-  $(selector).css('background-color', '#6c757d')
+  color(selector, '#6c757d')
 }
 
 // convenience functions for setting/getting cookies
