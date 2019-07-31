@@ -138,6 +138,12 @@ function getCookie (cname) {
   }
   return ''
 }
+
+// isNumeric
+function isNumeric (num) {
+    return !isNaN(num) && !(num == '') || num == 0
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest (msg) {

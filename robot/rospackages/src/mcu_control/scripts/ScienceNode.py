@@ -149,7 +149,8 @@ requests = {
     'led2s' : ['led2s done'],
     'dgo' : ['dgo done'],
     'ds' : ['ds done'],
-    'drillspeed' : ['drillspeed done']
+    'drillspeed' : ['drillspeed done'],
+    'drilltime' : ['drilltime done']
 }
 
 def handle_client(req):

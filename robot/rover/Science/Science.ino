@@ -178,7 +178,7 @@ void loop() {
   // print relevant data for pub/sub nodes
   if (millis() - lastPrintTime > 1000) {
     // update variables
-    
+
     lastPrintTime = millis();
     UART_PORT.print("SCIENCE Science data:");
     UART_PORT.print("isActivated:"); UART_PORT.print(isActivated); UART_PORT.print(",");
@@ -197,6 +197,16 @@ void loop() {
     UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed);
     UART_PORT.println();
   }
+
+  // timed stop
+  if (drillInUse == true && (millis() - drillTimer >= drillDuration)) {
+    //stops drill
+    analogWrite(DRILL, 0);
+    drillInUse = false;
+    drillSpeed = drillSpeedPercent = 0;
+    UART_PORT.println("SCIENCE ds done");
+  }
+
   if (UART_PORT.available()) {
     String cmd = UART_PORT.readStringUntil('\n');
     cmd.trim();
@@ -243,8 +253,19 @@ void loop() {
         //turns drill for desired period of time
         // needs input "drilltime 100"
         drillDuration = 1000 * (getValue(cmd, ' ', 1).toInt());
-        UART_PORT.print("SCIENCE drilltime");
-        UART_PORT.println(drillDuration / 1000);
+        int analogVal = maxVelocity;
+
+        if (getCount(cmd, ' ') == 2) {
+          // get desired drill speed
+          int drillSpeedPercent = getValue(cmd, ' ', 2).toInt();
+          analogVal = drillSpeedPercent * 255 / 100;
+          drillSpeed = drill_speed(drillSpeedPercent);
+        } else {
+          drillSpeed = drill_speed(100);
+        }
+        
+        analogWrite(DRILL, analogVal);
+        UART_PORT.println("SCIENCE drilltime done");
         drillTimer = millis();
         drillInUse = true;
       }
@@ -272,8 +293,7 @@ void loop() {
         drillSpeedPercent = 100;
         UART_PORT.println("SCIENCE dgo done");
       }
-      else if (cmd == "ds" || (drillInUse == true && (millis() - drillTimer >= drillDuration))
-              ) {
+      else if (cmd == "ds") {
         //stops drill
         analogWrite(DRILL, 0);
         drillInUse = false;
@@ -524,9 +544,9 @@ void loop() {
 
       else if (cmd == "deactivate") {
         //stops all
-        UART_PORT.print("cmd: ");
-        UART_PORT.println(cmd);
-        UART_PORT.print("Homing Table");
+        //        UART_PORT.print("cmd: ");
+        //        UART_PORT.println(cmd);
+        //        UART_PORT.print("Homing Table");
         homingTimer = millis();
         turnTable (0, 0);
         deactivating = true;
@@ -714,9 +734,9 @@ void debouncing(void) {
 
 
 /*
- * Defaults input values to 0 or 100 if out of those bounds
- * Converts percentage value into estimate RPM
- */
+   Defaults input values to 0 or 100 if out of those bounds
+   Converts percentage value into estimate RPM
+*/
 int drill_speed(int input_drill_speed) {
   if (input_drill_speed < 0) {
     input_drill_speed = 0;
@@ -760,6 +780,12 @@ float photoChoice(int led) {
   digitalWrite(S3, binary[3]);
 }
 
+/**
+   Tokenizes strings and returns section by index
+
+   Usage: getValue("hello_robotics_world", '_', 2)
+   This will return the string "world"
+*/
 String getValue(String data, char separator, int index) {
   int found = 0;
   int strIndex[] = {0, -1};
@@ -774,4 +800,20 @@ String getValue(String data, char separator, int index) {
   }
 
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+/**
+ * Returns the amount of times the target character appears in a given string
+ */
+int getCount(String data, char target) {
+  int ctr = 0, i = 0;
+
+  while (data[i] != '\0') {
+    if (data[i] == target) {
+      ctr++;
+    }
+    i++;
+  }
+
+  return ctr;
 }
