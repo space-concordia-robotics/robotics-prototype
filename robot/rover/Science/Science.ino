@@ -60,7 +60,8 @@ unsigned long triggerTime;
 // other variables
 bool isActivated = false;
 bool turnTableFree = true;
-bool drillInUse = false;
+bool drillInUse = false; // feedback for user
+bool drillTimerInUse = false; // for timing drill commands
 bool elevatorInUse = false;
 bool deactivating = false;
 int drillDuration = 0;
@@ -176,7 +177,7 @@ void setup() {
 
 void loop() {
   // print relevant data for pub/sub nodes
-  if (millis() - lastPrintTime > 1000) {
+  if (millis() - lastPrintTime > 750) {
     // update variables
 
     lastPrintTime = millis();
@@ -194,17 +195,19 @@ void loop() {
     UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
     UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
     UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
-    UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed);
+    UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
+    UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse);
     UART_PORT.println();
   }
 
   // timed stop
-  if (drillInUse == true && (millis() - drillTimer >= drillDuration)) {
+  if (drillTimerInUse == true && (millis() - drillTimer >= drillDuration)) {
     //stops drill
     analogWrite(DRILL, 0);
+    drillTimerInUse = false;
     drillInUse = false;
     drillSpeed = drillSpeedPercent = 0;
-    UART_PORT.println("SCIENCE ds done");
+    UART_PORT.println("SCIENCE drilltime done");
   }
 
   if (UART_PORT.available()) {
@@ -246,6 +249,7 @@ void loop() {
         drillSpeed = drill_speed(drillSpeedPercent);
         int analogVal = drillSpeedPercent * 255 / 100;
         analogWrite(DRILL, analogVal);
+        drillInUse = true;
         UART_PORT.println("SCIENCE drillspeed done");
         drillTimer = millis();
       }
@@ -268,6 +272,7 @@ void loop() {
         UART_PORT.println("SCIENCE drilltime done");
         drillTimer = millis();
         drillInUse = true;
+        drillTimerInUse = true;
       }
       else if (cmd == "dccw") {
         //turns drill counter-clockwise

@@ -222,6 +222,16 @@ function initRosWeb () {
     }
 
     $('#drill-rpm').val(values[13])
+
+    // drillInUse
+    if (values[14] == '0') {
+      lightUp('#drill-stop-btn')
+      greyOut('#set-speed-go-btn')
+      greyOut('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#drill-stop-btn')
+    }
   })
 
   /* rover commands */
