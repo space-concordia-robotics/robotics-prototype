@@ -15,6 +15,7 @@
 #define SERVO_MAX_CW   1250
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
+#define FEED_CONSTANT  2.5 // in seconds/inch
 //Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
@@ -194,7 +195,7 @@ void loop() {
     UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
     UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
     UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
-    UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
+    UART_PORT.println("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
     UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse);
     UART_PORT.println();
     //@TODO: ADD ELEVATOR_IN_USE AND ELEVATOR FEED (SPEED) FEEDBACK AND UPDATE GUI ACCORDINGLY
@@ -215,9 +216,11 @@ void loop() {
         //stops elevator
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';
-        elevatorTimerInUse == false;
-        elevatorInUse == false;
-        UART_PORT.println("SCIENCE es done");
+        elevatorTimerInUse = false;
+        elevatorInUse = false;
+        //UART_PORT.println("SCIENCE es done josh");
+        UART_PORT.print("elevatorTimerInUse: ");
+        UART_PORT.println(elevatorTimerInUse);
   }
   
   if (UART_PORT.available()) {
@@ -331,11 +334,13 @@ void loop() {
       if (cmd.startsWith("elevatordistance") && (cmd.indexOf(" ") > 0)) {
         //turns elevator for desired distance
         // needs input "elevatordistance 100"
-        elevatorDuration = 100 * 09.38 * (getValue(cmd, ' ', 1).toInt());
-        UART_PORT.println("SCIENCE elevatordistance");
-        UART_PORT.println((getValue(cmd, ' ', 1).toInt()) / 10);
+        //@TODO: default behavior --> feed 100%, given a second parameter --> include this in here
+        elevatorDuration = FEED_CONSTANT * 1000 * (getValue(cmd, ' ', 1).toInt());
+        UART_PORT.println("SCIENCE elevatordistance: ");
+        UART_PORT.println((getValue(cmd, ' ', 1).toInt()));
         UART_PORT.print("elevatorDuration: ");
         UART_PORT.println(elevatorDuration);
+        analogWrite(ELEVATOR, maxVelocity);
         elevatorTimer = millis();
         elevatorTimerInUse = true;
         elevatorInUse = true;
