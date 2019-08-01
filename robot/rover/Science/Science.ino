@@ -60,10 +60,9 @@ unsigned long triggerTime;
 // other variables
 bool isActivated = false;
 bool turnTableFree = true;
-bool drillInUse = false; // feedback for user
-bool drillTimerInUse = false; // for timing drill commands
-bool elevatorInUse = false;
 bool deactivating = false;
+bool drillInUse = false, elevatorInUse = false; // feedback for user
+bool drillTimerInUse = false, elevatorTimerInUse = false; // for timing based commands
 int drillDuration = 0;
 int drillSpeed = 0; // in RPM
 int drillDirection = 0; // 0 --> CW, 1 --> CCW
@@ -201,7 +200,7 @@ void loop() {
     //@TODO: ADD ELEVATOR_IN_USE AND ELEVATOR FEED (SPEED) FEEDBACK AND UPDATE GUI ACCORDINGLY
   }
 
-  // timed stop
+  // timed stop for drill time
   if (drillTimerInUse == true && (millis() - drillTimer >= drillDuration)) {
     //stops drill
     analogWrite(DRILL, 0);
@@ -211,6 +210,16 @@ void loop() {
     UART_PORT.println("SCIENCE drilltime done");
   }
 
+  // timed stop for elevator distance
+  if (elevatorTimerInUse == true && (millis() - elevatorTimer >= elevatorDuration)) {
+        //stops elevator
+        analogWrite(ELEVATOR, 0);
+        previousElevatorState = 'n';
+        elevatorTimerInUse == false;
+        elevatorInUse == false;
+        UART_PORT.println("SCIENCE es done");
+  }
+  
   if (UART_PORT.available()) {
     String cmd = UART_PORT.readStringUntil('\n');
     cmd.trim();
@@ -311,6 +320,7 @@ void loop() {
         // needs input "elevatorfeed 100"
         elevatorFeedPercent = getValue(cmd, ' ', 1).toInt();
         analogWrite(ELEVATOR, elevatorFeedPercent * 255 / 100);
+        elevatorInUse = false;
         UART_PORT.println("SCIENCE elevatorfeed done");
         //@TODO: include this in the feedback, figure out which units (inches per s/min)
         //UART_PORT.println(elevator_feed(elevatorFeedPercent));
@@ -321,10 +331,13 @@ void loop() {
       if (cmd.startsWith("elevatordistance") && (cmd.indexOf(" ") > 0)) {
         //turns elevator for desired distance
         // needs input "elevatordistance 100"
-        elevatorDuration = elevatorFeedPercent * 09.38 * (getValue(cmd, ' ', 1).toInt());
+        elevatorDuration = 100 * 09.38 * (getValue(cmd, ' ', 1).toInt());
         UART_PORT.println("SCIENCE elevatordistance");
         UART_PORT.println((getValue(cmd, ' ', 1).toInt()) / 10);
+        UART_PORT.print("elevatorDuration: ");
+        UART_PORT.println(elevatorDuration);
         elevatorTimer = millis();
+        elevatorTimerInUse = true;
         elevatorInUse = true;
       }
       else if (cmd == "eup") {
@@ -345,6 +358,8 @@ void loop() {
       }
       else if (cmd == "ego") {
         analogWrite(ELEVATOR, maxVelocity);
+        elevatorInUse = true;
+        
         if (digitalRead(ELEVATOR_DIRECTION) == HIGH) {
           previousElevatorState = 'u';
         }
@@ -354,12 +369,11 @@ void loop() {
 
         UART_PORT.println("SCIENCE ego done");
       }
-      else if (cmd == "es" || (elevatorInUse == true && (millis() - elevatorTimer >=
-                               elevatorDuration))) {
+      else if (cmd == "es") {
         //stops elevator
         analogWrite(ELEVATOR, 0);
-        previousElevatorState = 'n';
         elevatorInUse == false;
+        previousElevatorState = 'n';
         UART_PORT.println("SCIENCE es done");
       }
       else if (cmd.endsWith("goto") && (cmd.indexOf(" ") > 0)) {
