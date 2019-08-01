@@ -198,6 +198,7 @@ void loop() {
     UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
     UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse);
     UART_PORT.println();
+    //@TODO: ADD ELEVATOR_IN_USE AND ELEVATOR FEED (SPEED) FEEDBACK AND UPDATE GUI ACCORDINGLY
   }
 
   // timed stop
@@ -309,11 +310,11 @@ void loop() {
         //turns elevator at desired feed
         // needs input "elevatorfeed 100"
         elevatorFeedPercent = getValue(cmd, ' ', 1).toInt();
-        UART_PORT.println("SCIENCE elevatorfeed");
-        UART_PORT.println(elevator_feed(elevatorFeedPercent));
-        analogWrite(ELEVATOR, 0);
-        delay(50);
         analogWrite(ELEVATOR, elevatorFeedPercent * 255 / 100);
+        UART_PORT.println("SCIENCE elevatorfeed done");
+        //@TODO: include this in the feedback, figure out which units (inches per s/min)
+        //UART_PORT.println(elevator_feed(elevatorFeedPercent));
+        //@TODO: figure out why this is useful to keep track of
         if (digitalRead(ELEVATOR_DIRECTION) == HIGH)previousElevatorState = 'u';
         else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'd';
       }
@@ -355,9 +356,6 @@ void loop() {
       }
       else if (cmd == "es" || (elevatorInUse == true && (millis() - elevatorTimer >=
                                elevatorDuration))) {
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(50);
-        digitalWrite(LED_BUILTIN, HIGH);
         //stops elevator
         analogWrite(ELEVATOR, 0);
         previousElevatorState = 'n';

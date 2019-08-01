@@ -627,6 +627,38 @@ $(document).ready(function () {
     })
   })
 
+  $('#set-feed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let elevatorFeed = $('#elevator-feed').val()
+    let cmd = 'elevatorfeed ' + elevatorFeed
+    let requestedFeed = Number(elevatorFeed)
+
+    // invalid range check
+    // values under 10% don't actually rotate the drill
+    if (requestedFeed < 10 || requestedFeed > 100) {
+        color('#elevator-feed', 'orange')
+        appendToConsole('Valid ranges for elevator feed: [10, 100]')
+        return
+    }
+
+    color('#elevator-feed', 'white')
+
+    sendScienceRequest(cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('elevatorfeed done')) {
+        appendToConsole('Success')
+        lightUp('#set-feed-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
   $('#elevator-stop-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return
@@ -639,6 +671,8 @@ $(document).ready(function () {
         appendToConsole('Success')
         lightUp('#elevator-stop-btn')
         greyOut('#elevator-max-speed-go-btn')
+        greyOut('#set-feed-go-btn')
+        greyOut('#set-distance-go-btn')
       } else {
         appendToConsole('Something went wrong')
       }
