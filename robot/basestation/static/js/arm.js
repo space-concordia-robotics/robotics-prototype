@@ -186,34 +186,18 @@ $(document).ready(function () {
     }
   })
 
-  $('[id$=-closed-loop-btn]').on('change', function (event) {
+  $('[id$=-closed-loop-btn]').on('click', function (event) {
     event.preventDefault()
-    console.log(this.id)
     num = this.id[1]
-    console.log(num)
-    // click makes it checked during this time, so trying to enable
-    if ($(this.id).is(':checked')) {
-      console.log('checked')
-      sendArmRequest('motor ' + num + ' loop closed', function (msgs) {
-
-        console.log(msgs)
-        if (msgs[0]) {
-          $(this.id)[0].checked = true
+    open = !$(this.id).is(':checked')
+    armReq = function(msgs) {
+        if(msgs[0]) {
+          $(this.id)[0].checked = !open
         } else {
-          $(this.id)[0].checked = false
+          $(this.id)[0].checked = open
         }
-      })
-    } else {
-      console.log('unchecked')
-      sendArmRequest('motor ' + num + ' loop open', function (msgs) {
-      console.log(msgs)
-        if (msgs[0]) {
-          $(this.id)[0].checked = false
-        } else {
-          $(this.id)[0].checked = true
-        }
-      })
     }
+    sendArmRequest('motor ' + num + ' loop ' + open ? 'open' : 'closed', armReq)
   })
 })
 
