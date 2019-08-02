@@ -232,6 +232,17 @@ function initRosWeb () {
     } else if (values[14] == '1') {
       greyOut('#drill-stop-btn')
     }
+
+    // elevatorInUse
+    if (values[15] == '0') {
+      lightUp('#elevator-stop-btn')
+      greyOut('#set-feed-go-btn')
+      greyOut('#set-distance-go-btn')
+      greyOut('#elevator-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#elevator-stop-btn')
+    }
+
   })
 
   /* rover commands */

@@ -659,6 +659,40 @@ $(document).ready(function () {
     })
   })
 
+  // elevator - set distance command
+  $('#set-distance-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let elevatorDistance = $('#elevator-distance').val()
+    let cmd = 'elevatordistance ' + elevatorDistance
+    let requestedDistance = Number(elevatorDistance)
+
+    // invalid range check
+    // if the system on the MCU were closed loop we would do it based off current position
+    // otherwise we assume there will be limit switches for protection
+    if (requestedDistance <= 0 || requestedDistance > 15) {
+        color('#elevator-distance', 'orange')
+        appendToConsole('Valid ranges for elevator feed: (0, 15]')
+        return
+    }
+
+    color('#elevator-distance', 'white')
+
+    sendScienceRequest(cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('elevatordistance done')) {
+        appendToConsole('Success')
+        lightUp('#set-distance-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
   $('#elevator-stop-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return

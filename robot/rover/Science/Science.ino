@@ -195,8 +195,9 @@ void loop() {
     UART_PORT.print("v4:"); UART_PORT.print(digitalRead(VIBRATOR4)); UART_PORT.print(",");
     UART_PORT.print("v5:"); UART_PORT.print(digitalRead(VIBRATOR5)); UART_PORT.print(",");
     UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
-    UART_PORT.println("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
-    UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse);
+    UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
+    UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse); UART_PORT.print(",");
+    UART_PORT.print("elevatorInUse:"); UART_PORT.print(elevatorInUse);
     UART_PORT.println();
     //@TODO: ADD ELEVATOR_IN_USE AND ELEVATOR FEED (SPEED) FEEDBACK AND UPDATE GUI ACCORDINGLY
   }
@@ -323,7 +324,7 @@ void loop() {
         // needs input "elevatorfeed 100"
         elevatorFeedPercent = getValue(cmd, ' ', 1).toInt();
         analogWrite(ELEVATOR, elevatorFeedPercent * 255 / 100);
-        elevatorInUse = false;
+        elevatorInUse = true  ;
         UART_PORT.println("SCIENCE elevatorfeed done");
         //@TODO: include this in the feedback, figure out which units (inches per s/min)
         //UART_PORT.println(elevator_feed(elevatorFeedPercent));
@@ -336,11 +337,8 @@ void loop() {
         // needs input "elevatordistance 100"
         //@TODO: default behavior --> feed 100%, given a second parameter --> include this in here
         elevatorDuration = FEED_CONSTANT * 1000 * (getValue(cmd, ' ', 1).toInt());
-        UART_PORT.println("SCIENCE elevatordistance: ");
-        UART_PORT.println((getValue(cmd, ' ', 1).toInt()));
-        UART_PORT.print("elevatorDuration: ");
-        UART_PORT.println(elevatorDuration);
         analogWrite(ELEVATOR, maxVelocity);
+        UART_PORT.println("SCIENCE elevatordistance done");
         elevatorTimer = millis();
         elevatorTimerInUse = true;
         elevatorInUse = true;
