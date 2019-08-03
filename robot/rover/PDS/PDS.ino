@@ -98,6 +98,7 @@ unsigned long startTime = 0; //!< for task scheduler which is not implemented ye
 int messagesReceived, messagesSent, badMessages;
 char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
 
+
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
   Serial.setTimeout(SERIAL_TIMEOUT_DELAY);
@@ -125,11 +126,14 @@ void loop() {
   // listen to the serial port and parse an incoming message
   if (Serial.available()) {
     byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
+    String cmd = Serial.readStringUntil('\n');
     if (num > 0) {
       Serial.println(BUFFER); // echo the received command
       parseCommand(); // check the command and (in some cases) react to it
       memset(BUFFER, 0, CHAR_BUFF_SIZE);
       messagesReceived++;
+    } else if (cmd == "who") {
+      Serial.print("PDS");
     } else {
       badMessages++;
     }
@@ -199,6 +203,15 @@ void loop() {
     analogWrite(Fan_B_Speed_Pin, 0);
   }
   /***************************************************************************************************************/
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n'); 
+
+    cmd.trim();
+
+    if (cmd == "who") {
+      Serial.print("PDS\n");
+    }
+  }
   updateMotorState(); //update all motor enable pin states by reading them
   generateMessage();  //generate status message containing current, voltage and temperature values
   /***************************************************************************************************************/
@@ -215,12 +228,13 @@ void loop() {
 
 void parseCommand() {
 
-  char TEMP_BUFF = BUFFER;
+  char *TEMP_BUFF = BUFFER;
   char *token = strtok(TEMP_BUFF, " ");
   while (token != NULL) {
     if (strcmp(token, "PDS") == 0) {
       token = strtok(BUFFER, " "); //find the next token
       if (strcmp(token, "S") == 0) {  //disable all motors
+        Serial.print("Testing S"); //Testing
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
@@ -275,12 +289,14 @@ void parseCommand() {
 } // end of parseCommand
 
 void generateMessage() {
+
   sprintf(BUFFER, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
           batteryVoltage, currentReadings[0],
           currentReadings[1], currentReadings[2],
           currentReadings[3], currentReadings[4],
           currentReadings[5], tempReadings[0],
           tempReadings[1], tempReadings[2]);
+
 }
 
 void updateMotorState() {

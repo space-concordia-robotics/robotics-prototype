@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
 import sys
 import traceback
@@ -70,7 +70,7 @@ def init_serial():
                     rospy.loginfo('attempt #%d...', i + 1)
                     startListening = time.time()
                     ser.write(str.encode('who\n'))
-                    while (time.time() - startListening < timeout):
+                    while time.time() - startListening < timeout:
                         if ser.in_waiting:  # if there is data in the serial buffer
                             response = ser.readline().decode()
                             rospy.loginfo('response: ' + response)
@@ -94,7 +94,7 @@ def init_serial():
         try:
             ser = serial.Serial('/dev/' + port, baudrate)
         except:
-            rospy.logerr('No UART device recognized, terminating arm node')
+            rospy.logerr('No UART device recognized, terminating PDS node')
             sys.exit(0)
 
         rospy.loginfo("clearing buffer...")
@@ -106,7 +106,7 @@ def init_serial():
             rospy.loginfo('attempt #%d...', i)
             startListening = time.time()
             ser.write(str.encode('who\n'))
-            while (time.time() - startListening < timeout):
+            while time.time() - startListening < timeout:
                 if ser.in_waiting:
                     dat = ''
                     data = None
@@ -133,7 +133,7 @@ def init_serial():
 
 def subscriber_callback(message):
     global ser  # specify that it's global so it can be used properly
-    rospy.loginfo('received: ' + message.data + ' command from GUI, sending to arm Teensy')
+    rospy.loginfo('received: ' + message.data + ' command from GUI, sending to PDS')
     command = str.encode(message.data + '\n')
     ser.write(command)  # send command to teensy
     return
@@ -145,8 +145,6 @@ def subscriber_callback(message):
 ### currently the format is: "PDS,val,val,...,val\n"
 ### but 'PDS,' is stripped by stripFeedback()
 
-
-### create a publish for each ex: currentPub.publish(msg) etc.
 def publish_pds_data(message):
     # parse the data received from Teensy
 
@@ -172,13 +170,12 @@ def publish_pds_data(message):
     voltagePub.publish(voltage)
     currentPub.publish(current)
     tempPub.publish(temp)
-    # rospy.logdebug(msg.position)
     return
 
 
 def stripFeedback(data):
     startStrip = 'PDS,'
-    endStrip = '\r\n'
+    endStrip = '\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
             data, right = data.split(endStrip)
@@ -192,19 +189,17 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False)  # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-    init_serial()
-
     voltage_pub_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "' + voltage_pub_topic + '" topic')
-    voltagePub = rospy.publisher(voltage_pub_topic, Float32, queue_size=10)
+    voltagePub = rospy.Publisher(voltage_pub_topic, Float32, queue_size=10)
 
     current_pub_topic = '/wheel_motor_currents'
-    rospy.longinfo('Begining to publish to "' + current_pub_topic + '" topic')
-    currentPub = rospy.publisher(current_pub_topic, Float32MultiArray, queue_size=10)
+    rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
+    currentPub = rospy.Publisher(current_pub_topic, Float32MultiArray, queue_size=10)
 
     temp_pub_topic = '/battery_temp'
-    rospy.longinfo('Begining to publish to "' + temp_pub_topic + '" topic')
-    tempPub = rospy.publisher(current_pub_topic, Float32MultiArray, queue_size=10)
+    rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
+    tempPub = rospy.Publisher(current_pub_topic, Float32MultiArray, queue_size=10)
 
     feedback_pub_topic = '/pds_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')
@@ -212,8 +207,9 @@ if __name__ == '__main__':
 
     subscribe_topic = '/pds_command'
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
-    #I could have a topic that listens for JointStateso and constructs the message here...
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+
+    init_serial()
 
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser
@@ -231,12 +227,16 @@ if __name__ == '__main__':
                 except:
                     rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
-                    if 'Motor Angles' in feedback:
+                    if 'PDS data' in feedback:
                         #rospy.loginfo(feedback)
-                        publish_joint_states(feedback)  ###edit
+                        publish_pds_data(feedback)  ###edit
                     elif 'battery voltage' in feedback:
                         left, voltage = feedback.split('battery voltage: ')
-                        vBatPub.publish(float(voltage))  ###edit
+                        voltagePub.publish(float(voltage))  ###edit
+                    elif 'wheel current' in feedback:
+                        currentPub.publish(float(current))
+                    elif 'battery temperature' in feedback:
+                        tempPub.publish(float(temp))
                     else:
                         #rospy.loginfo(feedback)
                         if 'WARNING' in feedback:
