@@ -15,7 +15,7 @@
 #define SERVO_MAX_CW   1250
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
-#define FEED_CONSTANT  2.5 // in seconds/inch
+#define FEED_CONSTANT  3.2 // in seconds/inch
 //Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
@@ -333,11 +333,25 @@ void loop() {
         else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'd';
       }
       if (cmd.startsWith("elevatordistance") && (cmd.indexOf(" ") > 0)) {
-        //turns elevator for desired distance
+        // turns elevator for desired distance
         // needs input "elevatordistance 100"
-        //@TODO: default behavior --> feed 100%, given a second parameter --> include this in here
-        elevatorDuration = FEED_CONSTANT * 1000 * (getValue(cmd, ' ', 1).toInt());
-        analogWrite(ELEVATOR, maxVelocity);
+        int analogVal = maxVelocity;
+        double elevatorFeed = 0;
+
+        if (getCount(cmd, ' ') == 2) {
+          // get desired drill speed
+          int elevatorFeedPercent = getValue(cmd, ' ', 2).toInt();
+          analogVal = elevatorFeedPercent * 255 / 100;
+          elevatorFeed = elevator_feed(elevatorFeedPercent);
+          UART_PORT.print("elevatorFeed: ");
+          UART_PORT.println(elevatorFeed);
+        } else {
+          elevatorFeed = elevator_feed(100);
+        }
+        elevatorDuration = elevatorFeed * 1000 * (getValue(cmd, ' ', 1).toInt());
+        UART_PORT.print("ELEVATOR DURATION: ");
+        UART_PORT.println(elevatorDuration);
+        analogWrite(ELEVATOR, analogVal);
         UART_PORT.println("SCIENCE elevatordistance done");
         elevatorTimer = millis();
         elevatorTimerInUse = true;
@@ -772,9 +786,15 @@ float elevator_feed(int input_elevator_feed) {
     input_elevator_feed = 0;
   }
   if (input_elevator_feed > 100) {
-    input_elevator_feed = 0.1066;
+    input_elevator_feed = 100;
   }
-  return input_elevator_feed * 0.1066 / 100;
+
+  double thing = FEED_CONSTANT * (1/(input_elevator_feed/100.));
+
+  UART_PORT.print("thing: ");
+  UART_PORT.println(thing);
+  
+  return thing;
 }
 
 float photoChoice(int led) {
