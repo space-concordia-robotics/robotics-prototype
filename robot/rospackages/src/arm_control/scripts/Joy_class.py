@@ -359,25 +359,30 @@ class Astro_Joy():
         else:
             return None
 
-    def wheels_act_deact(self):
+
+    def wheels_act(self):
         pygame.event.pump()
-        ctr = (self.controls.get_button(11), self.controls.get_button(12))
-        if self.wheels_activate == False and ctr[1]:
+        temp = self.controls.get_button(12)
+        if self.wheels_activate == False and temp == 1:
             self.wheels_activate = True
             return None
-        elif self.wheels_activate == True and ctr[1]:
+        elif self.wheels_activate == True and temp == 0:
             self.wheels_activate = False
             return "activate"
-        elif self.wheels_deactivate == False and ctr[0]:
+        else:
+            return None
+
+    def wheels_deact(self):
+        pygame.event.pump()
+        temp = self.controls.get_button(11)
+        if self.wheels_deactivate == False and temp == 1:
             self.wheels_deactivate = True
             return None
-        elif self.wheels_deactivate == True and ctr[0]:
+        elif self.wheels_deactivate == True and temp == 0:
             self.wheels_deactivate = False
             return "deactivate"
         else:
             return None
-
-
 
     def switch(self):
         pygame.event.pump()
@@ -415,18 +420,27 @@ if __name__ == '__main__':
             # print("Rover mode : {}".format(my_joy.isRover))
             # print("Arm mode : {}".format(my_joy.isArm))
             if my_joy.isRover:
-                print(my_joy.wheels())
-                temp = my_joy.wheels_act_deact()
+                temp = my_joy.wheels_act()
                 if temp is not None:
                     print(temp)
-                    exit()
-                print("currently controlling : Rover")
+                temp = my_joy.wheels_deact()
+                if temp is not None:
+                    print(temp)
+                temp = my_joy.wheels()
+                if temp is not None:
+                    print(temp)
+                temp = my_joy.camera()
+                if temp is not None:
+                    print(temp)
+                #print("currently controlling : Rover")
             else:
                 temp = my_joy.arm_reset()
                 if temp is not None:
                     print(temp)
-                print(my_joy.arm())
-                print("currently controlling : Arm")
+                temp = my_joy.arm()
+                if temp is not None:
+                    print(temp)
+                #print("currently controlling : Arm")
 
 
     except KeyboardInterrupt:

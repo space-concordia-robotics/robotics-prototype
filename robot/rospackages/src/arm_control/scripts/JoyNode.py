@@ -30,7 +30,10 @@ if __name__ == '__main__':
                 if message is not None:
                     armPub.publish(message)
             elif my_joy.isRover:
-                message = my_joy.wheels_act_deact()
+                message = my_joy.wheels_act()
+                if message is not None:
+                    wheelPub.publish(message)
+                message = my_joy.wheels_deact()
                 if message is not None:
                     wheelPub.publish(message)
                 message = my_joy.wheels()
