@@ -1,5 +1,9 @@
 {% extends "Base.html" %}
 {% block title %}Rover{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../static/js/rover.js"></script>
+{% endblock %}
 {% block content %}
 <div class="row">
  <div class="col-md-3">{% include 'Console.html' %}</div>
@@ -10,8 +14,9 @@
  <div class="col-md-6">{% include 'CameraFeed.html' %}</div>
 </div>
 <div class="row">
-  <div class="col-md-4">{% include 'Navigation.html' %}</div>
-  <div class="col-md-2">{% include 'RoverMotorControls.html' %}</div>
-  <div class="col-md-6">{% include 'CameraControls.html' %}</div>
+  <div class="col-md-3">{% include 'Navigation.html' %}</div>
+  <div class="col-md-4">{% include 'RoverMotorControls.html' %}</div>
+  <div class="col-md-3">{% include 'CameraControls.html' %}</div>
+  <div class="col-md-2">{% include 'ExtraControls.html' %}</div>
 </div>
 {% endblock %}

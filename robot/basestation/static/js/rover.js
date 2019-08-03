@@ -135,32 +135,7 @@ $(document).ready(function () {
     }
   })
 
-  $('#ping-odroid').on('click', function (event) {
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      appendToConsole('pinging odroid')
-      $.ajax('/ping_rover', {
-        success: function (data) {
-          appendToConsole(data.ping_msg)
-          if (!data.ros_msg.includes('Response')) {
-            appendToConsole('No response from ROS ping_acknowledgment service')
-          } else {
-            appendToConsole(data.ros_msg)
-          }
-        },
-        error: function () {
-          console.log('An error occured')
-        }
-      })
-      lastCmdSent = new Date().getTime()
-    }
-  })
-  $('#ping-rover-mcu').on('click', function (event) {
-    event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendRoverRequest('ping', function (msgs) {})
-      lastCmdSent = new Date().getTime()
-    }
-  })
+
 
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()

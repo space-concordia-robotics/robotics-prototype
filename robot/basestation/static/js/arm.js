@@ -61,14 +61,6 @@ $(document).ready(function () {
     }
   })
 
-  $('#ping-arm-mcu').on('click', function (event) {
-    event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendArmRequest('ping', function (msgs) {})
-      lastCmdSent = new Date().getTime()
-    }
-  })
-
   $('#save-image').on('click', function (event) {
     $.ajax('/capture_image', {
       success: function (data) {

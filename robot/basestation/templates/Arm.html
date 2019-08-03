@@ -1,5 +1,9 @@
 {% extends "Base.html" %}
 {% block title %}Arm{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../static/js/arm.js"></script>
+{% endblock %}
 {% block content %}
 <div class="row">
  <div class="col-md-3">{% include 'Console.html' %}</div>
