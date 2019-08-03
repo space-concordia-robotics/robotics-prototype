@@ -1,0 +1,50 @@
+<h5 class="container-header">Navigation Data</h5>
+<div style="display: block" id="rover-unchanging">
+  <h6>Rover coords:</h6>
+  <h5>lat: <span id="rover-latitude">-</span></h5>
+  <h5>long: <span id="rover-longitude">-</span></h5>
+  <h5>heading: <span id="rover-heading">-</span></h5>
+</div>
+<div style="display: block" id="antenna-inputs" class="input-group input-group-sm">
+  <div class="input-group-prepend">
+    <span class="input-group-text">lat, long, bearing (Antenna)</span><br>
+  </div>
+  <input type="text" id="antenna-latitude-input">
+  <input type="text" id="antenna-longitude-input">
+  <input type="text" id="antenna-start-dir-input">
+  <br>
+  <button type="button" id="send-antenna-data-btn" class="btn btn-primary">Send antenna data</button>
+</div>
+<div style="display: none" id="antenna-unchanging">
+  <h6>Antenna coords:</h6>
+  <h5>lat: <span id="antenna-latitude">-</span></h5>
+  <h5>long: <span id="antenna-longitude">-</span></h5>
+  <h5>bearing: <span id="antenna-start-dir">-</span></h5>
+  <div>
+    <h6>Direct antenna to:</h6>
+    <h5>angle: <span id="recommended-antenna-angle">-</span></h3>
+    <h5>dist (m): <span id="distance-to-rover">-</span></h3>
+    <!-- <br> -->
+    <button type="button" id="change-antenna-data-btn" class="btn btn-primary">Change antenna data</button>
+  </div>
+</div>
+<div style="display: block" id="goal-inputs" class="input-group input-group-sm">
+  <div class="input-group-prepend">
+    <span class="input-group-text">lat, long (Destination)</span><br>
+  </div>
+  <input type="text" id="goal-latitude-input">
+  <input type="text" id="goal-longitude-input">
+  <br>
+  <button type="button" id="send-goal-pos-btn" class="btn btn-primary">Send</button>
+</div>
+<div style="display: none" id="goal-unchanging">
+  <h6>Destination coords:</h6>
+  <h5>lat: <span id="goal-latitude">-</span></h5>
+  <h5>long: <span id="goal-longitude">-</span></h5>
+  <div>
+    <h6>Direct rover to:</h6>
+    <h5>dir: <span id="recommended-rover-heading">-</span></h5>
+    <h5>dist (m): <span id="distance-to-goal">-</span></h5>
+    <button type="button" id="change-goal-pos-btn" class="btn btn-primary">Change goal coords</button>
+  </div>
+</div>

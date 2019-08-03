@@ -1,12 +1,9 @@
 {% extends "Base.html" %}
 {% block title %}Arm{% endblock %}
-{% block head %}
-    {{ super() }}
-{% endblock %}
 {% block content %}
 <div class="row">
  <div class="col-md-3">{% include 'Console.html' %}</div>
- <div class="col-md-3">{% include 'ArmPosition.html' %}{% include 'MotorTable.html' %}</div>
+ <div class="col-md-3">{% include 'ArmPosition.html' %}{% include 'ArmMotorTable.html' %}</div>
  <div class="col-md-6">{% include 'CameraFeed.html' %}</div>
 </div>
 <div class="row">
