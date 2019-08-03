@@ -1,37 +1,20 @@
-<div class="container fill">
-  <div>
+<div class="container control-panel">
     <div class="row">
-      <div class="col-sm" align="center" style="border-style:none;">
-          <span>
-              <strong>Command Listener</strong>
-          </span>
-          <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-              <label>
-                  <input id="toggle-arm-listener-btn" type="checkbox">
-                  <span> </span>
-              </label>
+      <div class="col-md-6">
+          <div class="command-listener-btn"
+            <span>
+                <strong>Command Listener</strong>
+            </span>
+            <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                <label>
+                    <input id="toggle-arm-listener-btn" type="checkbox">
+                    <span> </span>
+                </label>
+            </div>
           </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
-          <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-              <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Homing</span>
-          </button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-3" align="center">
-          <div class="btn-group" role="group">
-            <button type="button" id="ping-odroid" class="btn btn-primary" aria-hidden="true">Ping Odroid</button>
-            <button type="button" id="ping-arm-mcu" class="btn btn-primary" aria-hidden="true">Ping Arm MCU</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-9">
-        <div id="manual-controls-btn" align="center">
+      <div class="col-md-6">
+        <div id="manual-controls-btn">
             <span>
                 <strong>Manual Control</strong>
             </span>
@@ -42,14 +25,12 @@
                 </label>
             </div>
         </div>
+      </div>
+    </div>
+    <div class="row">
         <div class="movement-buttons">
           {% include 'AutomaticControls.html' %}
           {% include 'ManualControls.html' %}
         </div>
-      </div>
-      <div class="col-md-3">
-        {% include 'ExtraControls.html' %}
-      </div>
     </div>
-  </div>
 </div>
