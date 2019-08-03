@@ -2,6 +2,7 @@
 
 import pygame
 import time
+import sys
 
 
 
@@ -19,6 +20,7 @@ class Astro_Joy():
     isArm = False
     switch_button = False
 
+
     # Wheels related attributes :
     throttle_target = 0
     throttle_actual = 0
@@ -30,32 +32,31 @@ class Astro_Joy():
     rotating_left = False
     moving_forward = False
     moving_backward = False
+    wheels_activate = False
+    wheels_deactivate = False
+
 
     # Cameras related attributes :
     front_cam_position_actual = 90
     top_cam_position_actual = 90
-
     front_cam_contiuous = 93
     top_cam_continuous = 93
-
     continuous_motion = 25
-
     cameras_halt = True
     cameras_timeout_max = 10
     cameras_timeout = 0
+
 
     # Arm related attributes :
     arm_forward = 'fwd'
     arm_backward = 'back'
     arm_halt = '~'
-
     arm_motor1 = arm_halt
     arm_motor2 = arm_halt
     arm_motor3 = arm_halt
     arm_motor4 = arm_halt
     arm_motor5 = arm_halt
     arm_motor6 = arm_halt
-
     arm_reset_button = False
 
 
@@ -210,7 +211,7 @@ class Astro_Joy():
             self.timeout = self.timeout_max
 
         if self.timeout != 0:
-            msg = str(self.throttle_actual) + ':' + str(self.steer_actual) + '\n'
+            msg = str(self.throttle_actual) + ':' + str(self.steer_actual)
         else:
             msg = None
 
@@ -358,6 +359,24 @@ class Astro_Joy():
         else:
             return None
 
+    def wheels_act_deact(self):
+        pygame.event.pump()
+        ctr = (self.controls.get_button(11), self.controls.get_button(12))
+        if self.wheels_activate == False and ctr[1]:
+            self.wheels_activate = True
+            return None
+        elif self.wheels_activate == True and ctr[1]:
+            self.wheels_activate = False
+            return "activate"
+        elif self.wheels_deactivate == False and ctr[0]:
+            self.wheels_deactivate = True
+            return None
+        elif self.wheels_deactivate == True and ctr[0]:
+            self.wheels_deactivate = False
+            return "deactivate"
+        else:
+            return None
+
 
 
     def switch(self):
@@ -397,6 +416,10 @@ if __name__ == '__main__':
             # print("Arm mode : {}".format(my_joy.isArm))
             if my_joy.isRover:
                 print(my_joy.wheels())
+                temp = my_joy.wheels_act_deact()
+                if temp is not None:
+                    print(temp)
+                    exit()
                 print("currently controlling : Rover")
             else:
                 temp = my_joy.arm_reset()
