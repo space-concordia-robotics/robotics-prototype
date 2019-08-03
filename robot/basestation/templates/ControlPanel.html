@@ -1,8 +1,24 @@
-<div style="margin-bottom:10px"></div>
-
 <div class="container fill">
   <div>
-    <div class="row" >
+    <div class="row">
+      <div class="col-sm" align="center" style="border-style:none;">
+          <span>
+              <strong>Command Listener</strong>
+          </span>
+          <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+              <label>
+                  <input id="toggle-arm-listener-btn" type="checkbox">
+                  <span> </span>
+              </label>
+          </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
+          <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
+              <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Homing</span>
+          </button>
+      </div>
     </div>
     <div class="row">
       <div class="col-md-3" align="center">
@@ -12,62 +28,27 @@
           </div>
         </div>
       </div>
-
-      <div class="col-md"> <!-- control panel -->
-        <h5 class="container-header">Control Panel</h5>
-        <div class="row control-main-btn">
-          <div class="row control-main-toggles">
-            <div class="row">
-              <div class="col-sm" align="center" style="border-style:none;">
-                  <span>
-                      <strong>Command Listener</strong>
-                  </span>
-                  <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                      <label>
-                          <input id="toggle-arm-listener-btn" type="checkbox">
-                          <span> </span>
-                      </label>
-                  </div>
-              </div>
-              <div class="col-sm" align="center" style="border-style:none;">
-                  <span>
-                      <strong>Manual Control</strong>
-                  </span>
-                  <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
-                      <label>
-                          <input id="manual-control-btn" type="checkbox" onchange="manualControl()">
-                          <span> </span>
-                      </label>
-                  </div>
-              </div>
+    </div>
+    <div class="row">
+      <div class="col-md-9">
+        <div id="manual-controls-btn" align="center">
+            <span>
+                <strong>Manual Control</strong>
+            </span>
+            <div class="form-check checkbox-slider--a checkbox-slider-lg">
+                <label>
+                    <input id="manual-control-btn" type="checkbox" onchange="manualControl()">
+                    <span></span>
+                </label>
             </div>
-            <div class="row">
-              <div class="col-sm" align="center" style="border-style:none;">
-
-              </div>
-              <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
-                  <button type="button" id="homing-button" class="btn btn-primary btn-lg fa fa-home fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                      <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Home</span>
-                  </button>
-              </div>
-              <div class="col-sm" align="center" style="vertical-align:middle; border-style:none">
-                  <button type="button" id="reboot-button" class="btn btn-primary btn-lg fa fa-retweet fa-lg" aria-hidden="true" style="padding: 16px 10px 16px 10px;margin-top:12px">
-                      <span style="font-family:'Helvetica Neue', Arial, sans-serif;"> Reboot MCU</span>
-                  </button>
-              </div>
-            </div>
-          </div>
-          <div class="row movement-buttons">
-            {% include 'AutomaticControls.html' %}
-            {% include 'ManualControls.html' %}
-          </div>
+        </div>
+        <div class="movement-buttons">
+          {% include 'AutomaticControls.html' %}
+          {% include 'ManualControls.html' %}
         </div>
       </div>
-
-      <div class="col-md-4" align="center">
-        <div class="row" align="center">
-          {% include 'ExtraControls.html' %}
-        </div>
+      <div class="col-md-3">
+        {% include 'ExtraControls.html' %}
       </div>
     </div>
   </div>
