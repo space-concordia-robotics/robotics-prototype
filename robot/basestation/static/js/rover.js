@@ -135,8 +135,6 @@ $(document).ready(function () {
     }
   })
 
-
-
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendRoverCommand('reboot')

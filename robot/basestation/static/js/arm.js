@@ -42,6 +42,7 @@ function toggleToManual () {
 
 $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
+    event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
       appendToConsole('pinging odroid')
       $.ajax('/ping_rover', {
