@@ -17,6 +17,6 @@
   <div class="col-md-3">{% include 'Navigation.html' %}</div>
   <div class="col-md-4">{% include 'RoverMotorControls.html' %}</div>
   <div class="col-md-3">{% include 'CameraControls.html' %}</div>
-  <div class="col-md-2">{% include 'ExtraControls.html' %}</div>
+  <div class="col-md-2">{% with component="Rover" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}

@@ -83,6 +83,21 @@ $(document).ready(function () {
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
 
+  $('#list-all-cmds').on('click', function(event){
+    event.preventDefault()
+    printCommandsList()
+  })
+
+  $('#stop-all-motors').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('stop')
+  })
+
+  $('#reset-all-angles').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('reset')
+  })
+
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('reboot')
@@ -238,7 +253,6 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyL' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
     lastCmdSent = new Date().getTime()
   }
@@ -419,7 +433,6 @@ function gameLoop () {
     }
     // 'z' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
-      $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
     } else if (toBudge) {
@@ -435,7 +448,6 @@ function gameLoop () {
 
     // 'o' --> reset angle values
     if (!$serialCmdInput.is(':focus') && keyState[79]) {
-      $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('reset')
       lastCmdSent = new Date().getTime()
     }
@@ -561,24 +573,6 @@ document.addEventListener('keyup', function (event) {
 })
 
 // EXTRA CONTROLS
-document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyQ') {
-    $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyO') {
-    $('button#reset-motor-angles').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyL') {
-    $('button#list-all-cmds').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')

@@ -12,6 +12,6 @@
 </div>
 <div class="row">
   <div class="col-md-9">{% include 'ControlPanel.html' %}</div>
-  <div class="col-md-3">{% include 'ExtraControls.html' %}</div>
+  <div class="col-md-3">{% with component="Arm" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}

@@ -140,6 +140,16 @@ $(document).ready(function () {
     sendRoverCommand('reboot')
   })
 
+  $('#list-all-cmds').on('click', function(event){
+    event.preventDefault()
+    printCommandsList()
+  })
+
+  $('#stop-all-motors').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('stop')
+  })
+
   $('#activate-rover-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
