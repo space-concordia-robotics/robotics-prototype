@@ -553,9 +553,18 @@ $(document).ready(() => {
   })
 })
 
-function pingMCU() {
+function pingMCU(component) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-    sendArmRequest('ping', function (msgs) {})
+    switch(component)
+    {
+        case "Arm" :
+          sendArmRequest('ping', function (msgs) {})
+          break;
+        case "Rover" :
+          sendRoverRequest('ping', function (msgs) {})
+          break;
+    }
+
     lastCmdSent = new Date().getTime()
   }
 }
