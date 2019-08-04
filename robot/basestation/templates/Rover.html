@@ -436,21 +436,37 @@
         </div>
         <div class="row">
           <table align="center">
-            <tr>
-              <td><strong>Back</strong></td>
-              <td>
-                <a id="camera-back-home-btn">
-                  <button type="button" class="control-btn2">
-                    Home
-                  </button>
-                </a>
-              </td>
-            </tr>
-            <tr>
+          <tr>
+            <td><strong>Back</strong></td>
+            <td>
+              <a id="camera-back-tilt-up-btn">
+                <button type="button" class="control-btn2">
+                  &#8593;Tilt
+                </button>
+              </a>
+            </td>
+            <td>
+              <span class="col-md-3" id="back-tilt-pwm">-</span>
+            </td>
+            <td>
+              <span class="col-md-3" id="back-pan-pwm">-</span>
+            </td>
+            <!--<td>
+                <input id="servo-val" type="text" size="4"/>
+            </td>-->
+          </tr>
+          <tr>
               <td>
                 <a id="camera-back-lpan-btn">
                   <button type="button" class="control-btn2">
                     LPan
+                  </button>
+                </a>
+              </td>
+              <td>
+                <a id="camera-back-tilt-down-btn">
+                  <button type="button" class="control-btn2">
+                    &#8595;Tilt
                   </button>
                 </a>
               </td>
@@ -462,20 +478,13 @@
                 </a>
               </td>
               <td>
-                <a id="camera-back-tilt-up-btn">
+                <a id="camera-back-home-btn">
                   <button type="button" class="control-btn2">
-                    &#8593;Tilt
+                    Home
                   </button>
                 </a>
               </td>
-              <td>
-                <a id="camera-back-tilt-down-btn">
-                  <button type="button" class="control-btn2">
-                    &#8595;Tilt
-                  </button>
-                </a>
-              </td>
-            </tr>
+          </tr>
           </table>
         </div>
         <!-- EXTRA CONTROLS -->

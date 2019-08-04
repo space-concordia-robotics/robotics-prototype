@@ -15,6 +15,8 @@ const MAX_STEERING_SPEED = 45
 var lastCmdSent = 0
 var lastFrontPosServoCmd = 0
 var lastFrontContServoCmd = 0
+var lastRearPosServoCmd = 0
+var lastRearContServoCmd = 0
 
 var maxSoftThrottle = 25
 var maxSoftSteering = 39
@@ -27,7 +29,9 @@ var throttle = 0 // how fast are the wheels turning in general
 var steering = 0 // values further from 0 mean sharper turning radius
 var spinning = 0 // for rotating around its centre
 var frontTiltPwm = 90
+var rearTiltPwm = 90
 var frontPanPwm = SERVO_STOP
+var rearPanPwm = SERVO_STOP
 
 var throttleIncrement = 1
 var steeringIncrement = 1
@@ -75,11 +79,13 @@ $(document).ready(function () {
   // camera servos
 
   // init camera servos
+  //TODO: this should only happen once the rover is actually connected
+  // honestly this has to happen in the mcu code anyway, not the gui
   let frontContServo = '!' + SERVO_STOP.toString()
   let rearContServo = '#' + SERVO_STOP.toString()
   sendRoverCommand(frontContServo)
   sendRoverCommand(rearContServo)
-
+  /*
   // servo name: "Front camera positional tilt base"
   $('#camera-front-lpan-btn').click(function () {
     if ($('#servo-val').val() != '') {
@@ -134,6 +140,7 @@ $(document).ready(function () {
       sendRoverCommand('$' + $('#servo-val').val())
     }
   })
+  */
 
   $('#ping-odroid').on('click', function (event) {
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
@@ -645,6 +652,54 @@ function gameLoop () {
         }
         else {
           sentFrontServoStop = true
+        }
+      }
+    }
+
+    // front camera position servo (up/down, servo 1)
+    if ( (millisSince(lastRearPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
+      let returnVals = handlePositionServo (
+        rearTiltPwm, minRearTiltPwm, maxRearTiltPwm,
+        101, 98, // numpad '5' and '2'
+        '#camera-back-tilt-up-btn', '#camera-back-tilt-down-btn'
+      )
+      if (returnVals[0]) {
+        rearTiltPwm = returnVals[1]
+        $('#back-tilt-pwm').text(rearTiltPwm)
+        lastRearPosServoCmd = new Date().getTime()
+        sendRoverCommand('$' + rearTiltPwm.toString())
+      }
+    }
+    // Front camera continuous servo (left/right, servo 2)
+    if ( (millisSince(lastRearContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
+      rearPanPwm = handleContinuousServo (
+        rearPanPwm,
+        97, 99, // numpad '1' and '3'
+        '#camera-back-lpan-btn', '#camera-back-rpan-btn'
+      )
+      // check whether or not to send a new command for the continuous servo
+      if (rearPanPwm == SERVO_STOP && sentRearServoStop) {
+        ;
+      }
+      else {
+        let rearPan = SERVO_STOP
+        if (rearPanPwm > SERVO_STOP && rearPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET) {
+          rearPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else if (rearPanPwm < SERVO_STOP && rearPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET) {
+          rearPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        }
+        else {
+          rearPan = rearPanPwm
+        }
+        $('#back-pan-pwm').text(rearPan)
+        lastRearContServoCmd = new Date().getTime()
+        sendRoverCommand('#' + rearPan.toString())
+        if (rearPanPwm != SERVO_STOP) {
+          sentRearServoStop = false
+        }
+        else {
+          sentRearServoStop = true
         }
       }
     }
