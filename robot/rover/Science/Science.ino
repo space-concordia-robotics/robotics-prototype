@@ -15,7 +15,7 @@
 #define SERVO_MAX_CW   1250
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
-#define FEED_CONSTANT  3.2 // in seconds/inch
+#define FEED_CONSTANT  3.25 // in seconds/inch
 //Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
@@ -69,7 +69,7 @@ int drillSpeed = 0; // in RPM
 int drillDirection = 0; // 0 --> CW, 1 --> CCW
 int drillSpeedPercent = 0;
 int pumpDirection = 0; // 0 --> OUT, 1 --> IN
-int elevatorDuration = 0;
+long int elevatorDuration = 0;
 int elevatorDirection = 0; // 0 --> UP, 1 --> DOWN
 int maxVelocity = 255;
 int elevatorFeedPercent = 0;
@@ -214,16 +214,16 @@ void loop() {
 
   // timed stop for elevator distance
   if (elevatorTimerInUse == true && (millis() - elevatorTimer >= elevatorDuration)) {
-        //stops elevator
-        analogWrite(ELEVATOR, 0);
-        previousElevatorState = 'n';
-        elevatorTimerInUse = false;
-        elevatorInUse = false;
-        //UART_PORT.println("SCIENCE es done josh");
-        UART_PORT.print("elevatorTimerInUse: ");
-        UART_PORT.println(elevatorTimerInUse);
+    //stops elevator
+    analogWrite(ELEVATOR, 0);
+    previousElevatorState = 'n';
+    elevatorTimerInUse = false;
+    elevatorInUse = false;
+    //UART_PORT.println("SCIENCE es done josh");
+    UART_PORT.print("elevatorTimerInUse: ");
+    UART_PORT.println(elevatorTimerInUse);
   }
-  
+
   if (UART_PORT.available()) {
     String cmd = UART_PORT.readStringUntil('\n');
     cmd.trim();
@@ -281,7 +281,7 @@ void loop() {
         } else {
           drillSpeed = drill_speed(100);
         }
-        
+
         analogWrite(DRILL, analogVal);
         UART_PORT.println("SCIENCE drilltime done");
         drillTimer = millis();
@@ -376,7 +376,7 @@ void loop() {
       else if (cmd == "ego") {
         analogWrite(ELEVATOR, maxVelocity);
         elevatorInUse = true;
-        
+
         if (digitalRead(ELEVATOR_DIRECTION) == HIGH) {
           previousElevatorState = 'u';
         }
@@ -782,19 +782,19 @@ int drill_speed(int input_drill_speed) {
 }
 
 float elevator_feed(int input_elevator_feed) {
-  if (input_elevator_feed < 0) {
-    input_elevator_feed = 0;
+  if (input_elevator_feed < 13) { //The corrected duration formula equals 0 at x=12.11
+    input_elevator_feed = 13;    // to avoid a division by zero minimum value is set at 8
   }
   if (input_elevator_feed > 100) {
     input_elevator_feed = 100;
   }
 
-  double thing = FEED_CONSTANT * (1/(input_elevator_feed/100.));
+  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00732 * input_elevator_feed - 0.036));
 
-  UART_PORT.print("thing: ");
-  UART_PORT.println(thing);
-  
-  return thing;
+  UART_PORT.print("correctedDuration: ");
+  UART_PORT.println(correctedDuration);
+
+  return correctedDuration;
 }
 
 float photoChoice(int led) {
@@ -843,8 +843,8 @@ String getValue(String data, char separator, int index) {
 }
 
 /**
- * Returns the amount of times the target character appears in a given string
- */
+   Returns the amount of times the target character appears in a given string
+*/
 int getCount(String data, char target) {
   int ctr = 0, i = 0;
 
