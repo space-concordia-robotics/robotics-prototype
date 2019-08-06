@@ -147,7 +147,7 @@ $(document).ready(function () {
 
   $('#stop-all-motors').on('click', function(event){
     event.preventDefault()
-    sendArmCommand('stop')
+    sendRoverCommand('stop')
   })
 
   $('#activate-rover-btn').on('click', function (event) {
@@ -227,28 +227,6 @@ $(document).ready(function () {
         },
         serialType
       )
-    }
-  })
-
-  $('#m1-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 1 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = true
-        }
-      })
     }
   })
 
@@ -422,26 +400,7 @@ $(document).keydown(function (e) {
         break
 
       case 76: // 'l' --> list all commands
-        lightUp('button#list-all-rover-cmds')
-
-        $.ajax({
-          url: '/rover_drive',
-          type: 'POST',
-          data: {
-            cmd: 'l'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback:\n' + response.feedback)
-            if (!response.feedback.includes('limit exceeded')) {
-              disableRoverMotorsBtn()
-            }
-            if (response.error != 'None') {
-              appendToConsole('error:\n' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+        printCommandsList()
         lastCmdSent = new Date().getTime()
         break
       default:

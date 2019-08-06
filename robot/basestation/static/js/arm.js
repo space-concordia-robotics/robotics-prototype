@@ -197,15 +197,15 @@ $(document).ready(function () {
   $('[id$=-closed-loop-btn]').on('click', function (event) {
     event.preventDefault()
     num = this.id[1]
-    open = !$(this.id).is(':checked')
+    isOpen = !$(this.id).is(':checked')
     armReq = function(msgs) {
         if(msgs[0]) {
-          $(this.id)[0].checked = !open
+          $(this.id)[0].checked = !isOpen
         } else {
-          $(this.id)[0].checked = open
+          $(this.id)[0].checked = isOpen
         }
     }
-    sendArmRequest('motor ' + num + ' loop ' + open ? 'open' : 'closed', armReq)
+    sendArmRequest('motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
   })
 })
 
@@ -431,7 +431,7 @@ function gameLoop () {
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
-    // 'z' --> stop all motors
+    // 'q' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
