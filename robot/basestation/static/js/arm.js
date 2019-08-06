@@ -19,18 +19,17 @@ function printCommandsList () {
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
+function manualControl() {
+  var armsOFF = $('#ArmcontrolsOFF')[0]
+  var armsON = $('#ArmcontrolsON')[0]
 
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
+  if (armsOFF.style.display === 'none') {
+    armsOFF.style.display = 'block'
+    armsON.style.display = 'none'
   } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
+    armsOFF.style.display = 'none'
+    armsON.style.display = 'block'
+    armsON.style.borderRadius = '0'
   }
 }
 
@@ -93,7 +92,7 @@ $(document).ready(function () {
     sendArmCommand('stop')
   })
 
-  $('#reset-all-angles').on('click', function(event){
+  $('#reset-motor-angles').on('click', function(event){
     event.preventDefault()
     sendArmCommand('reset')
   })

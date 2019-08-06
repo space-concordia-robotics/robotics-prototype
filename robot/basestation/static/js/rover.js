@@ -50,27 +50,6 @@ function printCommandsList () {
   appendToConsole("'l': view key commands")
 }
 
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
-
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
-  } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
-  }
-}
-
-function toggleToManual () {
-  if (!$('#manual-control-btn')[0].checked) {
-    $('#manual-control-btn').click()
-  }
-}
-
 $(document).ready(function () {
   // camera servos
 
@@ -359,9 +338,6 @@ document.addEventListener('keydown', function (event) {
 $(document).keydown(function (e) {
   if (!$('#servo-val').is(':focus')) {
     switch (e.which) {
-      case 79:
-        lightUp('#stop-motors-btn')
-        break
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
         maxSoftThrottle += maxThrottleIncrement
@@ -371,24 +347,7 @@ $(document).keydown(function (e) {
         $('#max-throttle-speed').text(maxSoftThrottle)
         lastCmdSent = new Date().getTime()
         break
-      case 85: // 'u' --> decrease max throttle
-        lightUp('#max-throttle-decrease > button')
-        maxSoftThrottle -= maxThrottleIncrement
-        if (maxSoftThrottle < 0) {
-          maxSoftThrottle = 0
-        }
-        $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
-        break
-      case 75: // 'k' --> increase max steering
-        lightUp('#max-steering-increase > button')
-        maxSoftSteering += maxSteeringIncrement
-        if (maxSoftSteering > MAX_STEERING_SPEED) {
-          maxSoftSteering = MAX_STEERING_SPEED
-        }
-        $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
-        break
+
       case 74: // 'j' --> decrease max steering
         lightUp('#max-steering-decrease > button')
         maxSoftSteering -= maxSteeringIncrement
@@ -399,10 +358,35 @@ $(document).keydown(function (e) {
         lastCmdSent = new Date().getTime()
         break
 
+      case 75: // 'k' --> increase max steering
+        lightUp('#max-steering-increase > button')
+        maxSoftSteering += maxSteeringIncrement
+        if (maxSoftSteering > MAX_STEERING_SPEED) {
+          maxSoftSteering = MAX_STEERING_SPEED
+        }
+        $('#max-steering-speed').text(maxSoftSteering)
+        lastCmdSent = new Date().getTime()
+        break
+
       case 76: // 'l' --> list all commands
         printCommandsList()
         lastCmdSent = new Date().getTime()
         break
+
+      case 81: // 'q' --> stop
+        sendRoverCommand('stop')
+        break
+
+      case 85: // 'u' --> decrease max throttle
+        lightUp('#max-throttle-decrease > button')
+        maxSoftThrottle -= maxThrottleIncrement
+        if (maxSoftThrottle < 0) {
+          maxSoftThrottle = 0
+        }
+        $('#max-throttle-speed').text(maxSoftThrottle)
+        lastCmdSent = new Date().getTime()
+        break
+
       default:
         return // exit this handler for other keys
     }
