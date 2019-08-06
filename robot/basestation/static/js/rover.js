@@ -311,16 +311,6 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
-// rover stop command
-document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyO' && !$('#servo-val').is(':focus')) {
-    sendRoverRequest('stop', function (msgs) {
-      console.log('msgs', msgs)
-    })
-    lastCmdSent = new Date().getTime()
-  }
-})
-
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
   if (!$('#servo-val').is(':focus')) {
