@@ -198,11 +198,7 @@ textarea#rover-log {
 .imageWrapper {
   position: relative;
 }
-.overlayImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
+
 .overlayGpsDot {
   position: absolute;
   top: 0;
