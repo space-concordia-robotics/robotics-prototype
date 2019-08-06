@@ -45,7 +45,7 @@ sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'p': ping arm mcu")
+  appendToConsole("'p': ping rover mcu")
   appendToConsole("'q': emergency stop all motors")
   appendToConsole("'l': view key commands")
 }
@@ -274,7 +274,7 @@ $(document).ready(function () {
 })
 
 // KEYBOARD EVENTS
-// rover ping
+// odroid ping
 document.addEventListener('keydown', function (event) {
   if (
     event.ctrlKey &&
@@ -283,20 +283,7 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
     !$('#servo-val').is(':focus')
   ) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
+    pingDevice('Odroid')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -307,7 +294,7 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
     !$('#servo-val').is(':focus')
   ) {
-    sendRoverRequest('ping', function (msgs) {})
+    pingDevice('Rover')
     lastCmdSent = new Date().getTime()
   }
 })

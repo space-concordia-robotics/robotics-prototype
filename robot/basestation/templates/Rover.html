@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
 <div class="row">
- <div class="col-md-3">{% with component="Rover" %}{% include "Console.html" %}{% endwith %}</div>
+ <div class="col-md-3">{% with device="Rover" %}{% include "Console.html" %}{% endwith %}</div>
  <div class="col-md-3">
      {% include 'GPS.html' %}
      {% include 'RoverMotorTable.html' %}
@@ -17,6 +17,6 @@
   <div class="col-md-3">{% include 'Navigation.html' %}</div>
   <div class="col-md-4">{% include 'RoverMotorControls.html' %}</div>
   <div class="col-md-3">{% include 'CameraControls.html' %}</div>
-  <div class="col-md-2">{% with component="Rover" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
+  <div class="col-md-2">{% with device="Rover" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}

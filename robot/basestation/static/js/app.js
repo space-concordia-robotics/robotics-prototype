@@ -553,38 +553,39 @@ $(document).ready(() => {
   })
 })
 
-function pingMCU(component) {
+function pingDevice(device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-    switch(component)
+    switch(device)
     {
-        case "Arm" :
-          sendArmRequest('ping', function (msgs) {})
-          break;
-        case "Rover" :
-          sendRoverRequest('ping', function (msgs) {})
-          break;
+      case "Arm" :
+        sendArmRequest('ping', function (msgs) {})
+        break;
+      case "Rover" :
+        sendRoverRequest('ping', function (msgs) {})
+        break;
+      case "Odroid":
+      default:
+        pingOdroid()
+        break;
     }
-
     lastCmdSent = new Date().getTime()
   }
 }
 
 function pingOdroid() {
-  if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
+  appendToConsole('pinging odroid')
+  $.ajax('/ping_rover', {
+    success: function (data) {
+      appendToConsole(data.ping_msg)
+      if (!data.ros_msg.includes('Response')) {
+        appendToConsole('No response from ROS ping_acknowledgment service')
+      } else {
+        appendToConsole(data.ros_msg)
       }
-    })
-    lastCmdSent = new Date().getTime()
-  }
+    },
+    error: function () {
+      console.log('An error occured')
+    }
+  })
+  lastCmdSent = new Date().getTime()
 }

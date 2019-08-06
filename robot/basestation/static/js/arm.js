@@ -43,20 +43,7 @@ $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      appendToConsole('pinging odroid')
-      $.ajax('/ping_rover', {
-        success: function (data) {
-          appendToConsole(data.ping_msg)
-          if (!data.ros_msg.includes('Response')) {
-            appendToConsole('No response from ROS ping_acknowledgment service')
-          } else {
-            appendToConsole(data.ros_msg)
-          }
-        },
-        error: function () {
-          console.log('An error occured')
-        }
-      })
+      pingDevice("Odroid")
       lastCmdSent = new Date().getTime()
     }
   })
@@ -217,20 +204,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
+    pingDevice("Odroid")
     lastCmdSent = new Date().getTime()
   }
 })
@@ -241,7 +215,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    sendArmRequest('ping', function (msgs) {})
+    pingDevice('Arm')
     lastCmdSent = new Date().getTime()
   }
 })

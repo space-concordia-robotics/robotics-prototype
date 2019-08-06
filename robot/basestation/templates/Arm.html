@@ -6,12 +6,12 @@
 {% endblock %}
 {% block content %}
 <div class="row">
- <div class="col-md-3">{% with component="Arm" %}{% include "Console.html" %}{% endwith %}</div>
+ <div class="col-md-3">{% with device="Arm" %}{% include "Console.html" %}{% endwith %}</div>
  <div class="col-md-3">{% include 'ArmPosition.html' %}{% include 'ArmMotorTable.html' %}</div>
  <div class="col-md-6">{% include 'CameraFeed.html' %}</div>
 </div>
 <div class="row">
   <div class="col-md-9">{% include 'ControlPanel.html' %}</div>
-  <div class="col-md-3">{% with component="Arm" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
+  <div class="col-md-3">{% with device="Arm" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}
