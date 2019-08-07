@@ -19,18 +19,17 @@ function printCommandsList () {
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
+function manualControl() {
+  var armsOFF = $('#ArmcontrolsOFF')[0]
+  var armsON = $('#ArmcontrolsON')[0]
 
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
+  if (armsOFF.style.display === 'none') {
+    armsOFF.style.display = 'block'
+    armsON.style.display = 'none'
   } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
+    armsOFF.style.display = 'none'
+    armsON.style.display = 'block'
+    armsON.style.borderRadius = '0'
   }
 }
 
@@ -42,29 +41,9 @@ function toggleToManual () {
 
 $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      appendToConsole('pinging odroid')
-      $.ajax('/ping_rover', {
-        success: function (data) {
-          appendToConsole(data.ping_msg)
-          if (!data.ros_msg.includes('Response')) {
-            appendToConsole('No response from ROS ping_acknowledgment service')
-          } else {
-            appendToConsole(data.ros_msg)
-          }
-        },
-        error: function () {
-          console.log('An error occured')
-        }
-      })
-      lastCmdSent = new Date().getTime()
-    }
-  })
-
-  $('#ping-arm-mcu').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendArmRequest('ping', function (msgs) {})
+      pingDevice("Odroid")
       lastCmdSent = new Date().getTime()
     }
   })
@@ -88,6 +67,21 @@ $(document).ready(function () {
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('home') // REIMPLEMENT AS AN ACTION
+  })
+
+  $('#list-all-cmds').on('click', function(event){
+    event.preventDefault()
+    printCommandsList()
+  })
+
+  $('#stop-all-motors').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('stop')
+  })
+
+  $('#reset-motor-angles').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('reset')
   })
 
   $('#reboot-button').on('click', function (event) {
@@ -186,89 +180,18 @@ $(document).ready(function () {
     }
   })
 
-  $('#m1-closed-loop-btn').on('click', function (event) {
+  $('[id$=-closed-loop-btn]').on('click', function (event) {
     event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = true
+    num = this.id[1]
+    isOpen = !$(this.id).is(':checked')
+    armReq = function(msgs) {
+        if(msgs[0]) {
+          $(this.id)[0].checked = !isOpen
         } else {
-          $('#m1-closed-loop-btn')[0].checked = false
+          $(this.id)[0].checked = isOpen
         }
-      })
-    } else {
-      sendArmRequest('motor 1 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = true
-        }
-      })
     }
-  })
-  $('#m2-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m2-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 2 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 2 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m3-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m3-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 3 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 3 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m4-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m4-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 4 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 4 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
+    sendArmRequest('motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
   })
 })
 
@@ -281,20 +204,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
+    pingDevice("Odroid")
     lastCmdSent = new Date().getTime()
   }
 })
@@ -305,7 +215,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    sendArmRequest('ping', function (msgs) {})
+    pingDevice('Arm')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -316,7 +226,6 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyL' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
     lastCmdSent = new Date().getTime()
   }
@@ -495,9 +404,8 @@ function gameLoop () {
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
-    // 'z' --> stop all motors
+    // 'q' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
-      $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
     } else if (toBudge) {
@@ -513,7 +421,6 @@ function gameLoop () {
 
     // 'o' --> reset angle values
     if (!$serialCmdInput.is(':focus') && keyState[79]) {
-      $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('reset')
       lastCmdSent = new Date().getTime()
     }
@@ -639,24 +546,6 @@ document.addEventListener('keyup', function (event) {
 })
 
 // EXTRA CONTROLS
-document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyQ') {
-    $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyO') {
-    $('button#reset-motor-angles').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyL') {
-    $('button#list-all-cmds').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')

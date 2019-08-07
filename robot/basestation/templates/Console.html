@@ -1,0 +1,12 @@
+<h5 class="container-header">Log Console</h5>
+<div class="form-group">
+    <textarea id="write-to-log" rows="8" readonly></textarea>
+    <p hidden id="last-odroid-rx"></p>
+    <br>
+    <div class="btn-group" role="group" id="logs-btn">
+        <button type="button" class="btn fa fa-folder-open fa-sm btn-secondary" data-toggle="tooltip" title="Open Logs"></button>
+        <button type="button" class="btn fa fa-eraser fa-sm btn-secondary" data-toggle="tooltip" title="Clear Logs" onclick="clearLogConsole()"></button>
+        <button type="button" class="btn fa fa-feed fa-sm btn-secondary" data-toggle="tooltip" title="Ping Odroid" onclick="pingOdroid()">Odroid</button>
+        <button type="button" class="btn fa fa-feed fa-sm btn-secondary" data-toggle="tooltip" title="Ping MCU" onclick="pingDevice('{{device}}')">MCU</button>
+    </div>
+</div>

@@ -552,3 +552,40 @@ $(document).ready(() => {
     }
   })
 })
+
+function pingDevice(device) {
+  if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+    switch(device)
+    {
+      case "Arm" :
+        sendArmRequest('ping', function (msgs) {})
+        break;
+      case "Rover" :
+        sendRoverRequest('ping', function (msgs) {})
+        break;
+      case "Odroid":
+      default:
+        pingOdroid()
+        break;
+    }
+    lastCmdSent = new Date().getTime()
+  }
+}
+
+function pingOdroid() {
+  appendToConsole('pinging odroid')
+  $.ajax('/ping_rover', {
+    success: function (data) {
+      appendToConsole(data.ping_msg)
+      if (!data.ros_msg.includes('Response')) {
+        appendToConsole('No response from ROS ping_acknowledgment service')
+      } else {
+        appendToConsole(data.ros_msg)
+      }
+    },
+    error: function () {
+      console.log('An error occured')
+    }
+  })
+  lastCmdSent = new Date().getTime()
+}

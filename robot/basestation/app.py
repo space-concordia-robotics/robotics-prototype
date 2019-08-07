@@ -84,7 +84,6 @@ def index():
     """Current landing page, the arm panel."""
     return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
 
-
 @app.route("/rover")
 def rover():
     """Rover control panel."""
