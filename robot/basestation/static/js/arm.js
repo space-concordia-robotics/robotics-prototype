@@ -162,9 +162,10 @@ $(document).ready(function () {
       parseFloat(multiplier) <= maxMultiplier
     ) {
       let cmd = 'armspeed ' + multiplier
-      sendArmRequest(cmd, function (msgs) {})
+      sendArmRequest(cmd, printErrToConsole)
     }
   })
+
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
     if (e.keyCode == 13) {
       // enter key
@@ -175,7 +176,7 @@ $(document).ready(function () {
         parseFloat(multiplier) <= maxMultiplier
       ) {
         let cmd = 'armspeed ' + multiplier
-        sendArmRequest(cmd, function (msgs) {})
+        sendArmRequest(cmd, printErrToConsole)
       }
     }
   })

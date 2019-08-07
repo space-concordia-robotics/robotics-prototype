@@ -21,6 +21,7 @@ $(document).ready(() => {
               1,
               '#front-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('front camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -41,6 +42,7 @@ $(document).ready(() => {
               0,
               '#front-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('front camera OFF msgs:', msgs)
                 if (msgs[1].includes('Stopped camera_stream')) {
                   // succeeded to close stream
@@ -68,6 +70,7 @@ $(document).ready(() => {
               1,
               '#rear-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('rear camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -87,6 +90,7 @@ $(document).ready(() => {
               0,
               '#rear-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 if (msgs[1].includes('Stopped camera_stream')) {
                   console.log('rear camera OFF msgs:', msgs)
 
@@ -132,6 +136,7 @@ $(document).ready(() => {
               1,
               '#arm-science-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('arm/science camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -151,6 +156,8 @@ $(document).ready(() => {
               0,
               '#arm-science-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
+                
                 if (msgs[1].includes('Stopped camera_stream')) {
                   console.log('arm science camera OFF msgs:', msgs)
 

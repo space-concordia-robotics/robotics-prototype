@@ -1,3 +1,5 @@
+REQUEST_TIMEOUT = 3000
+
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
     url: 'ws://localhost:9090'
@@ -397,7 +399,12 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
+  timer = setTimeout(function() {
+      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+  }, REQUEST_TIMEOUT)
+
   task_handler_client.callService(request, function (result) {
+    timer.clearTimeout()
     let latency = millisSince(sentTime)
     console.log('result:', result)
     let msg = result.response
@@ -578,8 +585,8 @@ function sendArmRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after 3 seconds"])
-  }, 3000)
+      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+  }, REQUEST_TIMEOUT)
 
   arm_request_client.callService(request, function (result) {
 
@@ -610,8 +617,8 @@ function sendScienceRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after 3 seconds"])
-  }, 3000)
+      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+  }, REQUEST_TIMEOUT)
 
   science_request_client.callService(request, function (result) {
 
@@ -650,8 +657,9 @@ function sendRoverRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after 3 seconds"])
-  }, 3000)
+      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+  }, REQUEST_TIMEOUT)
+
 
   rover_request_client.callService(request, function (result) {
 
