@@ -553,15 +553,21 @@ $(document).ready(() => {
   })
 })
 
+function printErrToConsole(msg)
+{
+  if(!msg[0])
+    appendToConsole(msg[1])
+}
+
 function pingDevice(device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
     switch(device)
     {
       case "Arm" :
-        sendArmRequest('ping', function (msgs) {})
+        sendArmRequest('ping', printErrToConsole)
         break;
       case "Rover" :
-        sendRoverRequest('ping', function (msgs) {})
+        sendRoverRequest('ping', printErrToConsole)
         break;
       case "Odroid":
       default:

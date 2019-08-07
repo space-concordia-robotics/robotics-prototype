@@ -577,7 +577,13 @@ function sendArmRequest (command, callback) {
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
+  timer = setTimeout(function() {
+      callback([false, "Timeout after 3 seconds"])
+  }, 3000)
+
   arm_request_client.callService(request, function (result) {
+
+    timer.clearTimeout()
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -603,7 +609,13 @@ function sendScienceRequest (command, callback) {
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
+  timer = setTimeout(function() {
+      callback([false, "Timeout after 3 seconds"])
+  }, 3000)
+
   science_request_client.callService(request, function (result) {
+
+    timer.clearTimeout()
     let latency = millisSince(sentTime)
     console.log('result', result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -637,7 +649,13 @@ function sendRoverRequest (command, callback) {
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
+  timer = setTimeout(function() {
+      callback([false, "Timeout after 3 seconds"])
+  }, 3000)
+
   rover_request_client.callService(request, function (result) {
+
+    timer.clearTimeout()
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
