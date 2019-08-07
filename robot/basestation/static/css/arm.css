@@ -158,3 +158,7 @@ input#serial-cmd-input {
     margin: 4px;
     width: 100%;
 }
+
+.control-panel {
+  width:500px;
+}
