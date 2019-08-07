@@ -789,7 +789,8 @@ float elevator_feed(int input_elevator_feed) {
     input_elevator_feed = 100;
   }
 
-  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00732 * input_elevator_feed - 0.036));
+//  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00644 * input_elevator_feed));
+  double correctedDuration = FEED_CONSTANT * (1/(-0.00000130911*pow(input_elevator_feed,3)+0.000220708*pow(input_elevator_feed,2)+0.0010203*input_elevator_feed));
 
   UART_PORT.print("correctedDuration: ");
   UART_PORT.println(correctedDuration);
