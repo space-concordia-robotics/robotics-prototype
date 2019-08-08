@@ -575,7 +575,8 @@ function sendArmCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
-function sendArmRequest (command, callback) {
+
+function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
@@ -583,46 +584,28 @@ function sendArmRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
-  }, REQUEST_TIMEOUT)
+      callback([false, command + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
 
-  arm_request_client.callService(request, function (result) {
+  var requestClient;
+  switch(device):
+  {
+    case "Arm":
+      requestClient = arm_request_client
+    break
+    case "Rover":
+      requestClient = rover_request_client
+    break
+    case "Science":
+      requestClient = science_request_client
+    break
+  }
+
+  requestClient.callService(request, function (result) {
 
     timer.clearTimeout()
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
-    } else {
-      appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
-      )
-      // return true
-      callback([true, msg])
-    }
-  })
-}
-
-function sendScienceRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
-
-  timer = setTimeout(function() {
-      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
-  }, REQUEST_TIMEOUT)
-
-  science_request_client.callService(request, function (result) {
-
-    timer.clearTimeout()
-    let latency = millisSince(sentTime)
-    console.log('result', result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
@@ -645,39 +628,6 @@ function sendRoverCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
   // arm_command_publisher.publish(command)
-}
-
-function sendRoverRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
-
-  timer = setTimeout(function() {
-      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
-  }, REQUEST_TIMEOUT)
-
-
-  rover_request_client.callService(request, function (result) {
-
-    timer.clearTimeout()
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
-    } else {
-      appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
-      )
-      // return true
-      callback([true, msg])
-    }
-  })
 }
 
 function initNavigationPanel () {

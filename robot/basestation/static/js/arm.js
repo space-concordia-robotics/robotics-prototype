@@ -115,7 +115,7 @@ $(document).ready(function () {
           1,
           '#toggle-arm-listener-btn',
           function (msgs) {
-            console.log(msgs)
+            printErrToConsole(msgs)
             if (msgs[0]) {
               $('#toggle-arm-listener-btn')[0].checked = true
             } else {
@@ -135,7 +135,7 @@ $(document).ready(function () {
       requestTask('arm_listener', 0, '#toggle-arm-listener-btn', function (
         msgs
       ) {
-        console.log('msgs[0]', msgs[0])
+        printErrToConsole(msgs)
         if (msgs.length == 2) {
           console.log('msgs[1]', msgs[1])
           if (msgs[1].includes('already running')) {

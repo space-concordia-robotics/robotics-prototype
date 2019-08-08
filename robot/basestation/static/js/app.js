@@ -157,7 +157,7 @@ $(document).ready(() => {
               '#arm-science-camera-stream-btn',
               function (msgs) {
                 printErrToConsole(msgs)
-                
+
                 if (msgs[1].includes('Stopped camera_stream')) {
                   console.log('arm science camera OFF msgs:', msgs)
 
@@ -395,7 +395,7 @@ $(document).ready(() => {
                 $('#toggle-rover-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendRoverRequest('ping', function (msgs) {})
+                sendRequest("Rover", 'ping', function (msgs) {})
               } else {
                 $('#toggle-rover-listener-btn')[0].checked = false
               }
@@ -434,7 +434,7 @@ $(document).ready(() => {
                 $('#toggle-arm-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendArmRequest('ping', function (msgs) {})
+                sendRequest("Arm",'ping', function (msgs) {})
               } else {
                 $('#toggle-arm-listener-btn')[0].checked = false
               }
@@ -473,7 +473,7 @@ $(document).ready(() => {
                 $('#science-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendScienceRequest('ping', function (msgs) {})
+                sendRequest("Science", 'ping', function (msgs) {})
               } else {
                 $('#science-listener-btn')[0].checked = false
               }
@@ -571,10 +571,10 @@ function pingDevice(device) {
     switch(device)
     {
       case "Arm" :
-        sendArmRequest('ping', printErrToConsole)
+        sendRequest("Arm", 'ping', printErrToConsole)
         break;
       case "Rover" :
-        sendRoverRequest('ping', printErrToConsole)
+        sendRequest("Rover", 'ping', printErrToConsole)
         break;
       case "Odroid":
       default:
