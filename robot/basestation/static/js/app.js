@@ -374,7 +374,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/rover') {
           console.log('Activating Rover Listener Node')
@@ -413,7 +413,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/') {
           console.log('Activating Arm Listener Node')
@@ -452,7 +452,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/science') {
           console.log('Activating Science Listener Node')
@@ -491,7 +491,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
       })
     }
   })

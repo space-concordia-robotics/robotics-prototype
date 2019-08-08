@@ -135,7 +135,7 @@ $(document).ready(function () {
     if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#activate-rover-btn').is(':checked')) {
-      sendRoverRequest('activate', function (msgs) {
+      sendRequest("Rover", 'activate', function (msgs) {
         printErrToConsole(msgs)
         if (msgs[0]) {
           $('#activate-rover-btn')[0].checked = true
@@ -143,7 +143,7 @@ $(document).ready(function () {
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendRoverRequest('deactivate', function (msgs) {
+      sendRequest("Rover", 'deactivate', function (msgs) {
         printErrToConsole(msgs)
         if (msgs[0]) {
           $('#activate-rover-btn')[0].checked = false
