@@ -162,7 +162,7 @@ $(document).ready(function () {
       parseFloat(multiplier) <= maxMultiplier
     ) {
       let cmd = 'armspeed ' + multiplier
-      sendArmRequest(cmd, printErrToConsole)
+      sendRequest("Arm", cmd, printErrToConsole)
     }
   })
 
@@ -176,7 +176,7 @@ $(document).ready(function () {
         parseFloat(multiplier) <= maxMultiplier
       ) {
         let cmd = 'armspeed ' + multiplier
-        sendArmRequest(cmd, printErrToConsole)
+        sendRequest("Arm", cmd, printErrToConsole)
       }
     }
   })
@@ -192,7 +192,7 @@ $(document).ready(function () {
           $(this.id)[0].checked = isOpen
         }
     }
-    sendArmRequest('motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
+    sendRequest("Arm", 'motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
   })
 })
 

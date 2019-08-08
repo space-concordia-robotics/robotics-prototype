@@ -377,7 +377,7 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
+function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', timeout = REQUEST_TIMEOUT) {
   var request
   if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
@@ -400,8 +400,8 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   }
 
   timer = setTimeout(function() {
-      callback([false, reqTask + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
-  }, REQUEST_TIMEOUT)
+      callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
 
   task_handler_client.callService(request, function (result) {
     timer.clearTimeout()
@@ -503,7 +503,7 @@ function checkTaskStatuses () {
       }
     })
 
-    sendRoverRequest('who', function (msgs) {
+    sendRequest("Rover", 'who', function (msgs) {
       printErrToConsole(msgs)
       if (msgs[1].includes('Happy')) {
         $('#activate-rover-btn')[0].checked = true
@@ -588,7 +588,7 @@ function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
   }, timeout)
 
   var requestClient;
-  switch(device):
+  switch(device)
   {
     case "Arm":
       requestClient = arm_request_client
