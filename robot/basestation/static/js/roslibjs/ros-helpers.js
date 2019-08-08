@@ -400,7 +400,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
   }
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+      callback([false, reqTask + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
   }, REQUEST_TIMEOUT)
 
   task_handler_client.callService(request, function (result) {
@@ -448,7 +448,7 @@ function checkTaskStatuses () {
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#toggle-arm-listener-btn')[0].checked = false
@@ -461,7 +461,7 @@ function checkTaskStatuses () {
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
       msgs
     ) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (
           msgs[1].includes('running') &&
@@ -492,10 +492,8 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/rover') {
     // check arm listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
-      msgs
-    ) {
-      appendToConsole(msgs)
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#toggle-rover-listener-btn')[0].checked = false
@@ -506,7 +504,7 @@ function checkTaskStatuses () {
     })
 
     sendRoverRequest('who', function (msgs) {
-      console.log('msgs', msgs)
+      printErrToConsole(msgs)
       if (msgs[1].includes('Happy')) {
         $('#activate-rover-btn')[0].checked = true
       } else {
@@ -518,7 +516,7 @@ function checkTaskStatuses () {
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
       msgs
     ) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (
           msgs[1].includes('running') &&
@@ -550,7 +548,7 @@ function checkTaskStatuses () {
   } else if (window.location.pathname == '/science') {
     console.log('science page')
     requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
-      appendToConsole('msgs', msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#science-listener-btn')[0].checked = false
@@ -585,7 +583,7 @@ function sendArmRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
   }, REQUEST_TIMEOUT)
 
   arm_request_client.callService(request, function (result) {
@@ -617,7 +615,7 @@ function sendScienceRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
   }, REQUEST_TIMEOUT)
 
   science_request_client.callService(request, function (result) {
@@ -657,7 +655,7 @@ function sendRoverRequest (command, callback) {
   appendToConsole('Sending request to execute command "' + command + '"')
 
   timer = setTimeout(function() {
-      callback([false, "Timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
+      callback([false, command + " timeout after " + REQUEST_TIMEOUT/1000 + " seconds"])
   }, REQUEST_TIMEOUT)
 
 
