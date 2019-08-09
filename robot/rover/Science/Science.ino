@@ -15,7 +15,7 @@
 #define SERVO_MAX_CW   1250
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
-#define FEED_CONSTANT  3.25 // in seconds/inch
+#define FEED_CONSTANT  3.12 // in seconds/inch
 //Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
@@ -319,7 +319,7 @@ void loop() {
         drillSpeed = drillSpeedPercent = 0;
         UART_PORT.println("SCIENCE ds done");
       }
-      if (cmd.startsWith("elevatorfeed") && (cmd.indexOf(" ") > 0)) {
+      if (cmd.startsWith("ef") && (cmd.indexOf(" ") > 0)) {
         //turns elevator at desired feed
         // needs input "elevatorfeed 100"
         elevatorFeedPercent = getValue(cmd, ' ', 1).toInt();
@@ -782,16 +782,17 @@ int drill_speed(int input_drill_speed) {
 }
 
 float elevator_feed(int input_elevator_feed) {
-  if (input_elevator_feed < 13) { //The corrected duration formula equals 0 at x=12.11
-    input_elevator_feed = 13;    // to avoid a division by zero minimum value is set at 8
+  if (input_elevator_feed < 15) { //Below 15% the equation is not reliable
+    input_elevator_feed = 0;     //and the motor has a tendancy to stall
   }
   if (input_elevator_feed > 100) {
     input_elevator_feed = 100;
   }
 
-//  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00644 * input_elevator_feed));
-  double correctedDuration = FEED_CONSTANT * (1/(-0.00000130911*pow(input_elevator_feed,3)+0.000220708*pow(input_elevator_feed,2)+0.0010203*input_elevator_feed));
-
+  //  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00644 * input_elevator_feed));
+  //  double correctedDuration = FEED_CONSTANT * (1/(-0.00000130911*pow(input_elevator_feed,3)+0.000220708*pow(input_elevator_feed,2)+0.0010203*input_elevator_feed));
+   double correctedDuration = FEED_CONSTANT * (3/(-0.00000010682*pow(input_elevator_feed,4)+0.0000215*pow(input_elevator_feed,3)-0.00134*pow(input_elevator_feed,2)+0.06*input_elevator_feed-0.418));
+ // double correctedDuration = FEED_CONSTANT;
   UART_PORT.print("correctedDuration: ");
   UART_PORT.println(correctedDuration);
 
