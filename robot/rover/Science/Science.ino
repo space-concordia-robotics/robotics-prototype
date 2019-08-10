@@ -46,9 +46,9 @@
 #define LED1               33
 #define LED2               34
 
-#define DRILL              44 //PWM // 36 for TEENSY
+#define DRILL              36 //PWM // 36 for TEENSY, 44 for Arduino Mega
 #define DRILL_DIRECTION    35
-#define ELEVATOR           45 //PWM // 38 FOR TEENSY
+#define ELEVATOR           38 //PWM // 38 FOR TEENSY, 45 for Arduino Mega
 #define ELEVATOR_DIRECTION 37
 
 // debouncing variables
@@ -108,7 +108,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   // THIS MESSES UP PWM PINS 45/44 AND POSSIBLY OTHERS
-  //table.attach(TABLE_PIN);
+  table.attach(TABLE_PIN);
   pinMode(DRILL, OUTPUT);
   pinMode(DRILL_DIRECTION, OUTPUT);
   analogWrite(DRILL, 35);
@@ -791,8 +791,8 @@ float elevator_feed(int input_elevator_feed) {
 
   //  double correctedDuration = FEED_CONSTANT * (1 / ( 0.0000356 * pow(input_elevator_feed,2) + 0.00644 * input_elevator_feed));
   //  double correctedDuration = FEED_CONSTANT * (1/(-0.00000130911*pow(input_elevator_feed,3)+0.000220708*pow(input_elevator_feed,2)+0.0010203*input_elevator_feed));
-   double correctedDuration = FEED_CONSTANT * (3/(-0.00000010682*pow(input_elevator_feed,4)+0.0000215*pow(input_elevator_feed,3)-0.00134*pow(input_elevator_feed,2)+0.06*input_elevator_feed-0.418));
- // double correctedDuration = FEED_CONSTANT;
+  double correctedDuration = FEED_CONSTANT * (3 / (-0.00000010682 * pow(input_elevator_feed, 4) + 0.0000215 * pow(input_elevator_feed, 3) - 0.00134 * pow(input_elevator_feed, 2) + 0.06 * input_elevator_feed - 0.418));
+  // double correctedDuration = FEED_CONSTANT;
   UART_PORT.print("correctedDuration: ");
   UART_PORT.println(correctedDuration);
 
