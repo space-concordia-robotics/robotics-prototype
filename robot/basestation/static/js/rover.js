@@ -4,7 +4,7 @@ const CONTINUOUS_SERVO_PERIOD = 100
 const POSITION_SERVO_PERIOD = 60
 const SERVO_STOP = 93 // tested with front servos
 const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
-const MAX_CONTINUOUS_SERVO_OFFSET = 20//30
+const MAX_CONTINUOUS_SERVO_OFFSET = 20
 
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
@@ -12,36 +12,36 @@ const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
-var lastCmdSent = 0
-var lastFrontPosServoCmd = 0
-var lastFrontContServoCmd = 0
-var lastRearPosServoCmd = 0
-var lastRearContServoCmd = 0
+let lastCmdSent = 0
+let lastFrontPosServoCmd = 0
+let lastFrontContServoCmd = 0
+let lastRearPosServoCmd = 0
+let lastRearContServoCmd = 0
 
-var maxSoftThrottle = 25
-var maxSoftSteering = 39
-var maxFrontTiltPwm = 130
-var minFrontTiltPwm = 50
-var maxRearTiltPwm = 130
-var minRearTiltPwm = 50
+let maxSoftThrottle = 25
+let maxSoftSteering = 39
+let maxFrontTiltPwm = 130
+let minFrontTiltPwm = 50
+let maxRearTiltPwm = 115
+let minRearTiltPwm = 0
 
-var throttle = 0 // how fast are the wheels turning in general
-var steering = 0 // values further from 0 mean sharper turning radius
-var spinning = 0 // for rotating around its centre
-var frontTiltPwm = 90
-var rearTiltPwm = 90
-var frontPanPwm = SERVO_STOP
-var rearPanPwm = SERVO_STOP
+let throttle = 0 // how fast are the wheels turning in general
+let steering = 0 // values further from 0 mean sharper turning radius
+let spinning = 0 // for rotating around its centre
+let frontTiltPwm = 90
+let rearTiltPwm = 35
+let frontPanPwm = SERVO_STOP
+let rearPanPwm = SERVO_STOP
 
-var throttleIncrement = 1
-var steeringIncrement = 1
-var positionServoIncrement = 1
-var continuousServoIncrement = 2
-var continuousServoOffset = 20
+let throttleIncrement = 1
+let steeringIncrement = 1
+let positionServoIncrement = 1
+let continuousServoIncrement = 2
+let continuousServoOffset = 20
 
-var maxThrottleIncrement = 1
-var maxSteeringIncrement = 1
-var movementCommanded = false
+let maxThrottleIncrement = 1
+let maxSteeringIncrement = 1
+let movementCommanded = false
 
 sentZero = true // used to prevent the gui from sending wheel commands
 sentFrontServoStop = true // used to prevent the gui from sending servo commands
@@ -58,12 +58,6 @@ $(document).ready(function () {
   // camera servos
 
   // init camera servos
-  //TODO: this should only happen once the rover is actually connected
-  // honestly this has to happen in the mcu code anyway, not the gui
-  let frontContServo = '!' + SERVO_STOP.toString()
-  let rearContServo = '#' + SERVO_STOP.toString()
-  sendRoverCommand(frontContServo)
-  sendRoverCommand(rearContServo)
   /*
   // servo name: "Front camera positional tilt base"
   $('#camera-front-lpan-btn').click(function () {
