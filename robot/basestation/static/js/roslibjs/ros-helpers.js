@@ -315,6 +315,22 @@ function initRosWeb () {
     ros: ros,
     name: 'goal_longitude'
   })
+
+  /* PDS commands */
+  // setup a subscriber for the rover_goal topic
+  wheel_motor_currents_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'wheel_motor_currents',
+    messageType: 'std_msgs/Float32MultiArray'
+  })
+  wheel_motor_currents_listener.subscribe(function (message) {
+    $('#right-front-current').text(parseFloat(message.data[0]))
+    $('#right-mid-current').text(parseFloat(message.data[1]))
+    $('#right-rear-current').text(parseFloat(message.data[2]))
+    $('#left-front-current').text(parseFloat(message.data[3]))
+    $('#left-mid-current').text(parseFloat(message.data[4]))
+    $('#left-rear-current').text(parseFloat(message.data[5]))
+  })
 }
 
 initRosWeb()
