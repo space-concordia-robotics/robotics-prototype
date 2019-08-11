@@ -43,15 +43,6 @@ function initRosWeb () {
     name: 'task_handler',
     serviceType: 'HandleTask'
   })
-  // setup a subscriber for the battery_voltage topic
-  battery_voltage_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
-  })
-  battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
-  })
 
   /* arm controls */
 
@@ -317,7 +308,27 @@ function initRosWeb () {
   })
 
   /* PDS commands */
-  // setup a subscriber for the rover_goal topic
+  // setup a subscriber for the battery_voltage topic
+  battery_voltage_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_voltage',
+    messageType: 'std_msgs/Float32'
+  })
+  battery_voltage_listener.subscribe(function (message) {
+    $('#battery-voltage').text(message.data.toFixed(2))
+  })
+  // setup a subscriber for the battery_temps topic
+  battery_temps_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_temps',
+    messageType: 'std_msgs/Float32MultiArray'
+  })
+  battery_temps_listener.subscribe(function (message) {
+    $('#battery-temp-1').text(message.data[0].toFixed(2))
+    $('#battery-temp-2').text(message.data[0].toFixed(2))
+    $('#battery-temp-3').text(message.data[0].toFixed(2))
+  })
+  // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'wheel_motor_currents',

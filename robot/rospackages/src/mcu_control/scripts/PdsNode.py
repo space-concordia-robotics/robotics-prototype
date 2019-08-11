@@ -197,7 +197,7 @@ if __name__ == '__main__':
     rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
     currentPub = rospy.Publisher(current_pub_topic, Float32MultiArray, queue_size=10)
 
-    temp_pub_topic = '/battery_temp'
+    temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
     tempPub = rospy.Publisher(current_pub_topic, Float32MultiArray, queue_size=10)
 
