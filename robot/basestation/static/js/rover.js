@@ -20,15 +20,15 @@ let lastRearContServoCmd = 0
 
 let maxSoftThrottle = 25
 let maxSoftSteering = 39
-let maxFrontTiltPwm = 130
-let minFrontTiltPwm = 50
+let maxFrontTiltPwm = 90
+let minFrontTiltPwm = 0
 let maxRearTiltPwm = 115
 let minRearTiltPwm = 0
 
 let throttle = 0 // how fast are the wheels turning in general
 let steering = 0 // values further from 0 mean sharper turning radius
 let spinning = 0 // for rotating around its centre
-let frontTiltPwm = 90
+let frontTiltPwm = 60
 let rearTiltPwm = 35
 let frontPanPwm = SERVO_STOP
 let rearPanPwm = SERVO_STOP
