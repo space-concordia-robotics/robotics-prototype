@@ -334,7 +334,7 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
     )
   }
 
-  timer = setTimeout(function() {
+  let timer = setTimeout(function() {
       callback([false, elemID + " timeout after " + timeout/1000 + " seconds"])
   }, timeout)
 
@@ -404,7 +404,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', time
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
-  timer = setTimeout(function() {
+  let timer = setTimeout(function() {
       callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
   }, timeout)
 
@@ -588,7 +588,7 @@ function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  timer = setTimeout(function() {
+  let timer = setTimeout(function() {
       callback([false, command + " timeout after " + timeout/1000 + " seconds"])
   }, timeout)
 
