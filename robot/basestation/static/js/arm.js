@@ -1,3 +1,4 @@
+"use strict";
 // @TODO: fix implementation of odroid rx pub/sub to work on event triggers
 // rather than through polling
 // update odroid rx data every second

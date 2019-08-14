@@ -1,3 +1,4 @@
+"use strict";
 // Console Log
 const logConsole = '#write-to-log'
 const serialCmd = '#serial-cmd-input'

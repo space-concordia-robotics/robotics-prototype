@@ -1,7 +1,172 @@
+"use strict";
+let ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090'
+})
+// General Controls
+// setup a client for the ping service
+let ping_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'ping_response',
+  serviceType: 'PingResponse'
+})
+
+// setup a client for the mux_select service
+let mux_select_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'mux_select',
+  serviceType: 'SelectMux'
+})
+// setup a client for the serial_cmd service
+let serial_cmd_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'serial_cmd',
+  serviceType: 'SerialCmd'
+})
+// setup a client for the task_handler service
+let task_handler_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'task_handler',
+  serviceType: 'HandleTask'
+})
+// setup a subscriber for the battery_voltage topic
+let battery_voltage_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'battery_voltage',
+  messageType: 'std_msgs/Float32'
+})
+
+// Arm Controls
+// setup a client for the arm_request service
+let arm_request_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'arm_request',
+  serviceType: 'ArmRequest'
+})
+// setup a publisher for the arm_command topic
+let arm_command_publisher = new ROSLIB.Topic({
+  ros: ros,
+  name: 'arm_command',
+  messageType: 'std_msgs/String'
+})
+
+// setup a publisher for the ik_command topic
+let ik_command_publisher = new ROSLIB.Topic({
+  ros: ros,
+  name: 'ik_command',
+  messageType: 'IkCommand'
+})
+
+let gripper_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'gripper_position',
+  messageType: 'geometry_msgs/Point'
+})
+
+let arm_joint_states_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'arm_joint_states',
+  messageType: 'sensor_msgs/JointState'
+})
+
+let arm_feedback_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'arm_feedback',
+  messageType: 'std_msgs/String'
+})
+
+// Science commands
+// setup a client for the science_request service
+let science_request_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'science_request',
+  serviceType: 'ScienceRequest'
+})
+
+// setup a subscriber for the arm_joint_states topic
+let science_data_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'science_feedback',
+  messageType: 'std_msgs/String'
+})
+
+// Rover commands
+// setup a client for the rover_request service
+let rover_request_client = new ROSLIB.Service({
+  ros: ros,
+  name: 'rover_request',
+  serviceType: 'ArmRequest' // for now... might change
+})
+
+// setup a publisher for the rover_command topic
+let rover_command_publisher = new ROSLIB.Topic({
+  ros: ros,
+  name: 'rover_command',
+  messageType: 'std_msgs/String'
+})
+
+// setup a subscriber for the rover_joint_states topic
+let rover_joint_states_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'rover_joint_states',
+  messageType: 'sensor_msgs/JointState'
+})
+
+// setup a subscriber for the rover_position topic
+let rover_position_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'rover_position',
+  messageType: 'geometry_msgs/Point'
+})
+
+// setup a subscriber for the rover_feedback topic
+let rover_feedback_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'rover_feedback',
+  messageType: 'std_msgs/String'
+})
+// setup a subscriber for the antenna_goal topic
+let antenna_goal_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'antenna_goal',
+  messageType: 'geometry_msgs/Point'
+})
+
+// setup gps parameters for antenna directing
+let antenna_latitude = new ROSLIB.Param({
+  ros: ros,
+  name: 'antenna_latitude'
+})
+
+let antenna_longitude = new ROSLIB.Param({
+  ros: ros,
+  name: 'antenna_longitude'
+})
+
+let antenna_start_dir = new ROSLIB.Param({
+  ros: ros,
+  name: 'antenna_start_dir'
+})
+
+// setup a subscriber for the rover_goal topic
+let rover_goal_listener = new ROSLIB.Topic({
+  ros: ros,
+  name: 'rover_goal',
+  messageType: 'geometry_msgs/Point'
+})
+
+// setup gps parameters for rover goals
+let goal_latitude = new ROSLIB.Param({
+  ros: ros,
+  name: 'goal_latitude'
+})
+
+let goal_longitude = new ROSLIB.Param({
+  ros: ros,
+  name: 'goal_longitude'
+})
+
 function initRosWeb () {
-  let ros = new ROSLIB.Ros({
-    url: 'ws://localhost:9090'
-  })
+
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
@@ -9,6 +174,7 @@ function initRosWeb () {
       initNavigationPanel()
     }
   })
+
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)
   })
@@ -17,79 +183,16 @@ function initRosWeb () {
   })
 
   /* general controls */
-
-  // setup a client for the ping service
-  ping_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'ping_response',
-    serviceType: 'PingResponse'
-  })
-
-  // setup a client for the mux_select service
-  mux_select_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'mux_select',
-    serviceType: 'SelectMux'
-  })
-  // setup a client for the serial_cmd service
-  serial_cmd_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'serial_cmd',
-    serviceType: 'SerialCmd'
-  })
-  // setup a client for the task_handler service
-  task_handler_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'task_handler',
-    serviceType: 'HandleTask'
-  })
-  // setup a subscriber for the battery_voltage topic
-  battery_voltage_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
-  })
   battery_voltage_listener.subscribe(function (message) {
     $('#battery-voltage').text(message.data.toFixed(2))
   })
 
   /* arm controls */
-
-  // setup a client for the arm_request service
-  arm_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'arm_request',
-    serviceType: 'ArmRequest'
-  })
-  // setup a publisher for the arm_command topic
-  arm_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'arm_command',
-    messageType: 'std_msgs/String'
-  })
-  // setup a publisher for the ik_command topic
-  ik_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'ik_command',
-    messageType: 'IkCommand'
-  })
-
-  gripper_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'gripper_position',
-    messageType: 'geometry_msgs/Point'
-  })
-
   gripper_listener.subscribe(function (msg) {
     console.log('gripper_postion:', msg)
   })
 
   // setup a subscriber for the arm_joint_states topic
-  arm_joint_states_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'arm_joint_states',
-    messageType: 'sensor_msgs/JointState'
-  })
   arm_joint_states_listener.subscribe(function (message) {
     for (var angle in message.position) {
       // let motor = angle+1;
@@ -98,29 +201,8 @@ function initRosWeb () {
     }
   })
   // setup a subscriber for the arm_feedback topic
-  arm_feedback_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'arm_feedback',
-    messageType: 'std_msgs/String'
-  })
   arm_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
-  })
-
-  /* science commands */
-
-  // setup a client for the science_request service
-  science_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'science_request',
-    serviceType: 'ScienceRequest'
-  })
-
-  // setup a subscriber for the arm_joint_states topic
-  science_data_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'science_feedback',
-    messageType: 'std_msgs/String'
   })
 
   science_data_listener.subscribe(function (message) {
@@ -224,26 +306,6 @@ function initRosWeb () {
     $('#drill-rpm').val(values[13])
   })
 
-  /* rover commands */
-
-  // setup a client for the rover_request service
-  rover_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'rover_request',
-    serviceType: 'ArmRequest' // for now... might change
-  })
-  // setup a publisher for the rover_command topic
-  rover_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_command',
-    messageType: 'std_msgs/String'
-  })
-  // setup a subscriber for the rover_joint_states topic
-  rover_joint_states_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_joint_states',
-    messageType: 'sensor_msgs/JointState'
-  })
   rover_joint_states_listener.subscribe(function (message) {
     $('#right-front-rpm').text(message.velocity[0])
     $('#right-mid-rpm').text(message.velocity[1])
@@ -252,68 +314,25 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-rear-rpm').text(message.velocity[5])
   })
-  // setup a subscriber for the rover_position topic
-  rover_position_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_position',
-    messageType: 'geometry_msgs/Point'
-  })
+
   rover_position_listener.subscribe(function (message) {
     $('#rover-latitude').text(message.x)
     $('#rover-longitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
-  // setup a subscriber for the rover_feedback topic
-  rover_feedback_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_feedback',
-    messageType: 'std_msgs/String'
-  })
+
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
-  // setup a subscriber for the antenna_goal topic
-  antenna_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'antenna_goal',
-    messageType: 'geometry_msgs/Point'
-  })
+
   antenna_goal_listener.subscribe(function (message) {
     $('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
     $('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
   })
-  // setup gps parameters for antenna directing
-  antenna_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_latitude'
-  })
-  antenna_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_longitude'
-  })
-  antenna_start_dir = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_start_dir'
-  })
 
-  // setup a subscriber for the rover_goal topic
-  rover_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_goal',
-    messageType: 'geometry_msgs/Point'
-  })
   rover_goal_listener.subscribe(function (message) {
     $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
     $('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
-  })
-  // setup gps parameters for rover goals
-  goal_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_latitude'
-  })
-  goal_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_longitude'
   })
 }
 

@@ -1,8 +1,9 @@
+"use strict";
 // turn table graphics
 const twopi = 2 * Math.PI
 const pi = Math.PI
 
-run = async () => {
+let run = async () => {
   const canvas = document.getElementById('myCanvas')
   const w = canvas.width
   const h = canvas.height

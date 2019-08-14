@@ -1,3 +1,4 @@
+"use strict";
 // for command thoughput limiting
 const GAME_LOOP_PERIOD = 50
 const CONTINUOUS_SERVO_PERIOD = 100
@@ -39,9 +40,9 @@ var maxThrottleIncrement = 1
 var maxSteeringIncrement = 1
 var movementCommanded = false
 
-sentZero = true // used to prevent the gui from sending wheel commands
-sentFrontServoStop = true // used to prevent the gui from sending servo commands
-sentRearServoStop = true // used to prevent the gui from sending servo commands
+let sentZero = true // used to prevent the gui from sending wheel commands
+let sentFrontServoStop = true // used to prevent the gui from sending servo commands
+let sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")

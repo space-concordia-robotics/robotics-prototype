@@ -1,3 +1,4 @@
+"use strict";
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
   const Site = {
