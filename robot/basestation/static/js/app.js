@@ -395,7 +395,7 @@ $(document).ready(() => {
                 $('#toggle-rover-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendRequest("Rover", 'ping', function (msgs) {})
+                sendRequest("Rover", 'ping', printErrToConsole)
               } else {
                 $('#toggle-rover-listener-btn')[0].checked = false
               }
@@ -434,7 +434,7 @@ $(document).ready(() => {
                 $('#toggle-arm-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendRequest("Arm",'ping', function (msgs) {})
+                sendRequest("Arm",'ping', printErrToConsole)
               } else {
                 $('#toggle-arm-listener-btn')[0].checked = false
               }
@@ -473,7 +473,7 @@ $(document).ready(() => {
                 $('#science-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendRequest("Science", 'ping', function (msgs) {})
+                sendRequest("Science", 'ping', printErrToConsole)
               } else {
                 $('#science-listener-btn')[0].checked = false
               }

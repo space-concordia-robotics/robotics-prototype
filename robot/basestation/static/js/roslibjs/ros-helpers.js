@@ -339,7 +339,7 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   }, timeout)
 
   mux_select_client.callService(request, function (result) {
-    timer.clearTimeout()
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -409,7 +409,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', time
   }, timeout)
 
   task_handler_client.callService(request, function (result) {
-    timer.clearTimeout()
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log('result:', result)
     let msg = result.response
@@ -608,7 +608,7 @@ function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
 
   requestClient.callService(request, function (result) {
 
-    timer.clearTimeout()
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character

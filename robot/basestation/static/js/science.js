@@ -201,7 +201,7 @@ $(document).ready(function () {
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
-    sendRequest("Science", 'ping', function (msgs) {})
+    sendRequest("Science", 'ping', printErrToConsole)
   })
 
   $('#ping-odroid').on('click', function (event) {
