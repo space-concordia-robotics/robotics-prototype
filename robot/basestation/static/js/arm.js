@@ -115,7 +115,7 @@ $(document).ready(function () {
           1,
           '#toggle-arm-listener-btn',
           function (msgs) {
-            console.log(msgs)
+            printErrToConsole(msgs)
             if (msgs[0]) {
               $('#toggle-arm-listener-btn')[0].checked = true
             } else {
@@ -135,7 +135,7 @@ $(document).ready(function () {
       requestTask('arm_listener', 0, '#toggle-arm-listener-btn', function (
         msgs
       ) {
-        console.log('msgs[0]', msgs[0])
+        printErrToConsole(msgs)
         if (msgs.length == 2) {
           console.log('msgs[1]', msgs[1])
           if (msgs[1].includes('already running')) {
@@ -162,9 +162,10 @@ $(document).ready(function () {
       parseFloat(multiplier) <= maxMultiplier
     ) {
       let cmd = 'armspeed ' + multiplier
-      sendArmRequest(cmd, function (msgs) {})
+      sendRequest("Arm", cmd, printErrToConsole)
     }
   })
+
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
     if (e.keyCode == 13) {
       // enter key
@@ -175,7 +176,7 @@ $(document).ready(function () {
         parseFloat(multiplier) <= maxMultiplier
       ) {
         let cmd = 'armspeed ' + multiplier
-        sendArmRequest(cmd, function (msgs) {})
+        sendRequest("Arm", cmd, printErrToConsole)
       }
     }
   })
@@ -191,7 +192,7 @@ $(document).ready(function () {
           $(this.id)[0].checked = isOpen
         }
     }
-    sendArmRequest('motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
+    sendRequest("Arm", 'motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
   })
 })
 
