@@ -607,7 +607,7 @@ function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
         console.log('Error of type ' + errorThrown + 'occured')
       }
     },
-    timeout: 3000//timeoutVal
+    timeout: timeoutVal
   })
   lastCmdSent = new Date().getTime()
 }
