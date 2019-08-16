@@ -66,7 +66,8 @@ $(document).ready(function () {
 
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
-    sendArmCommand('home') // REIMPLEMENT AS AN ACTION
+    //TODO: uncomment this when homing is confirmed to work properly
+    //sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
 
   $('#list-all-cmds').on('click', function(event){
