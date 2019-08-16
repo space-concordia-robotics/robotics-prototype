@@ -1,30 +1,36 @@
 # ROS packages
 
+## setting up ROS and the workspace
+
+Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`.
+
+The simplest way to make use of these packages is to run `catkin_make` from the `rospackages` folder and either run the following line from your terminal or add it to your `~/.bashrc` file to have it be run every time you open a new terminal:
+```
+. /home/path-to-repo/robot/rospackages/devel/setup.bash`
+```
+
+After that, you may need to install additional packages to get the following homemade packages working. But in a perfect world all the dependencies are already handled.
+
 ## ping_acknowledgement
 
 ### Description
 
-The ping_acknowledgement package uses the `PingResponse` service defined in `srv` folder to allow the server to respond to a simple ping from the client. Any string can be sent in order to get a response.
+This package was the first one to be written and thus serves as an example for all future packages. The ping_acknowledgement package uses the `PingResponse` service defined in `srv` folder to allow the server to respond to a simple ping from the client. Any string can be sent in order to get a response.
 
 ### Setup
 
-Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`.
+You may test the service by running the following commands (each command in a new terminal):
 
-The simplest way to make use of these packages is to run `catkin_make` from the `rospackages` folder and run `. /home/path-to-repo/robot/rospackages/devel/setup.bash`, or you can add this line to your `~/.bashrc` file to have it be run every time you open a new terminal.
-
-After having built the package and generated the all the source code, you may test the service by running the following commands (each time in a new terminal):
-
-- Start ros master with `roscore`
+- Start ros master node with `roscore`. This node always has to be running before anything else can function. (Exception: it's automatically started when using `roslaunch`, see a few lines below)
 - Start server node with `rosrun ping_acknowledgment ping_response_server.py`
-- Send a request/obtain response using client node with `rosrun ping_acknowledgment ping_response_client.py "<msg>"`, where you are free to choose what
-ever message you wish to send.
+- Send a request/obtain response using client node with `rosrun ping_acknowledgment ping_response_client.py "<msg>"`, where you are free to choose what ever message you wish to send.
 
 **OR:**
-- Start server launch file with (starts both server node and ROS Master if none detected):
+- Start server launch file with (starts both server node and ROS master if master node isn't running):
 ```
 roslaunch ping_acknowledgment ping_acknowledgment_server.launch
 ```
-- SStart client launch file with
+- Start client launch file with
 ```
 roslaunch ping_acknowledgment ping_acknowledgment_client.launch ping_msg:="hello"
 ```
@@ -52,16 +58,13 @@ This package contains a server to be run on the Odroid and a client to be run an
 
 ### Description
 
-#### ArmNode.py
-This node simultaneously behaves as a publisher, subscriber and service. It serves as an interface between the arm Teensy and the GUI, so it must be run on the Odroid. It subscribes to `/arm_command` messages which do not necessarily need feedback, responds to `/arm_request` requests which have expected responses, and publishes `/arm_joint_states` messages based on incoming angle data from the Teensy. It can be run directly, through the task_handler, or through the `app.py` GUI when `rosbridge_websockets` is active.
+This package contains multiple ROS nodes both for the basestation and the Odroid related to communicating with microcontrollers (MCUs). It also contains example scripts which were used to test different types of ROS node scripts.
 
-#### IkNode.py
-
-This package also contains `IkNode.py`, an inverse kinematics node which behaves as a publisher and subscriber. It imports `ik_calculator.py` - a custom-made inverse kinematics library - which is used whenever it catches a new message from the `/ik_command` topic it subscribes to. It decides what angles to direct the Teensy to based on the `/arm_joint_states` topic that it also subscribes to, and publishes the command to `/arm_command` so `ArmNode.py` will send it to the Teensy.
+Notably, this package holds nodes for communicating with the arm, science, rover and PDS MCUs. It also holds inverse kinematics, navigation, and joystick controller nodes. See the package for more details.
 
 ### Usage
 
-The expected method of communication is through the `app.py` GUI when rosbridge_websockets is active, but it can also be controlled with command line ROS commands or with custom publishers and clients. For more info on `rosbridge_websockets`, see the readme in `/robot/basestation`
+The expected method of communication is through the `app.py` GUI when rosbridge_websockets is active, but it can also be controlled with command line ROS commands or with custom publishers and clients. For more info on `rosbridge_websockets`, see the readme in `/robot/basestation`.
 
 ## serial_cmd
 
@@ -74,3 +77,13 @@ This package contains a server to run on the Odroid and a client to be run anywh
 ### Description
 
 This package contains a publisher to run on the Odroid and a subscriber to be run anywhere. The publisher opens up communication with a serial port and publishes any incoming data. The subscriber listens to the data and logs it to a text file.
+
+## cv_camera
+
+### Description
+This node is not homemade. It's used to connect to USB cameras and publish their feed to ROS.
+
+## web_video_server
+
+### Description
+This node is not homemage. It's used to host camera feeds in a server which can be accessed by a webpage.
