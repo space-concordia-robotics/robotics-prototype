@@ -202,7 +202,7 @@ $(document).ready(function () {
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
-    sendScienceRequest('ping', function (msgs) {})
+    sendRequest("Science", 'ping', printErrToConsole)
   })
 
   $('#ping-odroid').on('click', function (event) {
@@ -294,12 +294,12 @@ $(document).ready(function () {
     if (!$('#science-listener-btn').is(':checked')) {
       appendToConsole('Science listener not yet activated!')
     } else if ($('#activate-science-btn').is(':checked')) {
-      sendScienceRequest('activate', function (msgs) {
+      sendRequest("Science", 'activate', function (msgs) {
         console.log('msgs', msgs)
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendScienceRequest('stop', function (msgs) {
+      sendRequest("Science", 'stop', function (msgs) {
         console.log('msgs', msgs)
       })
     }
@@ -309,7 +309,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendScienceRequest('dccw', function (msgs) {
+    sendRequest("Science", 'dccw', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -318,7 +318,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendScienceRequest('dcw', function (msgs) {
+    sendRequest("Science", 'dcw', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -327,7 +327,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendScienceRequest('eup', function (msgs) {
+    sendRequest("Science", 'eup', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -336,7 +336,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendScienceRequest('edown', function (msgs) {
+    sendRequest("Science", 'edown', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -360,7 +360,7 @@ $(document).ready(function () {
 
       // click makes it checked during this time, so trying to enable
       if ($(pumpDriveToggles[i]).is(':checked')) {
-        sendScienceRequest(cmd, function (msgs) {
+        sendRequest("Science", cmd, function (msgs) {
           console.log('msgs', msgs)
           if (msgs[1].includes(cmd + ' done')) {
             $(pumpDriveToggles[i])[0].checked = true
@@ -370,7 +370,7 @@ $(document).ready(function () {
         })
       } else {
         // stop all pumps
-        sendScienceRequest('ps', function (msgs) {
+        sendRequest("Science", 'ps', function (msgs) {
           if (msgs[1].includes('ps done')) {
             toggleOffAllPumps()
           } else {
@@ -389,7 +389,7 @@ $(document).ready(function () {
     }
     // click makes it checked during this time, so trying to enable
     if ($('#pump-dir-toggle').is(':checked')) {
-      sendScienceRequest('pd1', function (msgs) {
+      sendRequest("Science", 'pd1', function (msgs) {
         if (msgs[1].includes('OUT')) {
           appendToConsole('Success')
         } else {
@@ -397,7 +397,7 @@ $(document).ready(function () {
         }
       })
     } else {
-      sendScienceRequest('pd0', function (msgs) {
+      sendRequest("Science", 'pd0', function (msgs) {
         if (msgs[1].includes('IN')) {
           appendToConsole('Success')
         } else {
@@ -418,7 +418,7 @@ $(document).ready(function () {
       let cmd = 'led' + (i + 1)
 
       if ($('#led' + (i + 1) + '-toggle').is(':checked')) {
-        sendScienceRequest(cmd, function (msgs) {
+        sendRequest("Science", cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -429,7 +429,7 @@ $(document).ready(function () {
         })
       } else {
         cmd += 's'
-        sendScienceRequest(cmd, function (msgs) {
+        sendRequest("Science", cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -453,7 +453,7 @@ $(document).ready(function () {
       let cmd = 'v' + (i + 1)
 
       if ($('#vibrator' + (i + 1) + '-toggle').is(':checked')) {
-        sendScienceRequest(cmd, function (msgs) {
+        sendRequest("Science", cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -464,7 +464,7 @@ $(document).ready(function () {
         })
       } else {
         cmd = 'vs'
-        sendScienceRequest(cmd, function (msgs) {
+        sendRequest("Science", cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -482,7 +482,7 @@ $(document).ready(function () {
       return
     }
 
-    sendScienceRequest('dgo', function (msgs) {
+    sendRequest("Science", 'dgo', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('dgo done')) {
@@ -501,7 +501,7 @@ $(document).ready(function () {
     }
 
     // drill stop
-    sendScienceRequest('ds', function (msgs) {
+    sendRequest("Science", 'ds', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('ds done')) {
