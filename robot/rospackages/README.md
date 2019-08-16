@@ -1,15 +1,18 @@
 # ROS packages
 
-## setting up ROS and the workspace
+## Setting up ROS and the workspace for our custom packages
 
-Assuming ROS is properly installed, you need to setup a catkin workspace, add the package into the src folder and build the package with `catkin_make`.
-
-The simplest way to make use of these packages is to run `catkin_make` from the `rospackages` folder and either run the following line from your terminal or add it to your `~/.bashrc` file to have it be run every time you open a new terminal:
+Assuming ROS is properly installed, you need to have a catkin workspace in which all the packages are stored. Lucky for you, the `rospackages` folder in this repo is made specifically for this purpose. If this is your first time using one of these packages or you have just made modifications to a package, run `catkin_make` from the `rospackages` folder to build all the packages in this folder for use by ROS. Next, run the following line from your terminal:
 ```
 . /home/path-to-repo/robot/rospackages/devel/setup.bash`
 ```
+Add this line to your `~/.bashrc` file (to have it called every time you open a new terminal) if you haven't already, because otherwise your shell won't be aware of the nodes and other resources from packages in `rospackages`.
 
-After that, you may need to install additional packages to get the following homemade packages working. But in a perfect world all the dependencies are already handled.
+After that, you may need to install additional packages to get the homemade packages working. But in a perfect world all the dependencies are already handled.
+
+## Setting up ROS and the workspace for isolated testing
+
+If you would like to test a package in isolation from the rest of our packages, you can make your own workspace following a guide on the ROS wiki. To make sure it's fully isolated you can also comment out the `. /path-to-rospackages/devel/setup.bash` line in `~/.bashrc` before opening new terminals. As usual, once your package is ready to be tested, run `catkin_make` in the workspace and then use the same strategy of sourcing `/devel/setup.bash` except this time the file is in the isolated workspace.
 
 ## ping_acknowledgement
 
@@ -86,4 +89,4 @@ This node is not homemade. It's used to connect to USB cameras and publish their
 ## web_video_server
 
 ### Description
-This node is not homemage. It's used to host camera feeds in a server which can be accessed by a webpage.
+This node is not homemade. It's used to host camera feeds in a server which can be accessed by a webpage.
