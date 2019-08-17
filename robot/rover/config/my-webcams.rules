@@ -5,7 +5,8 @@
 # To quickly test if that camera actually works (without the GUI) you can run `./start_stream.sh /dev/video{number}`
 # to see if the proper camera starts. Vist http://{odroid_ip_address}:8090/?action=stream to view it.
 
-# currently implemented orientation on usb hub, from left to right: Rear, Front, Arm/Science
+# Currently implemented orientation on usb hub, from left to right: Rear, Front, Arm/Science
+# Also the usb hub itself is connected to the single usb 2.0 port on the odroid
 SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.1:1.0", SYMLINK+="ttyArmScienceCam"
 SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.2:1.0", SYMLINK+="ttyFrontCam"
 SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.3:1.0", SYMLINK+="ttyRearCam"
