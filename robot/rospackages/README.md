@@ -2,9 +2,9 @@
 
 ## Setting up ROS and the workspace for our custom packages
 
-Assuming ROS is properly installed, you need to have a catkin workspace in which all the packages are stored. Lucky for you, the `rospackages` folder in this repo is made specifically for this purpose. If this is your first time using one of these packages or you have just made modifications to a package, run `catkin_make` from the `rospackages` folder to build all the packages in this folder for use by ROS. Next, run the following line from your terminal:
+Assuming ROS is properly installed, you need to have a catkin workspace in which all the packages are stored. Lucky for you, the `rospackages` folder in this repo is made specifically for this purpose. If this is your first time using one of these packages or you have just made modifications to a package, run `catkin_make` from the `rospackages` folder to build all the packages in this folder for use by ROS. Next, run the following line from your terminal, replacing `path-to-repo` with... the path to the repo on your computer:
 ```
-. /home/path-to-repo/robot/rospackages/devel/setup.bash`
+. path-to-repo/robot/rospackages/devel/setup.bash
 ```
 Add this line to your `~/.bashrc` file (to have it called every time you open a new terminal) if you haven't already, because otherwise your shell won't be aware of the nodes and other resources from packages in `rospackages`.
 
@@ -12,7 +12,7 @@ After that, you may need to install additional packages to get the homemade pack
 
 ## Setting up ROS and the workspace for isolated testing
 
-If you would like to test a package in isolation from the rest of our packages, you can make your own workspace following a guide on the ROS wiki. To make sure it's fully isolated you can also comment out the `. /path-to-rospackages/devel/setup.bash` line in `~/.bashrc` before opening new terminals. As usual, once your package is ready to be tested, run `catkin_make` in the workspace and then use the same strategy of sourcing `/devel/setup.bash` except this time the file is in the isolated workspace.
+If you would like to test a package in isolation from the rest of our packages, you can make your own workspace following a guide on the ROS wiki. To make sure it's fully isolated you can also comment out the `. path-to-rospackages/devel/setup.bash` line in `~/.bashrc` before opening new terminals. As usual, once your package is ready to be tested, run `catkin_make` in the workspace and then use the same strategy of sourcing `devel/setup.bash` except this time the file is in the isolated workspace.
 
 ## Useful bash commands
 A very convenient way to test ROS nodes is with `rosbash` commands. For example, one can check which nodes are running using `rosnode list`, and for a more general idea, one can check which topics currently exist with `rostopic list`. One can listen in on a particular topic using `rostopic echo <topic-name>` and publish to a topic using `rostopic pub -1 <topic-name> <message-type> <message>`. For example, I commonly use something like `rostopic pub -1 /rover_command std_msgs/String 'hi'`. Tab completion makes this more convenient as `rosbash` is capable of guessing the message type based on the topic and can even autofill a template message, particularly useful for more complex message types like `sensor_msgs/JointState`. Similar commands can be used for sending requests to services or changing parameters.
