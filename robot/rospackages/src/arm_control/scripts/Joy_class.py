@@ -37,11 +37,15 @@ class Astro_Joy():
 
 
     # Cameras related attributes :
-    front_cam_position_actual = 90
-    top_cam_position_actual = 90
+    front_cam_position_actual = 60
+    front_cam_position_max = 90
+    front_cam_position_min = 0
+    top_cam_position_actual = 35
+    top_cam_position_max = 115
+    top_cam_position_min = 0
     front_cam_contiuous = 93
     top_cam_continuous = 93
-    continuous_motion = 25
+    continuous_motion = 5
     cameras_halt = True
     cameras_timeout_max = 10
     cameras_timeout = 0
@@ -235,11 +239,11 @@ class Astro_Joy():
         elif self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous - self.continuous_motion)
         elif self.joy_hat == (0, 1) and top_camera_ctr == (0, 0, 0, 0):
-            if self.front_cam_position_actual < 180:
+            if self.front_cam_position_actual < self.front_cam_position_max:
                 self.front_cam_position_actual += 1
             msg = "@" + str(self.front_cam_position_actual)
         elif self.joy_hat == (0, -1) and top_camera_ctr == (0, 0, 0, 0):
-            if self.front_cam_position_actual > 0:
+            if self.front_cam_position_actual > self.front_cam_position_min:
                 self.front_cam_position_actual -= 1
             msg = "@" + str(self.front_cam_position_actual)
         elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 1, 0, 0):
@@ -247,11 +251,11 @@ class Astro_Joy():
         elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 0, 1):
             msg = "#" + str(self.top_cam_continuous - self.continuous_motion)
         elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 1, 0):
-            if self.top_cam_position_actual < 180:
+            if self.top_cam_position_actual < self.top_cam_position_max:
                 self.top_cam_position_actual += 1
             msg = "$" + str(self.top_cam_position_actual)
         elif self.joy_hat == (0, 0) and top_camera_ctr == (1, 0, 0, 0):
-            if self.top_cam_position_actual > 0:
+            if self.top_cam_position_actual > self.top_cam_position_min:
                 self.top_cam_position_actual -= 1
             msg = "$" + str(self.top_cam_position_actual)
         else:

@@ -16,7 +16,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to '+wheels_topic+' topic')
     wheelPub = rospy.Publisher(wheels_topic, String, queue_size = 10)
 
-    my_joy = Astro_Joy(30,30,True)
+    my_joy = Astro_Joy(40,30,True)
     # joystick instance (maximum throttle,fine steering,controlled throttle)
 
     try:
