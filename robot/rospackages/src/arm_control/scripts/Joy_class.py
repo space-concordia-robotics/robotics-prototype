@@ -235,26 +235,26 @@ class Astro_Joy():
             self.cameras_halt = False
 
         if self.joy_hat == (1, 0) and top_camera_ctr == (0, 0, 0, 0):
-            msg = "!" + str(self.front_cam_contiuous + self.continuous_motion)
-        elif self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous - self.continuous_motion)
-        elif self.joy_hat == (0, 1) and top_camera_ctr == (0, 0, 0, 0):
+        elif self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
+            msg = "!" + str(self.front_cam_contiuous + self.continuous_motion)
+        elif self.joy_hat == (0, -1) and top_camera_ctr == (0, 0, 0, 0):
             if self.front_cam_position_actual < self.front_cam_position_max:
                 self.front_cam_position_actual += 1
             msg = "@" + str(self.front_cam_position_actual)
-        elif self.joy_hat == (0, -1) and top_camera_ctr == (0, 0, 0, 0):
+        elif self.joy_hat == (0, 1) and top_camera_ctr == (0, 0, 0, 0):
             if self.front_cam_position_actual > self.front_cam_position_min:
                 self.front_cam_position_actual -= 1
             msg = "@" + str(self.front_cam_position_actual)
-        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 1, 0, 0):
-            msg = "#" + str(self.top_cam_continuous + self.continuous_motion)
         elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 0, 1):
+            msg = "#" + str(self.top_cam_continuous + self.continuous_motion)
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 1, 0, 0):
             msg = "#" + str(self.top_cam_continuous - self.continuous_motion)
-        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 1, 0):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (1, 0, 0, 0):
             if self.top_cam_position_actual < self.top_cam_position_max:
                 self.top_cam_position_actual += 1
             msg = "$" + str(self.top_cam_position_actual)
-        elif self.joy_hat == (0, 0) and top_camera_ctr == (1, 0, 0, 0):
+        elif self.joy_hat == (0, 0) and top_camera_ctr == (0, 0, 1, 0):
             if self.top_cam_position_actual > self.top_cam_position_min:
                 self.top_cam_position_actual -= 1
             msg = "$" + str(self.top_cam_position_actual)
