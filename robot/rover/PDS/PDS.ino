@@ -3,6 +3,7 @@
    Contributors:
    - Abtin Ghodoussi
    - Philippe Carvajal
+   - Nicholas Harris
    Version 1.1 - May 2019
 
    Tutorial for uploading code through ICSP and setting the internal 8MHz clock:
@@ -132,8 +133,6 @@ void loop() {
       parseCommand(); // check the command and (in some cases) react to it
       memset(BUFFER, 0, CHAR_BUFF_SIZE);
       messagesReceived++;
-    } else if (cmd == "who") {
-      Serial.print("PDS");
     } else {
       badMessages++;
     }
@@ -212,6 +211,7 @@ void loop() {
       Serial.print("PDS\n");
     }
   }
+
   updateMotorState(); //update all motor enable pin states by reading them
   generateMessage();  //generate status message containing current, voltage and temperature values
   /***************************************************************************************************************/
@@ -239,12 +239,14 @@ void parseCommand() {
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
       } else if (strcmp(token, "A") == 0) { //enable all motors
+        Serial.print("Testing A"); //Testing
         if (!errorFlagGeneral.UV) { //if there is no undervoltage error
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
         }
       } else if (strcmp(token, "M") == 0) { //single motor on/off
+        Serial.print("Testing M"); //Testing 
         if (!errorFlagGeneral.UV) {
           token = strtok(BUFFER, " "); //find the next token
           int motorNum = (int)token;
@@ -289,14 +291,12 @@ void parseCommand() {
 } // end of parseCommand
 
 void generateMessage() {
-
   sprintf(BUFFER, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
           batteryVoltage, currentReadings[0],
           currentReadings[1], currentReadings[2],
           currentReadings[3], currentReadings[4],
           currentReadings[5], tempReadings[0],
           tempReadings[1], tempReadings[2]);
-
 }
 
 void updateMotorState() {
