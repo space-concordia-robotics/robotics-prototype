@@ -518,11 +518,11 @@ function checkTaskStatuses () {
     })
 
     // initialize rover to open-loop mode
-    // TODO: add button on rover page for this
     sendRequest('Rover', 'open-loop', function (msgs) {
       printErrToConsole(msgs)
       if (msgs[1].includes('loop status is: Open')) {
         appendToConsole('Open loop active')
+        $('#toggle-rover-pid-btn')[0].checked = false
       } else {
         appendToConsole('Failed to activate open loop mode')
       }

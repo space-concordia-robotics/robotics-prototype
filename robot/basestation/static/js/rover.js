@@ -142,10 +142,10 @@ $(document).ready(function () {
         }
       })
 
-      // TODO: come back here to update once button is added
       sendRequest('Rover', 'open-loop', function (msgs) {
         if (msgs[1].includes('loop status is: Open')) {
           appendToConsole('Open loop activated')
+          $('#toggle-rover-listener-btn')[0].checked = false
         } else {
           appendToConsole('Failed to activate open loop')
         }
@@ -160,6 +160,32 @@ $(document).ready(function () {
       })
     }
   })
+
+  $('#toggle-rover-pid-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if (!$('#toggle-rover-listener-btn').is(':checked')) {
+      appendToConsole('Rover listener not yet activated!')
+    } else if ($('#toggle-rover-pid-btn').is(':checked')) {
+      sendRequest('Rover', 'closed-loop', function (msgs) {
+        printErrToConsole(msgs)
+        if (msgs[1].includes('loop status is: CLose')) {
+          $('#toggle-rover-pid-btn')[0].checked = true
+          appendToConsole('Loop status: closed')
+        }
+      })
+
+    } else {
+      sendRequest('Rover', 'open-loop', function (msgs) {
+        printErrToConsole(msgs)
+        if (msgs[1].includes('loop status is: Open')) {
+          $('#toggle-rover-pid-btn')[0].checked = false
+          appendToConsole('Loop status: open')
+        }
+      })
+    }
+  })
+
   $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
     let serialType = $('#serial-type')
