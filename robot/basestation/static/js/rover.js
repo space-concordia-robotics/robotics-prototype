@@ -141,6 +141,15 @@ $(document).ready(function () {
           $('#activate-rover-btn')[0].checked = true
         }
       })
+
+      // TODO: come back here to update once button is added
+      sendRequest('Rover', 'open-loop', function (msgs) {
+        if (msgs[1].includes('loop status is: Open')) {
+          appendToConsole('Open loop activated')
+        } else {
+          appendToConsole('Failed to activate open loop')
+        }
+      })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
       sendRequest("Rover", 'deactivate', function (msgs) {
