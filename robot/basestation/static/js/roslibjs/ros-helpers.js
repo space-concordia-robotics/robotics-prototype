@@ -272,7 +272,7 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
   rover_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
+    appendToConsole(message.data, true, false)
   })
   // setup a subscriber for the antenna_goal topic
   antenna_goal_listener = new ROSLIB.Topic({
@@ -496,7 +496,7 @@ function checkTaskStatuses () {
       }
     })
   } else if (window.location.pathname == '/rover') {
-    // check arm listener status
+    // check rover listener status
     requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
@@ -512,6 +512,8 @@ function checkTaskStatuses () {
       printErrToConsole(msgs)
       if (msgs[1].includes('Happy')) {
         $('#activate-rover-btn')[0].checked = true
+        // initialize rover to open-loop mode
+        sendRoverCommand('open-loop', function(msg) {})
       } else {
         $('#activate-rover-btn')[0].checked = false
       }
