@@ -100,6 +100,13 @@ int messagesReceived, messagesSent, badMessages;
 char IN_BUFFER[CHAR_BUFF_SIZE]; //!< used for receiving/reading messages
 char OUT_BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/reading messages
 
+// string/message handling
+void parseCommand(char *inBuffer);
+void generateSensorFeedback(char *outBuffer);
+// sensor processing
+void updateMotorState();
+float readMultiplexer(uint8_t channel);
+
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
   Serial.setTimeout(SERIAL_TIMEOUT_DELAY);
@@ -210,23 +217,21 @@ void loop() {
   }
   /***************************************************************************************************************/
     updateMotorState(); //update all motor enable pin states by reading them
-    generateMessage(OUT_BUFFER);  //generate status message containing current, voltage and temperature values
+    generateSensorFeedback(OUT_BUFFER);  //generate status message containing current, voltage and temperature values
   /***************************************************************************************************************/
   if (millis() - prevBlinkTime > HEARTBEAT_DELAY) {
     digitalWrite(HeartBeat_Pin, !digitalRead(HeartBeat_Pin));
     prevBlinkTime = millis();
-    Serial.print(OUT_BUFFER);
+    Serial.println(OUT_BUFFER);
     messagesSent++;
   }
 }//end of void loop
 
 void parseCommand(char *inBuffer) {
-  //char *TEMP_BUFF = inBuffer; //IN_BUFFER;
   char *token = strtok_r(inBuffer, " ", &inBuffer);
-  while (token != NULL) {
     if (strcmp(token, "PDS") == 0) {
       Serial.println(inBuffer);
-      if (strcmp(inBuffer, "S") == 0) {  //disable all motors
+      if (strcmp(inBuffer, "S") == 0) { //disable all motors
         Serial.println("Testing S"); //Testing
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
@@ -292,14 +297,12 @@ void parseCommand(char *inBuffer) {
     } // end of main "PDS" token check
     else {
       badMessages++;
-      Serial.println("benis");
     }
-  } // end of while loop
 } // end of parseCommand
 
-void generateMessage(char *outBuffer) {
+void generateSensorFeedback(char *outBuffer) {
   memset(OUT_BUFFER, 0, CHAR_BUFF_SIZE);
-  sprintf(outBuffer, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+  sprintf(outBuffer, "PDS %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
     batteryVoltage, currentReadings[0],
     currentReadings[1], currentReadings[2],
     currentReadings[3], currentReadings[4],
