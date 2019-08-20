@@ -321,26 +321,26 @@ function initRosWeb () {
   battery_temps_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_temps',
-    messageType: 'std_msgs/Float32MultiArray'
+    messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(message.data[0].toFixed(2))
-    $('#battery-temp-2').text(message.data[0].toFixed(2))
-    $('#battery-temp-3').text(message.data[0].toFixed(2))
+    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
+    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
+    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'wheel_motor_currents',
-    messageType: 'std_msgs/Float32MultiArray'
+    messageType: 'sensor_msgs/JointState'
   })
   wheel_motor_currents_listener.subscribe(function (message) {
-    $('#right-front-current').text(parseFloat(message.data[0]))
-    $('#right-mid-current').text(parseFloat(message.data[1]))
-    $('#right-rear-current').text(parseFloat(message.data[2]))
-    $('#left-front-current').text(parseFloat(message.data[3]))
-    $('#left-mid-current').text(parseFloat(message.data[4]))
-    $('#left-rear-current').text(parseFloat(message.data[5]))
+    $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
+    $('#right-mid-current').text(parseFloat(message.effort[1]).toFixed(3))
+    $('#right-rear-current').text(parseFloat(message.effort[2]).toFixed(3))
+    $('#left-front-current').text(parseFloat(message.effort[3]).toFixed(3))
+    $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
+    $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
 }
 
