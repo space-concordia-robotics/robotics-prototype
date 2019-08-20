@@ -144,7 +144,7 @@ void loop() {
     }
     else {
       badMessages++;
-      // should also respond to bad messages
+      Serial.println("PDS error: received empty message");
     }
     memset(IN_BUFFER, 0, CHAR_BUFF_SIZE);
   }
@@ -230,12 +230,11 @@ void loop() {
 void parseCommand(char *inBuffer) {
   char *token = strtok_r(inBuffer, " ", &inBuffer);
     if (strcmp(token, "PDS") == 0) {
-      Serial.println(inBuffer);
       if (strcmp(inBuffer, "S") == 0) { //disable all motors
-        Serial.println("Testing S"); //Testing
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
+        Serial.println("PDS disabling power to all motors");
       }
       else if (strcmp(inBuffer, "A") == 0) { //enable all motors
         Serial.print("Testing A"); //Testing
@@ -292,11 +291,12 @@ void parseCommand(char *inBuffer) {
       }
       else { // nonexistent PDS command
         badMessages++;
-        // this should do something
+        Serial.println("PDS error: nonexistent PDS command");
       }
     } // end of main "PDS" token check
     else {
       badMessages++;
+      Serial.println("PDS error: command not prefixed by PDS");
     }
 } // end of parseCommand
 
