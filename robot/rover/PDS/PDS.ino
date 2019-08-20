@@ -94,11 +94,11 @@ double batteryVoltage = 0;
 
 uint8_t motorState[NUM_MOTORS]; //!< power to motor enable/disable
 
-unsigned long startTime = 0; //!< for task scheduler which is not implemented yet. \todo rename startTime to something more clear e.g. heartBeatTime or something? apparently its used for other stuff tho
+unsigned long prevBlinkTime = 0; //!< for task scheduler which is not implemented yet. \todo rename startTime to something more clear e.g. heartBeatTime or something? apparently its used for other stuff tho
 
 int messagesReceived, messagesSent, badMessages;
-char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
-
+char IN_BUFFER[CHAR_BUFF_SIZE]; //!< used for receiving/reading messages
+char OUT_BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/reading messages
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
@@ -126,16 +126,20 @@ void loop() {
   /***************************************************************************************************************/
   // listen to the serial port and parse an incoming message
   if (Serial.available()) {
-    byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
-    String cmd = Serial.readStringUntil('\n');
-    if (num > 0) {
-      Serial.println(BUFFER); // echo the received command
-      parseCommand(); // check the command and (in some cases) react to it
-      memset(BUFFER, 0, CHAR_BUFF_SIZE);
-      messagesReceived++;
-    } else {
-      badMessages++;
+    byte num = Serial.readBytesUntil('\n', IN_BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
+    if (IN_BUFFER[num-1] == '\r') { // catch carriage returns and ELIMINATE them >:(
+      IN_BUFFER[num-1] = '\0'; // replace it with the char array terminator character
     }
+    if (num > 0) { // not 100% sure if this catches every case
+      Serial.println(IN_BUFFER); // echo the received command
+      parseCommand(IN_BUFFER); // check the command and (in some cases) react to it
+      messagesReceived++;
+    }
+    else {
+      badMessages++;
+      // should also respond to bad messages
+    }
+    memset(IN_BUFFER, 0, CHAR_BUFF_SIZE);
   }
   /***************************************************************************************************************/
   // read raw current values
@@ -154,7 +158,8 @@ void loop() {
   batteryVoltage =  readMultiplexer(4) * VOLTAGE_RECIPROCAL;
   if (batteryVoltage < MIN_BATTERY_VOLTAGE) {
     errorFlagGeneral.UV = 1;
-  } else if (batteryVoltage > MAX_BATTERY_VOLTAGE) {
+  }
+  else if (batteryVoltage > MAX_BATTERY_VOLTAGE) {
     errorFlagGeneral.OV = 1;
   }
   if (batteryVoltage < 0 || batteryVoltage > 17.0) {
@@ -174,7 +179,8 @@ void loop() {
     if (rawTempReadings[i] <= 0 || rawTempReadings[i] >= 1023.0) {
       errorFlagGeneral.thermOutOfRange = 1;
       tempReadings[i] = 999.9; //make error case visible
-    } else {
+    }
+    else {
       errorFlagGeneral.thermOutOfRange = 0;
       double v = (double)rawTempReadings[i] * TEMP_RECIPROCAL;
       double Rt = THERMISTOR_BIAS_RES * (VOLTAGE_REF - v) / v;
@@ -197,77 +203,70 @@ void loop() {
     fanBSpeed = map(fanBSpeed, 0, 255, 0, MAX_FAN_SPEED); // attempt to keep the pwm voltage at 12v
     analogWrite(Fan_A_Speed_Pin, fanASpeed);
     analogWrite(Fan_B_Speed_Pin, fanBSpeed);
-  } else {
+  }
+  else {
     analogWrite(Fan_A_Speed_Pin, 0);
     analogWrite(Fan_B_Speed_Pin, 0);
   }
   /***************************************************************************************************************/
-  if (Serial.available()) {
-    String cmd = Serial.readStringUntil('\n'); 
-
-    cmd.trim();
-
-    if (cmd == "who") {
-      Serial.print("PDS\n");
-    }
-  }
-
-  updateMotorState(); //update all motor enable pin states by reading them
-  generateMessage();  //generate status message containing current, voltage and temperature values
+    updateMotorState(); //update all motor enable pin states by reading them
+    generateMessage(OUT_BUFFER);  //generate status message containing current, voltage and temperature values
   /***************************************************************************************************************/
-  if (millis() - startTime > HEARTBEAT_DELAY) {
+  if (millis() - prevBlinkTime > HEARTBEAT_DELAY) {
     digitalWrite(HeartBeat_Pin, !digitalRead(HeartBeat_Pin));
-    startTime = millis();
-    if (Serial.available()) {
-      Serial.print(BUFFER);
-      memset(BUFFER, 0, CHAR_BUFF_SIZE);
-      messagesSent++;
-    }
+    prevBlinkTime = millis();
+    Serial.print(OUT_BUFFER);
+    messagesSent++;
   }
 }//end of void loop
 
-void parseCommand() {
-
-  char *TEMP_BUFF = BUFFER;
-  char *token = strtok(TEMP_BUFF, " ");
+void parseCommand(char *inBuffer) {
+  //char *TEMP_BUFF = inBuffer; //IN_BUFFER;
+  char *token = strtok_r(inBuffer, " ", &inBuffer);
   while (token != NULL) {
     if (strcmp(token, "PDS") == 0) {
-      token = strtok(BUFFER, " "); //find the next token
-      if (strcmp(token, "S") == 0) {  //disable all motors
-        Serial.print("Testing S"); //Testing
+      Serial.println(inBuffer);
+      if (strcmp(inBuffer, "S") == 0) {  //disable all motors
+        Serial.println("Testing S"); //Testing
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
-      } else if (strcmp(token, "A") == 0) { //enable all motors
+      }
+      else if (strcmp(inBuffer, "A") == 0) { //enable all motors
         Serial.print("Testing A"); //Testing
         if (!errorFlagGeneral.UV) { //if there is no undervoltage error
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
         }
-      } else if (strcmp(token, "M") == 0) { //single motor on/off
-        Serial.print("Testing M"); //Testing 
+      }
+      else if (strcmp(inBuffer, "M") == 0) { //single motor on/off
+        Serial.print("Testing M"); //Testing
         if (!errorFlagGeneral.UV) {
-          token = strtok(BUFFER, " "); //find the next token
+          token = strtok_r(NULL, " ", &inBuffer); //find the next token
           int motorNum = (int)token;
           if (motorNum < 1 || motorNum > 6) {
             badMessages++;
-          } else {
-            token = strtok(BUFFER, " "); //find the next token
+          }
+          else {
+            token = strtok_r(NULL, " ", &inBuffer); //find the next token
             int state = (int)token;
             if (state != 0 || state != 1) {
               badMessages++;
-            } else {
+            }
+            else {
               digitalWrite(motorPins[motorNum - 1], state);
             }
           }
         }
-      } else if (strcmp(token, "F") == 0) { //set fan speed in percentage 0-100%
-        token = strtok(BUFFER, " "); //find the next token
+      }
+      else if (strcmp(inBuffer, "F") == 0) { //set fan speed in percentage 0-100%
+        token = strtok_r(NULL, " ", &inBuffer); //find the next token
         int fanNum = (int)token;
         if (fanNum < 1 || fanNum > 2) {
           badMessages++;
-        } else {
+        }
+        else {
           int fanSpeed = (int)token;
           if (fanSpeed < 0 || fanSpeed > 100) {
             badMessages++;
@@ -286,17 +285,26 @@ void parseCommand() {
           }
         }
       }
+      else { // nonexistent PDS command
+        badMessages++;
+        // this should do something
+      }
     } // end of main "PDS" token check
+    else {
+      badMessages++;
+      Serial.println("benis");
+    }
   } // end of while loop
 } // end of parseCommand
 
-void generateMessage() {
-  sprintf(BUFFER, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
-          batteryVoltage, currentReadings[0],
-          currentReadings[1], currentReadings[2],
-          currentReadings[3], currentReadings[4],
-          currentReadings[5], tempReadings[0],
-          tempReadings[1], tempReadings[2]);
+void generateMessage(char *outBuffer) {
+  memset(OUT_BUFFER, 0, CHAR_BUFF_SIZE);
+  sprintf(outBuffer, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+    batteryVoltage, currentReadings[0],
+    currentReadings[1], currentReadings[2],
+    currentReadings[3], currentReadings[4],
+    currentReadings[5], tempReadings[0],
+    tempReadings[1], tempReadings[2]);
 }
 
 void updateMotorState() {
@@ -306,7 +314,6 @@ void updateMotorState() {
 }
 
 float readMultiplexer(uint8_t channel) {
-
   if (channel < 0 || channel > 15) {
     channel = 0; //! \todo not the best implementation, should return a negative value or a false bool
   }
