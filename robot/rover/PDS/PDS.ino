@@ -236,16 +236,16 @@ void parseCommand(char *inBuffer) {
         PORTC &= 0B11000111; //motor four, five and six
         Serial.println("PDS disabling power to all motors");
       }
-      else if (strcmp(inBuffer, "A") == 0) { //enable all motors
-        Serial.print("Testing A"); //Testing
-        if (!errorFlagGeneral.UV) { //if there is no undervoltage error
+      else if (strcmp(inBuffer, "A") == 0) { //enable all motors 
+        if (!errorFlagGeneral.UV) { //if there is no undervoltage error BUG: doesn't actually enter this if statement? Maybe cause testing on arduino.... not sure...
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
+          Serial.println("PDS enabling power to all motors");
         }
+        Serial.println("hmm");
       }
       else if (strcmp(inBuffer, "M") == 0) { //single motor on/off
-        Serial.print("Testing M"); //Testing
         if (!errorFlagGeneral.UV) {
           token = strtok_r(NULL, " ", &inBuffer); //find the next token
           int motorNum = (int)token;
@@ -262,6 +262,7 @@ void parseCommand(char *inBuffer) {
               digitalWrite(motorPins[motorNum - 1], state);
             }
           }
+          Serial.println("PDS toggling power to motor " + motorNum);
         }
       }
       else if (strcmp(inBuffer, "F") == 0) { //set fan speed in percentage 0-100%
@@ -308,6 +309,7 @@ void generateSensorFeedback(char *outBuffer) {
     currentReadings[3], currentReadings[4],
     currentReadings[5], tempReadings[0],
     tempReadings[1], tempReadings[2]);
+
 }
 
 void updateMotorState() {
