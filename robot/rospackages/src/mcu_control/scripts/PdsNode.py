@@ -12,7 +12,8 @@ import serial.tools.list_ports  # pyserial
 
 import rospy
 from std_msgs.msg import String, Float32
-from sensor_msgs.msg import BatteryState, Temperature
+from geometry_msgs.msg import Point
+from sensor_msgs.msg import JointState
 
 global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
@@ -148,26 +149,32 @@ def subscriber_callback(message):
 
 def publish_pds_data(message):
     # parse the data received from PDS
-    #message = message.split('PDS,')
-    #dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
-    dataPDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
     # create the message to be published
-    msg = Float32()
+    voltage = Float32()
+    current = JointState()
+    temp = Point()
 
-    for i in range(10):
-        if i < 1:
-            msg.data = dataPDS[i]
-            voltagePub.publish(msg)
-        elif i < 7:
-            msg.data = (dataPDS[i])
-            currentPub.publish(msg)
-        else:
-            msg.data = (dataPDS[i])
-            tempPub.publish(msg)
+    try:
+        for i in range(10):
+            if i < 1:
+                voltage.data = float(dataPDS[i])
+                voltagePub.publish(voltage)
+            elif i < 7:
+                current.effort.append(float(dataPDS[i]))
+                currentPub.publish(current)
+            else:
+                temp.x = float(dataPDS[7])
+                temp.y = float(dataPDS[8])
+                temp.z = float(dataPDS[9])
+                tempPub.publish(temp)
+    except:
+        rospy.logwarn('trouble parsing PDS data')
+        return
     return
 
 def stripFeedback(data):
-    startStrip = 'PDS,'
+    startStrip = 'PDS '
     endStrip = '\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
@@ -189,11 +196,11 @@ if __name__ == '__main__':
 
     current_pub_topic = '/wheel_motor_currents'
     rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
-    currentPub = rospy.Publisher(current_pub_topic, Float32, queue_size=10)
+    currentPub = rospy.Publisher(current_pub_topic, JointState, queue_size=10)
 
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
-    tempPub = rospy.Publisher(temp_pub_topic, Float32, queue_size=10)
+    tempPub = rospy.Publisher(temp_pub_topic, Point, queue_size=10)
 
     feedback_pub_topic = '/pds_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')
@@ -215,31 +222,20 @@ if __name__ == '__main__':
             #not sure if I need the same precautions when writing but so far it seems ok.
             if ser.in_waiting:
                 data = ''
-                feedback = ser.readline().decode()
-                #feedback = None
-                # try:
-                #     data = ser.readline().decode()
-                #     feedback = stripFeedback(data)
-                # except:
-                #     rospy.logwarn('trouble reading from serial port')
+                #feedback = ser.readline().decode()
+                feedback = None
+                try:
+                     data = ser.readline().decode()
+                     feedback = data
+                     #feedback = stripFeedback(data)
+                except:
+                     rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
                     msg = Float32()
-                    if 'PDS' in feedback:
+                    if 'PDS ' in feedback:
                         feedback = stripFeedback(feedback)
                         #rospy.loginfo(feedback)
                         publish_pds_data(feedback)
-                    elif 'battery voltage' in feedback:
-                        left, data = feedback.split('battery voltage: ')
-                        msg = message.split(',')
-                        voltagePub.publish(msg)
-                    elif 'wheel current' in feedback:
-                        left, data = feedback.split('wheel currents: ')
-                        msg = message.split(',')
-                        currentPub.publish(msg)
-                    elif 'battery temperature' in feedback:
-                        left, data = feedback.split('battery temperatures: ')
-                        msg = message.split(',')
-                        tempPub.publish(msg)
                     else:
                         #rospy.loginfo(feedback)
                         if 'WARNING' in feedback:
