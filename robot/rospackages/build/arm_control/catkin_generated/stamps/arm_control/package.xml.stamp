@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>arm_control</name>
+  <version>0.0.0</version>
+  <description>
+    The arm_control package. This also contains rover control scripts, helpers, etc.
+
+    ArmNode.py will open a UART or USB serial port based on the input arguments.
+    It can be opened directly or through the task_handler.
+    This node listens to the serial port and based on the data it will know where to send it.
+    It subscribes to the arm_command topic and to arm_request client requests and
+    then either sends back feedback through the arm_feedback topic, the arm_joint_states topic,
+    or ArmRequest.srv.
+
+    RoverNode.py will open a UART or USB serial port based on the input arguments.
+    It cannot yet be opened directly through the task_handler.
+    This node listens to the serial port and based on the data it will know where to send it.
+    More information to be written later.
+
+    AntennaNode.py subscribes to the rover_position topic.
+    It depends on the antenna_latitude, antenna_longitude and antenna_start_dir ROS params.
+    The node will do nothing until the parameters are set, at which point it will send
+    the recommended angle on the antenna rotator display to attain optimal signal strength.
+    It also sends the distance from the antenna to the rover.
+    The node uses the rover latitude and longitude to determine the results.
+
+    NavigationNode.py subscribes to the rover_position topic.
+    It depends on the gps_latitude and gps_longitude ROS params.
+    The node will do nothing until the parameters are set, at which point it will send
+    the recommended direction of the rover to reach the goal position.
+    It also sends the distance from the rover to the goal position.
+    The node uses the rover latitude, longitude and heading to determine the results.
+  </description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="josh.glazer@spaceconcordia.ca">Josh Glazer</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+</package>
