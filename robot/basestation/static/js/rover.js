@@ -188,15 +188,13 @@ $(document).ready(function () {
 
   $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
-    let serialType = $('#serial-type')
-      .text()
-      .trim()
+    let serialType = $('#serial-type').text().trim()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-rover-listener-btn').is(':checked')) {
+      // validate UART mode options are correct, let pass if USB mode selected
       if (
-        $('button#mux')
-          .text()
-          .includes('Rover')
+        ($('button#mux').text().includes('Rover') && serialType == 'uart')
+        || serialType == 'usb'
       ) {
         requestTask(
           'rover_listener',
@@ -214,7 +212,7 @@ $(document).ready(function () {
         )
       } else {
         appendToConsole(
-          'Cannot turn rover listener on if not in rover mux channel!'
+          'UART MODE: Cannot turn rover listener on if not in rover mux channel!'
         )
       }
     } else {
