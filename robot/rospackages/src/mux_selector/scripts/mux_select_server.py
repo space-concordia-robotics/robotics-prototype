@@ -79,7 +79,11 @@ def mux_select_server():
     local = False
     if len(sys.argv) == 2:
         if sys.argv[1] == "local":
+            print("Running in local mode")
             local = True
+        else:
+            print("Argument '" + sys.argv[1] + "' not recognized, did you mean 'local'?")
+            sys.exit(0)
 
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
