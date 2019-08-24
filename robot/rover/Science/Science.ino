@@ -139,8 +139,8 @@ void setup() {
   pinMode(PHOTORESISTOR, INPUT_PULLUP);
   pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
   /*  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
-    attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
-    attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);*/
+    attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);*/
+  attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);
 
   analogWrite(DRILL, 0);
   analogWrite(ELEVATOR, 0);
@@ -404,14 +404,17 @@ void loop() {
         UART_PORT.print("SCIENCE desiredPosition ");
         UART_PORT.println(desiredPosition);
 
-        if (cuvette >= 26 || cuvette < 0) {
-          UART_PORT.println("Error. Chose cuvette number from 0 to 25");
+        if (cuvette >= numberTablePositions || cuvette < 0) {
+          UART_PORT.print("Error. Chose cuvette number from 0 to ");
+          UART_PORT.println(numberTablePositions - 1);
         }
-        if (desiredPosition >= 26 || desiredPosition < 0) {
-          UART_PORT.println("Error. Chose position number from 0 to 25");
+        if (desiredPosition >= numberTablePositions || desiredPosition < 0) {
+          UART_PORT.print("Error. Chose position number from 0 to ");
+          UART_PORT.println(numberTablePositions - 1);
         }
-        turnTable (cuvette, desiredPosition);
-
+        else if ((cuvette < numberTablePositions && cuvette >= 0) && (desiredPosition < numberTablePositions && desiredPosition >= 0)) {
+          turnTable (cuvette, desiredPosition);
+        }
       }
       else if (cmd == "tccw") {
         //turns table counter-clockwise
@@ -433,18 +436,18 @@ void loop() {
         //turns table counter-clockwise
         table.writeMicroseconds(SERVO_STOP);
         delay(10);
-        turnTableFree = false;
-        tableDirection = 'i';
-        turnTable(tablePosition[0], (numberTablePositions - 1));
+        cuvette = tablePosition[1];
+        desiredPosition = 0;
+        turnTable(cuvette, desiredPosition);
         UART_PORT.println("SCIENCE tccwstep");
       }
       else if (cmd == "tcwstep") {
         //turns table clockwise
         table.writeMicroseconds(SERVO_STOP);
         delay(10);
-        turnTableFree = false;
-        tableDirection = 'd';
-        turnTable(tablePosition[0], 1);
+        cuvette = tablePosition[0];
+        desiredPosition = 1;
+        turnTable(cuvette, desiredPosition);
         UART_PORT.println("SCIENCE tcwstep");
       }
       else if (cmd == "ts") {
@@ -708,19 +711,19 @@ void turnTable (int cuvette, int desiredPosition) {
     if (tablePosition[i] == cuvette)break;
   }
 
-  //  UART_PORT.print("initialPosition");
-  //  UART_PORT.println(initialPosition);
+  UART_PORT.print("initialPosition");
+  UART_PORT.println(initialPosition);
 
   difference = desiredPosition - initialPosition;
 
-  //  UART_PORT.print("difference: ");
-  //  UART_PORT.println(difference);
+  UART_PORT.print("difference: ");
+  UART_PORT.println(difference);
 
-  if ( (difference > -(numberTablePositions / 2) && difference < 0) || (difference > (numberTablePositions / 2) && difference < numberTablePositions)) {
+  if ( (difference >= -(numberTablePositions / 2) && difference < 0) || (difference > (numberTablePositions / 2) && difference < numberTablePositions)) {
     tableDirection = 'i';
     table.writeMicroseconds(SERVO_MAX_CCW);
   }
-  else if ( (difference > -numberTablePositions && difference < -(numberTablePositions / 2)) || (difference > 0 && difference < (numberTablePositions / 2))) {
+  else if ( (difference > -numberTablePositions && difference < -(numberTablePositions / 2)) || (difference > 0 && difference <= (numberTablePositions / 2))) {
     tableDirection = 'd';
     table.writeMicroseconds(SERVO_MAX_CW);
   }
