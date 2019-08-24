@@ -3,32 +3,32 @@
    Contributors:
    - Abtin Ghodoussi
    - Philippe Carvajal
-   - Nicholas Harris
    Version 1.1 - May 2019
 
    Tutorial for uploading code through ICSP and setting the internal 8MHz clock:
    https://www.instructables.com/id/How-to-change-fuse-bits-of-AVR-Atmega328p-8bit-mic/
 */
 
-#define HeartBeat_Pin PC2
+#define HeartBeat_Pin 16 // PC2
 
-#define Fan_A_Speed_Pin PB1
-#define Fan_B_Speed_Pin PB2
-#define M1_Enable_Pin PB0
-#define M2_Enable_Pin PD7
-#define M3_Enable_Pin PD6
-#define M4_Enable_Pin PC6
-#define M5_Enable_Pin PC5
-#define M6_Enable_Pin PC4
+#define Fan_A_Speed_Pin 9 // PB1
+#define Fan_B_Speed_Pin 10 // PB2
+#define M1_Enable_Pin 8 // PB0
+#define M2_Enable_Pin 7 // PD7
+#define M3_Enable_Pin 6 // PD6
+#define M4_Enable_Pin 17 // PC3
+#define M5_Enable_Pin 19 // PC5
+#define M6_Enable_Pin 18 // PC4
 
 //! Pin to read sensor value from
-#define Mux_out_Pin PC0
+#define Mux_out_Pin A0 // PC0, 14ide
 
 // Mux selector pins
-#define S0_PIN PD3
-#define S1_PIN PD2
-#define S2_PIN PD4
-#define S3_PIN PD5
+// (NOTE: S2 and S3 are routed incorectly on the PCB and the schematic Rev 2.2. Swapping their pin values corrects this.)
+#define S0_PIN 3 // PD3
+#define S1_PIN 2 // PD2
+#define S2_PIN 5 // PD5
+#define S3_PIN 4 // PD4
 
 #define HEARTBEAT_DELAY 1000 //!< in ms
 #define NUM_CURRENT_SENSORS 6
@@ -50,7 +50,7 @@
 #define SENSE_RESISTOR_VALUE (double)0.001  //!< 10mOhm from the PDS schematic
 #define CURRENT_SENSOR_GAIN (double)20.0    //!< INA193 current sensor internal gain
 #define CURRENT_RECIPROCAL (double)0.016129032 // VOLTAGE_REFERENCE/1023.00*(CURRENT_SENSOR_GAIN*SENSE_RESISTOR_VALUE)
-#define VOLTAGE_RECIPROCAL (double)((12.2*VOLTAGE_REF)/(2.2*1023.0)) //12.2k and 2.2k are resistor ratio from the PDS schematic
+#define VOLTAGE_RECIPROCAL (double)0.01935 // 0.01935V (3.3V / 1023) * (12KOhm / 2KOhm)
 #define TEMP_RECIPROCAL (double)VOLTAGE_REF/1023.0
 
 // Steinhart–Hart constants for a 10K NTC thermistor
@@ -237,13 +237,12 @@ void parseCommand(char *inBuffer) {
         Serial.println("PDS disabling power to all motors");
       }
       else if (strcmp(inBuffer, "A") == 0) { //enable all motors 
-        if (!errorFlagGeneral.UV) { //if there is no undervoltage error BUG: doesn't actually enter this if statement? Maybe cause testing on arduino.... not sure...
+        if (!errorFlagGeneral.UV) { //if there is no undervoltage error
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
           Serial.println("PDS enabling power to all motors");
         }
-        Serial.println("hmm");
       }
       else if (strcmp(inBuffer, "M") == 0) { //single motor on/off
         if (!errorFlagGeneral.UV) {
@@ -303,13 +302,20 @@ void parseCommand(char *inBuffer) {
 
 void generateSensorFeedback(char *outBuffer) {
   memset(OUT_BUFFER, 0, CHAR_BUFF_SIZE);
-  sprintf(outBuffer, "PDS %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
-    batteryVoltage, currentReadings[0],
-    currentReadings[1], currentReadings[2],
-    currentReadings[3], currentReadings[4],
-    currentReadings[5], tempReadings[0],
-    tempReadings[1], tempReadings[2]);
-
+  Serial.print("PDS ");
+  Serial.print(batteryVoltage); Serial.print(", ");
+  Serial.print(currentReadings[0]); Serial.print(", ");
+  Serial.print(currentReadings[1]); Serial.print(", ");
+  Serial.print(currentReadings[2]); Serial.print(", ");
+  Serial.print(currentReadings[3]); Serial.print(", ");
+  Serial.print(currentReadings[4]); Serial.print(", ");
+  Serial.print(currentReadings[5]); Serial.print(", ");
+  Serial.print(tempReadings[0]); Serial.print(", ");
+  Serial.print(tempReadings[1]); Serial.print(", ");
+  Serial.print(tempReadings[2]); Serial.print(", ");
+  Serial.print(fanASpeed); Serial.print(", ");
+  Serial.println(fanBSpeed);
+  
 }
 
 void updateMotorState() {

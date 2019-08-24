@@ -3,7 +3,8 @@
    Contributors:
    - Abtin Ghodoussi
    - Philippe Carvajal
-   Version 1.1 - May 2019
+   - Nicholas Harris
+   Version 1.1 - May 2019 (Updated August 2019)
 
    Tutorial for uploading code through ICSP and setting the internal 8MHz clock:
    https://www.instructables.com/id/How-to-change-fuse-bits-of-AVR-Atmega328p-8bit-mic/
@@ -99,6 +100,14 @@ unsigned long startTime2 = 0; // For Fans
 
 int messagesReceived, messagesSent, badMessages;
 char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
+
+// string/message handling
+void parseCommand();
+void generateSensorFeedback();
+void printMotorState();
+// sensor processing
+void updateMotorState();
+float readMultiplexer(uint8_t channel);
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
@@ -223,7 +232,7 @@ void loop() {
     digitalWrite(HeartBeat_Pin, !digitalRead(HeartBeat_Pin));
     startTime = millis();
     // if (Serial.available()) {
-      generateMessage();  //generate status message containing current, voltage, temp, speed
+      generateSensorFeedback();  //generate status message containing current, voltage, temp, speed
       //Serial.print(BUFFER);
       memset(BUFFER, 0, CHAR_BUFF_SIZE);
       messagesSent++;
@@ -238,73 +247,60 @@ void parseCommand() {
   while (token != NULL) {
     if (strcmp(token, "PDS") == 0) {
       token = strtok(NULL, " "); //find the next token
-
       if (*token == 'S') {  //disable all motors
-        //Serial.println("Command: STOP.");
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
-        //updateMotorState();
-        //printMotorState();
+        Serial.println("Command: PDS disabling power to all motors");
+        updateMotorState();
+        printMotorState();
         break;
       } else if (*token == 'A') { //enable all motors
-        //Serial.println("Command: ENABLE.");
         if (!errorFlagGeneral.UV) { //if there is no undervoltage error
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
-          //updateMotorState();
-          //printMotorState();
+          Serial.println("Command: PDS enabling power to all motors");
+          updateMotorState();
+          printMotorState();
         }
         break;
       } else if (*token == 'M') { //single motor on/off
-        //Serial.println("Command: SINGLE MOTOR ON/OFF.");
         if (!errorFlagGeneral.UV) {
           token = strtok(NULL, " "); //find the next token
           int motorNum = (int)*token - 48;
           if (motorNum < 1 || motorNum > 6) {
             badMessages++;
+            Serial.println("Command error: PDS invalid motor number");
           } else {
-            //Serial.println("Good message");
             token = strtok(NULL, " "); //find the next token
             int state = (int)*token - 48;
-            Serial.println(state);
             if (state == 0 || state == 1) {
-              //Serial.println("Digital write...");
               digitalWrite(motorPins[motorNum - 1], state);
+              Serial.println("Command: PDS toggling power state to motor " + motorNum);
             } else {
-              //Serial.println("Bad message");
+              Serial.println("Command error: PDS invalid motor state");
               badMessages++;
             }
           }
-          //updateMotorState();
-          //printMotorState();
+          updateMotorState();
+          printMotorState();
         }
         break;
       } else if (*token == 'F') { //set fan speed in percentage 0-100%
-        //Serial.println("Set Fan Speed.");
         token = strtok(NULL, " "); //find the next token
         int fanNum = (int)*token - 48;
-        //Serial.println(fanNum);
         if (fanNum == 1 || fanNum == 2) {
-
-          //Serial.print("Fan ");
-          //Serial.print(fanNum);
-          //Serial.println(" selected");
-
           token = strtok(NULL, " "); //find the next token
           int fanSpeed = atoi(token);
           if (fanSpeed <  0 || fanSpeed > 100) {
-            //Serial.println("Fan speed out of range.");
+            Serial.println("Command error: PDS fan speed out of range");
             badMessages++;
             break;
           }
 
           MAX_FAN_SPEED = (int)(12.0 * 255.0 / batteryVoltage); // calculate the max allowable fan speed
           fanSpeed = map(fanSpeed, 0, 100, 0, MAX_FAN_SPEED); // To check that the value returned is indeed correct
-          
-          //Serial.print("Setting fan speed to ");
-          //Serial.println(fanSpeed);
           switch (fanNum) {
             case 1:
               fanASpeed = fanSpeed;
@@ -315,8 +311,9 @@ void parseCommand() {
               analogWrite(Fan_B_Speed_Pin,fanBSpeed);
               break;
           }
+          Serial.println("Command: PDS updating fan speed");
         } else {
-          //Serial.println("Bad message");
+          Serial.println("Command error: PDS invalid fan number"); 
           badMessages++;
         }
       }
@@ -326,25 +323,20 @@ void parseCommand() {
   } // end of while loop
 } // end of parseCommand
 
-void generateMessage() {
-  Serial.print(batteryVoltage); Serial.print(",");
-  Serial.print(currentReadings[0]); Serial.print(",");
-  Serial.print(currentReadings[1]); Serial.print(",");
-  Serial.print(currentReadings[2]); Serial.print(",");
-  Serial.print(currentReadings[3]); Serial.print(",");
-  Serial.print(currentReadings[4]); Serial.print(",");
-  Serial.print(currentReadings[5]); Serial.print(",");
-  Serial.print(tempReadings[0]); Serial.print(",");
-  Serial.print(tempReadings[1]); Serial.print(",");
-  Serial.print(tempReadings[2]); Serial.print(",");
-  Serial.print(fanASpeed); Serial.print(",");
+void generateSensorFeedback() {
+  Serial.print("PDS ");
+  Serial.print(batteryVoltage); Serial.print(", ");
+  Serial.print(currentReadings[0]); Serial.print(", ");
+  Serial.print(currentReadings[1]); Serial.print(", ");
+  Serial.print(currentReadings[2]); Serial.print(", ");
+  Serial.print(currentReadings[3]); Serial.print(", ");
+  Serial.print(currentReadings[4]); Serial.print(", ");
+  Serial.print(currentReadings[5]); Serial.print(", ");
+  Serial.print(tempReadings[0]); Serial.print(", ");
+  Serial.print(tempReadings[1]); Serial.print(", ");
+  Serial.print(tempReadings[2]); Serial.print(", ");
+  Serial.print(fanASpeed); Serial.print(", ");
   Serial.println(fanBSpeed);
-  // sprintf(BUFFER, "PDS,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\r\n",
-  //         batteryVoltage, currentReadings[0],
-  //         currentReadings[1], currentReadings[2],
-  //         currentReadings[3], currentReadings[4],
-  //         currentReadings[5], tempReadings[0],
-  //         tempReadings[1], tempReadings[2]);
 }
 
 void updateMotorState() {

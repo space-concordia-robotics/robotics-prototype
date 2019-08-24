@@ -149,7 +149,7 @@ def subscriber_callback(message):
 
 def publish_pds_data(message):
     # parse the data received from PDS
-    dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
+    dataPDS = message.split(', ')  ###returns an array of ALL data from the PDS
     # create the message to be published
     voltage = Float32()
     current = JointState()
@@ -159,15 +159,16 @@ def publish_pds_data(message):
         for i in range(10):
             if i < 1:
                 voltage.data = float(dataPDS[i])
-                voltagePub.publish(voltage)
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
-                currentPub.publish(current)
             else:
                 temp.x = float(dataPDS[7])
                 temp.y = float(dataPDS[8])
                 temp.z = float(dataPDS[9])
-                tempPub.publish(temp)
+
+        voltagePub.publish(voltage)
+        currentPub.publish(current)
+        tempPub.publish(temp)
     except:
         rospy.logwarn('trouble parsing PDS data')
         return
@@ -231,17 +232,16 @@ if __name__ == '__main__':
                 except:
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
-                    msg = Float32()
-                    if 'PDS ' in feedback:
-                        feedback = stripFeedback(feedback)
-                        #rospy.loginfo(feedback)
-                        publish_pds_data(feedback)
-                    else:
-                        #rospy.loginfo(feedback)
-                        if 'WARNING' in feedback:
-                            rospy.logwarn(feedback)
-                        #rospy.loginfo(feedback)
+                    if 'Command:' in feedback:
+                        rospy.loginfo(feedback)
+                        #feedback_pub_topic(feedback)
                         feedbackPub.publish(feedback)
+                    elif 'Command error:' in feedback:
+                        rospy.logwarn(feedback)
+                        feedbackPub.publish(feedback)
+                    elif 'PDS ' in feedback:
+                        feedback = stripFeedback(feedback)
+                        publish_pds_data(feedback)
                 else:
                     rospy.loginfo('got raw data: ' + data)
             rospy.Rate(100).sleep()
