@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code.
+This repo contains the Robotics software team code. For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 
 ## Contributing and Development Environment Instructions
 
