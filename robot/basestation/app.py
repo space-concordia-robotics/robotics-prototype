@@ -24,10 +24,9 @@ def fetch_ros_master_uri():
 def index():
     return flask.render_template("AsimovOperation.html")
 
-@app.route('/static/model')
-def serveArmFile(filename):
-        return send_from_directory('./'+path, filename)
-	return send_from_directory(static_file_dir, path)
+@app.route('/static/model/<path:filename>')
+def serveArmModel(filename):
+	return flask.send_from_directory('../rospackages/src/', filename)
 
 # Automatic controls
 @app.route("/click_btn_pitch_up")

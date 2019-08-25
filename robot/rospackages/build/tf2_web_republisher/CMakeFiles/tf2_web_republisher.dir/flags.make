@@ -6,5 +6,5 @@ CXX_FLAGS =
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"tf2_web_republisher\"
 
-CXX_INCLUDES = -I/home/ali/Programming/robotics-prototype/robot/rospackages/devel/include -I/home/ali/Programming/robotics-prototype/robot/rospackages/src/tf2_web_republisher/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp 
+CXX_INCLUDES = -I/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/devel/include -I/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/tf2_web_republisher/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp 
 

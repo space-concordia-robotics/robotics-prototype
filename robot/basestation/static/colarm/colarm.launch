@@ -1,4 +1,0 @@
-<launch>
-  <!--send colarm urdf to param server -->
-  <param name="robot_description" textfile="$(find colarm)/urdf/colarm.urdf" />
-</launch>

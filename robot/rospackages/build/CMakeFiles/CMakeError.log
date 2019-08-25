@@ -1,24 +1,24 @@
 Determining if the pthread_create exist failed with the following output:
-Change Dir: /home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp
+Change Dir: /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_40720/fast"
-/usr/bin/make -f CMakeFiles/cmTC_40720.dir/build.make CMakeFiles/cmTC_40720.dir/build
-make[1]: Entering directory '/home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_40720.dir/CheckSymbolExists.c.o
-/usr/bin/cc     -o CMakeFiles/cmTC_40720.dir/CheckSymbolExists.c.o   -c /home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
-Linking C executable cmTC_40720
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_40720.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_40720.dir/CheckSymbolExists.c.o  -o cmTC_40720 -rdynamic 
-CMakeFiles/cmTC_40720.dir/CheckSymbolExists.c.o: In function `main':
+Run Build Command:"/usr/bin/make" "cmTC_8cc8d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_8cc8d.dir/build.make CMakeFiles/cmTC_8cc8d.dir/build
+make[1]: Entering directory '/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8cc8d.dir/CheckSymbolExists.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_8cc8d.dir/CheckSymbolExists.c.o   -c /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_8cc8d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8cc8d.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_8cc8d.dir/CheckSymbolExists.c.o  -o cmTC_8cc8d -rdynamic 
+CMakeFiles/cmTC_8cc8d.dir/CheckSymbolExists.c.o: In function `main':
 CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_40720.dir/build.make:97: recipe for target 'cmTC_40720' failed
-make[1]: *** [cmTC_40720] Error 1
-make[1]: Leaving directory '/home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_40720/fast' failed
-make: *** [cmTC_40720/fast] Error 2
+CMakeFiles/cmTC_8cc8d.dir/build.make:97: recipe for target 'cmTC_8cc8d' failed
+make[1]: *** [cmTC_8cc8d] Error 1
+make[1]: Leaving directory '/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8cc8d/fast' failed
+make: *** [cmTC_8cc8d/fast] Error 2
 
-File /home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+File /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
 /* */
 #include <pthread.h>
 
@@ -34,22 +34,22 @@ int main(int argc, char** argv)
 }
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp
+Change Dir: /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_cf1b6/fast"
-/usr/bin/make -f CMakeFiles/cmTC_cf1b6.dir/build.make CMakeFiles/cmTC_cf1b6.dir/build
-make[1]: Entering directory '/home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_cf1b6.dir/CheckFunctionExists.c.o
-/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_cf1b6.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
-Linking C executable cmTC_cf1b6
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cf1b6.dir/link.txt --verbose=1
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_cf1b6.dir/CheckFunctionExists.c.o  -o cmTC_cf1b6 -rdynamic -lpthreads 
+Run Build Command:"/usr/bin/make" "cmTC_f9d3b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_f9d3b.dir/build.make CMakeFiles/cmTC_f9d3b.dir/build
+make[1]: Entering directory '/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f9d3b.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_f9d3b.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_f9d3b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f9d3b.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_f9d3b.dir/CheckFunctionExists.c.o  -o cmTC_f9d3b -rdynamic -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_cf1b6.dir/build.make:97: recipe for target 'cmTC_cf1b6' failed
-make[1]: *** [cmTC_cf1b6] Error 1
-make[1]: Leaving directory '/home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_cf1b6/fast' failed
-make: *** [cmTC_cf1b6/fast] Error 2
+CMakeFiles/cmTC_f9d3b.dir/build.make:97: recipe for target 'cmTC_f9d3b' failed
+make[1]: *** [cmTC_f9d3b] Error 1
+make[1]: Leaving directory '/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_f9d3b/fast' failed
+make: *** [cmTC_f9d3b/fast] Error 2
 
 

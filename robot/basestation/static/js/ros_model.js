@@ -31,7 +31,7 @@
       ros : ros,
       tfClient : tfClient,
       //path : 'http://static.robotwebtools.org/',
-      path : 'http://localhost:5000/static/',
+      path : 'http://localhost:5000/static/model',
       rootObject : viewer.scene,
       loader : ROS3D.COLLADA_LOADER_2
     });

@@ -1,8 +1,8 @@
-# Install script for directory: /home/ali/Programming/robotics-prototype/robot/rospackages/src
+# Install script for directory: /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/ali/Programming/robotics-prototype/robot/rospackages/install")
+  set(CMAKE_INSTALL_PREFIX "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -44,90 +44,81 @@ endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/_setup_util.py")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/_setup_util.py")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE PROGRAM FILES "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/_setup_util.py")
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE PROGRAM FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/_setup_util.py")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/env.sh")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/env.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE PROGRAM FILES "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/env.sh")
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE PROGRAM FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/env.sh")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/setup.bash;/home/ali/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/setup.bash")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE FILE FILES
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.bash"
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/local_setup.bash"
-    )
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE FILE FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.bash")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/setup.sh;/home/ali/Programming/robotics-prototype/robot/rospackages/install/local_setup.sh")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/setup.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE FILE FILES
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.sh"
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/local_setup.sh"
-    )
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE FILE FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.sh")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/setup.zsh;/home/ali/Programming/robotics-prototype/robot/rospackages/install/local_setup.zsh")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/setup.zsh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE FILE FILES
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.zsh"
-    "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/local_setup.zsh"
-    )
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE FILE FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/setup.zsh")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/home/ali/Programming/robotics-prototype/robot/rospackages/install/.rosinstall")
+   "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/.rosinstall")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/ali/Programming/robotics-prototype/robot/rospackages/install" TYPE FILE FILES "/home/ali/Programming/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/.rosinstall")
+file(INSTALL DESTINATION "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install" TYPE FILE FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/catkin_generated/installspace/.rosinstall")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/ali/Programming/robotics-prototype/robot/rospackages/build/gtest/cmake_install.cmake")
-  include("/home/ali/Programming/robotics-prototype/robot/rospackages/build/tf2_web_republisher/cmake_install.cmake")
-  include("/home/ali/Programming/robotics-prototype/robot/rospackages/build/colarm/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/gtest/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/tf2_web_republisher/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/colarm/cmake_install.cmake")
 
 endif()
 
@@ -139,5 +130,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ali/Programming/robotics-prototype/robot/rospackages/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

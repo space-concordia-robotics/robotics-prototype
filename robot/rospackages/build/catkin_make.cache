@@ -1,2 +1,2 @@
 colarm:tf2_web_republisher
--DCATKIN_DEVEL_PREFIX=/home/ali/Programming/robotics-prototype/robot/rospackages/devel -DCMAKE_INSTALL_PREFIX=/home/ali/Programming/robotics-prototype/robot/rospackages/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/devel -DCMAKE_INSTALL_PREFIX=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install -G Unix Makefiles

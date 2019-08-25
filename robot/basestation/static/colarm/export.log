@@ -1,8 +1,0 @@
-2019-08-24 13:27:52,955 INFO  Logger.cs: 70 - 
---------------------------------------------------------------------------------
-2019-08-24 13:27:53,274 INFO  Logger.cs: 71 - Logging commencing for SW2URDF exporter
-2019-08-24 13:27:53,280 INFO  Logger.cs: 73 - Commit version 1.5.1-0-g916b5db
-2019-08-24 13:27:53,282 INFO  Logger.cs: 74 - Build version 1.5.7152.31018
-2019-08-24 13:27:53,502 INFO  SwAddin.cs: 250 - Adding Assembly export to file menu
-2019-08-24 13:27:53,505 INFO  SwAddin.cs: 253 - Adding Part export to file menu
-2019-08-24 13:27:54,132 INFO  SwAddin.cs: 218 - Connecting plugin to SolidWorks
