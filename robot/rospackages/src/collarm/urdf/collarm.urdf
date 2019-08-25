@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="collarm">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.0013534 0.00175 0.055542"
+        rpy="0 0 0" />
+      <mass
+        value="0.118" />
+      <inertia
+        ixx="0.00022082"
+        ixy="-7.5508E-22"
+        ixz="-9.9376E-21"
+        iyy="0.00022082"
+        iyz="-6.569E-19"
+        izz="0.00042194" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="upbase_link">
+    <inertial>
+      <origin
+        xyz="-1.4745E-17 -0.016989 0.0508"
+        rpy="0 0 0" />
+      <mass
+        value="0.58842" />
+      <inertia
+        ixx="0.00085482"
+        ixy="6.2042E-20"
+        ixz="1.5771E-20"
+        iyy="0.00082214"
+        iyz="-1.9538E-19"
+        izz="0.00059713" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/upbase_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/upbase_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="upbase_joint"
+    type="revolute">
+    <origin
+      xyz="0.0013534 -0.11186 0.05255"
+      rpy="-3.1416 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="upbase_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="prox_link">
+    <inertial>
+      <origin
+        xyz="-1.1493E-17 5.5511E-17 0.045"
+        rpy="0 0 0" />
+      <mass
+        value="1.9378" />
+      <inertia
+        ixx="0.014439"
+        ixy="2.9886E-18"
+        ixz="-1.3249E-19"
+        iyy="0.0022903"
+        iyz="7.8841E-19"
+        izz="0.014015" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/prox_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/prox_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="prox_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.19368 0.0058"
+      rpy="0 0 0" />
+    <parent
+      link="upbase_link" />
+    <child
+      link="prox_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="distal_link">
+    <inertial>
+      <origin
+        xyz="-1.4745E-17 0 0.04"
+        rpy="0 0 0" />
+      <mass
+        value="2.0127" />
+      <inertia
+        ixx="0.019589"
+        ixy="7.2214E-19"
+        ixz="8.5433E-20"
+        iyy="0.002078"
+        iyz="-2.765E-19"
+        izz="0.019451" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/distal_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/distal_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="distal_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.33811 0.0050674"
+      rpy="0 0 0" />
+    <parent
+      link="prox_link" />
+    <child
+      link="distal_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="wrist_link">
+    <inertial>
+      <origin
+        xyz="-2.537E-17 -0.0014726 0.035"
+        rpy="0 0 0" />
+      <mass
+        value="0.48493" />
+      <inertia
+        ixx="0.00059851"
+        ixy="-1.3199E-19"
+        ixz="-2.2313E-21"
+        iyy="0.00043866"
+        iyz="-1.3288E-19"
+        izz="0.0006197" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/wrist_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/wrist_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wrist_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.24313 0.0044118"
+      rpy="0 0 0" />
+    <parent
+      link="distal_link" />
+    <child
+      link="wrist_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="subfing_link">
+    <inertial>
+      <origin
+        xyz="1.5179E-18 0.038955 -7.8063E-18"
+        rpy="0 0 0" />
+      <mass
+        value="0.25614" />
+      <inertia
+        ixx="0.00017484"
+        ixy="2.4512E-20"
+        ixz="-3.6189E-21"
+        iyy="0.00017072"
+        iyz="-3.7104E-21"
+        izz="0.00025723" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/subfing_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/subfing_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="subfing_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.05313 0.035"
+      rpy="0 0 0" />
+    <parent
+      link="wrist_link" />
+    <child
+      link="subfing_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="finger2_link">
+    <inertial>
+      <origin
+        xyz="-0.00027571 -0.001852 0.02"
+        rpy="0 0 0" />
+      <mass
+        value="0.081443" />
+      <inertia
+        ixx="4.3829E-05"
+        ixy="-1.8224E-06"
+        ixz="-2.7174E-12"
+        iyy="1.9906E-05"
+        iyz="8.9567E-12"
+        izz="4.1116E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/finger2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/finger2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger2_joint"
+    type="revolute">
+    <origin
+      xyz="-0.01905 0.12535 -0.020524"
+      rpy="0 0 0" />
+    <parent
+      link="subfing_link" />
+    <child
+      link="finger2_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="finger1_link">
+    <inertial>
+      <origin
+        xyz="-0.00027571 -0.001852 0.02"
+        rpy="0 0 0" />
+      <mass
+        value="0.081443" />
+      <inertia
+        ixx="4.3829E-05"
+        ixy="-1.8224E-06"
+        ixz="-2.7174E-12"
+        iyy="1.9906E-05"
+        iyz="8.9567E-12"
+        izz="4.1116E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/finger1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://collarm/meshes/finger1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger1_joint"
+    type="revolute">
+    <origin
+      xyz="0.01905 0.12535 0.019476"
+      rpy="-3.1416 0 3.1416" />
+    <parent
+      link="subfing_link" />
+    <child
+      link="finger1_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="5"
+      velocity="0.5" />
+  </joint>
+</robot>
