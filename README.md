@@ -95,7 +95,7 @@ and that you will have to change the paths in the last two lines to reflect wher
 Additionally you need to build the packages in the rospackages folder.
 `cd` into `rospackages` and run `catkin_make`, otherwise the second last line in the above snippet will fail (as the folder devel will not have yet been generated).
 
-### Bash hook to prepend branch/issue number
+### Commit message hook
 
 This explains how to use and setup a git hook that will prepend the issue number to a commit message.
 Git hooks are used to automate git commands and functions.
