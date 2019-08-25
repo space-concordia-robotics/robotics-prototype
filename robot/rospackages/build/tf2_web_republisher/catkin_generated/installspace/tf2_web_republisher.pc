@@ -1,8 +1,8 @@
-prefix=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install
+prefix=/home/ali/Programming/robotics-prototype/robot/rospackages/install
 
 Name: tf2_web_republisher
 Description: Description of tf2_web_republisher
 Version: 0.3.2
-Cflags: -I/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/include
-Libs: -L/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/lib 
+Cflags: -I/home/ali/Programming/robotics-prototype/robot/rospackages/install/include
+Libs: -L/home/ali/Programming/robotics-prototype/robot/rospackages/install/lib 
 Requires: tf tf2_ros geometry_msgs actionlib actionlib_msgs message_runtime

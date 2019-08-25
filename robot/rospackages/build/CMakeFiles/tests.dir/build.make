@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src
+CMAKE_SOURCE_DIR = /home/ali/Programming/robotics-prototype/robot/rospackages/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build
+CMAKE_BINARY_DIR = /home/ali/Programming/robotics-prototype/robot/rospackages/build
 
 # Utility rule file for tests.
 
@@ -67,6 +67,6 @@ CMakeFiles/tests.dir/clean:
 .PHONY : CMakeFiles/tests.dir/clean
 
 CMakeFiles/tests.dir/depend:
-	cd /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build /home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/CMakeFiles/tests.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ali/Programming/robotics-prototype/robot/rospackages/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ali/Programming/robotics-prototype/robot/rospackages/src /home/ali/Programming/robotics-prototype/robot/rospackages/src /home/ali/Programming/robotics-prototype/robot/rospackages/build /home/ali/Programming/robotics-prototype/robot/rospackages/build /home/ali/Programming/robotics-prototype/robot/rospackages/build/CMakeFiles/tests.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/tests.dir/depend
 

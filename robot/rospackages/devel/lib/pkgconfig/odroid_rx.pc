@@ -1,8 +1,0 @@
-prefix=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/devel
-
-Name: odroid_rx
-Description: Description of odroid_rx
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/devel/lib 
-Requires: 

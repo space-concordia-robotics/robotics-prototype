@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE "/usr/src/gtest")
-set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/ali/Programming/robotics-prototype/robot/rospackages/build")
 
 # Force unix paths in dependencies.
 set(CMAKE_FORCE_UNIX_PATHS 1)

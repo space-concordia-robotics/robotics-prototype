@@ -5,12 +5,13 @@
 # It tries it's best to undo changes from a previously sourced setup file before.
 # Supported command line options:
 # --extend: skips the undoing of changes from a previously sourced setup file
-#   (in plain sh shell which does't support arguments for sourced scripts you
-#   can set the environment variable `CATKIN_SETUP_UTIL_ARGS=--extend` instead)
+# --local: only considers this workspace but not the chained ones
+# In plain sh shell which doesn't support arguments for sourced scripts you can
+# set the environment variable `CATKIN_SETUP_UTIL_ARGS=--extend/--local` instead.
 
 # since this file is sourced either use the provided _CATKIN_SETUP_DIR
 # or fall back to the destination set at configure time
-: ${_CATKIN_SETUP_DIR:=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install}
+: ${_CATKIN_SETUP_DIR:=/home/ali/Programming/robotics-prototype/robot/rospackages/install}
 _SETUP_UTIL="$_CATKIN_SETUP_DIR/_setup_util.py"
 unset _CATKIN_SETUP_DIR
 

@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install")
+  set(CMAKE_INSTALL_PREFIX "/home/ali/Programming/robotics-prototype/robot/rospackages/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/gtest/gtest/cmake_install.cmake")
+  include("/home/ali/Programming/robotics-prototype/robot/rospackages/build/gtest/gtest/cmake_install.cmake")
 
 endif()
 

@@ -1,8 +1,0 @@
-prefix=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install
-
-Name: mcu_control
-Description: Description of mcu_control
-Version: 0.0.0
-Cflags: -I/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/include
-Libs: -L/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/lib 
-Requires: message_runtime

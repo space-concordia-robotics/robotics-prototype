@@ -1,2 +1,0 @@
-set(mcu_control_MESSAGE_FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mcu_control/msg/IkCommand.msg;/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mcu_control/msg/AntennaGoal.msg")
-set(mcu_control_SERVICE_FILES "/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mcu_control/srv/ArmRequest.srv;/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mcu_control/srv/ScienceRequest.srv")

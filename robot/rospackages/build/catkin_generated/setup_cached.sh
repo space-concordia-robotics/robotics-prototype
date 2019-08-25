@@ -7,4 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export PWD="/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build"
+export PWD="/home/ali/Programming/robotics-prototype/robot/rospackages/build"

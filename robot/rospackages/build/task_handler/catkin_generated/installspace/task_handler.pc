@@ -1,8 +1,0 @@
-prefix=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install
-
-Name: task_handler
-Description: Description of task_handler
-Version: 0.0.0
-Cflags: -I/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/include
-Libs: -L/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install/lib 
-Requires: 

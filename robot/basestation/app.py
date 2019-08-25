@@ -23,13 +23,12 @@ def fetch_ros_master_uri():
 @app.route("/")
 def index():
     return flask.render_template("AsimovOperation.html")
-'''
-@app.route('/<path:filename>', methods=['GET'])
-def serveFile(filename):
-    if request.method == 'GET':
+
+@app.route('/static/model')
+def serveArmFile(filename):
         return send_from_directory('./'+path, filename)
-        return send_from_directory(static_file_dir, path)
-        '''
+	return send_from_directory(static_file_dir, path)
+
 # Automatic controls
 @app.route("/click_btn_pitch_up")
 def click_pitch_up():
