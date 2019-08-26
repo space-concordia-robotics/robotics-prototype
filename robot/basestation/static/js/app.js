@@ -4,7 +4,6 @@ $(document).ready(() => {
     init () {
       // connect ros to the rosbridge websockets server
       initRosWeb()
-      initR();
 
       if (getCookie('serialType')) {
         appendToConsole('Found cookie!')
@@ -22,6 +21,7 @@ $(document).ready(() => {
               1,
               '#front-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('front camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -42,6 +42,7 @@ $(document).ready(() => {
               0,
               '#front-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('front camera OFF msgs:', msgs)
                 if (msgs[1].includes('Stopped camera_stream')) {
                   // succeeded to close stream
@@ -69,6 +70,7 @@ $(document).ready(() => {
               1,
               '#rear-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('rear camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -88,6 +90,7 @@ $(document).ready(() => {
               0,
               '#rear-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 if (msgs[1].includes('Stopped camera_stream')) {
                   console.log('rear camera OFF msgs:', msgs)
 
@@ -133,6 +136,7 @@ $(document).ready(() => {
               1,
               '#arm-science-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
                 console.log('arm/science camera ON msgs:', msgs)
                 if (msgs[1].includes('Started camera_stream')) {
                   $('img#camera-feed')[0].src =
@@ -152,6 +156,8 @@ $(document).ready(() => {
               0,
               '#arm-science-camera-stream-btn',
               function (msgs) {
+                printErrToConsole(msgs)
+
                 if (msgs[1].includes('Stopped camera_stream')) {
                   console.log('arm science camera OFF msgs:', msgs)
 
@@ -368,7 +374,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/rover') {
           console.log('Activating Rover Listener Node')
@@ -389,7 +395,7 @@ $(document).ready(() => {
                 $('#toggle-rover-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendRoverRequest('ping', function (msgs) {})
+                sendRequest("Rover", 'ping', printErrToConsole)
               } else {
                 $('#toggle-rover-listener-btn')[0].checked = false
               }
@@ -407,7 +413,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/') {
           console.log('Activating Arm Listener Node')
@@ -428,7 +434,7 @@ $(document).ready(() => {
                 $('#toggle-arm-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendArmRequest('ping', function (msgs) {})
+                sendRequest("Arm",'ping', printErrToConsole)
               } else {
                 $('#toggle-arm-listener-btn')[0].checked = false
               }
@@ -446,7 +452,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
 
         if (msgs[0] == true && window.location.pathname == '/science') {
           console.log('Activating Science Listener Node')
@@ -467,12 +473,11 @@ $(document).ready(() => {
                 $('#science-listener-btn')[0].checked = true
                 // try pinging MCU
                 wait(1000)
-                sendScienceRequest('ping', function (msgs) {})
+                sendRequest("Science", 'ping', printErrToConsole)
               } else {
                 $('#science-listener-btn')[0].checked = false
               }
             },
-<<<<<<< HEAD
             serialType
           )
         }
@@ -486,7 +491,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
       })
     }
   })
@@ -555,15 +560,21 @@ $(document).ready(() => {
   })
 })
 
+function printErrToConsole(msg)
+{
+  if(!msg[0])
+    appendToConsole(msg[1])
+}
+
 function pingDevice(device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
     switch(device)
     {
       case "Arm" :
-        sendArmRequest('ping', function (msgs) {})
+        sendRequest("Arm", 'ping', printErrToConsole)
         break;
       case "Rover" :
-        sendRoverRequest('ping', function (msgs) {})
+        sendRequest("Rover", 'ping', printErrToConsole)
         break;
       case "Odroid":
       default:
@@ -574,7 +585,7 @@ function pingDevice(device) {
   }
 }
 
-function pingOdroid() {
+function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
   appendToConsole('pinging odroid')
   $.ajax('/ping_rover', {
     success: function (data) {
@@ -585,136 +596,18 @@ function pingOdroid() {
         appendToConsole(data.ros_msg)
       }
     },
-    error: function () {
-      console.log('An error occured')
-    }
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(errorThrown)
+      if (errorThrown=="timeout") {
+         msg = "Odroid ping timeout after " + timeoutVal/1000 + " seconds. " +
+           "Check if the websockets server is running. If not, there's either a network issue " +
+           "or the Odroid and possibly the whole rover has shut down unexpectedly."
+        appendToConsole(msg)
+      } else {
+        console.log('Error of type ' + errorThrown + 'occured')
+      }
+    },
+    timeout: timeoutVal
   })
   lastCmdSent = new Date().getTime()
 }
-=======
-            {
-                $el: $('a#click_btn_claw_open'),
-                event: "click",
-                route: "/click_btn_claw_open",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_claw_close'),
-                event: "click",
-                route: "/click_btn_claw_close",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_up'),
-                event: "click",
-                route: "/click_btn_arm_up",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_down'),
-                event: "click",
-                route: "/click_btn_arm_down",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_left'),
-                event: "click",
-                route: "/click_btn_arm_left",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_right'),
-                event: "click",
-                route: "/click_btn_arm_right",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_back'),
-                event: "click",
-                route: "/click_btn_arm_back",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_arm_forward'),
-                event: "click",
-                route: "/click_btn_arm_forward",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor1_ccw'),
-                event: "click",
-                route: "/click_btn_motor1_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor1_cw'),
-                event: "click",
-                route: "/click_btn_motor1_cw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor2_ccw'),
-                event: "click",
-                route: "/click_btn_motor2_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor2_cw'),
-                event: "click",
-                route: "/click_btn_motor2_cw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor3_ccw'),
-                event: "click",
-                route: "/click_btn_motor3_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor3_cw'),
-                event: "click",
-                route: "/click_btn_motor3_cw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor4_ccw'),
-                event: "click",
-                route: "/click_btn_motor4_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor4_cw'),
-                event: "click",
-                route: "/click_btn_motor4_cw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor5_ccw'),
-                event: "click",
-                route: "/click_btn_motor5_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor5_cw'),
-                event: "click",
-                route: "/click_btn_motor5_cw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor6_ccw'),
-                event: "click",
-                route: "/click_btn_motor6_ccw",
-                handler: function(data) { }
-            },
-            {
-                $el: $('a#click_btn_motor6_cw'),
-                event: "click",
-                route: "/click_btn_motor6_cw",
-                handler: function(data) { }
-            },
-        ]
-    };
-
-    Site.init();
-})
->>>>>>> 61a7eac... [#58] Make robot visualization semi-functional and add explanations in ROS3D.md

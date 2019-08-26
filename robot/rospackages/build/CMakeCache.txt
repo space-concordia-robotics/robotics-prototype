@@ -389,6 +389,12 @@ gtest_main_LIB_DEPENDS:STATIC=general;-lpthread;general;gtest;
 //Path to a library.
 lib:FILEPATH=/opt/ros/kinetic/lib/libtf2.so
 
+//Value Computed by CMake
+mcu_control_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/mcu_control
+
+//Value Computed by CMake
+mcu_control_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mcu_control
+
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/kinetic/share/message_filters/cmake
 
@@ -397,6 +403,24 @@ message_generation_DIR:PATH=/opt/ros/kinetic/share/message_generation/cmake
 
 //The directory containing a CMake configuration file for message_runtime.
 message_runtime_DIR:PATH=/opt/ros/kinetic/share/message_runtime/cmake
+
+//Value Computed by CMake
+mux_selector_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/mux_selector
+
+//Value Computed by CMake
+mux_selector_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/mux_selector
+
+//Value Computed by CMake
+odroid_rx_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/odroid_rx
+
+//Value Computed by CMake
+odroid_rx_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/odroid_rx
+
+//Value Computed by CMake
+ping_acknowledgment_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/ping_acknowledgment
+
+//Value Computed by CMake
+ping_acknowledgment_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/ping_acknowledgment
 
 //The directory containing a CMake configuration file for rosconsole.
 rosconsole_DIR:PATH=/opt/ros/kinetic/share/rosconsole/cmake
@@ -431,8 +455,20 @@ rostime_DIR:PATH=/opt/ros/kinetic/share/rostime/cmake
 //The directory containing a CMake configuration file for sensor_msgs.
 sensor_msgs_DIR:PATH=/opt/ros/kinetic/share/sensor_msgs/cmake
 
+//Value Computed by CMake
+serial_cmd_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/serial_cmd
+
+//Value Computed by CMake
+serial_cmd_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/serial_cmd
+
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/kinetic/share/std_msgs/cmake
+
+//Value Computed by CMake
+task_handler_BINARY_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/task_handler
+
+//Value Computed by CMake
+task_handler_SOURCE_DIR:STATIC=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/src/task_handler
 
 //The directory containing a CMake configuration file for tf2.
 tf2_DIR:PATH=/opt/ros/kinetic/share/tf2/cmake
@@ -588,7 +624,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=11
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

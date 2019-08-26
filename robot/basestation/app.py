@@ -12,52 +12,12 @@ from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
 from shlex import split
-import os as os
 
-app = flask.Flask(__name__)#, static_folder=os.path.abspath('~/catkin_rover/src/'))
+app = flask.Flask(__name__)
+
 
 def fetch_ros_master_uri():
     """Fetch and parse ROS Master URI from environment variable.
-# Once we launch this, this will route us to the "../" page or index page and
-# automatically render the Rover GUI
-@app.route("/")
-def index():
-    return flask.render_template("AsimovOperation.html")
-
-@app.route('/static/model/<path:filename>')
-def serveArmModel(filename):
-	return flask.send_from_directory('../rospackages/src/', filename)
-
-# Automatic controls
-@app.route("/click_btn_pitch_up")
-def click_pitch_up():
-    print("click_btn_pitch_up")
-    return ""
-
-
-@app.route("/click_btn_pitch_down")
-def click_btn_pitch_down():
-    print("click_btn_pitch_down")
-    return ""
-
-
-@app.route("/click_btn_roll_left")
-def click_btn_roll_left():
-    print("click_btn_roll_left")
-    return ""
-
-
-@app.route("/click_btn_roll_right")
-def click_btn_roll_right():
-    print("click_btn_roll_right")
-    return ""
-
-
-@app.route("/click_btn_claw_open")
-def click_btn_claw_open():
-    print("click_btn_claw_open")
-    return ""
-
 
     The parsed URI is returned as a urllib.parse.ParseResult instance.
 
@@ -99,6 +59,7 @@ def run_shell(cmd, args=""):
 
     return output, error
 
+
 def get_pid(keyword):
     cmd = "ps aux"
     output, error = run_shell(cmd)
@@ -117,12 +78,20 @@ def get_pid(keyword):
 
     return -1
 
+
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
 def index():
     """Current landing page, the arm panel."""
     return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
+
+
+@app.route('/static/model/<path:filename>')
+def serveArmModel(filename):
+    """Lets ros3djs access the meshes used to render the arm model"""
+    return flask.send_from_directory('../rospackages/src/', filename)
+
 
 @app.route("/rover")
 def rover():

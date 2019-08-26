@@ -117,6 +117,12 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/gtest/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/mux_selector/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/odroid_rx/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/ping_acknowledgment/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/serial_cmd/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/task_handler/cmake_install.cmake")
+  include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/mcu_control/cmake_install.cmake")
   include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/tf2_web_republisher/cmake_install.cmake")
   include("/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/build/colarm/cmake_install.cmake")
 
