@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
@@ -149,11 +149,16 @@
       link="prox_link" />
     <axis
       xyz="0 0 1" />
-    <limit
-      lower="-1.5708"
-      upper="1.5708"
-      effort="0"
-      velocity="0" />
+      <!--limit
+        lower="-1.5708"
+        upper="1.5708"
+        effort="0"
+        velocity="0" /-->
+      <limit
+        lower="-3"
+        upper="3"
+        effort="0"
+        velocity="0" />
   </joint>
   <link
     name="distal_link">
@@ -207,11 +212,16 @@
       link="distal_link" />
     <axis
       xyz="0 0 1" />
-    <limit
-      lower="-1.5708"
-      upper="1.5708"
-      effort="0"
-      velocity="0" />
+      <!--limit
+        lower="-1.5708"
+        upper="1.5708"
+        effort="0"
+        velocity="0" /-->
+      <limit
+        lower="-3"
+        upper="3"
+        effort="0"
+        velocity="0" />
   </joint>
   <link
     name="wrist_flex_link">
@@ -265,9 +275,14 @@
       link="wrist_flex_link" />
     <axis
       xyz="0 0 1" />
-    <limit
+    <!--limit
       lower="-1.5708"
       upper="1.5708"
+      effort="0"
+      velocity="0" /-->
+    <limit
+      lower="-3"
+      upper="3"
       effort="0"
       velocity="0" />
   </joint>
@@ -376,9 +391,14 @@
       link="finger1_link" />
     <axis
       xyz="1 0 0" />
-    <limit
+    <!--limit
       lower="-0.01"
       upper="0"
+      effort="0"
+      velocity="0" /-->
+    <limit
+      lower="-0.02"
+      upper="0.005"
       effort="0"
       velocity="0" />
   </joint>
@@ -434,10 +454,15 @@
       link="finger2_link" />
     <axis
       xyz="1 0 0" />
-    <limit
-      lower="-0.01"
-      upper="0"
-      effort="0"
-      velocity="0" />
+      <!--limit
+        lower="-0.01"
+        upper="0"
+        effort="0"
+        velocity="0" /-->
+      <limit
+        lower="-0.02"
+        upper="0.005"
+        effort="0"
+        velocity="0" />
   </joint>
 </robot>

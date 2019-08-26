@@ -1,0 +1,10 @@
+<launch>
+  <!-- this launch file runs all nodes, currently requires venv to be deactivated -->
+  <!-- this next node sends asimov urdf to param server -->
+  <param name="robot_description" textfile="$(find asimov_simplified)/urdf/asimov_simplified.urdf" />
+  <param name="use_gui" type="bool" value="true" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <!-- this next node gives control over the joints -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" />
+</launch>
