@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="asimov_simplified">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="4.1741E-36 4.9302E-19 0.0042472"
+        rpy="0 0 0" />
+      <mass
+        value="0.118" />
+      <inertia
+        ixx="0.00022082"
+        ixy="-1.4238E-37"
+        ixz="-2.5519E-21"
+        iyy="0.00022082"
+        iyz="1.2317E-20"
+        izz="0.00042194" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="upbase_link">
+    <inertial>
+      <origin
+        xyz="4.565E-18 0.038705 -1.5824E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.58276" />
+      <inertia
+        ixx="0.00085254"
+        ixy="1.1312E-19"
+        ixz="-5.9904E-20"
+        iyy="0.00082203"
+        iyz="-2.3382E-19"
+        izz="0.00059485" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/upbase_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/upbase_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="upbase_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 0.025"
+      rpy="1.5708 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="upbase_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="prox_link">
+    <inertial>
+      <origin
+        xyz="6.3306E-18 -0.15716 0.0005625"
+        rpy="0 0 0" />
+      <mass
+        value="1.9378" />
+      <inertia
+        ixx="0.014439"
+        ixy="9.1498E-19"
+        ixz="-1.3979E-19"
+        iyy="0.0022903"
+        iyz="1.5237E-19"
+        izz="0.014015" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/prox_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/prox_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="prox_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.092075 0"
+      rpy="0 0 3.1416" />
+    <parent
+      link="upbase_link" />
+    <child
+      link="prox_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.5708"
+      upper="1.5708"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="distal_link">
+    <inertial>
+      <origin
+        xyz="-6.7589E-18 0.18095 0.00049507"
+        rpy="0 0 0" />
+      <mass
+        value="2.0127" />
+      <inertia
+        ixx="0.019589"
+        ixy="-1.1089E-18"
+        ixz="-2.04E-19"
+        iyy="0.002078"
+        iyz="-1.7181E-18"
+        izz="0.019451" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/distal_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/distal_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="distal_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.31433 0"
+      rpy="0 0 -3.1416" />
+    <parent
+      link="prox_link" />
+    <child
+      link="distal_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.5708"
+      upper="1.5708"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="wrist_flex_link">
+    <inertial>
+      <origin
+        xyz="1.6288E-17 0.060707 -9.3183E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.48493" />
+      <inertia
+        ixx="0.00059851"
+        ixy="-1.2113E-19"
+        ixz="2.0065E-21"
+        iyy="0.00043866"
+        iyz="-3.1675E-21"
+        izz="0.0006197" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/wrist_flex_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/wrist_flex_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wrist_flex_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.3619 0"
+      rpy="0 0 0" />
+    <parent
+      link="distal_link" />
+    <child
+      link="wrist_flex_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.5708"
+      upper="1.5708"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="wrist_twist_link">
+    <inertial>
+      <origin
+        xyz="-1.295E-05 0.038827 -9.0987E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.25544" />
+      <inertia
+        ixx="0.000173"
+        ixy="-4.8498E-10"
+        ixz="-2.9509E-20"
+        iyy="0.0001701"
+        iyz="9.6433E-21"
+        izz="0.00025541" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/wrist_twist_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/wrist_twist_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="wrist_twist_joint"
+    type="continuous">
+    <origin
+      xyz="1.299E-05 0.11531 -9.2273E-05"
+      rpy="0 0 0" />
+    <parent
+      link="wrist_flex_link" />
+    <child
+      link="wrist_twist_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="finger1_link">
+    <inertial>
+      <origin
+        xyz="-0.021321 -0.001852 0.019912"
+        rpy="0 0 0" />
+      <mass
+        value="0.081443" />
+      <inertia
+        ixx="4.3829E-05"
+        ixy="-1.8224E-06"
+        ixz="-2.7174E-12"
+        iyy="1.9906E-05"
+        iyz="8.9567E-12"
+        izz="4.1116E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/finger1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/finger1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger1_joint"
+    type="prismatic">
+    <origin
+      xyz="0.0019818 0.12535 -0.019389"
+      rpy="0 0 0" />
+    <parent
+      link="wrist_twist_link" />
+    <child
+      link="finger1_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-0.01"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="finger2_link">
+    <inertial>
+      <origin
+        xyz="-0.021441 0.001852 -0.019904"
+        rpy="0 0 0" />
+      <mass
+        value="0.081443" />
+      <inertia
+        ixx="4.3829E-05"
+        ixy="1.8224E-06"
+        ixz="2.7174E-12"
+        iyy="1.9906E-05"
+        iyz="8.9567E-12"
+        izz="4.1116E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/finger2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://asimov_simplified/meshes/finger2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="finger2_joint"
+    type="prismatic">
+    <origin
+      xyz="-0.002128 0.12535 0.020427"
+      rpy="0 0 3.1416" />
+    <parent
+      link="wrist_twist_link" />
+    <child
+      link="finger2_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-0.01"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+</robot>
