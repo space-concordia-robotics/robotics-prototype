@@ -1,2 +1,0 @@
-colarm:mcu_control:mux_selector:odroid_rx:ping_acknowledgment:serial_cmd:task_handler:tf2_web_republisher
--DCATKIN_DEVEL_PREFIX=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/devel -DCMAKE_INSTALL_PREFIX=/home/vashmata/Programming/git/robotics-prototype/robot/rospackages/install -G Unix Makefiles
