@@ -1,0 +1,8 @@
+<launch>
+  <!--send colllarm urdf to param server -->
+  <param name="robot_description" textfile="$(find colllarm)/urdf/colllarm.urdf" />
+  <param name="use_gui" type="bool" value="true" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher" />
+</launch>

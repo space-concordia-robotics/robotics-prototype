@@ -1,29 +1,30 @@
 # Displaying the robot in the GUI
 
 ## Instructions to set everything up
-If this is your first time using these tools, read through the Dependencies section below. If your laptop is already set up, simply follow these instructions. 
+If this is your first time using these tools, read through the Dependencies section below. Otherwise, if you laptop is fully set up you can follow the next steps.
 
-NOTE: Some of the following commands require `venv` to be deactivated, otherwise I got strange errors:
-http://wiki.ros.org/ros3djs/Tutorials/VisualizingAURDF
+Currently the newest version of the robot is `colllarm`. The easiest way to run it is:
+1) `deactivate` and then `roslaunch colllarm_full.launch`
+2) `rosgui` OR `deactivate` and then `roslaunch rosbridge_server rosbridge_websocket.launch`
+3) `startgui` OR go to the `basestation` folder and then `./app.py`
 
-1) if using pr2, `roslaunch pr2_description upload_pr2.launch`
-OR
-1) if using colarm, go to rospackages and `roslaunch colarm/colarm.launch`
+A few notes:
+-The following packages require `venv` to be deactivated, otherwise I get strange errors: rosbridge_server, joint_state_publisher, tf2_web_republisher
+-Also, tf2_web_republisher will give errors if you try loading the page before the robot's joint states are being published. This means either the joint_state_publisher or the node publishing JointStates on the rover must be running before you open the GUI.
+-The most barebones launch file we use to set up the robot simply reads the robot's URDF into the `robot_description` parameter. There's probably a way to do this with a rosbash command. `colllarm_full.launch`, on the other hand, is capable of setting up everything besides the GUI.
+
+The above instructions were adapted from [this link](http://wiki.ros.org/ros3djs/Tutorials/VisualizingAURDF). The following instructions follow what's described in the link, so if you want to have more control over the outputs of the different nodes, use these commands instead:
+1) if using pr2, `roslaunch pr2_description upload_pr2.launch` OR if using colarm, `roslaunch colarm.launch`
+NOTE: if using pr2, you'll need to copy the pr2 package into `rospackages/src` so the javascript we use can find the meshes.
 2) `rosrun robot_state_publisher robot_state_publisher`
 3) `rosparam set use_gui true`
 4) `deactivate` and then `rosrun joint_state_publisher joint_state_publisher`
 5) `deactivate` and then `rosrun tf2_web_republisher tf2_web_republisher`
 6) `deactivate` and then `roslaunch rosbridge_server rosbridge_websocket.launch`
-OR
-6) `rosgui`
-7) Go to `basestation` and then `./app.py`
-OR
-7) `startgui`
+7) Go to the `basestation` folder and then `./app.py`
 
 ## Next Steps
-The next step would be to make a launch file which goes through steps 1 to 5. Steps 6 and 7 should be done separately, just like they currently are in `master`, because each command returns feedback that needs to be shown in separate terminals.
-
-Also, some research should be done to understand why `venv` must be deactivated.
+Some research should be done to understand why `venv` must be deactivated.
 
 ## How we got the javascript to work properly
 Another issue I found is that you need to connect to an http server in order to access the meshes used to visualize the robot in the GUI. The example links to the RobotWebTools website which doesn't seem to actually work. The solution is to host the meshes from the Flask app, so this was modified in the javascript. I started by pasting the `pr2_description` folder into `/static/` but afer we switched to using `colarm`, we eventually discovered how to have Flask serve the files from a different directory using some commands in `app.py`. So instead of having `colarm` in `rospackages` and having a second copy in `/static/` (the second one being used to access the meshes), flask will get the meshes from `rospackages`. Here's some further reading:
