@@ -141,15 +141,10 @@ def subscriber_callback(message):
     return
 
 
-### currently the pds gives 3 types of feedback in one message
-### so this needs to publish to 3 different topics:
-### battery voltage, wheel motor current, battery temp
-### currently the format is: "PDS,val,val,...,val\n"
-### but 'PDS,' is stripped by stripFeedback()
-
 def publish_pds_data(message):
     # parse the data received from PDS
-    dataPDS = message.split(', ')  ###returns an array of ALL data from the PDS
+    # converts message from string to float
+    dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
     # create the message to be published
     voltage = Float32()
     current = JointState()
@@ -165,7 +160,6 @@ def publish_pds_data(message):
                 temp.x = float(dataPDS[7])
                 temp.y = float(dataPDS[8])
                 temp.z = float(dataPDS[9])
-
         voltagePub.publish(voltage)
         currentPub.publish(current)
         tempPub.publish(temp)
@@ -173,6 +167,7 @@ def publish_pds_data(message):
         rospy.logwarn('trouble parsing PDS data')
         return
     return
+
 
 def stripFeedback(data):
     startStrip = 'PDS '
@@ -214,7 +209,6 @@ if __name__ == '__main__':
     init_serial()
 
     # service requests are implicitly handled but only at the rate the node publishes at
-    ## still being worked on -Nick
     global ser
     try:
         while not rospy.is_shutdown():
@@ -223,18 +217,15 @@ if __name__ == '__main__':
             #not sure if I need the same precautions when writing but so far it seems ok.
             if ser.in_waiting:
                 data = ''
-                #feedback = ser.readline().decode()
                 feedback = None
                 try:
                      data = ser.readline().decode()
                      feedback = data
-                     #feedback = stripFeedback(data)
                 except:
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
                     if 'Command:' in feedback:
                         rospy.loginfo(feedback)
-                        #feedback_pub_topic(feedback)
                         feedbackPub.publish(feedback)
                     elif 'Command error:' in feedback:
                         rospy.logwarn(feedback)
@@ -251,7 +242,6 @@ if __name__ == '__main__':
     def shutdown_hook():
         rospy.logwarn('This node (' + node_name + ') is shutting down')
         ser.close()  # good practice to close the serial port
-        # do I need to clear the serial buffer too?
         time.sleep(1)  # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)

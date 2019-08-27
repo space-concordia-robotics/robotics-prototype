@@ -147,6 +147,7 @@ void loop() {
       memset(BUFFER, 0, CHAR_BUFF_SIZE);
       messagesReceived++;
     } else {
+      Serial.println("Command error: PDS received empty message");
       badMessages++;
     }
   }
@@ -277,7 +278,8 @@ void parseCommand() {
             int state = (int)*token - 48;
             if (state == 0 || state == 1) {
               digitalWrite(motorPins[motorNum - 1], state);
-              Serial.println("Command: PDS toggling power state to motor " + motorNum);
+              Serial.print("Command: PDS toggling power state to motor: ");
+              Serial.println(motorNum);
             } else {
               Serial.println("Command error: PDS invalid motor state");
               badMessages++;
@@ -298,7 +300,6 @@ void parseCommand() {
             badMessages++;
             break;
           }
-
           MAX_FAN_SPEED = (int)(12.0 * 255.0 / batteryVoltage); // calculate the max allowable fan speed
           fanSpeed = map(fanSpeed, 0, 100, 0, MAX_FAN_SPEED); // To check that the value returned is indeed correct
           switch (fanNum) {
@@ -317,7 +318,10 @@ void parseCommand() {
           badMessages++;
         }
       }
+      break;
     } else {
+      Serial.println("Command error: PDS invalid command");
+      badMessages++;
       break;
     } // end of main "PDS" token check
   } // end of while loop
