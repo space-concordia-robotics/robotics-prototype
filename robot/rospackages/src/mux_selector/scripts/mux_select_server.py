@@ -30,7 +30,7 @@ def select_device(device):
     device = int(device)
 
     # s1 most significant bit, s0 least significant bit
-    # s0 --> gpio 18 (physical 15), s1 --> gpio 21 (physical 13)
+    # s0 --> gpio 18 (physical 15), s1 --> gpio 30 (physical 19)
     # NOTE: on the final PCB the select logic will be inverted
     # this is why selecting device 0 is mapped to (1, 1) --> (0, 0)
     if not device in (0, 1, 2, 3):
@@ -63,7 +63,7 @@ def select_device(device):
         with open(gpio_dir + "/gpio18/value", "w") as f:
             f.write(str(s0_val))
         # s1
-        with open(gpio_dir + "/gpio21/value", "w") as f:
+        with open(gpio_dir + "/gpio30/value", "w") as f:
             f.write(str(s1_val))
 
     s0_state = "s0: " + str(s0_val)
