@@ -14,31 +14,11 @@ $(document).ready(() => {
 
     function prefer_theme(name) {
         console.log('Prefer theme: ' + name);
-        var futuredate = new Date();
-        var futuretime = futuredate.getTime();
-        futuretime += 3600 * 1000 * 24 * 365; // Roughly 1 year into the future
-        futuredate.setTime(futuretime);
-        document.cookie = "theme=" + name + "; expires=" + futuredate.toUTCString() + "; path=/";
+        setCookie(theme, name, 365); // setCookie() from helpers.js
         append_css('themes/' + name);
     }
 
-    function get_cookie(cname) {
-        var name = cname + "=";
-        var decodedCookie = decodeURIComponent(document.cookie);
-        var ca = decodedCookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
-    preferred_theme = get_cookie('theme');
+    preferred_theme = getCookie('theme'); // getCookie() from helpers.js
     if (preferred_theme != "") {
         prefer_theme(preferred_theme);
     }
