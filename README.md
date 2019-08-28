@@ -14,6 +14,7 @@ Secondly, it is imperative you use a virtual env (instead of your system Python)
 We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages, use the commands below :
 
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
+
 Pull : `git pull; git submodule update --recursive --remote`
  
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
