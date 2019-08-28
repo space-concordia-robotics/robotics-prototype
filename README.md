@@ -15,7 +15,7 @@ We are using git submodules in `robotics-prototype`. This means that we are usin
 
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
-Pull : `git pull; git submodule update --recursive --remote`
+Pull : `git pull; git submodule update --init --recursive`
  
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
