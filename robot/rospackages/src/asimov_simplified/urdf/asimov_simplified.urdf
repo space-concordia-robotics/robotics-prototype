@@ -391,14 +391,9 @@
       link="finger1_link" />
     <axis
       xyz="1 0 0" />
-    <!--limit
-      lower="-0.01"
-      upper="0"
-      effort="0"
-      velocity="0" /-->
     <limit
       lower="-0.02"
-      upper="0.005"
+      upper="0.0"
       effort="0"
       velocity="0" />
   </joint>
@@ -454,14 +449,9 @@
       link="finger2_link" />
     <axis
       xyz="1 0 0" />
-      <!--limit
-        lower="-0.01"
-        upper="0"
-        effort="0"
-        velocity="0" /-->
       <limit
         lower="-0.02"
-        upper="0.005"
+        upper="0.0"
         effort="0"
         velocity="0" />
   </joint>

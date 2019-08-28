@@ -32,7 +32,8 @@ function initRosWeb () {
   let tfClient = new ROSLIB.TFClient({
     ros : ros,
     angularThres : 0.01,
-    transThres : 0.01,
+    // the default example uses 0.01 which is not small enough to see the fingers move smoothly
+    transThres : 0.001,
     rate : 10.0
   })
 
@@ -44,7 +45,7 @@ function initRosWeb () {
     rootObject : viewer.scene,
     loader : ROS3D.COLLADA_LOADER_2
   })
-  
+
   /* general controls */
 
   // setup a client for the ping service
