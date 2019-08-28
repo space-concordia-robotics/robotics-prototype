@@ -14,7 +14,7 @@ $(document).ready(() => {
 
     function prefer_theme(name) {
         console.log('Prefer theme: ' + name);
-        setCookie(theme, name, 365); // setCookie() from helpers.js
+        setCookie('theme', name, 365); // setCookie() from helpers.js
         append_css('themes/' + name);
     }
 
