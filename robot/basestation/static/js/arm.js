@@ -19,18 +19,17 @@ function printCommandsList () {
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
+function manualControl() {
+  var armsOFF = $('#ArmcontrolsOFF')[0]
+  var armsON = $('#ArmcontrolsON')[0]
 
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
+  if (armsOFF.style.display === 'none') {
+    armsOFF.style.display = 'block'
+    armsON.style.display = 'none'
   } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
+    armsOFF.style.display = 'none'
+    armsON.style.display = 'block'
+    armsON.style.borderRadius = '0'
   }
 }
 
@@ -41,39 +40,51 @@ function toggleToManual () {
 }
 
 $(document).ready(function () {
-  // checkTaskStatuses()
-
   $('#ping-odroid').on('click', function (event) {
+    event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      appendToConsole('pinging odroid')
-      $.ajax('/ping_rover', {
-        success: function (data) {
-          appendToConsole(data.ping_msg)
-          if (!data.ros_msg.includes('Response')) {
-            appendToConsole('No response from ROS ping_acknowledgment service')
-          } else {
-            appendToConsole(data.ros_msg)
-          }
-        },
-        error: function () {
-          console.log('An error occured')
-        }
-      })
+      pingDevice("Odroid")
       lastCmdSent = new Date().getTime()
     }
   })
-  $('#ping-arm-mcu').on('click', function (event) {
-    event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendArmRequest('ping', function (msgs) {})
-      lastCmdSent = new Date().getTime()
-    }
+
+  $('#save-image').on('click', function (event) {
+    $.ajax('/capture_image', {
+      success: function (data) {
+        appendToConsole(data.msg)
+        if (!data.msg.includes('success')) {
+          appendToConsole('Something went wrong, got', data.msg)
+        } else {
+          appendToConsole(data.msg)
+        }
+      },
+      error: function () {
+        console.log('An error occured')
+      }
+    })
   })
 
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
-    sendArmCommand('home') // REIMPLEMENT AS AN ACTION
+    //TODO: uncomment this when homing is confirmed to work properly
+    //sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
+
+  $('#list-all-cmds').on('click', function(event){
+    event.preventDefault()
+    printCommandsList()
+  })
+
+  $('#stop-all-motors').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('stop')
+  })
+
+  $('#reset-motor-angles').on('click', function(event){
+    event.preventDefault()
+    sendArmCommand('reset')
+  })
+
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('reboot')
@@ -105,7 +116,7 @@ $(document).ready(function () {
           1,
           '#toggle-arm-listener-btn',
           function (msgs) {
-            console.log(msgs)
+            printErrToConsole(msgs)
             if (msgs[0]) {
               $('#toggle-arm-listener-btn')[0].checked = true
             } else {
@@ -125,7 +136,7 @@ $(document).ready(function () {
       requestTask('arm_listener', 0, '#toggle-arm-listener-btn', function (
         msgs
       ) {
-        console.log('msgs[0]', msgs[0])
+        printErrToConsole(msgs)
         if (msgs.length == 2) {
           console.log('msgs[1]', msgs[1])
           if (msgs[1].includes('already running')) {
@@ -143,28 +154,6 @@ $(document).ready(function () {
       })
     }
   })
-  $('#toggle-arm-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#toggle-arm-stream-btn').is(':checked')) {
-      requestTask('camera_stream', 1, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          console.log('activating stream window')
-          getRoverIP(function (ip) {
-            console.log('ip', ip)
-            $('img#camera-feed')[0].src = ip + ':8090/?action=stream'
-          })
-        }
-      }) //, '/dev/ttyArmScienceCam')
-    } else {
-      requestTask('camera_stream', 0, '#toggle-arm-stream-btn', function (msgs) {
-        if (msgs[0]) {
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = '../static/images/stream-offline.jpg'
-        }
-      })
-    }
-  })
 
   $('#arm-speed-multiplier-btn').mouseup(function () {
     let multiplier = $('#arm-speed-multiplier-input').val()
@@ -174,9 +163,10 @@ $(document).ready(function () {
       parseFloat(multiplier) <= maxMultiplier
     ) {
       let cmd = 'armspeed ' + multiplier
-      sendArmRequest(cmd, function (msgs) {})
+      sendRequest("Arm", cmd, printErrToConsole)
     }
   })
+
   $('#arm-speed-multiplier-input').on('keyup', function (e) {
     if (e.keyCode == 13) {
       // enter key
@@ -187,94 +177,23 @@ $(document).ready(function () {
         parseFloat(multiplier) <= maxMultiplier
       ) {
         let cmd = 'armspeed ' + multiplier
-        sendArmRequest(cmd, function (msgs) {})
+        sendRequest("Arm", cmd, printErrToConsole)
       }
     }
   })
 
-  $('#m1-closed-loop-btn').on('click', function (event) {
+  $('[id$=-closed-loop-btn]').on('click', function (event) {
     event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = true
+    num = this.id[1]
+    isOpen = !$(this.id).is(':checked')
+    armReq = function(msgs) {
+        if(msgs[0]) {
+          $(this.id)[0].checked = !isOpen
         } else {
-          $('#m1-closed-loop-btn')[0].checked = false
+          $(this.id)[0].checked = isOpen
         }
-      })
-    } else {
-      sendArmRequest('motor 1 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = true
-        }
-      })
     }
-  })
-  $('#m2-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m2-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 2 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 2 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m2-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m2-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m3-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m3-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 3 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 3 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m3-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m3-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
-  })
-  $('#m4-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m4-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 4 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 4 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m4-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m4-closed-loop-btn')[0].checked = true
-        }
-      })
-    }
+    sendRequest("Arm", 'motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
   })
 })
 
@@ -287,20 +206,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
+    pingDevice("Odroid")
     lastCmdSent = new Date().getTime()
   }
 })
@@ -311,7 +217,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    sendArmRequest('ping', function (msgs) {})
+    pingDevice('Arm')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -322,7 +228,6 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyL' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
     lastCmdSent = new Date().getTime()
   }
@@ -501,9 +406,8 @@ function gameLoop () {
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
-    // 'z' --> stop all motors
+    // 'q' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
-      $('button#stop-all-motors').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
     } else if (toBudge) {
@@ -519,11 +423,45 @@ function gameLoop () {
 
     // 'o' --> reset angle values
     if (!$serialCmdInput.is(':focus') && keyState[79]) {
-      $('button#reset-motor-angles').css('background-color', 'rgb(255, 0, 0)')
       sendArmCommand('reset')
       lastCmdSent = new Date().getTime()
     }
 
+    // numpad8 --> ARM UP
+    if (!$serialCmdInput.is(':focus') && keyState[104]) {
+      console.log('ARM UP')
+      lightUp('#arm-up-btn > button')
+    }
+
+    // numpad4 --> ARM LEFT
+    if (!$serialCmdInput.is(':focus') && keyState[100]) {
+      console.log('ARM LEFT')
+      lightUp('#arm-left-btn > button')
+    }
+
+    // numpad6 --> ARM RIGHT
+    if (!$serialCmdInput.is(':focus') && keyState[102]) {
+      console.log('ARM RIGHT')
+      lightUp('#arm-right-btn > button')
+    }
+
+    // numpad5 --> ARM DOWN
+    if (!$serialCmdInput.is(':focus') && keyState[101]) {
+      console.log('ARM DOWN')
+      lightUp('#arm-down-btn > button')
+    }
+
+    // numpad1 --> ARM BACK
+    if (!$serialCmdInput.is(':focus') && keyState[97]) {
+      console.log('ARM BACK')
+      lightUp('#arm-back-btn > button')
+    }
+
+    // numpad3 --> ARM FWD
+    if (!$serialCmdInput.is(':focus') && keyState[99]) {
+      console.log('ARM FWD')
+      lightUp('#arm-fwd-btn > button')
+    }
     // redraw/reposition your object here
     // also redraw/animate any objects not controlled by the user
   }
@@ -611,25 +549,44 @@ document.addEventListener('keyup', function (event) {
 
 // EXTRA CONTROLS
 document.addEventListener('keyup', function (event) {
-  if (!$serialCmdInput.is(':focus') && event.code === 'KeyQ') {
-    $('button#stop-all-motors').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyO') {
-    $('button#reset-motor-angles').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyL') {
-    $('button#list-all-cmds').css('background-color', 'rgb(74, 0, 0)')
-  }
-})
-
-document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  console.log('event.code:', event.code)
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad8') {
+    dim('#arm-up-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad4') {
+    dim('#arm-left-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad6') {
+    dim('#arm-right-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad5') {
+    dim('#arm-down-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad1') {
+    dim('#arm-back-btn > button')
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad3') {
+    dim('#arm-fwd-btn > button')
   }
 })

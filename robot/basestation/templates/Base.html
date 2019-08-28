@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport">
+
+    {% block head %}
+    <title>{% block title %}{% endblock %} - Space Concordia</title>
+
+    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
+
+    <!-- Bootstrap CSS -->
+    <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
+    <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
+    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
+    <link href="../static/css/bootstrap-toggle-2.2.2.min.css" rel="stylesheet">
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/helpers.js"></script>
+
+    <link href="../static/css/app.css" rel="stylesheet">
+    <link href="../static/css/arm.css" rel="stylesheet">
+    <link href="../static/css/rover.css" rel="stylesheet">
+
+    <script src="../static/css/bootstrap-toggle-2.2.2.min.js"></script>
+
+    <!-- for roslibjs stuff -->
+    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
+    <!-- all for ros3d -->
+    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
+    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
+    <!-- homemade -->
+    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
+
+    <script src="../static/js/app.js"></script>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous" async></script> -->
+    <script src="../static/js/popper-1.14.3.min.js"></script>
+    <script src="../static/js/bootstrap-4.1.2.min.js"></script>
+    {% endblock %}
+</head>
+<body>
+    <div id="content">
+      {% include 'Navbar.html' %}
+      <br>
+      <br>
+      <br>
+      <br>
+      {% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+        <a href="https://spaceconcordia.github.io/">Space Concordia</a>.
+        {% endblock %}
+    </div>
+</body>
+</html>

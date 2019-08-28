@@ -10,6 +10,173 @@ $(document).ready(() => {
         $('#serial-type').text(getCookie('serialType'))
       }
 
+      // only for ARM and ROVER (for now)
+      if (window.location.pathname != '/science') {
+        $('#front-camera-stream-btn').on('click', function (event) {
+          event.preventDefault()
+          // click makes it checked during this time, so trying to enable
+          if ($('#front-camera-stream-btn').is(':checked')) {
+            requestTask(
+              'camera_stream',
+              1,
+              '#front-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+                console.log('front camera ON msgs:', msgs)
+                if (msgs[1].includes('Started camera_stream')) {
+                  $('img#camera-feed')[0].src =
+                    'http://' +
+                    getRoverIP() +
+                    ':8080/stream?topic=/cv_camera/image_raw'
+                  $('img#camera-feed').addClass('rotateimg180')
+                } else {
+                  appendToConsole('Failed to open stream')
+                  $('#front-camera-stream-btn')[0].checked = false
+                }
+              },
+              '/dev/ttyFrontCam'
+            )
+          } else {
+            requestTask(
+              'camera_stream',
+              0,
+              '#front-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+                console.log('front camera OFF msgs:', msgs)
+                if (msgs[1].includes('Stopped camera_stream')) {
+                  // succeeded to close stream
+                  $('img#camera-feed')[0].src =
+                    '../static/images/stream-offline.jpg'
+                  $('img#camera-feed').removeClass('rotateimg180')
+                } else {
+                  // failed to close stream
+                  // $('img#camera-feed')[0].src =
+                  // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
+                  appendToConsole('Failed to close stream')
+                }
+              },
+              '/dev/ttyFrontCam'
+            )
+          }
+        })
+
+        $('#rear-camera-stream-btn').on('click', function (event) {
+          event.preventDefault()
+          // click makes it checked during this time, so trying to enable
+          if ($('#rear-camera-stream-btn').is(':checked')) {
+            requestTask(
+              'camera_stream',
+              1,
+              '#rear-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+                console.log('rear camera ON msgs:', msgs)
+                if (msgs[1].includes('Started camera_stream')) {
+                  $('img#camera-feed')[0].src =
+                    'http://' +
+                    getRoverIP() +
+                    ':8080/stream?topic=/cv_camera/image_raw'
+                } else {
+                  appendToConsole('Failed to open stream')
+                  $('#rear-camera-stream-btn')[0].checked = false
+                }
+              },
+              '/dev/ttyRearCam'
+            )
+          } else {
+            requestTask(
+              'camera_stream',
+              0,
+              '#rear-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+                if (msgs[1].includes('Stopped camera_stream')) {
+                  console.log('rear camera OFF msgs:', msgs)
+
+                  // succeeded to close stream
+                  $('img#camera-feed')[0].src =
+                    '../static/images/stream-offline.jpg'
+                } else {
+                  // failed to close stream
+                  appendToConsole('Failed to close stream')
+                  // $('img#camera-feed')[0].src =
+                  // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
+                }
+              },
+              '/dev/ttyRearCam'
+            )
+          }
+        })
+
+        $('#capture-image-btn').on('click', function (event) {
+          $.ajax('/capture_image', {
+            success: function (data) {
+              appendToConsole(data.msg)
+              if (!data.msg.includes('success')) {
+                appendToConsole(
+                  'No response from ROS ping_acknowledgment service'
+                )
+              } else {
+                appendToConsole(data.msg)
+              }
+            },
+            error: function () {
+              console.log('An error occured')
+            }
+          })
+        })
+
+        $('#arm-science-camera-stream-btn').on('click', function (event) {
+          event.preventDefault()
+          // click makes it checked during this time, so trying to enable
+          if ($('#arm-science-camera-stream-btn').is(':checked')) {
+            requestTask(
+              'camera_stream',
+              1,
+              '#arm-science-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+                console.log('arm/science camera ON msgs:', msgs)
+                if (msgs[1].includes('Started camera_stream')) {
+                  $('img#camera-feed')[0].src =
+                    'http://' +
+                    getRoverIP() +
+                    ':8080/stream?topic=/cv_camera/image_raw'
+                } else {
+                  appendToConsole('Failed to open stream')
+                  $('#arm-science-camera-stream-btn')[0].checked = false
+                }
+              },
+              '/dev/ttyArmScienceCam'
+            )
+          } else {
+            requestTask(
+              'camera_stream',
+              0,
+              '#arm-science-camera-stream-btn',
+              function (msgs) {
+                printErrToConsole(msgs)
+
+                if (msgs[1].includes('Stopped camera_stream')) {
+                  console.log('arm science camera OFF msgs:', msgs)
+
+                  // succeeded to close stream
+                  $('img#camera-feed')[0].src =
+                    '../static/images/stream-offline.jpg'
+                } else {
+                  // failed to close stream
+                  appendToConsole('Failed to close stream')
+                  // $('img#camera-feed')[0].src =
+                  // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
+                }
+              },
+              '/dev/ttyArmScienceCam'
+            )
+          }
+        })
+      }
+
       this.bindEventHandlers()
     },
     bindEventHandlers () {
@@ -207,7 +374,35 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/rover') {
+          console.log('Activating Rover Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          requestTask(
+            'rover_listener',
+            1,
+            '#toggle-rover-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#toggle-rover-listener-btn')[0].checked = true
+                // try pinging MCU
+                wait(1000)
+                sendRequest("Rover", 'ping', printErrToConsole)
+              } else {
+                $('#toggle-rover-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
@@ -218,7 +413,35 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/') {
+          console.log('Activating Arm Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          requestTask(
+            'arm_listener',
+            1,
+            '#toggle-arm-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#toggle-arm-listener-btn')[0].checked = true
+                // try pinging MCU
+                wait(1000)
+                sendRequest("Arm",'ping', printErrToConsole)
+              } else {
+                $('#toggle-arm-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
@@ -229,7 +452,35 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/science') {
+          console.log('Activating Science Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          requestTask(
+            'science_listener',
+            1,
+            '#science-listener-btn',
+            function (msgs) {
+              if (msgs[0]) {
+                $('#science-listener-btn')[0].checked = true
+                // try pinging MCU
+                wait(1000)
+                sendRequest("Science", 'ping', printErrToConsole)
+              } else {
+                $('#science-listener-btn')[0].checked = false
+              }
+            },
+            serialType
+          )
+        }
       })
     }
   })
@@ -240,7 +491,7 @@ $(document).ready(() => {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
-        console.log('msgs', msgs)
+        printErrToConsole(msgs)
       })
     }
   })
@@ -308,3 +559,55 @@ $(document).ready(() => {
     }
   })
 })
+
+function printErrToConsole(msg)
+{
+  if(!msg[0])
+    appendToConsole(msg[1])
+}
+
+function pingDevice(device) {
+  if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+    switch(device)
+    {
+      case "Arm" :
+        sendRequest("Arm", 'ping', printErrToConsole)
+        break;
+      case "Rover" :
+        sendRequest("Rover", 'ping', printErrToConsole)
+        break;
+      case "Odroid":
+      default:
+        pingOdroid()
+        break;
+    }
+    lastCmdSent = new Date().getTime()
+  }
+}
+
+function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
+  appendToConsole('pinging odroid')
+  $.ajax('/ping_rover', {
+    success: function (data) {
+      appendToConsole(data.ping_msg)
+      if (!data.ros_msg.includes('Response')) {
+        appendToConsole('No response from ROS ping_acknowledgment service')
+      } else {
+        appendToConsole(data.ros_msg)
+      }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(errorThrown)
+      if (errorThrown=="timeout") {
+         msg = "Odroid ping timeout after " + timeoutVal/1000 + " seconds. " +
+           "Check if the websockets server is running. If not, there's either a network issue " +
+           "or the Odroid and possibly the whole rover has shut down unexpectedly."
+        appendToConsole(msg)
+      } else {
+        console.log('Error of type ' + errorThrown + 'occured')
+      }
+    },
+    timeout: timeoutVal
+  })
+  lastCmdSent = new Date().getTime()
+}

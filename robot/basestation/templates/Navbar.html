@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <div class="col-md-2">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+          <img src="../static/img/sclogo_header.png">
+      </a>
+  </div>
+
+  <div class="dropdown col-md-2">
+    <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+      Device Channel
+    </button>
+    <div class="dropdown-menu">
+      <a id="mux-0" class="dropdown-item">0: Rover</a>
+      <a id="mux-1" class="dropdown-item">1: Arm</a>
+      <a id="mux-2" class="dropdown-item">2: Science</a>
+      <a id="mux-3" class="dropdown-item">3: PDS</a>
+    </div>
+  </div>
+
+  <div class="dropdown col-md-2">
+    <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+      Serial Type
+    </button>
+    <div class="dropdown-menu">
+      <a id="uart" class="dropdown-item">uart</a>
+      <a id="usb" class="dropdown-item">usb</a>
+    </div>
+  </div>
+
+   <!-- <div class="col-md-6">
+        <input type="text" id="serial-cmd-input">
+      </div>
+      <div class="col-md-1">
+        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
+      </div> -->
+
+      <div class="col-md-7">
+        <div class="row" style="color:white">
+          <div class="col-md-3">BATTERY VOLTAGE: </div>
+          <div class="col-md-1" id="battery-voltage">-</div>
+        </div>
+      </div>
+</nav>
