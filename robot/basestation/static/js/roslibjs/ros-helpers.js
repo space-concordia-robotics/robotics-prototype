@@ -20,8 +20,8 @@ function initRosWeb () {
   // Create the main viewer.
   let viewer = new ROS3D.Viewer({
     divID : 'urdf',
-    width : 610,
-    height : 345,
+    width : 300,
+    height : 350,
     antialias : true
   })
 
