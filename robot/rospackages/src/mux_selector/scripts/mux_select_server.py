@@ -8,7 +8,12 @@ current_channel = 0
 def handle_mux_select(req):
     if req.device == '?':
         global current_channel
-        return "Current: " + str(current_channel()) + '\n'
+
+        if local:
+            return "Current: " + str(current_channel) + '\n'
+        else:
+            current_channel = current_channel()
+            return "Current: " + str(current_channel) + '\n'
 
     response = "Switched MUX select to device {:s}".format(req.device)
 
