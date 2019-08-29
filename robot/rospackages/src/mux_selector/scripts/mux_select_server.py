@@ -8,7 +8,7 @@ current_channel = 0
 def handle_mux_select(req):
     if req.device == '?':
         global current_channel
-        return "Current: " + str(current_channel) + '\n'
+        return "Current: " + str(current_channel()) + '\n'
 
     response = "Switched MUX select to device {:s}".format(req.device)
 
@@ -16,6 +16,39 @@ def handle_mux_select(req):
     response += "\n" + str(select_device(req.device))
 
     return response
+
+def current_channel():
+    global local
+    global current_channel
+    gpio_dir = '/sys/class/gpio'
+    s1 = 0
+    s0 = 0
+    dev = 0
+
+    if not local:
+        # s1
+        with open(gpio_dir + '/gpio30/value', 'r') as f:
+            s1 = f.read()
+        # s0
+        with open(gpio_dir + '/gpio18/value', 'r') as f:
+            s0 = f.read()
+
+        # remove leading/trailing whitespace for comparisons
+        s1 = s1.strip()
+        s0 = s0.strip()
+
+        if s1 == "0" and s0 == "0":
+            dev = 3
+        elif s1 == "0" and s0 == "1":
+            dev = 2
+        elif s1 == "1" and s0 == "0":
+            dev = 1
+        elif s1 == "1" and s0 == "1":
+            dev = 0
+    else:
+        dev = current_channel
+
+    return dev
 
 def select_device(device):
     global current_channel
