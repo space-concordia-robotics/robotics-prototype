@@ -16,7 +16,7 @@
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
 #define FEED_CONSTANT  3.12 // in seconds/inch
-//Multoplexer pins for to chose photoresistor
+// Multiplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
 #define S2                  2
@@ -252,7 +252,18 @@ void loop() {
     }
     else if (isActivated == true) {
 
-      if (cmd == "active") { // query the status
+      if (cmd == "deactivate") {
+        //stops all
+        //        UART_PORT.print("cmd: ");
+        //        UART_PORT.println(cmd);
+        //        UART_PORT.print("Homing Table");
+        homingTimer = millis();
+        turnTable (0, 0);
+        deactivating = true;
+        isActivated = false;
+        UART_PORT.println("SCIENCE deactivated");
+      }
+      else if (cmd == "active") { // query the status
         UART_PORT.print("SCIENCE activated");
         UART_PORT.println(isActivated);
       }
@@ -577,17 +588,6 @@ void loop() {
         digitalWrite(S3, 0);
 
         UART_PORT.println("SCIENCE led2s done");
-      }
-
-      else if (cmd == "deactivate") {
-        //stops all
-        //        UART_PORT.print("cmd: ");
-        //        UART_PORT.println(cmd);
-        //        UART_PORT.print("Homing Table");
-        homingTimer = millis();
-        turnTable (0, 0);
-        deactivating = true;
-        UART_PORT.println("SCIENCE deactivated");
       }
       if (cmd == "stop" || (deactivating == true && (millis() - homingTimer > 30000))) {
         analogWrite(ELEVATOR, 0);
