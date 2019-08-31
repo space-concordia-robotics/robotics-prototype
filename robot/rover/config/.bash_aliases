@@ -1,6 +1,7 @@
 ROBOTICS_WS="~/Programming/robotics-prototype"
 BASE="$ROBOTICS_WS/robot/basestation"
 ROVER="$ROBOTICS_WS/robot/rover"
+ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
 BASH_A="~/.bash_aliases"
 NANORC="~/.nanorc"
 
@@ -10,6 +11,10 @@ alias b="cd -"
 alias robotics="cd $ROBOTICS_WS"
 alias base="cd $BASE"
 alias rover="cd $ROVER"
+alias arm="cd $ROVER/ArmDriverUnit"
+alias wheels="cd $ROVER/MobilePlatform"
+alias rostings="cd $ROSPACKAGES"
+alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"
 
 # edit thyself
 alias editalius="nano $BASH_A"

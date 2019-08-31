@@ -4,7 +4,9 @@ After=ip-emailer.service
 Wants=ip-emailer.service
 
 [Service]
-User=odroid
+#User=odroid
+# For some unkown reason this service stopped working when running as user odroid
+User=root
 Type=simple
 ExecStart=/home/odroid/Programming/robotics-prototype/robot/util/rosRoverStart/runRosRoverStart.sh
 

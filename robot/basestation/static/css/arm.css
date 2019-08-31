@@ -159,9 +159,6 @@ input#serial-cmd-input {
     width: 100%;
 }
 
-img#camera-feed {
-    /* these values should ideally reflect the resolution
-    at which the camera is streaming images at */
-    height: 480px;
-    width: 640px;
+.control-panel {
+  width:500px;
 }

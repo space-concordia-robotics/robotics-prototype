@@ -1,0 +1,101 @@
+<div class="row">
+  <div class="col-sm-12" style="text-align: center">
+    <h5 class="container-header">Motor Controls</h5>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-5">Activate Rover</div>
+  <div class="col-sm-5">Command Listener</div>
+</div>
+<div class="row">
+  <div class="col-sm-5" align="center" style="border-style:none;">
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+          <label>
+              <input id="activate-rover-btn" type="checkbox">
+              <span> </span>
+          </label>
+      </div>
+  </div>
+  <div class="col-sm-5" align="center" style="border-style:none;">
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+          <label>
+              <input id="toggle-rover-listener-btn" type="checkbox">
+              <span> </span>
+          </label>
+      </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-3">
+    <a id="rover-up">
+      <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+    </a>
+  </div>
+  <div class="col-md-3"></div>
+</div>
+<div class="row">
+  <div class="col-md-3">
+    <a id="rover-left">
+      <button type="button" class="control-btn4 fa fa-chevron-left fa-1x"></button>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a id="rover-down">
+      <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a id="rover-right">
+      <button type="button" class="control-btn4 fa fa-chevron-right fa-1x"></button>
+    </a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-2">Throttle: </div>
+  <div class="col-md-3" id="throttle-speed">-</div>
+  <div class="col-md-2">Steering: </div>
+  <div class="col-md-3" id="steering-speed">-</div>
+</div>
+<div class="row">
+  <div class="col-md-8">Max Throttle: </div>
+  <div class="col-md-2" id="max-throttle-speed">25</div>
+</div>
+<div class="row">
+  <div class="col-md-4">U</div>
+  <div class="col-md-4">I</div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <a id="max-throttle-decrease">
+        <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a id="max-throttle-increase">
+        <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">Max Steering: </div>
+  <div class="col-md-2" id="max-steering-speed">39</div>
+</div>
+<div class="row">
+  <div class="col-md-4">J</div>
+  <div class="col-md-4">K</div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <a id="max-steering-decrease">
+        <button type="button" class="control-btn4 fa fa-chevron-down fa-1x"></button>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a id="max-steering-increase">
+        <button type="button" class="control-btn4 fa fa-chevron-up fa-1x"></button>
+    </a>
+  </div>
+</div>

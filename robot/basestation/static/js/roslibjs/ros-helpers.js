@@ -1,17 +1,19 @@
+REQUEST_TIMEOUT = 3000
+
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
     url: 'ws://localhost:9090'
   })
-
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
+    if (window.location.pathname == '/rover') {
+      initNavigationPanel()
+    }
   })
-
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)
   })
-
   ros.on('close', function () {
     appendToConsole('Connection to websocket server closed.')
   })
@@ -31,19 +33,26 @@ function initRosWeb () {
     name: 'mux_select',
     serviceType: 'SelectMux'
   })
-
   // setup a client for the serial_cmd service
   serial_cmd_client = new ROSLIB.Service({
     ros: ros,
     name: 'serial_cmd',
     serviceType: 'SerialCmd'
   })
-
   // setup a client for the task_handler service
   task_handler_client = new ROSLIB.Service({
     ros: ros,
     name: 'task_handler',
     serviceType: 'HandleTask'
+  })
+  // setup a subscriber for the battery_voltage topic
+  battery_voltage_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_voltage',
+    messageType: 'std_msgs/Float32'
+  })
+  battery_voltage_listener.subscribe(function (message) {
+    $('#battery-voltage').text(message.data.toFixed(2))
   })
 
   /* arm controls */
@@ -54,19 +63,27 @@ function initRosWeb () {
     name: 'arm_request',
     serviceType: 'ArmRequest'
   })
-
   // setup a publisher for the arm_command topic
   arm_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'arm_command',
     messageType: 'std_msgs/String'
   })
-
   // setup a publisher for the ik_command topic
   ik_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'ik_command',
     messageType: 'IkCommand'
+  })
+
+  gripper_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'gripper_position',
+    messageType: 'geometry_msgs/Point'
+  })
+
+  gripper_listener.subscribe(function (msg) {
+    console.log('gripper_postion:', msg)
   })
 
   // setup a subscriber for the arm_joint_states topic
@@ -75,7 +92,6 @@ function initRosWeb () {
     name: 'arm_joint_states',
     messageType: 'sensor_msgs/JointState'
   })
-
   arm_joint_states_listener.subscribe(function (message) {
     for (var angle in message.position) {
       // let motor = angle+1;
@@ -83,14 +99,12 @@ function initRosWeb () {
       $('#m' + motor + '-angle').text(message.position[angle])
     }
   })
-
   // setup a subscriber for the arm_feedback topic
   arm_feedback_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'arm_feedback',
     messageType: 'std_msgs/String'
   })
-
   arm_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
@@ -208,6 +222,8 @@ function initRosWeb () {
     } else if (values[6] == '1') {
       $('#vibrator6-toggle')[0].checked = true
     }
+
+    $('#drill-rpm').val(values[13])
   })
 
   /* rover commands */
@@ -218,59 +234,95 @@ function initRosWeb () {
     name: 'rover_request',
     serviceType: 'ArmRequest' // for now... might change
   })
-
-  // setup a publisher for the arm_command topic
+  // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_command',
     messageType: 'std_msgs/String'
   })
-
   // setup a subscriber for the rover_joint_states topic
   rover_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_joint_states',
     messageType: 'sensor_msgs/JointState'
   })
-
   rover_joint_states_listener.subscribe(function (message) {
-    // TODO: make sure the indices are correct... DONE?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?!?
     $('#right-front-rpm').text(message.velocity[0])
     $('#right-mid-rpm').text(message.velocity[1])
-    $('#right-back-rpm').text(message.velocity[2])
+    $('#right-rear-rpm').text(message.velocity[2])
     $('#left-front-rpm').text(message.velocity[3])
     $('#left-mid-rpm').text(message.velocity[4])
-    $('#left-back-rpm').text(message.velocity[5])
+    $('#left-rear-rpm').text(message.velocity[5])
   })
-
   // setup a subscriber for the rover_position topic
   rover_position_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_position',
-    messageType: 'RoverPosition'
+    messageType: 'geometry_msgs/Point'
   })
-
   rover_position_listener.subscribe(function (message) {
-    // TODO: place the data somewhere, call ros node, etc?
-    // idk how this will work exactly, maybe a ros python node does stuff
-    // this could still display the data though i guess
+    $('#rover-latitude').text(message.x)
+    $('#rover-longitude').text(message.y)
+    $('#rover-heading').text(message.z)
   })
-
   // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_feedback',
     messageType: 'std_msgs/String'
   })
-
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
+  // setup a subscriber for the antenna_goal topic
+  antenna_goal_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'antenna_goal',
+    messageType: 'geometry_msgs/Point'
+  })
+  antenna_goal_listener.subscribe(function (message) {
+    $('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
+    $('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
+  })
+  // setup gps parameters for antenna directing
+  antenna_latitude = new ROSLIB.Param({
+    ros: ros,
+    name: 'antenna_latitude'
+  })
+  antenna_longitude = new ROSLIB.Param({
+    ros: ros,
+    name: 'antenna_longitude'
+  })
+  antenna_start_dir = new ROSLIB.Param({
+    ros: ros,
+    name: 'antenna_start_dir'
+  })
+
+  // setup a subscriber for the rover_goal topic
+  rover_goal_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_goal',
+    messageType: 'geometry_msgs/Point'
+  })
+  rover_goal_listener.subscribe(function (message) {
+    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
+    $('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
+  })
+  // setup gps parameters for rover goals
+  goal_latitude = new ROSLIB.Param({
+    ros: ros,
+    name: 'goal_latitude'
+  })
+  goal_longitude = new ROSLIB.Param({
+    ros: ros,
+    name: 'goal_longitude'
+  })
 }
 
-/* functions used in main code */
+initRosWeb()
 
-function requestMuxChannel (elemID, callback) {
+/* functions used in main code */
+function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
@@ -282,7 +334,12 @@ function requestMuxChannel (elemID, callback) {
     )
   }
 
+  let timer = setTimeout(function() {
+      callback([false, elemID + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
+
   mux_select_client.callService(request, function (result) {
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -302,7 +359,6 @@ function requestMuxChannel (elemID, callback) {
     }
   })
 }
-
 function requestSerialCommand (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command + '\n' })
   let sentTime = new Date().getTime()
@@ -326,8 +382,7 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-
-function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
+function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', timeout = REQUEST_TIMEOUT) {
   var request
   if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
@@ -349,7 +404,12 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
+  let timer = setTimeout(function() {
+      callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
+
   task_handler_client.callService(request, function (result) {
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log('result:', result)
     let msg = result.response
@@ -367,6 +427,7 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
       appendToConsole(
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
+
       if (reqStatus == 0) {
         $(buttonID)[0].checked = false
       } else if (reqStatus == 1) {
@@ -392,7 +453,7 @@ function checkTaskStatuses () {
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#toggle-arm-listener-btn')[0].checked = false
@@ -401,23 +462,98 @@ function checkTaskStatuses () {
         }
       }
     })
-    // check arm camera stream status
-    requestTask('camera_stream', 2, '#toggle-arm-stream-btn', function (msgs) {
-      appendToConsole(msgs)
+    // check all camera stream status
+    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
+      msgs
+    ) {
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
-        if (msgs[1].includes('not running')) {
-          $('#toggle-arm-stream-btn')[0].checked = false
-        } else if (msgs[1].includes('running')) {
-          $('#toggle-arm-stream-btn')[0].checked = true
+        if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyArmScienceCam')
+        ) {
+          $('#camera-feed').removeClass('rotateimg180')
+          $('#arm-science-camera-stream-btn')[0].checked = true
+          $('#rear-camera-stream-btn')[0].checked = false
+          $('#front-camera-stream-btn')[0].checked = false
+        } else if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyFrontCam')
+        ) {
+          $('#camera-feed').addClass('rotateimg180')
+          $('#front-camera-stream-btn')[0].checked = true
+          $('#arm-science-camera-stream-btn')[0].checked = false
+          $('#rear-camera-stream-btn')[0].checked = false
+        } else if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyRearCam')
+        ) {
+          $('#camera-feed').addClass('rotateimg180')
+          $('#rear-camera-stream-btn')[0].checked = true
+          $('#front-camera-stream-btn')[0].checked = false
+          $('#arm-science-camera-stream-btn')[0].checked = false
         }
       }
     })
   } else if (window.location.pathname == '/rover') {
-    console.log('rover page')
+    // check arm listener status
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-rover-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-rover-listener-btn')[0].checked = true
+        }
+      }
+    })
+
+    sendRequest("Rover", 'who', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[1].includes('Happy')) {
+        $('#activate-rover-btn')[0].checked = true
+      } else {
+        $('#activate-rover-btn')[0].checked = false
+      }
+    })
+
+    // check all camera stream status
+    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
+      msgs
+    ) {
+      printErrToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyArmScienceCam')
+        ) {
+          $('#front-camera-stream-btn').removeClass('rotateimg180')
+          $('#arm-science-camera-stream-btn')[0].checked = true
+          $('#rear-camera-stream-btn')[0].checked = false
+          $('#front-camera-stream-btn')[0].checked = false
+        } else if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyFrontCam')
+        ) {
+          $('#front-camera-stream-btn').addClass('rotateimg180')
+          $('#front-camera-stream-btn')[0].checked = true
+          $('#arm-science-camera-stream-btn')[0].checked = false
+          $('#rear-camera-stream-btn')[0].checked = false
+        } else if (
+          msgs[1].includes('running') &&
+          msgs[1].includes('/dev/ttyRearCam')
+        ) {
+          $('#front-camera-stream-btn').removeClass('rotateimg180')
+          $('#rear-camera-stream-btn')[0].checked = true
+          $('#front-camera-stream-btn')[0].checked = false
+          $('#arm-science-camera-stream-btn')[0].checked = false
+        }
+      }
+    })
   } else if (window.location.pathname == '/science') {
     console.log('science page')
     requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
-      appendToConsole('msgs', msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#science-listener-btn')[0].checked = false
@@ -431,6 +567,13 @@ function checkTaskStatuses () {
   } */
 }
 
+function sendIKCommand () {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to IK node')
+  ik_command_publisher.publish(cmd)
+}
+
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
@@ -438,47 +581,34 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
-/*
-// usage
-sendArmRequest('this is a command', function (succeeded) {
-  console.log(succeeded ? 'command succeeded' : 'command failed')
-})
-*/
-
-function sendArmRequest (command, callback) {
+function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  science_request_client.callService(request, function (result) {
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
-    } else {
-      appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
-      )
-      // return true
-      callback([true, msg])
-    }
-  })
-}
+  let timer = setTimeout(function() {
+      callback([false, command + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
 
-function sendScienceRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
+  var requestClient;
+  switch(device)
+  {
+    case "Arm":
+      requestClient = arm_request_client
+    break
+    case "Rover":
+      requestClient = rover_request_client
+    break
+    case "Science":
+      requestClient = science_request_client
+    break
+  }
 
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  requestClient.callService(request, function (result) {
 
-  science_request_client.callService(request, function (result) {
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -502,37 +632,75 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
+  // arm_command_publisher.publish(command)
 }
 
-/*
-// example usage
-sendRoverRequest('this is a command', function (succeeded) {
-  console.log(succeeded ? 'command succeeded' : 'command failed')
-})
-*/
-
-function sendRoverRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
-
-  rover_request_client.callService(request, function (result) {
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
+function initNavigationPanel () {
+  let hasAntennaParams = true
+  antenna_latitude.get(function (val) {
+    if (val != null) {
+      $('#antenna-latitude').text(val)
+      antenna_longitude.get(function (val) {
+        if (val != null) {
+          $('#antenna-longitude').text(val)
+          antenna_start_dir.get(function (val) {
+            if (val != null) {
+              $('#antenna-start-dir').text(val)
+              appendToConsole(
+                'Antenna goal parameters already set, displaying antenna directions'
+              )
+              $('#antenna-inputs').hide()
+              $('#antenna-unchanging').show()
+            } else {
+              appendToConsole(
+                'One or more antenna parameters is missing, if you would like antenna directions then please input them'
+              )
+              $('#antenna-inputs').show()
+              $('#antenna-unchanging').hide()
+            }
+          })
+        } else {
+          appendToConsole(
+            'One or more antenna parameters is missing, if you would like antenna directions then please input them'
+          )
+          $('#antenna-inputs').show()
+          $('#antenna-unchanging').hide()
+        }
+      })
     } else {
       appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
+        'One or more antenna parameters is missing, if you would like antenna directions then please input them'
       )
-      // return true
-      callback([true, msg])
+      $('#antenna-inputs').show()
+      $('#antenna-unchanging').hide()
+    }
+  })
+
+  goal_latitude.get(function (val) {
+    if (val != null) {
+      $('#goal-latitude').text(val)
+      goal_longitude.get(function (val) {
+        if (val != null) {
+          appendToConsole(
+            'GPS goal parameters already set, displaying directions to the goal'
+          )
+          $('#goal-longitude').text(val)
+          $('#goal-inputs').hide()
+          $('#goal-unchanging').show()
+        } else {
+          appendToConsole(
+            'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
+          )
+          $('#goal-inputs').show()
+          $('#goal-unchanging').hide()
+        }
+      })
+    } else {
+      appendToConsole(
+        'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
+      )
+      $('#goal-inputs').show()
+      $('#goal-unchanging').hide()
     }
   })
 }
@@ -541,9 +709,10 @@ function sendRoverRequest (command, callback) {
 returns the currently set ROS_MASTER_URI value
 
 usage:
-getRoverIP(function(callback) {})
+getRoverIP(function(callback) { // do something with the response })
 */
 function getRoverIP (callback) {
+  /*
   let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
   console.log('request', request)
   ping_client.callService(request, function (result) {
@@ -552,4 +721,7 @@ function getRoverIP (callback) {
       callback(result.response)
     }
   })
+  */
+  return '172.16.1.30' // competition
+  // return '127.0.0.1' // local
 }

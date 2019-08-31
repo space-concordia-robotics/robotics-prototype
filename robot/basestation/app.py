@@ -11,6 +11,7 @@ import flask
 from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
+from shlex import split
 
 app = flask.Flask(__name__)
 
@@ -82,7 +83,6 @@ def get_pid(keyword):
 def index():
     """Current landing page, the arm panel."""
     return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
-
 
 @app.route("/rover")
 def rover():
@@ -203,6 +203,34 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
+# capture image
+@app.route("/capture_image", methods=["POST", "GET"])
+def capture_image():
+    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
+    #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
+    # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
+    # p2 = subprocess.Popen(split("wc -l"), stdin=p1.stdout)
+    # output, error = p2.communicate()
+    output, error = run_shell('ls')
+    output = output.decode()
+    print('output:', output)
+    i = 0
+
+    if 'img' in output:
+        i = output.rfind('img')
+        i = int(output[i + 3]) + 1 # shift by 'img'
+        print('i', i)
+
+    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 img" + str(i) + ".jpg")
+    msg = "success"
+
+    if error:
+        msg = "F"
+
+    print('msg', msg)
+
+    return jsonify(msg=msg)
+
 # routes for science page
 @app.route('/numSections')
 def numSections():
@@ -235,5 +263,5 @@ if __name__ == "__main__":
     # if ros_master_ip in ["127.0.0.1", "localhost"]
     #     local = True
 
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
     # add param `host= '0.0.0.0'` if you want to run on your machine's IP address

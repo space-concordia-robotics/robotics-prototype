@@ -1,9 +1,9 @@
-  #include <Arduino.h>
+#include <Arduino.h>
 #include <Servo.h>
 //#include <SoftwareSerial.h>
 
-#define DEVEL_MODE_1       1     //Use with USB
-//#define DEVEL_MODE_2       2   //Use with UART4
+//#define DEVEL_MODE_1       1     //Use with USB
+#define DEVEL_MODE_2       2   //Use with UART4
 
 #if defined(DEVEL_MODE_1)
 #define UART_PORT Serial
@@ -64,12 +64,13 @@ bool drillInUse = false;
 bool elevatorInUse = false;
 bool deactivating = false;
 int drillDuration = 0;
+int drillSpeed = 0; // in RPM
 int drillDirection = 0; // 0 --> CW, 1 --> CCW
+int drillSpeedPercent = 0;
 int pumpDirection = 0; // 0 --> OUT, 1 --> IN
 int elevatorDuration = 0;
 int elevatorDirection = 0; // 0 --> UP, 1 --> DOWN
 int maxVelocity = 255;
-int drillSpeed;
 int elevatorFeedPercent = 0;
 int cuvette = 0;
 int desiredPosition = 0;
@@ -192,7 +193,8 @@ void loop() {
     UART_PORT.print("v3:");UART_PORT.print(digitalRead(VIBRATOR3));UART_PORT.print(",");
     UART_PORT.print("v4:");UART_PORT.print(digitalRead(VIBRATOR4));UART_PORT.print(",");
     UART_PORT.print("v5:");UART_PORT.print(digitalRead(VIBRATOR5));UART_PORT.print(",");
-    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));
+    UART_PORT.print("v6:");UART_PORT.print(digitalRead(VIBRATOR6));UART_PORT.print(",");
+    UART_PORT.print("drillSpeed:");UART_PORT.print(drillSpeed);
     UART_PORT.println();
   }
   if (UART_PORT.available()) {
@@ -224,10 +226,10 @@ void loop() {
       else if (cmd.startsWith("drillspeed") && (cmd.indexOf(" ") > 0)) {
         //turns drill at desired speed
         // needs input "drillspeed 100"
-        int drillSpeedPercent = 0;
         drillSpeedPercent = getValue(cmd, ' ', 1).toInt();
+        drillSpeed = drill_speed(drillSpeedPercent);
         UART_PORT.print("SCIENCE drillspeed");
-        UART_PORT.println(drill_speed(drillSpeedPercent));
+        UART_PORT.println(drillSpeed);
         analogWrite(DRILL, 0);
         delay(50);
         analogWrite(DRILL, drillSpeedPercent * 255 / 100);
@@ -269,6 +271,7 @@ void loop() {
         //stops drill
         analogWrite(DRILL, 0);
         drillInUse = false;
+        drillSpeed = drillSpeedPercent = 0;
         UART_PORT.println("SCIENCE ds done");
       }
       if (cmd.startsWith("elevatorfeed") && (cmd.indexOf(" ") > 0)) {
