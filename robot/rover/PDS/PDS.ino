@@ -3,7 +3,8 @@
    Contributors:
    - Abtin Ghodoussi
    - Philippe Carvajal
-   Version 1.1 - May 2019
+   - Nicholas Harris
+   Version 1.1 - May 2019 (Updated August 2019)
 
    Tutorial for uploading code through ICSP and setting the internal 8MHz clock:
    https://www.instructables.com/id/How-to-change-fuse-bits-of-AVR-Atmega328p-8bit-mic/
@@ -36,7 +37,7 @@
 #define NUM_MOTORS 6
 
 // communication
-#define SERIAL_BAUD_RATE 9600
+#define SERIAL_BAUD_RATE 9600*2 //Because internal clock of the ATMega328p is set to 8MHz
 #define CHAR_BUFF_SIZE 150
 #define SERIAL_TIMEOUT_DELAY 50 //!< in ms
 
@@ -94,15 +95,16 @@ double batteryVoltage = 0;
 
 uint8_t motorState[NUM_MOTORS]; //!< power to motor enable/disable
 
-unsigned long prevBlinkTime = 0; //!< for task scheduler which is not implemented yet. \todo rename startTime to something more clear e.g. heartBeatTime or something? apparently its used for other stuff tho
+unsigned long startTime = 0; //!< for task scheduler which is not implemented yet. \todo rename startTime to something more clear e.g. heartBeatTime or something? apparently its used for other stuff tho
+unsigned long startTime2 = 0; // For Fans
 
 int messagesReceived, messagesSent, badMessages;
-char IN_BUFFER[CHAR_BUFF_SIZE]; //!< used for receiving/reading messages
-char OUT_BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/reading messages
+char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
 
 // string/message handling
-void parseCommand(char *inBuffer);
-void generateSensorFeedback(char *outBuffer);
+void parseCommand();
+void generateSensorFeedback();
+void printMotorState();
 // sensor processing
 void updateMotorState();
 float readMultiplexer(uint8_t channel);
@@ -124,29 +126,30 @@ void setup() {
   pinMode(S1_PIN, OUTPUT);
   pinMode(S2_PIN, OUTPUT);
   pinMode(S3_PIN, OUTPUT);
-  pinMode(Mux_out_Pin, INPUT);
 
   digitalWrite(HeartBeat_Pin, LOW);
+
+  analogWrite(Fan_A_Speed_Pin,0);
+  analogWrite(Fan_B_Speed_Pin,0);
+
+  startTime  = millis();
+  startTime2 = millis();
 }
 
 void loop() {
   /***************************************************************************************************************/
   // listen to the serial port and parse an incoming message
   if (Serial.available()) {
-    byte num = Serial.readBytesUntil('\n', IN_BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
-    if (IN_BUFFER[num-1] == '\r') { // catch carriage returns and ELIMINATE them >:(
-      IN_BUFFER[num-1] = '\0'; // replace it with the char array terminator character
-    }
-    if (num > 0) { // not 100% sure if this catches every case
-      Serial.println(IN_BUFFER); // echo the received command
-      parseCommand(IN_BUFFER); // check the command and (in some cases) react to it
+    byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
+    if (num > 0) {
+      Serial.println(BUFFER); // echo the received command
+      parseCommand(); // check the command and (in some cases) react to it
+      memset(BUFFER, 0, CHAR_BUFF_SIZE);
       messagesReceived++;
-    }
-    else {
+    } else {
+      Serial.println("Command error: PDS received empty message");
       badMessages++;
-      Serial.println("PDS error: received empty message");
     }
-    memset(IN_BUFFER, 0, CHAR_BUFF_SIZE);
   }
   /***************************************************************************************************************/
   // read raw current values
@@ -163,17 +166,17 @@ void loop() {
   /***************************************************************************************************************/
   // read the raw battery voltage and convert it
   batteryVoltage =  readMultiplexer(4) * VOLTAGE_RECIPROCAL;
+
   if (batteryVoltage < MIN_BATTERY_VOLTAGE) {
     errorFlagGeneral.UV = 1;
-  }
-  else if (batteryVoltage > MAX_BATTERY_VOLTAGE) {
+  } else if (batteryVoltage > MAX_BATTERY_VOLTAGE) {
     errorFlagGeneral.OV = 1;
   }
   if (batteryVoltage < 0 || batteryVoltage > 17.0) {
     errorFlagGeneral.criticalError = 1;
-    batteryVoltage = 999.9;// make error case visible
+    batteryVoltage = 999.9; // make error case visible
   }
-  /***************************************************************************************************************/
+
   // read the temperature values
   rawTempReadings[0] = readMultiplexer(7);     // thermistor 1
   delayMicroseconds(200); //!< \todo replace with timer
@@ -186,8 +189,7 @@ void loop() {
     if (rawTempReadings[i] <= 0 || rawTempReadings[i] >= 1023.0) {
       errorFlagGeneral.thermOutOfRange = 1;
       tempReadings[i] = 999.9; //make error case visible
-    }
-    else {
+    } else {
       errorFlagGeneral.thermOutOfRange = 0;
       double v = (double)rawTempReadings[i] * TEMP_RECIPROCAL;
       double Rt = THERMISTOR_BIAS_RES * (VOLTAGE_REF - v) / v;
@@ -195,6 +197,7 @@ void loop() {
       tempReadings[i] = (1.0 / (A + B * ln + C * pow(ln, 3))) - 273.15;
     }
   }
+
   /***************************************************************************************************************/
   if (errorFlagGeneral.UV) {
     errorFlagGeneral.criticalError = 1;
@@ -202,106 +205,129 @@ void loop() {
     PORTD &= 0B00111111; //motor two and three
     PORTC &= 0B11000111; //motor four, five and six
   }
+
+    if (!errorFlagGeneral.UV) {
+      // ATTENTION: Needs fixing!!!!!!!!!!!!!!!!!!!!!
+      // if (millis() - startTime2 > 5000)
+      // {
+      //   // convert speed percentage to PWM based on battery voltage
+      //   MAX_FAN_SPEED = (int)(12.0 * 255.0 / batteryVoltage); // calculate the max allowable fan speed
+      //   // fanASpeed = map(fanASpeed, 0, 255, 0, MAX_FAN_SPEED); // attempt to keep the pwm voltage at 12v
+      //   // fanBSpeed = map(fanBSpeed, 0, 255, 0, MAX_FAN_SPEED); // attempt to keep the pwm voltage at 12v
+      //   fanASpeed = (int)( fanASpeed * 170.0 / 255.0 );
+      //   fanBSpeed = (int)( fanBSpeed * 170.0 / 255.0 );
+      //   Serial.println(fanASpeed);
+      //   analogWrite(Fan_A_Speed_Pin, fanASpeed);
+      //   analogWrite(Fan_B_Speed_Pin, fanBSpeed);
+
+      //   startTime2 = millis();
+      // }
+    } else {
+      analogWrite(Fan_A_Speed_Pin, 0);
+      analogWrite(Fan_B_Speed_Pin, 0);
+    }
   /***************************************************************************************************************/
-  if (!errorFlagGeneral.UV) {
-    // convert speed percentage to PWM based on battery voltage
-    MAX_FAN_SPEED = (int)(12 * 255 / batteryVoltage); // calculate the max allowable fan speed
-    fanASpeed = map(fanASpeed, 0, 255, 0, MAX_FAN_SPEED); // attempt to keep the pwm voltage at 12v
-    fanBSpeed = map(fanBSpeed, 0, 255, 0, MAX_FAN_SPEED); // attempt to keep the pwm voltage at 12v
-    analogWrite(Fan_A_Speed_Pin, fanASpeed);
-    analogWrite(Fan_B_Speed_Pin, fanBSpeed);
-  }
-  else {
-    analogWrite(Fan_A_Speed_Pin, 0);
-    analogWrite(Fan_B_Speed_Pin, 0);
-  }
+  updateMotorState(); //update all motor enable pin states by reading them
   /***************************************************************************************************************/
-    updateMotorState(); //update all motor enable pin states by reading them
-    generateSensorFeedback(OUT_BUFFER);  //generate status message containing current, voltage and temperature values
-  /***************************************************************************************************************/
-  if (millis() - prevBlinkTime > HEARTBEAT_DELAY) {
+  if (millis() - startTime > HEARTBEAT_DELAY) {
     digitalWrite(HeartBeat_Pin, !digitalRead(HeartBeat_Pin));
-    prevBlinkTime = millis();
-    Serial.println(OUT_BUFFER);
-    messagesSent++;
+    startTime = millis();
+    // if (Serial.available()) {
+      generateSensorFeedback();  //generate status message containing current, voltage, temp, speed
+      //Serial.print(BUFFER);
+      memset(BUFFER, 0, CHAR_BUFF_SIZE);
+      messagesSent++;
+    // }
   }
 }//end of void loop
 
-void parseCommand(char *inBuffer) {
-  char *token = strtok_r(inBuffer, " ", &inBuffer);
+void parseCommand() {
+
+  char *token = strtok(BUFFER, " ");
+
+  while (token != NULL) {
     if (strcmp(token, "PDS") == 0) {
-      if (strcmp(inBuffer, "S") == 0) { //disable all motors
+      token = strtok(NULL, " "); //find the next token
+      if (*token == 'S') {  //disable all motors
         PORTB &= 0B11111110; //motor one
         PORTD &= 0B00111111; //motor two and three
         PORTC &= 0B11000111; //motor four, five and six
-        Serial.println("PDS disabling power to all motors");
-      }
-      else if (strcmp(inBuffer, "A") == 0) { //enable all motors 
+        Serial.println("Command: PDS disabling power to all motors");
+        updateMotorState();
+        printMotorState();
+        break;
+      } else if (*token == 'A') { //enable all motors
         if (!errorFlagGeneral.UV) { //if there is no undervoltage error
           PORTB |= 0B00000001; //motor one
           PORTD |= 0B11000000; //motor two and three
           PORTC |= 0B00111000; //motor four, five and six
-          Serial.println("PDS enabling power to all motors");
+          Serial.println("Command: PDS enabling power to all motors");
+          updateMotorState();
+          printMotorState();
         }
-      }
-      else if (strcmp(inBuffer, "M") == 0) { //single motor on/off
+        break;
+      } else if (*token == 'M') { //single motor on/off
         if (!errorFlagGeneral.UV) {
-          token = strtok_r(NULL, " ", &inBuffer); //find the next token
-          int motorNum = (int)token;
+          token = strtok(NULL, " "); //find the next token
+          int motorNum = (int)*token - 48;
           if (motorNum < 1 || motorNum > 6) {
             badMessages++;
-          }
-          else {
-            token = strtok_r(NULL, " ", &inBuffer); //find the next token
-            int state = (int)token;
-            if (state != 0 || state != 1) {
+            Serial.println("Command error: PDS invalid motor number");
+          } else {
+            token = strtok(NULL, " "); //find the next token
+            int state = (int)*token - 48;
+            if (state == 0 || state == 1) {
+              digitalWrite(motorPins[motorNum - 1], state);
+              Serial.print("Command: PDS toggling power state to motor: ");
+              Serial.println(motorNum);
+            } else {
+              Serial.println("Command error: PDS invalid motor state");
               badMessages++;
             }
-            else {
-              digitalWrite(motorPins[motorNum - 1], state);
-            }
           }
-          Serial.println("PDS toggling power to motor " + motorNum);
+          updateMotorState();
+          printMotorState();
         }
-      }
-      else if (strcmp(inBuffer, "F") == 0) { //set fan speed in percentage 0-100%
-        token = strtok_r(NULL, " ", &inBuffer); //find the next token
-        int fanNum = (int)token;
-        if (fanNum < 1 || fanNum > 2) {
-          badMessages++;
-        }
-        else {
-          int fanSpeed = (int)token;
-          if (fanSpeed < 0 || fanSpeed > 100) {
+        break;
+      } else if (*token == 'F') { //set fan speed in percentage 0-100%
+        token = strtok(NULL, " "); //find the next token
+        int fanNum = (int)*token - 48;
+        if (fanNum == 1 || fanNum == 2) {
+          token = strtok(NULL, " "); //find the next token
+          int fanSpeed = atoi(token);
+          if (fanSpeed <  0 || fanSpeed > 100) {
+            Serial.println("Command error: PDS fan speed out of range");
             badMessages++;
-            return;
+            break;
           }
-
-          MAX_FAN_SPEED = (int)(12 * 255 / batteryVoltage); // calculate the max allowable fan speed
+          MAX_FAN_SPEED = (int)(12.0 * 255.0 / batteryVoltage); // calculate the max allowable fan speed
           fanSpeed = map(fanSpeed, 0, 100, 0, MAX_FAN_SPEED); // To check that the value returned is indeed correct
           switch (fanNum) {
             case 1:
               fanASpeed = fanSpeed;
+              analogWrite(Fan_A_Speed_Pin,fanASpeed);
               break;
             case 2:
               fanBSpeed = fanSpeed;
+              analogWrite(Fan_B_Speed_Pin,fanBSpeed);
               break;
           }
+          Serial.println("Command: PDS updating fan speed");
+        } else {
+          Serial.println("Command error: PDS invalid fan number"); 
+          badMessages++;
         }
       }
-      else { // nonexistent PDS command
-        badMessages++;
-        Serial.println("PDS error: nonexistent PDS command");
-      }
-    } // end of main "PDS" token check
-    else {
+      break;
+    } else {
+      Serial.println("Command error: PDS invalid command");
       badMessages++;
-      Serial.println("PDS error: command not prefixed by PDS");
-    }
+      break;
+    } // end of main "PDS" token check
+  } // end of while loop
 } // end of parseCommand
 
-void generateSensorFeedback(char *outBuffer) {
-  memset(OUT_BUFFER, 0, CHAR_BUFF_SIZE);
+void generateSensorFeedback() {
   Serial.print("PDS ");
   Serial.print(batteryVoltage); Serial.print(", ");
   Serial.print(currentReadings[0]); Serial.print(", ");
@@ -315,7 +341,6 @@ void generateSensorFeedback(char *outBuffer) {
   Serial.print(tempReadings[2]); Serial.print(", ");
   Serial.print(fanASpeed); Serial.print(", ");
   Serial.println(fanBSpeed);
-  
 }
 
 void updateMotorState() {
@@ -325,19 +350,131 @@ void updateMotorState() {
 }
 
 float readMultiplexer(uint8_t channel) {
+
   if (channel < 0 || channel > 15) {
     channel = 0; //! \todo not the best implementation, should return a negative value or a false bool
   }
 
-  //! this is done because S0 and S1 are swapped on PORTD. This swaps those bits in the channel variable
-  uint8_t bit0 = (channel >> 0) & 1; // save bit 0
-  uint8_t bit1 = (channel >> 1) & 1; // save bit 1
-  uint8_t mask = bit0 ^ bit1; // if 11 or 00 then mask is 0, else mask is 1
-  mask = (mask << 0) | (mask << 1); // turn mask of 0 into 00, turn mask of 1 into 11
-  channel = channel ^ mask; // 0 XOR 0 preserves the bit, anything XOR 1 flips the bit, so if mask is 11 it flips the lower 2 bits and regardless it preserves everything else
+  // //! this is done because S0 and S1 are swapped on PORTD. This swaps those bits in the channel variable
+  // uint8_t bit0 = (channel >> 0) & 1; // save bit 0
+  // uint8_t bit1 = (channel >> 1) & 1; // save bit 1
+  // uint8_t mask = bit0 ^ bit1; // if 11 or 00 then mask is 0, else mask is 1
+  // mask = (mask << 0) | (mask << 1); // turn mask of 0 into 00, turn mask of 1 into 11
+  // channel = channel ^ mask; // 0 XOR 0 preserves the bit, anything XOR 1 flips the bit, so if mask is 11 it flips the lower 2 bits and regardless it preserves everything else
 
-  // set bits two to five on PORTD for mux select line
-  PORTD = (PORTD & B11000011) | (channel << 2);
+  // // set bits two to five on PORTD for mux select line
+  // PORTD = (PORTD & B11000011) | (channel << 2);
 
+  switch (channel) {
+    case 0:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 1:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 2:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 3:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 4:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 5:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 6:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 7:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, LOW);
+      break;
+    case 8:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 9:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 10:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 11:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, LOW);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 12:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 13:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, LOW);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 14:
+      digitalWrite(S0_PIN, LOW);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+    case 15:
+      digitalWrite(S0_PIN, HIGH);
+      digitalWrite(S1_PIN, HIGH);
+      digitalWrite(S2_PIN, HIGH);
+      digitalWrite(S3_PIN, HIGH);
+      break;
+  }
+
+  delay(10);
   return (double)analogRead(Mux_out_Pin);
+}
+
+void printMotorState() {
+   // Print Motor state
+  for (int i = 1; i <= NUM_MOTORS; ++i)
+  {
+    Serial.print("Motor ");
+    Serial.print(i);
+    Serial.print(" State: ");
+    Serial.println(motorState[i-1]);
+  }
 }
