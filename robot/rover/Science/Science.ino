@@ -16,7 +16,7 @@
 #define SERVO_MAX_CCW  1750
 #define TRIGGER_DELAY  50
 #define FEED_CONSTANT  3.12 // in seconds/inch
-// Multiplexer pins for to chose photoresistor
+//Multoplexer pins for to chose photoresistor
 #define S0                  0
 #define S1                  1
 #define S2                  2
@@ -76,7 +76,7 @@ int elevatorFeedPercent = 0;
 int cuvette = 0;
 int desiredPosition = 0;
 int i = 0; // Used in all the for loops, don't worry no nested loops
-int numberTablePositions = 4;
+int numberTablePositions = 8;
 volatile int tablePosition[50];
 float val = 0; // Photoresistor
 float voltage = 0;  // Photoresistor
@@ -252,18 +252,7 @@ void loop() {
     }
     else if (isActivated == true) {
 
-      if (cmd == "deactivate") {
-        //stops all
-        //        UART_PORT.print("cmd: ");
-        //        UART_PORT.println(cmd);
-        //        UART_PORT.print("Homing Table");
-        homingTimer = millis();
-        turnTable (0, 0);
-        deactivating = true;
-        isActivated = false;
-        UART_PORT.println("SCIENCE deactivated");
-      }
-      else if (cmd == "active") { // query the status
+      if (cmd == "active") { // query the status
         UART_PORT.print("SCIENCE activated");
         UART_PORT.println(isActivated);
       }
@@ -407,21 +396,20 @@ void loop() {
       else if (cmd.endsWith("goto") && (cmd.indexOf(" ") > 0)) {
         //sends table to wanted position
 
-        cuvette = getValue(cmd, ' ', 0).toInt();
+        cuvette = (getValue(cmd, ' ', 0).toInt())*2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
         UART_PORT.print("SCIENCE cuvette ");
         UART_PORT.println(cuvette);
 
-        desiredPosition = getValue(cmd, ' ', 1).toInt();
-        UART_PORT.print("SCIENCE desiredPosition ");
+        desiredPosition = (getValue(cmd, ' ', 1).toInt())*2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
         UART_PORT.println(desiredPosition);
 
         if (cuvette >= numberTablePositions || cuvette < 0) {
           UART_PORT.print("Error. Chose cuvette number from 0 to ");
-          UART_PORT.println(numberTablePositions - 1);
+          UART_PORT.println((numberTablePositions - 1)/2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
         }
         if (desiredPosition >= numberTablePositions || desiredPosition < 0) {
           UART_PORT.print("Error. Chose position number from 0 to ");
-          UART_PORT.println(numberTablePositions - 1);
+          UART_PORT.println((numberTablePositions - 1)/2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
         }
         else if ((cuvette < numberTablePositions && cuvette >= 0) && (desiredPosition < numberTablePositions && desiredPosition >= 0)) {
           turnTable (cuvette, desiredPosition);
@@ -589,6 +577,19 @@ void loop() {
 
         UART_PORT.println("SCIENCE led2s done");
       }
+
+      else if (cmd == "deactivate") {
+        //stops all
+        //        UART_PORT.print("cmd: ");
+        //        UART_PORT.println(cmd);
+        //        UART_PORT.print("Homing Table");
+        homingTimer = millis();
+        cuvette = 0;
+        desiredPosition = 0;
+        turnTable (cuvette, desiredPosition);
+        deactivating = true;
+        UART_PORT.println("SCIENCE deactivated");
+      }
       if (cmd == "stop" || (deactivating == true && (millis() - homingTimer > 30000))) {
         analogWrite(ELEVATOR, 0);
         analogWrite(DRILL, 0);
@@ -615,7 +616,7 @@ void loop() {
         turnTableFree = true;
         previousElevatorState = 'n';
         isActivated = false;
-        deactivating == true;
+        deactivating = false;
         UART_PORT.println("SCIENCE stopped");
       }
     }
