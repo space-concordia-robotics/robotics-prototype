@@ -396,20 +396,20 @@ void loop() {
       else if (cmd.endsWith("goto") && (cmd.indexOf(" ") > 0)) {
         //sends table to wanted position
 
-        cuvette = (getValue(cmd, ' ', 0).toInt())*2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
+        cuvette = (getValue(cmd, ' ', 0).toInt()) * 2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
         UART_PORT.print("SCIENCE cuvette ");
         UART_PORT.println(cuvette);
 
-        desiredPosition = (getValue(cmd, ' ', 1).toInt())*2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
+        desiredPosition = (getValue(cmd, ' ', 1).toInt()) * 2; //multiplied by 2 only for ERC because there are 8 actual positions but only 4 needed
         UART_PORT.println(desiredPosition);
 
         if (cuvette >= numberTablePositions || cuvette < 0) {
           UART_PORT.print("Error. Chose cuvette number from 0 to ");
-          UART_PORT.println((numberTablePositions - 1)/2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
+          UART_PORT.println((numberTablePositions - 1) / 2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
         }
         if (desiredPosition >= numberTablePositions || desiredPosition < 0) {
           UART_PORT.print("Error. Chose position number from 0 to ");
-          UART_PORT.println((numberTablePositions - 1)/2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
+          UART_PORT.println((numberTablePositions - 1) / 2); //divided by 2 only for ERC because there are 8 actual positions but only 4 needed
         }
         else if ((cuvette < numberTablePositions && cuvette >= 0) && (desiredPosition < numberTablePositions && desiredPosition >= 0)) {
           turnTable (cuvette, desiredPosition);
@@ -448,6 +448,15 @@ void loop() {
         desiredPosition = 1;
         turnTable(cuvette, desiredPosition);
         UART_PORT.println("SCIENCE tcwstep");
+      }
+      else if (cmd == "trefresh") { // sets whatever position facing the drill to zero and numbers increasingly clockwise
+        //stops table
+        for (i = 0; i < numberTablePositions; i++) {
+          tablePosition[i] = i;
+        }
+        UART_PORT.print("SCIENCE tablePosition[0]");
+        UART_PORT.println(tablePosition[0]);
+        UART_PORT.println("SCIENCE trefresh");
       }
       else if (cmd == "ts") {
         //stops table
