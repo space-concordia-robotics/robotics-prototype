@@ -152,12 +152,12 @@
   #define M6_ENCODER_A       37
   #define M6_ENCODER_B       38
 */
-#define M6_LIMIT_SW_EXTEND_PORT  GPIOD_PDIR // i need to pick a pin
-#define M6_LIMIT_SW_EXTEND_SHIFT CORE_PIN14_BIT // i need to pick a pin
-#define M6_LIMIT_SW_EXTEND 14 // i need to pick a pin
-#define M6_LIMIT_SW_FLEX_PORT  GPIOC_PDIR // i need to pick a pin
-#define M6_LIMIT_SW_FLEX_SHIFT CORE_PIN36_BIT // i need to pick a pin
-#define M6_LIMIT_SW_FLEX 36 // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND_PORT  GPIOC_PDIR // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND_SHIFT CORE_PIN36_BIT // i need to pick a pin
+#define M6_LIMIT_SW_EXTEND 36 // i need to pick a pin
+#define M6_LIMIT_SW_FLEX_PORT  GPIOD_PDIR // i need to pick a pin
+#define M6_LIMIT_SW_FLEX_SHIFT CORE_PIN14_BIT // i need to pick a pin
+#define M6_LIMIT_SW_FLEX 14 // i need to pick a pin
 #define M6_GEAR_RATIO      27.0
 #define M6_MIN_HARD_ANGLE   -75.0 //-120.0
 #define M6_MAX_HARD_ANGLE   75.0 // 150.0 //30.0

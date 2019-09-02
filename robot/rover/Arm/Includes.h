@@ -12,7 +12,7 @@
 //#define DEBUG_VERIFYING 12 //!< debug messages during verification function
 //#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
 //#define DEBUG_PID 14 //!< debug messages during pid loop calculations
-#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
+//#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
 #define DEBUG_HOMING 16 //!< debug messages during homing sequence
 //#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
 //#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
