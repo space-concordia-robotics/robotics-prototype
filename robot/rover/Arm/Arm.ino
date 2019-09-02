@@ -542,7 +542,7 @@ void initEncoders(void) {
   motor1.isOpenLoop = false; motor1.encoderModifier=-1;
   motor2.isOpenLoop = false;
   motor3.isOpenLoop = false;
-  motor4.isOpenLoop = false; motor4.encoderModifier=-1;
+  motor4.isOpenLoop = false; //motor4.encoderModifier=-1;
 
   // set pid gains
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
@@ -737,17 +737,17 @@ void respondToLimitSwitches(void) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->minSoftAngle);
+          UART_PORT.print(motorArray[i]->maxSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
         }
         if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->maxSoftAngle);
+          UART_PORT.print(motorArray[i]->minSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
         }
         motorArray[i]->actualPress = false;
         motorArray[i]->limitSwitchState = 0;

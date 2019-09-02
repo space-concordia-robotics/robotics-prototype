@@ -1,3 +1,5 @@
+REQUEST_TIMEOUT = 3000
+
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
     url: 'ws://localhost:9090'
@@ -254,6 +256,16 @@ function initRosWeb () {
     $('#rover-longitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
+  // setup a subscriber for the rover_twist topic
+  rover_twist_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_twist',
+    messageType: 'geometry_msgs/Twist'
+  })
+  rover_twist_listener.subscribe(function (message) {
+    $('#rover-speed').text(message.linear.x)
+    $('#rover-angular-velocity').text(message.angular.x)
+  })
   // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
@@ -347,7 +359,7 @@ function initRosWeb () {
 initRosWeb()
 
 /* functions used in main code */
-function requestMuxChannel (elemID, callback) {
+function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
@@ -359,7 +371,12 @@ function requestMuxChannel (elemID, callback) {
     )
   }
 
+  let timer = setTimeout(function() {
+      callback([false, elemID + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
+
   mux_select_client.callService(request, function (result) {
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
@@ -402,7 +419,7 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
+function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', timeout = REQUEST_TIMEOUT) {
   var request
   if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
@@ -424,7 +441,12 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '') {
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
+  let timer = setTimeout(function() {
+      callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
+
   task_handler_client.callService(request, function (result) {
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log('result:', result)
     let msg = result.response
@@ -468,7 +490,7 @@ function checkTaskStatuses () {
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#toggle-arm-listener-btn')[0].checked = false
@@ -481,7 +503,7 @@ function checkTaskStatuses () {
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
       msgs
     ) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (
           msgs[1].includes('running') &&
@@ -512,10 +534,8 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/rover') {
     // check arm listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
-      msgs
-    ) {
-      appendToConsole(msgs)
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#toggle-rover-listener-btn')[0].checked = false
@@ -525,8 +545,8 @@ function checkTaskStatuses () {
       }
     })
 
-    sendRoverRequest('who', function (msgs) {
-      console.log('msgs', msgs)
+    sendRequest("Rover", 'who', function (msgs) {
+      printErrToConsole(msgs)
       if (msgs[1].includes('Happy')) {
         $('#activate-rover-btn')[0].checked = true
       } else {
@@ -538,7 +558,7 @@ function checkTaskStatuses () {
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
       msgs
     ) {
-      appendToConsole(msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (
           msgs[1].includes('running') &&
@@ -570,7 +590,7 @@ function checkTaskStatuses () {
   } else if (window.location.pathname == '/science') {
     console.log('science page')
     requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
-      appendToConsole('msgs', msgs)
+      printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
           $('#science-listener-btn')[0].checked = false
@@ -597,42 +617,37 @@ function sendArmCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
-function sendArmRequest (command, callback) {
+
+function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  arm_request_client.callService(request, function (result) {
+  let timer = setTimeout(function() {
+      callback([false, command + " timeout after " + timeout/1000 + " seconds"])
+  }, timeout)
+
+  var requestClient;
+  switch(device)
+  {
+    case "Arm":
+      requestClient = arm_request_client
+    break
+    case "Rover":
+      requestClient = rover_request_client
+    break
+    case "Science":
+      requestClient = science_request_client
+    break
+  }
+
+  requestClient.callService(request, function (result) {
+
+    clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
-    } else {
-      appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
-      )
-      // return true
-      callback([true, msg])
-    }
-  })
-}
-
-function sendScienceRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
-
-  science_request_client.callService(request, function (result) {
-    let latency = millisSince(sentTime)
-    console.log('result', result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (!result.success) {
       // how to account for a lack of response?
@@ -655,32 +670,6 @@ function sendRoverCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
   // arm_command_publisher.publish(command)
-}
-
-function sendRoverRequest (command, callback) {
-  let request = new ROSLIB.ServiceRequest({ msg: command })
-  let sentTime = new Date().getTime()
-
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
-
-  rover_request_client.callService(request, function (result) {
-    let latency = millisSince(sentTime)
-    console.log(result)
-    let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
-    if (!result.success) {
-      // how to account for a lack of response?
-      appendToConsole('Request failed. Received "' + msg + '"')
-      // return false
-      callback([false, msg])
-    } else {
-      appendToConsole(
-        'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
-      )
-      // return true
-      callback([true, msg])
-    }
-  })
 }
 
 function initNavigationPanel () {
