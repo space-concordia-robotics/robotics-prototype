@@ -320,6 +320,18 @@ function initRosWeb () {
   })
 
   /* PDS commands */
+  // setup a client for the pds_request service
+  pds_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'pds_request',
+    serviceType: 'ArmRequest' // for now... might change
+  })
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
   // setup a subscriber for the battery_voltage topic
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
@@ -353,6 +365,15 @@ function initRosWeb () {
     $('#left-front-current').text(parseFloat(message.effort[3]).toFixed(3))
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
+  })
+  // setup a subscriber for the pds_feedback topic
+  pds_feedback_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_feedback',
+    messageType: 'std_msgs/String'
+  })
+  pds_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
   })
 }
 
@@ -533,7 +554,7 @@ function checkTaskStatuses () {
       }
     })
   } else if (window.location.pathname == '/rover') {
-    // check arm listener status
+    // check rover listener status
     requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
@@ -599,9 +620,19 @@ function checkTaskStatuses () {
         }
       }
     })
-  } /* else if (window.location.pathname == '/rover') { //pds
-    console.log('rover page')
-  } */
+  } else if (window.location.pathname == '/pds') {
+    // check rover listener status
+    requestTask('pds_listener', 2, '#toggle-pds-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-pds-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-pds-listener-btn')[0].checked = true
+        }
+      }
+    })
+  }
 }
 
 function sendIKCommand () {
@@ -640,6 +671,8 @@ function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
     break
     case "Science":
       requestClient = science_request_client
+    case "PDS":
+      requestClient = pds_request_client
     break
   }
 
@@ -670,6 +703,13 @@ function sendRoverCommand (cmd) {
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
   // arm_command_publisher.publish(command)
+}
+
+function sendPdsCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+  pds_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {
