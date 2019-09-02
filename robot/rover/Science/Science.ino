@@ -435,7 +435,7 @@ void loop() {
         //turns table counter-clockwise
         table.writeMicroseconds(SERVO_STOP);
         delay(10);
-        cuvette = tablePosition[1];
+        cuvette = tablePosition[2];
         desiredPosition = 0;
         turnTable(cuvette, desiredPosition);
         UART_PORT.println("SCIENCE tccwstep");
@@ -445,7 +445,7 @@ void loop() {
         table.writeMicroseconds(SERVO_STOP);
         delay(10);
         cuvette = tablePosition[0];
-        desiredPosition = 1;
+        desiredPosition = 2;
         turnTable(cuvette, desiredPosition);
         UART_PORT.println("SCIENCE tcwstep");
       }
