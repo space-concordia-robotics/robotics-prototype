@@ -86,6 +86,9 @@ unsigned long homingTimer;
 unsigned long lastPrintTime;
 unsigned long drillTimer;
 unsigned long elevatorTimer;
+int semiStep = 0;
+bool tcwstepDone = false;
+bool tccwstepDone = false;
 
 // forward declarations
 int drill_speed(int input_drill_speed);//takes percentage returns RPM, max 165RPM
@@ -197,8 +200,18 @@ void loop() {
     UART_PORT.print("v6:"); UART_PORT.print(digitalRead(VIBRATOR6)); UART_PORT.print(",");
     UART_PORT.print("drillSpeed:"); UART_PORT.print(drillSpeed); UART_PORT.print(",");
     UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse); UART_PORT.print(",");
-    UART_PORT.print("elevatorInUse:"); UART_PORT.print(elevatorInUse);
+    UART_PORT.print("elevatorInUse:"); UART_PORT.print(elevatorInUse); UART_PORT.print(",");
+    UART_PORT.print("tcwstepDone:"); UART_PORT.print(tcwstepDone); UART_PORT.print(",");
+    UART_PORT.print("tccwstepDone:"); UART_PORT.print(tccwstepDone);
     UART_PORT.println();
+
+    // make sure to immediately set back to false for only one rotation in gui turntable
+    if (tccwstepDone) {
+      tccwstepDone = false;
+    }
+    if (tcwstepDone) {
+      tcwstepDone = false;
+    }
     //@TODO: ADD ELEVATOR_IN_USE AND ELEVATOR FEED (SPEED) FEEDBACK AND UPDATE GUI ACCORDINGLY
   }
 
@@ -438,7 +451,8 @@ void loop() {
         cuvette = tablePosition[2];
         desiredPosition = 0;
         turnTable(cuvette, desiredPosition);
-        UART_PORT.println("SCIENCE tccwstep");
+        // let it be known that roation is initiated
+        UART_PORT.println("SCIENCE tccwstep done");
       }
       else if (cmd == "tcwstep") {
         //turns table clockwise
@@ -447,7 +461,8 @@ void loop() {
         cuvette = tablePosition[0];
         desiredPosition = 2;
         turnTable(cuvette, desiredPosition);
-        UART_PORT.println("SCIENCE tcwstep");
+        // let it be known that roation is initiated
+        UART_PORT.println("SCIENCE tcwstep done");
       }
       else if (cmd == "trefresh") { // sets whatever position facing the drill to zero and numbers increasingly clockwise
         //stops table
@@ -689,15 +704,23 @@ void loop() {
   }
 */
 void cuvettePosition() {
-  //gives the integer value of the cuvette of the table 1 to "numberTablePositions" , cuvettes are only on even numbers, chute is cuvettePosition 0
+  // gives the integer value of the cuvette of the table 1 to "numberTablePositions" , cuvettes are only on even numbers, chute is cuvettePosition 0
   if (tableDirection == 'n') {
   }
   else if (tableDirection == 'i') {
     for (i = 0; i < (numberTablePositions - 1); i++) {
       tablePosition[i] = (tablePosition[i] + 1) % numberTablePositions;
     }
-    UART_PORT.print("SCIENCE tablePosition[0]");
-    UART_PORT.println(tablePosition[0]);
+    //    UART_PORT.print("SCIENCE tablePosition[0]");
+    //    UART_PORT.println(tablePosition[0]);
+    semiStep++;
+
+    if (semiStep == 2) {
+      // reset
+      semiStep = 0;
+      // for gui to turn table accordingly
+      tccwstepDone = true;
+    }
   }
   else if (tableDirection == 'd') {
     int temp = tablePosition[0];
@@ -707,8 +730,16 @@ void cuvettePosition() {
         tablePosition[i] = (numberTablePositions - 1);
       }
     }
-    UART_PORT.print("SCIENCE tablePosition[0]");
-    UART_PORT.println(tablePosition[0]);
+    //    UART_PORT.print("SCIENCE tablePosition[0]");
+    //    UART_PORT.println(tablePosition[0]);
+    semiStep++;
+
+    if (semiStep == 2) {
+      // reset
+      semiStep = 0;
+      // for gui to turn table accordingly
+      tcwstepDone = true;
+    }
   }
 }
 
