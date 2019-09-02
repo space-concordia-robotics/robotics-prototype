@@ -12,7 +12,7 @@ def handle_mux_select(req):
         if local:
             return "Current: " + str(current_channel) + '\n'
         else:
-            current_channel = current_channel()
+            current_channel = get_current_channel()
             return "Current: " + str(current_channel) + '\n'
 
     response = "Switched MUX select to device {:s}".format(req.device)
@@ -22,7 +22,7 @@ def handle_mux_select(req):
 
     return response
 
-def current_channel():
+def get_current_channel():
     global local
     global current_channel
     gpio_dir = '/sys/class/gpio'
