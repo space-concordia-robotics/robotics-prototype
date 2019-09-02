@@ -12,6 +12,8 @@ do
 done
 
 # source venv
+cd $REPO_HOME
+
 source "$REPO_HOME/venv/bin/activate"
 
 python3 "$REPO_HOME/setup.py" develop

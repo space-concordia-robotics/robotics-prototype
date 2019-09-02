@@ -1,0 +1,36 @@
+<div class="container control-panel">
+    <div class="row">
+      <div class="col-md-6">
+          <div class="command-listener-btn"
+            <span>
+                <strong>Command Listener</strong>
+            </span>
+            <div class="form-check checkbox-slider--a checkbox-slider-lg" align="center">
+                <label>
+                    <input id="toggle-arm-listener-btn" type="checkbox">
+                    <span> </span>
+                </label>
+            </div>
+          </div>
+      </div>
+      <div class="col-md-6">
+        <div id="manual-controls-btn">
+            <span>
+                <strong>Manual Control</strong>
+            </span>
+            <div class="form-check checkbox-slider--a checkbox-slider-lg">
+                <label>
+                    <input id="manual-control-btn" type="checkbox" onchange="manualControl()">
+                    <span></span>
+                </label>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+        <div class="movement-buttons">
+          {% include 'AutomaticControls.html' %}
+          {% include 'ManualControls.html' %}
+        </div>
+    </div>
+</div>

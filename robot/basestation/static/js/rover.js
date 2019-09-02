@@ -45,30 +45,9 @@ sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'p': ping arm mcu")
+  appendToConsole("'p': ping rover mcu")
   appendToConsole("'q': emergency stop all motors")
   appendToConsole("'l': view key commands")
-}
-
-// Manual control
-function manualControl () {
-  var a = document.getElementById('ArmcontrolsOFF')
-  var b = document.getElementById('ArmcontrolsON')
-
-  if (a.style.display === 'none') {
-    a.style.display = 'block'
-    b.style.display = 'none'
-  } else {
-    a.style.display = 'none'
-    b.style.display = 'block'
-    b.style.borderRadius = '0'
-  }
-}
-
-function toggleToManual () {
-  if (!$('#manual-control-btn')[0].checked) {
-    $('#manual-control-btn').click()
-  }
 }
 
 $(document).ready(function () {
@@ -135,36 +114,19 @@ $(document).ready(function () {
     }
   })
 
-  $('#ping-odroid').on('click', function (event) {
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      appendToConsole('pinging odroid')
-      $.ajax('/ping_rover', {
-        success: function (data) {
-          appendToConsole(data.ping_msg)
-          if (!data.ros_msg.includes('Response')) {
-            appendToConsole('No response from ROS ping_acknowledgment service')
-          } else {
-            appendToConsole(data.ros_msg)
-          }
-        },
-        error: function () {
-          console.log('An error occured')
-        }
-      })
-      lastCmdSent = new Date().getTime()
-    }
-  })
-  $('#ping-rover-mcu').on('click', function (event) {
-    event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      sendRoverRequest('ping', function (msgs) {})
-      lastCmdSent = new Date().getTime()
-    }
-  })
-
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendRoverCommand('reboot')
+  })
+
+  $('#list-all-cmds').on('click', function(event){
+    event.preventDefault()
+    printCommandsList()
+  })
+
+  $('#stop-all-motors').on('click', function(event){
+    event.preventDefault()
+    sendRoverCommand('stop')
   })
 
   $('#activate-rover-btn').on('click', function (event) {
@@ -173,16 +135,16 @@ $(document).ready(function () {
     if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#activate-rover-btn').is(':checked')) {
-      sendRoverRequest('activate', function (msgs) {
-        console.log('msgs', msgs)
+      sendRequest("Rover", 'activate', function (msgs) {
+        printErrToConsole(msgs)
         if (msgs[0]) {
           $('#activate-rover-btn')[0].checked = true
         }
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendRoverRequest('deactivate', function (msgs) {
-        console.log('msgs', msgs)
+      sendRequest("Rover", 'deactivate', function (msgs) {
+        printErrToConsole(msgs)
         if (msgs[0]) {
           $('#activate-rover-btn')[0].checked = false
         }
@@ -206,6 +168,7 @@ $(document).ready(function () {
           1,
           '#toggle-rover-listener-btn',
           function (msgs) {
+            printErrToConsole(msgs)
             if (msgs[0]) {
               $('#toggle-rover-listener-btn')[0].checked = true
             } else {
@@ -226,7 +189,7 @@ $(document).ready(function () {
         0,
         '#toggle-rover-listener-btn',
         function (msgs) {
-          console.log('msgs[0]', msgs[0])
+          printErrToConsole(msgs)
           if (msgs.length == 2) {
             console.log('msgs[1]', msgs[1])
             if (msgs[1].includes('already running')) {
@@ -244,28 +207,6 @@ $(document).ready(function () {
         },
         serialType
       )
-    }
-  })
-
-  $('#m1-closed-loop-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#m1-closed-loop-btn').is(':checked')) {
-      sendArmRequest('motor 1 loop closed', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = true
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = false
-        }
-      })
-    } else {
-      sendArmRequest('motor 1 loop open', function (msgs) {
-        if (msgs[0]) {
-          $('#m1-closed-loop-btn')[0].checked = false
-        } else {
-          $('#m1-closed-loop-btn')[0].checked = true
-        }
-      })
     }
   })
 
@@ -334,7 +275,7 @@ $(document).ready(function () {
 })
 
 // KEYBOARD EVENTS
-// rover ping
+// odroid ping
 document.addEventListener('keydown', function (event) {
   if (
     event.ctrlKey &&
@@ -343,20 +284,7 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
     !$('#servo-val').is(':focus')
   ) {
-    appendToConsole('pinging odroid')
-    $.ajax('/ping_rover', {
-      success: function (data) {
-        appendToConsole(data.ping_msg)
-        if (!data.ros_msg.includes('Response')) {
-          appendToConsole('No response from ROS ping_acknowledgment service')
-        } else {
-          appendToConsole(data.ros_msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
+    pingDevice('Odroid')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -367,7 +295,7 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
     !$('#servo-val').is(':focus')
   ) {
-    sendRoverRequest('ping', function (msgs) {})
+    pingDevice('Rover')
     lastCmdSent = new Date().getTime()
   }
 })
@@ -384,23 +312,10 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
-// rover stop command
-document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyO' && !$('#servo-val').is(':focus')) {
-    sendRoverRequest('stop', function (msgs) {
-      console.log('msgs', msgs)
-    })
-    lastCmdSent = new Date().getTime()
-  }
-})
-
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
   if (!$('#servo-val').is(':focus')) {
     switch (e.which) {
-      case 79:
-        lightUp('#stop-motors-btn')
-        break
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
         maxSoftThrottle += maxThrottleIncrement
@@ -410,24 +325,7 @@ $(document).keydown(function (e) {
         $('#max-throttle-speed').text(maxSoftThrottle)
         lastCmdSent = new Date().getTime()
         break
-      case 85: // 'u' --> decrease max throttle
-        lightUp('#max-throttle-decrease > button')
-        maxSoftThrottle -= maxThrottleIncrement
-        if (maxSoftThrottle < 0) {
-          maxSoftThrottle = 0
-        }
-        $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
-        break
-      case 75: // 'k' --> increase max steering
-        lightUp('#max-steering-increase > button')
-        maxSoftSteering += maxSteeringIncrement
-        if (maxSoftSteering > MAX_STEERING_SPEED) {
-          maxSoftSteering = MAX_STEERING_SPEED
-        }
-        $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
-        break
+
       case 74: // 'j' --> decrease max steering
         lightUp('#max-steering-decrease > button')
         maxSoftSteering -= maxSteeringIncrement
@@ -438,29 +336,35 @@ $(document).keydown(function (e) {
         lastCmdSent = new Date().getTime()
         break
 
-      case 76: // 'l' --> list all commands
-        lightUp('button#list-all-rover-cmds')
-
-        $.ajax({
-          url: '/rover_drive',
-          type: 'POST',
-          data: {
-            cmd: 'l'
-          },
-          success: function (response) {
-            appendToConsole('cmd: ' + response.cmd)
-            appendToConsole('feedback:\n' + response.feedback)
-            if (!response.feedback.includes('limit exceeded')) {
-              disableRoverMotorsBtn()
-            }
-            if (response.error != 'None') {
-              appendToConsole('error:\n' + response.error)
-            }
-            scrollToBottom()
-          }
-        })
+      case 75: // 'k' --> increase max steering
+        lightUp('#max-steering-increase > button')
+        maxSoftSteering += maxSteeringIncrement
+        if (maxSoftSteering > MAX_STEERING_SPEED) {
+          maxSoftSteering = MAX_STEERING_SPEED
+        }
+        $('#max-steering-speed').text(maxSoftSteering)
         lastCmdSent = new Date().getTime()
         break
+
+      case 76: // 'l' --> list all commands
+        printCommandsList()
+        lastCmdSent = new Date().getTime()
+        break
+
+      case 81: // 'q' --> stop
+        sendRoverCommand('stop')
+        break
+
+      case 85: // 'u' --> decrease max throttle
+        lightUp('#max-throttle-decrease > button')
+        maxSoftThrottle -= maxThrottleIncrement
+        if (maxSoftThrottle < 0) {
+          maxSoftThrottle = 0
+        }
+        $('#max-throttle-speed').text(maxSoftThrottle)
+        lastCmdSent = new Date().getTime()
+        break
+
       default:
         return // exit this handler for other keys
     }

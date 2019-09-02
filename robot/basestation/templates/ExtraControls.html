@@ -1,0 +1,21 @@
+<div id="extra-controls" style="margin:50px">
+  <table>
+    <tr>
+      <td>
+        <button title="List all commands" id="list-all-cmds" type="button" class="btn btn-primary btn-md">
+          <strong>List cmds (L)</strong>
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button title="Stop all motors" id="stop-all-motors" type="button" class="btn btn-primary btn-md">
+          <strong>STOP (Q)</strong>
+        </button>
+      </td>
+    </tr>
+    {% if device == "Arm" %}
+      {% include 'ArmExtraControls.html' %}
+    {% endif %}
+  </table>
+</div>
