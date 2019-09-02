@@ -95,6 +95,24 @@ def science():
     """Science page."""
     return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
+# routes for science page
+@app.route('/numSections')
+def numSections():
+    return '4'
+
+@app.route('/initialSection')
+def initialSection():
+    return '0'
+
+@app.route('/rotatePos')
+def rotatePos():
+    time.sleep(1) # wait 1 second
+    return 'done'
+
+@app.route('/rotateNeg')
+def rotateNeg():
+    time.sleep(1)
+    return 'done'
 
 @app.route("/ping_rover")
 def ping_rover():
@@ -230,25 +248,6 @@ def capture_image():
     print('msg', msg)
 
     return jsonify(msg=msg)
-
-# routes for science page
-@app.route('/numSections')
-def numSections():
-    return '26'
-
-@app.route('/initialSection')
-def initialSection():
-    return '0'
-
-@app.route('/rotatePos')
-def rotatePos():
-    time.sleep(1) # wait 1 second
-    return 'done'
-
-@app.route('/rotateNeg')
-def rotateNeg():
-    time.sleep(1)
-    return 'done'
 
 if __name__ == "__main__":
 
