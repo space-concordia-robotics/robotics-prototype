@@ -737,17 +737,17 @@ void respondToLimitSwitches(void) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->minSoftAngle);
+          UART_PORT.print(motorArray[i]->maxSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
         }
         if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->maxSoftAngle);
+          UART_PORT.print(motorArray[i]->minSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
         }
         motorArray[i]->actualPress = false;
         motorArray[i]->limitSwitchState = 0;
