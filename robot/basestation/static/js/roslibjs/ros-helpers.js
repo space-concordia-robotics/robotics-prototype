@@ -642,7 +642,6 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  // arm_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {
