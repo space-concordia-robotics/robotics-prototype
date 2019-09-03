@@ -643,7 +643,7 @@ void Commands::controlCameraMotors(String cmd) {
                 servoName = "Rear camera Side continuous servo";
                 if ( (0 <= angleInt) && (angleInt <= 180)) {
                     println("ASTRO "+servoName+" is moving at rate: " + angleStr);
-                    frontSide.write(angleInt);
+                    rearSide.write(angleInt);
                 }
                 else {
                     println("ASTRO "+servoName+": choose values from 0 to 180");

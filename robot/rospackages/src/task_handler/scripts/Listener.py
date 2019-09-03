@@ -31,7 +31,7 @@ class Listener:
             return False
 
         if os.path.isfile(self.script):
-            print("Starting listener service...")
+            print("Attempting to start listener service...")
             # non-blocking
             if self.args:
                 self.p1 = subprocess.Popen([self.type, self.script, self.args], stdout=subprocess.PIPE)
@@ -40,8 +40,11 @@ class Listener:
 
             self.p1_pid = self.p1.pid
 
-            # allow some time to pass
-            time.sleep(0.5)
+            # allow some time to pass, listener scripts need more time
+            if 'Node' in self.script:
+                time.sleep(2)
+            else:
+                time.sleep(0.5)
 
             poll = self.p1.poll()
 
