@@ -553,7 +553,7 @@ function gameLoop () {
       }
     }
 
-    // front camera position servo (up/down, servo 1)
+    // rear camera position servo (up/down, servo 1)
     if ( (millisSince(lastRearPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
       let returnVals = handlePositionServo (
         rearTiltPwm, minRearTiltPwm, maxRearTiltPwm,
@@ -567,7 +567,7 @@ function gameLoop () {
         sendRoverCommand('$' + rearTiltPwm.toString())
       }
     }
-    // Front camera continuous servo (left/right, servo 2)
+    // rear camera continuous servo (left/right, servo 2)
     if ( (millisSince(lastRearContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
       rearPanPwm = handleContinuousServo (
         rearPanPwm,
@@ -576,7 +576,7 @@ function gameLoop () {
       )
       // check whether or not to send a new command for the continuous servo
       if (rearPanPwm == SERVO_STOP && sentRearServoStop) {
-        ;
+        ; // don't move the servo
       }
       else {
         let rearPan = SERVO_STOP
@@ -592,12 +592,7 @@ function gameLoop () {
         $('#back-pan-pwm').text(rearPan)
         lastRearContServoCmd = new Date().getTime()
         sendRoverCommand('#' + rearPan.toString())
-        if (rearPanPwm != SERVO_STOP) {
-          sentRearServoStop = false
-        }
-        else {
-          sentRearServoStop = true
-        }
+        sentRearServoStop = (rearPanPwn == SERVO_STOP)
       }
     }
 

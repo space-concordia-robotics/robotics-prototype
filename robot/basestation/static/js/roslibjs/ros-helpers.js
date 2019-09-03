@@ -625,9 +625,8 @@ function sendScienceRequest (command, callback) {
 function sendRoverCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  //appendToConsole('Sending "' + cmd + '" to rover Teensy')
+  appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  // arm_command_publisher.publish(command)
 }
 
 function sendRoverRequest (command, callback) {
