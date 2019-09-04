@@ -10,12 +10,12 @@
    {% with device="PDS" %}{% include "Console.html" %}{% endwith %}
  </div>
  <div class="col-md-4">
-   {% include 'ArmMotorTable.html' %}
-   {% include 'RoverMotorTable.html' %}
- </div>
- <div class="col-md-4">
    {% include 'PdsControls.html' %}
    {% with device="PDS" %}{% include 'ExtraControls.html' %}{% endwith %}
+ </div>
+ <div class="col-md-4">
+   {% include 'ArmMotorTable.html' %}
+   {% include 'RoverMotorTable.html' %}
  </div>
 </div>
 {% endblock %}

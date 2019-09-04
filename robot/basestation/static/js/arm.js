@@ -184,8 +184,8 @@ $(document).ready(function () {
 
   $('[id$=-closed-loop-btn]').on('click', function (event) {
     event.preventDefault()
-    num = this.id[1]
-    isOpen = !$(this.id).is(':checked')
+    let num = this.id[1]
+    let isOpen = !$(this.id).is(':checked')
     armReq = function(msgs) {
         if(msgs[0]) {
           $(this.id)[0].checked = !isOpen

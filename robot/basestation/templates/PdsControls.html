@@ -1,20 +1,104 @@
-<tr>
-  <td>
-    <button title="Homing" id="homing-button" type="button" class="btn btn-primary btn-md">
-      <strong>Homing</strong>
-    </button>
-  </td>
-</tr>
-<tr>
-  <td>
-    <button title="Reset memorized angle values" id="reset-motor-angles" type="button" class="btn btn-primary btn-md">
-      <strong>Reset angles (O)</strong>
-    </button>
-  </td>
-</tr>
-<tr>
-  <td>
-    <button type="button" id="arm-speed-multiplier-btn" class="btn btn-primary btn-md">Send speed multiplier</button>
-    <input type="text" id="arm-speed-multiplier-input" value="1" size="3">
-  </td>
-</tr>
+<table>
+  <tr>
+    <td>
+      <button title="Cut power to all wheel motors" id="cut-pds-power-button" type="button" class="btn btn-primary btn-md">
+        <strong>Cut power (Q)</strong>
+      </button>
+    </td>
+    <td>
+      <button title="Provide power to all wheel motors" id="provide-pds-power-button" type="button" class="btn btn-primary btn-md">
+        <strong>Provide power</strong>
+      </button>
+    </td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td>
+      <strong>Motor 1</strong>
+    </td>
+    <td>
+      <strong>Motor 2</strong>
+    </td>
+    <td>
+      <strong>Motor 3</strong>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m1-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m2-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m3-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Motor 4</strong>
+    </td>
+    <td>
+      <strong>Motor 5</strong>
+    </td>
+    <td>
+      <strong>Motor 6</strong>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m4-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m5-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+    <td>
+      <div class="form-check checkbox-slider--a checkbox-slider-md" align="center">
+        <label>
+          <input id="m6-power-btn" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+    </td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td>
+      <button type="button" id="fan1-speed-btn" class="btn btn-primary btn-md">Send fan 1 speed</button>
+      <input type="text" id="fan1-speed-input" value="100" size="3">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <button type="button" id="fan2-speed-btn" class="btn btn-primary btn-md">Send fan 2 speed</button>
+      <input type="text" id="fan2-speed-input" value="100" size="3">
+    </td>
+  </tr>
+</table>

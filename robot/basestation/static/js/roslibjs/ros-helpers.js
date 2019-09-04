@@ -671,6 +671,7 @@ function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
     break
     case "Science":
       requestClient = science_request_client
+    break
     case "PDS":
       requestClient = pds_request_client
     break

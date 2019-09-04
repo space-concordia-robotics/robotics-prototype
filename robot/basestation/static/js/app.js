@@ -576,6 +576,9 @@ function pingDevice(device) {
       case "Rover" :
         sendRequest("Rover", 'ping', printErrToConsole)
         break;
+      case "PDS" :
+        sendRequest("PDS", 'ping', printErrToConsole)
+        break;
       case "Odroid":
       default:
         pingOdroid()

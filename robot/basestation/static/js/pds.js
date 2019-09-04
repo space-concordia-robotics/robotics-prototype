@@ -1,9 +1,11 @@
 const PING_THROTTLE_TIME = 1000
+const PDS_REQUEST_TIMEOUT = 3000
+let lastCmdSent = 0
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'p': ping rover mcu")
-  appendToConsole("'q': emergency stop all motors")
+  appendToConsole("'q': cut power to all motors")
   appendToConsole("'l': view key commands")
 }
 
@@ -75,6 +77,59 @@ $(document).ready(function () {
       )
     }
   })
+
+  $('[id$=-power-btn]').on('click', function (event) {
+    event.preventDefault()
+    let num = this.id[1]
+    let isPowered = !$(this.id).is(':checked')
+    pdsReq = function(msgs) {
+        if(msgs[0]) {
+          $(this.id)[0].checked = isPowered
+        } else {
+          $(this.id)[0].checked = !isPowered
+        }
+    }
+    //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
+    sendRequest("PDS", 'PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'), pdsReq, PDS_REQUEST_TIMEOUT)
+  })
+
+  $('#fan1-speed-btn').mouseup(function () {
+    let num = this.id[3]
+    let fanSpeed = $('#fan1-speed-input').val()
+    let maxSpeed = 100
+    if (
+      parseInt(fanSpeed) >= 0 &&
+      parseInt(fanSpeed) <= maxSpeed
+    ) {
+      console.log('PDS F ' + num + ' ' + fanSpeed)
+      sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+    }
+  })
+  $('#fan2-speed-btn').mouseup(function () {
+    let num = this.id[3]
+    let fanSpeed = $('#fan2-speed-input').val()
+    let maxSpeed = 100
+    if (
+      parseInt(fanSpeed) >= 0 &&
+      parseInt(fanSpeed) <= maxSpeed
+    ) {
+      console.log('PDS F ' + num + ' ' + fanSpeed)
+      sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+    }
+  })
+})
+
+$('#list-all-cmds').on('click', function(event){
+  event.preventDefault()
+  printCommandsList()
+})
+$('#cut-pds-power-button').on('click', function(event){
+  event.preventDefault()
+  sendPdsCommand('PDS S')
+})
+$('#provide-pds-power-button').on('click', function(event){
+  event.preventDefault()
+  sendPdsCommand('PDS A')
 })
 
 // KEYBOARD EVENTS
@@ -106,7 +161,6 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyL' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
     printCommandsList()
     lastCmdSent = new Date().getTime()
   }
@@ -116,6 +170,9 @@ document.addEventListener('keydown', function (event) {
 $(document).keydown(function (e) {
   if (!$('#servo-val').is(':focus')) {
     switch (e.which) {
+      case 81: // 'q' --> cut all power
+        sendPdsCommand('PDS S')
+        break
 /*
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
@@ -146,15 +203,6 @@ $(document).keydown(function (e) {
         $('#max-steering-speed').text(maxSoftSteering)
         lastCmdSent = new Date().getTime()
         break
-*/
-      case 76: // 'l' --> list all commands
-        printCommandsList()
-        lastCmdSent = new Date().getTime()
-        break
-/*
-      case 81: // 'q' --> stop
-        sendPdsCommand('stop')
-        break
 
       case 85: // 'u' --> decrease max throttle
         lightUp('#max-throttle-decrease > button')
@@ -171,48 +219,4 @@ $(document).keydown(function (e) {
     }
     e.preventDefault() // prevent the default action (scroll / move caret)
   }
-})
-
-// no throttling necessary as since keydown events are throttled
-// those keys will not change color and the following code will only set it to it's default color
-$(document).keyup(function (e) {
-  switch (e.which) {
-/*
-    case 79:
-      dim('#stop-motors-btn')
-      break
-    case 65: // left
-      dim('#rover-left > button')
-      break
-    case 87: // up
-      dim('#rover-up > button')
-      break
-    case 68: // right
-      dim('#rover-right > button')
-      break
-    case 83: // down
-      dim('#rover-down > button')
-      break
-
-    case 73: // increase throttle
-      dim('#max-throttle-increase > button')
-      break
-    case 85: // decrease throttle
-      dim('#max-throttle-decrease > button')
-      break
-    case 75: // increase steering
-      dim('#max-steering-increase > button')
-      break
-    case 74: // decrease steering
-      dim('#max-steering-decrease > button')
-      break
-*/
-    case 76: // list all rover cmds
-      dim('button#list-all-rover-cmds')
-      break
-
-    default:
-      return // exit this handler for other keys
-  }
-  e.preventDefault() // prevent the default action (scroll / move caret)
 })
