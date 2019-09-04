@@ -10,11 +10,6 @@ function printCommandsList () {
 }
 
 $(document).ready(function () {
-  $('#reboot-button').on('click', function (event) {
-    event.preventDefault()
-    sendPdsCommand('reboot')
-  })
-
   $('#list-all-cmds').on('click', function(event){
     event.preventDefault()
     printCommandsList()
@@ -27,12 +22,7 @@ $(document).ready(function () {
       .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-pds-listener-btn').is(':checked')) {
-      if (
-        $('button#mux')
-          .text()
-          .includes('PDS')
-      ) {
-        requestTask(
+      requestTask(
           'pds_listener',
           1,
           '#toggle-pds-listener-btn',
@@ -45,11 +35,6 @@ $(document).ready(function () {
           },
           serialType
         )
-      } else {
-        appendToConsole(
-          'Cannot turn PDS listener on if not in PDS mux channel!'
-        )
-      }
     } else {
       // closing PDS listener
       requestTask(
@@ -80,41 +65,61 @@ $(document).ready(function () {
 
   $('[id$=-power-btn]').on('click', function (event) {
     event.preventDefault()
-    let num = this.id[1]
-    let isPowered = !$(this.id).is(':checked')
-    pdsReq = function(msgs) {
-        if(msgs[0]) {
-          $(this.id)[0].checked = isPowered
-        } else {
-          $(this.id)[0].checked = !isPowered
-        }
+    if ($('button#mux').text().includes('PDS')) {
+      let powerBtnID = this.id
+      let num = this.id[1]
+      let isPowered = !$(this.id).is(':checked')
+      //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
+      if ($(this.id).is(':checked')){
+        sendRequest("PDS", 'PDS M ' + num + ' ' + '0', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = true
+          }
+        }, PDS_REQUEST_TIMEOUT)
+      } else {
+        sendRequest("PDS", 'PDS M ' + num + ' ' + '1', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = false
+          }
+        }, PDS_REQUEST_TIMEOUT)
+      }
+    } else {
+      appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
     }
-    //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
-    sendRequest("PDS", 'PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'), pdsReq, PDS_REQUEST_TIMEOUT)
   })
 
   $('#fan1-speed-btn').mouseup(function () {
-    let num = this.id[3]
-    let fanSpeed = $('#fan1-speed-input').val()
-    let maxSpeed = 100
-    if (
-      parseInt(fanSpeed) >= 0 &&
-      parseInt(fanSpeed) <= maxSpeed
-    ) {
-      console.log('PDS F ' + num + ' ' + fanSpeed)
-      sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+    if ($('button#mux').text().includes('PDS')) {
+      let num = this.id[3]
+      let fanSpeed = $('#fan1-speed-input').val()
+      let maxSpeed = 100
+      if (
+        parseInt(fanSpeed) >= 0 &&
+        parseInt(fanSpeed) <= maxSpeed
+      ) {
+        console.log('PDS F ' + num + ' ' + fanSpeed)
+        sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+      }
+    } else {
+      appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
     }
   })
   $('#fan2-speed-btn').mouseup(function () {
-    let num = this.id[3]
-    let fanSpeed = $('#fan2-speed-input').val()
-    let maxSpeed = 100
-    if (
-      parseInt(fanSpeed) >= 0 &&
-      parseInt(fanSpeed) <= maxSpeed
-    ) {
-      console.log('PDS F ' + num + ' ' + fanSpeed)
-      sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+    if ($('button#mux').text().includes('PDS')) {
+      let num = this.id[3]
+      let fanSpeed = $('#fan2-speed-input').val()
+      let maxSpeed = 100
+      if (
+        parseInt(fanSpeed) >= 0 &&
+        parseInt(fanSpeed) <= maxSpeed
+      ) {
+        console.log('PDS F ' + num + ' ' + fanSpeed)
+        sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+      }
+    } else {
+      appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
     }
   })
 })
@@ -129,7 +134,11 @@ $('#cut-pds-power-button').on('click', function(event){
 })
 $('#provide-pds-power-button').on('click', function(event){
   event.preventDefault()
-  sendPdsCommand('PDS A')
+  if ($('button#mux').text().includes('PDS')) {
+    sendPdsCommand('PDS A')
+  } else {
+    appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
+  }
 })
 
 // KEYBOARD EVENTS
