@@ -1,0 +1,12 @@
+{% extends "Base.html" %}
+{% block title %}Arm{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../static/js/stream.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    {% include 'MultiCameraFeed.html' %}
+    {% include 'ControlPanel.html' %}
+</div>
+{% endblock %}

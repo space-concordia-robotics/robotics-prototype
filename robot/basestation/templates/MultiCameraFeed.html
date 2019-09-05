@@ -1,0 +1,46 @@
+
+
+<h5 class="text-center"><strong>Camera Streams</strong></h5>
+<!-- It would be preferable to use video tag, but mjpeg streams are not have no general support beyond img tags -->
+<div class="row">
+
+    <div class="col">
+        <img id="arm-camera-feed" src="http://localhost:8080/stream_viewer?topic=/ArmCamera/image_raw" class="w-100" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+        <span>
+            <strong>Arm/Science Stream</strong>
+        </span>
+        <div class="form-check checkbox-slider--a checkbox-slider-lg">
+            <label>
+                <input id="arm-stream-btn" type="checkbox">
+                <span></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="col">
+        <img id="front-camera-feed" src="http://{{ roverIP }}:8080/?action=stream" class="w-100" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+        <span>
+            <strong>Front Rover Stream</strong>
+        </span>
+        <div class="form-check checkbox-slider--a checkbox-slider-lg">
+            <label>
+                <input id="front-stream-btn" type="checkbox">
+                <span></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="col">
+        <img id="rear-camera-feed" src="http://localhost:8080/stream_viewer?topic=/RearCamera/image_raw" class="w-100" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+        <span>
+            <strong>Rear Rover Stream</strong>
+        </span>
+        <div class="form-check checkbox-slider--a checkbox-slider-lg">
+            <label>
+              <input id="rear-stream-btn" type="checkbox">
+              <span></span>
+            </label>
+        </div>
+    </div>
+
+</div>
