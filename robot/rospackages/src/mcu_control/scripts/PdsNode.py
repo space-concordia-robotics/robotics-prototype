@@ -113,8 +113,9 @@ def init_serial():
                     dat = ''
                     data = None
                     try:
-                        dat = ser.readline().decode()
-                        data = stripFeedback(dat)
+                        #dat = ser.readline().decode()
+                        data = ser.readline().decode()
+                        #data = stripFeedback(dat)
                     except:
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
@@ -149,20 +150,28 @@ def publish_pds_data(message):
     voltage = Float32()
     current = JointState()
     temp = Point()
+    fanSpeeds = Point()
 
     try:
-        for i in range(10):
+        for i in range(12):
             if i < 1:
                 voltage.data = float(dataPDS[i])
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
-            else:
+            elif i < 10:
                 temp.x = float(dataPDS[7])
                 temp.y = float(dataPDS[8])
                 temp.z = float(dataPDS[9])
+            else:
+                fanSpeeds.x = float(dataPDS[10])
+                fanSpeeds.y = float(dataPDS[11])
         voltagePub.publish(voltage)
         currentPub.publish(current)
         tempPub.publish(temp)
+        fanSpeedsPub.publish(fanSpeeds)
+        nada,firstFlag = dataPDS[12].split(' ')
+        flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
+        flagsPub.publish(flagsMsg)
     except:
         rospy.logwarn('trouble parsing PDS data')
         return
@@ -197,6 +206,14 @@ if __name__ == '__main__':
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
     tempPub = rospy.Publisher(temp_pub_topic, Point, queue_size=10)
+
+    fan_speeds_pub_topic = '/fan_speeds'
+    rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
+    fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, Point, queue_size=10)
+
+    error_flags_topic = '/pds_flags'
+    rospy.loginfo('Beginning to publish to "' + error_flags_topic + '" topic')
+    flagsPub = rospy.Publisher(error_flags_topic, String, queue_size=10)
 
     feedback_pub_topic = '/pds_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')
