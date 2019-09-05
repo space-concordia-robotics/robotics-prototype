@@ -46,8 +46,14 @@
 #define LED1               33
 #define LED2               34
 
+// MOTOR 2
+// M2B - negative
+// M2A - positive
 #define DRILL              36 //PWM // 36 for TEENSY, 44 for Arduino Mega
 #define DRILL_DIRECTION    35
+// MOTOR 1
+// M1A - negative
+// M1B - positive
 #define ELEVATOR           38 //PWM // 38 FOR TEENSY, 45 for Arduino Mega
 #define ELEVATOR_DIRECTION 37
 
@@ -660,7 +666,7 @@ void loop() {
   }
   if (isActualPress) {
     if (previousElevatorState == 'n')cuvettePosition();
-    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
+    else if (previousElevatorState == 'u')elevatorTopInterrupt();
     else if (previousElevatorState == 'd')elevatorBottomInterrupt();
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
     isActualPress = false;
@@ -673,12 +679,16 @@ void loop() {
   }
 }
 
-  void elevatorTopInterrupt () {
+// elevatorDirection
+// 0 --> UP, 1 --> DOWN
+void elevatorTopInterrupt () {
+  UART_PORT.println("elevatorTopInterrupt");
   //stops elevator
   unsigned long timer = millis();
 
   analogWrite(ELEVATOR, 0);
   digitalWrite(ELEVATOR_DIRECTION, LOW);
+  previousElevatorState = 'u';
   analogWrite(ELEVATOR, maxVelocity);
   while ((millis() - timer) < 500) {
     ;
@@ -686,14 +696,17 @@ void loop() {
   analogWrite(ELEVATOR, 0);
   UART_PORT.println("Elevator Top Limit");
   previousElevatorState = 'n';
-  }
+  elevatorDirection = 0;
+}
 
-  void elevatorBottomInterrupt () {
+void elevatorBottomInterrupt () {
+  UART_PORT.println("elevatorBottomInterrupt");
   //stops elevator
   unsigned long timer = millis();
 
   analogWrite(ELEVATOR, 0);
   digitalWrite(ELEVATOR_DIRECTION, HIGH);
+  previousElevatorState = 'd';
   analogWrite(ELEVATOR, maxVelocity);
   while ((millis() - timer) < 500) {
     ;
@@ -701,7 +714,8 @@ void loop() {
   analogWrite(ELEVATOR, 0);
   UART_PORT.println("SCIENCE Elevator Bottom Limit");
   previousElevatorState = 'n';
-  }
+  elevatorDirection = 1;
+}
 
 void cuvettePosition() {
   // gives the integer value of the cuvette of the table 1 to "numberTablePositions" , cuvettes are only on even numbers, chute is cuvettePosition 0
