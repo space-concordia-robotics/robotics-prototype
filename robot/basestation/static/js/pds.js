@@ -22,6 +22,11 @@ $(document).ready(function () {
       .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-pds-listener-btn').is(':checked')) {
+      if (
+        $('button#mux')
+          .text()
+          .includes('PDS')
+      ) {
       requestTask(
           'pds_listener',
           1,
@@ -35,6 +40,11 @@ $(document).ready(function () {
           },
           serialType
         )
+      } else {
+        appendToConsole(
+          'Cannot turn rover listener on if not in rover mux channel!'
+        )
+      }
     } else {
       // closing PDS listener
       requestTask(
@@ -62,6 +72,33 @@ $(document).ready(function () {
       )
     }
   })
+  $('#toggle-auto-mode-btn').on('click', function (event) {
+    event.preventDefault()
+    if ($('#toggle-auto-mode-btn').is(':checked')){
+      sendRequest("PDS", 'PDS T 1', function (msgs) {
+        printErrToConsole(msgs)
+        if (msgs[0]) {
+          $('#toggle-auto-mode-btn')[0].checked = true
+        }
+      }, PDS_REQUEST_TIMEOUT)
+    } else {
+      sendRequest("PDS", 'PDS T 0', function (msgs) {
+        printErrToConsole(msgs)
+        if (msgs[0]) {
+          $('#toggle-auto-mode-btn')[0].checked = false
+        }
+      }, PDS_REQUEST_TIMEOUT)
+    }
+  })
+
+  $('#cut-pds-power-button').on('click', function(event){
+    event.preventDefault()
+    sendPdsCommand('PDS S')
+  })
+  $('#provide-pds-power-button').on('click', function(event){
+    event.preventDefault()
+    sendPdsCommand('PDS A')
+  })
 
   $('[id$=-power-btn]').on('click', function (event) {
     event.preventDefault()
@@ -88,6 +125,15 @@ $(document).ready(function () {
     } else {
       appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
     }
+  })
+
+  $('#reset-general-flags-button').on('click', function (event) {
+    event.preventDefault()
+    sendPdsCommand('PDS G')
+  })
+  $('#reset-current-flags-button').on('click', function (event) {
+    event.preventDefault()
+    sendPdsCommand('PDS C')
   })
 
   $('#fan1-speed-btn').mouseup(function () {
@@ -122,23 +168,6 @@ $(document).ready(function () {
       appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
     }
   })
-})
-
-$('#list-all-cmds').on('click', function(event){
-  event.preventDefault()
-  printCommandsList()
-})
-$('#cut-pds-power-button').on('click', function(event){
-  event.preventDefault()
-  sendPdsCommand('PDS S')
-})
-$('#provide-pds-power-button').on('click', function(event){
-  event.preventDefault()
-  if ($('button#mux').text().includes('PDS')) {
-    sendPdsCommand('PDS A')
-  } else {
-    appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
-  }
 })
 
 // KEYBOARD EVENTS
