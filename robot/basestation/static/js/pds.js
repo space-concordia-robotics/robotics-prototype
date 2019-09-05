@@ -108,14 +108,14 @@ $(document).ready(function () {
     let isPowered = !$(this.id).is(':checked')
     //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
     if ($('#m'+num+'-power-btn').is(':checked')){
-        sendRequest("PDS", 'PDS M ' + num + ' ' + '0', function (msgs) {
+        sendRequest("PDS", 'PDS M ' + num + ' ' + '1', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
             $('#m'+num+'-power-btn')[0].checked = true
           }
         }, PDS_REQUEST_TIMEOUT)
       } else {
-        sendRequest("PDS", 'PDS M ' + num + ' ' + '1', function (msgs) {
+        sendRequest("PDS", 'PDS M ' + num + ' ' + '0', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
             $('#m'+num+'-power-btn')[0].checked = false
