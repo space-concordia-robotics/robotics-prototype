@@ -39,8 +39,8 @@
 #define VIBRATOR5          22
 #define VIBRATOR6          23
 
-#define LIMIT_TOP          24 //limSW_1
-#define LIMIT_BOTTOM       25 //limSW_2
+#define LIMIT_TOP          25 //limSW_1
+#define LIMIT_BOTTOM       24 //limSW_2
 #define TABLE_SWITCH_PIN   26 //limSW_3
 
 #define LED1               33
@@ -93,8 +93,8 @@ bool tccwstepDone = false;
 // forward declarations
 int drill_speed(int input_drill_speed);//takes percentage returns RPM, max 165RPM
 float elevator_feed(int input_elevator_feed);//takes percentage returns inch/s, max 0.107inch/s
-/*void elevatorTopInterrupt (void); //limit switch
-  void elevatorBottomInterrupt (void); //limit switch*/
+void elevatorTopInterrupt (void); //limit switch
+void elevatorBottomInterrupt (void); //limit switch
 void cuvettePosition (void); //tracks the position of the cuvettes 0-25 relative to the table positions 0-25
 void turnTable (int cuvette, int desiredPosition);// sends the wanted cuvette to the wanted position
 void debouncing(void); //pure magic
@@ -141,8 +141,8 @@ void setup() {
   pinMode(LIMIT_BOTTOM, INPUT_PULLUP);
   pinMode(PHOTORESISTOR, INPUT_PULLUP);
   pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
-  /*  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
-    attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);*/
+  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
   attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);
 
   analogWrite(DRILL, 0);
@@ -660,8 +660,8 @@ void loop() {
   }
   if (isActualPress) {
     if (previousElevatorState == 'n')cuvettePosition();
-    /*    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
-        else if (previousElevatorState == 'd')elevatorBottomInterrupt();*/
+    else if (previousElevatorState == 'u')elevatorBottomInterrupt();
+    else if (previousElevatorState == 'd')elevatorBottomInterrupt();
     // now that the behaviour is complete we can reset these in wait for the next trigger to be confirmed
     isActualPress = false;
 
@@ -672,7 +672,7 @@ void loop() {
     }
   }
 }
-/*
+
   void elevatorTopInterrupt () {
   //stops elevator
   unsigned long timer = millis();
@@ -702,7 +702,7 @@ void loop() {
   UART_PORT.println("SCIENCE Elevator Bottom Limit");
   previousElevatorState = 'n';
   }
-*/
+
 void cuvettePosition() {
   // gives the integer value of the cuvette of the table 1 to "numberTablePositions" , cuvettes are only on even numbers, chute is cuvettePosition 0
   if (tableDirection == 'n') {
