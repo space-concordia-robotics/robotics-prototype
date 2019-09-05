@@ -95,6 +95,11 @@ def science():
     """Science page."""
     return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/stream")
+def stream():
+    """Stream page."""
+    return flask.render_template("Stream.html", roverIP=fetch_ros_master_ip())
+
 
 @app.route("/ping_rover")
 def ping_rover():
