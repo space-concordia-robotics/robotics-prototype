@@ -35,4 +35,3 @@ $(document).ready(() => {
         prefer_theme('blue');
     });
 });
-

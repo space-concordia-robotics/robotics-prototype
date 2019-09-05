@@ -388,22 +388,22 @@ $(document).ready(() => {
 
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
-              requestTask(
-                'rover_listener',
-                1,
-                '#toggle-rover-listener-btn',
-                function (msgs) {
-                  if (msgs[0]) {
-                    $('#toggle-rover-listener-btn')[0].checked = true
-                    // try pinging MCU
-                    wait(1000)
-                    sendRequest("Rover", 'ping', printErrToConsole)
-                  } else {
-                    $('#toggle-rover-listener-btn')[0].checked = false
-                  }
-                },
-                serialType
-              )
+            requestTask(
+              'rover_listener',
+              1,
+              '#toggle-rover-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-rover-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Rover', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-rover-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
           }
         }
       })
@@ -430,22 +430,22 @@ $(document).ready(() => {
 
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
-              requestTask(
-                'arm_listener',
-                1,
-                '#toggle-arm-listener-btn',
-                function (msgs) {
-                  if (msgs[0]) {
-                    $('#toggle-arm-listener-btn')[0].checked = true
-                    // try pinging MCU
-                    wait(1000)
-                    sendRequest("Arm",'ping', printErrToConsole)
-                  } else {
-                    $('#toggle-arm-listener-btn')[0].checked = false
-                  }
-                },
-                serialType
-              )
+            requestTask(
+              'arm_listener',
+              1,
+              '#toggle-arm-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-arm-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Arm', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-arm-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
           }
         }
       })
@@ -472,22 +472,22 @@ $(document).ready(() => {
 
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
-              requestTask(
-                'science_listener',
-                1,
-                '#science-listener-btn',
-                function (msgs) {
-                  if (msgs[0]) {
-                    $('#science-listener-btn')[0].checked = true
-                    // try pinging MCU
-                    wait(1000)
-                    sendRequest("Science", 'ping', printErrToConsole)
-                  } else {
-                    $('#science-listener-btn')[0].checked = false
-                  }
-                },
-                serialType
-              )
+            requestTask(
+              'science_listener',
+              1,
+              '#science-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#science-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Science', 'ping', printErrToConsole)
+                } else {
+                  $('#science-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
           }
         }
       })
@@ -569,13 +569,11 @@ $(document).ready(() => {
   })
 })
 
-function printErrToConsole(msg)
-{
-  if(!msg[0])
-    appendToConsole(msg[1])
+function printErrToConsole (msg) {
+  if (!msg[0]) appendToConsole(msg[1])
 }
 
-function pingDevice(device) {
+function pingDevice (device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
     switch(device)
     {
@@ -591,13 +589,13 @@ function pingDevice(device) {
       case "Odroid":
       default:
         pingOdroid()
-        break;
+        break
     }
     lastCmdSent = new Date().getTime()
   }
 }
 
-function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
+function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   appendToConsole('pinging odroid')
   $.ajax('/ping_rover', {
     success: function (data) {
@@ -608,12 +606,15 @@ function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
         appendToConsole(data.ros_msg)
       }
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error: function (jqXHR, textStatus, errorThrown) {
       console.log(errorThrown)
-      if (errorThrown=="timeout") {
-         msg = "Odroid ping timeout after " + timeoutVal/1000 + " seconds. " +
-           "Check if the websockets server is running. If not, there's either a network issue " +
-           "or the Odroid and possibly the whole rover has shut down unexpectedly."
+      if (errorThrown == 'timeout') {
+        msg =
+          'Odroid ping timeout after ' +
+          timeoutVal / 1000 +
+          ' seconds. ' +
+          "Check if the websockets server is running. If not, there's either a network issue " +
+          'or the Odroid and possibly the whole rover has shut down unexpectedly.'
         appendToConsole(msg)
       } else {
         console.log('Error of type ' + errorThrown + 'occured')
