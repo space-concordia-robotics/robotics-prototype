@@ -20,7 +20,7 @@ global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
 
 # 300 ms timeout... could potentially be even less, needs testing
-timeout = 0.3  # to wait for a response from the MCU
+timeout = 1  # to wait for a response from the MCU
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -56,6 +56,7 @@ def init_serial():
 
     startConnecting = time.time()
     if usb:
+        baudrate = 19200
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
             for portObj in ports:
@@ -134,35 +135,34 @@ def init_serial():
     sys.exit(0)
 
 requests = {
-    'PDS T 1' : ['toggling'],
-    'PDS T 0' : ['toggling'],
+    'PDS T 1' : ['ON'],
+    'PDS T 0' : ['OFF'],
     #'who' : ['pds'],
-    'PDS M 1 1' : ['ON'],
-    'PDS M 1 0' : ['OFF'],
-    'PDS M 2 1' : ['ON'],
-    'PDS M 2 0' : ['OFF'],
-    'PDS M 3 1' : ['ON'],
-    'PDS M 3 0' : ['OFF'],
-    'PDS M 4 1' : ['ON'],
-    'PDS M 4 0' : ['OFF'],
-    'PDS M 5 1' : ['ON'],
-    'PDS M 5 0' : ['OFF'],
-    'PDS M 6 1' : ['ON'],
-    'PDS M 6 0' : ['OFF']
+    'PDS M 1 1' : ['toggling'],
+    'PDS M 1 0' : ['toggling'],
+    'PDS M 2 1' : ['toggling'],
+    'PDS M 2 0' : ['toggling'],
+    'PDS M 3 1' : ['toggling'],
+    'PDS M 3 0' : ['toggling'],
+    'PDS M 4 1' : ['toggling'],
+    'PDS M 4 0' : ['toggling'],
+    'PDS M 5 1' : ['toggling'],
+    'PDS M 5 0' : ['toggling'],
+    'PDS M 6 1' : ['toggling'],
+    'PDS M 6 0' : ['toggling']
 }
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
     global reqFeedback
     global reqInWaiting
     pdsResponse = ArmRequestResponse()
-    timeout = 0.1 # 100ms timeout
-    reqInWaiting=True
+    timeout = 0.3 # 300ms timeout
+    reqInWaiting = True
     sinceRequest = time.time()
     rospy.loginfo('received '+req.msg+' request from GUI, sending to PDS MCU')
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
     while pdsResponse.success is False and (time.time()-sinceRequest < timeout):
         if reqFeedback is not '':
-            print(reqFeedback)
             for request in requests:
                 for response in requests[request]:
                     if request == req.msg and response in reqFeedback:
@@ -172,7 +172,7 @@ def handle_client(req):
             if pdsResponse.success:
                 break
             else:
-                pdsResponse.response += reqFeedback
+                pdsResponse.response = reqFeedback
         rospy.Rate(100).sleep()
     rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
     rospy.loginfo(pdsResponse)
@@ -196,7 +196,6 @@ def publish_pds_data(message):
     current = JointState()
     temp = Point()
     fanSpeeds = Point()
-
     try:
         for i in range(12):
             if i < 1:
@@ -218,22 +217,24 @@ def publish_pds_data(message):
         flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
         flagsPub.publish(flagsMsg)
     except:
-        rospy.logwarn('trouble parsing PDS data')
+        rospy.logwarn('trouble parsing PDS sensor data')
         return
     return
 
 def stripFeedback(data):
-    startStrip = 'PDS '
-    startStrip2 = 'Command'
-    endStrip = '\n'
-    if data.startswith(startStrip) and data.count(startStrip) == 1:
-        if data.endswith(endStrip) and data.count(endStrip) == 1:
-            data, right = data.split(endStrip)
-            left, data = data.split(startStrip)
-            return data
-    elif data.startswith(startStrip2) and data.count(startStrip2) == 1:
-        if data.endswith(endStrip) and data.count(endStrip) == 1:
-            data, right = data.split(endStrip)
+    startStrips = ['PDS ', 'Command', 'Motor']
+    endStrips = ['\r\n', '\n']
+    for strip in startStrips:
+        if data.startswith(strip) and data.count(strip) == 1:
+            try:
+                data, right = data.split(endStrips[0])
+            except:
+                pass
+            try:
+                data, right = data.split(endStrips[1])
+            except:
+                pass
+            #left, data = data.split(startStrip)
             return data
     return None
 
@@ -279,9 +280,9 @@ if __name__ == '__main__':
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser
     global reqFeedback
-    reqFeedback=''
+    reqFeedback = ''
     global reqInWaiting
-    reqInWaiting=False
+    reqInWaiting = False
     try:
         while not rospy.is_shutdown():
             #if I try reading from the serial port inside callbacks, bad things happen
@@ -292,18 +293,12 @@ if __name__ == '__main__':
                 feedback = None
                 try:
                      data = ser.readline().decode()
-                     feedback = data
+                     feedback = stripFeedback(data)
                 except:
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
-                    if 'Command:' in feedback:
-                        rospy.loginfo(feedback)
-                        feedbackPub.publish(feedback)
-                    elif 'Command error:' in feedback:
-                        rospy.logwarn(feedback)
-                        feedbackPub.publish(feedback)
-                    elif 'PDS ' in feedback:
-                        feedback = stripFeedback(feedback)
+                    if feedback.startswith('PDS '):
+                        nada,feedback=feedback.split('PDS ')
                         publish_pds_data(feedback)
                     else:
                         if reqInWaiting:

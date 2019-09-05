@@ -102,29 +102,29 @@ $(document).ready(function () {
 
   $('[id$=-power-btn]').on('click', function (event) {
     event.preventDefault()
-    if ($('button#mux').text().includes('PDS')) {
-      let powerBtnID = this.id
-      let num = this.id[1]
-      let isPowered = !$(this.id).is(':checked')
-      //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
-      if ($(this.id).is(':checked')){
+    //if ($('button#mux').text().includes('PDS')) {
+    let powerBtnID = this.id
+    let num = this.id[1]
+    let isPowered = !$(this.id).is(':checked')
+    //console.log('PDS M ' + num + ' ' + ((isPowered) ? '1' : '0'))
+    if ($('#m'+num+'-power-btn').is(':checked')){
         sendRequest("PDS", 'PDS M ' + num + ' ' + '0', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
-            $('#activate-rover-btn')[0].checked = true
+            $('#m'+num+'-power-btn')[0].checked = true
           }
         }, PDS_REQUEST_TIMEOUT)
       } else {
         sendRequest("PDS", 'PDS M ' + num + ' ' + '1', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
-            $('#activate-rover-btn')[0].checked = false
+            $('#m'+num+'-power-btn')[0].checked = false
           }
         }, PDS_REQUEST_TIMEOUT)
       }
-    } else {
-      appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
-    }
+    //} else {
+      //appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
+    //}
   })
 
   $('#reset-general-flags-button').on('click', function (event) {
