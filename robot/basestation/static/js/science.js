@@ -654,7 +654,7 @@ $(document).ready(function () {
     let requestedFeed = Number(elevatorFeed)
 
     // invalid range check
-    // values under 10% don't actually rotate the drill
+    // values under 10% don't actually move the elevator
     if (requestedFeed < 10 || requestedFeed > 100) {
       color('#elevator-feed', 'orange')
       appendToConsole('Valid ranges for elevator feed: [10, 100]')
@@ -696,6 +696,23 @@ $(document).ready(function () {
     }
 
     color('#elevator-distance', 'white')
+
+    // check if feed set
+    let feed = $('#elevator-feed').val()
+    feed = Number(feed)
+
+    // anything under 20% is too slow and takes _very_ long time to reach 1 inch distance
+    if (isNumeric(feed) && (feed >= 20 && feed <= 100)) {
+      cmd += ' ' + feed
+    } else {
+      color('#elevator-feed', 'orange')
+      appendToConsole('Illegal parameter set for feed')
+      appendToConsole('Legal range of integers: [10, 100]')
+      return
+    }
+
+    // if we made it this far then reset the input field to normal background
+    color('#elevator-feed', 'white')
 
     sendRequest('Science', cmd, function (msgs) {
       console.log('msgs', msgs)
