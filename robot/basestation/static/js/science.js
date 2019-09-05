@@ -554,7 +554,7 @@ $(document).ready(function () {
 
     color('#drill-speed', 'white')
 
-    sendScienceRequest(cmd, function (msgs) {
+    sendRequest('Science', cmd, function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('drillspeed done')) {
@@ -592,7 +592,7 @@ $(document).ready(function () {
       cmd += ' ' + drillSpeed
     }
 
-    sendScienceRequest(cmd, function (msgs) {
+    sendRequest('Science', cmd, function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('drilltime done')) {
@@ -631,7 +631,7 @@ $(document).ready(function () {
       return
     }
 
-    sendScienceRequest('ego', function (msgs) {
+    sendRequest('Science', 'ego', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('ego done')) {
@@ -650,7 +650,7 @@ $(document).ready(function () {
     }
 
     let elevatorFeed = $('#elevator-feed').val()
-    let cmd = 'elevatorfeed ' + elevatorFeed
+    let cmd = 'ef ' + elevatorFeed
     let requestedFeed = Number(elevatorFeed)
 
     // invalid range check
@@ -663,7 +663,7 @@ $(document).ready(function () {
 
     color('#elevator-feed', 'white')
 
-    sendScienceRequest(cmd, function (msgs) {
+    sendRequest('Science', cmd, function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('elevatorfeed done')) {
@@ -697,7 +697,7 @@ $(document).ready(function () {
 
     color('#elevator-distance', 'white')
 
-    sendScienceRequest(cmd, function (msgs) {
+    sendRequest('Science', cmd, function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('elevatordistance done')) {
@@ -715,7 +715,7 @@ $(document).ready(function () {
       return
     }
 
-    sendScienceRequest('es', function (msgs) {
+    sendRequest('Science', 'es', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('es done')) {
