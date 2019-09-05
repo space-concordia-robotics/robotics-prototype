@@ -8,12 +8,16 @@
 /* comms */
 #define SERIAL_BAUD 115200
 #define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 10//50
+#define FEEDBACK_PRINT_INTERVAL 50
 #define LED_BLINK_INTERVAL 1000
 #define SENSOR_READ_INTERVAL 200
 #define SENSOR_TIMEOUT 20
 #define THROTTLE_TIMEOUT 200
 #define MOTOR_CONTROL_INTERVAL 10
+
+#define SERVO_STOP 93
+#define FRONT_BASE_DEFAULT_PWM 65
+#define REAR_BASE_DEFAULT_PWM 35
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -178,38 +182,30 @@ void loop() {
     if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
             print("ASTRO Motor Speeds: ");
-
             print(RF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RB.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             println(LB.getCurrentVelocity());
 
             roverVelocityCalculator();
 
-            print("ASTRO");
-            print(" Desired Velocities");
-
-            print(RF.desiredVelocity);
-            print(" ");
-            print(RM.desiredVelocity);
-            print(" ");
-            print(RB.desiredVelocity);
-            print(" ");
-            print(LF.desiredVelocity);
-            print(" ");
-            print(LM.desiredVelocity);
-            print(" ");
-            println(LB.desiredVelocity);
-
+            print("ASTRO Desired Velocities: ");
+            print(String(RF.desiredVelocity) + ", ");
+            print(String(RM.desiredVelocity) + ", ");
+            print(String(RB.desiredVelocity) + ", ");
+            print(String(LF.desiredVelocity) + ", ");
+            print(String(LM.desiredVelocity) + ", ");
+            println(String(LB.desiredVelocity));
         }
         else {
+            print("ASTRO Motor Speeds: ");
             print(String(RF.desiredVelocity) + ", ");
             print(String(RM.desiredVelocity) + ", ");
             print(String(RB.desiredVelocity) + ", ");
@@ -265,11 +261,11 @@ void roverVelocityCalculator(void) {
     rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
 
     print("ASTRO ");
-    print("Linear velocity ");
+    print("Linear Velocity: ");
     print(linearVelocity);
     print(" m/s ");
 
-    print(" Rotational Velocity ");
+    print("Rotational Velocity: ");
     print(rotationalVelocity);
     println(" m^2/6 ");
 }
@@ -364,12 +360,14 @@ void serialHandler(void) {
 //! attach the servos to pins
 void attachServos() {
     frontSide.attach(FS_SERVO);
-    frontSide.write(93);
+    frontSide.write(FRONT_BASE_DEFAULT_PWM);
     frontBase.attach(FB_SERVO);
+    frontBase.write(SERVO_STOP);
 
     rearSide.attach(RS_SERVO);
-    frontSide.write(93);
+    rearSide.write(REAR_BASE_DEFAULT_PWM);
     rearBase.attach(RB_SERVO);
+    rearBase.write(SERVO_STOP);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes

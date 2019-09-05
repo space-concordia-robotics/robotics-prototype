@@ -92,7 +92,7 @@ $(document).ready(function () {
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
-    let serialType = 'uart'
+    let serialType = $('#serial-type').text().trim()
     if (
       $('#serialType')
         .text()
@@ -102,15 +102,11 @@ $(document).ready(function () {
     }
     // click makes it checked during this time, so trying to enable
     else if ($('#toggle-arm-listener-btn').is(':checked')) {
+      // validate UART mode options are correct, let pass if USB mode selected
       if (
-        $('button#mux')
-          .text()
-          .includes('Arm')
+        ($('button#mux').text().includes('Arm') && serialType == 'uart')
+          || serialType == 'usb'
       ) {
-        serialType = $('#serial-type')
-          .text()
-          .trim()
-        console.log('setting serialType:', serialType)
         requestTask(
           'arm_listener',
           1,
@@ -128,7 +124,7 @@ $(document).ready(function () {
         // console.log('returnVals', returnVals)
       } else {
         appendToConsole(
-          'Cannot turn arm listener on if not in arm mux channel!'
+          'UART MODE: Cannot turn arm listener on if not in arm mux channel!'
         )
       }
     } else {

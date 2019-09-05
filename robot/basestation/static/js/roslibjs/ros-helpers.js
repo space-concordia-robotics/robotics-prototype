@@ -273,7 +273,7 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
   rover_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
+    appendToConsole(message.data, true, false)
   })
   // setup a subscriber for the antenna_goal topic
   antenna_goal_listener = new ROSLIB.Topic({
@@ -586,15 +586,6 @@ function checkTaskStatuses () {
       }
     })
 
-    sendRequest("Rover", 'who', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('Happy')) {
-        $('#activate-rover-btn')[0].checked = true
-      } else {
-        $('#activate-rover-btn')[0].checked = false
-      }
-    })
-
     // check all camera stream status
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
       msgs
@@ -723,7 +714,6 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  // arm_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
