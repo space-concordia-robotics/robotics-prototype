@@ -100,7 +100,6 @@ def stream():
     """Stream page."""
     return flask.render_template("Stream.html", roverIP=fetch_ros_master_ip())
 
-
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
