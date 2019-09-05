@@ -145,8 +145,8 @@ $(document).ready(function () {
         parseInt(fanSpeed) >= 0 &&
         parseInt(fanSpeed) <= maxSpeed
       ) {
-        console.log('PDS F ' + num + ' ' + fanSpeed)
-        sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+        //console.log('PDS F ' + num + ' ' + fanSpeed)
+        sendPdsCommand('PDS F ' + num + ' ' + fanSpeed)
       }
     } else {
       appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
@@ -161,8 +161,8 @@ $(document).ready(function () {
         parseInt(fanSpeed) >= 0 &&
         parseInt(fanSpeed) <= maxSpeed
       ) {
-        console.log('PDS F ' + num + ' ' + fanSpeed)
-        sendRequest("PDS", 'PDS F ' + num + ' ' + fanSpeed, printErrToConsole, PDS_REQUEST_TIMEOUT)
+        //console.log('PDS F ' + num + ' ' + fanSpeed)
+        sendPdsCommand('PDS F ' + num + ' ' + fanSpeed)
       }
     } else {
       appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')

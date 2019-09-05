@@ -14,6 +14,7 @@ import rospy
 from std_msgs.msg import String, Float32
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import JointState
+from mcu_control.srv import *
 
 global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
@@ -24,7 +25,6 @@ timeout = 0.3  # to wait for a response from the MCU
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
-
 
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 def init_serial():
@@ -133,6 +133,52 @@ def init_serial():
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
+requests = {
+    'PDS T 1' : ['toggling'],
+    'PDS T 0' : ['toggling'],
+    #'who' : ['pds'],
+    'PDS M 1 1' : ['ON'],
+    'PDS M 1 0' : ['OFF'],
+    'PDS M 2 1' : ['ON'],
+    'PDS M 2 0' : ['OFF'],
+    'PDS M 3 1' : ['ON'],
+    'PDS M 3 0' : ['OFF'],
+    'PDS M 4 1' : ['ON'],
+    'PDS M 4 0' : ['OFF'],
+    'PDS M 5 1' : ['ON'],
+    'PDS M 5 0' : ['OFF'],
+    'PDS M 6 1' : ['ON'],
+    'PDS M 6 0' : ['OFF']
+}
+def handle_client(req):
+    global ser # specify that it's global so it can be used properly
+    global reqFeedback
+    global reqInWaiting
+    pdsResponse = ArmRequestResponse()
+    timeout = 0.1 # 100ms timeout
+    reqInWaiting=True
+    sinceRequest = time.time()
+    rospy.loginfo('received '+req.msg+' request from GUI, sending to PDS MCU')
+    ser.write(str.encode(req.msg+'\n')) # ping the teensy
+    while pdsResponse.success is False and (time.time()-sinceRequest < timeout):
+        if reqFeedback is not '':
+            print(reqFeedback)
+            for request in requests:
+                for response in requests[request]:
+                    if request == req.msg and response in reqFeedback:
+                        pdsResponse.response = reqFeedback
+                        pdsResponse.success = True #a valid request and a valid response from the
+                        break
+            if pdsResponse.success:
+                break
+            else:
+                pdsResponse.response += reqFeedback
+        rospy.Rate(100).sleep()
+    rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
+    rospy.loginfo(pdsResponse)
+    reqFeedback=''
+    reqInWaiting=False
+    return pdsResponse
 
 def subscriber_callback(message):
     global ser  # specify that it's global so it can be used properly
@@ -140,7 +186,6 @@ def subscriber_callback(message):
     command = str.encode(message.data + '\n')
     ser.write(command)  # send command to PDS
     return
-
 
 def publish_pds_data(message):
     # parse the data received from PDS
@@ -177,20 +222,22 @@ def publish_pds_data(message):
         return
     return
 
-
 def stripFeedback(data):
     startStrip = 'PDS '
+    startStrip2 = 'Command'
     endStrip = '\n'
     if data.startswith(startStrip) and data.count(startStrip) == 1:
         if data.endswith(endStrip) and data.count(endStrip) == 1:
             data, right = data.split(endStrip)
             left, data = data.split(startStrip)
             return data
+    elif data.startswith(startStrip2) and data.count(startStrip2) == 1:
+        if data.endswith(endStrip) and data.count(endStrip) == 1:
+            data, right = data.split(endStrip)
+            return data
     return None
 
-
 if __name__ == '__main__':
-
     node_name = 'pds_node'
     rospy.init_node(node_name, anonymous=False)  # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
@@ -223,10 +270,18 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
     sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
 
+    service_name = '/pds_request'
+    rospy.loginfo('Waiting for "'+service_name+'" service request from client')
+    serv = rospy.Service(service_name, ArmRequest, handle_client)
+
     init_serial()
 
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser
+    global reqFeedback
+    reqFeedback=''
+    global reqInWaiting
+    reqInWaiting=False
     try:
         while not rospy.is_shutdown():
             #if I try reading from the serial port inside callbacks, bad things happen
@@ -250,6 +305,14 @@ if __name__ == '__main__':
                     elif 'PDS ' in feedback:
                         feedback = stripFeedback(feedback)
                         publish_pds_data(feedback)
+                    else:
+                        if reqInWaiting:
+                            reqFeedback += feedback+'\r\n' #pass data to request handler
+                        else:
+                            if 'WARNING' in feedback:
+                                rospy.logwarn(feedback)
+                            #rospy.loginfo(feedback)
+                            feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: ' + data)
             rospy.Rate(100).sleep()
@@ -259,6 +322,7 @@ if __name__ == '__main__':
     def shutdown_hook():
         rospy.logwarn('This node (' + node_name + ') is shutting down')
         ser.close()  # good practice to close the serial port
+        # do I need to clear the serial buffer too?
         time.sleep(1)  # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)
