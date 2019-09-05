@@ -35,9 +35,6 @@ run = async () => {
       button_rpos.disabled = true
       button_rneg.disabled = true
 
-      // wait for server to finish rotating
-      // await fetch('http://localhost:5000/rotatePos')
-
       const start = (((-i + n) % n) * twopi) / n
       for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a - d, z + 1]) {
         await timer(1)
@@ -57,9 +54,6 @@ run = async () => {
       console.log('rotateNeg')
       button_rpos.disabled = true
       button_rneg.disabled = true
-
-      // wait for server to finish rotating
-      // await fetch('http://localhost:5000/rotateNeg')
 
       const start = (-i * twopi) / n
       for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a + d, z + 1]) {

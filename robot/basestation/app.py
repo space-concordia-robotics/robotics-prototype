@@ -104,16 +104,6 @@ def numSections():
 def initialSection():
     return '0'
 
-@app.route('/rotatePos')
-def rotatePos():
-    time.sleep(1) # wait 1 second
-    return 'done'
-
-@app.route('/rotateNeg')
-def rotateNeg():
-    time.sleep(1)
-    return 'done'
-
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
