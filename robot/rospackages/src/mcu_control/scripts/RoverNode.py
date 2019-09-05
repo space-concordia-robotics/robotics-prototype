@@ -77,6 +77,8 @@ def init_serial():
                                 rospy.loginfo(mcuName+" MCU identified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                                 rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
+                                ser.reset_input_buffer()
+                                ser.reset_output_buffer()
                                 return
         else:
             rospy.logerr("No USB devices recognized, exiting")
@@ -172,11 +174,16 @@ def subscriber_callback(message):
     rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,message = message.split('Motor Speeds: ')
+    try:
+        lhs,message = message.split('Motor Speeds: ')
+    except Exception as e:
+        print("type error: " + str(e))
     speeds = message.split(', ')
     # create the message to be published
     msg = JointState()
@@ -296,7 +303,10 @@ if __name__ == '__main__':
                         publish_joint_states(feedback)
                     elif 'Battery voltage' in feedback:
                         left,voltage = feedback.split('Battery voltage: ')
-                        vBatPub.publish(float(voltage))
+                        try:
+                            vBatPub.publish(float(voltage))
+                        except Exception as e:
+                            print("type error: " + str(e))
                     elif 'GPS' in feedback: #use a better string? longer?
                         publish_nav_states(feedback)
                     elif 'Linear' in feedback:
