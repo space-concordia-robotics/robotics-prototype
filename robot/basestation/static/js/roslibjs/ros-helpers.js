@@ -225,8 +225,9 @@ function initRosWeb () {
       $('#vibrator6-toggle')[0].checked = true
     }
 
-    $('#drill-rpm').val(values[13])
-
+    if (values[13]) {
+      $('#drill-rpm').val(values[13])
+    }
     // drillInUse
     if (values[14] == '0') {
       lightUp('#drill-stop-btn')
@@ -262,6 +263,12 @@ function initRosWeb () {
         lastRotate = Date.now()
       }
     }
+
+    // elevatorFeedPercent
+    if (values[18]) {
+      $('#elevator-feed-percent').val(values[18])
+    }
+
   })
 
   /* rover commands */

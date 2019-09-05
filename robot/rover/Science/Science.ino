@@ -208,7 +208,8 @@ void loop() {
     UART_PORT.print("drillInUse:"); UART_PORT.print(drillInUse); UART_PORT.print(",");
     UART_PORT.print("elevatorInUse:"); UART_PORT.print(elevatorInUse); UART_PORT.print(",");
     UART_PORT.print("tcwstepDone:"); UART_PORT.print(tcwstepDone); UART_PORT.print(",");
-    UART_PORT.print("tccwstepDone:"); UART_PORT.print(tccwstepDone);
+    UART_PORT.print("tccwstepDone:"); UART_PORT.print(tccwstepDone); UART_PORT.print(",");
+    UART_PORT.print("elevatorFeedPercent:"); UART_PORT.print(elevatorFeedPercent);
     UART_PORT.println();
 
     // make sure to immediately set back to false for only one rotation in gui turntable
@@ -238,6 +239,7 @@ void loop() {
     previousElevatorState = 'n';
     elevatorTimerInUse = false;
     elevatorInUse = false;
+    elevatorFeedPercent = 0;
     //UART_PORT.println("SCIENCE es done josh");
     UART_PORT.print("elevatorTimerInUse: ");
     UART_PORT.println(elevatorTimerInUse);
@@ -359,7 +361,7 @@ void loop() {
 
         if (getCount(cmd, ' ') == 2) {
           // get desired drill speed
-          int elevatorFeedPercent = getValue(cmd, ' ', 2).toInt();
+          elevatorFeedPercent = getValue(cmd, ' ', 2).toInt();
           analogVal = elevatorFeedPercent * 255 / 100;
           elevatorFeed = elevator_feed(elevatorFeedPercent);
           UART_PORT.print("elevatorFeed: ");
@@ -410,6 +412,7 @@ void loop() {
         analogWrite(ELEVATOR, 0);
         elevatorInUse == false;
         previousElevatorState = 'n';
+        elevatorFeedPercent = 0;
         UART_PORT.println("SCIENCE es done");
       }
       else if (cmd.endsWith("goto") && (cmd.indexOf(" ") > 0)) {
