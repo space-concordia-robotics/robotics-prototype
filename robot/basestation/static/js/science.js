@@ -158,9 +158,9 @@ const drawWheel = (ctx, w, h, r, n, a) => {
   ctx.font = '18px serif'
   ctx.fillStyle = 'black'
   ctx.textAlign = 'center'
-  let indeces = [0, 3, 2, 1]
+  let indices = [0, 3, 2, 1]
   for (let z = 0; z < n; z++) {
-    let number = indeces[z]
+    let number = indices[z]
     let a_ = a - z * (twopi / n)
     let x = Math.cos(a_) * r * 0.8
     let y = Math.sin(a_) * r * 0.8
