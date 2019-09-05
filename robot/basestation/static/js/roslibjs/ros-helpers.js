@@ -269,6 +269,11 @@ function initRosWeb () {
       $('#elevator-feed-percent').val(values[18])
     }
 
+    // currentTablePosition
+    if (values[19]) {
+      $('#table-position').val(values[19])
+    }
+
   })
 
   /* rover commands */
