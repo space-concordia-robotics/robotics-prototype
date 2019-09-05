@@ -8,7 +8,7 @@
 #if defined(DEVEL_MODE_1)
 #define UART_PORT Serial
 #elif defined(DEVEL_MODE_2)
-//#define UART_PORT Serial4
+#define UART_PORT Serial4
 #endif
 
 #define SERVO_STOP     1500
