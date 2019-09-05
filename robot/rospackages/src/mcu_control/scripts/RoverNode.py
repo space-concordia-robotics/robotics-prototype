@@ -126,7 +126,7 @@ requests = {
     'activate' : ['ACTIVATED', 'Active'],
     'deactivate' : ['Inactive'],
     'open-loop' : ['loop status is: Open'],
-    'close-loop' : ['loop status is: CLose'],
+    'close-loop' : ['loop status is: CLose'], # typo on purpose, LEAVE CLose ALONE (for now)
     'steer-off' : ['Wheel Control is Activated'],
     'steer-on' : ['Skid Steering is Activated'],
     'acc-on' : ['Limiter: Open'],

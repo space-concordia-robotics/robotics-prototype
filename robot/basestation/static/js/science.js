@@ -270,24 +270,20 @@ $(document).ready(function () {
   // ROS related stuff
   $('#science-listener-btn').on('click', function (event) {
     event.preventDefault()
+    let serialType = $('#serial-type').text().trim()
     // click makes it checked during this time, so trying to enable
     if ($('#science-listener-btn').is(':checked')) {
-      let serialType = 'uart'
       if (
-        $('#serial-type')
-          .text()
-          .includes('Serial')
+        $('#serial-type').text().includes('Serial')
       ) {
         appendToConsole('Select a serial type!')
-      } else if (
-        $('button#mux')
-          .text()
-          .includes('Science')
+      }
+      // validate UART mode options are correct, let pass if USB mode selected
+      else if (
+        ($('button#mux').text().includes('Science') && serialType == 'uart')
+        || serialType == 'usb'
       ) {
-        serialType = $('#serial-type')
-          .text()
-          .trim()
-        requestTask(
+        requestTask (
           'science_listener',
           1,
           '#science-listener-btn',
@@ -305,7 +301,7 @@ $(document).ready(function () {
         )
       } else {
         appendToConsole(
-          'Cannot turn science listener on if not in science mux channel!'
+          'UART MODE: Cannot turn science listener on if not in science mux channel!'
         )
       }
     } else {

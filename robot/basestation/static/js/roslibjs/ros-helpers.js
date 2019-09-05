@@ -320,7 +320,7 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
   rover_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
+    appendToConsole(message.data, true, false)
   })
   // setup a subscriber for the antenna_goal topic
   antenna_goal_listener = new ROSLIB.Topic({
@@ -551,10 +551,8 @@ function checkTaskStatuses () {
       }
     })
   } else if (window.location.pathname == '/rover') {
-    // check arm listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
-      msgs
-    ) {
+    // check rover listener status
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -573,6 +571,18 @@ function checkTaskStatuses () {
         $('#activate-rover-btn')[0].checked = false
       }
     })
+
+    // initialize rover to open-loop mode
+    sendRequest('Rover', 'open-loop', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[1].includes('loop status is: Open')) {
+        appendToConsole('Open loop active')
+        $('#toggle-rover-pid-btn')[0].checked = false
+      } else {
+        appendToConsole('Failed to activate open loop mode')
+      }
+    })
+
 
     // check all camera stream status
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
@@ -687,7 +697,6 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  // arm_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {
