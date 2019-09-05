@@ -10,8 +10,8 @@ $(document).ready(() => {
         $('#serial-type').text(getCookie('serialType'))
       }
 
-      // only for ARM and ROVER (for now)
-      if (window.location.pathname != '/science') {
+      // only for ARM, ROVER and SCIENCE (for now)
+      if (window.location.pathname != '/pds') {
         $('#front-camera-stream-btn').on('click', function (event) {
           event.preventDefault()
           // click makes it checked during this time, so trying to enable
