@@ -32,7 +32,7 @@ def init_serial():
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
-    usb = False; uart = True
+    usb = True; uart = False
     myargv = rospy.myargv(argv=sys.argv)
     if len(myargv) == 1:
         rospy.loginfo('Using UART by default')
@@ -124,7 +124,7 @@ requests = {
     'ping' : ['pong'],
     'who' : ['Happy Astro','Paralyzed Astro'],
     'activate' : ['ACTIVATED', 'Active'],
-    'deactivate' : ['Inactive'],
+    'deactivate' : ['Inactive', 'inactive'],
     'open-loop' : ['loop status is: Open'],
     'close-loop' : ['loop status is: CLose'], # typo on purpose, LEAVE CLose ALONE (for now)
     'steer-off' : ['Wheel Control is Activated'],
@@ -134,6 +134,10 @@ requests = {
     'reboot' : ['rebooting']
 }
 def handle_client(req):
+    # feedback to tell if script itself is responsive
+    if req.msg == 'ping':
+        feedbackPub.publish('listener received ping request')
+
     global ser # specify that it's global so it can be used properly
     global reqFeedback
     global reqInWaiting
@@ -286,7 +290,7 @@ if __name__ == '__main__':
                     feedback = stripFeedback(data)
                 except:
                     rospy.logwarn('trouble reading from serial port')
-                if feedback is not None:
+                if feedback is not None and feedback is not '':
                     if 'Motor Speeds' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
@@ -295,6 +299,10 @@ if __name__ == '__main__':
                         vBatPub.publish(float(voltage))
                     elif 'GPS' in feedback: #use a better string? longer?
                         publish_nav_states(feedback)
+                    elif 'Linear' in feedback:
+                        pass
+                    elif 'Desired' in feedback:
+                        pass
                     else:
                         #rospy.loginfo(feedback)
                         if reqInWaiting:
@@ -305,9 +313,6 @@ if __name__ == '__main__':
                             if 'WARNING' in feedback:
                                 rospy.logwarn(feedback)
                             #rospy.loginfo(feedback)
-                            #else:
-                            #    feedbackPub.publish(feedback)
-                            #this next line is annoying, should be filtered somehow like the above commented code
                             feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: '+data)
