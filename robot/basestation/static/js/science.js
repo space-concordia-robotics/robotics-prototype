@@ -266,20 +266,27 @@ $(document).ready(function () {
   // ROS related stuff
   $('#science-listener-btn').on('click', function (event) {
     event.preventDefault()
-    let serialType = $('#serial-type').text().trim()
+    let serialType = $('#serial-type')
+      .text()
+      .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#science-listener-btn').is(':checked')) {
       if (
-        $('#serial-type').text().includes('Serial')
+        $('#serial-type')
+          .text()
+          .includes('Serial')
       ) {
         appendToConsole('Select a serial type!')
       }
       // validate UART mode options are correct, let pass if USB mode selected
       else if (
-        ($('button#mux').text().includes('Science') && serialType == 'uart')
-        || serialType == 'usb'
+        ($('button#mux')
+          .text()
+          .includes('Science') &&
+          serialType == 'uart') ||
+        serialType == 'usb'
       ) {
-        requestTask (
+        requestTask(
           'science_listener',
           1,
           '#science-listener-btn',

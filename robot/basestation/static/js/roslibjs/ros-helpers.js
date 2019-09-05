@@ -564,7 +564,9 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/rover') {
     // check rover listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
+      msgs
+    ) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -574,27 +576,6 @@ function checkTaskStatuses () {
         }
       }
     })
-
-    sendRequest('Rover', 'who', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('Happy')) {
-        $('#activate-rover-btn')[0].checked = true
-      } else {
-        $('#activate-rover-btn')[0].checked = false
-      }
-    })
-
-    // initialize rover to open-loop mode
-    sendRequest('Rover', 'open-loop', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('loop status is: Open')) {
-        appendToConsole('Open loop active')
-        $('#toggle-rover-pid-btn')[0].checked = false
-      } else {
-        appendToConsole('Failed to activate open loop mode')
-      }
-    })
-
 
     // check all camera stream status
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
