@@ -196,7 +196,7 @@ $(document).ready(function () {
     }
     sendRequest(
       'Arm',
-      'motor ' + num + ' loop ' + isOpen ? 'open' : 'closed',
+      'motor ' + num + ' loop ' + (isOpen ? 'open' : 'closed'),
       armReq
     )
   })
