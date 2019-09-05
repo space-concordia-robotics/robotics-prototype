@@ -135,30 +135,23 @@ $(document).ready(function () {
     // click makes it checked during this time, so trying to enable
     if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
-    } else if ($('#activate-rover-btn').is(':checked')) {
-      sendRequest('Rover', 'activate', function (msgs) {
-        printErrToConsole(msgs)
-        if (msgs[0]) {
-          $('#activate-rover-btn')[0].checked = true
-        }
-      })
-
-      sendRequest('Rover', 'open-loop', function (msgs) {
-        if (msgs[1].includes('loop status is: Open')) {
-          appendToConsole('Open loop activated')
-          $('#toggle-rover-listener-btn')[0].checked = false
-        } else {
-          appendToConsole('Failed to activate open loop')
-        }
-      })
     } else {
-      // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendRequest('Rover', 'deactivate', function (msgs) {
-        printErrToConsole(msgs)
-        if (msgs[0]) {
-          $('#activate-rover-btn')[0].checked = false
-        }
-      })
+      if ($('#activate-rover-btn').is(':checked')) {
+        sendRequest("Rover", 'activate', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = true
+          }
+        })
+      } else {
+        // 'deactivated' needs to be handled differently since it takes 45 secconds
+        sendRequest("Rover", 'deactivate', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = false
+          }
+        })
+      }
     }
   })
 
@@ -168,7 +161,7 @@ $(document).ready(function () {
     if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
     } else if ($('#toggle-rover-pid-btn').is(':checked')) {
-      sendRequest('Rover', 'closed-loop', function (msgs) {
+      sendRequest('Rover', 'close-loop', function (msgs) {
         printErrToConsole(msgs)
         if (msgs[1].includes('loop status is: CLose')) {
           $('#toggle-rover-pid-btn')[0].checked = true
@@ -656,7 +649,11 @@ function gameLoop () {
         $('#back-pan-pwm').text(rearPan)
         lastRearContServoCmd = new Date().getTime()
         sendRoverCommand('#' + rearPan.toString())
+<<<<<<< HEAD
         sentRearServoStop = rearPanPwn == SERVO_STOP
+=======
+        sentRearServoStop = (rearPan == SERVO_STOP)
+>>>>>>> master
       }
     }
 
