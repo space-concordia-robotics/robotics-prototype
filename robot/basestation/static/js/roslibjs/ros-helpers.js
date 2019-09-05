@@ -366,6 +366,26 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
+  error_flags_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_flags',
+    messageType: 'std_msgs/String'
+  })
+  error_flags_listener.subscribe(function (message) {
+    let flags = message.data.split(', ')
+    $('#pds-ov-flag').text(parseInt(flags[0]))
+    $('#pds-uv-flag').text(parseInt(flags[1]))
+    $('#pds-critical-flag').text(parseInt(flags[2]))
+  })
+  fan_speeds_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'fan_speeds',
+    messageType: 'geometry_msgs/Point'
+  })
+  fan_speeds_listener.subscribe(function (message) {
+    $('#fan-1-speed').text(parseInt(message.x))
+    $('#fan-2-speed').text(parseInt(message.y))
+  })
   // setup a subscriber for the pds_feedback topic
   pds_feedback_listener = new ROSLIB.Topic({
     ros: ros,
