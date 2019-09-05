@@ -147,8 +147,8 @@ void setup() {
   pinMode(LIMIT_BOTTOM, INPUT_PULLUP);
   pinMode(PHOTORESISTOR, INPUT_PULLUP);
   pinMode(TABLE_SWITCH_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, FALLING);
-  attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, FALLING);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_TOP), debouncing, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_BOTTOM), debouncing, CHANGE);
   attachInterrupt(digitalPinToInterrupt(TABLE_SWITCH_PIN), debouncing, CHANGE);
 
   analogWrite(DRILL, 0);
@@ -348,8 +348,8 @@ void loop() {
         //@TODO: include this in the feedback, figure out which units (inches per s/min)
         //UART_PORT.println(elevator_feed(elevatorFeedPercent));
         //@TODO: figure out why this is useful to keep track of
-        if (digitalRead(ELEVATOR_DIRECTION) == HIGH)previousElevatorState = 'u';
-        else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'd';
+        if (digitalRead(ELEVATOR_DIRECTION) == HIGH)previousElevatorState = 'd';
+        else if (digitalRead(ELEVATOR_DIRECTION) == LOW)previousElevatorState = 'u';
       }
       if (cmd.startsWith("elevatordistance") && (cmd.indexOf(" ") > 0)) {
         // turns elevator for desired distance
@@ -397,10 +397,10 @@ void loop() {
         elevatorInUse = true;
 
         if (digitalRead(ELEVATOR_DIRECTION) == HIGH) {
-          previousElevatorState = 'u';
+          previousElevatorState = 'd';
         }
         else if (digitalRead(ELEVATOR_DIRECTION) == LOW) {
-          previousElevatorState = 'd';
+          previousElevatorState = 'u';
         }
 
         UART_PORT.println("SCIENCE ego done");
@@ -654,11 +654,12 @@ void loop() {
   // this works but doesn't consider the possibility of both switches
   // being triggered at the same time which shouldn't ever actually happen
   if (isTriggered) {
-    if ( (millis() - triggerTime) >= TRIGGER_DELAY) {
+    if ((millis() - triggerTime) >= TRIGGER_DELAY) {
       // if the last interrupt was a press (meaning it's stabilized and in contact)
       // then there's a real press
       if (isContacted) {
         isActualPress = true;   // otherwise it's not a real press
+        //triggerTime = 0;
       }                         // so the limit switch state should stay whatever it used to be
       // and so should actualPress
       isTriggered = false;      // either way, we should reset the triggered bool in wait for the next trigger
@@ -681,40 +682,42 @@ void loop() {
 
 // elevatorDirection
 // 0 --> UP, 1 --> DOWN
+
+/*
+  NOTE: It is bad practice to have interrupts which are not super quick
+  These interrupts ideally should only be setting flags and the main code
+  should be dealing with causing delays and whatnot
+*/
 void elevatorTopInterrupt () {
-  UART_PORT.println("elevatorTopInterrupt");
-  //stops elevator
-  unsigned long timer = millis();
-
-  analogWrite(ELEVATOR, 0);
-  digitalWrite(ELEVATOR_DIRECTION, LOW);
-  previousElevatorState = 'u';
-  analogWrite(ELEVATOR, maxVelocity);
-  while ((millis() - timer) < 500) {
-    ;
-  }
-  analogWrite(ELEVATOR, 0);
-  UART_PORT.println("Elevator Top Limit");
-  previousElevatorState = 'n';
-  elevatorDirection = 0;
-}
-
-void elevatorBottomInterrupt () {
-  UART_PORT.println("elevatorBottomInterrupt");
   //stops elevator
   unsigned long timer = millis();
 
   analogWrite(ELEVATOR, 0);
   digitalWrite(ELEVATOR_DIRECTION, HIGH);
-  previousElevatorState = 'd';
+  //previousElevatorState = 'd';
   analogWrite(ELEVATOR, maxVelocity);
   while ((millis() - timer) < 500) {
     ;
   }
   analogWrite(ELEVATOR, 0);
-  UART_PORT.println("SCIENCE Elevator Bottom Limit");
   previousElevatorState = 'n';
   elevatorDirection = 1;
+}
+
+void elevatorBottomInterrupt () {
+  //stops elevator
+  unsigned long timer = millis();
+
+  analogWrite(ELEVATOR, 0);
+  digitalWrite(ELEVATOR_DIRECTION, LOW);
+  //previousElevatorState = 'u';
+  analogWrite(ELEVATOR, maxVelocity);
+  while ((millis() - timer) < 500) {
+    ;
+  }
+  analogWrite(ELEVATOR, 0);
+  previousElevatorState = 'n';
+  elevatorDirection = 0;
 }
 
 void cuvettePosition() {
@@ -823,7 +826,6 @@ void debouncing(void) {
     }
   }
 }
-
 
 /*
    Defaults input values to 0 or 100 if out of those bounds
