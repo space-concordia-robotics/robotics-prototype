@@ -41,7 +41,7 @@
 
 #define LIMIT_TOP          26 //limSW_1
 #define LIMIT_BOTTOM       25 //limSW_2
-#define TABLE_SWITCH_PIN   24 //limSW_3
+#define TABLE_SWITCH_PIN   24 //limSW_3 
 
 #define LED1               33
 #define LED2               34
@@ -49,13 +49,13 @@
 // MOTOR 2
 // M2B - negative
 // M2A - positive
-#define DRILL              36 //PWM // 36 for TEENSY, 44 for Arduino Mega
-#define DRILL_DIRECTION    35
+#define DRILL              35//36 //PWM // 36 for TEENSY, 44 for Arduino Mega
+#define DRILL_DIRECTION    36//35
 // MOTOR 1
 // M1A - negative
 // M1B - positive
-#define ELEVATOR           38 //PWM // 38 FOR TEENSY, 45 for Arduino Mega
-#define ELEVATOR_DIRECTION 37
+#define ELEVATOR           37//38 //PWM // 38 FOR TEENSY, 45 for Arduino Mega
+#define ELEVATOR_DIRECTION 38//37
 
 // debouncing variables
 volatile bool isTriggered = false;
@@ -76,7 +76,7 @@ int drillDirection = 0; // 0 --> CW, 1 --> CCW
 int drillSpeedPercent = 0;
 int pumpDirection = 0; // 0 --> OUT, 1 --> IN
 long int elevatorDuration = 0;
-int elevatorDirection = 0; // 0 --> UP, 1 --> DOWN
+int elevatorDirection = 1 - 0; // 0 --> UP, 1 --> DOWN
 int maxVelocity = 255;
 int elevatorFeedPercent = 0;
 int cuvette = 0;
@@ -376,14 +376,14 @@ void loop() {
       }
       else if (cmd == "eup") {
         // sets elevator direction clockwise
-        elevatorDirection = 0;
-        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        elevatorDirection = 1- 0;
+        digitalWrite(ELEVATOR_DIRECTION, 1 - elevatorDirection);
         UART_PORT.println("SCIENCE eup done");
       }
       else if (cmd == "edown") {
         // sets elevator direction counter-clockwise
-        elevatorDirection = 1;
-        digitalWrite(ELEVATOR_DIRECTION, elevatorDirection);
+        elevatorDirection = 1 - 1;
+        digitalWrite(ELEVATOR_DIRECTION, 1 - elevatorDirection);
         UART_PORT.println("SCIENCE edown done");
       }
       else if (cmd == "ed") {
@@ -700,7 +700,7 @@ void elevatorTopInterrupt () {
   }
   analogWrite(ELEVATOR, 0);
   previousElevatorState = 'n';
-  elevatorDirection = 1;
+  elevatorDirection = 1 - 1;
 }
 
 void elevatorBottomInterrupt () {
@@ -716,7 +716,7 @@ void elevatorBottomInterrupt () {
   }
   analogWrite(ELEVATOR, 0);
   previousElevatorState = 'n';
-  elevatorDirection = 0;
+  elevatorDirection = 1- 0;
 }
 
 void cuvettePosition() {
