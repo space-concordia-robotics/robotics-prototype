@@ -234,9 +234,9 @@ class Astro_Joy():
         else:
             self.cameras_halt = False
 
-        if self.joy_hat == (1, 0) and top_camera_ctr == (0, 0, 0, 0):
+        if self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous - self.continuous_motion)
-        elif self.joy_hat == (-1, 0) and top_camera_ctr == (0, 0, 0, 0):
+        elif self.joy_hat == (1, 0) and top_camera_ctr == (0, 0, 0, 0):
             msg = "!" + str(self.front_cam_contiuous + self.continuous_motion)
         elif self.joy_hat == (0, -1) and top_camera_ctr == (0, 0, 0, 0):
             if self.front_cam_position_actual < self.front_cam_position_max:
