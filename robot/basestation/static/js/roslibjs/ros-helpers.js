@@ -344,8 +344,8 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
     )
   }
 
-  let timer = setTimeout(function() {
-      callback([false, elemID + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, elemID + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
   mux_select_client.callService(request, function (result) {
@@ -392,7 +392,14 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', timeout = REQUEST_TIMEOUT) {
+function requestTask (
+  reqTask,
+  reqStatus,
+  buttonID,
+  callback,
+  reqArgs = '',
+  timeout = REQUEST_TIMEOUT
+) {
   var request
   if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
@@ -414,8 +421,8 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', time
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
-  let timer = setTimeout(function() {
-      callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, reqTask + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
   task_handler_client.callService(request, function (result) {
@@ -507,7 +514,9 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/rover') {
     // check rover listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
+      msgs
+    ) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -517,27 +526,6 @@ function checkTaskStatuses () {
         }
       }
     })
-
-    sendRequest("Rover", 'who', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('Happy')) {
-        $('#activate-rover-btn')[0].checked = true
-      } else {
-        $('#activate-rover-btn')[0].checked = false
-      }
-    })
-
-    // initialize rover to open-loop mode
-    sendRequest('Rover', 'open-loop', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('loop status is: Open')) {
-        appendToConsole('Open loop active')
-        $('#toggle-rover-pid-btn')[0].checked = false
-      } else {
-        appendToConsole('Failed to activate open loop mode')
-      }
-    })
-
 
     // check all camera stream status
     requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
@@ -603,33 +591,31 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
-function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
+function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  let timer = setTimeout(function() {
-      callback([false, command + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, command + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
-  var requestClient;
-  switch(device)
-  {
-    case "Arm":
+  var requestClient
+  switch (device) {
+    case 'Arm':
       requestClient = arm_request_client
-    break
-    case "Rover":
+      break
+    case 'Rover':
       requestClient = rover_request_client
-    break
-    case "Science":
+      break
+    case 'Science':
       requestClient = science_request_client
-    break
+      break
   }
 
   requestClient.callService(request, function (result) {
-
     clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)

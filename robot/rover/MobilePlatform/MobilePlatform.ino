@@ -182,38 +182,30 @@ void loop() {
     if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
             print("ASTRO Motor Speeds: ");
-
             print(RF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RB.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             println(LB.getCurrentVelocity());
 
             roverVelocityCalculator();
 
-            print("ASTRO");
-            print(" Desired Velocities");
-
-            print(RF.desiredVelocity);
-            print(" ");
-            print(RM.desiredVelocity);
-            print(" ");
-            print(RB.desiredVelocity);
-            print(" ");
-            print(LF.desiredVelocity);
-            print(" ");
-            print(LM.desiredVelocity);
-            print(" ");
-            println(LB.desiredVelocity);
-
+            print("ASTRO Desired Velocities: ");
+            print(String(RF.desiredVelocity) + ", ");
+            print(String(RM.desiredVelocity) + ", ");
+            print(String(RB.desiredVelocity) + ", ");
+            print(String(LF.desiredVelocity) + ", ");
+            print(String(LM.desiredVelocity) + ", ");
+            println(String(LB.desiredVelocity));
         }
         else {
+            print("ASTRO Motor Speeds: ");
             print(String(RF.desiredVelocity) + ", ");
             print(String(RM.desiredVelocity) + ", ");
             print(String(RB.desiredVelocity) + ", ");
@@ -269,11 +261,11 @@ void roverVelocityCalculator(void) {
     rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
 
     print("ASTRO ");
-    print("Linear velocity ");
+    print("Linear Velocity: ");
     print(linearVelocity);
     print(" m/s ");
 
-    print(" Rotational Velocity ");
+    print("Rotational Velocity: ");
     print(rotationalVelocity);
     println(" m^2/6 ");
 }
