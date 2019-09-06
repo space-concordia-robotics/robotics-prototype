@@ -649,11 +649,7 @@ function gameLoop () {
         $('#back-pan-pwm').text(rearPan)
         lastRearContServoCmd = new Date().getTime()
         sendRoverCommand('#' + rearPan.toString())
-<<<<<<< HEAD
-        sentRearServoStop = rearPanPwn == SERVO_STOP
-=======
         sentRearServoStop = (rearPan == SERVO_STOP)
->>>>>>> master
       }
     }
 
