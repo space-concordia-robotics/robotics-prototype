@@ -410,6 +410,10 @@ $(document).ready(() => {
     }
   })
 
+  $('#flip-stream').on('click', function() {
+    $('#camera-feed').toggleClass('rotateimg180')
+  })
+
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
