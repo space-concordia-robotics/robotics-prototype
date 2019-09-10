@@ -347,8 +347,6 @@ function initRosWeb () {
   })
 }
 
-initRosWeb()
-
 /* functions used in main code */
 function requestMuxChannel (elemID, callback) {
   let dev = elemID[elemID.length - 1]
