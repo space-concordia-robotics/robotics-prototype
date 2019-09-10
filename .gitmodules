@@ -7,3 +7,6 @@
 [submodule "tf2_web_republisher"]
 	path = robot/rospackages/src/tf2_web_republisher
 	url = https://github.com/RobotWebTools/tf2_web_republisher
+[submodule "rover2018-elec"]
+	path = rover2018-elec
+	url = https://gitlab.com/space-concordia-robotics/rover2018-elec
