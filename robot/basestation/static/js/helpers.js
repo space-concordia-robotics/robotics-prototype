@@ -107,7 +107,7 @@ function dim (selector) {
   color(selector, 'rgb(74, 0, 0)')
 }
 
-function isLit (selector,) {
+function isLit (selector) {
   return ($(selector).css('background-color').toLowerCase() == 'rgb(255, 0, 0)')
 }
 
