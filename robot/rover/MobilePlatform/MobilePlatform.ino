@@ -360,14 +360,14 @@ void serialHandler(void) {
 //! attach the servos to pins
 void attachServos() {
     frontSide.attach(FS_SERVO);
-    frontSide.write(FRONT_BASE_DEFAULT_PWM);
+    frontSide.write(SERVO_STOP);
     frontBase.attach(FB_SERVO);
-    frontBase.write(SERVO_STOP);
+    frontBase.write(FRONT_BASE_DEFAULT_PWM);
 
     rearSide.attach(RS_SERVO);
-    rearSide.write(REAR_BASE_DEFAULT_PWM);
+    rearSide.write(SERVO_STOP);
     rearBase.attach(RB_SERVO);
-    rearBase.write(SERVO_STOP);
+    rearBase.write(REAR_BASE_DEFAULT_PWM);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes
