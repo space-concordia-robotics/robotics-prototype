@@ -190,6 +190,7 @@ void loop() {
     // if a message was sent to the Teensy
     msgReceived = true;
     UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
+    // @TODO find a way to check for \r carriage return and remove it... the issue is that it's a char array not String
 #ifdef DEBUG_MAIN
     UART_PORT.print("ARM GOT: "); UART_PORT.println(serialBuffer); // send back what was received
 #endif
