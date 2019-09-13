@@ -48,22 +48,6 @@ $(document).ready(function () {
     }
   })
 
-  $('#save-image').on('click', function (event) {
-    $.ajax('/capture_image', {
-      success: function (data) {
-        appendToConsole(data.msg)
-        if (!data.msg.includes('success')) {
-          appendToConsole('Something went wrong, got', data.msg)
-        } else {
-          appendToConsole(data.msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
-  })
-
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     // TODO: uncomment this when homing is confirmed to work properly
