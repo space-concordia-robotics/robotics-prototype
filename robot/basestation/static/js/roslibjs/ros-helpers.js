@@ -2,7 +2,7 @@ REQUEST_TIMEOUT = 3000
 
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
-    url: 'ws://localhost:9090'
+    url: 'ws://' + env.HOST_IP + ':9090'
   })
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
