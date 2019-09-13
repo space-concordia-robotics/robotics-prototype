@@ -542,7 +542,7 @@ void initEncoders(void) {
   motor1.isOpenLoop = false; motor1.encoderModifier=-1;
   motor2.isOpenLoop = false;
   motor3.isOpenLoop = false;
-  motor4.isOpenLoop = false; //motor4.encoderModifier=-1;
+  motor4.isOpenLoop = false; motor4.encoderModifier=-1;
 
   // set pid gains
   motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
