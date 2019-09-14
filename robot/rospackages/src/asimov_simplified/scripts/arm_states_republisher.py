@@ -22,7 +22,8 @@ def subscriber_callback(data):
     msg.position.append(radians(data.position[2]))
     msg.position.append(radians(data.position[3]))
     msg.position.append(radians(data.position[4]))
-    msg.position.append(radians(data.position[5]))
+    # the fingers use m instead of deg so we need to convert differently. If the gripper takes -70 to 70 then it can be considered as mm
+    msg.position.append(data.position[5]/1000)
     msg.position.append(msg.position[5])
 
     anglePub.publish(msg)
