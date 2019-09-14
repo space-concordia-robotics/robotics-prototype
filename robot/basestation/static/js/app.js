@@ -353,61 +353,6 @@ $(document).ready(() => {
 
   Site.init()
 
-  function isListenerOpen () {
-    return (
-      (window.location.pathname == '/rover' &&
-        $('#toggle-rover-listener-btn')[0].checked == true) ||
-      (window.location.pathname == '/' &&
-        $('#toggle-arm-listener-btn')[0].checked == true) ||
-      (window.location.pathname == '/science' &&
-        $('#science-listener-btn')[0].checked == true)
-      // pds Listener
-    )
-  }
-
-  // select mux channel using mux_select service
-  $('#mux-0').mouseup(function () {
-    // Rover
-    if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
-    } else {
-      requestMuxChannel('#mux-0', function (msgs) {
-        printErrToConsole(msgs)
-
-        if (msgs[0] == true && window.location.pathname == '/rover') {
-          console.log('Activating Rover Listener Node')
-
-          let serialType = getCookie('serialType')
-
-          if (serialType == '') {
-            appendToConsole('Serial type not yet defined!')
-            return
-          }
-
-          // automating opening listener and sending MCU ping in UART mode
-          if (serialType == 'uart') {
-            requestTask(
-              'rover_listener',
-              1,
-              '#toggle-rover-listener-btn',
-              function (msgs) {
-                if (msgs[0]) {
-                  $('#toggle-rover-listener-btn')[0].checked = true
-                  // try pinging MCU
-                  wait(1000)
-                  sendRequest('Rover', 'ping', printErrToConsole)
-                } else {
-                  $('#toggle-rover-listener-btn')[0].checked = false
-                }
-              },
-              serialType
-            )
-          }
-        }
-      })
-    }
-  })
-
   $('#flip-stream').on('click', function () {
     $('#camera-feed').toggleClass('rotateimg180')
   })
@@ -421,7 +366,7 @@ $(document).ready(() => {
     $('#camera-feed').toggleClass('rotateimgcw')
     $('#camera-feed').toggleClass('stretch-down')
   })
-}
+})
 
 function printErrToConsole (msg) {
   if (!msg[0]) appendToConsole(msg[1])
@@ -445,6 +390,7 @@ function pingDevice (device) {
   }
 }
 
+/*
 function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   appendToConsole('pinging odroid')
   $.ajax('/ping_rover', {
@@ -474,3 +420,4 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   })
   lastCmdSent = new Date().getTime()
 }
+*/
