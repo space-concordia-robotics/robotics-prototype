@@ -703,16 +703,18 @@ $(document).ready(function () {
 
     // check if feed set
     let feed = $('#elevator-feed').val()
-    feed = Number(feed)
 
-    // anything under 20% is too slow and takes _very_ long time to reach 1 inch distance
-    if (isNumeric(feed) && (feed >= 20 && feed <= 100)) {
-      cmd += ' ' + feed
-    } else {
-      color('#elevator-feed', 'orange')
-      appendToConsole('Illegal parameter set for feed')
-      appendToConsole('Legal range of integers: [10, 100]')
-      return
+    if (feed != '') {
+      feed = Number(feed)
+      // anything under 20% is too slow and takes _very_ long time to reach 1 inch distance
+      if (isNumeric(feed) && (feed >= 20 && feed <= 100)) {
+        cmd += ' ' + feed
+      } else {
+        color('#elevator-feed', 'orange')
+        appendToConsole('Illegal parameter set for feed')
+        appendToConsole('Legal range of integers: [10, 100]')
+        return
+      }
     }
 
     // if we made it this far then reset the input field to normal background
