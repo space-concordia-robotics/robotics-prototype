@@ -254,17 +254,7 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-rear-rpm').text(message.velocity[5])
   })
-  // setup a subscriber for the rover_position topic
-  rover_position_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_position',
-    messageType: 'geometry_msgs/Point'
-  })
-  rover_position_listener.subscribe(function (message) {
-    $('#rover-latitude').text(message.x)
-    $('#rover-longitude').text(message.y)
-    $('#rover-heading').text(message.z)
-  })
+  
   // setup a subscriber for the rover_twist topic
   rover_twist_listener = new ROSLIB.Topic({
     ros: ros,
@@ -283,49 +273,6 @@ function initRosWeb () {
   })
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data, true, false)
-  })
-  // setup a subscriber for the antenna_goal topic
-  antenna_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'antenna_goal',
-    messageType: 'geometry_msgs/Point'
-  })
-  antenna_goal_listener.subscribe(function (message) {
-    $('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
-  })
-  // setup gps parameters for antenna directing
-  antenna_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_latitude'
-  })
-  antenna_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_longitude'
-  })
-  antenna_start_dir = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_start_dir'
-  })
-
-  // setup a subscriber for the rover_goal topic
-  rover_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_goal',
-    messageType: 'geometry_msgs/Point'
-  })
-  rover_goal_listener.subscribe(function (message) {
-    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
-  })
-  // setup gps parameters for rover goals
-  goal_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_latitude'
-  })
-  goal_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_longitude'
   })
 }
 
@@ -640,76 +587,6 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-}
-
-function initNavigationPanel () {
-  let hasAntennaParams = true
-  antenna_latitude.get(function (val) {
-    if (val != null) {
-      $('#antenna-latitude').text(val)
-      antenna_longitude.get(function (val) {
-        if (val != null) {
-          $('#antenna-longitude').text(val)
-          antenna_start_dir.get(function (val) {
-            if (val != null) {
-              $('#antenna-start-dir').text(val)
-              appendToConsole(
-                'Antenna goal parameters already set, displaying antenna directions'
-              )
-              $('#antenna-inputs').hide()
-              $('#antenna-unchanging').show()
-            } else {
-              appendToConsole(
-                'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-              )
-              $('#antenna-inputs').show()
-              $('#antenna-unchanging').hide()
-            }
-          })
-        } else {
-          appendToConsole(
-            'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-          )
-          $('#antenna-inputs').show()
-          $('#antenna-unchanging').hide()
-        }
-      })
-    } else {
-      appendToConsole(
-        'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-      )
-      $('#antenna-inputs').show()
-      $('#antenna-unchanging').hide()
-    }
-  })
-
-  goal_latitude.get(function (val) {
-    if (val != null) {
-      $('#goal-latitude').text(val)
-      goal_longitude.get(function (val) {
-        if (val != null) {
-          appendToConsole(
-            'GPS goal parameters already set, displaying directions to the goal'
-          )
-          $('#goal-longitude').text(val)
-          $('#goal-inputs').hide()
-          $('#goal-unchanging').show()
-        } else {
-          appendToConsole(
-            'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
-          )
-          $('#goal-inputs').show()
-          $('#goal-unchanging').hide()
-        }
-      })
-    } else {
-      appendToConsole(
-        'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
-      )
-      $('#goal-inputs').show()
-      $('#goal-unchanging').hide()
-    }
-  })
 }
 
 /*

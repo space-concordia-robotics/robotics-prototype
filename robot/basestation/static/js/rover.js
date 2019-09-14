@@ -240,69 +240,6 @@ $(document).ready(function () {
       )
     }
   })
-
-  $('#send-antenna-data-btn').on('click', function (event) {
-    event.preventDefault()
-    let goodInput = true
-    if (!$('#antenna-latitude-input').val()) {
-      appendToConsole('latitude field empty!')
-      goodInput = false
-    }
-    if (!$('#antenna-longitude-input').val()) {
-      appendToConsole('longitude field empty!')
-      goodInput = false
-    }
-    if (!$('#antenna-start-dir-input').val()) {
-      appendToConsole('bearing field empty!')
-      goodInput = false
-    }
-    if (goodInput) {
-      let initialLatitude = $('#antenna-latitude-input').val()
-      let initialLongitude = $('#antenna-longitude-input').val()
-      let initialBearing = $('#antenna-start-dir-input').val()
-      antenna_latitude.set(parseFloat(initialLatitude))
-      antenna_longitude.set(parseFloat(initialLongitude))
-      antenna_start_dir.set(parseFloat(initialBearing))
-      $('#antenna-latitude').text(initialLatitude)
-      $('#antenna-longitude').text(initialLongitude)
-      $('#antenna-start-dir').text(initialBearing)
-      $('#antenna-inputs').hide()
-      $('#antenna-unchanging').show()
-    }
-  })
-  $('#change-antenna-data-btn').on('click', function (event) {
-    event.preventDefault()
-    $('#antenna-inputs').show()
-    $('#antenna-unchanging').hide()
-  })
-
-  $('#send-goal-pos-btn').on('click', function (event) {
-    event.preventDefault()
-    let goodInput = true
-    if (!$('#goal-latitude-input').val()) {
-      appendToConsole('latitude field empty!')
-      goodInput = false
-    }
-    if (!$('#goal-longitude-input').val()) {
-      appendToConsole('longitude field empty!')
-      goodInput = false
-    }
-    if (goodInput) {
-      let desiredLatitude = $('#goal-latitude-input').val()
-      let desiredLongitude = $('#goal-longitude-input').val()
-      goal_latitude.set(parseFloat(desiredLatitude))
-      goal_longitude.set(parseFloat(desiredLongitude))
-      $('#goal-latitude').text(desiredLatitude)
-      $('#goal-longitude').text(desiredLongitude)
-      $('#goal-inputs').hide()
-      $('#goal-unchanging').show()
-    }
-  })
-  $('#change-goal-pos-btn').on('click', function (event) {
-    event.preventDefault()
-    $('#goal-inputs').show()
-    $('#goal-unchanging').hide()
-  })
 })
 
 // KEYBOARD EVENTS
@@ -784,5 +721,4 @@ function gameLoop () {
   }
   setTimeout(gameLoop, 5)
 }
-
 gameLoop()
