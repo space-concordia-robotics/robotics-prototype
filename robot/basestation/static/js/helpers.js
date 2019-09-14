@@ -13,6 +13,10 @@ function appendToConsole (msg, devConsole = true, guiConsole = true) {
   }
 }
 
+function printErrToConsole (msg) {
+  if (!msg[0]) appendToConsole(msg[1])
+}
+
 // Rover log
 // logs to console and scrolls to bottom
 function appendToRoverLog (msg) {
