@@ -390,7 +390,6 @@ function pingDevice (device) {
   }
 }
 
-/*
 function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   appendToConsole('pinging odroid')
   $.ajax('/ping_rover', {
@@ -420,4 +419,3 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   })
   lastCmdSent = new Date().getTime()
 }
-*/
