@@ -117,7 +117,8 @@ def init_serial():
                         #dat = ser.readline().decode()
                         data = ser.readline().decode()
                         #data = stripFeedback(dat)
-                    except:
+                    except Exception as e:
+                        print("type error: " + str(e))
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
                         if mcuName in data:
@@ -137,7 +138,7 @@ def init_serial():
 requests = {
     'PDS T 1' : ['ON'],
     'PDS T 0' : ['OFF'],
-    #'who' : ['pds'],
+    #'who' : ['pds'], #@TODO: MCU code can't handle this request, fix it
     'PDS M 1 1' : ['toggling'],
     'PDS M 1 0' : ['toggling'],
     'PDS M 2 1' : ['toggling'],
@@ -200,6 +201,7 @@ def publish_pds_data(message):
         for i in range(12):
             if i < 1:
                 voltage.data = float(dataPDS[i])
+                rospy.loginfo('voltage=' + dataPDS[i])
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
             elif i < 10:
@@ -209,14 +211,32 @@ def publish_pds_data(message):
             else:
                 fanSpeeds.x = float(dataPDS[10])
                 fanSpeeds.y = float(dataPDS[11])
+
+        temps = ''
+        for i in [dataPDS[7], dataPDS[8], dataPDS[9]]:
+            temps += i.strip() + ','
+        temps = temps[:-1]
+        rospy.loginfo('temps=' + temps)
+
+        # motor currents
+        currents = ''
+        for i in current.effort:
+            currents += str(i).strip() + ','
+        currents = currents[:-1]
+
+        rospy.loginfo('currents=' + currents)
+        # battery voltage
         voltagePub.publish(voltage)
+        # 6 motor currents from M0-M5
         currentPub.publish(current)
+        # temperatures of the battery
         tempPub.publish(temp)
         fanSpeedsPub.publish(fanSpeeds)
         nada,firstFlag = dataPDS[12].split(' ')
         flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
         flagsPub.publish(flagsMsg)
-    except:
+    except Exception as e:
+        print("type error: " + str(e))
         rospy.logwarn('trouble parsing PDS sensor data')
         return
     return
@@ -294,7 +314,8 @@ if __name__ == '__main__':
                 try:
                      data = ser.readline().decode()
                      feedback = stripFeedback(data)
-                except:
+                except Exception as e:
+                     print("type error: " + str(e))
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
                     if feedback.startswith('PDS '):
