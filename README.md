@@ -73,6 +73,7 @@ To remove the package you just installed using:
 Finally, to link ROS to our webpage we need to install rosbridge: `sudo apt install ros-kinetic-rosbridge-suite`.
 Before running the GUI with `./app.py`, you need to run in a separate terminal: `roslaunch rosbridge_server rosbridge_websocket.launch`. Make sure to deactivate the `venv` for this terminal (otherwise it will crash).
 Make sure it works fine: after running the `./app.py` go visit `localhost:5000` in your browser (recommended browser: Google Chrome).
+For increased modularity, make sure to add to your `.bashrc` a line to source the `.bash_aliases` file in `robot/basestation/config/` so that you can use our shortcut aliases, such as `startgui` which you should always use to start the gui. It will automatically update the environment file for the browser called `env.js`.
 
 ### .bashrc edits
 You should edit your `~/.bashrc` file so that it looks like this:
