@@ -109,14 +109,12 @@ $(document).ready(() => {
           }
         })
 
-        $('#capture-image-btn').on('click', function (event) {
+        $('#save-image').on('click', function (event) {
           $.ajax('/capture_image', {
             success: function (data) {
               appendToConsole(data.msg)
               if (!data.msg.includes('success')) {
-                appendToConsole(
-                  'No response from ROS ping_acknowledgment service'
-                )
+                appendToConsole('Something went wrong, got', data.msg)
               } else {
                 appendToConsole(data.msg)
               }
@@ -370,7 +368,7 @@ $(document).ready(() => {
   // select mux channel using mux_select service
   $('#mux-0').mouseup(function () {
     // Rover
-    if (isListenerOpen()) {
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
@@ -386,30 +384,47 @@ $(document).ready(() => {
             return
           }
 
-          requestTask(
-            'rover_listener',
-            1,
-            '#toggle-rover-listener-btn',
-            function (msgs) {
-              if (msgs[0]) {
-                $('#toggle-rover-listener-btn')[0].checked = true
-                // try pinging MCU
-                wait(1000)
-                sendRequest("Rover", 'ping', printErrToConsole)
-              } else {
-                $('#toggle-rover-listener-btn')[0].checked = false
-              }
-            },
-            serialType
-          )
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              'rover_listener',
+              1,
+              '#toggle-rover-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-rover-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Rover', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-rover-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
         }
       })
     }
   })
 
+  $('#flip-stream').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimg180')
+  })
+
+  $('#flip-stream-ccw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgccw')
+    $('#camera-feed').toggleClass('stretch-down')
+  })
+
+  $('#flip-stream-cw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgcw')
+    $('#camera-feed').toggleClass('stretch-down')
+  })
+
   $('#mux-1').mouseup(function () {
     // Arm
-    if (isListenerOpen()) {
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
@@ -425,22 +440,25 @@ $(document).ready(() => {
             return
           }
 
-          requestTask(
-            'arm_listener',
-            1,
-            '#toggle-arm-listener-btn',
-            function (msgs) {
-              if (msgs[0]) {
-                $('#toggle-arm-listener-btn')[0].checked = true
-                // try pinging MCU
-                wait(1000)
-                sendRequest("Arm",'ping', printErrToConsole)
-              } else {
-                $('#toggle-arm-listener-btn')[0].checked = false
-              }
-            },
-            serialType
-          )
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              'arm_listener',
+              1,
+              '#toggle-arm-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-arm-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Arm', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-arm-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
         }
       })
     }
@@ -448,7 +466,7 @@ $(document).ready(() => {
 
   $('#mux-2').mouseup(function () {
     // Science
-    if (isListenerOpen()) {
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
@@ -464,22 +482,25 @@ $(document).ready(() => {
             return
           }
 
-          requestTask(
-            'science_listener',
-            1,
-            '#science-listener-btn',
-            function (msgs) {
-              if (msgs[0]) {
-                $('#science-listener-btn')[0].checked = true
-                // try pinging MCU
-                wait(1000)
-                sendRequest("Science", 'ping', printErrToConsole)
-              } else {
-                $('#science-listener-btn')[0].checked = false
-              }
-            },
-            serialType
-          )
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              'science_listener',
+              1,
+              '#science-listener-btn',
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#science-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Science', 'ping', printErrToConsole)
+                } else {
+                  $('#science-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
         }
       })
     }
@@ -487,7 +508,7 @@ $(document).ready(() => {
 
   $('#mux-3').mouseup(function () {
     // PDS
-    if (isListenerOpen()) {
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole("Don't change the mux channel while a listener is open!")
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
@@ -560,32 +581,29 @@ $(document).ready(() => {
   })
 })
 
-function printErrToConsole(msg)
-{
-  if(!msg[0])
-    appendToConsole(msg[1])
+function printErrToConsole (msg) {
+  if (!msg[0]) appendToConsole(msg[1])
 }
 
-function pingDevice(device) {
+function pingDevice (device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-    switch(device)
-    {
-      case "Arm" :
-        sendRequest("Arm", 'ping', printErrToConsole)
-        break;
-      case "Rover" :
-        sendRequest("Rover", 'ping', printErrToConsole)
-        break;
-      case "Odroid":
+    switch (device) {
+      case 'Arm':
+        sendRequest('Arm', 'ping', printErrToConsole)
+        break
+      case 'Rover':
+        sendRequest('Rover', 'ping', printErrToConsole)
+        break
+      case 'Odroid':
       default:
         pingOdroid()
-        break;
+        break
     }
     lastCmdSent = new Date().getTime()
   }
 }
 
-function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
+function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   appendToConsole('pinging odroid')
   $.ajax('/ping_rover', {
     success: function (data) {
@@ -596,12 +614,15 @@ function pingOdroid(timeoutVal=REQUEST_TIMEOUT) {
         appendToConsole(data.ros_msg)
       }
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error: function (jqXHR, textStatus, errorThrown) {
       console.log(errorThrown)
-      if (errorThrown=="timeout") {
-         msg = "Odroid ping timeout after " + timeoutVal/1000 + " seconds. " +
-           "Check if the websockets server is running. If not, there's either a network issue " +
-           "or the Odroid and possibly the whole rover has shut down unexpectedly."
+      if (errorThrown == 'timeout') {
+        msg =
+          'Odroid ping timeout after ' +
+          timeoutVal / 1000 +
+          ' seconds. ' +
+          "Check if the websockets server is running. If not, there's either a network issue " +
+          'or the Odroid and possibly the whole rover has shut down unexpectedly.'
         appendToConsole(msg)
       } else {
         console.log('Error of type ' + errorThrown + 'occured')

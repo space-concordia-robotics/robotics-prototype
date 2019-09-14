@@ -32,7 +32,7 @@ def init_serial():
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
-    usb = False; uart = True
+    usb = True; uart = False
     myargv = rospy.myargv(argv=sys.argv)
     if len(myargv) == 1:
         rospy.loginfo('Using UART by default')
@@ -77,6 +77,8 @@ def init_serial():
                                 rospy.loginfo(mcuName+" MCU identified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                                 rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
+                                ser.reset_input_buffer()
+                                ser.reset_output_buffer()
                                 return
         else:
             rospy.logerr("No USB devices recognized, exiting")
@@ -124,9 +126,9 @@ requests = {
     'ping' : ['pong'],
     'who' : ['Happy Astro','Paralyzed Astro'],
     'activate' : ['ACTIVATED', 'Active'],
-    'deactivate' : ['Inactive'],
+    'deactivate' : ['Inactive', 'inactive'],
     'open-loop' : ['loop status is: Open'],
-    'close-loop' : ['loop status is: CLose'],
+    'close-loop' : ['loop status is: CLose'], # typo on purpose, LEAVE CLose ALONE (for now)
     'steer-off' : ['Wheel Control is Activated'],
     'steer-on' : ['Skid Steering is Activated'],
     'acc-on' : ['Limiter: Open'],
@@ -134,6 +136,10 @@ requests = {
     'reboot' : ['rebooting']
 }
 def handle_client(req):
+    # feedback to tell if script itself is responsive
+    if req.msg == 'ping':
+        feedbackPub.publish('listener received ping request')
+
     global ser # specify that it's global so it can be used properly
     global reqFeedback
     global reqInWaiting
@@ -168,11 +174,16 @@ def subscriber_callback(message):
     rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
-    lhs,message = message.split('Motor Speeds: ')
+    try:
+        lhs,message = message.split('Motor Speeds: ')
+    except Exception as e:
+        print("type error: " + str(e))
     speeds = message.split(', ')
     # create the message to be published
     msg = JointState()
@@ -286,15 +297,22 @@ if __name__ == '__main__':
                     feedback = stripFeedback(data)
                 except:
                     rospy.logwarn('trouble reading from serial port')
-                if feedback is not None:
+                if feedback is not None and feedback is not '':
                     if 'Motor Speeds' in feedback:
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
                     elif 'Battery voltage' in feedback:
                         left,voltage = feedback.split('Battery voltage: ')
-                        vBatPub.publish(float(voltage))
+                        try:
+                            vBatPub.publish(float(voltage))
+                        except Exception as e:
+                            print("type error: " + str(e))
                     elif 'GPS' in feedback: #use a better string? longer?
                         publish_nav_states(feedback)
+                    elif 'Linear' in feedback:
+                        pass
+                    elif 'Desired' in feedback:
+                        pass
                     else:
                         #rospy.loginfo(feedback)
                         if reqInWaiting:
@@ -305,9 +323,6 @@ if __name__ == '__main__':
                             if 'WARNING' in feedback:
                                 rospy.logwarn(feedback)
                             #rospy.loginfo(feedback)
-                            #else:
-                            #    feedbackPub.publish(feedback)
-                            #this next line is annoying, should be filtered somehow like the above commented code
                             feedbackPub.publish(feedback)
                 else:
                     rospy.loginfo('got raw data: '+data)
