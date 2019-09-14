@@ -45,15 +45,6 @@ function initRosWeb () {
     name: 'task_handler',
     serviceType: 'HandleTask'
   })
-  // setup a subscriber for the battery_voltage topic
-  battery_voltage_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
-  })
-  battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
-  })
 
   /* arm controls */
 
@@ -327,6 +318,83 @@ function initRosWeb () {
     ros: ros,
     name: 'goal_longitude'
   })
+
+  /* PDS commands */
+  // setup a client for the pds_request service
+  pds_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'pds_request',
+    serviceType: 'ArmRequest' // for now... might change
+  })
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+  // setup a subscriber for the battery_voltage topic
+  battery_voltage_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_voltage',
+    messageType: 'std_msgs/Float32'
+  })
+  battery_voltage_listener.subscribe(function (message) {
+    $('#battery-voltage').text(message.data.toFixed(2))
+  })
+  // setup a subscriber for the battery_temps topic
+  battery_temps_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_temps',
+    messageType: 'geometry_msgs/Point'
+  })
+  battery_temps_listener.subscribe(function (message) {
+    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
+    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
+    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+  })
+  // setup a subscriber for the wheel_motor_currents topic
+  wheel_motor_currents_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'wheel_motor_currents',
+    messageType: 'sensor_msgs/JointState'
+  })
+  wheel_motor_currents_listener.subscribe(function (message) {
+    $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
+    $('#right-mid-current').text(parseFloat(message.effort[1]).toFixed(3))
+    $('#right-rear-current').text(parseFloat(message.effort[2]).toFixed(3))
+    $('#left-front-current').text(parseFloat(message.effort[3]).toFixed(3))
+    $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
+    $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
+  })
+  error_flags_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_flags',
+    messageType: 'std_msgs/String'
+  })
+  error_flags_listener.subscribe(function (message) {
+    let flags = message.data.split(', ')
+    $('#pds-ov-flag').text(parseInt(flags[0]))
+    $('#pds-uv-flag').text(parseInt(flags[1]))
+    $('#pds-critical-flag').text(parseInt(flags[2]))
+  })
+  fan_speeds_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'fan_speeds',
+    messageType: 'geometry_msgs/Point'
+  })
+  fan_speeds_listener.subscribe(function (message) {
+    $('#fan-1-speed').text(parseInt(message.x))
+    $('#fan-2-speed').text(parseInt(message.y))
+  })
+  // setup a subscriber for the pds_feedback topic
+  pds_feedback_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_feedback',
+    messageType: 'std_msgs/String'
+  })
+  pds_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
+  })
 }
 
 initRosWeb()
@@ -572,9 +640,19 @@ function checkTaskStatuses () {
         }
       }
     })
-  } /* else if (window.location.pathname == '/rover') { //pds
-    console.log('rover page')
-  } */
+  } else if (window.location.pathname == '/pds') {
+    // check rover listener status
+    requestTask('pds_listener', 2, '#toggle-pds-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-pds-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-pds-listener-btn')[0].checked = true
+        }
+      }
+    })
+  }
 }
 
 function sendIKCommand () {
@@ -612,7 +690,10 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
       break
     case 'Science':
       requestClient = science_request_client
-      break
+    break
+    case "PDS":
+      requestClient = pds_request_client
+    break
   }
 
   requestClient.callService(request, function (result) {
@@ -640,6 +721,13 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
+}
+
+function sendPdsCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+  pds_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {

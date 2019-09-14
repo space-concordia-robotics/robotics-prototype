@@ -587,14 +587,18 @@ function printErrToConsole (msg) {
 
 function pingDevice (device) {
   if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-    switch (device) {
-      case 'Arm':
-        sendRequest('Arm', 'ping', printErrToConsole)
-        break
-      case 'Rover':
-        sendRequest('Rover', 'ping', printErrToConsole)
-        break
-      case 'Odroid':
+    switch(device)
+    {
+      case "Arm" :
+        sendRequest("Arm", 'ping', printErrToConsole)
+        break;
+      case "Rover" :
+        sendRequest("Rover", 'ping', printErrToConsole)
+        break;
+      case "PDS" :
+        sendRequest("PDS", 'PDS ping', printErrToConsole)
+        break;
+      case "Odroid":
       default:
         pingOdroid()
         break
