@@ -87,6 +87,50 @@ This package contains a publisher to run on the Odroid and a subscriber to be ru
 ## cv_camera
 
 ### Description
+
+This package creates an opencv camera feed. The feed is automatically detected by a web_video_server node.
+
+***Main parameters that we care about***
+device_id: Used to select the camera that the node will use. Int values 0, 1, 2 since we have 3 cameras in total
+image_width: specifies camera image width in pixels
+image_height: specifies the camera image height in pixels
+
+***How to set the parameters***
+These parameters can be set on startup. For example:
+rosrun cv_camera cv_camera_node _device_id:=0 _image_width:=1920 _image_height:=1080
+
+Otherwise you can set the parameters before running the node:
+rosparam set /cv_camera/device_id 1
+rosparam set /cv_camera/image_width 1920
+rosparam set /cv_camera/image_height 1080
+
+***Running more than one cv_camera node***
+First, understand that the default cv_camera node publishes the video feed to the topic /cv_camera/image_raw
+
+Your first node can be run like normal with or without the parameters set at startup:
+rosrun cv_camera cv_camera_node device_id:=0 image_width:=1920 image_height:=1080
+and it will publish to /cv_camera/image_raw
+
+any node after that must be run like this with or without launch parameters:
+rosrun cv_camera cv_camera_node __name:=new-name
+the new node will now publish to /new-name/image_raw
+
+if you set the parameters before launch, here is what it would look like:
+rosparam set /new-name/device_id 1
+rosparam set /new-name/image_width 1920
+rosparam set /new-name/image_height 1080
+
+Here is a little example for clarification:
+rosparam set /cv_camera2/device_id 1
+rosparam set /cv_camera2/image_width 960
+rosparam set /cv_camera2/image_height 720
+rosrun cv_camera cv_camera_node __name:=cv_camera2
+
+this will now publish to /cv_camera2/image_raw
+
+No matter how many nodes you create, web_video_server will be able to access these nodes automatically.
+
+### Description
 This node is not homemade. It's used to connect to USB cameras and publish their feed to ROS.
 
 ## web_video_server

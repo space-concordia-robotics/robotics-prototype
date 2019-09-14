@@ -204,24 +204,32 @@ def publish_nav_states(message):
     heading,gps = message.split(' -- ')
     # parse heading, give -999 if invalid heading
     if 'OK' in heading:
-        left,heading = heading.split(' ')
-        roverHeading = float(heading)
+        try:
+            left,heading = heading.split(' ')
+            roverHeading = float(heading)
+        except:
+            roverHeading = -999
+            rospy.logwarn('bad string, got: ' + heading)
     else:
         if 'N/A' in heading:
             rospy.logwarn('IMU heading data unavailable')
         else:
-            rospy.logwarn('bad string, got: '+heading)
+            rospy.logwarn('bad string, got: ' + heading)
         roverHeading = -999
     # parse gps, give -999 for lat and long if invalid coords
     if 'OK' in gps:
-        left,tempLat,tempLong = gps.split(' ')
-        roverLatitude = float(tempLat)
-        roverLongitude = float(tempLong)
+        try:
+            left,tempLat,tempLong = gps.split(' ')
+            roverLatitude = float(tempLat)
+            roverLongitude = float(tempLong)
+        except:
+            roverLatitude = roverLongitude = -999
+            rospy.logwarn('bad string, got: ' + gps)
     else:
         if 'N/A' in gps:
             rospy.logwarn('GPS data unavailable')
         else:
-            rospy.logwarn('bad string, got: '+left)
+            rospy.logwarn('bad string, got: ' + gps)
         roverLatitude = roverLongitude = -999
 
     msg = Point();
@@ -302,7 +310,10 @@ if __name__ == '__main__':
                         #rospy.loginfo(feedback)
                         publish_joint_states(feedback)
                     elif 'Battery voltage' in feedback:
-                        left,voltage = feedback.split('Battery voltage: ')
+                        try:
+                            left,voltage = feedback.split('Battery voltage: ')
+                        except Exception as e:
+                            print("type error: " + str(e))
                         try:
                             vBatPub.publish(float(voltage))
                         except Exception as e:

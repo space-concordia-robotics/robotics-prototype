@@ -109,14 +109,12 @@ $(document).ready(() => {
           }
         })
 
-        $('#capture-image-btn').on('click', function (event) {
+        $('#save-image').on('click', function (event) {
           $.ajax('/capture_image', {
             success: function (data) {
               appendToConsole(data.msg)
               if (!data.msg.includes('success')) {
-                appendToConsole(
-                  'No response from ROS ping_acknowledgment service'
-                )
+                appendToConsole('Something went wrong, got', data.msg)
               } else {
                 appendToConsole(data.msg)
               }
@@ -408,6 +406,20 @@ $(document).ready(() => {
         }
       })
     }
+  })
+
+  $('#flip-stream').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimg180')
+  })
+
+  $('#flip-stream-ccw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgccw')
+    $('#camera-feed').toggleClass('stretch-down')
+  })
+
+  $('#flip-stream-cw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgcw')
+    $('#camera-feed').toggleClass('stretch-down')
   })
 
   $('#mux-1').mouseup(function () {

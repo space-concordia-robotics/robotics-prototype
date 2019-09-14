@@ -20,7 +20,7 @@ let lastRearContServoCmd = 0
 
 let maxSoftThrottle = 25
 let maxSoftSteering = 39
-let maxFrontTiltPwm = 90
+let maxFrontTiltPwm = 180
 let minFrontTiltPwm = 0
 let maxRearTiltPwm = 115
 let minRearTiltPwm = 0
@@ -137,7 +137,7 @@ $(document).ready(function () {
       appendToConsole('Rover listener not yet activated!')
     } else {
       if ($('#activate-rover-btn').is(':checked')) {
-        sendRequest("Rover", 'activate', function (msgs) {
+        sendRequest('Rover', 'activate', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
             $('#activate-rover-btn')[0].checked = true
@@ -145,7 +145,7 @@ $(document).ready(function () {
         })
       } else {
         // 'deactivated' needs to be handled differently since it takes 45 secconds
-        sendRequest("Rover", 'deactivate', function (msgs) {
+        sendRequest('Rover', 'deactivate', function (msgs) {
           printErrToConsole(msgs)
           if (msgs[0]) {
             $('#activate-rover-btn')[0].checked = false
@@ -550,7 +550,7 @@ function gameLoop () {
         frontTiltPwm = returnVals[1]
         $('#front-tilt-pwm').text(frontTiltPwm)
         lastFrontPosServoCmd = new Date().getTime()
-        sendRoverCommand('@' + frontTiltPwm.toString())
+        sendRoverCommand('!' + frontTiltPwm.toString())
       }
     }
     // Front camera continuous servo (left/right, servo 2)
@@ -561,8 +561,8 @@ function gameLoop () {
       // > CONTINUOUS_SERVO_PERIOD){
       frontPanPwm = handleContinuousServo(
         frontPanPwm,
-        103,
         105, // numpad '7' and '9'
+        103,
         '#camera-front-lpan-btn',
         '#camera-front-rpan-btn'
       )
@@ -585,7 +585,7 @@ function gameLoop () {
         }
         $('#front-pan-pwm').text(frontPan)
         lastFrontContServoCmd = new Date().getTime()
-        sendRoverCommand('!' + frontPan.toString())
+        sendRoverCommand('@' + frontPan.toString())
         if (frontPanPwm != SERVO_STOP) {
           sentFrontServoStop = false
         } else {
@@ -612,7 +612,7 @@ function gameLoop () {
         rearTiltPwm = returnVals[1]
         $('#back-tilt-pwm').text(rearTiltPwm)
         lastRearPosServoCmd = new Date().getTime()
-        sendRoverCommand('$' + rearTiltPwm.toString())
+        sendRoverCommand('#' + rearTiltPwm.toString())
       }
     }
     // rear camera continuous servo (left/right, servo 2)
@@ -648,12 +648,8 @@ function gameLoop () {
         }
         $('#back-pan-pwm').text(rearPan)
         lastRearContServoCmd = new Date().getTime()
-        sendRoverCommand('#' + rearPan.toString())
-<<<<<<< HEAD
-        sentRearServoStop = rearPanPwn == SERVO_STOP
-=======
-        sentRearServoStop = (rearPan == SERVO_STOP)
->>>>>>> master
+        sendRoverCommand('$' + rearPan.toString())
+        sentRearServoStop = rearPan == SERVO_STOP
       }
     }
 

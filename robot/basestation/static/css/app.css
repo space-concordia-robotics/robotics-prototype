@@ -6,6 +6,26 @@
   transform: rotate(180deg);
 }
 
+.rotateimgccw {
+  -webkit-transform:rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+
+.rotateimgcw {
+  -webkit-transform:rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.stretch-down {
+  margin-bottom: 100px;
+}
+
 img#camera-feed {
     /* these values should ideally reflect the resolution
     at which the camera is streaming images at */
