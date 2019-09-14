@@ -31,42 +31,42 @@ run = async () => {
 
   const button_rpos = document.getElementById('button_rpos')
   window.rotatePos = async () => {
-      console.log('rotatePos')
-      button_rpos.disabled = true
-      button_rneg.disabled = true
+    console.log('rotatePos')
+    button_rpos.disabled = true
+    button_rneg.disabled = true
 
-      const start = (((-i + n) % n) * twopi) / n
-      for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a - d, z + 1]) {
-        await timer(1)
-        drawWheel(context, w, h, r, n, a)
-      }
+    const start = (((-i + n) % n) * twopi) / n
+    for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a - d, z + 1]) {
+      await timer(1)
+      drawWheel(context, w, h, r, n, a)
+    }
 
-      i = (i + 1) % n
-      drawWheel(context, w, h, r, n, (-i * twopi) / n)
+    i = (i + 1) % n
+    drawWheel(context, w, h, r, n, (-i * twopi) / n)
 
-      button_rpos.disabled = false
-      button_rneg.disabled = false
-      lastRotation = Date.now()
+    button_rpos.disabled = false
+    button_rneg.disabled = false
+    lastRotation = Date.now()
   }
 
   const button_rneg = document.getElementById('button_rneg')
   window.rotateNeg = async () => {
-      console.log('rotateNeg')
-      button_rpos.disabled = true
-      button_rneg.disabled = true
+    console.log('rotateNeg')
+    button_rpos.disabled = true
+    button_rneg.disabled = true
 
-      const start = (-i * twopi) / n
-      for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a + d, z + 1]) {
-        await timer(1)
-        drawWheel(context, w, h, r, n, a)
-      }
+    const start = (-i * twopi) / n
+    for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a + d, z + 1]) {
+      await timer(1)
+      drawWheel(context, w, h, r, n, a)
+    }
 
-      i = (i + n - 1) % n
-      drawWheel(context, w, h, r, n, (-i * twopi) / n)
+    i = (i + n - 1) % n
+    drawWheel(context, w, h, r, n, (-i * twopi) / n)
 
-      button_rpos.disabled = false
-      button_rneg.disabled = false
-      lastRotation = Date.now()
+    button_rpos.disabled = false
+    button_rneg.disabled = false
+    lastRotation = Date.now()
   }
 
   $('#button_rpos').on('click', function (event) {
@@ -86,7 +86,6 @@ run = async () => {
       console.log('msgs', msgs)
     })
   })
-
 }
 
 /**
@@ -366,11 +365,13 @@ $(document).ready(function () {
     })
   })
 
+  // @TODO: these buttons are flipped because of wiring issues
+  // fix the wiring, change back the correct values
   $('#elevator-up-btn').on('click', function (event) {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest('Science', 'eup', function (msgs) {
+    sendRequest('Science', 'edown', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -379,7 +380,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest('Science', 'edown', function (msgs) {
+    sendRequest('Science', 'eup', function (msgs) {
       console.log('msgs', msgs)
     })
   })
