@@ -39,8 +39,8 @@
 #define VIBRATOR5          22
 #define VIBRATOR6          23
 
-#define LIMIT_TOP          26 //limSW_1
-#define LIMIT_BOTTOM       25 //limSW_2
+#define LIMIT_TOP          25 //limSW_1
+#define LIMIT_BOTTOM       26 //limSW_2
 #define TABLE_SWITCH_PIN   24 //limSW_3 
 
 #define LED1               33
