@@ -154,67 +154,67 @@ function initRosWeb () {
       greyOut('#elevator-up-btn')
     }
 
-    if (values[3] == '0') {
-      $('#pump-dir-label').text('DIR: OUT')
-      $('#pump-dir-toggle')[0].checked = false
-    } else if (values[3] == '1') {
-      $('#pump-dir-label').text('DIR: IN')
-      $('#pump-dir-toggle')[0].checked = true
-    }
-
-    // photo resistor Voltage
-    $('#photo-resistor-voltage').val(values[4])
-
-    // LED 1 ON
-    if (values[5] == '0') {
-      $('#led1-toggle')[0].checked = false
-    } else if (values[5] == '1') {
-      $('#led1-toggle')[0].checked = true
-    }
-
-    // LED 2 ON
-    if (values[6] == '0') {
-      $('#led2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#led2-toggle')[0].checked = true
-    }
-
-    // Vibrator ON statuses
-    if (values[7] == '0') {
-      $('#vibrator1-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator1-toggle')[0].checked = true
-    }
-
-    if (values[8] == '0') {
-      $('#vibrator2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator2-toggle')[0].checked = true
-    }
-
-    if (values[9] == '0') {
-      $('#vibrator3-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator3-toggle')[0].checked = true
-    }
-
-    if (values[10] == '0') {
-      $('#vibrator4-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator4-toggle')[0].checked = true
-    }
-
-    if (values[11] == '0') {
-      $('#vibrator5-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator5-toggle')[0].checked = true
-    }
-
-    if (values[12] == '0') {
-      $('#vibrator6-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator6-toggle')[0].checked = true
-    }
+    // if (values[3] == '0') {
+    //   $('#pump-dir-label').text('DIR: OUT')
+    //   $('#pump-dir-toggle')[0].checked = false
+    // } else if (values[3] == '1') {
+    //   $('#pump-dir-label').text('DIR: IN')
+    //   $('#pump-dir-toggle')[0].checked = true
+    // }
+    //
+    // // photo resistor Voltage
+    // $('#photo-resistor-voltage').val(values[4])
+    //
+    // // LED 1 ON
+    // if (values[5] == '0') {
+    //   $('#led1-toggle')[0].checked = false
+    // } else if (values[5] == '1') {
+    //   $('#led1-toggle')[0].checked = true
+    // }
+    //
+    // // LED 2 ON
+    // if (values[6] == '0') {
+    //   $('#led2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#led2-toggle')[0].checked = true
+    // }
+    //
+    // // Vibrator ON statuses
+    // if (values[7] == '0') {
+    //   $('#vibrator1-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator1-toggle')[0].checked = true
+    // }
+    //
+    // if (values[8] == '0') {
+    //   $('#vibrator2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator2-toggle')[0].checked = true
+    // }
+    //
+    // if (values[9] == '0') {
+    //   $('#vibrator3-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator3-toggle')[0].checked = true
+    // }
+    //
+    // if (values[10] == '0') {
+    //   $('#vibrator4-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator4-toggle')[0].checked = true
+    // }
+    //
+    // if (values[11] == '0') {
+    //   $('#vibrator5-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator5-toggle')[0].checked = true
+    // }
+    //
+    // if (values[12] == '0') {
+    //   $('#vibrator6-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator6-toggle')[0].checked = true
+    // }
 
     if (values[13]) {
       $('#drill-rpm').val(values[13])
@@ -264,7 +264,6 @@ function initRosWeb () {
     if (values[19]) {
       $('#table-position').val(values[19])
     }
-
   })
 
   /* rover commands */
@@ -740,10 +739,10 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
       break
     case 'Science':
       requestClient = science_request_client
-    break
-    case "PDS":
+      break
+    case 'PDS':
       requestClient = pds_request_client
-    break
+      break
   }
 
   requestClient.callService(request, function (result) {
