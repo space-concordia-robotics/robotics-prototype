@@ -26,4 +26,5 @@ fi
 
 # run the cv_camera_node
 # web_video_server node must be running in background for this to work
-rosrun cv_camera cv_camera_node _device_path:=$port
+# the image width & image height are hard coded to meet the requirements of ERC 2K19
+rosrun cv_camera cv_camera_node _device_path:=$port _image_width:=1280 _image_height:=720

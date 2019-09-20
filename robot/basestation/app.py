@@ -89,12 +89,15 @@ def rover():
     """Rover control panel."""
     return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
 
-
 @app.route("/science")
 def science():
     """Science page."""
     return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/pds")
+def pds():
+    """PDS page."""
+    return flask.render_template("PDS.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/ping_rover")
 def ping_rover():

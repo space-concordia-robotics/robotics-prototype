@@ -21,3 +21,7 @@
 **/tmp
 **/c_cpp_properties.json
 **/img*.jpg
+**/env.js
+**/currents_final.csv
+**/temps_final.csv
+**/voltage_final.csv
