@@ -19,17 +19,6 @@
   </div>
 
   <div class="dropdown col-md-2">
-    <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
-      Theme
-    </button>
-    <div class="dropdown-menu">
-      <a id="theme-red" class="dropdown-item">Red</a>
-      <a id="theme-green" class="dropdown-item">Green</a>
-      <a id="theme-blue" class="dropdown-item">Blue</a>
-    </div>
-  </div>
-
-  <div class="dropdown col-md-2">
     <button id="mux" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
       Device Channel
     </button>
@@ -41,7 +30,7 @@
     </div>
   </div>
 
-  <div class="dropdown col-md-2">
+  <div class="dropdown col-md-1">
     <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
       Serial Type
     </button>
@@ -51,17 +40,43 @@
     </div>
   </div>
 
-   <!-- <div class="col-md-6">
-        <input type="text" id="serial-cmd-input">
-      </div>
-      <div class="col-md-1">
-        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
-      </div> -->
+  <div class="dropdown col-md-1">
+    <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
+      Theme
+    </button>
+    <div class="dropdown-menu">
+      <a id="theme-red" class="dropdown-item">Red</a>
+      <a id="theme-green" class="dropdown-item">Green</a>
+      <a id="theme-blue" class="dropdown-item">Blue</a>
+    </div>
+  </div>
 
-      <div class="col-md-6">
-        <div class="row" style="color:white">
-          <div class="col-md-3">BATTERY VOLTAGE: </div>
-          <div class="col-md-1" id="battery-voltage">-</div>
-        </div>
-      </div>
+  <!-- <div class="col-md-6">
+       <input type="text" id="serial-cmd-input">
+     </div>
+     <div class="col-md-1">
+       <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
+     </div> -->
+
+ <div class="col-md-2">
+   <div class="row" style="color:white">
+     <div class="col-md-4">BATTERY VOLTAGE: </div>
+     <div class="col-md-4" id="battery-voltage">-</div>
+   </div>
+ </div>
+
+ <div class="col-md-4">
+   <div class="row" style="color:white">
+     <div class="col-md-3">BATTERY TEMPS: </div>
+     <div class="col-md-5">
+       <div class="row">
+         T2:<div class="col-md-3" id="battery-temp-1">-</div>&#8451;
+         T1:<div class="col-md-3" id="battery-temp-2">-</div>&#8451;
+       </div>
+       <div class=row>
+         T3:<div class="col-md-3" id="battery-temp-3">-</div>&#8451;
+       </div>
+     </div>
+   </div>
+ </div>
 </nav>
