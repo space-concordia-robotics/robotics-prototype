@@ -154,7 +154,8 @@ requests = {
     'tcwstep' : ['tcwstep done'],
     'tccwstep' : ['tccwstep done'],
     'tcw' : ['tcw done'],
-    'tccw' : ['tccw done']
+    'tccw' : ['tccw done'],
+    'ts' : ['ts done']
 }
 
 def handle_client(req):
