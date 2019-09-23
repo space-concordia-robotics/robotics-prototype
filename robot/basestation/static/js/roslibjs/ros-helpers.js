@@ -254,7 +254,7 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-rear-rpm').text(message.velocity[5])
   })
-  
+
   // setup a subscriber for the rover_twist topic
   rover_twist_listener = new ROSLIB.Topic({
     ros: ros,
@@ -275,8 +275,6 @@ function initRosWeb () {
     appendToConsole(message.data, true, false)
   })
 }
-
-initRosWeb()
 
 /* functions used in main code */
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
