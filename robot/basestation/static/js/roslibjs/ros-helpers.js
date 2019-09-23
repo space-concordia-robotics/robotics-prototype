@@ -1,4 +1,6 @@
 REQUEST_TIMEOUT = 3000
+ROTATE_TIMEOUT = 1000
+lastRotate = 0
 
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
@@ -152,69 +154,116 @@ function initRosWeb () {
       greyOut('#elevator-up-btn')
     }
 
-    if (values[3] == '0') {
-      $('#pump-dir-label').text('DIR: OUT')
-      $('#pump-dir-toggle')[0].checked = false
-    } else if (values[3] == '1') {
-      $('#pump-dir-label').text('DIR: IN')
-      $('#pump-dir-toggle')[0].checked = true
+    // if (values[3] == '0') {
+    //   $('#pump-dir-label').text('DIR: OUT')
+    //   $('#pump-dir-toggle')[0].checked = false
+    // } else if (values[3] == '1') {
+    //   $('#pump-dir-label').text('DIR: IN')
+    //   $('#pump-dir-toggle')[0].checked = true
+    // }
+    //
+    // // photo resistor Voltage
+    // $('#photo-resistor-voltage').val(values[4])
+    //
+    // // LED 1 ON
+    // if (values[5] == '0') {
+    //   $('#led1-toggle')[0].checked = false
+    // } else if (values[5] == '1') {
+    //   $('#led1-toggle')[0].checked = true
+    // }
+    //
+    // // LED 2 ON
+    // if (values[6] == '0') {
+    //   $('#led2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#led2-toggle')[0].checked = true
+    // }
+    //
+    // // Vibrator ON statuses
+    // if (values[7] == '0') {
+    //   $('#vibrator1-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator1-toggle')[0].checked = true
+    // }
+    //
+    // if (values[8] == '0') {
+    //   $('#vibrator2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator2-toggle')[0].checked = true
+    // }
+    //
+    // if (values[9] == '0') {
+    //   $('#vibrator3-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator3-toggle')[0].checked = true
+    // }
+    //
+    // if (values[10] == '0') {
+    //   $('#vibrator4-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator4-toggle')[0].checked = true
+    // }
+    //
+    // if (values[11] == '0') {
+    //   $('#vibrator5-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator5-toggle')[0].checked = true
+    // }
+    //
+    // if (values[12] == '0') {
+    //   $('#vibrator6-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator6-toggle')[0].checked = true
+    // }
+
+    if (values[13]) {
+      $('#drill-rpm').val(values[13])
+    }
+    // drillInUse
+    if (values[14] == '0') {
+      lightUp('#drill-stop-btn')
+      greyOut('#set-speed-go-btn')
+      greyOut('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#drill-stop-btn')
     }
 
-    // photo resistor Voltage
-    $('#photo-resistor-voltage').val(values[4])
-
-    // LED 1 ON
-    if (values[5] == '0') {
-      $('#led1-toggle')[0].checked = false
-    } else if (values[5] == '1') {
-      $('#led1-toggle')[0].checked = true
+    // elevatorInUse
+    if (values[15] == '0') {
+      lightUp('#elevator-stop-btn')
+      greyOut('#set-feed-go-btn')
+      greyOut('#set-distance-go-btn')
+      greyOut('#elevator-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#elevator-stop-btn')
     }
 
-    // LED 2 ON
-    if (values[6] == '0') {
-      $('#led2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#led2-toggle')[0].checked = true
+    // tcwstepDone
+    if (values[16] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotateNeg()
+        lastRotate = Date.now()
+      }
     }
 
-    // Vibrator ON statuses
-    if (values[7] == '0') {
-      $('#vibrator1-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator1-toggle')[0].checked = true
+    // tccwstepDone
+    if (values[17] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotatePos()
+        lastRotate = Date.now()
+      }
     }
 
-    if (values[8] == '0') {
-      $('#vibrator2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator2-toggle')[0].checked = true
+    // elevatorFeedPercent
+    if (values[18]) {
+      $('#elevator-feed-percent').val(values[18])
     }
 
-    if (values[9] == '0') {
-      $('#vibrator3-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator3-toggle')[0].checked = true
+    // currentTablePosition
+    if (values[19]) {
+      $('#table-position').val(values[19])
     }
-
-    if (values[10] == '0') {
-      $('#vibrator4-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator4-toggle')[0].checked = true
-    }
-
-    if (values[11] == '0') {
-      $('#vibrator5-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator5-toggle')[0].checked = true
-    }
-
-    if (values[12] == '0') {
-      $('#vibrator6-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator6-toggle')[0].checked = true
-    }
-
-    $('#drill-rpm').val(values[13])
   })
 
   /* rover commands */
@@ -690,10 +739,10 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
       break
     case 'Science':
       requestClient = science_request_client
-    break
-    case "PDS":
+      break
+    case 'PDS':
       requestClient = pds_request_client
-    break
+      break
   }
 
   requestClient.callService(request, function (result) {

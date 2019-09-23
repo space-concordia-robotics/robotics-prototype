@@ -68,6 +68,7 @@ def init_serial():
                     rospy.loginfo('attempt #%d...', i+1)
                     startListening = time.time()
                     ser.write(str.encode('who\n'))
+
                     while (time.time()-startListening < timeout):
                         if ser.in_waiting: # if there is data in the serial buffer
                             response = ser.readline().decode()
@@ -133,6 +134,8 @@ requests = {
     'eup' : ['eup done'],
     'edown' : ['edown done'],
     'ed' : ['UP', 'DOWN'],
+    'ego' : ['ego done'],
+    'es' : ['es done'],
     'pd0' : ['OUT'],
     'pd1' : ['IN'],
     'p1' : ['p1 done'],
@@ -146,7 +149,13 @@ requests = {
     'led2s' : ['led2s done'],
     'dgo' : ['dgo done'],
     'ds' : ['ds done'],
-    'drillspeed' : ['drillspeed done']
+    'drillspeed' : ['drillspeed done'],
+    'drilltime' : ['drilltime done'],
+    'tcwstep' : ['tcwstep done'],
+    'tccwstep' : ['tccwstep done'],
+    'tcw' : ['tcw done'],
+    'tccw' : ['tccw done'],
+    'ts' : ['ts done']
 }
 
 def handle_client(req):
