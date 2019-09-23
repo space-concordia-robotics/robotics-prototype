@@ -48,32 +48,6 @@ $(document).ready(function () {
     }
   })
 
-  $('#homing-button').on('click', function (event) {
-    event.preventDefault()
-    // TODO: uncomment this when homing is confirmed to work properly
-    // sendArmCommand('home') // REIMPLEMENT AS AN ACTION
-  })
-
-  $('#list-all-cmds').on('click', function (event) {
-    event.preventDefault()
-    printCommandsList()
-  })
-
-  $('#stop-all-motors').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('stop')
-  })
-
-  $('#reset-motor-angles').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('reset')
-  })
-
-  $('#reboot-button').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('reboot')
-  })
-
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
     let serialType = $('#serial-type')
