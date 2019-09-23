@@ -602,7 +602,7 @@ $(document).ready(() => {
     window.open('pds');
   })
 
-  $( "#stream-page" ).click(function() {
+  $( "#streams-page" ).click(function() {
     window.open('stream');
   })
 
