@@ -3,7 +3,7 @@ const twopi = 2 * Math.PI
 const pi = Math.PI
 
 run = async () => {
-  const canvas = document.getElementById('myCanvas')
+  const canvas = document.getElementById('turntable-canvas')
   const w = canvas.width
   const h = canvas.height
   const context = canvas.getContext('2d')
@@ -12,10 +12,10 @@ run = async () => {
   const r = x * 0.5 * Math.min(w, h)
 
   // BEGIN: GET WHEEL PARAMS FROM SERVER
-  const response1 = await fetch('http://localhost:5000/numSections')
+  const response1 = await fetch('http://localhost:5000/science/numSections')
   const n = Number(await response1.text())
 
-  const response2 = await fetch('http://localhost:5000/initialSection')
+  const response2 = await fetch('http://localhost:5000/science/initialSection')
   const initial_section = Number(await response2.text())
   // END: GET WHEEL PARAMS FROM SERVER
 

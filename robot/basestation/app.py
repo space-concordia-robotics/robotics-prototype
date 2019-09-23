@@ -95,11 +95,11 @@ def science():
     return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
 
 # routes for science page
-@app.route('/numSections')
+@app.route('/science/numSections')
 def numSections():
     return '4'
 
-@app.route('/initialSection')
+@app.route('/science/initialSection')
 def initialSection():
     return '0'
 
