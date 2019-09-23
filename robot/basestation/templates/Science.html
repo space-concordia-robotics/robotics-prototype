@@ -436,32 +436,9 @@
                     {% include 'CameraFeed.html' %}
                 </div>
 
-				<!-- LOG CONSOLE -->
-				<div class="col-md">
-					<h5 class="container-header">Log Console</h5>
-					<div class="form-group">
-						<textarea id="write-to-log" rows="8" readonly></textarea>
-						<br>
-						<!--log console buttons-->
-						<div class="btn-group" role="group" id="logs-btn">
-							<a href=# id=click_btn>
-								<button type="button" class="btn btn-secondary">Open Logs</button>
-							</a>
-							<a href="javascript:void(0)" id="clear-log">
-								<button type="button" class="btn btn-secondary" onclick="clearLogConsole()">Clear
-									Logs</button>
-							</a>
-							<a href="javascript:void(0)" id="test-log">
-								<button type="button" class="btn btn-secondary"
-									onclick="appendToScienceLog('Simple test.');">Test</button>
-							</a>
-						</div>
-                        <div class="btn-group" role="group">
-                          <button type="button" id="ping-odroid" class="btn btn-primary" aria-hidden="true">Ping Odroid</button>
-                          <button type="button" id="ping-science-mcu" class="btn btn-primary" aria-hidden="true">Ping Science MCU</button>
-                        </div>
-					</div>
-				</div>
+                <div class="col-md-6" align="center">
+                    {% include 'Console.html' %}
+                </div>
 			</div>
 
 		</div>

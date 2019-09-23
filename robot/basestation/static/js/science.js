@@ -238,6 +238,9 @@ function toggleOffAllVibrators () {
 }
 
 $(document).ready(function () {
+  // turntable graphics
+  run()
+
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
