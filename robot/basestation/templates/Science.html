@@ -1,110 +1,16 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-	<!-- Required meta tags -->
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>SC Robotics GUI - Science</title>
-    <link rel="shortcut icon" href="static/img/sclogo_header_black.ico">
-
-
-    <!-- Bootstrap CSS -->
-    <link href="../static/css/bootstrap-4.1.2.min.css" rel="stylesheet">
-    <link href="../static/css/font-awesome-4.7.0.min.css" rel="stylesheet">
-    <link href="../static/css/titatoggle-dist.css" rel="stylesheet">
-    <!-- TODO: continue to abstract common css to app.css -->
-    <link href="../static/css/app.css" rel="stylesheet">
-    <link href="../static/css/arm.css" rel="stylesheet">
-    <link href="../static/css/science.css" rel="stylesheet">
-    <script src="../static/js/jquery-3.3.1.min.js"></script>
-    <script src="../static/js/popper-1.14.3.min.js"></script>
-    <script src="../static/js/bootstrap-4.1.2.min.js"></script>
-
-    <!-- for roslibjs stuff -->
-    <script type="text/javascript" src="../static/js/roslibjs/roslib.min.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/eventemitter2.min.js"></script>
-    <!-- all for ros3d -->
-    <script type="text/javascript" src="../static/js/roslibjs/three.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ColladaLoader2.min.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/STLLoader.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ros3d.min.js"></script>
-    <!-- homemade -->
-    <script src="../static/js/helpers.js"></script>
-    <script src="../static/js/env.js"></script>
-    <script type="text/javascript" src="../static/js/roslibjs/ros-helpers.js"></script>
-    <script src="../static/js/app.js"></script>
-    <script src="../static/js/science.js"></script>
-    <script src="../static/js/themes.js"></script>
-
-</head>
-
-<body onload="run()">
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 120px">
-      <div class="col-md-1">
-          <a class="navbar-brand" href="'javascript:void(0)'">
-              <img src="../static/img/sclogo_header.png">
-          </a>
-      </div>
-
-        <div class="dropdown col-md-1">
-            <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-            Theme
-            </button>
-            <div class="dropdown-menu">
-            <a id="theme-red" class="dropdown-item">Red</a>
-            <a id="theme-green" class="dropdown-item">Green</a>
-            <a id="theme-blue" class="dropdown-item">Blue</a>
-            </div>
-        </div>
-
-      <div class="dropdown col-md-2">
-        <button id="mux" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Select Device Channel
-        </button>
-        <div class="dropdown-menu">
-          <a id="mux-0" class="dropdown-item">0: Rover</a>
-          <a id="mux-1" class="dropdown-item">1: Arm</a>
-          <a id="mux-2" class="dropdown-item">2: Science</a>
-          <a id="mux-3" class="dropdown-item">3: PDS</a>
-        </div>
-      </div>
-
-      <div class="dropdown col-md-2">
-        <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-          Serial Type
-        </button>
-        <div class="dropdown-menu">
-          <a id="uart" class="dropdown-item">uart</a>
-          <a id="usb" class="dropdown-item">usb</a>
-        </div>
-      </div>
-
-      <!-- <div class="col-md-6">
-        <input type="text" id="serial-cmd-input">
-      </div>
-      <div class="col-md-1">
-        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
-      </div> -->
-
-
-			<div class="col-md-4">
-	      <div class="row" style="color:white">
-	        <div class="col-md-5">BATTERY VOLTAGE: </div>
-	        <div class="col-md-1" id="battery-voltage">-</div>
-	      </div>
-	    </div>
-    </nav>
-	<br>
-	<br>
-	<div style="margin-bottom:10px"></div>
-
+{% extends "Base.html" %}
+{% block title %}Science{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../static/js/science.js"></script>
+{% endblock %}
+{% block content %}
 	<div class="container fill">
 		<div>
 			<div class="row">
-				<!-- MOTOR TABLE -->
+				<!-- DRILL + ELEVATOR CONTROLS -->
 				<div class="col-md">
+                    <!-- DRILL CONTROLS -->
                     <h5 class="container-header">Drill Control</h5>
 							<div class="row">
 								<div class="col-md-4">
@@ -167,6 +73,7 @@
 									</a>
 								</div>
 							</div>
+                            <!-- ELEVATOR CONTROLS -->
                             <h5 class="container-header">Elevator</h5>
                             <div class="row">
 								<div class="col-md-4">
@@ -443,7 +350,4 @@
 
 		</div>
 	</div>
-
-</body>
-
-</html>
+{% endblock %}
