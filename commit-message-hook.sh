@@ -28,3 +28,9 @@ fi
     echo "Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Work-Flow"
     exit 1
 fi
+#Checks to see if branch name includes any upper case letters
+if [[ $BRANCH_NAME =~ [\$A-Z] ]];then
+# If any upper case letters are in the branch name,
+  echo "Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Work-Flow"
+  exit 1
+fi
