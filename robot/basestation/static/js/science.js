@@ -201,7 +201,7 @@ $(document).ready(function () {
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
-    sendRequest("Science", 'ping', printErrToConsole)
+    sendRequest('Science', 'ping', printErrToConsole)
   })
 
   $('#ping-odroid').on('click', function (event) {
@@ -225,23 +225,26 @@ $(document).ready(function () {
   // ROS related stuff
   $('#science-listener-btn').on('click', function (event) {
     event.preventDefault()
+    let serialType = $('#serial-type')
+      .text()
+      .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#science-listener-btn').is(':checked')) {
-      let serialType = 'uart'
       if (
         $('#serial-type')
           .text()
           .includes('Serial')
       ) {
         appendToConsole('Select a serial type!')
-      } else if (
-        $('button#mux')
+      }
+      // validate UART mode options are correct, let pass if USB mode selected
+      else if (
+        ($('button#mux')
           .text()
-          .includes('Science')
+          .includes('Science') &&
+          serialType == 'uart') ||
+        serialType == 'usb'
       ) {
-        serialType = $('#serial-type')
-          .text()
-          .trim()
         requestTask(
           'science_listener',
           1,
@@ -260,7 +263,7 @@ $(document).ready(function () {
         )
       } else {
         appendToConsole(
-          'Cannot turn science listener on if not in science mux channel!'
+          'UART MODE: Cannot turn science listener on if not in science mux channel!'
         )
       }
     } else {
@@ -293,12 +296,12 @@ $(document).ready(function () {
     if (!$('#science-listener-btn').is(':checked')) {
       appendToConsole('Science listener not yet activated!')
     } else if ($('#activate-science-btn').is(':checked')) {
-      sendRequest("Science", 'activate', function (msgs) {
+      sendRequest('Science', 'activate', function (msgs) {
         console.log('msgs', msgs)
       })
     } else {
       // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendRequest("Science", 'stop', function (msgs) {
+      sendRequest('Science', 'stop', function (msgs) {
         console.log('msgs', msgs)
       })
     }
@@ -308,7 +311,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest("Science", 'dccw', function (msgs) {
+    sendRequest('Science', 'dccw', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -317,7 +320,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest("Science", 'dcw', function (msgs) {
+    sendRequest('Science', 'dcw', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -326,7 +329,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest("Science", 'eup', function (msgs) {
+    sendRequest('Science', 'eup', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -335,7 +338,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest("Science", 'edown', function (msgs) {
+    sendRequest('Science', 'edown', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -359,7 +362,7 @@ $(document).ready(function () {
 
       // click makes it checked during this time, so trying to enable
       if ($(pumpDriveToggles[i]).is(':checked')) {
-        sendRequest("Science", cmd, function (msgs) {
+        sendRequest('Science', cmd, function (msgs) {
           console.log('msgs', msgs)
           if (msgs[1].includes(cmd + ' done')) {
             $(pumpDriveToggles[i])[0].checked = true
@@ -369,7 +372,7 @@ $(document).ready(function () {
         })
       } else {
         // stop all pumps
-        sendRequest("Science", 'ps', function (msgs) {
+        sendRequest('Science', 'ps', function (msgs) {
           if (msgs[1].includes('ps done')) {
             toggleOffAllPumps()
           } else {
@@ -388,7 +391,7 @@ $(document).ready(function () {
     }
     // click makes it checked during this time, so trying to enable
     if ($('#pump-dir-toggle').is(':checked')) {
-      sendRequest("Science", 'pd1', function (msgs) {
+      sendRequest('Science', 'pd1', function (msgs) {
         if (msgs[1].includes('OUT')) {
           appendToConsole('Success')
         } else {
@@ -396,7 +399,7 @@ $(document).ready(function () {
         }
       })
     } else {
-      sendRequest("Science", 'pd0', function (msgs) {
+      sendRequest('Science', 'pd0', function (msgs) {
         if (msgs[1].includes('IN')) {
           appendToConsole('Success')
         } else {
@@ -417,7 +420,7 @@ $(document).ready(function () {
       let cmd = 'led' + (i + 1)
 
       if ($('#led' + (i + 1) + '-toggle').is(':checked')) {
-        sendRequest("Science", cmd, function (msgs) {
+        sendRequest('Science', cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -428,7 +431,7 @@ $(document).ready(function () {
         })
       } else {
         cmd += 's'
-        sendRequest("Science", cmd, function (msgs) {
+        sendRequest('Science', cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -452,7 +455,7 @@ $(document).ready(function () {
       let cmd = 'v' + (i + 1)
 
       if ($('#vibrator' + (i + 1) + '-toggle').is(':checked')) {
-        sendRequest("Science", cmd, function (msgs) {
+        sendRequest('Science', cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -463,7 +466,7 @@ $(document).ready(function () {
         })
       } else {
         cmd = 'vs'
-        sendRequest("Science", cmd, function (msgs) {
+        sendRequest('Science', cmd, function (msgs) {
           console.log('msgs', msgs)
 
           if (msgs[1].includes(cmd + ' done')) {
@@ -481,7 +484,7 @@ $(document).ready(function () {
       return
     }
 
-    sendRequest("Science", 'dgo', function (msgs) {
+    sendRequest('Science', 'dgo', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('dgo done')) {
@@ -500,7 +503,7 @@ $(document).ready(function () {
     }
 
     // drill stop
-    sendRequest("Science", 'ds', function (msgs) {
+    sendRequest('Science', 'ds', function (msgs) {
       console.log('msgs', msgs)
 
       if (msgs[1].includes('ds done')) {

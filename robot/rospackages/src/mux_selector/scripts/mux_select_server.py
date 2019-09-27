@@ -8,7 +8,12 @@ current_channel = 0
 def handle_mux_select(req):
     if req.device == '?':
         global current_channel
-        return "Current: " + str(current_channel) + '\n'
+
+        if local:
+            return "Current: " + str(current_channel) + '\n'
+        else:
+            current_channel = get_current_channel()
+            return "Current: " + str(current_channel) + '\n'
 
     response = "Switched MUX select to device {:s}".format(req.device)
 
@@ -16,6 +21,39 @@ def handle_mux_select(req):
     response += "\n" + str(select_device(req.device))
 
     return response
+
+def get_current_channel():
+    global local
+    global current_channel
+    gpio_dir = '/sys/class/gpio'
+    s1 = 0
+    s0 = 0
+    dev = 0
+
+    if not local:
+        # s1
+        with open(gpio_dir + '/gpio30/value', 'r') as f:
+            s1 = f.read()
+        # s0
+        with open(gpio_dir + '/gpio18/value', 'r') as f:
+            s0 = f.read()
+
+        # remove leading/trailing whitespace for comparisons
+        s1 = s1.strip()
+        s0 = s0.strip()
+
+        if s1 == "0" and s0 == "0":
+            dev = 3
+        elif s1 == "0" and s0 == "1":
+            dev = 2
+        elif s1 == "1" and s0 == "0":
+            dev = 1
+        elif s1 == "1" and s0 == "1":
+            dev = 0
+    else:
+        dev = current_channel
+
+    return dev
 
 def select_device(device):
     global current_channel
@@ -30,7 +68,7 @@ def select_device(device):
     device = int(device)
 
     # s1 most significant bit, s0 least significant bit
-    # s0 --> gpio 18 (physical 15), s1 --> gpio 21 (physical 13)
+    # s0 --> gpio 18 (physical 15), s1 --> gpio 30 (physical 19)
     # NOTE: on the final PCB the select logic will be inverted
     # this is why selecting device 0 is mapped to (1, 1) --> (0, 0)
     if not device in (0, 1, 2, 3):
@@ -63,7 +101,7 @@ def select_device(device):
         with open(gpio_dir + "/gpio18/value", "w") as f:
             f.write(str(s0_val))
         # s1
-        with open(gpio_dir + "/gpio21/value", "w") as f:
+        with open(gpio_dir + "/gpio30/value", "w") as f:
             f.write(str(s1_val))
 
     s0_state = "s0: " + str(s0_val)
@@ -79,7 +117,11 @@ def mux_select_server():
     local = False
     if len(sys.argv) == 2:
         if sys.argv[1] == "local":
+            print("Running in local mode")
             local = True
+        else:
+            print("Argument '" + sys.argv[1] + "' not recognized, did you mean 'local'?")
+            sys.exit(0)
 
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)

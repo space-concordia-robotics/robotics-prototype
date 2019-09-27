@@ -2,7 +2,7 @@ REQUEST_TIMEOUT = 3000
 
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
-    url: 'ws://localhost:9090'
+    url: 'ws://' + env.HOST_IP + ':9090'
   })
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
@@ -265,6 +265,16 @@ function initRosWeb () {
     $('#rover-longitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
+  // setup a subscriber for the rover_twist topic
+  rover_twist_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_twist',
+    messageType: 'geometry_msgs/Twist'
+  })
+  rover_twist_listener.subscribe(function (message) {
+    $('#rover-speed').text(message.linear.x)
+    $('#rover-angular-velocity').text(message.angular.x)
+  })
   // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
@@ -272,7 +282,7 @@ function initRosWeb () {
     messageType: 'std_msgs/String'
   })
   rover_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
+    appendToConsole(message.data, true, false)
   })
   // setup a subscriber for the antenna_goal topic
   antenna_goal_listener = new ROSLIB.Topic({
@@ -334,8 +344,8 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
     )
   }
 
-  let timer = setTimeout(function() {
-      callback([false, elemID + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, elemID + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
   mux_select_client.callService(request, function (result) {
@@ -382,7 +392,14 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
-function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', timeout = REQUEST_TIMEOUT) {
+function requestTask (
+  reqTask,
+  reqStatus,
+  buttonID,
+  callback,
+  reqArgs = '',
+  timeout = REQUEST_TIMEOUT
+) {
   var request
   if (reqArgs == '') {
     request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
@@ -404,8 +421,8 @@ function requestTask (reqTask, reqStatus, buttonID, callback, reqArgs = '', time
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
-  let timer = setTimeout(function() {
-      callback([false, reqTask + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, reqTask + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
   task_handler_client.callService(request, function (result) {
@@ -496,8 +513,10 @@ function checkTaskStatuses () {
       }
     })
   } else if (window.location.pathname == '/rover') {
-    // check arm listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (msgs) {
+    // check rover listener status
+    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
+      msgs
+    ) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -505,15 +524,6 @@ function checkTaskStatuses () {
         } else if (msgs[1].includes('running')) {
           $('#toggle-rover-listener-btn')[0].checked = true
         }
-      }
-    })
-
-    sendRequest("Rover", 'who', function (msgs) {
-      printErrToConsole(msgs)
-      if (msgs[1].includes('Happy')) {
-        $('#activate-rover-btn')[0].checked = true
-      } else {
-        $('#activate-rover-btn')[0].checked = false
       }
     })
 
@@ -581,33 +591,31 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
-function sendRequest(device, command, callback, timeout = REQUEST_TIMEOUT) {
+function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
   console.log(request)
   appendToConsole('Sending request to execute command "' + command + '"')
 
-  let timer = setTimeout(function() {
-      callback([false, command + " timeout after " + timeout/1000 + " seconds"])
+  let timer = setTimeout(function () {
+    callback([false, command + ' timeout after ' + timeout / 1000 + ' seconds'])
   }, timeout)
 
-  var requestClient;
-  switch(device)
-  {
-    case "Arm":
+  var requestClient
+  switch (device) {
+    case 'Arm':
       requestClient = arm_request_client
-    break
-    case "Rover":
+      break
+    case 'Rover':
       requestClient = rover_request_client
-    break
-    case "Science":
+      break
+    case 'Science':
       requestClient = science_request_client
-    break
+      break
   }
 
   requestClient.callService(request, function (result) {
-
     clearTimeout(timer)
     let latency = millisSince(sentTime)
     console.log(result)
@@ -632,7 +640,6 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  // arm_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {

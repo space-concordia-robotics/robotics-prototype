@@ -109,7 +109,7 @@ void DcMotor::calcCurrentVelocity() {
 //    Serial.print(dt);
 //    Serial.print(" ");
 //    Serial.print(encoderCount);
-//    Serial.print(" ");
+//    Serial.println(" ");
 
     if (dt <= 0 || encoderCount <= 0) {
         currentVelocity = 0;

@@ -190,6 +190,7 @@ void loop() {
     // if a message was sent to the Teensy
     msgReceived = true;
     UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
+    // @TODO find a way to check for \r carriage return and remove it... the issue is that it's a char array not String
 #ifdef DEBUG_MAIN
     UART_PORT.print("ARM GOT: "); UART_PORT.println(serialBuffer); // send back what was received
 #endif
@@ -737,17 +738,17 @@ void respondToLimitSwitches(void) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->minSoftAngle);
+          UART_PORT.print(motorArray[i]->maxSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
         }
         if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
 #ifdef DEBUG_SWITCHES
           UART_PORT.println("ARM gripper hit a switch");
           UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->maxSoftAngle);
+          UART_PORT.print(motorArray[i]->minSoftAngle);
 #endif
-          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
+          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
         }
         motorArray[i]->actualPress = false;
         motorArray[i]->limitSwitchState = 0;

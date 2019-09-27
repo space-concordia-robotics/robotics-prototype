@@ -4,7 +4,7 @@ const CONTINUOUS_SERVO_PERIOD = 100
 const POSITION_SERVO_PERIOD = 60
 const SERVO_STOP = 93 // tested with front servos
 const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
-const MAX_CONTINUOUS_SERVO_OFFSET = 20//30
+const MAX_CONTINUOUS_SERVO_OFFSET = 20
 
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
@@ -12,32 +12,36 @@ const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
-var lastCmdSent = 0
-var lastFrontPosServoCmd = 0
-var lastFrontContServoCmd = 0
+let lastCmdSent = 0
+let lastFrontPosServoCmd = 0
+let lastFrontContServoCmd = 0
+let lastRearPosServoCmd = 0
+let lastRearContServoCmd = 0
 
-var maxSoftThrottle = 25
-var maxSoftSteering = 39
-var maxFrontTiltPwm = 130
-var minFrontTiltPwm = 50
-var maxRearTiltPwm = 130
-var minRearTiltPwm = 50
+let maxSoftThrottle = 25
+let maxSoftSteering = 39
+let maxFrontTiltPwm = 180
+let minFrontTiltPwm = 0
+let maxRearTiltPwm = 115
+let minRearTiltPwm = 0
 
-var throttle = 0 // how fast are the wheels turning in general
-var steering = 0 // values further from 0 mean sharper turning radius
-var spinning = 0 // for rotating around its centre
-var frontTiltPwm = 90
-var frontPanPwm = SERVO_STOP
+let throttle = 0 // how fast are the wheels turning in general
+let steering = 0 // values further from 0 mean sharper turning radius
+let spinning = 0 // for rotating around its centre
+let frontTiltPwm = 60
+let rearTiltPwm = 35
+let frontPanPwm = SERVO_STOP
+let rearPanPwm = SERVO_STOP
 
-var throttleIncrement = 1
-var steeringIncrement = 1
-var positionServoIncrement = 1
-var continuousServoIncrement = 2
-var continuousServoOffset = 20
+let throttleIncrement = 1
+let steeringIncrement = 1
+let positionServoIncrement = 1
+let continuousServoIncrement = 2
+let continuousServoOffset = 20
 
-var maxThrottleIncrement = 1
-var maxSteeringIncrement = 1
-var movementCommanded = false
+let maxThrottleIncrement = 1
+let maxSteeringIncrement = 1
+let movementCommanded = false
 
 sentZero = true // used to prevent the gui from sending wheel commands
 sentFrontServoStop = true // used to prevent the gui from sending servo commands
@@ -54,11 +58,7 @@ $(document).ready(function () {
   // camera servos
 
   // init camera servos
-  let frontContServo = '!' + SERVO_STOP.toString()
-  let rearContServo = '#' + SERVO_STOP.toString()
-  sendRoverCommand(frontContServo)
-  sendRoverCommand(rearContServo)
-
+  /*
   // servo name: "Front camera positional tilt base"
   $('#camera-front-lpan-btn').click(function () {
     if ($('#servo-val').val() != '') {
@@ -113,18 +113,19 @@ $(document).ready(function () {
       sendRoverCommand('$' + $('#servo-val').val())
     }
   })
+  */
 
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
     sendRoverCommand('reboot')
   })
 
-  $('#list-all-cmds').on('click', function(event){
+  $('#list-all-cmds').on('click', function (event) {
     event.preventDefault()
     printCommandsList()
   })
 
-  $('#stop-all-motors').on('click', function(event){
+  $('#stop-all-motors').on('click', function (event) {
     event.preventDefault()
     sendRoverCommand('stop')
   })
@@ -134,23 +135,50 @@ $(document).ready(function () {
     // click makes it checked during this time, so trying to enable
     if (!$('#toggle-rover-listener-btn').is(':checked')) {
       appendToConsole('Rover listener not yet activated!')
-    } else if ($('#activate-rover-btn').is(':checked')) {
-      sendRequest("Rover", 'activate', function (msgs) {
+    } else {
+      if ($('#activate-rover-btn').is(':checked')) {
+        sendRequest('Rover', 'activate', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = true
+          }
+        })
+      } else {
+        // 'deactivated' needs to be handled differently since it takes 45 secconds
+        sendRequest('Rover', 'deactivate', function (msgs) {
+          printErrToConsole(msgs)
+          if (msgs[0]) {
+            $('#activate-rover-btn')[0].checked = false
+          }
+        })
+      }
+    }
+  })
+
+  $('#toggle-rover-pid-btn').on('click', function (event) {
+    event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if (!$('#toggle-rover-listener-btn').is(':checked')) {
+      appendToConsole('Rover listener not yet activated!')
+    } else if ($('#toggle-rover-pid-btn').is(':checked')) {
+      sendRequest('Rover', 'close-loop', function (msgs) {
         printErrToConsole(msgs)
-        if (msgs[0]) {
-          $('#activate-rover-btn')[0].checked = true
+        if (msgs[1].includes('loop status is: CLose')) {
+          $('#toggle-rover-pid-btn')[0].checked = true
+          appendToConsole('Loop status: closed')
         }
       })
     } else {
-      // 'deactivated' needs to be handled differently since it takes 45 secconds
-      sendRequest("Rover", 'deactivate', function (msgs) {
+      sendRequest('Rover', 'open-loop', function (msgs) {
         printErrToConsole(msgs)
-        if (msgs[0]) {
-          $('#activate-rover-btn')[0].checked = false
+        if (msgs[1].includes('loop status is: Open')) {
+          $('#toggle-rover-pid-btn')[0].checked = false
+          appendToConsole('Loop status: open')
         }
       })
     }
   })
+
   $('#toggle-rover-listener-btn').on('click', function (event) {
     event.preventDefault()
     let serialType = $('#serial-type')
@@ -158,10 +186,13 @@ $(document).ready(function () {
       .trim()
     // click makes it checked during this time, so trying to enable
     if ($('#toggle-rover-listener-btn').is(':checked')) {
+      // validate UART mode options are correct, let pass if USB mode selected
       if (
-        $('button#mux')
+        ($('button#mux')
           .text()
-          .includes('Rover')
+          .includes('Rover') &&
+          serialType == 'uart') ||
+        serialType == 'usb'
       ) {
         requestTask(
           'rover_listener',
@@ -179,7 +210,7 @@ $(document).ready(function () {
         )
       } else {
         appendToConsole(
-          'Cannot turn rover listener on if not in rover mux channel!'
+          'UART MODE: Cannot turn rover listener on if not in rover mux channel!'
         )
       }
     } else {
@@ -434,54 +465,50 @@ window.addEventListener(
 )
 
 function handlePositionServo (
-  pwmVal, minPwm, maxPwm,
-  upKey, downKey,
-  upBtn, downBtn,
+  pwmVal,
+  minPwm,
+  maxPwm,
+  upKey,
+  downKey,
+  upBtn,
+  downBtn
 ) {
-    let newCommand = false
-    if (keyState[upKey]) {
-      lightUp(upBtn)
-      if (pwmVal > minPwm) {
-        pwmVal -= positionServoIncrement
-      }
-      newCommand = true
+  let newCommand = false
+  if (keyState[upKey]) {
+    lightUp(upBtn)
+    if (pwmVal > minPwm) {
+      pwmVal -= positionServoIncrement
     }
-    else if (keyState[downKey]) {
-      lightUp(downBtn)
-      if (pwmVal < maxPwm) {
-        pwmVal += positionServoIncrement
-      }
-      newCommand = true
+    newCommand = true
+  } else if (keyState[downKey]) {
+    lightUp(downBtn)
+    if (pwmVal < maxPwm) {
+      pwmVal += positionServoIncrement
     }
-    return [newCommand, pwmVal]
+    newCommand = true
+  }
+  return [newCommand, pwmVal]
 }
 
-function handleContinuousServo (
-  pwmVal,
-  leftKey, rightKey,
-  leftBtn, rightBtn
-) {
+function handleContinuousServo (pwmVal, leftKey, rightKey, leftBtn, rightBtn) {
   if (keyState[leftKey] && !$('#servo-val').is(':focus')) {
     lightUp(leftBtn)
     if (pwmVal < SERVO_STOP + continuousServoOffset) {
       pwmVal += continuousServoIncrement
     }
-  }
-  else if (keyState[rightKey] && !$('#servo-val').is(':focus')) {
+  } else if (keyState[rightKey] && !$('#servo-val').is(':focus')) {
     lightUp(rightBtn)
     if (pwmVal > SERVO_STOP - continuousServoOffset) {
       pwmVal -= continuousServoIncrement
     }
-  }
-  else { // decelerate
+  } else {
+    // decelerate
     if (pwmVal < SERVO_STOP) {
       pwmVal += continuousServoIncrement
-    }
-    else if (pwmVal > SERVO_STOP) {
+    } else if (pwmVal > SERVO_STOP) {
       pwmVal -= continuousServoIncrement
-    }
-    else {
-      ; // do nothing, you've stopped
+    } else {
+      // do nothing, you've stopped
     }
   }
   return pwmVal
@@ -497,63 +524,136 @@ function gameLoop () {
   */
   if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
     /* CAMERA SERVO CONTROL */
-    //TODO: check if the position servo code is the same for rear servo or if
+    // TODO: check if the position servo code is the same for rear servo or if
     // the directions must be reversed, because that may be annoying
-    //TODO: same thing but for the continuous servo code
-    //WARNING: the position servo limits are probably off
-    //WARNING: currently I assume that 90 deg is the home position but this may not be the case
-    //WARNING: the current implementation allows commands to two different servos to occur back-to-back
-    //with no delay. this may be bad, consider something that only allows one command per x ms
+    // TODO: same thing but for the continuous servo code
+    // WARNING: the position servo limits are probably off
+    // WARNING: currently I assume that 90 deg is the home position but this may not be the case
+    // WARNING: the current implementation allows commands to two different servos to occur back-to-back
+    // with no delay. this may be bad, consider something that only allows one command per x ms
 
     // front camera position servo (up/down, servo 1)
-    if ( (millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD) && !$('#servo-val').is(':focus') ) {
-      let returnVals = handlePositionServo (
-        frontTiltPwm, minFrontTiltPwm, maxFrontTiltPwm,
-        111, 104, // numpad '/' and '8'
-        '#camera-front-tilt-up-btn', '#camera-front-tilt-down-btn'
+    if (
+      millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD &&
+      !$('#servo-val').is(':focus')
+    ) {
+      let returnVals = handlePositionServo(
+        frontTiltPwm,
+        minFrontTiltPwm,
+        maxFrontTiltPwm,
+        111,
+        104, // numpad '/' and '8'
+        '#camera-front-tilt-up-btn',
+        '#camera-front-tilt-down-btn'
       )
       if (returnVals[0]) {
         frontTiltPwm = returnVals[1]
         $('#front-tilt-pwm').text(frontTiltPwm)
         lastFrontPosServoCmd = new Date().getTime()
-        sendRoverCommand('@' + frontTiltPwm.toString())
+        sendRoverCommand('!' + frontTiltPwm.toString())
       }
     }
     // Front camera continuous servo (left/right, servo 2)
-    if ( (millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD) && !$('#servo-val').is(':focus') ){//> CONTINUOUS_SERVO_PERIOD){
-      frontPanPwm = handleContinuousServo (
+    if (
+      millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
+      !$('#servo-val').is(':focus')
+    ) {
+      // > CONTINUOUS_SERVO_PERIOD){
+      frontPanPwm = handleContinuousServo(
         frontPanPwm,
-        103, 105, // numpad '7' and '9'
-        '#camera-front-lpan-btn', '#camera-front-rpan-btn'
+        105, // numpad '7' and '9'
+        103,
+        '#camera-front-lpan-btn',
+        '#camera-front-rpan-btn'
       )
       // check whether or not to send a new command for the continuous servo
       if (frontPanPwm == SERVO_STOP && sentFrontServoStop) {
-        ;
-      }
-      else {
+      } else {
         let frontPan = SERVO_STOP
-        if (frontPanPwm > SERVO_STOP && frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET) {
+        if (
+          frontPanPwm > SERVO_STOP &&
+          frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        ) {
           frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        }
-        else if (frontPanPwm < SERVO_STOP && frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET) {
+        } else if (
+          frontPanPwm < SERVO_STOP &&
+          frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        ) {
           frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        }
-        else {
+        } else {
           frontPan = frontPanPwm
         }
         $('#front-pan-pwm').text(frontPan)
         lastFrontContServoCmd = new Date().getTime()
-        sendRoverCommand('!' + frontPan.toString())
+        sendRoverCommand('@' + frontPan.toString())
         if (frontPanPwm != SERVO_STOP) {
           sentFrontServoStop = false
-        }
-        else {
+        } else {
           sentFrontServoStop = true
         }
       }
     }
 
-    /*ROVER WHEEL CONTROL*/
+    // rear camera position servo (up/down, servo 1)
+    if (
+      millisSince(lastRearPosServoCmd) > POSITION_SERVO_PERIOD &&
+      !$('#servo-val').is(':focus')
+    ) {
+      let returnVals = handlePositionServo(
+        rearTiltPwm,
+        minRearTiltPwm,
+        maxRearTiltPwm,
+        101,
+        98, // numpad '5' and '2'
+        '#camera-back-tilt-up-btn',
+        '#camera-back-tilt-down-btn'
+      )
+      if (returnVals[0]) {
+        rearTiltPwm = returnVals[1]
+        $('#back-tilt-pwm').text(rearTiltPwm)
+        lastRearPosServoCmd = new Date().getTime()
+        sendRoverCommand('#' + rearTiltPwm.toString())
+      }
+    }
+    // rear camera continuous servo (left/right, servo 2)
+    if (
+      millisSince(lastRearContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
+      !$('#servo-val').is(':focus')
+    ) {
+      // > CONTINUOUS_SERVO_PERIOD){
+      rearPanPwm = handleContinuousServo(
+        rearPanPwm,
+        97,
+        99, // numpad '1' and '3'
+        '#camera-back-lpan-btn',
+        '#camera-back-rpan-btn'
+      )
+      // check whether or not to send a new command for the continuous servo
+      if (rearPanPwm == SERVO_STOP && sentRearServoStop) {
+        // don't move the servo
+      } else {
+        let rearPan = SERVO_STOP
+        if (
+          rearPanPwm > SERVO_STOP &&
+          rearPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        ) {
+          rearPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
+        } else if (
+          rearPanPwm < SERVO_STOP &&
+          rearPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        ) {
+          rearPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
+        } else {
+          rearPan = rearPanPwm
+        }
+        $('#back-pan-pwm').text(rearPan)
+        lastRearContServoCmd = new Date().getTime()
+        sendRoverCommand('$' + rearPan.toString())
+        sentRearServoStop = rearPan == SERVO_STOP
+      }
+    }
+
+    /* ROVER WHEEL CONTROL */
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-right > button')
@@ -654,14 +754,12 @@ function gameLoop () {
           steering = MAX_STEERING_SPEED
           // do stuff with `spinning`
           // lastCmdSent = new Date().getTime()
-        }
-        else if (keyState[65]) {
+        } else if (keyState[65]) {
           // 'a' --> rover turn left
           steering = -MAX_STEERING_SPEED
           // do stuff with `spinning`
           // lastCmdSent = new Date().getTime()
-        }
-        else {
+        } else {
           steering = 0
           spinning = 0
         }
@@ -670,8 +768,7 @@ function gameLoop () {
         sendRoverCommand(cmd)
         lastCmdSent = new Date().getTime()
       }
-    }
-    else {
+    } else {
       $('#throttle-speed').text(throttle)
       // the following stops sending commands if it already sent 0 throttle
       let cmd = throttle.toString() + ':' + steering.toString()
@@ -679,8 +776,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
       if (throttle != 0) {
         sentZero = false
-      }
-      else {
+      } else {
         sentZero = true
       }
     }

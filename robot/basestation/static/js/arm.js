@@ -19,7 +19,7 @@ function printCommandsList () {
   appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
-function manualControl() {
+function manualControl () {
   var armsOFF = $('#ArmcontrolsOFF')[0]
   var armsON = $('#ArmcontrolsON')[0]
 
@@ -43,44 +43,28 @@ $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
     event.preventDefault()
     if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      pingDevice("Odroid")
+      pingDevice('Odroid')
       lastCmdSent = new Date().getTime()
     }
   })
 
-  $('#save-image').on('click', function (event) {
-    $.ajax('/capture_image', {
-      success: function (data) {
-        appendToConsole(data.msg)
-        if (!data.msg.includes('success')) {
-          appendToConsole('Something went wrong, got', data.msg)
-        } else {
-          appendToConsole(data.msg)
-        }
-      },
-      error: function () {
-        console.log('An error occured')
-      }
-    })
-  })
-
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
-    //TODO: uncomment this when homing is confirmed to work properly
-    //sendArmCommand('home') // REIMPLEMENT AS AN ACTION
+    // TODO: uncomment this when homing is confirmed to work properly
+    // sendArmCommand('home') // REIMPLEMENT AS AN ACTION
   })
 
-  $('#list-all-cmds').on('click', function(event){
+  $('#list-all-cmds').on('click', function (event) {
     event.preventDefault()
     printCommandsList()
   })
 
-  $('#stop-all-motors').on('click', function(event){
+  $('#stop-all-motors').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('stop')
   })
 
-  $('#reset-motor-angles').on('click', function(event){
+  $('#reset-motor-angles').on('click', function (event) {
     event.preventDefault()
     sendArmCommand('reset')
   })
@@ -92,7 +76,9 @@ $(document).ready(function () {
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
-    let serialType = 'uart'
+    let serialType = $('#serial-type')
+      .text()
+      .trim()
     if (
       $('#serialType')
         .text()
@@ -102,15 +88,14 @@ $(document).ready(function () {
     }
     // click makes it checked during this time, so trying to enable
     else if ($('#toggle-arm-listener-btn').is(':checked')) {
+      // validate UART mode options are correct, let pass if USB mode selected
       if (
-        $('button#mux')
+        ($('button#mux')
           .text()
-          .includes('Arm')
+          .includes('Arm') &&
+          serialType == 'uart') ||
+        serialType == 'usb'
       ) {
-        serialType = $('#serial-type')
-          .text()
-          .trim()
-        console.log('setting serialType:', serialType)
         requestTask(
           'arm_listener',
           1,
@@ -128,7 +113,7 @@ $(document).ready(function () {
         // console.log('returnVals', returnVals)
       } else {
         appendToConsole(
-          'Cannot turn arm listener on if not in arm mux channel!'
+          'UART MODE: Cannot turn arm listener on if not in arm mux channel!'
         )
       }
     } else {
@@ -163,7 +148,7 @@ $(document).ready(function () {
       parseFloat(multiplier) <= maxMultiplier
     ) {
       let cmd = 'armspeed ' + multiplier
-      sendRequest("Arm", cmd, printErrToConsole)
+      sendRequest('Arm', cmd, printErrToConsole)
     }
   })
 
@@ -177,7 +162,7 @@ $(document).ready(function () {
         parseFloat(multiplier) <= maxMultiplier
       ) {
         let cmd = 'armspeed ' + multiplier
-        sendRequest("Arm", cmd, printErrToConsole)
+        sendRequest('Arm', cmd, printErrToConsole)
       }
     }
   })
@@ -186,14 +171,18 @@ $(document).ready(function () {
     event.preventDefault()
     num = this.id[1]
     isOpen = !$(this.id).is(':checked')
-    armReq = function(msgs) {
-        if(msgs[0]) {
-          $(this.id)[0].checked = !isOpen
-        } else {
-          $(this.id)[0].checked = isOpen
-        }
+    armReq = function (msgs) {
+      if (msgs[0]) {
+        $(this.id)[0].checked = !isOpen
+      } else {
+        $(this.id)[0].checked = isOpen
+      }
     }
-    sendRequest("Arm", 'motor ' + num + ' loop ' + (isOpen) ? 'open' : 'closed', armReq)
+    sendRequest(
+      'Arm',
+      'motor ' + num + ' loop ' + (isOpen ? 'open' : 'closed'),
+      armReq
+    )
   })
 })
 
@@ -206,7 +195,7 @@ document.addEventListener('keydown', function (event) {
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
-    pingDevice("Odroid")
+    pingDevice('Odroid')
     lastCmdSent = new Date().getTime()
   }
 })
