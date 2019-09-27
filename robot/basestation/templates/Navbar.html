@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-  <div class="col-md-0.5">
+  <div class="col-md-1">
       <a class="navbar-brand" href="{{ url_for('index') }}">
           <img src="../static/img/sclogo_header.png">
       </a>
@@ -30,7 +30,7 @@
     </div>
   </div>
 
-  <div class="dropdown col-md-1.5">
+  <div class="dropdown col-md-2">
     <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
       Serial Type
     </button>
@@ -58,17 +58,12 @@
        <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
      </div> -->
 
- <div class="col-md-2">
-   <div class="row" style="color:white">
-     <div class="col-md-4">BATTERY VOLTAGE: </div>
-     <div class="col-md-4" id="battery-voltage">-</div>
-   </div>
- </div>
-
  <div class="col-md-4">
    <div class="row" style="color:white">
-     <div class="col-md-3">BATTERY TEMPS: </div>
-     <div class="col-md-5">
+     <div class="col-md-2">BATTERY VOLTAGE: </div>
+     <div class="col-md-2" id="battery-voltage">-</div>
+     <div class="col-md-2">BATTERY TEMPS: </div>
+     <div class="col-md-6">
        <div class="row">
          T2:<div class="col-md-3" id="battery-temp-1">-</div>&#8451;
          T1:<div class="col-md-3" id="battery-temp-2">-</div>&#8451;
