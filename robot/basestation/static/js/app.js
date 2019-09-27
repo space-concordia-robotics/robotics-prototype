@@ -585,7 +585,29 @@ $(document).ready(() => {
       // copy code from above
     }
   })
+
+  $( "#arm-page" ).click(function() {
+    window.open('/');
+  })
+
+  $( "#rover-page" ).click(function() {
+    window.open('rover');
+  })
+
+  $( "#science-page" ).click(function() {
+    window.open('science');
+  })
+
+  $( "#pds-page" ).click(function() {
+    window.open('pds');
+  })
+
+  $( "#streams-page" ).click(function() {
+    window.open('stream');
+  })
+
 })
+
 
 function printErrToConsole (msg) {
   if (!msg[0]) appendToConsole(msg[1])
