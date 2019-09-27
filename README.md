@@ -9,6 +9,18 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
+### Cloning and Pulling
+
+We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages, use the commands below :
+
+Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
+
+Pull : `git pull; git submodule update --init --recursive`
+
+If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
+
+If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and this [issue](https://stackoverflow.com/a/51133684/4048657) you may encounter
+
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
 Make sure you supply a path to a Python 3.6.x+ binary. Make sure to use backticks (not single quotes) for `which python3.6`:
