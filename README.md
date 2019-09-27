@@ -16,6 +16,8 @@ We are using git submodules in `robotics-prototype`. This means that we are usin
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
 Pull : `git pull; git submodule update --init --recursive`
+
+If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
  
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 Navigate to the projects root directory (`cd ~/.../robotics-prototype`) and create the virtual environment):
