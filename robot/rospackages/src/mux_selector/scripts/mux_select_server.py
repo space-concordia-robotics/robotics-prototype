@@ -125,7 +125,10 @@ def mux_select_server():
 
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
-    print("Ready to respond to mux select commands")
+    startup_msg = "Ready to respond to mux select commands"
+    startup_msg = startup_msg + " (local mode)" if local else startup_msg
+
+    print(startup_msg)
     rospy.spin()
 
 if __name__ == "__main__":

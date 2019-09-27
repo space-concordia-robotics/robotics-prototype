@@ -1,5 +1,11 @@
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
+  // @TODO: fix this hacky workaround (refer to issue #142)
+  // https://github.com/space-concordia-robotics/robotics-prototype/issues/142
+  lastCmdSent = 0
+  PING_THROTTLE_TIME = 1000
+  // end of said hacky workaround
+
   const Site = {
     init () {
       // connect ros to the rosbridge websockets server
@@ -10,8 +16,8 @@ $(document).ready(() => {
         $('#serial-type').text(getCookie('serialType'))
       }
 
-      // only for ARM and ROVER (for now)
-      if (window.location.pathname != '/science') {
+      // only for ARM, ROVER and SCIENCE (for now)
+      if (window.location.pathname != '/pds') {
         $('#front-camera-stream-btn').on('click', function (event) {
           event.preventDefault()
           // click makes it checked during this time, so trying to enable
@@ -593,6 +599,12 @@ function pingDevice (device) {
         break
       case 'Rover':
         sendRequest('Rover', 'ping', printErrToConsole)
+        break
+      case 'PDS':
+        sendRequest('PDS', 'PDS ping', printErrToConsole)
+        break
+      case 'Science':
+        sendRequest('Science', 'ping', printErrToConsole)
         break
       case 'Odroid':
       default:

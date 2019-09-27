@@ -1,4 +1,6 @@
 REQUEST_TIMEOUT = 3000
+ROTATE_TIMEOUT = 1000
+lastRotate = 0
 
 function initRosWeb () {
   let ros = new ROSLIB.Ros({
@@ -44,15 +46,6 @@ function initRosWeb () {
     ros: ros,
     name: 'task_handler',
     serviceType: 'HandleTask'
-  })
-  // setup a subscriber for the battery_voltage topic
-  battery_voltage_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
-  })
-  battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
   })
 
   /* arm controls */
@@ -161,69 +154,116 @@ function initRosWeb () {
       greyOut('#elevator-up-btn')
     }
 
-    if (values[3] == '0') {
-      $('#pump-dir-label').text('DIR: OUT')
-      $('#pump-dir-toggle')[0].checked = false
-    } else if (values[3] == '1') {
-      $('#pump-dir-label').text('DIR: IN')
-      $('#pump-dir-toggle')[0].checked = true
+    // if (values[3] == '0') {
+    //   $('#pump-dir-label').text('DIR: OUT')
+    //   $('#pump-dir-toggle')[0].checked = false
+    // } else if (values[3] == '1') {
+    //   $('#pump-dir-label').text('DIR: IN')
+    //   $('#pump-dir-toggle')[0].checked = true
+    // }
+    //
+    // // photo resistor Voltage
+    // $('#photo-resistor-voltage').val(values[4])
+    //
+    // // LED 1 ON
+    // if (values[5] == '0') {
+    //   $('#led1-toggle')[0].checked = false
+    // } else if (values[5] == '1') {
+    //   $('#led1-toggle')[0].checked = true
+    // }
+    //
+    // // LED 2 ON
+    // if (values[6] == '0') {
+    //   $('#led2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#led2-toggle')[0].checked = true
+    // }
+    //
+    // // Vibrator ON statuses
+    // if (values[7] == '0') {
+    //   $('#vibrator1-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator1-toggle')[0].checked = true
+    // }
+    //
+    // if (values[8] == '0') {
+    //   $('#vibrator2-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator2-toggle')[0].checked = true
+    // }
+    //
+    // if (values[9] == '0') {
+    //   $('#vibrator3-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator3-toggle')[0].checked = true
+    // }
+    //
+    // if (values[10] == '0') {
+    //   $('#vibrator4-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator4-toggle')[0].checked = true
+    // }
+    //
+    // if (values[11] == '0') {
+    //   $('#vibrator5-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator5-toggle')[0].checked = true
+    // }
+    //
+    // if (values[12] == '0') {
+    //   $('#vibrator6-toggle')[0].checked = false
+    // } else if (values[6] == '1') {
+    //   $('#vibrator6-toggle')[0].checked = true
+    // }
+
+    if (values[13]) {
+      $('#drill-rpm').val(values[13])
+    }
+    // drillInUse
+    if (values[14] == '0') {
+      lightUp('#drill-stop-btn')
+      greyOut('#set-speed-go-btn')
+      greyOut('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#drill-stop-btn')
     }
 
-    // photo resistor Voltage
-    $('#photo-resistor-voltage').val(values[4])
-
-    // LED 1 ON
-    if (values[5] == '0') {
-      $('#led1-toggle')[0].checked = false
-    } else if (values[5] == '1') {
-      $('#led1-toggle')[0].checked = true
+    // elevatorInUse
+    if (values[15] == '0') {
+      lightUp('#elevator-stop-btn')
+      greyOut('#set-feed-go-btn')
+      greyOut('#set-distance-go-btn')
+      greyOut('#elevator-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#elevator-stop-btn')
     }
 
-    // LED 2 ON
-    if (values[6] == '0') {
-      $('#led2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#led2-toggle')[0].checked = true
+    // tcwstepDone
+    if (values[16] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotateNeg()
+        lastRotate = Date.now()
+      }
     }
 
-    // Vibrator ON statuses
-    if (values[7] == '0') {
-      $('#vibrator1-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator1-toggle')[0].checked = true
+    // tccwstepDone
+    if (values[17] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotatePos()
+        lastRotate = Date.now()
+      }
     }
 
-    if (values[8] == '0') {
-      $('#vibrator2-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator2-toggle')[0].checked = true
+    // elevatorFeedPercent
+    if (values[18]) {
+      $('#elevator-feed-percent').val(values[18])
     }
 
-    if (values[9] == '0') {
-      $('#vibrator3-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator3-toggle')[0].checked = true
+    // currentTablePosition
+    if (values[19]) {
+      $('#table-position').val(values[19])
     }
-
-    if (values[10] == '0') {
-      $('#vibrator4-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator4-toggle')[0].checked = true
-    }
-
-    if (values[11] == '0') {
-      $('#vibrator5-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator5-toggle')[0].checked = true
-    }
-
-    if (values[12] == '0') {
-      $('#vibrator6-toggle')[0].checked = false
-    } else if (values[6] == '1') {
-      $('#vibrator6-toggle')[0].checked = true
-    }
-
-    $('#drill-rpm').val(values[13])
   })
 
   /* rover commands */
@@ -326,6 +366,83 @@ function initRosWeb () {
   goal_longitude = new ROSLIB.Param({
     ros: ros,
     name: 'goal_longitude'
+  })
+
+  /* PDS commands */
+  // setup a client for the pds_request service
+  pds_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'pds_request',
+    serviceType: 'ArmRequest' // for now... might change
+  })
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+  // setup a subscriber for the battery_voltage topic
+  battery_voltage_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_voltage',
+    messageType: 'std_msgs/Float32'
+  })
+  battery_voltage_listener.subscribe(function (message) {
+    $('#battery-voltage').text(message.data.toFixed(2))
+  })
+  // setup a subscriber for the battery_temps topic
+  battery_temps_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'battery_temps',
+    messageType: 'geometry_msgs/Point'
+  })
+  battery_temps_listener.subscribe(function (message) {
+    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
+    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
+    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+  })
+  // setup a subscriber for the wheel_motor_currents topic
+  wheel_motor_currents_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'wheel_motor_currents',
+    messageType: 'sensor_msgs/JointState'
+  })
+  wheel_motor_currents_listener.subscribe(function (message) {
+    $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
+    $('#right-mid-current').text(parseFloat(message.effort[1]).toFixed(3))
+    $('#right-rear-current').text(parseFloat(message.effort[2]).toFixed(3))
+    $('#left-front-current').text(parseFloat(message.effort[3]).toFixed(3))
+    $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
+    $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
+  })
+  error_flags_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_flags',
+    messageType: 'std_msgs/String'
+  })
+  error_flags_listener.subscribe(function (message) {
+    let flags = message.data.split(', ')
+    $('#pds-ov-flag').text(parseInt(flags[0]))
+    $('#pds-uv-flag').text(parseInt(flags[1]))
+    $('#pds-critical-flag').text(parseInt(flags[2]))
+  })
+  fan_speeds_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'fan_speeds',
+    messageType: 'geometry_msgs/Point'
+  })
+  fan_speeds_listener.subscribe(function (message) {
+    $('#fan-1-speed').text(parseInt(message.x))
+    $('#fan-2-speed').text(parseInt(message.y))
+  })
+  // setup a subscriber for the pds_feedback topic
+  pds_feedback_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_feedback',
+    messageType: 'std_msgs/String'
+  })
+  pds_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
   })
 }
 
@@ -572,9 +689,19 @@ function checkTaskStatuses () {
         }
       }
     })
-  } /* else if (window.location.pathname == '/rover') { //pds
-    console.log('rover page')
-  } */
+  } else if (window.location.pathname == '/pds') {
+    // check rover listener status
+    requestTask('pds_listener', 2, '#toggle-pds-listener-btn', function (msgs) {
+      printErrToConsole(msgs)
+      if (msgs[0] && msgs.length == 2) {
+        if (msgs[1].includes('not running')) {
+          $('#toggle-pds-listener-btn')[0].checked = false
+        } else if (msgs[1].includes('running')) {
+          $('#toggle-pds-listener-btn')[0].checked = true
+        }
+      }
+    })
+  }
 }
 
 function sendIKCommand () {
@@ -613,6 +740,9 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
     case 'Science':
       requestClient = science_request_client
       break
+    case 'PDS':
+      requestClient = pds_request_client
+      break
   }
 
   requestClient.callService(request, function (result) {
@@ -640,6 +770,13 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
+}
+
+function sendPdsCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+  pds_command_publisher.publish(command)
 }
 
 function initNavigationPanel () {
