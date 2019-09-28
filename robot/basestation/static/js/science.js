@@ -3,7 +3,7 @@ const twopi = 2 * Math.PI
 const pi = Math.PI
 
 run = async () => {
-  const canvas = document.getElementById('myCanvas')
+  const canvas = document.getElementById('turntable-canvas')
   const w = canvas.width
   const h = canvas.height
   const context = canvas.getContext('2d')
@@ -12,10 +12,10 @@ run = async () => {
   const r = x * 0.5 * Math.min(w, h)
 
   // BEGIN: GET WHEEL PARAMS FROM SERVER
-  const response1 = await fetch('http://localhost:5000/numSections')
+  const response1 = await fetch('http://localhost:5000/science/numSections')
   const n = Number(await response1.text())
 
-  const response2 = await fetch('http://localhost:5000/initialSection')
+  const response2 = await fetch('http://localhost:5000/science/initialSection')
   const initial_section = Number(await response2.text())
   // END: GET WHEEL PARAMS FROM SERVER
 
@@ -31,11 +31,9 @@ run = async () => {
 
   const button_rpos = document.getElementById('button_rpos')
   window.rotatePos = async () => {
+    console.log('rotatePos')
     button_rpos.disabled = true
     button_rneg.disabled = true
-
-    // wait for server to finish rotating
-    await fetch('http://localhost:5000/rotatePos')
 
     const start = (((-i + n) % n) * twopi) / n
     for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a - d, z + 1]) {
@@ -48,16 +46,14 @@ run = async () => {
 
     button_rpos.disabled = false
     button_rneg.disabled = false
+    lastRotation = Date.now()
   }
-  button_rpos.addEventListener('click', window.rotatePos)
 
   const button_rneg = document.getElementById('button_rneg')
   window.rotateNeg = async () => {
+    console.log('rotateNeg')
     button_rpos.disabled = true
     button_rneg.disabled = true
-
-    // wait for server to finish rotating
-    await fetch('http://localhost:5000/rotateNeg')
 
     const start = (-i * twopi) / n
     for (let [a, z] = [start, 0]; z < nframes; [a, z] = [a + d, z + 1]) {
@@ -70,8 +66,26 @@ run = async () => {
 
     button_rpos.disabled = false
     button_rneg.disabled = false
+    lastRotation = Date.now()
   }
-  button_rneg.addEventListener('click', rotateNeg)
+
+  $('#button_rpos').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendRequest('Science', 'tccwstep', function (msgs) {
+      console.log('msgs', msgs)
+    })
+  })
+
+  $('#button_rneg').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendRequest('Science', 'tcwstep', function (msgs) {
+      console.log('msgs', msgs)
+    })
+  })
 }
 
 /**
@@ -143,11 +157,13 @@ const drawWheel = (ctx, w, h, r, n, a) => {
   ctx.font = '18px serif'
   ctx.fillStyle = 'black'
   ctx.textAlign = 'center'
+  let indices = [0, 3, 2, 1]
   for (let z = 0; z < n; z++) {
+    let number = indices[z]
     let a_ = a - z * (twopi / n)
     let x = Math.cos(a_) * r * 0.8
     let y = Math.sin(a_) * r * 0.8
-    ctx.fillText(`${z}`, mx + x, my + y)
+    ctx.fillText(`${number}`, mx + x, my + y)
   }
   a = oldA
 
@@ -197,7 +213,34 @@ const timer = delay => {
   })
 }
 
+function isScienceActivated () {
+  if (!$('#science-listener-btn').is(':checked')) {
+    appendToConsole('Science listener not yet activated!')
+    return false
+  } else if (!$('#activate-science-btn').is(':checked')) {
+    appendToConsole('Science MCU is not yet activated!')
+    return false
+  }
+  return true
+}
+
+// convenience UI functions
+function toggleOffAllPumps () {
+  for (let i = 0; i < 5; i++) {
+    $('#pump' + (i + 1) + '-drive-toggle')[0].checked = false
+  }
+}
+
+function toggleOffAllVibrators () {
+  for (let i = 0; i < 6; i++) {
+    $('#vibrator' + (i + 1) + '-toggle')[0].checked = false
+  }
+}
+
 $(document).ready(function () {
+  // turntable graphics
+  run()
+
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
@@ -325,11 +368,40 @@ $(document).ready(function () {
     })
   })
 
+  $('#tcw-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendRequest('Science', 'tcw', function (msgs) {
+      console.log('msgs', msgs)
+    })
+  })
+
+  $('#tccw-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendRequest('Science', 'tccw', function (msgs) {
+      console.log('msgs', msgs)
+    })
+  })
+
+  $('#ts-btn').on('click', function (event) {
+    if (!isScienceActivated()) {
+      return
+    }
+    sendRequest('Science', 'ts', function (msgs) {
+      console.log('msgs', msgs)
+    })
+  })
+
+  // @TODO: these buttons are flipped because of wiring issues
+  // fix the wiring, change back the correct values
   $('#elevator-up-btn').on('click', function (event) {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest('Science', 'eup', function (msgs) {
+    sendRequest('Science', 'edown', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -338,7 +410,7 @@ $(document).ready(function () {
     if (!isScienceActivated()) {
       return
     }
-    sendRequest('Science', 'edown', function (msgs) {
+    sendRequest('Science', 'eup', function (msgs) {
       console.log('msgs', msgs)
     })
   })
@@ -497,6 +569,76 @@ $(document).ready(function () {
     })
   })
 
+  $('#set-speed-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let drillSpeed = $('#drill-speed').val()
+    let cmd = 'drillspeed ' + drillSpeed
+    let requestedSpeed = Number(drillSpeed)
+
+    // invalid range check
+    // values under 6% don't actually rotate the drill
+    if (requestedSpeed < 6 || requestedSpeed > 100) {
+      color('#drill-speed', 'orange')
+      appendToConsole('Valid ranges for drill speed: [7, 100]')
+      return
+    }
+
+    color('#drill-speed', 'white')
+
+    sendRequest('Science', cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('drillspeed done')) {
+        appendToConsole('Success')
+        lightUp('#set-speed-go-btn')
+        greyOut('#drill-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
+  $('#set-time-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let drillTime = $('#drill-time').val()
+    let cmd = 'drilltime ' + drillTime
+    let requestedTime = Number(drillTime)
+
+    // ensure time at least one second
+    if (requestedTime < 1) {
+      color('#drill-time', 'orange')
+      appendToConsole('Valid ranges for drill speed: [1, ∞)')
+      return
+    }
+
+    color('#drill-time', 'white')
+
+    // check if drillspeed set
+    let drillSpeed = $('#drill-speed').val()
+
+    if (isNumeric(drillSpeed)) {
+      cmd += ' ' + drillSpeed
+    }
+
+    sendRequest('Science', cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('drilltime done')) {
+        appendToConsole('Success')
+        lightUp('#set-time-go-btn')
+        greyOut('#drill-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
   $('#drill-stop-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return
@@ -510,65 +652,134 @@ $(document).ready(function () {
         appendToConsole('Success')
         lightUp('#drill-stop-btn')
         greyOut('#drill-max-speed-go-btn')
+        greyOut('#set-speed-go-btn')
+        greyOut('#set-time-go-btn')
       } else {
         appendToConsole('Something went wrong')
       }
     })
   })
 
-  $('#set-speed-go-btn').click(function (msgs) {
+  $('#elevator-max-speed-go-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return
     }
 
-    console.log('msgs', msgs)
+    sendRequest('Science', 'ego', function (msgs) {
+      console.log('msgs', msgs)
 
-    if (msgs[1].includes('drillspeed done')) {
-      appendToConsole('Success')
-      lightUp('#set-speed-go-btn')
-      greyOut('#drill-max-speed-go-btn')
-    } else {
-      appendToConsole('Something went wrong')
-    }
+      if (msgs[1].includes('ego done')) {
+        appendToConsole('Success')
+        lightUp('#elevator-max-speed-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
   })
 
-  $('#set-time-go-btn').click(function (msgs) {
+  $('#set-feed-go-btn').click(function (msgs) {
     if (!isScienceActivated()) {
       return
     }
 
-    console.log('msgs', msgs)
+    let elevatorFeed = $('#elevator-feed').val()
+    let cmd = 'ef ' + elevatorFeed
+    let requestedFeed = Number(elevatorFeed)
 
-    if (msgs[1].includes('drillspeed done')) {
-      appendToConsole('Success')
-      lightUp('#set-time-go-btn')
-      greyOut('#drill-max-speed-go-btn')
-    } else {
-      appendToConsole('Something went wrong')
+    // invalid range check
+    // values under 10% don't actually move the elevator
+    if (requestedFeed < 10 || requestedFeed > 100) {
+      color('#elevator-feed', 'orange')
+      appendToConsole('Valid ranges for elevator feed: [10, 100]')
+      return
     }
+
+    color('#elevator-feed', 'white')
+
+    sendRequest('Science', cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('elevatorfeed done')) {
+        appendToConsole('Success')
+        lightUp('#set-feed-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
+  // elevator - set distance command
+  $('#set-distance-go-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    let elevatorDistance = $('#elevator-distance').val()
+    let cmd = 'elevatordistance ' + elevatorDistance
+    let requestedDistance = Number(elevatorDistance)
+
+    // invalid range check
+    // if the system on the MCU were closed loop we would do it based off current position
+    // otherwise we assume there will be limit switches for protection
+    if (requestedDistance <= 0 || requestedDistance > 15) {
+      color('#elevator-distance', 'orange')
+      appendToConsole('Valid ranges for elevator feed: (0, 15]')
+      return
+    }
+
+    color('#elevator-distance', 'white')
+
+    // check if feed set
+    let feed = $('#elevator-feed').val()
+
+    if (feed != '') {
+      feed = Number(feed)
+      // anything under 20% is too slow and takes _very_ long time to reach 1 inch distance
+      if (isNumeric(feed) && (feed >= 20 && feed <= 100)) {
+        cmd += ' ' + feed
+      } else {
+        color('#elevator-feed', 'orange')
+        appendToConsole('Illegal parameter set for feed')
+        appendToConsole('Legal range of integers: [10, 100]')
+        return
+      }
+    }
+
+    // if we made it this far then reset the input field to normal background
+    color('#elevator-feed', 'white')
+
+    sendRequest('Science', cmd, function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('elevatordistance done')) {
+        appendToConsole('Success')
+        lightUp('#set-distance-go-btn')
+        greyOut('#elevator-stop-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
+  })
+
+  $('#elevator-stop-btn').click(function (msgs) {
+    if (!isScienceActivated()) {
+      return
+    }
+
+    sendRequest('Science', 'es', function (msgs) {
+      console.log('msgs', msgs)
+
+      if (msgs[1].includes('es done')) {
+        appendToConsole('Success')
+        lightUp('#elevator-stop-btn')
+        greyOut('#elevator-max-speed-go-btn')
+        greyOut('#set-feed-go-btn')
+        greyOut('#set-distance-go-btn')
+      } else {
+        appendToConsole('Something went wrong')
+      }
+    })
   })
 })
-
-function isScienceActivated () {
-  if (!$('#science-listener-btn').is(':checked')) {
-    appendToConsole('Science listener not yet activated!')
-    return false
-  } else if (!$('#activate-science-btn').is(':checked')) {
-    appendToConsole('Science MCU is not yet activated!')
-    return false
-  }
-  return true
-}
-
-// convenience UI functions
-function toggleOffAllPumps () {
-  for (let i = 0; i < 5; i++) {
-    $('#pump' + (i + 1) + '-drive-toggle')[0].checked = false
-  }
-}
-
-function toggleOffAllVibrators () {
-  for (let i = 0; i < 6; i++) {
-    $('#vibrator' + (i + 1) + '-toggle')[0].checked = false
-  }
-}

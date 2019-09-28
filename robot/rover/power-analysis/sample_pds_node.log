@@ -1,0 +1,1589 @@
+[rospy.client][INFO] 2019-09-13 22:02:03,430: init_node, name[/pds_node], pid[4918]
+[xmlrpc][INFO] 2019-09-13 22:02:03,431: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-13 22:02:03,431: Started XML-RPC server [http://odroid:37213/]
+[rospy.init][INFO] 2019-09-13 22:02:03,432: ROS Slave URI: [http://odroid:37213/]
+[rospy.impl.masterslave][INFO] 2019-09-13 22:02:03,432: _ready: http://odroid:37213/
+[rospy.registration][INFO] 2019-09-13 22:02:03,434: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-13 22:02:03,435: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-13 22:02:03,533: registered with master
+[rospy.rosout][INFO] 2019-09-13 22:02:03,533: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-13 22:02:03,544: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-13 22:02:03,548: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-13 22:02:03,556: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-13 22:02:03,557: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-13 22:02:03,562: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-13 22:02:03,566: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-13 22:02:03,570: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-13 22:02:03,574: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-13 22:02:03,582: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-13 22:02:03,591: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-13 22:02:03,612: Waiting for "/pds_request" service request from client
+[rospy.internal][INFO] 2019-09-13 22:02:03,627: topic[/battery_voltage] adding connection to [/rostopic_2120_1568422921303], count 0
+[rosout][INFO] 2019-09-13 22:02:03,628: Using 9600 baud by default
+[rosout][INFO] 2019-09-13 22:02:03,631: Using UART by default
+[rosout][INFO] 2019-09-13 22:02:03,733: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-13 22:02:03,735: clearing buffer...
+[rosout][INFO] 2019-09-13 22:02:03,736: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-13 22:02:03,736: attempt #1...
+[rospy.internal][INFO] 2019-09-13 22:02:03,798: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-13 22:02:03,909: PDS MCU identified!
+[rosout][INFO] 2019-09-13 22:02:03,910: timeout: 173.032999 ms
+[rosout][INFO] 2019-09-13 22:02:03,911: took 177.616835 ms to find the PDS MCU
+[rosout][INFO] 2019-09-13 22:02:04,799: voltage=15.40
+[rosout][INFO] 2019-09-13 22:02:04,802: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:04,804: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:04,807: temps=999.90,999.90,999.90
+[rosout][WARNING] 2019-09-13 22:02:04,809: trouble parsing PDS sensor data
+[rospy.core][INFO] 2019-09-13 22:02:06,788: signal_shutdown [signal-2]
+[rospy.internal][INFO] 2019-09-13 22:02:06,838: topic[/rosout] removing connection to /rosout
+[rospy.internal][INFO] 2019-09-13 22:02:06,839: topic[/battery_voltage] removing connection to /rostopic_2120_1568422921303
+[rospy.impl.masterslave][INFO] 2019-09-13 22:02:06,841: signal-2
+[rospy.core][WARNING] 2019-09-13 22:02:07,393: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-13 22:02:07,394: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-13 22:02:08,417: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-13 22:02:46,345: init_node, name[/pds_node], pid[4943]
+[xmlrpc][INFO] 2019-09-13 22:02:46,346: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-13 22:02:46,347: Started XML-RPC server [http://odroid:36247/]
+[rospy.init][INFO] 2019-09-13 22:02:46,348: ROS Slave URI: [http://odroid:36247/]
+[rospy.impl.masterslave][INFO] 2019-09-13 22:02:46,348: _ready: http://odroid:36247/
+[rospy.registration][INFO] 2019-09-13 22:02:46,350: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-13 22:02:46,350: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-13 22:02:46,448: registered with master
+[rospy.rosout][INFO] 2019-09-13 22:02:46,449: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-13 22:02:46,460: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-13 22:02:46,463: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-13 22:02:46,472: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-13 22:02:46,473: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-13 22:02:46,484: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-13 22:02:46,494: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-13 22:02:46,517: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-13 22:02:46,529: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-13 22:02:46,540: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-13 22:02:46,550: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-13 22:02:46,569: Waiting for "/pds_request" service request from client
+[rospy.internal][INFO] 2019-09-13 22:02:46,583: topic[/battery_voltage] adding connection to [/rostopic_2120_1568422921303], count 0
+[rosout][INFO] 2019-09-13 22:02:46,585: Using 9600 baud by default
+[rosout][INFO] 2019-09-13 22:02:46,588: Using UART by default
+[rospy.internal][INFO] 2019-09-13 22:02:46,611: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-13 22:02:46,669: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-13 22:02:46,672: clearing buffer...
+[rosout][INFO] 2019-09-13 22:02:46,673: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-13 22:02:46,673: attempt #1...
+[rosout][INFO] 2019-09-13 22:02:46,747: PDS MCU identified!
+[rosout][INFO] 2019-09-13 22:02:46,748: timeout: 74.093819 ms
+[rosout][INFO] 2019-09-13 22:02:46,750: took 80.603123 ms to find the PDS MCU
+[rosout][INFO] 2019-09-13 22:02:48,663: voltage=15.42
+[rosout][INFO] 2019-09-13 22:02:48,665: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:48,667: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:48,669: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:48,671: currents=0.02,0.08,0.0,0.03,0.15,0.18
+[rosout][INFO] 2019-09-13 22:02:50,754: voltage=15.42
+[rosout][INFO] 2019-09-13 22:02:50,756: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:50,759: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:50,761: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:02:50,763: currents=0.02,0.05,0.61,0.0,0.16,0.13
+[rospy.core][INFO] 2019-09-13 22:02:51,329: signal_shutdown [signal-2]
+[rospy.internal][INFO] 2019-09-13 22:02:51,371: topic[/rosout] removing connection to /rosout
+[rospy.internal][INFO] 2019-09-13 22:02:51,372: topic[/battery_voltage] removing connection to /rostopic_2120_1568422921303
+[rospy.impl.masterslave][INFO] 2019-09-13 22:02:51,374: signal-2
+[rospy.core][WARNING] 2019-09-13 22:02:51,935: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-13 22:02:51,937: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-13 22:02:52,968: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-13 22:05:01,992: init_node, name[/pds_node], pid[4969]
+[xmlrpc][INFO] 2019-09-13 22:05:01,993: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-13 22:05:01,994: Started XML-RPC server [http://odroid:44539/]
+[rospy.init][INFO] 2019-09-13 22:05:01,994: ROS Slave URI: [http://odroid:44539/]
+[rospy.impl.masterslave][INFO] 2019-09-13 22:05:01,995: _ready: http://odroid:44539/
+[rospy.registration][INFO] 2019-09-13 22:05:01,997: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-13 22:05:01,997: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-13 22:05:02,095: registered with master
+[rospy.rosout][INFO] 2019-09-13 22:05:02,095: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-13 22:05:02,107: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-13 22:05:02,114: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-13 22:05:02,138: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-13 22:05:02,140: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-13 22:05:02,151: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-13 22:05:02,162: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-13 22:05:02,172: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-13 22:05:02,183: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-13 22:05:02,193: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-13 22:05:02,203: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-13 22:05:02,221: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-13 22:05:02,237: Using 9600 baud by default
+[rosout][INFO] 2019-09-13 22:05:02,240: Using UART by default
+[rospy.internal][INFO] 2019-09-13 22:05:02,280: topic[/battery_voltage] adding connection to [/rostopic_2120_1568422921303], count 0
+[rosout][INFO] 2019-09-13 22:05:02,311: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-13 22:05:02,313: clearing buffer...
+[rosout][INFO] 2019-09-13 22:05:02,313: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-13 22:05:02,314: attempt #1...
+[rospy.internal][INFO] 2019-09-13 22:05:02,341: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-13 22:05:02,502: PDS MCU identified!
+[rosout][INFO] 2019-09-13 22:05:02,503: timeout: 188.686371 ms
+[rosout][INFO] 2019-09-13 22:05:02,505: took 193.749905 ms to find the PDS MCU
+[rosout][INFO] 2019-09-13 22:05:04,427: voltage=15.40
+[rosout][INFO] 2019-09-13 22:05:04,429: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:04,432: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:04,434: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:04,436: currents=0.02,0.03,0.0,0.06,0.15,0.19
+[rosout][INFO] 2019-09-13 22:05:06,520: voltage=15.34
+[rosout][INFO] 2019-09-13 22:05:06,522: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:06,524: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:06,527: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:06,529: currents=0.1,0.08,0.03,0.03,0.13,0.18
+[rospy.core][INFO] 2019-09-13 22:05:07,897: signal_shutdown [signal-2]
+[rospy.internal][INFO] 2019-09-13 22:05:07,938: topic[/rosout] removing connection to /rosout
+[rospy.internal][INFO] 2019-09-13 22:05:07,940: topic[/battery_voltage] removing connection to /rostopic_2120_1568422921303
+[rospy.impl.masterslave][INFO] 2019-09-13 22:05:07,941: signal-2
+[rospy.core][WARNING] 2019-09-13 22:05:08,509: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-13 22:05:08,510: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-13 22:05:09,556: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-13 22:05:55,155: init_node, name[/pds_node], pid[4999]
+[xmlrpc][INFO] 2019-09-13 22:05:55,156: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-13 22:05:55,157: Started XML-RPC server [http://odroid:45167/]
+[rospy.init][INFO] 2019-09-13 22:05:55,158: ROS Slave URI: [http://odroid:45167/]
+[rospy.impl.masterslave][INFO] 2019-09-13 22:05:55,158: _ready: http://odroid:45167/
+[rospy.registration][INFO] 2019-09-13 22:05:55,160: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-13 22:05:55,160: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-13 22:05:55,258: registered with master
+[rospy.rosout][INFO] 2019-09-13 22:05:55,258: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-13 22:05:55,270: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-13 22:05:55,274: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-13 22:05:55,286: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-13 22:05:55,288: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-13 22:05:55,297: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-13 22:05:55,307: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-13 22:05:55,317: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-13 22:05:55,326: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-13 22:05:55,335: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-13 22:05:55,349: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-13 22:05:55,368: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-13 22:05:55,378: Using 9600 baud by default
+[rosout][INFO] 2019-09-13 22:05:55,381: Using UART by default
+[rospy.internal][INFO] 2019-09-13 22:05:55,401: topic[/battery_voltage] adding connection to [/rostopic_2120_1568422921303], count 0
+[rosout][INFO] 2019-09-13 22:05:55,465: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-13 22:05:55,467: clearing buffer...
+[rosout][INFO] 2019-09-13 22:05:55,468: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-13 22:05:55,468: attempt #1...
+[rospy.internal][INFO] 2019-09-13 22:05:55,549: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][WARNING] 2019-09-13 22:05:55,572: trouble reading from serial port
+[rosout][INFO] 2019-09-13 22:05:55,573: got raw message: 
+[rosout][INFO] 2019-09-13 22:05:55,576: PDS MCU identified!
+[rosout][INFO] 2019-09-13 22:05:55,576: timeout: 107.550859 ms
+[rosout][INFO] 2019-09-13 22:05:55,578: took 112.470388 ms to find the PDS MCU
+[rosout][INFO] 2019-09-13 22:05:56,669: voltage=15.38
+[rosout][INFO] 2019-09-13 22:05:56,672: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,674: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,676: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,679: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,681: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,683: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,685: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,687: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,689: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,692: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,693: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,695: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:56,696: currents=0.0,0.03,0.18,0.03,0.15,0.18
+[rosout][INFO] 2019-09-13 22:05:58,760: voltage=15.38
+[rosout][INFO] 2019-09-13 22:05:58,762: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,765: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,767: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,769: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,771: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,773: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,775: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,778: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,780: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,782: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,784: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,786: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:05:58,788: currents=0.0,0.05,0.02,0.03,0.16,0.18
+[rospy.core][INFO] 2019-09-13 22:05:59,589: signal_shutdown [signal-2]
+[rospy.internal][INFO] 2019-09-13 22:05:59,624: topic[/rosout] removing connection to /rosout
+[rospy.internal][INFO] 2019-09-13 22:05:59,625: topic[/battery_voltage] removing connection to /rostopic_2120_1568422921303
+[rospy.impl.masterslave][INFO] 2019-09-13 22:05:59,626: signal-2
+[rospy.core][WARNING] 2019-09-13 22:06:00,194: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-13 22:06:00,195: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-13 22:06:01,246: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-13 22:06:38,489: init_node, name[/pds_node], pid[5024]
+[xmlrpc][INFO] 2019-09-13 22:06:38,490: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-13 22:06:38,491: Started XML-RPC server [http://odroid:33941/]
+[rospy.init][INFO] 2019-09-13 22:06:38,492: ROS Slave URI: [http://odroid:33941/]
+[rospy.impl.masterslave][INFO] 2019-09-13 22:06:38,492: _ready: http://odroid:33941/
+[rospy.registration][INFO] 2019-09-13 22:06:38,494: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-13 22:06:38,495: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-13 22:06:38,592: registered with master
+[rospy.rosout][INFO] 2019-09-13 22:06:38,593: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-13 22:06:38,606: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-13 22:06:38,610: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-13 22:06:38,620: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-13 22:06:38,621: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-13 22:06:38,626: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-13 22:06:38,631: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-13 22:06:38,636: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-13 22:06:38,641: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-13 22:06:38,648: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-13 22:06:38,654: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-13 22:06:38,662: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-13 22:06:38,668: Using 9600 baud by default
+[rosout][INFO] 2019-09-13 22:06:38,669: Using UART by default
+[rospy.internal][INFO] 2019-09-13 22:06:38,713: topic[/battery_voltage] adding connection to [/rostopic_2120_1568422921303], count 0
+[rosout][INFO] 2019-09-13 22:06:38,748: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-13 22:06:38,751: clearing buffer...
+[rosout][INFO] 2019-09-13 22:06:38,752: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-13 22:06:38,753: attempt #1...
+[rospy.internal][INFO] 2019-09-13 22:06:38,875: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-13 22:06:38,995: PDS MCU identified!
+[rosout][INFO] 2019-09-13 22:06:38,996: timeout: 242.304325 ms
+[rosout][INFO] 2019-09-13 22:06:38,997: took 249.134779 ms to find the PDS MCU
+[rosout][INFO] 2019-09-13 22:06:40,494: voltage=15.38
+[rosout][INFO] 2019-09-13 22:06:40,496: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:40,498: currents=0.5,0.08,0.03,0.0,0.18,0.13
+[rosout][INFO] 2019-09-13 22:06:42,575: voltage=15.38
+[rosout][INFO] 2019-09-13 22:06:42,577: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:42,579: currents=0.15,0.06,0.02,0.11,0.1,0.15
+[rosout][INFO] 2019-09-13 22:06:44,658: voltage=15.40
+[rosout][INFO] 2019-09-13 22:06:44,660: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:44,663: currents=0.0,0.0,0.02,0.06,0.16,0.19
+[rosout][INFO] 2019-09-13 22:06:46,737: voltage=15.40
+[rosout][INFO] 2019-09-13 22:06:46,740: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:46,742: currents=1.02,0.08,0.11,0.0,0.06,0.19
+[rosout][INFO] 2019-09-13 22:06:48,818: voltage=15.36
+[rosout][INFO] 2019-09-13 22:06:48,820: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:48,823: currents=0.0,0.06,0.05,0.06,0.13,0.37
+[rosout][INFO] 2019-09-13 22:06:50,902: voltage=15.36
+[rosout][INFO] 2019-09-13 22:06:50,904: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-13 22:06:51,527: currents=0.18,0.0,0.0,0.15,0.15,0.15
+[rospy.core][WARNING] 2019-09-13 22:06:51,539: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-13 22:06:51,542: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-13 22:06:52,589: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-14 00:22:24,987: init_node, name[/pds_node], pid[2664]
+[xmlrpc][INFO] 2019-09-14 00:22:24,989: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:22:24,990: Started XML-RPC server [http://odroid:39391/]
+[rospy.init][INFO] 2019-09-14 00:22:24,990: ROS Slave URI: [http://odroid:39391/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:22:24,991: _ready: http://odroid:39391/
+[rospy.registration][INFO] 2019-09-14 00:22:24,993: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:22:24,993: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:22:25,091: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:22:25,091: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:22:25,103: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:22:25,107: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:22:25,116: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:22:25,117: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:22:25,121: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:22:25,125: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:22:25,129: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:22:25,133: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:22:25,138: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:22:25,142: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:22:25,149: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:22:25,157: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:22:25,159: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:22:25,199: topic[/battery_voltage] adding connection to [/rosbridge_websocket], count 0
+[rosout][INFO] 2019-09-14 00:22:25,288: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:22:25,290: clearing buffer...
+[rosout][INFO] 2019-09-14 00:22:25,292: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:22:25,293: attempt #1...
+[rosout][INFO] 2019-09-14 00:22:25,356: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:22:25,356: timeout: 62.291384 ms
+[rosout][INFO] 2019-09-14 00:22:25,357: took 69.074631 ms to find the PDS MCU
+[rospy.internal][INFO] 2019-09-14 00:22:25,367: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:22:26,032: voltage=16.64
+[rosout][WARNING] 2019-09-14 00:22:26,035: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:22:30,218: got raw data:  66,00,01,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rospy.internal][INFO] 2019-09-14 00:22:31,449: topic[/battery_temps] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:22:31,459: topic[/wheel_motor_currents] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:22:31,498: topic[/pds_flags] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:22:31,544: topic[/fan_speeds] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:22:31,587: topic[/pds_feedback] adding connection to [/rosbridge_websocket], count 0
+[rosout][INFO] 2019-09-14 00:22:34,405: voltage=16.68
+[rosout][WARNING] 2019-09-14 00:22:34,407: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:22:36,495: got raw data: 00,01,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:22:46,952: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:22:46,955: got raw data: 
+[rosout][WARNING] 2019-09-14 00:22:49,050: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:22:49,052: got raw data: 
+[rosout][INFO] 2019-09-14 00:22:51,138: got raw data: 166,00,00,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:22:55,321: got raw data: 3 .6 01,01,999.0 9.0 9.0 ,0 ,0 PDS 16.66, 0.03, 0.05, 0.02, 0.03, 0.15, 0.16, 999.90, 999.90, 999.90, 0, 0, 1,0 
+
+[rosout][INFO] 2019-09-14 00:22:57,414: voltage=16.64
+[rosout][INFO] 2019-09-14 00:22:57,417: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:22:57,420: currents=0.0,0.11,0.02,0.37,0.0,0.19
+[rosout][INFO] 2019-09-14 00:22:59,506: got raw data:  .5,00,00,00,01,02,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:23:01,598: got raw data: ,0,0  ,0
+
+[rosout][WARNING] 2019-09-14 00:23:05,789: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:23:05,792: got raw data: 
+[rosout][INFO] 2019-09-14 00:23:07,877: got raw data: 5 .1 99,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:23:09,972: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:23:12,058: got raw data: S.4 .6 .,00,00,01,01,999,999 999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:23:14,142: got raw data: 0 .0 ,0 1 ,0
+
+[rosout][INFO] 2019-09-14 00:23:16,236: got raw data: 2,00,06,00,00,02,09 9.0 9.,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:23:18,321: got raw data: 0 999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:23:20,409: got raw data: .3,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:23:22,496: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:23:22,499: got raw data: 
+[rosout][INFO] 2019-09-14 00:23:26,679: got raw data: PDS 16.66, 0.03, 1.29, 0.00, 0.35, 0.15, 0.18, 999.90, 999.90, 999.90, 0, 0 1,0 PDS 16.66, 0.55, 0.10, 0.00, 0.44, 0.06, 0.19, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:23:28,770: voltage=16.64
+[rosout][INFO] 2019-09-14 00:23:28,773: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:23:28,775: currents=0.06,0.0,0.0,0.05,0.19,0.21
+[rosout][WARNING] 2019-09-14 00:23:28,778: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:23:35,041: got raw data: ,PDS 16.66, 0.00, 0.11, 0.48, .9,00, .3 9.0 9.0 9., ,0 ,0 PDS 16.66, 0.00, 0.06, 0.02, 0.10, 0.13, 0.21, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:23:37,132: voltage=16.64
+[rosout][WARNING] 2019-09-14 00:23:37,135: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:23:39,219: got raw data: 05 .3 999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:23:41,310: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:23:45,490: got raw data: . .9 9.0 9.0 9.0 ,0 ,0 PDS 16.62, 0.05, 0.00, 0.02, 0.21, 0.13, 0.27, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][WARNING] 2019-09-14 00:23:49,665: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:23:49,668: got raw data: 
+[rosout][INFO] 2019-09-14 00:23:51,758: voltage=16.66
+[rosout][WARNING] 2019-09-14 00:23:51,760: trouble parsing PDS sensor data
+[rosout][WARNING] 2019-09-14 00:23:53,847: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:23:53,850: got raw data: 
+[rosout][INFO] 2019-09-14 00:23:58,024: got raw data: .5 .1,01,999,999,999,,0 ,0 PDS 16.66, 0.02, 0.06, 0.00, 0.03, 0.15, 0.16, 999.90, 999.90, 999.90, 0,0 ,0 
+
+[rosout][WARNING] 2019-09-14 00:24:04,281: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:04,284: got raw data: 
+[rosout][WARNING] 2019-09-14 00:24:08,460: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:08,463: got raw data: 
+[rosout][INFO] 2019-09-14 00:24:10,548: got raw data: 1,99.0 9.0 9.0 ,0 ,00
+
+[rosout][WARNING] 2019-09-14 00:24:12,635: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:12,638: got raw data: 
+[rosout][INFO] 2019-09-14 00:24:14,728: voltage=16.66
+[rosout][INFO] 2019-09-14 00:24:14,730: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:24:14,732: currents=0.06,0.05,0.03,0.0,0.15,0.18
+[rosout][INFO] 2019-09-14 00:24:16,819: got raw data:   ,0
+
+[rosout][INFO] 2019-09-14 00:24:18,905: got raw data:  .1,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:24:25,171: got raw data:  00,01,00,01,01,999,999,9990 ,0 ,0 PDS 16.64, 0.2,00,00,01,01,01 9.0 9.0 9.0 ,0 ,0 PDS 16.58, 0.02, 0.15, 0.00, 0.10, 0.02, 0.16, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][WARNING] 2019-09-14 00:24:27,256: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:27,258: got raw data: 
+[rosout][INFO] 2019-09-14 00:24:29,349: got raw data: . .0 .2 .0 .3 .8999, 9.0 9.0 ,0 ,,0
+
+[rosout][WARNING] 2019-09-14 00:24:31,428: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:31,431: got raw data: 
+[rosout][INFO] 2019-09-14 00:24:33,520: voltage=16.66
+[rosout][WARNING] 2019-09-14 00:24:33,522: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:24:35,609: got raw data: .0 .6 .2 .8 .0 .9 9.0 9.0 9.00 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:24:39,780: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:39,784: got raw data: 
+[rosout][WARNING] 2019-09-14 00:24:41,869: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:41,871: got raw data: 
+[rosout][INFO] 2019-09-14 00:24:43,956: voltage=16.58
+[rosout][WARNING] 2019-09-14 00:24:43,959: trouble parsing PDS sensor data
+[rosout][WARNING] 2019-09-14 00:24:48,134: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:48,137: got raw data: 
+[rosout][WARNING] 2019-09-14 00:24:50,220: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:50,223: got raw data: 
+[rosout][WARNING] 2019-09-14 00:24:56,484: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:24:56,487: got raw data: 
+[rospy.client][INFO] 2019-09-14 00:24:59,848: init_node, name[/pds_node], pid[2795]
+[xmlrpc][INFO] 2019-09-14 00:24:59,849: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:24:59,850: Started XML-RPC server [http://odroid:35175/]
+[rospy.init][INFO] 2019-09-14 00:24:59,850: ROS Slave URI: [http://odroid:35175/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:24:59,850: _ready: http://odroid:35175/
+[rospy.registration][INFO] 2019-09-14 00:24:59,853: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:24:59,853: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:24:59,951: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:24:59,951: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:24:59,962: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:24:59,966: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:24:59,975: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:24:59,976: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:24:59,980: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:24:59,984: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:24:59,988: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:24:59,993: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:25:00,015: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:25:00,031: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:25:00,061: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:25:00,089: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:25:00,093: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:25:00,095: topic[/battery_temps] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:25:00,123: topic[/wheel_motor_currents] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:25:00,128: topic[/battery_voltage] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:25:00,132: topic[/fan_speeds] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:25:00,135: topic[/pds_flags] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:25:00,139: topic[/pds_feedback] adding connection to [/rosbridge_websocket], count 0
+[rosout][INFO] 2019-09-14 00:25:00,201: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:25:00,202: clearing buffer...
+[rosout][INFO] 2019-09-14 00:25:00,203: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:25:00,204: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:25:00,243: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:25:00,398: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:25:00,399: timeout: 194.793701 ms
+[rosout][INFO] 2019-09-14 00:25:00,400: took 198.943853 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:25:00,669: got raw data: PDS1.4 .5 .11 .6 .3 .3 .9 9.0 9.0 9.0 0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:25:04,837: got raw data: 0 .0 .6 .8 9.0 9.0 9.0 ,0 ,0 PDS 16.64, 0.02, 0.03, 0.06, 0.00, 0.11, 0.16, 999.90, 999.90, 999.90, 0, 0, 1, 0,0
+
+[rosout][INFO] 2019-09-14 00:25:09,010: got raw data: 9990 9.0 ,0 ,0 PDS 16.62, 0.02, 0.05, 0.02, 0.00, 0.1,01,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:25:13,185: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:25:17,363: got raw data:  0,00,01,00,01,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:25:21,543: got raw data: D1.2 .3 .1 .0 .5 .1 .9 9.0 9.0 9.9,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:25:25,722: voltage=16.58
+[rosout][WARNING] 2019-09-14 00:25:25,725: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:25:27,817: got raw data: 99, ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:25:29,905: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:25:29,908: got raw data: 
+[rosout][WARNING] 2019-09-14 00:25:31,984: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:25:31,987: got raw data: 
+[rosout][INFO] 2019-09-14 00:25:34,065: voltage=16.62
+[rosout][INFO] 2019-09-14 00:25:34,068: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:25:34,070: currents=0.02,0.0,0.02,0.05,0.16,0.03
+[rosout][INFO] 2019-09-14 00:25:36,146: got raw data: 200,03,00,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:25:38,231: got raw data: 9,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:25:40,310: voltage=66
+[rosout][WARNING] 2019-09-14 00:25:40,313: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:25:46,553: got raw data: .2 .0,00,00,01 .6 9.0,999,999,0 ,1 ,0PDS 16.64, 0.08, 0.00, 0.03, 0.05, 0.32, 0.08, 999.90, 999.90, 999.90, 0, 0, 1, , PDS 66,.2 .7 .2 .0 .5 .8 9.0 99,9990 ,01 ,0
+
+[rosout][INFO] 2019-09-14 00:25:48,638: got raw data: ,0 , ,0
+
+[rosout][WARNING] 2019-09-14 00:25:50,716: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:25:50,719: got raw data: 
+[rospy.client][INFO] 2019-09-14 00:27:06,823: init_node, name[/pds_node], pid[3333]
+[xmlrpc][INFO] 2019-09-14 00:27:06,824: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:27:06,825: Started XML-RPC server [http://odroid:37647/]
+[rospy.init][INFO] 2019-09-14 00:27:06,825: ROS Slave URI: [http://odroid:37647/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:27:06,825: _ready: http://odroid:37647/
+[rospy.registration][INFO] 2019-09-14 00:27:06,828: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:27:06,828: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:27:06,926: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:27:06,926: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:27:06,943: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:27:06,948: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:27:06,960: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:27:06,962: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:27:06,968: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:27:06,974: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:27:06,980: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:27:06,986: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:27:06,992: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:27:07,000: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:27:07,013: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:27:07,019: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:27:07,021: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:27:07,070: topic[/pds_flags] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:27:07,076: topic[/pds_feedback] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:27:07,081: topic[/fan_speeds] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:27:07,083: topic[/battery_temps] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:27:07,085: topic[/wheel_motor_currents] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:27:07,088: topic[/battery_voltage] adding connection to [/rosbridge_websocket], count 0
+[rosout][INFO] 2019-09-14 00:27:07,124: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:27:07,126: clearing buffer...
+[rosout][INFO] 2019-09-14 00:27:07,127: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:27:07,128: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:27:07,207: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:27:07,312: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:27:07,313: timeout: 183.829784 ms
+[rosout][INFO] 2019-09-14 00:27:07,314: took 189.568520 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:27:07,790: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:07,793: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:07,795: currents=0.05,0.37,0.0,0.05,0.16,0.39
+[rosout][INFO] 2019-09-14 00:27:09,874: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:09,877: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:09,879: currents=0.02,0.0,0.0,0.0,0.15,1.39
+[rosout][INFO] 2019-09-14 00:27:11,968: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:11,971: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:11,974: currents=0.0,0.08,0.06,0.05,0.02,0.15
+[rosout][INFO] 2019-09-14 00:27:14,056: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:14,059: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:14,062: currents=0.05,0.1,0.03,0.03,0.13,0.52
+[rosout][INFO] 2019-09-14 00:27:16,145: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:16,148: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:16,150: currents=0.0,0.1,0.05,0.0,0.55,0.19
+[rosout][INFO] 2019-09-14 00:27:18,234: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:18,237: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:18,240: currents=0.0,0.06,0.05,0.02,0.1,0.19
+[rosout][INFO] 2019-09-14 00:27:20,325: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:20,328: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:20,331: currents=0.0,0.06,0.03,0.05,0.16,0.26
+[rosout][INFO] 2019-09-14 00:27:22,414: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:22,417: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:22,420: currents=0.03,0.1,0.0,0.02,0.16,0.15
+[rosout][INFO] 2019-09-14 00:27:24,502: voltage=16.62
+[rosout][INFO] 2019-09-14 00:27:24,505: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:24,507: currents=0.03,0.06,0.06,0.05,0.13,0.23
+[rosout][INFO] 2019-09-14 00:27:26,591: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:26,593: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:26,596: currents=1.42,0.1,0.0,0.08,0.1,0.18
+[rosout][INFO] 2019-09-14 00:27:28,689: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:28,692: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:28,695: currents=0.03,0.18,0.0,0.0,0.11,0.15
+[rosout][INFO] 2019-09-14 00:27:30,768: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:30,771: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:30,774: currents=0.0,0.0,0.03,0.05,0.16,0.16
+[rosout][INFO] 2019-09-14 00:27:32,866: voltage=16.51
+[rosout][INFO] 2019-09-14 00:27:32,869: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:32,872: currents=0.02,0.0,0.02,0.03,0.13,0.21
+[rosout][INFO] 2019-09-14 00:27:34,955: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:34,958: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:34,961: currents=0.02,0.13,0.0,0.06,0.15,0.08
+[rosout][INFO] 2019-09-14 00:27:37,046: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:37,049: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:37,051: currents=0.0,0.08,0.0,0.05,0.13,0.15
+[rosout][INFO] 2019-09-14 00:27:39,133: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:39,136: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:39,139: currents=0.03,0.82,0.02,0.08,0.16,0.16
+[rosout][INFO] 2019-09-14 00:27:41,222: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:41,224: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:41,227: currents=0.03,0.31,0.24,0.02,0.16,0.06
+[rosout][INFO] 2019-09-14 00:27:43,312: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:43,315: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:43,318: currents=0.0,0.06,0.06,0.1,0.13,0.11
+[rosout][INFO] 2019-09-14 00:27:45,403: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:45,405: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:45,408: currents=0.06,0.05,0.02,0.05,0.15,0.05
+[rosout][INFO] 2019-09-14 00:27:47,490: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:47,493: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:47,496: currents=0.08,0.21,0.18,0.08,0.18,0.19
+[rosout][INFO] 2019-09-14 00:27:49,579: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:49,582: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:49,584: currents=0.0,0.06,0.08,0.0,0.18,0.18
+[rosout][INFO] 2019-09-14 00:27:51,671: voltage=16.58
+[rosout][INFO] 2019-09-14 00:27:51,674: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:51,676: currents=0.06,0.1,0.0,0.08,0.1,0.15
+[rosout][INFO] 2019-09-14 00:27:53,758: voltage=16.54
+[rosout][INFO] 2019-09-14 00:27:53,761: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:53,763: currents=0.0,0.08,0.02,0.0,0.15,0.16
+[rosout][INFO] 2019-09-14 00:27:55,846: voltage=16.56
+[rosout][INFO] 2019-09-14 00:27:55,849: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:27:55,852: currents=0.02,0.11,0.27,0.06,0.29,0.18
+[rospy.client][INFO] 2019-09-14 00:29:41,698: init_node, name[/pds_node], pid[2686]
+[xmlrpc][INFO] 2019-09-14 00:29:41,700: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:29:41,701: Started XML-RPC server [http://odroid:37169/]
+[rospy.init][INFO] 2019-09-14 00:29:41,702: ROS Slave URI: [http://odroid:37169/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:29:41,702: _ready: http://odroid:37169/
+[rospy.registration][INFO] 2019-09-14 00:29:41,704: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:29:41,705: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:29:41,802: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:29:41,803: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:29:41,815: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:29:41,819: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:29:41,828: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:29:41,829: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:29:41,835: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:29:41,841: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:29:41,845: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:29:41,850: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:29:41,854: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:29:41,859: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:29:41,867: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:29:41,872: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:29:41,873: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:29:41,927: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:29:41,928: clearing buffer...
+[rosout][INFO] 2019-09-14 00:29:41,929: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:29:41,930: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:29:42,042: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:29:42,170: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:29:42,171: timeout: 240.672112 ms
+[rosout][INFO] 2019-09-14 00:29:42,172: took 245.192289 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:29:42,647: voltage=16.54
+[rosout][INFO] 2019-09-14 00:29:42,650: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:42,652: currents=0.11,0.08,0.02,0.0,0.13,0.18
+[rosout][INFO] 2019-09-14 00:29:44,730: voltage=16.49
+[rosout][INFO] 2019-09-14 00:29:44,733: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:44,736: currents=0.16,0.06,0.26,0.03,0.11,0.19
+[rosout][INFO] 2019-09-14 00:29:46,816: voltage=16.56
+[rosout][INFO] 2019-09-14 00:29:46,819: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:46,822: currents=0.05,0.11,0.19,0.03,1.24,0.19
+[rosout][INFO] 2019-09-14 00:29:48,906: voltage=16.52
+[rosout][INFO] 2019-09-14 00:29:48,908: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:48,911: currents=0.0,1.61,0.0,0.0,0.03,0.18
+[rosout][INFO] 2019-09-14 00:29:50,990: voltage=16.54
+[rosout][INFO] 2019-09-14 00:29:50,993: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:50,996: currents=0.0,0.03,0.0,0.08,0.16,0.18
+[rosout][INFO] 2019-09-14 00:29:53,084: voltage=16.54
+[rosout][INFO] 2019-09-14 00:29:53,087: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:53,090: currents=1.1,0.03,0.03,0.05,0.35,0.16
+[rosout][INFO] 2019-09-14 00:29:55,169: voltage=16.56
+[rosout][INFO] 2019-09-14 00:29:55,172: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:55,175: currents=0.0,0.1,0.0,0.0,0.11,0.18
+[rosout][INFO] 2019-09-14 00:29:57,256: voltage=16.52
+[rosout][INFO] 2019-09-14 00:29:57,259: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:57,262: currents=0.18,0.0,0.03,0.08,0.13,0.95
+[rosout][INFO] 2019-09-14 00:29:59,344: voltage=16.54
+[rosout][INFO] 2019-09-14 00:29:59,347: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:29:59,350: currents=0.05,0.08,0.03,0.0,0.15,0.1
+[rosout][INFO] 2019-09-14 00:30:01,429: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:01,433: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:01,435: currents=0.02,0.06,0.0,0.02,0.11,0.19
+[rospy.client][INFO] 2019-09-14 00:30:04,558: init_node, name[/pds_node], pid[2739]
+[xmlrpc][INFO] 2019-09-14 00:30:04,559: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:30:04,559: Started XML-RPC server [http://odroid:43455/]
+[rospy.init][INFO] 2019-09-14 00:30:04,560: ROS Slave URI: [http://odroid:43455/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:30:04,560: _ready: http://odroid:43455/
+[rospy.registration][INFO] 2019-09-14 00:30:04,562: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:30:04,563: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:30:04,661: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:30:04,661: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:30:04,681: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:30:04,688: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:30:04,703: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:30:04,704: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:30:04,712: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:30:04,719: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:30:04,726: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:30:04,734: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:30:04,741: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:30:04,748: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:30:04,760: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:30:04,767: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:04,769: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:04,838: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:30:04,840: clearing buffer...
+[rosout][INFO] 2019-09-14 00:30:04,841: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:30:04,841: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:30:04,912: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:30:04,917: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:30:04,918: timeout: 76.046705 ms
+[rosout][INFO] 2019-09-14 00:30:04,919: took 80.792904 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:30:05,601: voltage=16.51
+[rosout][INFO] 2019-09-14 00:30:05,604: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:05,606: currents=0.05,0.06,0.05,0.13,0.13,0.13
+[rosout][INFO] 2019-09-14 00:30:07,686: voltage=16.52
+[rosout][INFO] 2019-09-14 00:30:07,689: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:07,692: currents=0.0,0.1,0.0,0.06,0.15,0.19
+[rosout][INFO] 2019-09-14 00:30:09,774: voltage=16.49
+[rosout][INFO] 2019-09-14 00:30:09,778: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:09,780: currents=0.02,0.03,0.05,0.15,0.03,0.23
+[rosout][INFO] 2019-09-14 00:30:11,853: voltage=16.51
+[rosout][INFO] 2019-09-14 00:30:11,856: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:11,859: currents=0.03,0.1,0.02,0.05,0.16,0.27
+[rosout][INFO] 2019-09-14 00:30:13,938: voltage=16.45
+[rosout][INFO] 2019-09-14 00:30:13,942: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:13,945: currents=1.29,0.0,0.02,0.0,0.19,0.16
+[rospy.client][INFO] 2019-09-14 00:30:22,165: init_node, name[/pds_node], pid[2820]
+[xmlrpc][INFO] 2019-09-14 00:30:22,166: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:30:22,167: Started XML-RPC server [http://odroid:37187/]
+[rospy.init][INFO] 2019-09-14 00:30:22,167: ROS Slave URI: [http://odroid:37187/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:30:22,167: _ready: http://odroid:37187/
+[rospy.registration][INFO] 2019-09-14 00:30:22,170: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:30:22,170: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:30:22,268: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:30:22,268: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:30:22,279: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:30:22,283: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:30:22,291: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:30:22,292: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:30:22,297: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:30:22,301: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:30:22,304: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:30:22,312: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:30:22,321: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:30:22,330: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:30:22,350: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:30:22,360: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:22,362: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:22,464: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:30:22,466: clearing buffer...
+[rosout][INFO] 2019-09-14 00:30:22,466: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:30:22,467: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:30:22,558: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:30:22,658: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:30:22,658: timeout: 191.109180 ms
+[rosout][INFO] 2019-09-14 00:30:22,659: took 195.252657 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:30:24,375: voltage=16.41
+[rosout][INFO] 2019-09-14 00:30:24,378: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:24,381: currents=0.02,0.05,0.08,0.05,0.16,0.21
+[rosout][INFO] 2019-09-14 00:30:26,460: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:26,463: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:26,466: currents=0.03,0.0,0.0,0.02,0.15,0.27
+[rosout][INFO] 2019-09-14 00:30:28,540: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:28,543: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:28,546: currents=0.06,0.06,0.02,0.02,0.1,0.15
+[rospy.client][INFO] 2019-09-14 00:30:37,365: init_node, name[/pds_node], pid[2866]
+[xmlrpc][INFO] 2019-09-14 00:30:37,366: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:30:37,367: Started XML-RPC server [http://odroid:35369/]
+[rospy.init][INFO] 2019-09-14 00:30:37,368: ROS Slave URI: [http://odroid:35369/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:30:37,368: _ready: http://odroid:35369/
+[rospy.registration][INFO] 2019-09-14 00:30:37,370: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:30:37,371: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:30:37,468: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:30:37,469: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:30:37,483: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:30:37,487: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:30:37,502: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:30:37,503: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:30:37,508: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:30:37,512: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:30:37,517: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:30:37,522: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:30:37,527: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:30:37,531: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:30:37,539: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:30:37,544: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:37,546: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:30:37,599: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:30:37,601: clearing buffer...
+[rosout][INFO] 2019-09-14 00:30:37,601: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:30:37,602: attempt #1...
+[rosout][INFO] 2019-09-14 00:30:37,674: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:30:37,675: timeout: 71.852446 ms
+[rosout][INFO] 2019-09-14 00:30:37,676: took 76.949596 ms to find the PDS MCU
+[rospy.internal][INFO] 2019-09-14 00:30:37,698: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:30:38,972: voltage=16.52
+[rosout][INFO] 2019-09-14 00:30:38,976: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:38,979: currents=0.08,0.08,0.11,0.0,0.13,0.16
+[rosout][INFO] 2019-09-14 00:30:41,057: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:41,059: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:41,062: currents=0.0,0.05,0.0,0.71,0.13,0.19
+[rosout][INFO] 2019-09-14 00:30:43,144: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:43,147: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:43,149: currents=0.0,0.08,0.1,0.02,0.16,1.34
+[rosout][INFO] 2019-09-14 00:30:45,238: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:45,241: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:45,244: currents=0.0,0.08,0.32,0.0,0.16,0.1
+[rosout][INFO] 2019-09-14 00:30:47,323: voltage=16.52
+[rosout][INFO] 2019-09-14 00:30:47,326: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:47,329: currents=0.03,0.52,0.23,0.06,0.15,0.08
+[rosout][INFO] 2019-09-14 00:30:49,410: voltage=16.51
+[rosout][INFO] 2019-09-14 00:30:49,413: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:49,415: currents=0.03,0.08,0.05,0.05,0.13,1.45
+[rosout][INFO] 2019-09-14 00:30:51,496: voltage=16.51
+[rosout][INFO] 2019-09-14 00:30:51,499: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:51,501: currents=0.03,0.05,0.03,0.0,0.11,0.1
+[rosout][INFO] 2019-09-14 00:30:53,583: voltage=16.54
+[rosout][INFO] 2019-09-14 00:30:53,586: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:53,588: currents=0.24,0.11,0.02,0.18,0.15,0.19
+[rosout][INFO] 2019-09-14 00:30:55,668: voltage=16.49
+[rosout][INFO] 2019-09-14 00:30:55,671: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:55,673: currents=0.05,0.13,0.03,0.0,0.15,0.18
+[rosout][INFO] 2019-09-14 00:30:57,759: voltage=16.52
+[rosout][INFO] 2019-09-14 00:30:57,762: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:57,764: currents=0.0,0.0,0.03,0.05,0.08,0.16
+[rosout][INFO] 2019-09-14 00:30:59,848: voltage=16.49
+[rosout][INFO] 2019-09-14 00:30:59,851: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:30:59,854: currents=0.02,0.05,0.03,0.06,0.13,0.18
+[rospy.client][INFO] 2019-09-14 00:31:34,674: init_node, name[/pds_node], pid[2908]
+[xmlrpc][INFO] 2019-09-14 00:31:34,675: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:31:34,676: Started XML-RPC server [http://odroid:33843/]
+[rospy.init][INFO] 2019-09-14 00:31:34,676: ROS Slave URI: [http://odroid:33843/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:31:34,677: _ready: http://odroid:33843/
+[rospy.registration][INFO] 2019-09-14 00:31:34,679: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:31:34,679: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:31:34,777: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:31:34,778: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:31:34,788: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:31:34,794: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:31:34,812: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:31:34,814: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:31:34,823: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:31:34,833: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:31:34,843: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:31:34,852: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:31:34,861: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:31:34,870: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:31:34,885: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:31:34,894: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:31:34,897: Using UART by default
+[rosout][INFO] 2019-09-14 00:31:34,973: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:31:34,974: clearing buffer...
+[rosout][INFO] 2019-09-14 00:31:34,975: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:31:34,975: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:31:35,042: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:31:35,064: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:31:35,065: timeout: 89.223623 ms
+[rosout][INFO] 2019-09-14 00:31:35,066: took 93.589783 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:31:35,331: voltage=16.49
+[rosout][INFO] 2019-09-14 00:31:35,335: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:35,339: currents=0.08,0.06,0.0,0.06,0.08,0.16
+[rosout][INFO] 2019-09-14 00:31:37,422: voltage=16.52
+[rosout][INFO] 2019-09-14 00:31:37,425: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:37,428: currents=0.0,0.13,0.02,0.08,0.15,0.15
+[rosout][INFO] 2019-09-14 00:31:39,509: voltage=16.47
+[rosout][INFO] 2019-09-14 00:31:39,512: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:39,514: currents=0.02,0.06,0.06,0.05,0.15,0.18
+[rosout][INFO] 2019-09-14 00:31:41,588: voltage=16.51
+[rosout][INFO] 2019-09-14 00:31:41,591: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:41,592: currents=0.03,0.08,0.05,0.1,0.13,0.18
+[rosout][INFO] 2019-09-14 00:31:43,680: voltage=16.54
+[rosout][INFO] 2019-09-14 00:31:43,684: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:43,687: currents=0.0,0.06,0.02,0.03,0.15,0.23
+[rosout][INFO] 2019-09-14 00:31:45,766: voltage=16.47
+[rosout][INFO] 2019-09-14 00:31:45,770: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:45,773: currents=0.03,0.0,0.0,0.06,0.15,0.15
+[rosout][INFO] 2019-09-14 00:31:47,854: voltage=16.54
+[rosout][INFO] 2019-09-14 00:31:47,857: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:47,859: currents=0.02,0.21,0.0,0.23,0.11,0.24
+[rosout][INFO] 2019-09-14 00:31:49,944: voltage=16.47
+[rosout][INFO] 2019-09-14 00:31:49,947: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:49,950: currents=0.03,0.08,0.05,0.0,0.18,0.18
+[rosout][INFO] 2019-09-14 00:31:52,025: voltage=16.51
+[rosout][INFO] 2019-09-14 00:31:52,028: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:52,031: currents=0.15,0.06,0.03,0.03,0.16,0.23
+[rosout][INFO] 2019-09-14 00:31:54,115: voltage=16.49
+[rosout][INFO] 2019-09-14 00:31:54,117: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:54,120: currents=0.0,0.03,0.05,0.18,0.16,0.19
+[rosout][INFO] 2019-09-14 00:31:56,205: voltage=16.51
+[rosout][INFO] 2019-09-14 00:31:56,208: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:56,211: currents=0.02,0.08,0.0,0.02,0.21,0.16
+[rosout][INFO] 2019-09-14 00:31:58,284: voltage=16.51
+[rosout][INFO] 2019-09-14 00:31:58,286: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:31:58,288: currents=0.02,0.19,0.02,0.0,0.11,0.23
+[rosout][INFO] 2019-09-14 00:32:00,368: voltage=16.52
+[rosout][INFO] 2019-09-14 00:32:00,369: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:00,370: currents=0.02,0.05,0.0,0.13,0.11,0.18
+[rospy.client][INFO] 2019-09-14 00:32:00,916: init_node, name[/pds_node], pid[2997]
+[xmlrpc][INFO] 2019-09-14 00:32:00,917: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:32:00,918: Started XML-RPC server [http://odroid:35053/]
+[rospy.init][INFO] 2019-09-14 00:32:00,919: ROS Slave URI: [http://odroid:35053/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:32:00,919: _ready: http://odroid:35053/
+[rospy.registration][INFO] 2019-09-14 00:32:00,921: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:32:00,921: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:32:01,019: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:32:01,020: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:32:01,031: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:32:01,035: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:32:01,043: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:32:01,044: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:32:01,048: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:32:01,053: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:32:01,057: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:32:01,064: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:32:01,073: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:32:01,085: Beginning to subscribe to "/pds_command" topic
+[rospy.impl.masterslave][INFO] 2019-09-14 00:32:01,087: external shutdown request from [/master]: new node registered with same name
+[rospy.core][INFO] 2019-09-14 00:32:01,088: signal_shutdown [external shutdown request from [/master]: [new node registered with same name]]
+[rospy.internal][INFO] 2019-09-14 00:32:01,092: topic[/rosout] removing connection to /rosout
+[rosout][INFO] 2019-09-14 00:32:01,134: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:32:01,146: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:32:01,149: Using UART and 9600 baud by default
+[rospy.core][WARNING] 2019-09-14 00:32:01,161: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-14 00:32:01,162: This node (pds_node) is shutting down
+[rosout][INFO] 2019-09-14 00:32:01,242: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:32:01,244: clearing buffer...
+[rosout][INFO] 2019-09-14 00:32:01,245: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:32:01,245: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:32:01,362: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:32:01,370: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:32:01,371: timeout: 125.461817 ms
+[rosout][INFO] 2019-09-14 00:32:01,373: took 131.080627 ms to find the PDS MCU
+[rospy.core][INFO] 2019-09-14 00:32:02,166: signal_shutdown [atexit]
+[rosout][INFO] 2019-09-14 00:32:02,461: voltage=16.47
+[rosout][INFO] 2019-09-14 00:32:02,465: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:02,469: currents=0.0,0.03,0.15,0.05,0.15,0.58
+[rosout][INFO] 2019-09-14 00:32:04,554: voltage=16.54
+[rosout][INFO] 2019-09-14 00:32:04,558: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:04,560: currents=0.0,0.08,0.03,0.06,0.47,0.18
+[rosout][INFO] 2019-09-14 00:32:06,639: voltage=16.39
+[rosout][INFO] 2019-09-14 00:32:06,642: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:06,646: currents=0.08,0.0,0.0,0.05,0.18,0.19
+[rosout][INFO] 2019-09-14 00:32:08,722: voltage=16.51
+[rosout][INFO] 2019-09-14 00:32:08,725: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:08,727: currents=0.02,0.1,0.02,0.02,0.13,0.18
+[rosout][INFO] 2019-09-14 00:32:10,810: voltage=16.51
+[rosout][INFO] 2019-09-14 00:32:10,813: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:32:10,816: currents=0.1,0.0,0.02,0.06,0.19,0.16
+[rospy.client][INFO] 2019-09-14 00:33:57,546: init_node, name[/pds_node], pid[2739]
+[xmlrpc][INFO] 2019-09-14 00:33:57,548: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:33:57,549: Started XML-RPC server [http://odroid:44739/]
+[rospy.init][INFO] 2019-09-14 00:33:57,550: ROS Slave URI: [http://odroid:44739/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:33:57,550: _ready: http://odroid:44739/
+[rospy.registration][INFO] 2019-09-14 00:33:57,552: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:33:57,552: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:33:57,650: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:33:57,651: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:33:57,662: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:33:57,666: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:33:57,677: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:33:57,678: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:33:57,682: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:33:57,686: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:33:57,690: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:33:57,694: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:33:57,698: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:33:57,707: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:33:57,725: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:33:57,735: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:33:57,738: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:33:57,858: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:33:57,860: clearing buffer...
+[rosout][INFO] 2019-09-14 00:33:57,861: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:33:57,861: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:33:57,880: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:34:01,081: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:34:01,084: timeout: 3222.070932 ms
+[rosout][INFO] 2019-09-14 00:34:01,088: took 3230.288029 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:34:05,253: got raw data: .,00,00,01,03, 9.0 9.0 9.0 ,0 ,0 PDS 16.49, 0.08, 0.00, 0.02, 0.03, 0.15, 0.18, 999.90, 999.90, 999.90, 0, ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:34:07,338: got raw data: D 65,00,00,01,00,01,02,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:34:09,429: got raw data: 
+
+[rosout][INFO] 2019-09-14 00:34:11,514: got raw data: .4,00,0.,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:34:17,781: got raw data:  ,,0 PDS 16.49, 0.02, 0.05, 0.02, 0.00, 0.16, 0.19, 9.0 9.0 9.0 ,0 ,0 PDS 16.49, 0.00, 0.03, 0.03, 0.05, 0.10, 0.21, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:34:21,951: got raw data: 0,006 .7 .2 .8 .2 9.0 9.0 9.0 ,0 ,0 PDS 16.49, 0.03, 0.08, 0.39, 0.02, 0.08, 0.08, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][WARNING] 2019-09-14 00:34:24,044: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:34:24,046: got raw data: 
+[rosout][INFO] 2019-09-14 00:34:26,128: got raw data: D 64,00,00,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rospy.client][INFO] 2019-09-14 00:34:42,404: init_node, name[/pds_node], pid[2837]
+[xmlrpc][INFO] 2019-09-14 00:34:42,404: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:34:42,405: Started XML-RPC server [http://odroid:41403/]
+[rospy.init][INFO] 2019-09-14 00:34:42,406: ROS Slave URI: [http://odroid:41403/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:34:42,406: _ready: http://odroid:41403/
+[rospy.registration][INFO] 2019-09-14 00:34:42,408: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:34:42,408: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:34:42,506: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:34:42,507: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:34:42,518: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:34:42,522: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:34:42,530: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:34:42,531: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:34:42,535: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:34:42,541: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:34:42,550: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:34:42,559: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:34:42,568: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:34:42,578: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:34:42,593: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:34:42,603: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:34:42,605: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:34:42,704: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:34:42,706: clearing buffer...
+[rosout][INFO] 2019-09-14 00:34:42,706: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:34:42,706: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:34:42,749: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:34:42,862: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:34:42,863: timeout: 156.509399 ms
+[rosout][INFO] 2019-09-14 00:34:42,864: took 159.993649 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:34:42,865: got raw data: who
+
+[rosout][INFO] 2019-09-14 00:34:47,038: got raw data: PDS 16.43, 0.02, 0.10, 0.03,01,.6 .8 9.0 9.0 9.0 ,0 ,0 PDS 16.47, 0.03, 0.00, 0.1,03, 01,01,999,999,9.90,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:34:49,122: got raw data: 4 .2 .3 .2 .2,01,01,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:34:51,210: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:34:51,212: got raw data: 
+[rosout][INFO] 2019-09-14 00:34:57,473: got raw data: PDS 16.47,00,00,.0 .5 .0 .6 9.0 9.0 9.0 ,0 ,0 PDS 16.4,.2 .6 0.3 .0 .9 .6 9.0 9.0 9.0 ,0 ,0 PDS 16.49, 0.00, 0.03, 0.00, 0.03, 0.24, 0.8, 9.0 9.0999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:34:59,561: got raw data:  ,0 0
+
+[rosout][INFO] 2019-09-14 00:35:01,645: got raw data: .09.0 99,9990 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:35:05,819: got raw data: .0,,0 ,0 PDS 16.47, 0.00, 0.02, 0.03, 0.06, 0.08, 0.10, 999.90, 999.90, 99.,0 ,1 ,0
+
+[rospy.client][INFO] 2019-09-14 00:35:35,242: init_node, name[/pds_node], pid[2955]
+[xmlrpc][INFO] 2019-09-14 00:35:35,243: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:35:35,244: Started XML-RPC server [http://odroid:44191/]
+[rospy.init][INFO] 2019-09-14 00:35:35,245: ROS Slave URI: [http://odroid:44191/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:35:35,246: _ready: http://odroid:44191/
+[rospy.registration][INFO] 2019-09-14 00:35:35,249: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:35:35,249: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:35:35,346: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:35:35,347: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:35:35,365: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:35:35,375: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:35:35,390: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:35:35,391: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:35:35,398: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:35:35,406: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:35:35,413: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:35:35,420: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:35:35,427: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:35:35,434: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:35:35,447: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:35:35,455: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:35:35,456: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:35:35,504: topic[/fan_speeds] adding connection to [/rostopic_22888_1568435722005], count 0
+[rosout][INFO] 2019-09-14 00:35:35,529: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:35:35,530: clearing buffer...
+[rosout][INFO] 2019-09-14 00:35:35,530: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:35:35,531: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:35:35,597: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:35:35,623: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:35:35,624: timeout: 93.241692 ms
+[rosout][INFO] 2019-09-14 00:35:35,625: took 96.667528 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:35:37,120: got raw data: 7 .8,00,00 .5 .8 .6 9.0 9.0 9.0 ,0 ,0 
+
+[rosout][WARNING] 2019-09-14 00:35:39,213: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:35:39,217: got raw data: 
+[rospy.client][INFO] 2019-09-14 00:35:48,206: init_node, name[/pds_node], pid[3014]
+[xmlrpc][INFO] 2019-09-14 00:35:48,207: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:35:48,208: Started XML-RPC server [http://odroid:38757/]
+[rospy.init][INFO] 2019-09-14 00:35:48,209: ROS Slave URI: [http://odroid:38757/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:35:48,209: _ready: http://odroid:38757/
+[rospy.registration][INFO] 2019-09-14 00:35:48,211: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:35:48,211: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:35:48,309: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:35:48,310: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:35:48,321: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:35:48,325: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:35:48,341: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:35:48,343: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:35:48,351: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:35:48,358: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:35:48,365: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:35:48,372: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:35:48,379: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:35:48,386: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:35:48,399: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:35:48,407: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:35:48,409: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:35:48,483: topic[/fan_speeds] adding connection to [/rostopic_22888_1568435722005], count 0
+[rosout][INFO] 2019-09-14 00:35:48,494: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:35:48,495: clearing buffer...
+[rosout][INFO] 2019-09-14 00:35:48,496: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:35:48,496: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:35:48,562: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:35:48,567: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:35:48,568: timeout: 70.487738 ms
+[rosout][INFO] 2019-09-14 00:35:48,569: took 75.148821 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:35:51,740: got raw data: 7 .0 .0 .6 .6 .3 .8 9.0 9.0 9.0 ,0 ,0 PDS 16.45, 1.40, 0.06, 0.06, .6 .16 .8 99,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:35:53,831: got raw data: ,0 ,0,0
+
+[rosout][INFO] 2019-09-14 00:35:58,008: got raw data: 2 .0 . .8,01,999,999,999,0 ,1  PDS 16.41, 0.05, 0.06, 0.00, 0.05, 0.10, 0.18, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][WARNING] 2019-09-14 00:36:02,185: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:02,188: got raw data: 
+[rosout][INFO] 2019-09-14 00:36:04,271: got raw data: PS1.5 .5 .3 .6 .2 .6 .2 9.0 999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:36:08,445: voltage=16.45
+[rosout][WARNING] 2019-09-14 00:36:08,447: trouble parsing PDS sensor data
+[rosout][WARNING] 2019-09-14 00:36:10,529: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:10,532: got raw data: 
+[rosout][WARNING] 2019-09-14 00:36:12,623: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:12,626: got raw data: 
+[rosout][INFO] 2019-09-14 00:36:18,881: got raw data: PDS 643,00,00,00 .0 .1 .1 9.0 9.0 9.0 ,0,1,0 PDS 16.45, 0.03, 0.06, 0.00, 1.13, 0.16, 0.16, 999.90, 99.0, 99.0 ,0 ,0 PDS 16.47,03,00,00,00,01,02,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:36:23,057: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:23,061: got raw data: 
+[rosout][INFO] 2019-09-14 00:36:25,144: got raw data: 1.1,00,00,00,00,01,02,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:36:27,227: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:27,230: got raw data: 
+[rosout][INFO] 2019-09-14 00:36:29,322: got raw data: 1.5 .0 .8 .3 .5 .7 .8 9.0 9.0 9.0 ,0  ,0
+
+[rosout][INFO] 2019-09-14 00:36:31,404: got raw data: ,00,00,00,01,01,999,999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:36:35,583: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:35,586: got raw data: 
+[rosout][WARNING] 2019-09-14 00:36:37,674: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:36:37,677: got raw data: 
+[rosout][WARNING] 2019-09-14 00:36:39,755: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:36:41,842: got raw data: .0 0 ,1 ,0
+
+[rospy.client][INFO] 2019-09-14 00:38:07,261: init_node, name[/pds_node], pid[2733]
+[xmlrpc][INFO] 2019-09-14 00:38:07,263: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:38:07,264: Started XML-RPC server [http://odroid:40515/]
+[rospy.init][INFO] 2019-09-14 00:38:07,265: ROS Slave URI: [http://odroid:40515/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:38:07,265: _ready: http://odroid:40515/
+[rospy.registration][INFO] 2019-09-14 00:38:07,267: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:38:07,267: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:38:07,365: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:38:07,366: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:38:07,379: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:38:07,384: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:38:07,394: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:38:07,395: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:38:07,400: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:38:07,405: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:38:07,410: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:38:07,415: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:38:07,420: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:38:07,425: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:38:07,433: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:38:07,439: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:38:07,440: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:38:07,501: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:38:07,505: clearing buffer...
+[rosout][INFO] 2019-09-14 00:38:07,506: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:38:07,506: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:38:07,611: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:38:07,761: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:38:07,762: timeout: 254.861355 ms
+[rosout][INFO] 2019-09-14 00:38:07,763: took 262.609005 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:38:10,314: voltage=16.33
+[rosout][INFO] 2019-09-14 00:38:10,316: temps=99.0,99.,999
+[rosout][INFO] 2019-09-14 00:38:10,318: currents=0.05,0.02,0.08,0.03,0.1,0.19
+[rosout][WARNING] 2019-09-14 00:38:10,321: trouble parsing PDS sensor data
+[rosout][WARNING] 2019-09-14 00:38:12,400: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:38:12,403: got raw data: 
+[rosout][WARNING] 2019-09-14 00:38:14,483: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:38:14,485: got raw data: 
+[rosout][INFO] 2019-09-14 00:38:18,659: got raw data: D 63,00,00,00,00 .6 .1 9.0 9.0 9.0 ,0 ,0 PDS 16.39, 0.00, 0.00, 1.39, 0.00, 0.32, 0.19, 999.90, 999.0 9.00 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:38:20,747: got raw data: 0 , ,0
+
+[rosout][INFO] 2019-09-14 00:38:27,000: got raw data:  9.0 9.0 ,0 ,0 PDS 16.39, 0.00, 0.00, 0.02, 0.27, 0.11, 0.06, 99.0, 9.0 9.90 ,0 ,0 PDS 16.41, 0.02, 0.3 .500,00,02,999,999,999,0 ,1 ,0
+
+[rospy.internal][INFO] 2019-09-14 00:38:30,743: topic[/wheel_motor_currents] adding connection to [/rostopic_23808_1568435896781], count 0
+[rosout][INFO] 2019-09-14 00:38:31,175: got raw data: 01,0.5 .8 .6 .6 9.0 9.0 9.0 ,0 ,0 PDS 16.39, 0.00, 0.05, 0.00, 0.00, 0.13, 0.18, 999.90, 999.90, 999.90, ,0 ,0 
+
+[rospy.client][INFO] 2019-09-14 00:38:39,700: init_node, name[/pds_node], pid[2799]
+[xmlrpc][INFO] 2019-09-14 00:38:39,701: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:38:39,702: Started XML-RPC server [http://odroid:45603/]
+[rospy.init][INFO] 2019-09-14 00:38:39,702: ROS Slave URI: [http://odroid:45603/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:38:39,703: _ready: http://odroid:45603/
+[rospy.registration][INFO] 2019-09-14 00:38:39,705: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:38:39,705: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:38:39,803: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:38:39,804: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:38:39,824: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:38:39,830: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:38:39,845: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:38:39,846: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:38:39,853: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:38:39,861: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:38:39,868: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:38:39,875: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:38:39,882: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:38:39,892: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:38:39,906: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:38:39,913: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:38:39,915: Using UART and 9600 baud by default
+[rospy.internal][INFO] 2019-09-14 00:38:39,960: topic[/wheel_motor_currents] adding connection to [/rostopic_23808_1568435896781], count 0
+[rosout][INFO] 2019-09-14 00:38:39,990: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:38:39,991: clearing buffer...
+[rosout][INFO] 2019-09-14 00:38:39,992: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:38:39,993: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:38:40,104: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:38:40,115: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:38:40,116: timeout: 122.821093 ms
+[rosout][INFO] 2019-09-14 00:38:40,117: took 127.050877 ms to find the PDS MCU
+[rosout][WARNING] 2019-09-14 00:38:41,616: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:38:41,618: got raw data: 
+[rosout][INFO] 2019-09-14 00:38:43,704: voltage=16.39
+[rosout][INFO] 2019-09-14 00:38:43,707: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:38:43,709: currents=0.03,0.15,0.0,0.44,0.05,0.18
+[rosout][INFO] 2019-09-14 00:38:49,971: got raw data: PDS 16.37, 0.00, 0.00, 00,03,09 .6 9.0 9.0 9.0 ,0 ,0 PDS 16.39, 0.00, 0.05, 0.02, 0.11, 0.03, 0.45, 999.90, 999.90, 999.90,0,0 ,0 PDS 16.37, 0.03, 0.03, 1.31, 0.31, 0.27, 0.18, 999.90,9.0 9.0 0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:38:56,239: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:38:56,242: got raw data: 
+[rosout][INFO] 2019-09-14 00:38:58,330: voltage=16.37
+[rosout][INFO] 2019-09-14 00:38:58,332: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:38:58,335: currents=0.15,0.1,0.0,0.0,0.16,0.18
+[rosout][WARNING] 2019-09-14 00:38:58,337: trouble parsing PDS sensor data
+[rosout][WARNING] 2019-09-14 00:39:00,413: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:39:00,416: got raw data: 
+[rosout][INFO] 2019-09-14 00:39:04,591: got raw data:  0,02,11,999,999,9990 ,0 ,0 PDS 16.3,00,00,00,00,01,00,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:39:06,684: got raw data: 99,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:39:12,948: got raw data: 0,.8 . .8 .8 9.0 90 9.0 ,0 ,0 PDS 16.35, 0.06, 0.06, 0.03, 0.08, 0.02, 0.21, 999.90, 999.90, 999.0,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:39:15,034: got raw data: 30011,008 .5 .9 9.9,999,999,0 ,1 0
+
+[rosout][INFO] 2019-09-14 00:39:17,123: got raw data: 9999,9990 , 0, 1, ,0
+
+[rosout][WARNING] 2019-09-14 00:39:19,211: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:39:19,214: got raw data: 
+[rosout][INFO] 2019-09-14 00:39:21,298: got raw data: 4 .4 8 9.09.0 9.0 ,0 ,0 
+
+[rosout][INFO] 2019-09-14 00:39:23,380: got raw data: 1.5 .3 .0,00,02,02,01,999,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:39:25,470: got raw data: 0 ,,0
+
+[rosout][INFO] 2019-09-14 00:39:29,648: got raw data: 99,99.0 ,0 ,0 PDS 16.33, 0.00, 0.21, 0.00, 0.06, 0.19, 0.27, 999.90, 999.90, 999.90, ,01 ,0
+
+[rosout][INFO] 2019-09-14 00:39:31,738: got raw data: 0
+
+[rosout][INFO] 2019-09-14 00:39:35,913: got raw data: .3 1,01,999,999,999, ,0 ,0 PDS 16.37, 0.03, 0.03, 0.05, 1.00, 0.13, 0.19, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:39:38,001: voltage=16.35
+[rosout][INFO] 2019-09-14 00:39:38,004: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:39:38,006: currents=0.0,0.08,0.02,0.24,0.13,0.19
+[rosout][INFO] 2019-09-14 00:39:42,180: got raw data: PDS 16.33, 0.02,06 .0 .0 .3 .0 9.0 9.0 9.0 ,0 ,0 PDS 16.33, 0.00, 0.03, 0.00, 0.00, 0.15, 0.23, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:39:44,269: voltage=16.31
+[rosout][INFO] 2019-09-14 00:39:44,272: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:39:44,274: currents=0.05,0.06,1.52,0.0,0.15,0.11
+[rosout][INFO] 2019-09-14 00:39:48,448: got raw data: PDS 16.37, 0.0 .3 .0 .5 .1 .9 9.0 9.0 9.0 ,0 ,0 PDS 16.29, 0.00, 0.08, 0.02, 0.00, 0.13, 0.19, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:39:50,539: voltage=16.35
+[rosout][INFO] 2019-09-14 00:39:50,541: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:39:50,543: currents=0.05,0.06,0.0,0.05,0.16,0.19
+[rosout][WARNING] 2019-09-14 00:39:50,546: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:39:56,804: got raw data:  9.0 9.0,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:00,983: got raw data: 999,999,99.0 ,0 ,0 
+
+[rosout][INFO] 2019-09-14 00:40:03,069: voltage=16.31
+[rosout][INFO] 2019-09-14 00:40:03,072: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:40:03,074: currents=0.05,0.13,0.0,0.02,0.15,0.18
+[rosout][INFO] 2019-09-14 00:40:05,159: voltage=16.35
+[rosout][WARNING] 2019-09-14 00:40:05,161: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:40:07,243: got raw data: ,.8 9.0 9.0 9.0 ,,1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:09,331: voltage=16.35
+[rosout][INFO] 2019-09-14 00:40:09,334: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:40:09,336: currents=0.08,0.06,0.03,0.03,0.13,0.16
+[rosout][INFO] 2019-09-14 00:40:11,422: voltage=16.31
+[rosout][WARNING] 2019-09-14 00:40:11,424: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:40:15,588: got raw data: 99,0 ,1 0 PDS 16.29, 0.03, 1.55, 0.02, 0.0, .0 .1 9.0 9.0 9.0 ,0 ,0,0
+
+[rosout][INFO] 2019-09-14 00:40:17,673: got raw data: 9.0 . .2 .1 .6 .6 9.0 999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:23,936: got raw data: 00,0,00,03 01,9.0 9.0 9.0 ,0 ,0 PDS 16.29, 0.02, 0.05,00,02,01,02,999,999,999,0 ,1 0 PDS 16.35, 0.02, 0.06, 0.05, 0.03, 0.18, 0.21, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:40:26,019: got raw data:  0,03 .1 9.0 999,999,0 ,1 , 
+
+[rosout][INFO] 2019-09-14 00:40:32,281: got raw data: ,00,00,01,0.5 .3 .9 9.0 9.0 9.0 ,0 ,0 PDS 16.31 00,00,00,00,0,02,999,999,999,0 0 ,0 PDS 16.33, 0.02, 0.02, 0.00, 0.00, 0.18, 0.15, 999.90, 999.90, 999.90, 0, 0, 1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:34,367: got raw data:  .0,01,01,08 9.0 9.0,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:36,464: voltage=16.3
+[rosout][WARNING] 2019-09-14 00:40:36,466: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:40:38,544: got raw data: 901,02 .0 .0 .6 .8 9.0 9.0 99,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:40:40,639: voltage=16.33
+[rosout][INFO] 2019-09-14 00:40:40,642: temps=999,999,999
+[rosout][INFO] 2019-09-14 00:40:40,644: currents=0.0,1.0,0.0,1.0,0.0,2.0
+[rosout][WARNING] 2019-09-14 00:40:40,647: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:40:48,988: got raw data:  .1,01,999,999,990 ,0 ,0 PDS 16.33, 0.02, 0.06, 0.05, 0.00, 0.11, 0.15, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0PDS1.1 .8 .0 .8 .8 .15 .8,999,999,999,0 ,1 , PDS 16.22, 0.05, 0.66, 0.00, 0.02, 0.08, 0.21, 999.90, 999.90, 999.9,0 ,1, ,0
+
+[rosout][INFO] 2019-09-14 00:40:53,166: got raw data:  .8,01,03,999,999,999,0 ,1,0 PDS 16.27, 0.05, 0.05, 0.00, 0.10, 0.60, 0.19, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:40:55,253: got raw data: 1,0,00,0.5 .0 9.0999,999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:40:59,430: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:40:59,433: got raw data: 
+[rosout][INFO] 2019-09-14 00:41:01,516: got raw data:  99,999,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:41:11,950: got raw data:  1.1 .5 .2 .8 .5 .5 .9 9.0 9.0 999,0 ,1 0 PDS 16.29, 0.00, 0.10, 0.95, 0.23, 0.16, 01,999 9.0 9.0 ,0 ,0 PDS 62,00,00,00,00,01, .5 99,999, 99.90, 0,0 ,0 PDS 16.31, 0.03, 0.29, 0.00, 0.21, 0.13, 0.13, 999.90, 999.90, 999.90, 0, 0, 1, ,0PDS 16.27, 0.00, 0.06, 0.03, 0.08, 0.1, .1 9.0 9.0 9.0 ,0 ,0,0
+
+[rosout][INFO] 2019-09-14 00:41:18,208: got raw data: ,00,0,00,00,01,0.5 9.0 9.0 9.0 ,0 ,0 PDS 16.31, 0.13, 000 .6 .1 .8 9.0 9.0 9.0 ,0 ,0 PDS 1.9 .0 .3 .6 .6 .8 .3 9.0 9.0 999,0 ,1 ,0
+
+[rosout][WARNING] 2019-09-14 00:41:20,295: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:41:20,298: got raw data: 
+[rosout][WARNING] 2019-09-14 00:41:24,470: trouble reading from serial port
+[rosout][INFO] 2019-09-14 00:41:24,474: got raw data: 
+[rosout][INFO] 2019-09-14 00:41:26,555: got raw data: 0 .8 .0 9.0,999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:41:28,640: got raw data: ,04 9.0 9.0 999,0 ,1 ,0
+
+[rosout][INFO] 2019-09-14 00:41:32,815: got raw data: .2.2 01, .6 9.0 9.0 9.0 ,0 ,0 PDS 16.27, 0.00, 0.06, 0.02, 0.00, 0.06, 0.21, 999.90, 999.90, 999.90, 0, 0, 1, 0, 0
+
+[rosout][INFO] 2019-09-14 00:41:34,903: voltage=16.27
+[rosout][INFO] 2019-09-14 00:41:34,906: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:41:34,908: currents=0.02,0.0,0.0,0.06,0.0,0.19
+[rosout][WARNING] 2019-09-14 00:41:34,911: trouble parsing PDS sensor data
+[rosout][INFO] 2019-09-14 00:41:36,990: got raw data: ,99,999, ,1 ,0
+
+[rospy.core][INFO] 2019-09-14 00:41:38,458: signal_shutdown [signal-15]
+[rospy.registration][WARNING] 2019-09-14 00:41:38,477: cannot unregister with master due to network issues
+[rospy.internal][INFO] 2019-09-14 00:41:38,478: topic[/rosout] removing connection to /rosout
+[rospy.internal][INFO] 2019-09-14 00:41:38,478: topic[/wheel_motor_currents] removing connection to /rostopic_23808_1568435896781
+[rospy.impl.masterslave][INFO] 2019-09-14 00:41:38,481: signal-15
+[rospy.core][INFO] 2019-09-14 00:41:38,545: signal_shutdown [signal-2]
+[rospy.core][INFO] 2019-09-14 00:41:38,644: signal_shutdown [signal-15]
+[rospy.core][INFO] 2019-09-14 00:41:38,756: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-14 00:43:31,413: init_node, name[/pds_node], pid[2745]
+[xmlrpc][INFO] 2019-09-14 00:43:31,415: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:43:31,416: Started XML-RPC server [http://odroid:39793/]
+[rospy.init][INFO] 2019-09-14 00:43:31,416: ROS Slave URI: [http://odroid:39793/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:43:31,417: _ready: http://odroid:39793/
+[rospy.registration][INFO] 2019-09-14 00:43:31,419: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:43:31,419: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:43:31,517: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:43:31,517: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:43:31,528: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:43:31,532: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:43:31,541: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:43:31,542: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:43:31,545: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:43:31,549: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:43:31,553: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:43:31,557: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:43:31,570: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:43:31,581: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:43:31,600: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:43:31,610: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:43:31,613: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:43:31,723: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:43:31,724: clearing buffer...
+[rosout][INFO] 2019-09-14 00:43:31,725: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:43:31,725: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:43:31,788: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:43:31,791: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:43:31,791: timeout: 65.500021 ms
+[rosout][INFO] 2019-09-14 00:43:31,793: took 69.855928 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:43:33,711: voltage=16.22
+[rosout][INFO] 2019-09-14 00:43:33,715: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:33,717: currents=0.0,0.13,0.06,0.05,0.08,0.16
+[rosout][INFO] 2019-09-14 00:43:35,792: voltage=16.25
+[rosout][INFO] 2019-09-14 00:43:35,795: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:35,798: currents=0.0,0.08,0.0,0.0,0.11,0.23
+[rosout][INFO] 2019-09-14 00:43:37,881: voltage=16.23
+[rosout][INFO] 2019-09-14 00:43:37,884: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:37,886: currents=0.03,0.05,0.02,0.02,0.13,0.18
+[rosout][INFO] 2019-09-14 00:43:39,974: voltage=16.23
+[rosout][INFO] 2019-09-14 00:43:39,977: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:39,979: currents=0.05,0.0,0.05,0.0,0.16,0.19
+[rospy.client][INFO] 2019-09-14 00:43:45,075: init_node, name[/pds_node], pid[2802]
+[xmlrpc][INFO] 2019-09-14 00:43:45,076: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:43:45,076: Started XML-RPC server [http://odroid:46637/]
+[rospy.init][INFO] 2019-09-14 00:43:45,077: ROS Slave URI: [http://odroid:46637/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:43:45,077: _ready: http://odroid:46637/
+[rospy.registration][INFO] 2019-09-14 00:43:45,080: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:43:45,080: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:43:45,178: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:43:45,178: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:43:45,189: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:43:45,193: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:43:45,203: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:43:45,205: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:43:45,209: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:43:45,213: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:43:45,217: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:43:45,221: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:43:45,225: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:43:45,229: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:43:45,236: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:43:45,243: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:43:45,245: Using UART by default
+[rosout][INFO] 2019-09-14 00:43:45,337: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:43:45,340: clearing buffer...
+[rosout][INFO] 2019-09-14 00:43:45,341: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:43:45,342: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:43:45,414: topic[/rosout] adding connection to [/rosout], count 0
+[rosout][INFO] 2019-09-14 00:43:45,548: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:43:45,549: timeout: 206.892490 ms
+[rosout][INFO] 2019-09-14 00:43:45,551: took 213.848352 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:43:46,223: voltage=16.20
+[rosout][INFO] 2019-09-14 00:43:46,226: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:46,228: currents=0.08,0.03,0.0,0.08,0.21,0.05
+[rosout][INFO] 2019-09-14 00:43:48,318: voltage=16.22
+[rosout][INFO] 2019-09-14 00:43:48,321: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:48,324: currents=0.0,0.0,0.0,0.03,0.15,0.1
+[rosout][INFO] 2019-09-14 00:43:50,405: voltage=16.18
+[rosout][INFO] 2019-09-14 00:43:50,408: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:50,410: currents=0.0,0.03,0.02,0.1,0.11,0.16
+[rosout][INFO] 2019-09-14 00:43:52,487: voltage=16.20
+[rosout][INFO] 2019-09-14 00:43:52,490: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:52,492: currents=0.03,0.1,0.0,0.03,0.1,0.15
+[rosout][INFO] 2019-09-14 00:43:54,571: voltage=16.25
+[rosout][INFO] 2019-09-14 00:43:54,575: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:54,578: currents=0.06,0.0,0.0,0.06,0.13,0.19
+[rosout][INFO] 2019-09-14 00:43:56,669: voltage=16.23
+[rosout][INFO] 2019-09-14 00:43:56,672: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:56,675: currents=0.11,0.1,0.03,0.05,0.13,0.16
+[rosout][INFO] 2019-09-14 00:43:58,753: voltage=16.23
+[rosout][INFO] 2019-09-14 00:43:58,755: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:43:58,758: currents=0.0,0.06,0.0,0.06,0.69,0.27
+[rosout][INFO] 2019-09-14 00:44:00,839: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:00,842: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:00,844: currents=0.03,0.89,0.02,0.03,0.03,0.19
+[rosout][INFO] 2019-09-14 00:44:02,930: voltage=16.25
+[rosout][INFO] 2019-09-14 00:44:02,933: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:02,936: currents=0.05,0.1,0.03,0.06,0.15,0.18
+[rosout][INFO] 2019-09-14 00:44:05,015: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:05,018: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:05,020: currents=0.02,0.0,0.0,0.0,0.1,0.73
+[rosout][INFO] 2019-09-14 00:44:07,102: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:07,105: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:07,108: currents=0.03,0.1,0.0,0.13,0.06,0.06
+[rosout][INFO] 2019-09-14 00:44:09,191: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:09,194: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:09,196: currents=0.02,0.4,0.05,0.0,0.08,0.18
+[rosout][INFO] 2019-09-14 00:44:11,278: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:11,281: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:11,284: currents=0.05,0.11,0.77,0.06,0.16,0.08
+[rosout][INFO] 2019-09-14 00:44:13,356: voltage=16.20
+[rosout][INFO] 2019-09-14 00:44:13,359: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:13,362: currents=0.0,0.29,0.0,0.16,0.15,0.16
+[rosout][INFO] 2019-09-14 00:44:15,447: voltage=16.25
+[rosout][INFO] 2019-09-14 00:44:15,451: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:15,454: currents=0.03,0.05,0.05,0.05,0.15,0.24
+[rosout][INFO] 2019-09-14 00:44:17,533: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:17,536: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:17,539: currents=0.0,0.1,0.02,0.0,0.02,0.24
+[rosout][INFO] 2019-09-14 00:44:19,617: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:19,620: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:19,623: currents=0.08,0.1,0.02,0.06,0.13,0.18
+[rosout][INFO] 2019-09-14 00:44:21,696: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:21,699: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:21,701: currents=0.03,0.03,0.19,0.0,0.15,0.13
+[rosout][INFO] 2019-09-14 00:44:23,787: voltage=16.27
+[rosout][INFO] 2019-09-14 00:44:23,790: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:23,793: currents=0.03,0.08,0.02,0.08,0.03,0.18
+[rosout][INFO] 2019-09-14 00:44:25,874: voltage=16.20
+[rosout][INFO] 2019-09-14 00:44:25,877: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:25,880: currents=0.1,0.0,1.18,0.05,0.15,0.24
+[rosout][INFO] 2019-09-14 00:44:27,960: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:27,963: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:27,966: currents=0.0,0.27,0.0,0.08,0.15,0.19
+[rosout][INFO] 2019-09-14 00:44:30,046: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:30,049: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:30,052: currents=0.0,0.58,0.0,0.1,0.15,0.18
+[rosout][INFO] 2019-09-14 00:44:31,516: received ping request from GUI, sending to PDS MCU
+[rosout][INFO] 2019-09-14 00:44:31,670: got raw data: ping
+
+[rosout][INFO] 2019-09-14 00:44:31,817: took 0.30101919174194336 seconds, sending this back to GUI: 
+[rosout][INFO] 2019-09-14 00:44:31,820: response: "Command error: PDS invalid command\r\n"
+success: False
+[rosout][INFO] 2019-09-14 00:44:32,145: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:32,149: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:32,153: currents=0.05,0.05,0.0,0.15,0.15,0.08
+[rosout][INFO] 2019-09-14 00:44:33,890: received ping request from GUI, sending to PDS MCU
+[rosout][INFO] 2019-09-14 00:44:33,968: got raw data: ping
+
+[rosout][INFO] 2019-09-14 00:44:34,194: took 0.304004430770874 seconds, sending this back to GUI: 
+[rosout][INFO] 2019-09-14 00:44:34,197: response: "Command error: PDS invalid command\r\n"
+success: False
+[rosout][INFO] 2019-09-14 00:44:34,222: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:34,225: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:34,228: currents=0.02,0.0,0.0,0.02,0.11,0.18
+[rosout][INFO] 2019-09-14 00:44:34,512: received ping request from GUI, sending to PDS MCU
+[rosout][INFO] 2019-09-14 00:44:34,607: got raw data: ping
+
+[rosout][INFO] 2019-09-14 00:44:34,815: took 0.30296826362609863 seconds, sending this back to GUI: 
+[rosout][INFO] 2019-09-14 00:44:34,818: response: "Command error: PDS invalid command\r\n"
+success: False
+[rosout][INFO] 2019-09-14 00:44:36,315: voltage=16.20
+[rosout][INFO] 2019-09-14 00:44:36,319: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:36,322: currents=0.0,0.08,0.02,0.0,0.08,0.47
+[rosout][INFO] 2019-09-14 00:44:38,403: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:38,406: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:38,409: currents=0.06,1.73,0.0,0.05,0.06,0.21
+[rosout][INFO] 2019-09-14 00:44:39,203: received ping request from GUI, sending to PDS MCU
+[rosout][INFO] 2019-09-14 00:44:39,393: got raw data: ping
+
+[rosout][INFO] 2019-09-14 00:44:39,505: took 0.3012235164642334 seconds, sending this back to GUI: 
+[rosout][INFO] 2019-09-14 00:44:39,508: response: "Command error: PDS invalid command\r\n"
+success: False
+[rosout][INFO] 2019-09-14 00:44:40,481: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:40,483: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:40,486: currents=0.08,0.03,0.0,0.02,0.15,0.16
+[rosout][INFO] 2019-09-14 00:44:42,576: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:42,579: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:42,582: currents=0.06,0.06,0.0,0.26,0.03,0.16
+[rosout][INFO] 2019-09-14 00:44:44,661: voltage=16.23
+[rosout][INFO] 2019-09-14 00:44:44,664: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:44,671: currents=0.0,0.02,0.02,0.06,0.34,0.19
+[rosout][INFO] 2019-09-14 00:44:46,753: voltage=16.22
+[rosout][INFO] 2019-09-14 00:44:46,757: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:44:46,760: currents=0.08,0.05,0.0,0.06,0.16,0.19
+[rospy.core][INFO] 2019-09-14 00:44:46,928: signal_shutdown [signal-2]
+[rospy.internal][INFO] 2019-09-14 00:44:46,970: topic[/rosout] removing connection to /rosout
+[rospy.impl.masterslave][INFO] 2019-09-14 00:44:46,971: signal-2
+[rospy.core][WARNING] 2019-09-14 00:44:47,547: add_shutdown_hook called after shutdown
+[rosout][WARNING] 2019-09-14 00:44:47,556: This node (pds_node) is shutting down
+[rospy.core][INFO] 2019-09-14 00:44:48,590: signal_shutdown [atexit]
+[rospy.client][INFO] 2019-09-14 00:45:06,694: init_node, name[/pds_node], pid[3012]
+[xmlrpc][INFO] 2019-09-14 00:45:06,695: XML-RPC server binding to 0.0.0.0:0
+[xmlrpc][INFO] 2019-09-14 00:45:06,695: Started XML-RPC server [http://odroid:43447/]
+[rospy.init][INFO] 2019-09-14 00:45:06,696: ROS Slave URI: [http://odroid:43447/]
+[rospy.impl.masterslave][INFO] 2019-09-14 00:45:06,696: _ready: http://odroid:43447/
+[rospy.registration][INFO] 2019-09-14 00:45:06,698: Registering with master node http://localhost:11311
+[xmlrpc][INFO] 2019-09-14 00:45:06,699: xml rpc node: starting XML-RPC server
+[rospy.init][INFO] 2019-09-14 00:45:06,797: registered with master
+[rospy.rosout][INFO] 2019-09-14 00:45:06,797: initializing /rosout core topic
+[rospy.rosout][INFO] 2019-09-14 00:45:06,811: connected to core topic /rosout
+[rospy.simtime][INFO] 2019-09-14 00:45:06,818: /use_sim_time is not set, will not subscribe to simulated time [/clock] topic
+[rosout][INFO] 2019-09-14 00:45:06,828: Initialized "pds_node" node for pub/sub/service functionality
+[rosout][INFO] 2019-09-14 00:45:06,829: Beginning to publish to "/battery_voltage" topic
+[rosout][INFO] 2019-09-14 00:45:06,833: Begining to publish to "/wheel_motor_currents" topic
+[rosout][INFO] 2019-09-14 00:45:06,838: Begining to publish to "/battery_temps" topic
+[rosout][INFO] 2019-09-14 00:45:06,843: Beginning to publish to "/fan_speeds" topic
+[rosout][INFO] 2019-09-14 00:45:06,848: Beginning to publish to "/pds_flags" topic
+[rosout][INFO] 2019-09-14 00:45:06,852: Beginning to publish to "/pds_feedback" topic
+[rosout][INFO] 2019-09-14 00:45:06,857: Beginning to subscribe to "/pds_command" topic
+[rosout][INFO] 2019-09-14 00:45:06,865: Waiting for "/pds_request" service request from client
+[rosout][INFO] 2019-09-14 00:45:06,870: Using 9600 baud by default
+[rosout][INFO] 2019-09-14 00:45:06,872: Using UART and 9600 baud by default
+[rosout][INFO] 2019-09-14 00:45:06,929: Attempting to connect to /dev/ttySAC0
+[rosout][INFO] 2019-09-14 00:45:06,931: clearing buffer...
+[rosout][INFO] 2019-09-14 00:45:06,932: identifying MCU by sending 'who' every 1000 ms
+[rosout][INFO] 2019-09-14 00:45:06,932: attempt #1...
+[rospy.internal][INFO] 2019-09-14 00:45:06,965: topic[/battery_voltage] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,049: topic[/wheel_motor_currents] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,065: topic[/battery_temps] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,102: topic[/fan_speeds] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,103: topic[/rosout] adding connection to [/rosout], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,106: topic[/pds_flags] adding connection to [/rosbridge_websocket], count 0
+[rospy.internal][INFO] 2019-09-14 00:45:07,107: topic[/pds_feedback] adding connection to [/rosbridge_websocket], count 0
+[rosout][INFO] 2019-09-14 00:45:07,139: PDS MCU identified!
+[rosout][INFO] 2019-09-14 00:45:07,139: timeout: 206.491947 ms
+[rosout][INFO] 2019-09-14 00:45:07,141: took 211.759090 ms to find the PDS MCU
+[rosout][INFO] 2019-09-14 00:45:07,615: voltage=16.16
+[rosout][INFO] 2019-09-14 00:45:07,618: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:07,620: currents=0.06,0.15,0.0,0.06,0.19,0.16
+[rosout][INFO] 2019-09-14 00:45:09,700: voltage=16.20
+[rosout][INFO] 2019-09-14 00:45:09,703: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:09,706: currents=0.06,0.03,0.0,0.03,0.13,0.19
+[rosout][INFO] 2019-09-14 00:45:11,787: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:11,790: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:11,793: currents=0.1,0.0,0.0,0.18,0.27,0.29
+[rosout][INFO] 2019-09-14 00:45:13,867: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:13,870: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:13,872: currents=0.05,0.05,0.03,0.06,0.05,0.18
+[rosout][INFO] 2019-09-14 00:45:15,956: voltage=16.20
+[rosout][INFO] 2019-09-14 00:45:15,960: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:15,962: currents=0.06,0.05,0.0,0.02,0.1,0.32
+[rosout][INFO] 2019-09-14 00:45:18,037: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:18,038: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:18,040: currents=0.0,0.0,0.0,0.11,0.35,0.18
+[rosout][INFO] 2019-09-14 00:45:20,125: voltage=16.23
+[rosout][INFO] 2019-09-14 00:45:20,128: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:20,131: currents=0.03,1.61,0.0,0.06,0.16,0.05
+[rosout][INFO] 2019-09-14 00:45:22,213: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:22,216: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:22,218: currents=0.03,0.11,0.02,0.03,0.18,0.16
+[rosout][INFO] 2019-09-14 00:45:24,300: voltage=16.20
+[rosout][INFO] 2019-09-14 00:45:24,303: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:24,306: currents=0.03,0.06,0.03,0.03,0.02,0.27
+[rosout][INFO] 2019-09-14 00:45:26,388: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:26,390: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:26,393: currents=0.06,0.08,0.03,0.0,0.11,0.19
+[rosout][INFO] 2019-09-14 00:45:28,475: voltage=16.20
+[rosout][INFO] 2019-09-14 00:45:28,477: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:28,480: currents=0.02,0.08,0.0,0.0,0.16,0.21
+[rosout][INFO] 2019-09-14 00:45:30,562: voltage=16.16
+[rosout][INFO] 2019-09-14 00:45:30,566: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:30,568: currents=0.87,0.08,0.11,0.0,0.16,0.13
+[rosout][INFO] 2019-09-14 00:45:32,647: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:32,651: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:32,653: currents=0.98,0.06,0.0,0.0,0.15,0.06
+[rosout][INFO] 2019-09-14 00:45:34,733: voltage=16.22
+[rosout][INFO] 2019-09-14 00:45:34,736: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:34,739: currents=0.05,0.11,0.03,1.24,0.03,0.13
+[rospy.internal][INFO] 2019-09-14 00:45:35,913: topic[/battery_voltage] removing connection to /rosbridge_websocket
+[rospy.internal][INFO] 2019-09-14 00:45:35,915: topic[/wheel_motor_currents] removing connection to /rosbridge_websocket
+[rospy.internal][INFO] 2019-09-14 00:45:35,917: topic[/battery_temps] removing connection to /rosbridge_websocket
+[rospy.internal][INFO] 2019-09-14 00:45:35,919: topic[/fan_speeds] removing connection to /rosbridge_websocket
+[rospy.internal][INFO] 2019-09-14 00:45:35,921: topic[/pds_flags] removing connection to /rosbridge_websocket
+[rospy.internal][INFO] 2019-09-14 00:45:35,924: topic[/pds_feedback] removing connection to /rosbridge_websocket
+[rosout][INFO] 2019-09-14 00:45:36,823: voltage=16.23
+[rosout][INFO] 2019-09-14 00:45:36,826: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:36,829: currents=0.02,0.06,0.0,0.05,0.11,0.19
+[rosout][INFO] 2019-09-14 00:45:38,908: voltage=16.20
+[rosout][INFO] 2019-09-14 00:45:38,911: temps=999.90,999.90,999.90
+[rosout][INFO] 2019-09-14 00:45:38,913: currents=0.06,0.05,0.02,0.06,0.13,0.18
+[rospy.core][INFO] 2019-09-14 00:45:39,535: signal_shutdown [signal-15]
+[rospy.registration][WARNING] 2019-09-14 00:45:39,562: cannot unregister with master due to network issues
+[rospy.internal][INFO] 2019-09-14 00:45:39,563: topic[/rosout] removing connection to /rosout
+[rospy.impl.masterslave][INFO] 2019-09-14 00:45:39,565: signal-15
+[rospy.core][INFO] 2019-09-14 00:45:39,570: signal_shutdown [signal-2]
+[rospy.core][INFO] 2019-09-14 00:45:39,741: signal_shutdown [signal-15]
+[rospy.core][INFO] 2019-09-14 00:45:39,902: signal_shutdown [atexit]
