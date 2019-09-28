@@ -31,7 +31,7 @@ if [[ $TRIMMED =~ [\$0-9] ]];then
     sed -i.bak -e "1s/^/[#$TRIMMED] /" $1
 fi
  else
-    echo
+    echo $ERROR
     exit 1
 fi
 #Checks to see if branch name includes any upper case letters. If it does, it exits and tells user to check wiki
@@ -47,7 +47,7 @@ if [[ "${TRIM_NUM: -1}" != *-* ]];then
   exit 1
 fi
 #Checks to see if branch name includes various other symbols. If so, it exits and tells user to check wiki
-if [[ $BRANCH_NAME == *[/\//'!'@\$%\&(){}:;|,._+~£'='¬<>']']*'+' ]];then
+if [[ $BRANCH_NAME == *[\/'!'\@\$\%\&\(\)\:\,\.\_\+\|\~\;\£\=\¬\<\>\]]* ]];then
 # If any of these symbols are found,
   echo $ERROR
   exit 1
