@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code.
+This repo contains the Robotics software team code. For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 
 ## Contributing and Development Environment Instructions
 
@@ -9,14 +9,15 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 ### Prerequisites
-Make sure you are using Ubuntu 16.04 (The ROS distribution we doesn't support anything newer than 16.04).
+Make sure you are using Ubuntu 16.04 (The ROS distribution we use doesn't support anything newer than 16.04).
 
 Make sure the following are installed
 ```
+$ sudo apt install python-pip
 $ sudo apt install virtualenv
 $ sudo apt install git
 ```
-You will also need python3.6, which is by default not in Ubuntu 16.04's available packages.
+You will also need python3.6, which is by default not in Ubuntu 16.04's APT's available packages.
 #### Installing python3.6
 ```
 $ sudo add-apt-repository ppa:deadsnakes/ppa
@@ -149,7 +150,7 @@ Finish the commit and `git push` as usual.
 
 ### Cloning and Pulling
 
-We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages, use the commands below :
+We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
 
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
@@ -158,6 +159,7 @@ Pull : `git pull; git submodule update --init --recursive`
 If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
 
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and this [issue](https://stackoverflow.com/a/51133684/4048657) you may encounter
+
 ### Atom
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
 
