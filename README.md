@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code. For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
+This repo contains the Robotics software team code.
 
 ## Contributing and Development Environment Instructions
 
@@ -29,7 +29,7 @@ $ sudo apt install python3.6
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
@@ -51,7 +51,7 @@ Still in the root directory,
 (venv) $ python setup.py develop
 (venv) $ pytest
 ```
-Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, check out https://github.com/space-concordia-robotics/robotics-prototype/edit/master/README.md
+Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, click [here]( https://github.com/space-concordia-robotics/robotics-prototype/edit/master/README.md)
 
 To deactivate virtualenv, run `deactivate`(you can do this now or later).
 ### Install ROS-Kinetic
@@ -117,11 +117,11 @@ Open a new terminal for changes to apply. You should automatically have a virtua
 For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
 - sudo apt install ffmpeg
 
-You can read about the formatting guide on https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions
+You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-### Using Git
-For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
-#### Commit message hook
+## Using Git
+
+### Commit message hook
 
 This explains how to use and setup a git hook that will prepend the issue number to a commit message.
 Git hooks are used to automate git commands and functions.
@@ -129,24 +129,36 @@ There are a number of different options, but this particular hook will add the i
 `git commit -m` message once it is pushed to the repository.
 Git hooks live in a local `.git/hooks` file of each repo, so initializing this hook in the this repo will not change any other repos you might have.
 
-#### Setting up a git hook
+### Setting up a git hook
 
 If you're in Linux run the following command. If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same command.
 
 From the root of the repository:
 - `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
 
-#### Using the commit hook prepender
+### Using the commit hook prepender
 
 Now, when ever you using `git commit -m` the hook will prepend the issue number to your message.
 This will show up in the repo as [#\<issue number\>], so there is no longer a need to add this to your commit message.
-This will work as long as your branches are named using our branch naming standards defined in our wiki, otherwise the commit will be aborted.
+This will work as long as your branches are named using our branch naming standards defined in our wiki, otherwise the commit will be aborted. For more information on our conventions check [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions).
 
 In order to write a long commit message using `git commit -m`, write a concise title and then press enter twice.
 Then, type as long a message as is appropriate and close the quotation mark. This ensures it will be formatted nicely on github.
 
-Finish the commit and `git push` as usual. For more information on our conventions check [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions).
-#### Atom
+Finish the commit and `git push` as usual.
+
+### Cloning and Pulling
+
+We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages, use the commands below :
+
+Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
+
+Pull : `git pull; git submodule update --init --recursive`
+
+If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
+
+If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and this [issue](https://stackoverflow.com/a/51133684/4048657) you may encounter
+### Atom
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
 
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
