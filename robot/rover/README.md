@@ -29,7 +29,7 @@ This foler contains MCU code for the mobile platform.
 This folder contains MCU code for the science payload.
 
 ### PDS
-This folder contains MCU code for the PDS.
+The PDS code can be found [here](https://gitlab.com/space-concordia-robotics/rover2018-elec/tree/master/mod/pds/PDS_code)
 
 ### TestCode
 This directory contains test code which may or may not go into the main code being developed.
