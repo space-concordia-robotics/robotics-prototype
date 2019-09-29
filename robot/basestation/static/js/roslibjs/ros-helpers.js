@@ -314,8 +314,6 @@ function initRosWeb () {
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data, true, false)
   })
-<<<<<<< HEAD
-=======
   // setup a subscriber for the antenna_goal topic
   antenna_goal_listener = new ROSLIB.Topic({
     ros: ros,

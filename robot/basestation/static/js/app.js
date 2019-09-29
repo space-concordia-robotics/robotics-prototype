@@ -1,9 +1,9 @@
+PING_THROTTLE_TIME = 1000
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
   // @TODO: fix this hacky workaround (refer to issue #142)
   // https://github.com/space-concordia-robotics/robotics-prototype/issues/142
   lastCmdSent = 0
-  PING_THROTTLE_TIME = 1000
   // end of said hacky workaround
 
   const Site = {

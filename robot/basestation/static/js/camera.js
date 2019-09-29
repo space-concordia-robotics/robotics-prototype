@@ -1,7 +1,6 @@
 $(document).ready(() => {
   $('#front-camera-stream-btn').on('click', function (event) {
     event.preventDefault()
-    console.log('fuck')
     // click makes it checked during this time, so trying to enable
     if ($('#front-camera-stream-btn').is(':checked')) {
       requestTask(
