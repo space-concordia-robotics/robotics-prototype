@@ -53,19 +53,19 @@ In my case I used the following eMMC reader to microSD, paired with a Transcend 
 
 1. eMMC module reader
 
-<img src="docs/media/emmc-module-reader.jpg" height="250" width="250">
+<img src="../../docs/media/emmc-module-reader.jpg" height="250" width="250">
 
 2. eMMC module mounted onto reader
 
-<img src="docs/media/emmc-reader-mounted.jpg" height="500" width="500">
+<img src="../../docs/media/emmc-reader-mounted.jpg" height="500" width="500">
 
 3. eMMC module reader mounted onto USB adapter microSD slot
 
-<img src="docs/media/emmc-reader-usb-mounted.jpg" height="500" width="500">
+<img src="../../docs/media/emmc-reader-usb-mounted.jpg" height="500" width="500">
 
 4. Plugged in
 
-<img src="docs/media/usb-emmc-live.jpg" height="500" width="500">
+<img src="../../docs/media/usb-emmc-live.jpg" height="500" width="500">
 
 The next step is to download the ubuntuMATE 16.04 image from [here](https://odroid.in/ubuntu_16.04lts/). Choose the proper image depending on the type of odroid you have.
 For the odroid we are using in competition (xu4) I used `ubuntu-16.04.2-mate-odroid-xu4-20170510.img.xz`.
