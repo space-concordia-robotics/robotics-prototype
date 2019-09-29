@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
 
 # robotics-prototype
-This repo contains the Robotics software team code. For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
+This repo contains the Robotics software team code.
 
 ## Contributing and Development Environment Instructions
 
@@ -55,7 +55,7 @@ Still in the root directory,
 Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, click [here]( https://github.com/space-concordia-robotics/robotics-prototype/edit/master/README.md)
 
 To deactivate virtualenv, run `deactivate`(you can do this now or later).
-### Install ROS-Kinetic
+### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
 $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 $ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
@@ -69,7 +69,7 @@ To verify ROS-Kinetic has been successfully installed, you should do
 $ source /opt/ros/kinetic/setup.bash
 $ roscore
 ```
-### Install rosbridge-suite
+### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 `$ sudo apt install ros-kinetic-rosbridge-suite`
 
 At this point, the virtualenv must be deactivated (or the following won't work). You should be able to now run
@@ -77,7 +77,7 @@ At this point, the virtualenv must be deactivated (or the following won't work).
 $ source /opt/ros/kinetic/setup.bash
 $ roslaunch rosbridge_server rosbridge_websocket.launch
 ```
-### Setup catkin workspaces
+### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
 ```
 $ cd ~
 $ mkdir catkin_ws
@@ -121,7 +121,7 @@ For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
 You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
 ## Using Git
-
+For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 ### Commit message hook
 
 This explains how to use and setup a git hook that will prepend the issue number to a commit message.
