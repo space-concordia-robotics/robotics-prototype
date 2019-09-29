@@ -12,7 +12,7 @@ function printCommandsList () {
 $(document).ready(() => {
   /* PDS commands */
   // setup a client for the pds_request service
-  let pds_request_client = new ROSLIB.Service({
+  pds_request_client = new ROSLIB.Service({
     ros: ros,
     name: 'pds_request',
     serviceType: 'ArmRequest' // for now... might change
