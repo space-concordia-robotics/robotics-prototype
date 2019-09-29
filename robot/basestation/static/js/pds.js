@@ -9,7 +9,7 @@ function printCommandsList () {
   appendToConsole("'l': view key commands")
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
   /* PDS commands */
   // setup a client for the pds_request service
   let pds_request_client = new ROSLIB.Service({
@@ -29,7 +29,7 @@ $(document).ready(function () {
     name: 'pds_flags',
     messageType: 'std_msgs/String'
   })
-  let error_flags_listener.subscribe(function (message) {
+  error_flags_listener.subscribe(function (message) {
     let flags = message.data.split(', ')
     $('#pds-ov-flag').text(parseInt(flags[0]))
     $('#pds-uv-flag').text(parseInt(flags[1]))
@@ -40,7 +40,7 @@ $(document).ready(function () {
     name: 'fan_speeds',
     messageType: 'geometry_msgs/Point'
   })
-  let fan_speeds_listener.subscribe(function (message) {
+  fan_speeds_listener.subscribe(function (message) {
     $('#fan-1-speed').text(parseInt(message.x))
     $('#fan-2-speed').text(parseInt(message.y))
   })
@@ -50,7 +50,7 @@ $(document).ready(function () {
     name: 'pds_feedback',
     messageType: 'std_msgs/String'
   })
-  let pds_feedback_listener.subscribe(function (message) {
+  pds_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data)
   })
 
@@ -166,9 +166,6 @@ $(document).ready(function () {
           }
         }, PDS_REQUEST_TIMEOUT)
       }
-    //} else {
-      //appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
-    //}
   })
 
   $('#reset-general-flags-button').on('click', function (event) {

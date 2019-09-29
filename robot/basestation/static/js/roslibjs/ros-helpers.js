@@ -3,7 +3,7 @@ ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
 function initRosWeb () {
-  let ros = new ROSLIB.Ros({
+  ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
   })
   ros.on('connection', function () {
