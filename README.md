@@ -24,13 +24,13 @@ $ sudo add-apt-repository ppa:deadsnakes/ppa
 $ sudo apt update
 $ sudo apt install python3.6
 ```
-### Setup the root repository
+### Setup the local repository
 
 ```
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
@@ -90,7 +90,7 @@ You need to setup another catkin workspace in robot/rospackages
 $ cd ~/Programming/robotics-prototype/robot/rospackages
 $ catkin_make
 ```
-You can verify that the GUI by running the app.py file in basestation
+You can verify that the GUI is working by running the app.py file in basestation
 ```
 $ cd ~/Programming/robotics-prototype/robot/basestation
 $ python app.py
@@ -106,9 +106,9 @@ export ROS_HOSTNAME=localhost
 # competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
 #export ROS_HOSTNAME=beep
+
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 . ~/Programming/robotics-prototype/venv/bin/activate
-
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 ```
 Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of shortcut aliases. You should now be able to do `startgui` to start the GUI. You can read the .bash_aliases file to see all the new shortcuts.
