@@ -34,7 +34,7 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
-### Setup virtualenv
+### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 
 ```
 $ cd robotics-prototype
@@ -42,11 +42,11 @@ $ virtualenv -p `which python3.6` venv
 $ source venv/bin/activate
 ```
 The virtual environment should now be activated.
-### Install dependencies
+### Install [dependencies](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
 ```
 (venv) $ pip install -r requirements.txt -r requirements-dev.txt
 ```
-### Setup setuptools
+### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
 Still in the root directory,
 ```
 (venv) $ python setup.py develop
@@ -87,13 +87,13 @@ $ catkin_make
 ```
 You need to setup another catkin workspace in robot/rospackages
 ```
-cd ~/Programming/robotics-prototype/robot/rospackages
-catkin_make
+$ cd ~/Programming/robotics-prototype/robot/rospackages
+$ catkin_make
 ```
 You can verify that the GUI by running the app.py file in basestation
 ```
-cd ~/Programming/robotics-prototype/robot/basestation
-python app.py
+$ cd ~/Programming/robotics-prototype/robot/basestation
+$ python app.py
 ```
 ### .bashrc edits
 You should add this to your `~/.bashrc` file.
@@ -164,4 +164,4 @@ If you have access to the GitLab repository, you will need additional setups for
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
 
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
-- Note that the config file `./atom/config.cson` is where the configurations for said packages are stored/versioned for this project.
+- Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
