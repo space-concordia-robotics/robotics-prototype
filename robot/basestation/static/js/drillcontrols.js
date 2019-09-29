@@ -1,5 +1,4 @@
 $(document).ready(() => {
-
     $('#drill-max-speed-go-btn').click(function (msgs) {
       if (!isScienceActivated()) {
         return
@@ -15,6 +14,24 @@ $(document).ready(() => {
         } else {
           appendToConsole('Something went wrong')
         }
+      })
+    })
+
+    $('#drill-ccw-btn').on('click', function (event) {
+      if (!isScienceActivated()) {
+        return
+      }
+      sendRequest('Science', 'dccw', function (msgs) {
+        console.log('msgs', msgs)
+      })
+    })
+
+    $('#drill-cw-btn').on('click', function (event) {
+      if (!isScienceActivated()) {
+        return
+      }
+      sendRequest('Science', 'dcw', function (msgs) {
+        console.log('msgs', msgs)
       })
     })
 

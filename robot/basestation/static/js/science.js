@@ -350,51 +350,6 @@ $(document).ready(function () {
     }
   })
 
-  $('#ccw-btn').on('click', function (event) {
-    if (!isScienceActivated()) {
-      return
-    }
-    sendRequest('Science', 'dccw', function (msgs) {
-      console.log('msgs', msgs)
-    })
-  })
-
-  $('#cw-btn').on('click', function (event) {
-    if (!isScienceActivated()) {
-      return
-    }
-    sendRequest('Science', 'dcw', function (msgs) {
-      console.log('msgs', msgs)
-    })
-  })
-
-  $('#tcw-btn').on('click', function (event) {
-    if (!isScienceActivated()) {
-      return
-    }
-    sendRequest('Science', 'tcw', function (msgs) {
-      console.log('msgs', msgs)
-    })
-  })
-
-  $('#tccw-btn').on('click', function (event) {
-    if (!isScienceActivated()) {
-      return
-    }
-    sendRequest('Science', 'tccw', function (msgs) {
-      console.log('msgs', msgs)
-    })
-  })
-
-  $('#ts-btn').on('click', function (event) {
-    if (!isScienceActivated()) {
-      return
-    }
-    sendRequest('Science', 'ts', function (msgs) {
-      console.log('msgs', msgs)
-    })
-  })
-
   // @TODO: these buttons are flipped because of wiring issues
   // fix the wiring, change back the correct values
   $('#elevator-up-btn').on('click', function (event) {
