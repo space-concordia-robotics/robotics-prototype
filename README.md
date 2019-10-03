@@ -35,13 +35,17 @@ $ git clone https://github.com/space-concordia-robotics/robotics-prototype robot
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
-
 ```
 $ cd robotics-prototype
 $ virtualenv -p `which python3.6` venv
 $ source venv/bin/activate
 ```
-The virtual environment should now be activated.
+You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
+```
+(venv) $ pip install <package>
+```
+It will get installed in the `venv`, and not conflict with other projects installed system-wide.
+
 ### Install [dependencies](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
 ```
 (venv) $ pip install -r requirements.txt -r requirements-dev.txt
@@ -52,66 +56,53 @@ Still in the root directory,
 (venv) $ python setup.py develop
 (venv) $ pytest
 ```
-Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, click [here]( https://github.com/space-concordia-robotics/robotics-prototype/edit/master/README.md)
+Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, click [here]()
 
 To deactivate virtualenv, run `deactivate`(you can do this now or later).
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
-$ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-$ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-$ sudo apt update
-$ sudo apt upgrade
-$ sudo apt install ros-kinetic-desktop-full
+cd ~/
+wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
+chmod 755 ./install_ros_kinetic.sh
+bash ./install_ros_kinetic.sh
 ```
+To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in the `~` directory. Your `~/.bashrc` file was modified, and to make use of the new changes, you should open a new terminal at this point.
 
 To verify ROS-Kinetic has been successfully installed, you should do
 ```
-$ source /opt/ros/kinetic/setup.bash
 $ roscore
 ```
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
-`$ sudo apt install ros-kinetic-rosbridge-suite`
+```$ sudo apt install ros-kinetic-rosbridge-suite```
 
-At this point, the virtualenv must be deactivated (or the following won't work). You should be able to now run
+You should be able to now run
 ```
-$ source /opt/ros/kinetic/setup.bash
 $ roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
-```
-$ cd ~
-$ mkdir catkin_ws
-$ cd catkin_ws
-$ mkdir src
-$ catkin_make
-```
+The first catkin workspace was automatically generated during the scripted installation of ROS, you can see `catkin_ws` in your `~` directory.
+
 You need to setup another catkin workspace in robot/rospackages
 ```
 $ cd ~/Programming/robotics-prototype/robot/rospackages
 $ catkin_make
 ```
-You can verify that the GUI is working by running the app.py file in basestation
-```
-$ cd ~/Programming/robotics-prototype/robot/basestation
-$ python app.py
-```
 ### .bashrc edits
-You should add this to your `~/.bashrc` file.
+You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` using the GNU nano text editor, you can run `eb`. (this shortcut was added in your .bashrc file during the scripted ROS installation, among a few others)
 ```
-source /opt/ros/kinetic/setup.bash
-source ~/catkin_ws/devel/setup.bash
-# local mode
-export ROS_MASTER_URI=http://localhost:11311
-export ROS_HOSTNAME=localhost
-# competition mode
-#export ROS_MASTER_URI=http://172.16.1.30:11311
-#export ROS_HOSTNAME=beep
-
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 . ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 ```
-Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of shortcut aliases. You should now be able to do `startgui` to start the GUI. You can read the .bash_aliases file to see all the new shortcuts.
+Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of shortcut aliases. You can read the /../config/.bash_aliases file to see all the new shortcuts.
+
+#### Run the GUI
+You can verify that the flask GUI is working by running the app.py file located basestation. You can make use of the `base` alias that was previously added, to be automatically directed to the robot/basestation directory.
+
+```
+$ base
+$ python app.py
+```
 
 ### ffmpeg
 
@@ -149,7 +140,6 @@ Then, type as long a message as is appropriate and close the quotation mark. Thi
 Finish the commit and `git push` as usual.
 
 ### Cloning and Pulling
-
 We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
 
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`

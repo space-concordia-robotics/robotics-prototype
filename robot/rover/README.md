@@ -1,5 +1,5 @@
 # Rover
-`The code running on the rover
+The code running on the rover
 
 ## Scripts in this folder
 
