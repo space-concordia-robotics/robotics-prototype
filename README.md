@@ -56,26 +56,27 @@ Still in the root directory,
 (venv) $ python setup.py develop
 (venv) $ pytest
 ```
-Running `pytest` without doing `python setup.py develop` will give an ModuleNotFound error. To read up more on this, click [here]()
+Running `pytest` without doing `python setup.py develop` will give a ModuleNotFound error. To read up more on this, click [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Troubleshooting)
 
-To deactivate virtualenv, run `deactivate`(you can do this now or later).
+To deactivate virtualenv, run `deactivate`.
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
-cd ~/
 wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
 chmod 755 ./install_ros_kinetic.sh
 bash ./install_ros_kinetic.sh
 ```
-To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in the `~` directory. Your `~/.bashrc` file was modified, and to make use of the new changes, you should open a new terminal at this point.
+To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, you should restart your terminal.
 
 To verify ROS-Kinetic has been successfully installed, you should do
 ```
 $ roscore
 ```
+To stop a running process in the command line, press `Ctrl-C`
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
-```$ sudo apt install ros-kinetic-rosbridge-suite```
-
-You should be able to now run
+```
+$ sudo apt install ros-kinetic-rosbridge-suite
+```
+To verify that its working,
 ```
 $ roslaunch rosbridge_server rosbridge_websocket.launch
 ```
@@ -90,20 +91,26 @@ $ catkin_make
 ### .bashrc edits
 You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` using the GNU nano text editor, you can run `eb`. (this shortcut was added in your .bashrc file during the scripted ROS installation, among a few others)
 ```
+#competition mode
+#export ROS_MASTER_URI=http://172.16.1.30:11311
+#export ROS_HOSTNAME=$USER
+
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 . ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 ```
-Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of shortcut aliases. You can read the /../config/.bash_aliases file to see all the new shortcuts.
+Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of aliases. You can read the .bash_aliases file to see all the new aliases.
 
 #### Run the GUI
-You can verify that the flask GUI is working by running the app.py file located basestation. You can make use of the `base` alias that was previously added, to be automatically directed to the robot/basestation directory.
+Firstly, in a new terminal you should run `rosgui` (this is one of the new aliases in .bash_aliases that you added) to launch a ROS server
+
+Back in the original terminal, you can make use of the `base` alias, to be automatically directed to the basestation directory, and then run the app.py file.
 
 ```
 $ base
 $ python app.py
 ```
-
+Alternatively, after running `rosgui` you can run `startgui` to run the GUI.
 ### ffmpeg
 
 For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
