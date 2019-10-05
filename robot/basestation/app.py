@@ -80,19 +80,26 @@ def get_pid(keyword):
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
+@app.route("/arm")
 def index():
     """Current landing page, the arm panel."""
-    return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/rover")
 def rover():
     """Rover control panel."""
-    return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Rover.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/science")
 def science():
     """Science page."""
-    return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Science.html", roverIP=fetch_ros_master_ip())
+
+@app.route("/pds")
+def pds():
+    """PDS page."""
+    return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
+
 
 # routes for science page
 @app.route('/science/numSections')
@@ -102,11 +109,6 @@ def numSections():
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
-
-@app.route("/pds")
-def pds():
-    """PDS page."""
-    return flask.render_template("PDS.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/ping_rover")
 def ping_rover():
