@@ -242,20 +242,6 @@ $(document).ready(function () {
   })
 })
 
-// KEYBOARD EVENTS
-// odroid ping
-document.addEventListener('keydown', function (event) {
-  if (
-    event.ctrlKey &&
-    event.altKey &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-    !$('#servo-val').is(':focus')
-  ) {
-    pingDevice('Odroid')
-    lastCmdSent = new Date().getTime()
-  }
-})
 // rover mcu ping
 document.addEventListener('keydown', function (event) {
   if (
@@ -264,18 +250,6 @@ document.addEventListener('keydown', function (event) {
     !$('#servo-val').is(':focus')
   ) {
     pingDevice('Rover')
-    lastCmdSent = new Date().getTime()
-  }
-})
-// print commands list
-document.addEventListener('keydown', function (event) {
-  if (
-    event.code === 'KeyL' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-    !$('#servo-val').is(':focus')
-  ) {
-    $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
-    printCommandsList()
     lastCmdSent = new Date().getTime()
   }
 })

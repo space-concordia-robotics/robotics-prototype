@@ -195,7 +195,6 @@ $(document).ready(() => {
   Site.init()
 })
 
-
 function printErrToConsole (msg) {
   if (!msg[0]) appendToConsole(msg[1])
 }

@@ -212,18 +212,6 @@ $(document).ready(() => {
 })
 
 // KEYBOARD EVENTS
-// odroid ping
-document.addEventListener('keydown', function (event) {
-  if (
-    event.ctrlKey &&
-    event.altKey &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    pingDevice('Odroid')
-    lastCmdSent = new Date().getTime()
-  }
-})
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
