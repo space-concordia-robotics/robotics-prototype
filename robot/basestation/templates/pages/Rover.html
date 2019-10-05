@@ -2,27 +2,27 @@
 {% block title %}Rover{% endblock %}
 {% block head %}
  {{ super() }}
-   <script src="../static/js/rover.js"></script>
-   <script src="../static/js/console.js"></script>
-   <script src="../static/js/gps.js"></script>
-   <script src="../static/js/navigation.js"></script>
-   <script src="../static/js/camera.js"></script>
-   <script src="../static/js/extra-controls.js"></script>
-   <script src="../static/js/rover-motortable.js"></script>
+   <script src="../../static/js/rover.js"></script>
+   <script src="../../static/js/console.js"></script>
+   <script src="../../static/js/gps.js"></script>
+   <script src="../../static/js/navigation.js"></script>
+   <script src="../../static/js/camera.js"></script>
+   <script src="../../static/js/extra-controls.js"></script>
+   <script src="../../static/js/rover-motortable.js"></script>
 {% endblock %}
 {% block content %}
 <div class="row">
- <div class="col-md-3">{% with device="Rover" %}{% include "Console.html" %}{% endwith %}</div>
+ <div class="col-md-3">{% with device="Rover" %}{% include "elements/feed/Console.html" %}{% endwith %}</div>
  <div class="col-md-3">
-     {% include 'GPS.html' %}
-     {% include 'RoverMotorTable.html' %}
+     {% include 'elements/navigation/GPS.html' %}
+     {% include 'elements/feed/RoverMotorTable.html' %}
  </div>
- <div class="col-md-6">{% include 'CameraFeed.html' %}</div>
+ <div class="col-md-6">{% include 'elements/feed/CameraFeed.html' %}</div>
 </div>
 <div class="row">
-  <div class="col-md-3">{% include 'Navigation.html' %}</div>
-  <div class="col-md-4">{% include 'RoverMotorControls.html' %}</div>
-  <div class="col-md-3">{% include 'CameraControls.html' %}</div>
-  <div class="col-md-2">{% with device="Rover" %}{% include 'ExtraControls.html' %}{% endwith %}</div>
+  <div class="col-md-3">{% include 'elements/navigation/Navigation.html' %}</div>
+  <div class="col-md-4">{% include 'elements/controls/RoverMotorControls.html' %}</div>
+  <div class="col-md-3">{% include 'elements/controls/CameraControls.html' %}</div>
+  <div class="col-md-2">{% with device="Rover" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}
