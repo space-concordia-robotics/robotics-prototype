@@ -23,15 +23,12 @@ $(document).ready(() => {
         prefer_theme(preferred_theme);
     }
 
-    $('#theme-red').click(function () {
-        prefer_theme('red');
+    $('#theme-light').click(function () {
+        console.log('theme-light');
+        prefer_theme('light');
     });
-    $('#theme-green').click(function () {
-        console.log('theme-green');
-        prefer_theme('green');
-    });
-    $('#theme-blue').click(function () {
-        console.log('theme-blue');
-        prefer_theme('blue');
+    $('#theme-dark').click(function () {
+        console.log('theme-dark');
+        prefer_theme('dark');
     });
 });
