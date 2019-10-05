@@ -2,10 +2,11 @@ html, body {
     background-color: #1C1D2F;
 }
 
-/*    Trying to override the bootstrap navbar coloring
 .navbar {
     background-color: #0C120C;
 }
+
+/*    Trying to override the bootstrap navbar coloring
 
 .navbar .nav > li > a {
     float: none;
