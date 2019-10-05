@@ -30,7 +30,7 @@ $ sudo apt install python3.6
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
@@ -99,9 +99,16 @@ You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` 
 . ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 ```
-Open a new terminal for changes to apply. You should automatically have a virtual environment activated. The last line added a couple of aliases. You can read the .bash_aliases file to see all the new aliases.
+**Open a new terminal for changes to apply**. You should automatically have a virtual environment activated. The last line added a couple of aliases. You can read the .bash_aliases file to see all the new aliases.
 
-#### Run the GUI
+### Setup env.js
+You will need to provide the IP that the GUI will work with. By running this script, everything is handled.
+
+```
+./robot/basestation/env.sh > robot/basestation/static/js/env.js
+```
+
+### Run the GUI
 Firstly, in a new terminal you should run `rosgui` (this is one of the new aliases in .bash_aliases that you added) to launch a ROS server
 
 Back in the original terminal, you can make use of the `base` alias, to be automatically directed to the basestation directory, and then run the app.py file.
