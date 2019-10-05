@@ -25,3 +25,4 @@ tornado==6.0.2
 bson==0.5.8
 pymongo==3.8.0
 image==1.5.27
+Twisted==19.7.0

@@ -90,6 +90,20 @@ $(document).ready(() => {
     }
   })
 
+  $('#flip-stream').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimg180')
+  })
+
+  $('#flip-stream-ccw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgccw')
+    $('#camera-feed').toggleClass('stretch-down')
+  })
+
+  $('#flip-stream-cw').on('click', function () {
+    $('#camera-feed').toggleClass('rotateimgcw')
+    $('#camera-feed').toggleClass('stretch-down')
+  })
+
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
@@ -246,5 +260,25 @@ $(document).ready(() => {
       // enter key
       // copy code from above
     }
+  })
+
+  $( "#arm-page" ).click(function() {
+    window.open('/arm');
+  })
+
+  $( "#rover-page" ).click(function() {
+    window.open('rover');
+  })
+
+  $( "#science-page" ).click(function() {
+    window.open('science');
+  })
+
+  $( "#pds-page" ).click(function() {
+    window.open('pds');
+  })
+
+  $( "#streams-page" ).click(function() {
+    window.open('stream');
   })
 })
