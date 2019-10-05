@@ -14,3 +14,7 @@ install:
 script:
   # - cd tests/unit/ # unnecessary
   - pytest
+
+# bypass submodules because gitlab requires authentication for pull
+git:
+  submodules: false
