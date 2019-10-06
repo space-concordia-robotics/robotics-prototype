@@ -117,7 +117,7 @@ Back in the original terminal, you can make use of the `base` alias, to be autom
 $ base
 $ python app.py
 ```
-Alternatively, after running `rosgui` you can run `startgui` to run the GUI.
+Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 ### ffmpeg
 
 For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
