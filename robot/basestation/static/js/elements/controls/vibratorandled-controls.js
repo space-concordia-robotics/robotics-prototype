@@ -1,5 +1,11 @@
 $(document).ready(()=> {
 
+  function toggleOffAllVibrators () {
+    for (let i = 0; i < 6; i++) {
+      $('#vibrator' + (i + 1) + '-toggle')[0].checked = false
+    }
+  }
+  
     for (let i = 0; i < 2; i++) {
       $('#led' + (i + 1) + '-toggle').click(function (event) {
         event.preventDefault()

@@ -1,4 +1,10 @@
 $(document).ready(() => {
+  // convenience UI functions
+  function toggleOffAllPumps () {
+    for (let i = 0; i < 5; i++) {
+      $('#pump' + (i + 1) + '-drive-toggle')[0].checked = false
+    }
+  }
 
     let pumpDriveToggles = [
       '#pump1-drive-toggle',
