@@ -3,7 +3,7 @@ ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
 function initRosWeb () {
-  let ros = new ROSLIB.Ros({
+  ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
   })
   ros.on('connection', function () {
@@ -294,17 +294,7 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-rear-rpm').text(message.velocity[5])
   })
-  // setup a subscriber for the rover_position topic
-  rover_position_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_position',
-    messageType: 'geometry_msgs/Point'
-  })
-  rover_position_listener.subscribe(function (message) {
-    $('#rover-latitude').text(message.x)
-    $('#rover-longitude').text(message.y)
-    $('#rover-heading').text(message.z)
-  })
+
   // setup a subscriber for the rover_twist topic
   rover_twist_listener = new ROSLIB.Topic({
     ros: ros,
@@ -368,19 +358,6 @@ function initRosWeb () {
     name: 'goal_longitude'
   })
 
-  /* PDS commands */
-  // setup a client for the pds_request service
-  pds_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'pds_request',
-    serviceType: 'ArmRequest' // for now... might change
-  })
-  // setup a publisher for the pds_command topic
-  pds_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_command',
-    messageType: 'std_msgs/String'
-  })
   // setup a subscriber for the battery_voltage topic
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
@@ -415,38 +392,7 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
-  error_flags_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_flags',
-    messageType: 'std_msgs/String'
-  })
-  error_flags_listener.subscribe(function (message) {
-    let flags = message.data.split(', ')
-    $('#pds-ov-flag').text(parseInt(flags[0]))
-    $('#pds-uv-flag').text(parseInt(flags[1]))
-    $('#pds-critical-flag').text(parseInt(flags[2]))
-  })
-  fan_speeds_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'fan_speeds',
-    messageType: 'geometry_msgs/Point'
-  })
-  fan_speeds_listener.subscribe(function (message) {
-    $('#fan-1-speed').text(parseInt(message.x))
-    $('#fan-2-speed').text(parseInt(message.y))
-  })
-  // setup a subscriber for the pds_feedback topic
-  pds_feedback_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_feedback',
-    messageType: 'std_msgs/String'
-  })
-  pds_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
-  })
 }
-
-initRosWeb()
 
 /* functions used in main code */
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {

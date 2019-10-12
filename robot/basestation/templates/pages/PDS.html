@@ -1,0 +1,25 @@
+{% extends "pages/Base.html" %}
+{% block title %}PDS{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../../static/js/pages/pds.js"></script>
+   <script src="../../static/js/elements/feed/console.js"></script>
+   <script src="../../static/js/elements/feed/armtable.js"></script>
+   <script src="../../static/js/elements/feed/rover-motortable.js"></script
+{% endblock %}
+{% block content %}
+<div class="row">
+ <div class="col-md-4">
+   {% with device="PDS" %}{% include "elements/feed/Console.html" %}{% endwith %}
+ </div>
+ <div class="col-md-4">
+   {% include 'elements/controls/PdsControls.html' %}
+   {% with device="PDS" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}
+ </div>
+ <div class="col-md-4">
+   {% include 'elements/feed/PdsExtraTable.html' %}
+   {% include 'elements/feed/RoverMotorTable.html' %}
+   {% include 'elements/feed/ArmMotorTable.html' %}
+ </div>
+</div>
+{% endblock %}
