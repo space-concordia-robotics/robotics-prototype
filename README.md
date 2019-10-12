@@ -80,12 +80,12 @@ To stop a running process in the command line, press `Ctrl-C`
 ```
 $ sudo apt install ros-kinetic-rosbridge-suite
 ```
-To verify that its working, deactivate `venv` with `deactivate venv`
+To verify that its working, deactivate `venv` with `deactivate`
 ```
 $ roslaunch rosbridge_server rosbridge_websocket.launch
-
-You will need `venv` activated for everything except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
 ```
+You will need `venv` activated for everything except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
+
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
 The first catkin workspace was automatically generated during the scripted installation of ROS, you can see `catkin_ws` in your `~` directory.
 
