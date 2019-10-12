@@ -21,8 +21,9 @@ Teams that have moved swiftly at the beginning of projects can find themselves m
 
 ### Functions
 
-#### Role
+#### Do one thing
 
+Functions should do one thing. They should do it well. They should do it only. One symptom of doing more than one thing is having sections within functions.
 
 #### Size
 
@@ -63,6 +64,7 @@ There are more changes we could do to improve this function that we will see lat
 
 
 ### Coupling
+<<<<<<< HEAD
 
 #### Modularity
 
@@ -71,6 +73,32 @@ There are more changes we could do to improve this function that we will see lat
 ### Comments
 
 #### Rotted Comments
+=======
+Coupling is the degree of interdependence between software modules.
+
+#### Modularity
+Since the rover needs to be modular, we need to have very loose coupling. The software needs to have independent modules that we can quickly swap out. This is one of the many reasons we use ROS, which creates a modular foundation.
+
+#### Levels of abstraction
+it is a best practice to abstract the code into different layers. For example, code related to communication with ROS should not include GUI changes. Common layers are GUI, Logic, Communication.
+
+
+### Comments
+Comments can be a blessing or a cure. Proper documentation can help developers while bad documentation can obstruct or mislead them.
+
+#### Useless comments
+Ideal code is self explanatory. Do not comment when it is obvious like
+
+```
+//Initialize ROS
+initRos();
+```
+
+This adds lines for the programmers to read without adding any value.
+
+#### Rotted Comments
+One major issue with comments is that they rot. Before writing a comment, make sure that this comment will still be relevant after the code passes through a lot of changes.
+>>>>>>> f11aa33... Add section on comments
 
 ### Meaningful names
 
