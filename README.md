@@ -34,6 +34,10 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
+If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
+
+If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
+
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 ```
 $ cd robotics-prototype
@@ -76,9 +80,11 @@ To stop a running process in the command line, press `Ctrl-C`
 ```
 $ sudo apt install ros-kinetic-rosbridge-suite
 ```
-To verify that its working,
+To verify that its working, deactivate `venv` with `deactivate venv`
 ```
 $ roslaunch rosbridge_server rosbridge_websocket.launch
+
+You will need `venv` activated for everything except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
 ```
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
 The first catkin workspace was automatically generated during the scripted installation of ROS, you can see `catkin_ws` in your `~` directory.
