@@ -19,17 +19,19 @@ Teams that have moved swiftly at the beginning of projects can find themselves m
 
 ## Best Practices
 
-### Functions
+These best practices are mostly taken from the book `Clean Code, A Handbook of Agile Craftsmanship` by Robert C. Martin 
 
-#### Do one thing
+### 1. Functions
+
+#### 1.1 Do one thing
 
 Functions should do one thing. They should do it well. They should do it only. One symptom of doing more than one thing is having sections within functions.
 
-#### Size
+#### 1.2 Size
 
-Size does matter! The size of the function should be small. A function that cannot be read in one screen should definitely be split up.
+Size does matter! The size of the function should be **small**. A function that cannot be read in one screen should definitely be split up.
 
-#### Duplication
+#### 1.3 Duplication
 
 Duplicating code is one of the primary source of hard to maintain code. Here is an example of duplicated code in the code base of robotics-prototype
 
@@ -63,30 +65,20 @@ What we gain by eliminating duplication is the need to change the function multi
 There are more changes we could do to improve this function that we will see later.
 
 
-### Coupling
-<<<<<<< HEAD
-
-#### Modularity
-
-#### Levels of abstraction
-
-### Comments
-
-#### Rotted Comments
-=======
+### 2. Coupling
 Coupling is the degree of interdependence between software modules.
 
-#### Modularity
+#### 2.1 Modularity
 Since the rover needs to be modular, we need to have very loose coupling. The software needs to have independent modules that we can quickly swap out. This is one of the many reasons we use ROS, which creates a modular foundation.
 
-#### Levels of abstraction
-it is a best practice to abstract the code into different layers. For example, code related to communication with ROS should not include GUI changes. Common layers are GUI, Logic, Communication.
+#### 2.2 Levels of abstraction
+It is a best practice to abstract the code into different layers. For example, code related to communication with ROS should not include GUI changes. Common layers are GUI, Logic, Communication.
 
 
-### Comments
+### 3. Comments
 Comments can be a blessing or a cure. Proper documentation can help developers while bad documentation can obstruct or mislead them.
 
-#### Useless comments
+#### 3.1 Useless comments
 Ideal code is self explanatory. Do not comment when it is obvious like
 
 ```
@@ -96,11 +88,14 @@ initRos();
 
 This adds lines for the programmers to read without adding any value.
 
-#### Rotted Comments
-One major issue with comments is that they rot. Before writing a comment, make sure that this comment will still be relevant after the code passes through a lot of changes.
->>>>>>> f11aa33... Add section on comments
+#### 3.2 Rotted Comments
+One major issue with comments is that they rot with time. Before writing a comment, make sure that this comment will still be relevant after the code passes through a lot of changes.
 
-### Meaningful names
+#### 3.3 Todos
+Do not write any `Todo` comments. These get easily lost and forgotten. Open an issue instead.
+ 
+
+### 4. Meaningful names
 
 With the function that we improved above there is still a glaring issue :
 
@@ -112,7 +107,7 @@ void Commands::setTto(bool throttleTimeOut) {
 }
 ```
 
-What the heck is `TTO`? Observing this function and argument, it's obvious that it's for `Throttle Timeout`. However, imagine that you were stumbling upon a call to this function like this
+What the heck is `TTO`? By observing this function and it's argument, it is obvious that it's for `Throttle Timeout`. However, imagine that you were stumbling upon a call to this function like this
 
 ```
 //some code
@@ -121,10 +116,10 @@ setTto(false);
 ```
 To know what `TTO` means, you need to go to the function definition which could be tedious if you have to do this often.
 
-Furthermore, you'd expect `throttleTimeOut` to be a number, such as the timeout time, but it is a boolean.
+Furthermore, you would expect `throttleTimeOut` to be a number, the timeout time, but it is a boolean.
 
 ```
-void Commands::setThrottleTimeout(bool hasThrottleTimeout) {
+void Commands::hasThrottleTimeout(bool hasThrottleTimeout) {
     String msg = "ASTRO Throttle Timeout " + String(hasThrottleTimeout ? "On" : "Off");
     println(msg);
 }
@@ -135,7 +130,19 @@ Boolean variable should start with `has` or `is`.
 
 ```
 //some code
-setThrottleTimeout(false);
+hasThrottleTimeout(false);
 //more code
 ```
-### Error Handling
+Now it is much cleaner when the call is being read.
+
+## Programming Specific Guidelines
+
+### Python
+
+We use the PEP8 Style Guide. Please refer to it [here](https://www.python.org/dev/peps/pep-0008/)
+
+### JavaScript
+
+### C++
+
+### HTML/CSS
