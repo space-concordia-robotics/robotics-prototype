@@ -135,22 +135,20 @@ You can read about the formatting guide [here](https://github.com/space-concordi
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 ### Commit message hook
 
-This explains how to use and setup a git hook that will prepend the issue number to a commit message.
-Git hooks are used to automate git commands and functions.
-There are a number of different options, but this particular hook will add the issue number to your
-`git commit -m` message once it is pushed to the repository.
-Git hooks live in a local `.git/hooks` file of each repo, so initializing this hook in the this repo will not change any other repos you might have.
+This explains how to setup git hooks which prepend an issue number to a commit message, and verify branch naming conventions. Git hooks are located in the local `.git/hooks` file of each repo, so initializing this hook in the this repo will not change any other repos you might have.
 
-### Setting up a git hook
+### Setting up git hooks
 
-If you're in Linux run the following command. If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same command.
+Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-From the root of the repository:
-- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
+- `cp commit-message-hook .git/hooks/prepare-commit-msg.sh`
+- `cp branch-verification-hook .git/hooks/post-checkout.sh`
 
-### Using the commit hook prepender
+If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
-Now, when ever you using `git commit -m` the hook will prepend the issue number to your message.
+### The commit hook prepender and branch verification hook
+
+Now, when ever you using `git commit -m` commit-message-hook will prepend the issue number to your message.
 This will show up in the repo as [#\<issue number\>], so there is no longer a need to add this to your commit message.
 This will work as long as your branches are named using our branch naming standards defined in our wiki, otherwise the commit will be aborted. For more information on our conventions check [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions).
 
@@ -158,6 +156,8 @@ In order to write a long commit message using `git commit -m`, write a concise t
 Then, type as long a message as is appropriate and close the quotation mark. This ensures it will be formatted nicely on github.
 
 Finish the commit and `git push` as usual.
+
+Lastly, the branch-verification-hook will verify if the names of newly created branches follow our naming conventions explained [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions).
 
 ### Cloning and Pulling
 We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
