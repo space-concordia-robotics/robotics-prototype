@@ -1,0 +1,41 @@
+{% extends "pages/Base.html" %}
+{% block title %}Science{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../../static/js/pages/science.js"></script>
+   <script src="../../static/js/elements/controls/drill-controls.js"></script>
+   <script src="../../static/js/elements/controls/turntable-controls.js"></script>
+   <script src="../../static/js/elements/controls/elevator-controls.js"></script>
+   <script src="../../static/js/elements/controls/pump-controls.js"></script>
+   <script src="../../static/js/elements/controls/vibratorandled-controls.js"></script>
+   <script src="../../static/js/elements/feed/camera.js"></script>
+   <script src="../../static/js/elements/feed/console.js"></script>
+{% endblock %}
+{% block content %}
+	<div class="container fill">
+		<div>
+			<div class="row">
+				<div class="col-md">
+          {% include 'elements/controls/DrillControls.html' %}
+          {% include 'elements/controls/ElevatorControls.html' %}
+				</div>
+        <div>
+            {% include 'elements/controls/TurntableControls.html' %}
+        </div>
+				<div class="col-md">
+          <!-- These components were commented out since they were not useful for ERC 2019 -->
+          <!-- NOTE: Jinja comments have their own syntax, HTML style comments will not work -->
+          {#{% include 'elements/controls/PumpControls.html' %}#}
+          {#{% include 'elements/controls/VibratorAndLEDControls.html' %}#}
+          {% include 'elements/controls/ExtraControls.html' %}
+        </div>
+        <div class="col-md-6" align="center">
+          {% include 'elements/feed/CameraFeed.html' %}
+        </div>
+        <div class="col-md-6" align="center">
+          {% with device="Science" %}{% include 'elements/feed/Console.html' %}{% endwith %}
+        </div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
