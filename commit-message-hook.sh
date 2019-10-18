@@ -7,9 +7,6 @@ fi
 # Include any branches for which you wish to disable this script
   BRANCHES_TO_SKIP=(master develop staging test)
 
-#Error message to be returned if branch name is not named properly
-BRANCH_NAME_ERROR="Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Work-Flow"
-
 # Get the current branch name
 BRANCH_NAME=$(git symbolic-ref --short HEAD)
 
@@ -28,6 +25,6 @@ if [[ $TRIMMED =~ [\$0-9] ]];then
     sed -i.bak -e "1s/^/[#$TRIMMED] /" $1
 fi
  else
-    echo $BRANCH_NAME_ERROR
+    echo "Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Work-Flow"
     exit 1
 fi
