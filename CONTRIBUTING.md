@@ -4,7 +4,7 @@
 
 ### Why do we even need guidelines in the first place?
 
-At the beginning, Space Concordia Robotics was small and the code base was maintained by two individuals that knew their code inside out. The robotics team is now growing with members of a wide range of programming experience. Due to the negligence of the best practices, the code became spaghetti and almost impossible to read for new members. It is hard to debug and to test. We need clean code because
+At the beginning, Space Concordia Robotics was small. The code base was maintained by two individuals that knew the code very well. The robotics team is now growing with new members of a wide range of programming experience. Due to the negligence of the best practices, the code became spaghetti and almost impossible to read for new members. It is hard to debug and to test. We need clean code because
 
 #### Clean code is easier to read
 
@@ -25,7 +25,7 @@ These best practices are mostly taken from the book `Clean Code, A Handbook of A
 
 #### 1.1 Do one thing
 
-Functions should do one thing. They should do it well. They should do it only. One symptom of doing more than one thing is having sections within functions.
+Functions should do one thing. They should do it well. They should do it only. One symptom of doing more than one thing is having sections within functions. These can oftentimes easily be split up into subroutines that will only have a specific role.
 
 #### 1.2 Size
 
@@ -95,7 +95,9 @@ One major issue with comments is that they rot with time. Before writing a comme
 Do not write any `Todo` comments. These get easily lost and forgotten. Open an issue instead.
  
 
-### 4. Meaningful names
+### 4. Meaningful Names
+
+#### 4.1 Variable Names
 
 With the function that we improved above there is still a glaring issue :
 
@@ -135,6 +137,11 @@ hasThrottleTimeout(false);
 ```
 Now it is much cleaner when the call is being read.
 
+#### 4.2 Magic Values
+
+
+
+
 ## Programming Specific Guidelines
 
 ### Python
@@ -143,6 +150,14 @@ We use the PEP8 Style Guide. Please refer to it [here](https://www.python.org/de
 
 ### JavaScript
 
+We are attempting to use a strict variant of JavaScript. We have not enable `strict mode` yet, but all future code should respect the strict variant of JavaScript which can be found [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)
+
+We are also using JQuery, therefore you should use JQuery for document traversal and and manipulation. 
+
 ### C++
 
+While we have not officially started using standard programming practices. Future C++ code should use the C++ core guidelines defined [here](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-introduction)
+
+
 ### HTML/CSS
+
