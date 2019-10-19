@@ -139,6 +139,23 @@ Now it is much cleaner when the call is being read.
 
 #### 4.2 Magic Values
 
+Magic values (or magic numbers) are values used with unexplained context.
+
+An example of the usage of a magic value :
+```
+if (isPressed(input[65]))
+```
+
+We do not know what `65` is.
+
+To fix this problem, we can simply defined a constant.
+
+```
+if (isPressed(input[A_KEY]))
+```
+
+
+Magic values should be avoided and replaced by variables or constants with names that self-describes their behavior.
 
 
 
@@ -154,10 +171,18 @@ We are attempting to use a strict variant of JavaScript. We have not enable `str
 
 We are also using JQuery, therefore you should use JQuery for document traversal and and manipulation. 
 
+JavaScript should be organized per Jinja template.
+
 ### C++
 
 While we have not officially started using standard programming practices. Future C++ code should use the C++ core guidelines defined [here](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-introduction)
 
 
-### HTML/CSS
+### HTML
 
+HTML code must be placed in templates using [Jinja](https://palletsprojects.com/p/jinja/). Note that Jinja is included with Flask. Each module should have it's own HTML to meet our modularity requirements.
+
+### CSS
+CSS code should be organized per Jinja template along with JavaScript and HTML.
+
+Display values should avoid being hardcoded as they hurt the ease of responsiveness.
