@@ -185,4 +185,6 @@ HTML code must be placed in templates using [Jinja](https://palletsprojects.com/
 ### CSS
 CSS code should be organized per Jinja template along with JavaScript and HTML.
 
-Display values should avoid being hardcoded as they hurt the ease of responsiveness.
+Display values should avoid being hardcoded (such as width for example) as they hurt the ease of responsiveness. Instead, bootstrap columns should be used to adjust width.
+
+CSS should be regrouped together. Inline CSS should not be present.
