@@ -141,8 +141,8 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-- `cp commit-message-hook .git/hooks/prepare-commit-msg.sh`
-- `cp branch-verification-hook .git/hooks/post-checkout.sh`
+- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg.sh`
+- `cp branch-verification-hook.sh .git/hooks/post-checkout.sh`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
@@ -157,7 +157,7 @@ Then, type as long a message as is appropriate and close the quotation mark. Thi
 
 Finish the commit and `git push` as usual.
 
-Lastly, the branch-verification-hook will verify if the names of newly created branches follow our naming conventions explained [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions).
+Lastly, the branch-verification-hook will verify if the names of newly created branches follow our naming conventions explained [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions). Note that this hook will only run after entering git checkout <branch-name>, and not when the branch is created.
 
 ### Cloning and Pulling
 We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
