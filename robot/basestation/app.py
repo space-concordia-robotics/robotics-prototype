@@ -250,32 +250,31 @@ def capture_image():
 # This is called on if ffmpeg isn't already recording when the record toggle button is clicked
 @app.route("/start_recording_feed/<stream>", methods=["POST", "GET"])
 def start_recording_feed(stream):
-    # Get system time
     date = datetime.datetime.now().strftime("%I:%M:%S_%B_%d_%Y")
     # Name of file to be saved
     name = stream + '_' + date
     # Get stream url
     stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
     # Message to print to log
-    msg = 'recording feed for ' + stream
+    msg = 'recording feed of ' + stream
     # folder where to save recordings
     dir = 'rover_video_feed_clips_' + stream
 
     # Run ffmpeg to start recording stream as a subprocess
     subprocess.Popen(['mkdir ' + dir], shell=True)
-    global proc # proc is a global variable so that another function can send a byte to ffmpeg to stop recording
-    proc = {}
-    proc[stream] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + dir + '/' + name + '.mp4'], stdin=PIPE, shell=True)
+    global proc_v # proc is a global variable so that another function can send a byte to ffmpeg to stop recording
+    proc_v = {}
+    proc_v[stream] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + dir + '/' + name + '.mp4'], stdin=PIPE, shell=True)
     return jsonify(msg=msg)
 
 # This is called on if ffmpeg is already recording when the record toggle button is clicked
 @app.route("/stop_recording_feed/<stream>", methods=["POST", "GET"])
 def stop_recording_feed(stream):
     # Message to print to log
-    msg = 'saved recording for ' + stream
+    msg = 'saved recording of ' + stream
 
     # stop the recording by sending 'q' byte to ffmpeg
-    proc[stream].communicate(b'q')
+    proc_v[stream].communicate(b'q')
     return jsonify(msg=msg)
 
 if __name__ == "__main__":
