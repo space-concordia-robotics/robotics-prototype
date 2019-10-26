@@ -93,6 +93,9 @@ One major issue with comments is that they rot with time. Before writing a comme
 
 #### 3.3 Todos
 Do not write any `Todo` comments. These get easily lost and forgotten. Open an issue instead.
+
+#### 3.4 Commented code
+Avoid commenting code. A lot of the code that is commented, never gets uncommented again. It is a better practice to remove the code. We are using git as a version control tool, this means that old code can always be recuperated.
  
 
 ### 4. Meaningful Names
