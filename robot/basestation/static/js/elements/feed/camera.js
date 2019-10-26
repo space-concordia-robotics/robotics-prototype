@@ -112,6 +112,39 @@ $(document).ready(() => {
     })
   })
 
+  $('#record-video-toggle').on('click', function (event) {
+    var el = $(this); // variable of button text
+
+    // Swap button text out for 'Start recording feed' if button says 'Stop recording feed'
+    // run stop recording feed function in app.py
+    if (el.text() == el.data("text-swap")) {
+        el.text(el.data("text-original"));
+        el.css({ 'font-weight': 'bold' }) // Change font back to bold
+
+        // Call on stop_recording_feed function in app.py
+        $.ajax('/stop_recording_feed/default', {
+            success: function (data) {
+                appendToConsole(data.msg)
+            }
+        })
+    }
+
+    // Swap button text out for 'Stop recording feed' if button says 'Start recording feed'
+    // run start_recording_feed function in app.py
+    else {
+      el.data("text-original", el.text());
+      el.text(el.data("text-swap"));
+      el.css({ 'font-weight': 'bold' }) // Change font back to bold
+
+      // Call on start_recording_feed function in app.py
+      $.ajax('/start_recording_feed/default', {
+            success: function (data) {
+                appendToConsole(data.msg)
+            }
+        })
+    }
+  })
+
   $('#arm-science-camera-stream-btn').on('click', function (event) {
     event.preventDefault()
     // click makes it checked during this time, so trying to enable
