@@ -76,7 +76,7 @@ It is a best practice to abstract the code into different layers. For example, c
 
 
 ### 3. Comments
-Comments can be a blessing or a cure. Proper documentation can help developers while bad documentation can obstruct or mislead them.
+Comments can be a blessing or a curse. Proper documentation can help developers while bad documentation can obstruct or mislead them.
 
 #### 3.1 Useless comments
 Ideal code is self explanatory. Do not comment when it is obvious like
@@ -92,7 +92,7 @@ This adds lines for the programmers to read without adding any value.
 One major issue with comments is that they rot with time. Before writing a comment, make sure that this comment will still be relevant after the code passes through a lot of changes.
 
 #### 3.3 Todos
-Do not write any `Todo` comments. These get easily lost and forgotten. Open an issue instead.
+Do not write any `Todo` comments. These get easily lost and forgotten. Open an issue instead. It is fine to create `TODO`s as self-reminder on a certain branch as opening an issue may not be appropriate. However, `TODO`s should be removed prior to opening the Pull Request.
 
 #### 3.4 Commented code
 Avoid commenting code. A lot of the code that is commented, never gets uncommented again. It is a better practice to remove the code. We are using git as a version control tool, this means that old code can always be recuperated.
