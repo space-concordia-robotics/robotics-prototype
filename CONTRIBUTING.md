@@ -88,7 +88,7 @@ initRos();
 
 This adds lines for the programmers to read without adding any value.
 
-#### 3.2 Rotted Comments
+#### 3.2 Rotten Comments
 One major issue with comments is that they rot with time. Before writing a comment, make sure that this comment will still be relevant after the code passes through a lot of changes.
 
 #### 3.3 Todos
