@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.5.1)
+project(robotics-science CXX)
+set(SCIENCE_SRC Science.ino)
+message("Building Science")
+add_executable(Science ${SCIENCE_SRC})
+set_target_properties(Science PROPERTIES LINKER_LANGUAGE CXX)
