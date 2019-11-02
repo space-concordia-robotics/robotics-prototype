@@ -25,42 +25,52 @@ These best practices are mostly taken from the book `Clean Code, A Handbook of A
 
 #### 1.1 Do one thing
 
-Functions should do one thing. They should do it well. They should do it only. One symptom of doing more than one thing is having sections within functions. These can oftentimes easily be split up into subroutines that will only have a specific role.
+Functions should do one thing. They should do it well. They should do it only. This is called the Single Responsibility Principle (SRP). One symptom of doing more than one thing is having sections within functions. These can oftentimes easily be split up into subroutines that will only have a specific role. Additionally, this software engineering design principle extends to classes. Classes should have a clear purpose and not attempt to be a Swiss Army Knife.
 
 #### 1.2 Size
 
-Size does matter! The size of the function should be **small**. A function that cannot be read in one screen should definitely be split up.
+Size does matter! The size of the function should be **small**. We do not impose a hard limit on the number of lines of code. However, common sense should be applied. Code should be able to be read on a single monitor. It should be short enough to be able to conceptualize the logc in your head. Use common sense.  
 
 #### 1.3 Duplication
 
 Duplicating code is one of the primary source of hard to maintain code. Here is an example of duplicated code in the code base of robotics-prototype
 
 ```
-void Commands::ttoOn(void) {
-    throttleTimeOut = true;
-    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
-    println(msg);
-
+void Commands::accOn(void) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = true;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
 }
-void Commands::ttoOff(void) {
-    throttleTimeOut = false;
-    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
-    println(msg);
-
+void Commands::accOff(void) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = false;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
 }
 ```
 
 Which can just be simplified to
 
 ```
-void Commands::setTto(bool throttleTimeOut) {
-    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
-    println(msg);
-
+void Commands::acc(bool hasAccelerationLimit) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = hasAccLimit;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
 }
 ```
 
-What we gain by eliminating duplication is the need to change the function multiple times to make changes. If the logic above need to add another instruction, we would need to change `ttoOn(void)` and `ttoOff(void)` while now we only need to change `setTto(bool)`
+What we gain by eliminating duplication is the need to change the function multiple times to make changes. If the logic above need to add another instruction, we would need to change `accOn(void)` and `accOff(void)` while now we only need to change `acc(bool)`
 
 There are more changes we could do to improve this function that we will see later.
 
@@ -105,40 +115,45 @@ Avoid commenting code. A lot of the code that is commented, never gets uncomment
 With the function that we improved above there is still a glaring issue :
 
 ```
-void Commands::setTto(bool throttleTimeOut) {
-    String msg = "ASTRO Throttle Timeout " + String(throttleTimeOut ? "On" : "Off");
-    println(msg);
-
+void Commands::acc(bool hasAccelerationLimit) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = hasAccLimit;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
 }
 ```
 
-What the heck is `TTO`? By observing this function and it's argument, it is obvious that it's for `Throttle Timeout`. However, imagine that you were stumbling upon a call to this function like this
+What the heck is `acc`? By observing this function and it's argument, it is obvious that it's for `Acceleration Limit`. However, imagine that you were stumbling upon a call to this function like this
 
 ```
 //some code
-setTto(false);
+acc(false);
 //more code
 ```
-To know what `TTO` means, you need to go to the function definition which could be tedious if you have to do this often.
-
-Furthermore, you would expect `throttleTimeOut` to be a number, the timeout time, but it is a boolean.
+To know what `acc` means, you need to go to the function definition which could be tedious if you have to do this often.
 
 ```
-void Commands::hasThrottleTimeout(bool hasThrottleTimeout) {
-    String msg = "ASTRO Throttle Timeout " + String(hasThrottleTimeout ? "On" : "Off");
-    println(msg);
+void Commands::setAccelerationLimit(bool hasAccelerationLimit) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = hasAccLimit;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        println(msg);
+    }
 }
 ```
 
-Boolean variable should start with `has` or `is`.
-
-
-```
-//some code
-hasThrottleTimeout(false);
-//more code
-```
 Now it is much cleaner when the call is being read.
+
+```
+//some code
+setAccelerationLimit(false)
+//more code
+```
 
 #### 4.2 Magic Values
 
