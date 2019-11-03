@@ -1,4 +1,107 @@
 $(document).ready(function () {
+  /* science commands */
+
+  // setup a client for the science_request service
+  science_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'science_request',
+    serviceType: 'ScienceRequest'
+  })
+
+  // setup a subscriber for the arm_joint_states topic
+  science_data_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_feedback',
+    messageType: 'std_msgs/String'
+  })
+
+  science_data_listener.subscribe(function (message) {
+    appendToConsole(message.data, true, false)
+    // isActivated, drillDirection, elevatorDirection
+    let dataKeyValues = message.data.replace('Science data:', '').split(',')
+    let keys = dataKeyValues.map(i => {
+      return i.split(':')[0]
+    })
+    let values = dataKeyValues.map(i => {
+      return i.split(':')[1]
+    })
+
+    // isActivated
+    if (values[0] == '0') {
+      $('#activate-science-btn')[0].checked = false
+    } else if (values[0] == '1') {
+      $('#activate-science-btn')[0].checked = true
+    }
+
+    // drillDirection
+    if (values[1] == '0') {
+      lightUp('#cw-btn')
+      greyOut('#ccw-btn')
+    } else if (values[1] == '1') {
+      lightUp('#ccw-btn')
+      greyOut('#cw-btn')
+    }
+
+    // elevatorDirection
+    if (values[2] == '0') {
+      lightUp('#elevator-up-btn')
+      greyOut('#elevator-down-btn')
+    } else if (values[2] == '1') {
+      lightUp('#elevator-down-btn')
+      greyOut('#elevator-up-btn')
+    }
+
+
+    if (values[13]) {
+      $('#drill-rpm').val(values[13])
+    }
+    // drillInUse
+    if (values[14] == '0') {
+      lightUp('#drill-stop-btn')
+      greyOut('#set-speed-go-btn')
+      greyOut('#set-time-go-btn')
+      greyOut('#drill-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#drill-stop-btn')
+    }
+
+    // elevatorInUse
+    if (values[15] == '0') {
+      lightUp('#elevator-stop-btn')
+      greyOut('#set-feed-go-btn')
+      greyOut('#set-distance-go-btn')
+      greyOut('#elevator-max-speed-go-btn')
+    } else if (values[14] == '1') {
+      greyOut('#elevator-stop-btn')
+    }
+
+    // tcwstepDone
+    if (values[16] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotateNeg()
+        lastRotate = Date.now()
+      }
+    }
+
+    // tccwstepDone
+    if (values[17] == '1') {
+      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
+        rotatePos()
+        lastRotate = Date.now()
+      }
+    }
+
+    // elevatorFeedPercent
+    if (values[18]) {
+      $('#elevator-feed-percent').val(values[18])
+    }
+
+    // currentTablePosition
+    if (values[19]) {
+      $('#table-position').val(values[19])
+    }
+  })
+
   // MCU ping
   $('#ping-science-mcu').on('click', function (event) {
     event.preventDefault()
