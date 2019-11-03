@@ -22,16 +22,15 @@ $('#reset-motor-angles').on('click', function (event) {
   sendRoverCommand('reset')
 })
 
-$('#reboot-button')
-  .on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('reboot')
-    sendRoverCommand('stop')
-  })
-  .$('#flip-stream')
-  .on('click', function () {
-    $('#camera-feed').toggleClass('rotateimg180')
-  })
+$('#reboot-button').on('click', function (event) {
+  event.preventDefault()
+  sendArmCommand('reboot')
+  sendRoverCommand('stop')
+})
+
+$('#flip-stream').on('click', function () {
+  $('#camera-feed').toggleClass('rotateimg180')
+})
 
 $('#flip-stream-ccw').on('click', function () {
   $('#camera-feed').toggleClass('rotateimgccw')
