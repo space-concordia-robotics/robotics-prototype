@@ -48,32 +48,6 @@ $(document).ready(function () {
     }
   })
 
-  $('#homing-button').on('click', function (event) {
-    event.preventDefault()
-    // TODO: uncomment this when homing is confirmed to work properly
-    // sendArmCommand('home') // REIMPLEMENT AS AN ACTION
-  })
-
-  $('#list-all-cmds').on('click', function (event) {
-    event.preventDefault()
-    printCommandsList()
-  })
-
-  $('#stop-all-motors').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('stop')
-  })
-
-  $('#reset-motor-angles').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('reset')
-  })
-
-  $('#reboot-button').on('click', function (event) {
-    event.preventDefault()
-    sendArmCommand('reboot')
-  })
-
   $('#toggle-arm-listener-btn').on('click', function (event) {
     event.preventDefault()
     let serialType = $('#serial-type')
@@ -187,18 +161,6 @@ $(document).ready(function () {
 })
 
 // KEYBOARD EVENTS
-// rover ping
-document.addEventListener('keydown', function (event) {
-  if (
-    event.ctrlKey &&
-    event.altKey &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    pingDevice('Odroid')
-    lastCmdSent = new Date().getTime()
-  }
-})
 // arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
@@ -207,17 +169,6 @@ document.addEventListener('keydown', function (event) {
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     pingDevice('Arm')
-    lastCmdSent = new Date().getTime()
-  }
-})
-// print commands list
-document.addEventListener('keydown', function (event) {
-  if (
-    !$serialCmdInput.is(':focus') &&
-    event.code === 'KeyL' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    printCommandsList()
     lastCmdSent = new Date().getTime()
   }
 })

@@ -9,7 +9,51 @@ function printCommandsList () {
   appendToConsole("'l': view key commands")
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
+  /* PDS commands */
+  // setup a client for the pds_request service
+  pds_request_client = new ROSLIB.Service({
+    ros: ros,
+    name: 'pds_request',
+    serviceType: 'ArmRequest' // for now... might change
+  })
+  // setup a publisher for the pds_command topic
+  let pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+
+  let error_flags_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_flags',
+    messageType: 'std_msgs/String'
+  })
+  error_flags_listener.subscribe(function (message) {
+    let flags = message.data.split(', ')
+    $('#pds-ov-flag').text(parseInt(flags[0]))
+    $('#pds-uv-flag').text(parseInt(flags[1]))
+    $('#pds-critical-flag').text(parseInt(flags[2]))
+  })
+  let fan_speeds_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'fan_speeds',
+    messageType: 'geometry_msgs/Point'
+  })
+  fan_speeds_listener.subscribe(function (message) {
+    $('#fan-1-speed').text(parseInt(message.x))
+    $('#fan-2-speed').text(parseInt(message.y))
+  })
+  // setup a subscriber for the pds_feedback topic
+  let pds_feedback_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_feedback',
+    messageType: 'std_msgs/String'
+  })
+  pds_feedback_listener.subscribe(function (message) {
+    appendToConsole(message.data)
+  })
+
   $('#list-all-cmds').on('click', function(event){
     event.preventDefault()
     printCommandsList()
@@ -122,9 +166,6 @@ $(document).ready(function () {
           }
         }, PDS_REQUEST_TIMEOUT)
       }
-    //} else {
-      //appendToConsole('Cannot turn PDS listener on if not in PDS mux channel!')
-    //}
   })
 
   $('#reset-general-flags-button').on('click', function (event) {
@@ -171,18 +212,6 @@ $(document).ready(function () {
 })
 
 // KEYBOARD EVENTS
-// odroid ping
-document.addEventListener('keydown', function (event) {
-  if (
-    event.ctrlKey &&
-    event.altKey &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
-    pingDevice('Odroid')
-    lastCmdSent = new Date().getTime()
-  }
-})
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
