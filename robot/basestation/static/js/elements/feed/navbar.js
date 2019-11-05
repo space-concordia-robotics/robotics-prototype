@@ -90,20 +90,6 @@ $(document).ready(() => {
     }
   })
 
-  $('#flip-stream').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimg180')
-  })
-
-  $('#flip-stream-ccw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgccw')
-    $('#camera-feed').toggleClass('stretch-down')
-  })
-
-  $('#flip-stream-cw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgcw')
-    $('#camera-feed').toggleClass('stretch-down')
-  })
-
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
