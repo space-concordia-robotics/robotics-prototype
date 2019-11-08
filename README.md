@@ -133,7 +133,8 @@ You can read about the formatting guide [here](https://github.com/space-concordi
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
-### Commit message hook
+
+### Git hooks
 
 This explains how to setup git hooks which prepend an issue number to a commit message, and verify branch naming conventions. Git hooks are located in the local `.git/hooks` file of each repo, so initializing this hook in the this repo will not change any other repos you might have.
 
@@ -141,8 +142,8 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg.sh`
-- `cp branch-verification-hook.sh .git/hooks/post-checkout.sh`
+- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
+- `cp branch-verification-hook.sh .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
