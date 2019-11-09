@@ -151,7 +151,7 @@ Now it is much cleaner when the call is being read.
 
 ```
 //some code
-setAccelerationLimit(false)
+setAccelerationLimit(false);
 //more code
 ```
 
