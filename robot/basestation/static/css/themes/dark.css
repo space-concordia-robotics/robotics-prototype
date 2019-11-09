@@ -6,6 +6,26 @@ html, body {
     background-color: #0C120C;
 }
 
+.container-header {
+  color: blue;
+}
+
+.title {
+  color: green;
+}
+
+th {
+  color: blue;
+}
+
+td {
+  color: green;
+}
+
+.arm-speed-multipliter-input {
+  color: red;
+}
+
 /*    Trying to override the bootstrap navbar coloring
 
 .navbar .nav > li > a {
