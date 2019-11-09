@@ -3,7 +3,7 @@ ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
 function initRosWeb () {
-  let ros = new ROSLIB.Ros({
+  ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
   })
   ros.on('connection', function () {
@@ -102,170 +102,6 @@ function initRosWeb () {
     appendToConsole(message.data)
   })
 
-  /* science commands */
-
-  // setup a client for the science_request service
-  science_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'science_request',
-    serviceType: 'ScienceRequest'
-  })
-
-  // setup a subscriber for the arm_joint_states topic
-  science_data_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'science_feedback',
-    messageType: 'std_msgs/String'
-  })
-
-  science_data_listener.subscribe(function (message) {
-    appendToConsole(message.data, true, false)
-    // isActivated, drillDirection, elevatorDirection
-    let dataKeyValues = message.data.replace('Science data:', '').split(',')
-    let keys = dataKeyValues.map(i => {
-      return i.split(':')[0]
-    })
-    let values = dataKeyValues.map(i => {
-      return i.split(':')[1]
-    })
-
-    // isActivated
-    if (values[0] == '0') {
-      $('#activate-science-btn')[0].checked = false
-    } else if (values[0] == '1') {
-      $('#activate-science-btn')[0].checked = true
-    }
-
-    // drillDirection
-    if (values[1] == '0') {
-      lightUp('#cw-btn')
-      greyOut('#ccw-btn')
-    } else if (values[1] == '1') {
-      lightUp('#ccw-btn')
-      greyOut('#cw-btn')
-    }
-
-    // elevatorDirection
-    if (values[2] == '0') {
-      lightUp('#elevator-up-btn')
-      greyOut('#elevator-down-btn')
-    } else if (values[2] == '1') {
-      lightUp('#elevator-down-btn')
-      greyOut('#elevator-up-btn')
-    }
-
-    // if (values[3] == '0') {
-    //   $('#pump-dir-label').text('DIR: OUT')
-    //   $('#pump-dir-toggle')[0].checked = false
-    // } else if (values[3] == '1') {
-    //   $('#pump-dir-label').text('DIR: IN')
-    //   $('#pump-dir-toggle')[0].checked = true
-    // }
-    //
-    // // photo resistor Voltage
-    // $('#photo-resistor-voltage').val(values[4])
-    //
-    // // LED 1 ON
-    // if (values[5] == '0') {
-    //   $('#led1-toggle')[0].checked = false
-    // } else if (values[5] == '1') {
-    //   $('#led1-toggle')[0].checked = true
-    // }
-    //
-    // // LED 2 ON
-    // if (values[6] == '0') {
-    //   $('#led2-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#led2-toggle')[0].checked = true
-    // }
-    //
-    // // Vibrator ON statuses
-    // if (values[7] == '0') {
-    //   $('#vibrator1-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator1-toggle')[0].checked = true
-    // }
-    //
-    // if (values[8] == '0') {
-    //   $('#vibrator2-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator2-toggle')[0].checked = true
-    // }
-    //
-    // if (values[9] == '0') {
-    //   $('#vibrator3-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator3-toggle')[0].checked = true
-    // }
-    //
-    // if (values[10] == '0') {
-    //   $('#vibrator4-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator4-toggle')[0].checked = true
-    // }
-    //
-    // if (values[11] == '0') {
-    //   $('#vibrator5-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator5-toggle')[0].checked = true
-    // }
-    //
-    // if (values[12] == '0') {
-    //   $('#vibrator6-toggle')[0].checked = false
-    // } else if (values[6] == '1') {
-    //   $('#vibrator6-toggle')[0].checked = true
-    // }
-
-    if (values[13]) {
-      $('#drill-rpm').val(values[13])
-    }
-    // drillInUse
-    if (values[14] == '0') {
-      lightUp('#drill-stop-btn')
-      greyOut('#set-speed-go-btn')
-      greyOut('#set-time-go-btn')
-      greyOut('#drill-max-speed-go-btn')
-    } else if (values[14] == '1') {
-      greyOut('#drill-stop-btn')
-    }
-
-    // elevatorInUse
-    if (values[15] == '0') {
-      lightUp('#elevator-stop-btn')
-      greyOut('#set-feed-go-btn')
-      greyOut('#set-distance-go-btn')
-      greyOut('#elevator-max-speed-go-btn')
-    } else if (values[14] == '1') {
-      greyOut('#elevator-stop-btn')
-    }
-
-    // tcwstepDone
-    if (values[16] == '1') {
-      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
-        rotateNeg()
-        lastRotate = Date.now()
-      }
-    }
-
-    // tccwstepDone
-    if (values[17] == '1') {
-      if (millisSince(lastRotate) > ROTATE_TIMEOUT) {
-        rotatePos()
-        lastRotate = Date.now()
-      }
-    }
-
-    // elevatorFeedPercent
-    if (values[18]) {
-      $('#elevator-feed-percent').val(values[18])
-    }
-
-    // currentTablePosition
-    if (values[19]) {
-      $('#table-position').val(values[19])
-    }
-  })
-
   /* rover commands */
 
   // setup a client for the rover_request service
@@ -294,17 +130,7 @@ function initRosWeb () {
     $('#left-mid-rpm').text(message.velocity[4])
     $('#left-rear-rpm').text(message.velocity[5])
   })
-  // setup a subscriber for the rover_position topic
-  rover_position_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_position',
-    messageType: 'geometry_msgs/Point'
-  })
-  rover_position_listener.subscribe(function (message) {
-    $('#rover-latitude').text(message.x)
-    $('#rover-longitude').text(message.y)
-    $('#rover-heading').text(message.z)
-  })
+
   // setup a subscriber for the rover_twist topic
   rover_twist_listener = new ROSLIB.Topic({
     ros: ros,
@@ -324,63 +150,7 @@ function initRosWeb () {
   rover_feedback_listener.subscribe(function (message) {
     appendToConsole(message.data, true, false)
   })
-  // setup a subscriber for the antenna_goal topic
-  antenna_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'antenna_goal',
-    messageType: 'geometry_msgs/Point'
-  })
-  antenna_goal_listener.subscribe(function (message) {
-    $('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
-  })
-  // setup gps parameters for antenna directing
-  antenna_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_latitude'
-  })
-  antenna_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_longitude'
-  })
-  antenna_start_dir = new ROSLIB.Param({
-    ros: ros,
-    name: 'antenna_start_dir'
-  })
 
-  // setup a subscriber for the rover_goal topic
-  rover_goal_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_goal',
-    messageType: 'geometry_msgs/Point'
-  })
-  rover_goal_listener.subscribe(function (message) {
-    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
-  })
-  // setup gps parameters for rover goals
-  goal_latitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_latitude'
-  })
-  goal_longitude = new ROSLIB.Param({
-    ros: ros,
-    name: 'goal_longitude'
-  })
-
-  /* PDS commands */
-  // setup a client for the pds_request service
-  pds_request_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'pds_request',
-    serviceType: 'ArmRequest' // for now... might change
-  })
-  // setup a publisher for the pds_command topic
-  pds_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_command',
-    messageType: 'std_msgs/String'
-  })
   // setup a subscriber for the battery_voltage topic
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
@@ -415,38 +185,7 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
-  error_flags_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_flags',
-    messageType: 'std_msgs/String'
-  })
-  error_flags_listener.subscribe(function (message) {
-    let flags = message.data.split(', ')
-    $('#pds-ov-flag').text(parseInt(flags[0]))
-    $('#pds-uv-flag').text(parseInt(flags[1]))
-    $('#pds-critical-flag').text(parseInt(flags[2]))
-  })
-  fan_speeds_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'fan_speeds',
-    messageType: 'geometry_msgs/Point'
-  })
-  fan_speeds_listener.subscribe(function (message) {
-    $('#fan-1-speed').text(parseInt(message.x))
-    $('#fan-2-speed').text(parseInt(message.y))
-  })
-  // setup a subscriber for the pds_feedback topic
-  pds_feedback_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_feedback',
-    messageType: 'std_msgs/String'
-  })
-  pds_feedback_listener.subscribe(function (message) {
-    appendToConsole(message.data)
-  })
 }
-
-initRosWeb()
 
 /* functions used in main code */
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
@@ -777,76 +516,6 @@ function sendPdsCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to PDS Teensy')
   pds_command_publisher.publish(command)
-}
-
-function initNavigationPanel () {
-  let hasAntennaParams = true
-  antenna_latitude.get(function (val) {
-    if (val != null) {
-      $('#antenna-latitude').text(val)
-      antenna_longitude.get(function (val) {
-        if (val != null) {
-          $('#antenna-longitude').text(val)
-          antenna_start_dir.get(function (val) {
-            if (val != null) {
-              $('#antenna-start-dir').text(val)
-              appendToConsole(
-                'Antenna goal parameters already set, displaying antenna directions'
-              )
-              $('#antenna-inputs').hide()
-              $('#antenna-unchanging').show()
-            } else {
-              appendToConsole(
-                'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-              )
-              $('#antenna-inputs').show()
-              $('#antenna-unchanging').hide()
-            }
-          })
-        } else {
-          appendToConsole(
-            'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-          )
-          $('#antenna-inputs').show()
-          $('#antenna-unchanging').hide()
-        }
-      })
-    } else {
-      appendToConsole(
-        'One or more antenna parameters is missing, if you would like antenna directions then please input them'
-      )
-      $('#antenna-inputs').show()
-      $('#antenna-unchanging').hide()
-    }
-  })
-
-  goal_latitude.get(function (val) {
-    if (val != null) {
-      $('#goal-latitude').text(val)
-      goal_longitude.get(function (val) {
-        if (val != null) {
-          appendToConsole(
-            'GPS goal parameters already set, displaying directions to the goal'
-          )
-          $('#goal-longitude').text(val)
-          $('#goal-inputs').hide()
-          $('#goal-unchanging').show()
-        } else {
-          appendToConsole(
-            'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
-          )
-          $('#goal-inputs').show()
-          $('#goal-unchanging').hide()
-        }
-      })
-    } else {
-      appendToConsole(
-        'One or more GPS goal parameters is missing, if you would like directions to the goal then please input them'
-      )
-      $('#goal-inputs').show()
-      $('#goal-unchanging').hide()
-    }
-  })
 }
 
 /*

@@ -1,0 +1,28 @@
+{% extends "pages/Base.html" %}
+{% block title %}Rover{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../../static/js/pages/rover.js"></script>
+   <script src="../../static/js/elements/feed/console.js"></script>
+   <script src="../../static/js/elements/navigation/gps.js"></script>
+   <script src="../../static/js/elements/navigation/navigation.js"></script>
+   <script src="../../static/js/elements/feed/camera.js"></script>
+   <script src="../../static/js/elements/controls/extra-controls.js"></script>
+   <script src="../../static/js/elements/feed/rover-motortable.js"></script>
+{% endblock %}
+{% block content %}
+<div class="row">
+ <div class="col-md-3">{% with device="Rover" %}{% include "elements/feed/Console.html" %}{% endwith %}</div>
+ <div class="col-md-3">
+     {% include 'elements/navigation/GPS.html' %}
+     {% include 'elements/feed/RoverMotorTable.html' %}
+ </div>
+ <div class="col-md-6">{% include 'elements/feed/CameraFeed.html' %}</div>
+</div>
+<div class="row">
+  <div class="col-md-3">{% include 'elements/navigation/Navigation.html' %}</div>
+  <div class="col-md-4">{% include 'elements/controls/RoverMotorControls.html' %}</div>
+  <div class="col-md-3">{% include 'elements/controls/CameraControls.html' %}</div>
+  <div class="col-md-2">{% with device="Rover" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}</div>
+</div>
+{% endblock %}
