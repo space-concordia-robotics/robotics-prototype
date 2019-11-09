@@ -29,7 +29,7 @@ Functions should do one thing. They should do it well. They should do it only. T
 
 #### 1.2 Size
 
-Size does matter! The size of the function should be **small**. We do not impose a hard limit on the number of lines of code. However, common sense should be applied. Code should be able to be read on a single monitor. It should be short enough to be able to conceptualize the logc in your head. Use common sense.  
+Size does matter! The size of the function should be **small**. We do not impose a hard limit on the number of lines of code. However, common sense should be applied. Code should be able to be read on a single monitor. It should be short enough to be able to conceptualize the logic in your head. Use common sense.  
 
 #### 1.3 Duplication
 
