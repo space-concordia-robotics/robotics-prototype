@@ -1,6 +1,6 @@
 html, body {
     height: 100%;
-    background-color: #990000;
+    background-color: black;
 }
 
 .container {
@@ -151,7 +151,7 @@ html, body {
 
 #logs-btn button {
     background-color: #4a0000;
-    border: ridge 2px #434586;
+    border: ridge 2px white;
 }
 
 .center {
