@@ -187,7 +187,7 @@ We use the PEP8 Style Guide. Please refer to it [here](https://www.python.org/de
 
 We follow the [standard](https://github.com/standard/standard/blob/master/RULES.md) conventions, there exists an auto-formatter package in atom called `atom-standard-formatter` which automates this.
 
-Furthermore, we are attempting to use a strict variant of JavaScript. We have not enable `strict mode` yet, but all future code should respect the strict variant of JavaScript which can be found [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)
+Furthermore, we are attempting to use a strict variant of JavaScript. We have not enabled `strict mode` yet, but all future code should respect the strict variant of JavaScript which can be found [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)
 
 We are also using JQuery, therefore you should use JQuery for document traversal and and manipulation. 
 
