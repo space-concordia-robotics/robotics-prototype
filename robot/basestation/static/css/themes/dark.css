@@ -101,22 +101,6 @@ html, body {
     color: white;
 }
 
-#motor-table thead th, .table-grp tr:first-child {
-    text-align: center;
-    vertical-align: middle
-}
-
-#motor-table thead tr:first-child, #motor-table tbody th {
-    background-color: #101148;
-    color: #F0DAFA;
-    border: 2px solid #750000
-}
-
-#motor-table, #motor-table tr td {
-    border: 2px solid #750000;
-    text-align: center
-}
-
 .control-main-btn {
     border-bottom: 0px solid #05072f;
     border-top-style: none;
@@ -165,4 +149,24 @@ html, body {
   background:;
   border:0px
   solid: #2B343B"
+}
+
+/* Arm Motor Table */
+.table, .table-sm, .table-bordered {
+  font-size:12px;
+  background: #E4E1D1;
+  text-align: left
+}
+#motor-table thead th, .table-grp tr:first-child {
+    text-align: center;
+    vertical-align: middle
+}
+#motor-table thead tr:first-child, #motor-table tbody th {
+    background-color: #101148;
+    color: #F0DAFA;
+    border: 2px solid black
+}
+#motor-table, #motor-table tr td {
+    border: 2px solid black;
+    text-align: center
 }
