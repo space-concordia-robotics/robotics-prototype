@@ -31,8 +31,10 @@ html, body {
   border-color: white;
 }
 
-.container-header {
-  color: white;
+.container-header, thead {
+    color: #E4E1D1;
+    font-weight: bolder;
+    text-align: center;
 }
 
 .title {
@@ -99,12 +101,6 @@ html, body {
     color: white;
 }
 
-.container-header, thead {
-    color: #092b43;
-    font-weight: bolder;
-    text-align: center;
-}
-
 #motor-table thead th, .table-grp tr:first-child {
     text-align: center;
     vertical-align: middle
@@ -133,22 +129,40 @@ html, body {
     border: ridge 2px black;
 }
 
-.arm-speed-multipliter-input {
-  color: red;
+.table-grp td, .table-grp2 td {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    padding: 0;
+    border-style: none;
+    border-width: 0;
+    overflow: hidden;
+    word-break: normal;
+    border-color: yellow;
 }
 
-/*    Trying to override the bootstrap navbar coloring
-
-.navbar .nav > li > a {
-    float: none;
-    line-height: 19px;
-    padding: 9px 10px 11px;
-    text-decoration: none;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-    color:  #ddd;
+.table-grp th, .table-grp2 th {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    padding: 0;
+    border-style: solid;
+    border-width: 1px;
+    overflow: hidden;
+    word-break: normal;
+    border-color: #2B343B;
+    text-align: center;
 }
 
-html body .navbar .navbar-inner .container {
-    color: #FFF;
+.table-grp tr:last-child {
+    border-bottom: 0px inset #2B343B;
+    color: #E4E1D1;
+    font-weight: bold;
+    background-color: #2B343B;
 }
-*/
+
+.claw-controls {
+  width:30px;
+  background:;
+  border:0px
+  solid: #2B343B"
+}
