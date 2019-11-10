@@ -16,11 +16,36 @@ html, body {
 .container .dropdown .dropdown-menu a:hover
 {
   color: #fff;
-  background-color: #b91773;
-  border-color: yellow;
+  background-color: #fff;
+  border-color: white;
+}
+.btn-primary.dropdown-toggle {
+    color: #fff;
+    border-color: #fff;
 }
 .bootstrap-select .dropdown-toggle:focus {
   outline: none!important;
+  box-shadow:
+  0 0 0 0.2rem rgba(0,0,0,.5);
+}
+.btn .btn-primary .dropdown-toggle .btn-block{
+  color: #E4E1D1!important;
+  background-color: #E4E1D1!important;
+  border-color: #E4E1D1!important;
+}
+/*Keep this*/
+.btn-primary.focus, .btn-primary:focus {
+  box-shadow:
+  0 0 0 0.2rem rgba(255,255,255,0);
+}
+/*Test*/
+.btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
+    color: #fff;
+    background-color: #445b7b;
+    border-color: #445b7b;
+}
+.btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
 
 .btn.focus, .btn:focus {
@@ -76,7 +101,7 @@ html, body {
 }
 
 .control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
-    background-color: #183441;
+    background-color: #8E8E96;
     color: white;
 }
 
