@@ -6,6 +6,7 @@ html, body {
     background-color: #A38282;
 }
 
+/* Whole lotta bootstrap dropdown menu code */
 .dropdown .nav-link {color:#445B7B; text-decoration: none;}
 .dropdown .dropdown-menu a{color: #000; text-decoration: none;}
 .dropdown .btn {background: #445B7B; color:#fff;}
@@ -47,15 +48,14 @@ html, body {
 .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
     box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
-
 .btn.focus, .btn:focus {
   box shadow: white;
 }
-
 .btn-primary {
   border-color: white;
 }
 
+/* Titles */
 .container-header, thead {
     color: #E4E1D1;
     font-weight: bolder;
@@ -66,6 +66,7 @@ html, body {
   color: #E4E1D1;
 }
 
+/* Control Buttons */
 .control-btn {
   width: 80px;
   height: 80px;
@@ -196,3 +197,10 @@ html, body {
     border: 2px solid black;
     text-align: center
 }
+
+/* Other bootstrap buttons */
+.btn-primary {
+    color: #fff;
+    background-color: #445b7b;
+    border-color: #445b7b;
+  }
