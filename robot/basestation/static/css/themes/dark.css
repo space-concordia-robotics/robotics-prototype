@@ -162,8 +162,8 @@ html, body {
     vertical-align: middle
 }
 #motor-table thead tr:first-child, #motor-table tbody th {
-    background-color: #101148;
-    color: #F0DAFA;
+    background-color: #C34641;
+    color: white;
     border: 2px solid black
 }
 #motor-table, #motor-table tr td {
