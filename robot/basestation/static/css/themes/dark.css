@@ -6,19 +6,29 @@ html, body {
     background-color: #A38282;
 }
 
-.dropdown {list-style: none; background: green; padding: 10px; display: inline-block;}
-.dropdown .nav-link {color:#fff; text-decoration: none;}
+.dropdown .nav-link {color:#445B7B; text-decoration: none;}
 .dropdown .dropdown-menu a{color: #000; text-decoration: none;}
-.dropdown .btn {background: green; color:#fff;}
-.dropdown .btn:hover {background: cyan; color:#000;}
-.dropdown .btn:active {background: cyan; color:#000;}
-.dropdown .btn:focus {background: cyan; color:#000;}
+.dropdown .btn {background: #445B7B; color:#fff;}
+.dropdown .btn:hover {background: #EFEFEF; color:#000;}
+.dropdown .btn:active {background: #EFEFEF; color:#000;}
+.dropdown .btn:focus {background: #EFEFEF; color:#000;}
 .dropdown-menu .dropdown-item {display: inline-block; width: 100%; padding: 10px 5px;}
 .container .dropdown .dropdown-menu a:hover
 {
   color: #fff;
   background-color: #b91773;
-  border-color: #fff;
+  border-color: yellow;
+}
+.bootstrap-select .dropdown-toggle:focus {
+  outline: none!important;
+}
+
+.btn.focus, .btn:focus {
+  box shadow: white;
+}
+
+.btn-primary {
+  border-color: white;
 }
 
 .container-header {
