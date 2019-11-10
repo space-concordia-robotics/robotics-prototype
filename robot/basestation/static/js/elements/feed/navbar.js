@@ -26,9 +26,9 @@ $(document).ready(() => {
   $('#theme-light').click(function () {
       prefer_theme('light');
   });
-  $('#theme-dark').click(function () {
-      console.log('theme-dark');
-      prefer_theme('dark');
+  $('#theme-lofi').click(function () {
+      console.log('theme-lofi');
+      prefer_theme('lofi');
   });
 
   function isListenerOpen () {
