@@ -127,7 +127,9 @@ Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If 
 ### ffmpeg
 
 For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
-- sudo apt install ffmpeg
+```
+sudo apt install ffmpeg
+```
 
 You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
