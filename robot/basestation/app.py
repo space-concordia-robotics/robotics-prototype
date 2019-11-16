@@ -7,7 +7,7 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 import os
 import subprocess
 from subprocess import Popen, PIPE
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote
 import flask
 from flask import jsonify, request
 from robot.comms.connection import Connection
@@ -15,31 +15,12 @@ import time
 import datetime
 from shlex import split
 
+import stream_capture
+from stream_capture import start_recording_feed, stop_recording_feed, video_error_handling
+import ros_utils
+from ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
+
 app = flask.Flask(__name__)
-
-
-def fetch_ros_master_uri():
-    """Fetch and parse ROS Master URI from environment variable.
-
-    The parsed URI is returned as a urllib.parse.ParseResult instance.
-
-    Returns:
-        urllib.parse.ParseResult: 6-tuple instance with various attributes.
-
-    Attributes (urllib.parse.ParseResult):
-    - hostname -- the ip address or the dns resolvable name
-    - port -- the port number
-    - etc...
-
-    See https://docs.python.org/3/library/urllib.parse.html?highlight=urlparse#urllib.parse.urlparse
-    """
-    return urlparse(os.environ["ROS_MASTER_URI"])
-
-
-def fetch_ros_master_ip():
-    """Fetch only the hostname (host IP) portion of the parse URI."""
-    return fetch_ros_master_uri().hostname
-
 
 def run_shell(cmd, args=""):
     """Run script command supplied as string.
@@ -247,35 +228,13 @@ def capture_image():
 
     return jsonify(msg=msg)
 
-# This is called on if ffmpeg isn't already recording when the record toggle button is clicked
-@app.route("/start_recording_feed/<stream>", methods=["POST", "GET"])
-def start_recording_feed(stream):
-    date = datetime.datetime.now().strftime("%I:%M:%S_%B_%d_%Y")
-    # Name of file to be saved
-    name = stream + '_' + date
-    # Get stream url
-    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
-    # Message to print to log
-    msg = 'recording feed of ' + stream
-    # folder where to save recordings
-    dir = 'rover_video_feed_clips_' + stream
+@app.route("/initiate_feed_recording/<stream>", methods=["POST", "GET"])
+def initiate_feed_recording(stream):
+    return start_recording_feed(stream)
 
-    # Run ffmpeg to start recording stream as a subprocess
-    subprocess.Popen(['mkdir ' + dir], shell=True)
-    global proc_v # proc is a global variable so that another function can send a byte to ffmpeg to stop recording
-    proc_v = {}
-    proc_v[stream] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + dir + '/' + name + '.mp4'], stdin=PIPE, shell=True)
-    return jsonify(msg=msg)
-
-# This is called on if ffmpeg is already recording when the record toggle button is clicked
-@app.route("/stop_recording_feed/<stream>", methods=["POST", "GET"])
-def stop_recording_feed(stream):
-    # Message to print to log
-    msg = 'saved recording of ' + stream
-
-    # stop the recording by sending 'q' byte to ffmpeg
-    proc_v[stream].communicate(b'q')
-    return jsonify(msg=msg)
+@app.route("/stop_feed_recording/<stream>", methods=["POST", "GET"])
+def stop_feed_recording(stream):
+    return stop_recording_feed(stream)
 
 if __name__ == "__main__":
 
