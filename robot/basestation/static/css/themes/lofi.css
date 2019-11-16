@@ -52,11 +52,16 @@ html, body {
   background-color: #445b7b;
   border-color: #445b7b;
 }
+.btn-primary:hover {
+  color: black;
+  background-color: #BCD4DD;
+  border-color: #BCD4DD;
+}
 
 /* Titles */
 .container-header, thead {
-    color: #E4E1D1;
-    font-weight: bolder;
+  color: #E4E1D1;
+  font-weight: bolder;
 }
 
 .title {
@@ -95,8 +100,8 @@ html, body {
 }
 
 .control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
-    background-color: #8E8E96;
-    color: white;
+    background-color: #BCD4DD;
+    color: black;
 }
 
 .control-btn-left {
