@@ -1,19 +1,17 @@
+/* Background color */
 html, body {
-    background-color: #2B343B;
+  height: 100%;
+  background-color: #2B343B;
 }
 
+/* Navigation bar color */
 .navbar {
-    background-color: #A38282;
+  background-color: #A38282;
 }
 
 /* Whole lotta bootstrap dropdown menu code */
 .dropdown .nav-link {color:#445B7B; text-decoration: none;}
-.dropdown .dropdown-menu a{color: #000; text-decoration: none;}
 .dropdown .btn {background: #445B7B; color:#fff;}
-.dropdown .btn:hover {background: #EFEFEF; color:#000;}
-.dropdown .btn:active {background: #EFEFEF; color:#000;}
-.dropdown .btn:focus {background: #EFEFEF; color:#000;}
-.dropdown-menu .dropdown-item {display: inline-block; width: 100%; padding: 10px 5px;}
 .container .dropdown .dropdown-menu a:hover
 {
   color: #fff;
@@ -29,24 +27,17 @@ html, body {
   box-shadow:
   0 0 0 0.2rem rgba(0,0,0,.5);
 }
-.btn .btn-primary .dropdown-toggle .btn-block{
-  color: #E4E1D1!important;
-  background-color: #E4E1D1!important;
-  border-color: #E4E1D1!important;
-}
-/*Keep this*/
 .btn-primary.focus, .btn-primary:focus {
   box-shadow:
   0 0 0 0.2rem rgba(255,255,255,0);
 }
-/*Test*/
 .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
-    color: #fff;
-    background-color: #445b7b;
-    border-color: #445b7b;
+  color: #fff;
+  background-color: #445b7b;
+  border-color: #445b7b;
 }
 .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
-    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
+  box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
 .btn.focus, .btn:focus {
   box shadow: white;
@@ -55,47 +46,49 @@ html, body {
   border-color: white;
 }
 
+/* Bootstrap buttons */
+.btn-primary {
+  color: #fff;
+  background-color: #445b7b;
+  border-color: #445b7b;
+}
+
 /* Titles */
 .container-header, thead {
     color: #E4E1D1;
     font-weight: bolder;
-    text-align: center;
 }
 
 .title {
   color: #E4E1D1;
 }
 
-/* Control Buttons */
+/*Log buttons (rover.css)*/
+#logs-btn button {
+    background-color: #3D7F7F;
+    border: ridge 2px black;
+}
+
+/* Control Buttons (rover.css) */
 .control-btn {
-  width: 80px;
-  height: 80px;
   background-color: #3D7F7F;
   border: ridge 2px black;
   color: white;
-  border-radius: 10px;
 }
 
 .control-btn2 {
-    width: 60px;
-    height: 40px;
     background-color: #3D7F7F;
     border: ridge 2px black;
     color: white;
 }
 
 .control-btn3 {
-    width: 120px;
-    height: 30px;
     background-color: #3D7F7F;
     border: ridge 2px black;
-    margin: 2px;
     color: white;
 }
 
 .control-btn4 {
-    width: 60px;
-    height: 60px;
     background-color: #3D7F7F;
     border: ridge 2px black;
     color: white;
@@ -107,18 +100,14 @@ html, body {
 }
 
 .control-btn-left {
-    border-radius: 10px 0 0 10px;
     border-right-color: #848282;
 }
 
 .control-btn-right {
-    border-radius: 0 10px 10px 0;
     border-left-color: #848282;
 }
 
 .control-btn-mid {
-    width: 80px;
-    height: 80px;
     background-color: #848282;
     border-top: ridge 2px #434586;
     border-bottom: ridge 2px #434586;
@@ -127,39 +116,27 @@ html, body {
     color: white;
 }
 
-.control-main-btn {
-    border-bottom: 0px solid #05072f;
-    border-top-style: none;
-    border-left-style: none;
-    margin-bottom: 5px
+#motor-table thead tr:first-child, #motor-table tbody th {
+    background-color: #101148;
+    color: #F0DAFA;
+    border: 2px solid #750000
 }
 
-/*Claw controls*/
-#logs-btn button {
-    background-color: #3D7F7F;
-    border: ridge 2px black;
+#motor-table, #motor-table tr td {
+    border: 2px solid #750000;
+    text-align: center
 }
+
+.control-main-btn {
+    border-bottom: 0px solid #05072f;
+}
+
+/*Arm controls (arm.css)*/
 .table-grp td, .table-grp2 td {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    padding: 0;
-    border-style: none;
-    border-width: 0;
-    overflow: hidden;
-    word-break: normal;
-    border-color: yellow;
+    border-color: white;
 }
 .table-grp th, .table-grp2 th {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    font-weight: normal;
-    padding: 0;
-    border-style: solid;
-    border-width: 1px;
-    overflow: hidden;
-    word-break: normal;
     border-color: #2B343B;
-    text-align: center;
 }
 .table-grp tr:last-child {
     border-bottom: 0px inset #2B343B;
@@ -169,7 +146,7 @@ html, body {
 }
 .claw-controls {
   width:30px;
-  background:;
+  background: none;
   border:0px
   solid: #2B343B;
 }
@@ -180,27 +157,13 @@ html, body {
 
 /* Arm Motor Table */
 .table, .table-sm, .table-bordered {
-  font-size:12px;
   background: #EFEFEF;
-  text-align: left
-}
-#motor-table thead th, .table-grp tr:first-child {
-    text-align: center;
-    vertical-align: middle
 }
 #motor-table thead tr:first-child, #motor-table tbody th {
     background-color: #C34641;
     color: white;
-    border: 2px solid black
+    border: 2px solid black;
 }
 #motor-table, #motor-table tr td {
     border: 2px solid black;
-    text-align: center
 }
-
-/* Other bootstrap buttons */
-.btn-primary {
-    color: #fff;
-    background-color: #445b7b;
-    border-color: #445b7b;
-  }
