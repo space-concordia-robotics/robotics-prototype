@@ -16,7 +16,7 @@ import datetime
 from shlex import split
 
 import stream_capture
-from stream_capture import start_recording_feed, stop_recording_feed, video_error_handling
+from stream_capture import start_recording_feed, stop_recording_feed
 import ros_utils
 from ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 

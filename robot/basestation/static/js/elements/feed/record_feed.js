@@ -18,7 +18,7 @@ $(document).ready(() => {
 
         error: function (jqXHR, exception) {
           if (jqXHR.status === 0) {
-            recording_log_msg = 'cannot connect verify Network'
+            recording_log_msg = 'cannot connect verify network'
           } else if (jqXHR.status == 404) {
             recording_log_msg = 'requested page not found [404]'
           } else if (jqXHR.status == 500) {
@@ -30,7 +30,7 @@ $(document).ready(() => {
           } else if (exception === 'abort') {
             recording_log_msg = 'Ajax request aborted'
           } else {
-            recording_log_msg = 'Uncaught Error.   ' + jqXHR.responseText
+            recording_log_msg = 'Uncaught Error. ' + jqXHR.responseText
           }
           appendToConsole(recording_log_msg)
         }
