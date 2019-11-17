@@ -8,7 +8,8 @@ $(document).ready(() => {
 
   function toggleRecording (recordingButton, stream) {
     if (recordingButton.text() != recordingButton.data('text-swap')) {
-      $.ajax('/initiate_feed_recording/' + stream, {
+      const ajax_url = '/initiate_feed_recording/' + stream
+      $.ajax(ajax_url, {
         success: function (data) {
           appendToConsole(data.recording_log_msg)
           if (data.error_state == 0) {
@@ -17,18 +18,19 @@ $(document).ready(() => {
         },
 
         error: function (jqXHR, exception) {
-          flaskError(jqXHR, exception)
+          flaskError(jqXHR, exception, ajax_url)
         }
       })
     } else {
-      $.ajax('/stop_feed_recording/' + stream, {
+      const ajax_url = '/stop_feed_recording/' + stream
+      $.ajax(ajax_url, {
         success: function (data) {
           appendToConsole(data.recording_log_msg)
           toggleText(recordingButton)
         },
 
         error: function (jqXHR, exception) {
-          flaskError(jqXHR, exception)
+          flaskError(jqXHR, exception, ajax_url)
         }
       })
     }
