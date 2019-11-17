@@ -63,12 +63,20 @@ html, body {
   border-color: #BCD4DD;
 }
 
+/* Bootstrap forms */
+.form-control:focus {
+  color: white;
+  background-color: #fff;
+  border-color: white;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
+}
+
 /* Titles */
 .container-header, thead {
   color: #E4E1D1;
   font-weight: bolder;
 }
-
 .title {
   color: #E4E1D1;
 }
@@ -85,38 +93,31 @@ html, body {
   border: ridge 2px black;
   color: white;
 }
-
 .control-btn2 {
     background-color: #3D7F7F;
     border: ridge 2px black;
     color: white;
 }
-
 .control-btn3 {
     background-color: #3D7F7F;
     border: ridge 2px black;
     color: white;
 }
-
 .control-btn4 {
     background-color: #3D7F7F;
     border: ridge 2px black;
     color: white;
 }
-
 .control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
     background-color: #BCD4DD;
     color: black;
 }
-
 .control-btn-left {
     border-right-color: #848282;
 }
-
 .control-btn-right {
     border-left-color: #848282;
 }
-
 .control-btn-mid {
     background-color: #848282;
     border-top: ridge 2px #434586;
@@ -125,18 +126,15 @@ html, body {
     border-right: ridge 2px #848282;
     color: white;
 }
-
 #motor-table thead tr:first-child, #motor-table tbody th {
     background-color: #101148;
     color: #F0DAFA;
     border: 2px solid #750000
 }
-
 #motor-table, #motor-table tr td {
     border: 2px solid #750000;
     text-align: center
 }
-
 .control-main-btn {
     border-bottom: 0px solid #05072f;
 }
@@ -160,7 +158,6 @@ html, body {
   border:0px
   solid: #2B343B;
 }
-
 .claw-controls2 {
   color: #E4E1D1;
 }
@@ -178,11 +175,15 @@ html, body {
     border: 2px solid black;
 }
 
-/* Navigation text (Navigation.html) */
+/* Navigation Text */
 .navigation {
   color: #E4E1D1;
 }
-
 .row {
+  color: #E4E1D1;
+}
+
+/* PDS Text */
+.pds-text {
   color: #E4E1D1;
 }
