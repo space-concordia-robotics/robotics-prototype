@@ -45,6 +45,11 @@ html, body {
 .btn-primary {
   border-color: white;
 }
+.dropdown-item.active, .dropdown-item:active {
+    color: #fff;
+    text-decoration: none;
+    background-color: #BCD4DD;
+}
 
 /* Bootstrap buttons */
 .btn-primary {
@@ -171,4 +176,13 @@ html, body {
 }
 #motor-table, #motor-table tr td {
     border: 2px solid black;
+}
+
+/* Navigation text (Navigation.html) */
+.navigation {
+  color: #E4E1D1;
+}
+
+.row {
+  color: #E4E1D1;
 }

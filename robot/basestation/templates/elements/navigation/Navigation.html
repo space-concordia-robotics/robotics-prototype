@@ -1,12 +1,12 @@
 <h5 class="container-header">Navigation Data</h5>
-<div style="display: block" id="rover-unchanging">
+<div class="navigation" style="display: block" id="rover-unchanging">
   <h5>speed: <span id="rover-speed">-</span></h5>
   <h5>heading: <span id="rover-heading">-</span></h5>
   <h5>angular velocity: <span id="rover-angular-velocity">-</span></h5>
   <h5 hidden>lat: <span id="rover-latitude">-</span></h5>
   <h5 hidden>long: <span id="rover-longitude">-</span></h5>
 </div>
-<div style="display: block" id="antenna-inputs" class="input-group input-group-sm" hidden>
+<div class="navigation" style="display: block" id="antenna-inputs" class="input-group input-group-sm" hidden>
   <div class="input-group-prepend">
     <span class="input-group-text">lat, long, bearing (Antenna)</span><br>
   </div>
@@ -16,7 +16,7 @@
   <br>
   <button type="button" id="send-antenna-data-btn" class="btn btn-primary">Send antenna data</button>
 </div>
-<div style="display: none" id="antenna-unchanging">
+<div class="navigation" style="display: none" id="antenna-unchanging">
   <h6>Antenna coords:</h6>
   <h5>lat: <span id="antenna-latitude">-</span></h5>
   <h5>long: <span id="antenna-longitude">-</span></h5>
@@ -29,7 +29,7 @@
     <button type="button" id="change-antenna-data-btn" class="btn btn-primary">Change antenna data</button>
   </div>
 </div>
-<div style="display: block" id="goal-inputs" class="input-group input-group-sm" hidden>
+<div class="navigation" style="display: block" id="goal-inputs" class="input-group input-group-sm" hidden>
   <div class="input-group-prepend">
     <span class="input-group-text">lat, long (Destination)</span><br>
   </div>
@@ -38,7 +38,7 @@
   <br>
   <button type="button" id="send-goal-pos-btn" class="btn btn-primary">Send</button>
 </div>
-<div style="display: none" id="goal-unchanging">
+<div class="navigation" style="display: none" id="goal-unchanging">
   <h6>Destination coords:</h6>
   <h5>lat: <span id="goal-latitude">-</span></h5>
   <h5>long: <span id="goal-longitude">-</span></h5>
