@@ -1,4 +1,10 @@
 $(document).ready(() => {
+  window.onload = function () {
+    keepText($('#record-feed-toggle'))
+    $('#record-feed-toggle').css({ 'font-weight': 'bold' })
+    // Add more calls to keeptext when adding additional recording buttons
+  }
+
   $('#record-feed-toggle').click(function () {
     const recordingButton = $(this)
     const stream = 'default'
