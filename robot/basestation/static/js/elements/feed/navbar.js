@@ -23,8 +23,9 @@ $(document).ready(() => {
       prefer_theme(preferred_theme);
   }
 
-  $('#theme-light').click(function () {
-      prefer_theme('light');
+  $('#theme-mantis').click(function () {
+      console.log('theme-mantis');
+      prefer_theme('mantis');
   });
   $('#theme-lofi').click(function () {
       console.log('theme-lofi');
