@@ -130,8 +130,8 @@ html, body {
 }
 .control-btn-mid {
     background-color: #848282;
-    border-top: ridge 2px #434586;
-    border-bottom: ridge 2px #434586;
+    border-top: ridge 2px #848282;
+    border-bottom: ridge 2px #848282;
     border-left: ridge 2px #848282;
     border-right: ridge 2px #848282;
     color: white;

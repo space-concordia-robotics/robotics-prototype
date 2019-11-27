@@ -71,7 +71,6 @@
 .control-btn-mid {
     width: 80px;
     height: 80px;
-    color: white;
 }
 
 .container-header, thead {
@@ -91,7 +90,7 @@
 .control-main-btn {
     border-top-style: none;
     border-left-style: none;
-    margin-bottom: 5px
+    margin-bottom: 5px;
 }
 
 .center {
@@ -118,4 +117,11 @@ input#serial-cmd-input {
 
 .control-panel {
   width:500px;
+}
+
+.fa-3x {
+  width: 70px !important;
+  height: 55px !important;
+  vertical-align: bottom !important;
+  border-radius: 5px !important;
 }
