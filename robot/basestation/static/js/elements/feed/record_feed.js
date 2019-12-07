@@ -14,11 +14,12 @@ $(document).ready(() => {
 
   function toggleRecording (recordingButton, stream) {
     if (recordingButton.text() != recordingButton.data('text-swap')) {
+      toggleText(recordingButton)
       const ajax_url = '/initiate_feed_recording/' + stream
       $.ajax(ajax_url, {
         success: function (data) {
           appendToConsole(data.recording_log_msg)
-          if (data.error_state == 0) {
+          if (data.error_state == 1) {
             toggleText(recordingButton)
           }
         },
@@ -31,8 +32,10 @@ $(document).ready(() => {
       const ajax_url = '/stop_feed_recording/' + stream
       $.ajax(ajax_url, {
         success: function (data) {
-          appendToConsole(data.recording_log_msg)
-          toggleText(recordingButton)
+          if (data.error_state == 0) {
+            toggleText(recordingButton)
+            appendToConsole(data.recording_log_msg)
+          }
         },
 
         error: function (jqXHR, exception) {

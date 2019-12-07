@@ -9,6 +9,9 @@ import threading
 import ros_utils
 from ros_utils import fetch_ros_master_ip
 
+global proc_video
+proc_video = {}
+
 def start_recording_feed(stream):
     recording_log_msg = 'recording feed of ' + stream
     formatted_date = datetime.datetime.now().strftime("%I:%M:%S_%B_%d_%Y")
@@ -19,12 +22,17 @@ def start_recording_feed(stream):
 
 def stop_recording_feed(stream):
     recording_log_msg = 'saved recording of ' + stream
-    proc_video[stream].communicate(b'q')
-    return jsonify(recording_log_msg=recording_log_msg)
+    error_state = 0
+    try:
+        proc_video[stream].communicate(b'q')
+    except (KeyError, ValueError):
+        error_state = 1
+
+    return jsonify(recording_log_msg=recording_log_msg, error_state=error_state)
 
 def feed_connection_check(stream, filename, save_video_dir, stream_url, recording_log_msg):
     error_state = 0
-    connection_check = os.system('ffprobe -show_streams -select_streams v -i ' + stream_url)
+    connection_check = os.system('ffprobe -select_streams v -i ' + stream_url)
     if connection_check == 0:
         threading.Thread(target = start_ffmpeg_record, args = (stream, stream_url, filename, save_video_dir)).start()
         print(recording_log_msg)
@@ -43,6 +51,4 @@ def start_ffmpeg_record(stream, stream_url, filename, save_video_dir):
     """
     subprocess.Popen(['mkdir rover_stream'], shell=True)
     subprocess.Popen(['mkdir ' + save_video_dir], shell=True)
-    global proc_video
-    proc_video = {}
     proc_video[stream] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + save_video_dir + '/' + filename + '.mp4'], stdin=PIPE, shell=True)
