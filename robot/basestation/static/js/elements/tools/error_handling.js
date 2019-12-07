@@ -1,3 +1,4 @@
+// Handle and log ajax errors from flask server
 function flaskError (jqXHR, exception, ajax_url) {
   full_url = 'localhost:5000' + ajax_url
   if (jqXHR.status === 0) {
