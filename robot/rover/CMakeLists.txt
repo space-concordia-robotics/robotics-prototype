@@ -78,4 +78,4 @@ add_definitions("-ffunction-sections")
 add_definitions("-c")
 
 # include_directories(${AVR-CPP-EXAMPLE_SOURCE_DIR}/mycpplib)
-add_subdirectory(Science)
+add_subdirectory(science)

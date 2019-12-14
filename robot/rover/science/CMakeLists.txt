@@ -1,1 +1,1 @@
-add_avr_executable(science science.cpp)
+add_avr_executable(science science.ino)
