@@ -98,27 +98,22 @@ html, body {
 }
 
 /* Control Buttons (rover.css) */
-.control-btn {
+.round-btn {
   background-color: #656F8C;
   border: ridge 2px black;
   color: white;
 }
-.control-btn2 {
+.rect-btn {
     background-color: #656F8C;
     border: ridge 2px black;
     color: white;
 }
-.control-btn3 {
+.square-btn {
     background-color: #656F8C;
     border: ridge 2px black;
     color: white;
 }
-.control-btn4 {
-    background-color: #656F8C;
-    border: ridge 2px black;
-    color: white;
-}
-.control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
+.round-btn:hover, .rect-btn:hover, #logs-btn button:hover {
     background-color: #BCD4DD;
     color: black;
 }
@@ -150,13 +145,10 @@ html, body {
 }
 
 /*Arm controls (arm.css)*/
-.table-grp td, .table-grp2 td {
-    border-color: white;
-}
-.table-grp th, .table-grp2 th {
+.auto-ctrl-grp th, .manual-ctrl-grp th {
     border-color: #F2F1E8;
 }
-.table-grp tr:last-child {
+.auto-ctrl-grp tr:last-child {
     border-bottom: 0px inset #F2F1E8;
     color: #252931;
     font-weight: bold;

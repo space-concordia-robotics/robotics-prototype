@@ -21,6 +21,8 @@ $(document).ready(() => {
   preferred_theme = getCookie('theme'); // getCookie() from helpers.js
   if (preferred_theme != "") {
       prefer_theme(preferred_theme);
+  }else {
+    prefer_theme("lofi")
   }
 
   $('#theme-mantis').click(function () {

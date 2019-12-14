@@ -15,12 +15,12 @@
     min-height: 100vh;
 }
 
-.table-grp, .table-grp2 {
+.auto-ctrl-grp, .manual-ctrl-grp {
     border-collapse: collapse;
     border-spacing: 0;
 }
 
-.table-grp td, .table-grp2 td {
+.auto-ctrl-grp td, .manual-ctrl-grp td {
     font-family: Arial, sans-serif;
     font-size: 14px;
     padding: 0;
@@ -30,7 +30,7 @@
     word-break: normal;
 }
 
-.table-grp th, .table-grp2 th {
+.auto-ctrl-grp th, .manual-ctrl-grp th {
     font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: normal;
@@ -46,17 +46,17 @@
     border: 0px solid #05072f;
 }
 
-.control-btn {
+.round-btn {
     width: 80px;
     height: 80px;
 }
 
-.control-btn2 {
+.rect-btn {
     width: 80px;
     height: 80px;
 }
 
-.control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
+.rect-btn:hover, .rect-btn:hover, #logs-btn button:hover {
     color: white;
 }
 
@@ -78,7 +78,7 @@
     text-align: center;
 }
 
-#motor-table thead th, .table-grp tr:first-child {
+#motor-table thead th, .auto-ctrl-grp tr:first-child {
     text-align: center;
     vertical-align: middle
 }

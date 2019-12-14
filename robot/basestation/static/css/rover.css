@@ -20,12 +20,12 @@ html, body {
     min-height: 100vh;
 }
 
-.table-grp, .table-grp2 {
+.auto-ctrl-grp, .manual-ctrl-grp {
     border-collapse: collapse;
     border-spacing: 0;
 }
 
-.table-grp td, .table-grp2 td {
+.auto-ctrl-grp td, .manual-ctrl-grp td {
     font-family: Arial, sans-serif;
     font-size: 14px;
     padding: 0;
@@ -36,7 +36,7 @@ html, body {
     border-color: #990000;
 }
 
-.table-grp th, .table-grp2 th {
+.auto-ctrl-grp th, .manual-ctrl-grp th {
     font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: normal;
@@ -49,7 +49,7 @@ html, body {
     text-align: center;
 }
 
-.table-grp tr:last-child {
+.auto-ctrl-grp tr:last-child {
     border-bottom: 0px inset #05072F;
     color: #6768a1;
     font-weight: bold;
@@ -60,24 +60,18 @@ html, body {
     border: 0px solid #05072f;
 }
 
-.control-btn {
+.round-btn {
     width: 80px;
     height: 80px;
     border-radius: 10px;
 }
 
-.control-btn2 {
+.rect-btn {
     width: 60px;
     height: 40px;
 }
 
-.control-btn3 {
-    width: 120px;
-    height: 30px;
-    margin: 2px;
-}
-
-.control-btn4 {
+.square-btn {
     width: 60px;
     height: 60px;
 }
@@ -101,7 +95,7 @@ html, body {
     text-align: center;
 }
 
-#motor-table thead th, .table-grp tr:first-child {
+#motor-table thead th, .auto-ctrl-grp tr:first-child {
     text-align: center;
     vertical-align: middle
 }
