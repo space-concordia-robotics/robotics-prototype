@@ -202,7 +202,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor1_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -214,7 +214,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor1_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -227,7 +227,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor2_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -239,7 +239,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor2_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -252,7 +252,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor3_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -264,7 +264,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor3_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -277,7 +277,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor4_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -289,7 +289,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor4_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -302,7 +302,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor5_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -314,7 +314,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor5_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -327,7 +327,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor6_ccw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'fwd'
@@ -339,7 +339,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor6_cw > button').css(
         'background-color',
-        'rgb(255, 0, 0)'
+        'rgb(63, 97, 140)'
       )
 
       budgeArray[i] = 'back'
@@ -417,80 +417,80 @@ let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
-    $('#click_btn_motor1_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor1_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
-    $('#click_btn_motor1_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor1_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyE') {
-    $('#click_btn_motor2_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor2_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
-    $('#click_btn_motor2_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor2_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyR') {
-    $('#click_btn_motor3_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor3_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyF') {
-    $('#click_btn_motor3_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor3_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyT') {
-    $('#click_btn_motor4_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor4_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyG') {
-    $('#click_btn_motor4_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor4_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyY') {
-    $('#click_btn_motor5_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor5_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyH') {
-    $('#click_btn_motor5_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor5_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
-    $('#click_btn_motor6_ccw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor6_ccw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
-    $('#click_btn_motor6_cw > button').css('background-color', 'rgb(74, 0, 0)')
+    $('#click_btn_motor6_cw > button').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
 // EXTRA CONTROLS
 document.addEventListener('keyup', function (event) {
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
-    $('button#show-buffered-msgs').css('background-color', 'rgb(74, 0, 0)')
+    $('button#show-buffered-msgs').css('background-color', 'rgb(63, 97, 140)')
   }
 })
 
