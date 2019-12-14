@@ -10,7 +10,7 @@ set(AVR_L_FUSE 0xc3)
 
 include(generic-gcc-avr.cmake)
 
-project(SCIENCE-ROBOTICS)
+project(SCIENCE-ROBOTICS CXX)
 
 message(STATUS "Current uploadtool is: ${AVR_UPLOADTOOL}")
 message(STATUS "Current programmer is: ${AVR_PROGRAMMER}")
@@ -77,5 +77,4 @@ add_definitions("-funsigned-bitfields")
 add_definitions("-ffunction-sections")
 add_definitions("-c")
 
-# include_directories(${AVR-CPP-EXAMPLE_SOURCE_DIR}/mycpplib)
 add_subdirectory(science)

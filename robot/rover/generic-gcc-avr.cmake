@@ -175,7 +175,7 @@ function(add_avr_executable EXECUTABLE_NAME)
 
    # elf file
    add_executable(${elf_file} EXCLUDE_FROM_ALL ${ARGN})
-
+   
    set_target_properties(
       ${elf_file}
       PROPERTIES
