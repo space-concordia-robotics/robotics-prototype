@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="mux_selector" type="mux_select_server.py" name="mux_select_server" output="screen" args="local"/>
+</launch>

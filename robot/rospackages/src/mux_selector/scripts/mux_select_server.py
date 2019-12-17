@@ -115,7 +115,7 @@ def select_device(device):
 def mux_select_server():
     global local
     local = False
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 3:
         if sys.argv[1] == "local":
             print("Running in local mode")
             local = True
