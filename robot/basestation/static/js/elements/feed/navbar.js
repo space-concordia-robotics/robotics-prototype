@@ -267,4 +267,8 @@ $(document).ready(() => {
   $( "#streams-page" ).click(function() {
     window.open('stream');
   })
+ $( "#navigation-page" ).click(function() {
+    window.open('/navigation');
+  })
+
 })

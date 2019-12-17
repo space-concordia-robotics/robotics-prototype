@@ -100,6 +100,11 @@ def pds():
     """PDS page."""
     return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/navigation")
+def navigation():
+    """PDS page."""
+    return flask.render_template("pages/Navigation.html", roverIP=fetch_ros_master_ip())
+
 
 # routes for science page
 @app.route('/science/numSections')
