@@ -2,6 +2,7 @@
 
 import rospy
 import os
+import time
 from Listener import Listener
 from task_handler.srv import *
 import glob
@@ -83,7 +84,7 @@ def handle_task(task, status, args):
                     max_streams = len(ports)
                     print('ports:', ports)
 
-                    if args in ports and stream_ctr < max_streams:
+                    if args in ports and stream_ctr < max_streams or status == 0:
                         pass
                     else:
                         response = "Requested port not available, is the camera properly plugged into the USB port?"
@@ -99,7 +100,7 @@ def handle_task(task, status, args):
             i += 1
 
 
-        # request start
+        # process start request
         if status == 1:
             if task == "camera_stream":
                 # check if already started, if not then start it
@@ -108,10 +109,17 @@ def handle_task(task, status, args):
                 else:
                     stream = Listener(scripts[4], "bash", args, 1, True)
                     if stream.start():
-                        response = "Started " + chosen_task + "on port " + args
-                        active_ports.append(args)
-                        stream.set_name(args)
-                        active_streams.append(stream)
+                        # wait a second just in case it fails to start
+                        time.sleep(1)
+
+                        if stream.is_running():
+                            response = "Started " + chosen_task + " on port " + args
+                            active_ports.append(args)
+                            stream.set_name(args)
+                            active_streams.append(stream)
+                            stream_ctr += 1
+                        else:
+                            response = "Failed to start " + chosen_task + " on port " + args + ", process defunct"
                     else:
                         response = "Failed to start " + chosen_task
             else:
@@ -125,18 +133,41 @@ def handle_task(task, status, args):
                     else: # in this case it is worth trying to start the chosen_task
                         if running_tasks[i].start():
                             response = "Started " + chosen_task
-        # request stop
+
+        # process stop request
         elif status == 0:
             if task == "camera_stream":
+                # temp copy so no weird stuff happens in following for loop
+                active_streams_copy = active_streams.copy()
+                print("Attempting to terminate camera_stream")
+                print("active_ports: ", active_ports)
+                print("active_streams: ", active_streams)
+
+                for s in active_streams:
+                    print(s.get_name())
+
+                print("stream_ctr: ", stream_ctr)
+
                 if args in active_ports:
-                    for stream in active_streams:
+                    for stream in active_streams_copy:
                         if stream.get_name() == args:
-                            if stream.stop():
-                                response += "Stopped " + chosen_task + " on port: " + args
-                                stream_ctr -= 1
-                                active_ports.remove(args)
+                            print('stream.get_name()', stream.get_name())
+                            print('args', args)
+                            node_name = args[args.rindex('/')+1:]
+
+                            if stream.stop("__name:=" + node_name):
+                                time.sleep(1)
+                                if not stream.is_running():
+                                    response = "Stopped " + chosen_task + " on port: " + args
+                                    stream_ctr -= 1
+                                    active_ports.remove(args)
+                                    active_streams.remove(stream)
+                                else:
+                                    response = "Failed to stop " + chosen_task + " on port: " + args
                             else:
-                                response += "Failed to stop " + chosen_task + " on port: " + args
+                                response = "Failed to stop " + chosen_task + " on port: " + args
+                        else:
+                            print("Not: " + stream.get_name())
                 else:
                     response = "No active stream found on port: " + args + ", nothing to terminate"
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
