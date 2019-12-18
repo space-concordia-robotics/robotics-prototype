@@ -115,14 +115,10 @@ def select_device(device):
 def mux_select_server():
     global local
     local = False
-    if len(sys.argv) > 3:
-        if sys.argv[1] == "local":
+    for x in sys.argv:
+        if x == "local":
             print("Running in local mode")
             local = True
-        else:
-            print("Argument '" + sys.argv[1] + "' not recognized, did you mean 'local'?")
-            sys.exit(0)
-
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
     startup_msg = "Ready to respond to mux select commands"
