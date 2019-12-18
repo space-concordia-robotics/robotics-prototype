@@ -6,6 +6,11 @@ from Listener import Listener
 from task_handler.srv import *
 import glob
 
+# this value is set at runtime based off how many video port devices are identified
+max_streams = 0
+# how many streams are currently on
+stream_ctr = 0
+
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 mcu_control_dir = current_dir + '../../mcu_control/scripts/'
 
@@ -18,6 +23,10 @@ running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"
 # expected client arguments for choosing task
 known_tasks = ["rover_listener", "arm_listener", "science_listener", "pds_listener", "camera_stream"]
 known_listeners = known_tasks[:-1]
+
+# keep track of currently running streams
+active_ports = []
+active_streams = []
 
 i = 0
 for task in running_tasks:
@@ -36,6 +45,7 @@ def handle_task(task, status, args):
     response = "Nothing happened"
 
     global running_tasks
+    global stream_ctr
 
     if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
@@ -66,23 +76,18 @@ def handle_task(task, status, args):
 
                 # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
                 if chosen_task == "camera_stream":
-                    if running_tasks[i].is_running() and args != running_tasks[i].get_args():
-                        response = "Camera stream already running on port " + running_tasks[i].get_args()
-                        response += "\nTurn this stream off before starting or stopping a new one\n"
-                        return response
-                    # set appropriate usb port in args
-                    elif args and not running_tasks[i].is_running():
-                        # if in compeition mode/running on OBC
-                        #ports = glob.glob('/dev/tty[A-Za-z]*')
-                        # else if running local mode
-                        ports = glob.glob('/dev/video[0-9]*')
-                        print('ports', ports)
+                    # if in compeition mode/running on OBC
+                    #ports = glob.glob('/dev/tty[A-Za-z]*')
+                    # else if running local mode
+                    ports = glob.glob('/dev/video[0-9]*')
+                    max_streams = len(ports)
+                    print('ports:', ports)
 
-                        if args in ports:
-                            running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
-                        else:
-                            response = "Requested port not available, is the camera properly plugged into the USB port?"
-                            return response + "\n"
+                    if args in ports and stream_ctr < max_streams:
+                        pass
+                    else:
+                        response = "Requested port not available, is the camera properly plugged into the USB port?"
+                        return response + "\n"
                 elif chosen_task in known_listeners:
                     if args and not running_tasks[i].is_running():
                         if args == 'usb' or args == 'uart':
@@ -96,20 +101,45 @@ def handle_task(task, status, args):
 
         # request start
         if status == 1:
-
-            if running_tasks[i].start():
-                response = "Started " + chosen_task
+            if task == "camera_stream":
+                # check if already started, if not then start it
+                if args in active_ports:
+                    response = "Failed to start " + chosen_task
+                else:
+                    stream = Listener(scripts[4], "bash", args, 1, True)
+                    if stream.start():
+                        response = "Started " + chosen_task + "on port " + args
+                        active_ports.append(args)
+                        stream.set_name(args)
+                        active_streams.append(stream)
+                    else:
+                        response = "Failed to start " + chosen_task
             else:
-                response = "Failed to start " + chosen_task
+                if running_tasks[i].start():
+                    response = "Started " + chosen_task
+                else:
+                    response = "Failed to start " + chosen_task
 
-                if running_tasks[i].is_running():
-                    response += ", already running"
-                else: # in this case it is worth trying to start the chosen_task
-                    if running_tasks[i].start():
-                        response = "Started " + chosen_task
+                    if running_tasks[i].is_running():
+                        response += ", already running"
+                    else: # in this case it is worth trying to start the chosen_task
+                        if running_tasks[i].start():
+                            response = "Started " + chosen_task
         # request stop
         elif status == 0:
-            if len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
+            if task == "camera_stream":
+                if args in active_ports:
+                    for stream in active_streams:
+                        if stream.get_name() == args:
+                            if stream.stop():
+                                response += "Stopped " + chosen_task + " on port: " + args
+                                stream_ctr -= 1
+                                active_ports.remove(args)
+                            else:
+                                response += "Failed to stop " + chosen_task + " on port: " + args
+                else:
+                    response = "No active stream found on port: " + args + ", nothing to terminate"
+            elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = "Stopped " + chosen_task
                 else:
