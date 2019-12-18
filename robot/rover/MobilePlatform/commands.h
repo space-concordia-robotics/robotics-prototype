@@ -543,6 +543,9 @@ void Commands::controlWheelMotors(String cmd) {
             sinceThrottle = 0;
         }
         else {
+          // TODO: fix this.
+          // 1) make sure motor numbering makes sense in both closed and open loop (1 to 6 not 0 to 5)
+          // 2) make sure motor order is correct (1 to 6 actually turns motors 1 to 6)
             motorNumber = getValue(cmd, ':', 0).toFloat();
             int motorSpeed = getValue(cmd, ':', 1).toFloat();
             steering = 0;

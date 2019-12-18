@@ -182,38 +182,30 @@ void loop() {
     if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
             print("ASTRO Motor Speeds: ");
-
             print(RF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(RB.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LF.getCurrentVelocity());
-            print(" ");
+            print(", ");
             print(LM.getCurrentVelocity());
-            print(" ");
+            print(", ");
             println(LB.getCurrentVelocity());
 
             roverVelocityCalculator();
 
-            print("ASTRO");
-            print(" Desired Velocities");
-
-            print(RF.desiredVelocity);
-            print(" ");
-            print(RM.desiredVelocity);
-            print(" ");
-            print(RB.desiredVelocity);
-            print(" ");
-            print(LF.desiredVelocity);
-            print(" ");
-            print(LM.desiredVelocity);
-            print(" ");
-            println(LB.desiredVelocity);
-
+            print("ASTRO Desired Velocities: ");
+            print(String(RF.desiredVelocity) + ", ");
+            print(String(RM.desiredVelocity) + ", ");
+            print(String(RB.desiredVelocity) + ", ");
+            print(String(LF.desiredVelocity) + ", ");
+            print(String(LM.desiredVelocity) + ", ");
+            println(String(LB.desiredVelocity));
         }
         else {
+            print("ASTRO Motor Speeds: ");
             print(String(RF.desiredVelocity) + ", ");
             print(String(RM.desiredVelocity) + ", ");
             print(String(RB.desiredVelocity) + ", ");
@@ -269,11 +261,11 @@ void roverVelocityCalculator(void) {
     rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
 
     print("ASTRO ");
-    print("Linear velocity ");
+    print("Linear Velocity: ");
     print(linearVelocity);
     print(" m/s ");
 
-    print(" Rotational Velocity ");
+    print("Rotational Velocity: ");
     print(rotationalVelocity);
     println(" m^2/6 ");
 }
@@ -368,14 +360,14 @@ void serialHandler(void) {
 //! attach the servos to pins
 void attachServos() {
     frontSide.attach(FS_SERVO);
-    frontSide.write(FRONT_BASE_DEFAULT_PWM);
+    frontSide.write(SERVO_STOP);
     frontBase.attach(FB_SERVO);
-    frontBase.write(SERVO_STOP);
+    frontBase.write(FRONT_BASE_DEFAULT_PWM);
 
     rearSide.attach(RS_SERVO);
-    rearSide.write(REAR_BASE_DEFAULT_PWM);
+    rearSide.write(SERVO_STOP);
     rearBase.attach(RB_SERVO);
-    rearBase.write(SERVO_STOP);
+    rearBase.write(REAR_BASE_DEFAULT_PWM);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes
