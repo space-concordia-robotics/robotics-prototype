@@ -2,6 +2,7 @@
 
 import sys
 import datetime
+import glob
 import rospy
 from task_handler.srv import *
 
@@ -27,10 +28,13 @@ def is_valid_request(r_task, r_status, r_args):
 
     # all known tasks to be handled by the handler
     known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
-    camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
+    # if in competition mode then
+    #ports = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
+    # else if local mode
+    ports = glob.glob('/dev/video[0-9]*')
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
-        if r_args and r_task == "camera_stream" and not r_args in camera_args:
+        if r_args and r_task == "camera_stream" and not r_args in ports:
             return False
         return True
 
@@ -38,7 +42,7 @@ def is_valid_request(r_task, r_status, r_args):
 
 def usage():
     """
-    Return string showcasing proper usage of this client script
+    Return string showcasing proper usage of this client script for competition mode
     """
     help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]
                   \nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']

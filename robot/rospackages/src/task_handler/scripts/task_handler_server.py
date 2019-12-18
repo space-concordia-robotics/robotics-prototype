@@ -8,8 +8,14 @@ import glob
 
 current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
 mcu_control_dir = current_dir + '../../mcu_control/scripts/'
+
+# tasks that can be run
 scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh"]
+
+# set up listener objects
 running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
+
+# expected client arguments for choosing task
 known_tasks = ["rover_listener", "arm_listener", "science_listener", "pds_listener", "camera_stream"]
 known_listeners = known_tasks[:-1]
 
@@ -24,8 +30,9 @@ def handle_task_request(req):
 
     return response
 
+# process task, status and corresponding args sent from client
+# return response message
 def handle_task(task, status, args):
-
     response = "Nothing happened"
 
     global running_tasks
@@ -65,7 +72,12 @@ def handle_task(task, status, args):
                         return response
                     # set appropriate usb port in args
                     elif args and not running_tasks[i].is_running():
-                        ports = glob.glob('/dev/tty[A-Za-z]*')
+                        # if in compeition mode/running on OBC
+                        #ports = glob.glob('/dev/tty[A-Za-z]*')
+                        # else if running local mode
+                        ports = glob.glob('/dev/video[0-9]*')
+                        print('ports', ports)
+
                         if args in ports:
                             running_tasks[i] = Listener(scripts[i], "bash", args, 1, True)
                         else:
