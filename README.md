@@ -34,7 +34,7 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
-If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.**
 
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
@@ -69,7 +69,7 @@ wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_
 chmod 755 ./install_ros_kinetic.sh
 bash ./install_ros_kinetic.sh
 ```
-To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, you should restart your terminal.
+To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
 To verify ROS-Kinetic has been successfully installed, you should do
 ```
@@ -85,6 +85,14 @@ To verify that its working, deactivate `venv` with `deactivate`
 $ roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 You will need `venv` activated for everything except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
+
+### Install ROS nodes for camera
+To successfully build the ROS packages, you will need these dependencies.
+
+```
+sudo apt-get install ros-kinetic-cv-camera
+sudo apt-get install ros-kinetic-web-video-server
+```
 
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
 The first catkin workspace was automatically generated during the scripted installation of ROS, you can see `catkin_ws` in your `~` directory.
@@ -124,10 +132,13 @@ $ base
 $ python app.py
 ```
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
+
 ### ffmpeg
 
-For the feature of capturing a snapshot of our camera stream we need `ffmpeg`:
-- sudo apt install ffmpeg
+For the features of capturing a snapshot and recording the camera streams we require `ffmpeg`:
+```
+sudo apt install ffmpeg
+```
 
 You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
@@ -143,7 +154,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
 - `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
-- `cp branch-verification-hook.sh .git/hooks/post-checkout`
+- `cp branch-name-verification.sh .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
