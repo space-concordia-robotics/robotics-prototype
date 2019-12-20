@@ -112,25 +112,34 @@ def select_device(device):
 
     return s0_state + "\n" + s1_state
 
-# Check passed args and return invalid ones
 def get_invalid_args(whitelisted_args, actual_args):
+    ''' Returns list of unrecognized arguments '''
     wrong_args = []
     for arg in actual_args:
         if arg not in whitelisted_args:
             wrong_args.append(arg)
     return wrong_args
 
+def remove_ros_arguments(args):
+    ''' Returns list of arguments without ROS arguments '''
+    non_ros_args = []
+    for arg in args:
+        if ":=" not in arg:
+            non_ros_args.append(arg)
+    return non_ros_args
+
 def mux_select_server():
     global local
     local = False
-    wrong_args = get_invalid_args(['rosrun', 'mux_select_server.py', 'local'], sys.argv)
+    non_ros_args = remove_ros_arguments(sys.arv)
+    wrong_args = get_invalid_args(['rosrun', __file__, 'local'], non_ros_args)
     if len(wrong_args) > 0:
         print('Error with passed arguments: ')
         for arg in wrong_args:
             print(arg)
         print('Exiting...')
         sys.exit(0)
-    if 'local' in sys.argv:
+    if 'local' in non_ros_args:
         print("Running in local mode")
         local = True
     
