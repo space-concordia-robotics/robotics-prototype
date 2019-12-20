@@ -131,7 +131,7 @@ def remove_ros_arguments(args):
 def mux_select_server():
     global local
     local = False
-    non_ros_args = remove_ros_arguments(sys.arv)
+    non_ros_args = remove_ros_arguments(sys.argv)
     wrong_args = get_invalid_args(['rosrun', __file__, 'local'], non_ros_args)
     if len(wrong_args) > 0:
         print('Error with passed arguments: ')
