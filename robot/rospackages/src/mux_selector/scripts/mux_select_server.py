@@ -112,13 +112,28 @@ def select_device(device):
 
     return s0_state + "\n" + s1_state
 
+# Check passed args and return invalid ones
+def get_invalid_args(whitelisted_args, actual_args):
+    wrong_args = []
+    for arg in actual_args:
+        if arg not in whitelisted_args:
+            wrong_args.append(arg)
+    return wrong_args
+
 def mux_select_server():
     global local
     local = False
-    for x in sys.argv:
-        if x == "local":
-            print("Running in local mode")
-            local = True
+    wrong_args = get_invalid_args(['rosrun', 'mux_select_server.py', 'local'], sys.argv)
+    if len(wrong_args) > 0:
+        print('Error with passed arguments: ')
+        for arg in wrong_args:
+            print(arg)
+        print('Exiting...')
+        sys.exit(0)
+    if 'local' in sys.argv:
+        print("Running in local mode")
+        local = True
+    
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
     startup_msg = "Ready to respond to mux select commands"
