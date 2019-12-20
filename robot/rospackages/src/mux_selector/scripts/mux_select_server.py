@@ -134,10 +134,10 @@ def mux_select_server():
     non_ros_args = remove_ros_arguments(sys.argv)
     wrong_args = get_invalid_args(['rosrun', __file__, 'local'], non_ros_args)
     if len(wrong_args) > 0:
-        print('Error with passed arguments: ')
+        print('An error with passed arguments: ')
         for arg in wrong_args:
             print(arg)
-        print('Exiting...')
+        print('Exiting... Perhaps you mean\'t \'local\'?')
         sys.exit(0)
     if 'local' in non_ros_args:
         print("Running in local mode")
