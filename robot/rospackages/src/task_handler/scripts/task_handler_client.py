@@ -22,6 +22,7 @@ def is_valid_request(r_task, r_status, r_args):
     Validate client request parameters
     r_task: requested task
     r_status: status ON/OFF, represented by 1 and 0 respectively
+    r_args: optional args
     """
 
     global local
@@ -88,6 +89,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) >= 4:
         args = sys.argv[3]
+    else:
+        # if not enough args passed, then explicitly pass empty string for validation function to handle
+        args = ""
 
     if not is_valid_request(task, status, args):
         print("Invalid format")
