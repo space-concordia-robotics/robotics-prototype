@@ -3,36 +3,10 @@
 import rospy
 import os
 import time
-from Listener import Listener
+import sys
+from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *
 import glob
-
-# this value is set at runtime based off how many video port devices are identified
-max_streams = 0
-# how many streams are currently on
-stream_ctr = 0
-
-current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
-mcu_control_dir = current_dir + '../../mcu_control/scripts/'
-
-# tasks that can be run
-scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh"]
-
-# set up listener objects
-running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
-
-# expected client arguments for choosing task
-known_tasks = ["rover_listener", "arm_listener", "science_listener", "pds_listener", "camera_stream"]
-known_listeners = known_tasks[:-1]
-
-# keep track of currently running streams
-active_ports = []
-active_streams = []
-
-i = 0
-for task in running_tasks:
-    task.set_name(known_tasks[i])
-    i += 1
 
 # return the response string after calling the task handling function
 def handle_task_request(req):
@@ -47,6 +21,7 @@ def handle_task(task, status, args):
 
     global running_tasks
     global stream_ctr
+    global local
 
     if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
@@ -77,12 +52,19 @@ def handle_task(task, status, args):
 
                 # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
                 if chosen_task == "camera_stream":
-                    # if in compeition mode/running on OBC
-                    #ports = glob.glob('/dev/tty[A-Za-z]*')
                     # else if running local mode
-                    ports = glob.glob('/dev/video[0-9]*')
+                    if local:
+                        ports = glob.glob('/dev/video[0-9]*')
+                    else:
+                        # if in compeition mode/running on OBC
+                        ports = glob.glob('/dev/tty[A-Za-z]*')
+
                     max_streams = len(ports)
+                    print('args:', args)
                     print('ports:', ports)
+                    print('stream_ctr:', stream_ctr)
+                    print('max_streams:', max_streams)
+                    print('status:', status)
 
                     if args in ports and stream_ctr < max_streams or status == 0:
                         pass
@@ -179,10 +161,50 @@ def handle_task(task, status, args):
     return response + "\n"
 
 def task_handler_server():
+    global local
     rospy.init_node('task_handler_server')
     s = rospy.Service('task_handler', HandleTask, handle_task_request)
-    print("Ready to respond to task handling requests")
+    ready_msg = "Ready to respond to task handling requests"
+
+    if local:
+        ready_msg += " (local mode)"
+
+    print(ready_msg)
     rospy.spin()
 
 if __name__ == "__main__":
+    local = False
+
+    if "local" in sys.argv:
+        print("Task handler local mode supported tasks")
+        print("--> camera_stream")
+        local = True
+
+    # this value is set at runtime based off how many video port devices are identified
+    max_streams = 0
+    # how many streams are currently on
+    stream_ctr = 0
+
+    current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
+    mcu_control_dir = current_dir + '../../mcu_control/scripts/'
+
+    # tasks that can be run
+    scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh"]
+
+    # set up listener objects
+    running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
+
+    # expected client arguments for choosing task
+    known_tasks = ["rover_listener", "arm_listener", "science_listener", "pds_listener", "camera_stream"]
+    known_listeners = known_tasks[:-1]
+
+    # keep track of currently running streams
+    active_ports = []
+    active_streams = []
+
+    i = 0
+    for task in running_tasks:
+        task.set_name(known_tasks[i])
+        i += 1
+
     task_handler_server()

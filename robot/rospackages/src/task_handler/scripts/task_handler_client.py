@@ -23,15 +23,21 @@ def is_valid_request(r_task, r_status, r_args):
     r_task: requested task
     r_status: status ON/OFF, represented by 1 and 0 respectively
     """
+
+    global local
+    global ports
+
     r_task = str(r_task)
     r_status = int(r_status)
 
     # all known tasks to be handled by the handler
     known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
-    # if in competition mode then
-    #ports = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
-    # else if local mode
-    ports = glob.glob('/dev/video[0-9]*')
+
+    if local:
+        ports = glob.glob('/dev/video[0-9]*')
+    else:
+        # competition mode
+        ports = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
         if r_args and r_task == "camera_stream" and not r_args in ports:
@@ -42,26 +48,42 @@ def is_valid_request(r_task, r_status, r_args):
 
 def usage():
     """
-    Return string showcasing proper usage of this client script for competition mode
+    Return string showcasing proper usage of this client script
     """
-    help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]
-                  \nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']
-                  \nValid status options: [0, 1, 2]
-                  \nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam', '/dev/ttyArmScienceCam']"""
+    global ports
+
+    help_msg = "USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]"
+    help_msg += "\nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']"
+    help_msg  += "\nValid status options: [0, 1, 2]"
+
+    if local:
+        help_msg +="\nValid camera stream args: ["
+        help_msg += "'" + "' '".join(ports) + "']"
+    else:
+        help_msg  += "\nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam', '/dev/ttyArmScienceCam']"
+
     return help_msg
 
 if __name__ == "__main__":
     # check for invalid ranges for args
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
+    if len(sys.argv) < 3 or len(sys.argv) > 5:
         print(usage())
         sys.exit(1)
+
+    local = False
+    ports = []
+
+    if "local" in sys.argv:
+        print("supported options:")
+        print("- camera_stream")
+        local = True
 
     rospy.init_node("task_handler_client")
 
     task = sys.argv[1]
     status = int(sys.argv[2])
 
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
         args = sys.argv[3]
     else:
         args = ""
