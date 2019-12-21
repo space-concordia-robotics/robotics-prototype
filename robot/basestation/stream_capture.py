@@ -6,8 +6,8 @@ import flask
 from flask import jsonify, make_response
 import threading
 
-import ros_utils
-from ros_utils import fetch_ros_master_ip
+import robot.basestation.ros_utils as ros_utils
+from robot.basestation.ros_utils import fetch_ros_master_ip
 
 global proc_video
 proc_video = {}
