@@ -202,9 +202,7 @@ if __name__ == "__main__":
     active_ports = []
     active_streams = []
 
-    i = 0
-    for task in running_tasks:
-        task.set_name(known_tasks[i])
-        i += 1
+    for i in range(len(running_tasks)):
+        running_tasks[i].set_name(known_tasks[i])
 
     task_handler_server()

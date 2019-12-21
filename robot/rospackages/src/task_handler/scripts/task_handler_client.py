@@ -26,12 +26,10 @@ def is_valid_request(r_task, r_status, r_args):
 
     global local
     global ports
+    global known_tasks
 
     r_task = str(r_task)
     r_status = int(r_status)
-
-    # all known tasks to be handled by the handler
-    known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
 
     if local:
         ports = glob.glob('/dev/video[0-9]*')
@@ -51,9 +49,11 @@ def usage():
     Return string showcasing proper usage of this client script
     """
     global ports
+    global known_tasks
 
     help_msg = "USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]"
-    help_msg += "\nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']"
+    help_msg += "\nValid task options: ["
+    help_msg += "'" + "', '".join(known_tasks) + "']"
     help_msg  += "\nValid status options: [0, 1, 2]"
 
     if local:
@@ -73,6 +73,9 @@ if __name__ == "__main__":
     local = False
     ports = []
 
+    # all known tasks to be handled by the handler
+    known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
+
     if "local" in sys.argv:
         print("supported options:")
         print("- camera_stream")
@@ -85,8 +88,6 @@ if __name__ == "__main__":
 
     if len(sys.argv) >= 4:
         args = sys.argv[3]
-    else:
-        args = ""
 
     if not is_valid_request(task, status, args):
         print("Invalid format")

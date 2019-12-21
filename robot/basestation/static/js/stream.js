@@ -1,33 +1,31 @@
 $(document).ready(function () {
+
+    const STREAM_OFF = '../static/images/stream-offline.jpg'
+
+    function getStreamURL(streamName) {
+        return 'http://localhost:8080/stream?=topic=/' + streamName + '/image_raw'
+    }
+
     $('#arm-stream-btn').on('click', function (event) {
-        // click makes it checked during this time, so trying to enable
         if ($('#arm-stream-btn').is(':checked')) {
-            $('img#arm-camera-feed')[0].src =
-            'http://localhost:8080/stream?topic=/ArmCamera/image_raw'
+            $('img#arm-camera-feed')[0].src = getStreamURL('ArmCamera')
         } else {
-            $('img#arm-camera-feed')[0].src =
-                '../static/images/stream-offline.jpg'
+            $('img#arm-camera-feed')[0].src = STREAM_OFF
         }
     })
     $('#front-stream-btn').on('click', function (event) {
-        // click makes it checked during this time, so trying to enable
         if ($('#front-stream-btn').is(':checked')) {
-            $('img#front-camera-feed')[0].src =
-            'http://localhost:8080/stream?topic=/FrontCamera/image_raw'
+            $('img#front-camera-feed')[0].src = getStreamURL('FrontCamera')
         } else {
-            $('img#front-camera-feed')[0].src =
-                '../static/images/stream-offline.jpg'
+            $('img#front-camera-feed')[0].src = STREAM_OFF
         }
     })
 
     $('#rear-stream-btn').on('click', function (event) {
-        // click makes it checked during this time, so trying to enable
         if ($('#rear-stream-btn').is(':checked')) {
-            $('img#rear-camera-feed')[0].src =
-            'http://localhost:8080/stream?topic=/RearCamera/image_raw'
+            $('img#rear-camera-feed')[0].src = getStreamURL('RearCamera')
         } else {
-            $('img#rear-camera-feed')[0].src =
-                '../static/images/stream-offline.jpg'
+            $('img#rear-camera-feed')[0].src = STREAM_OFF
         }
     })
 })

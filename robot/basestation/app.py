@@ -94,7 +94,6 @@ def stream():
     """Stream page."""
     return flask.render_template("pages/Stream.html", roverIP=fetch_ros_master_ip())
 
-# we still using this?
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
