@@ -35,12 +35,10 @@ html, body {
 }
 .bootstrap-select .dropdown-toggle:focus {
   outline: none!important;
-  box-shadow:
-  0 0 0 0.2rem rgba(0,0,0,.5);
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.5);
 }
 .btn-primary.focus, .btn-primary:focus {
-  box-shadow:
-  0 0 0 0.2rem rgba(255,255,255,0);
+  box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
 .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
   color: #fff;
@@ -52,9 +50,6 @@ html, body {
 }
 .btn.focus, .btn:focus {
   box shadow: white;
-}
-.btn-primary {
-  border-color: white;
 }
 .dropdown-item.active, .dropdown-item:active {
     color: #fff;
@@ -181,7 +176,7 @@ html, body {
   color: black;
 }
 
-/* Navigation Text */
+/* Navigation */
 .navigation {
   color: #E4E1D1;
 }
@@ -189,7 +184,7 @@ html, body {
   color: #E4E1D1;
 }
 
-/* PDS Text */
+/* PDS */
 .pds-text {
   color: #E4E1D1;
 }

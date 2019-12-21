@@ -24,25 +24,23 @@ html, body {
 .dropdown .nav-link {color:#528EA5; text-decoration: none;}
 .dropdown .btn {background: #528EA5; color:#fff;}
 .container .dropdown .dropdown-menu a:hover {
-  color: #fff;
-  background-color: #fff;
+  color: #FFF;
+  background-color: #FFF;
   border-color: white;
 }
 .btn-primary.dropdown-toggle {
-    color: #fff;
-    border-color: #fff;
+    color: #FFF;
+    border-color: #FFF;
 }
 .bootstrap-select .dropdown-toggle:focus {
   outline: none!important;
-  box-shadow:
-  0 0 0 0.2rem rgba(0,0,0,.5);
+  box-shadow: 0 0 0 0.2rem rgba(0,0,0,.5);
 }
 .btn-primary.focus, .btn-primary:focus {
-  box-shadow:
-  0 0 0 0.2rem rgba(255,255,255,0);
+  box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
 .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
-  color: #fff;
+  color: #FFF;
   background-color: #528EA5;
   border-color: #528EA5;
 }
@@ -52,18 +50,15 @@ html, body {
 .btn.focus, .btn:focus {
   box shadow: white;
 }
-.btn-primary {
-  border-color: white;
-}
 .dropdown-item.active, .dropdown-item:active {
-    color: #fff;
+    color: #FFF;
     text-decoration: none;
     background-color: #BCD4DD;
 }
 
 /* Bootstrap buttons */
 .btn-primary {
-  color: #fff;
+  color: #FFF;
   background-color: #528EA5;
   border-color: #528EA5;
 }
@@ -76,7 +71,7 @@ html, body {
 /* Bootstrap forms */
 .form-control:focus {
   color: white;
-  background-color: #fff;
+  background-color: #FFF;
   border-color: white;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
@@ -180,7 +175,7 @@ html, body {
   color: black;
 }
 
-/* Navigation Text */
+/* Navigation */
 .navigation {
   color: #252931;
 }
@@ -188,7 +183,7 @@ html, body {
   color: #252931;
 }
 
-/* PDS Text */
+/* PDS */
 .pds-text {
   color: #252931;
 }
