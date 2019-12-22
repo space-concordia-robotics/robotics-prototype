@@ -180,6 +180,9 @@ html, body {
 .navigation {
   color: #E4E1D1;
 }
+.col-md-1 {
+  color: white;
+}
 .row {
   color: #E4E1D1;
 }
