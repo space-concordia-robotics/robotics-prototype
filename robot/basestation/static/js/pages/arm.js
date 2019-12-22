@@ -3,10 +3,6 @@
 // update odroid rx data every second
 // setInterval(updateOdroidRx, 1000);
 
-// Button coloring
-const orange = 'rgb(255, 151, 44)'
-const green = 'rgb(61 , 127, 127)'
-
 // for command thoughput limiting
 const MANUAL_CONTROL_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
@@ -193,6 +189,11 @@ window.addEventListener(
   },
   true
 )
+
+// Button coloring
+const orange = 'rgb(255, 151, 44)'
+const green = 'rgb(61 , 127, 127)'
+const purple = 'rgb(101, 111, 140)'
 
 function gameLoop () {
   let $serialCmdInput = $('#serial-cmd-input')
