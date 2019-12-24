@@ -11,9 +11,22 @@
  <div class="col-md-2">
    {% with device="PDS" %}{% include "elements/feed/Console.html" %}{% endwith %}
  </div>
- <div class="col-md-4" id = "data-start">
- 
+ <div class="col-md-3" id = "data-start">
+     
+    <div id = "rover-stats">
+     <h4 align = "center"> Rover stats </h4>
+     <ul class = "list-group" id = "rover-stats-list">
+        <li class = "list-group-item"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">Right aligned </span >  </li>
+        <li class = "list-group-item">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">Right aligned </span ></li>
+        <li class = "list-group-item"> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">Right aligned </span >  </li>
+        <li class = "list-group-item">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">Right aligned </span ></li>
+        <li class = "list-group-item">  <label for = "" > Angular Velocity</label>  <span id = "rover-speed" class="float-right">Right aligned </span ></li>
+                
+      </ul>
+    </div>   
 
+    <div id = "antenna-stats-list"> 
+    </div>
     <button id = "open-antenna-modal-btn" type = "button" class = "btn btn-primary" data-toggle = "modal" data-target = "#antenna-modal" > Antenna Data </button>
 
     <div class = "modal fade" id = "antenna-modal">
@@ -23,22 +36,23 @@
                   <h4> Modal header </h4>
               </div>
               <div class = "modal-body" id = "antenna-coordinates-modal-body">
-                  <div class = "input-group" id = "antenna-lat-input-group">
-                  <button type = "button" id = "antenna-input-lat-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Latitude Format</button> 
+                  <fieldset id = "antenna-fieldset"> 
+                  <div class = "input-group" id = "antenna-lat-input-group" >
+                  <button type = "button" id = "antenna-select-lat-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Latitude Format</button> 
                   <span class = "caret"> </span>
 
                 <ul class = "dropdown-menu">
-                    <li class = "dropdown-header"> Select </li>
-                    <li><button id = "antenna-lat-decimal-degrees-btn" class = "btn btn-primary btn-sm" >  Decimal Degrees </button></li>
+                    <li class = "dropdown-header"> Select latitude format</li>
+                    <li><button id = "antenna-lat-decimal-degrees-btn" class = "btn btn-primary btn-sm" >Decimal Degrees </button></li>
                     <li><button id = "antenna-lat-degrees-decimal-minutes-btn" class = "btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
                     <li><button id = "antenna-lat-degrees-minutes-seconds-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
-                    </ul>
+                </ul>
                 
                 </div> 
                   <hr>
 
                 <div class = "input-group" id = "antenna-long-input-group">
-                <button type = "button" id = "antenna-input-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Longtitude Format</button> 
+                <button type = "button" id = "antenna-select-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Longtitude Format</button> 
                 <span class = "caret"> </span>
 
                 <ul class = "dropdown-menu">
@@ -46,7 +60,7 @@
                     <li><button id = "antenna-long-decimal-degrees-btn" class = "btn btn-primary btn-sm"> Decimal Degrees </button> </li>
                     <li><button id = "antenna-long-degrees-decimal-minutes-btn" class = "btn btn-primary btn-sm">  Degrees Decimal Minutes</button></li>
                     <li><button id = "antenna-long-degrees-minutes-seconds-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
-                    </ul>  
+                </ul>  
 
                 </div>
                 <hr>
@@ -54,16 +68,17 @@
                   <span class=  "input-group-text"> Bearing </span>
                   <input id = "antenna-bearing-input" type="text" class="form-control" placeholder="Enter">
                 </div>
+                </fieldset>
               </div>
 
               <div class = "modal-footer">
-                <button id = "antenna-inputs-confirm-btn" type = "button" class = "btn btn-success"> Confirm </button>
-                <button id = "change" type = "button" class = "btn btn-warning"> Change </button>
+                <button id = "antenna-confirm-btn" type = "button" class = "btn btn-success"> Confirm </button>
+                <button id = "antenna-change-btn" type = "button" class = "btn btn-warning"> Change </button>
                   
               </div>
           </div>
-        
-      </div>
+        </div>
+    
     </div>  
   <br>
   <br>
