@@ -14,14 +14,41 @@ def handle_task_request(req):
 
     return response
 
+def validate_camera_task(args, status, active_stream_ctr, is_local=False):
+    """
+        Check if the camera_stream request is valid and worth processing
+        return true if the request is valid
+    """
+
+    # if running local mode
+    if is_local:
+        ports = glob.glob('/dev/video[0-9]*')
+    else:
+        # if in competition mode or running on OBC
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+
+    max_streams = len(ports)
+
+    print('args:', args)
+    print('ports:', ports)
+    print('active_stream_ctr:', active_stream_ctr)
+    print('max_streams:', max_streams)
+    print('status:', status)
+
+    if args in ports and active_stream_ctr < max_streams or status == 0:
+        return True
+    else:
+        response = "Requested port not available, is the camera properly plugged into the USB port?"
+        return False
+
 # process task, status and corresponding args sent from client
 # return response message
 def handle_task(task, status, args):
     response = "Nothing happened"
 
     global running_tasks
-    global stream_ctr
-    global local
+    global active_stream_ctr
+    global is_local
 
     if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
@@ -52,32 +79,16 @@ def handle_task(task, status, args):
 
                 # reinitialize Listener object with proper arguments if necessary, or quit early if nonesense request
                 if chosen_task == "camera_stream":
-                    # else if running local mode
-                    if local:
-                        ports = glob.glob('/dev/video[0-9]*')
-                    else:
-                        # if in compeition mode/running on OBC
-                        ports = glob.glob('/dev/tty[A-Za-z]*')
-
-                    max_streams = len(ports)
-                    print('args:', args)
-                    print('ports:', ports)
-                    print('stream_ctr:', stream_ctr)
-                    print('max_streams:', max_streams)
-                    print('status:', status)
-
-                    if args in ports and stream_ctr < max_streams or status == 0:
-                        pass
-                    else:
+                    if not validate_camera_task(args, status, active_stream_ctr, is_local):
                         response = "Requested port not available, is the camera properly plugged into the USB port?"
-                        return response + "\n"
+                        return response + '\n'
                 elif chosen_task in known_listeners:
                     if args and not running_tasks[i].is_running():
                         if args == 'usb' or args == 'uart':
                             running_tasks[i] = Listener(scripts[i], "python", args)
                         else:
                             response = "Requested serial type is invalid"
-                            return response+'\n'
+                            return response + '\n'
                 break
             i += 1
 
@@ -99,7 +110,7 @@ def handle_task(task, status, args):
                             active_ports.append(args)
                             stream.set_name(args)
                             active_streams.append(stream)
-                            stream_ctr += 1
+                            active_stream_ctr += 1
                         else:
                             response = "Failed to start " + chosen_task + " on port " + args + ", process defunct"
                     else:
@@ -128,7 +139,7 @@ def handle_task(task, status, args):
                 for s in active_streams:
                     print(s.get_name())
 
-                print("stream_ctr: ", stream_ctr)
+                print("active_stream_ctr: ", active_stream_ctr)
 
                 if args in active_ports:
                     for stream in active_streams_copy:
@@ -141,7 +152,7 @@ def handle_task(task, status, args):
                                 time.sleep(1)
                                 if not stream.is_running():
                                     response = "Stopped " + chosen_task + " on port: " + args
-                                    stream_ctr -= 1
+                                    active_stream_ctr -= 1
                                     active_ports.remove(args)
                                     active_streams.remove(stream)
                                 else:
@@ -161,29 +172,29 @@ def handle_task(task, status, args):
     return response + "\n"
 
 def task_handler_server():
-    global local
+    global is_local
     rospy.init_node('task_handler_server')
     s = rospy.Service('task_handler', HandleTask, handle_task_request)
     ready_msg = "Ready to respond to task handling requests"
 
-    if local:
+    if is_local:
         ready_msg += " (local mode)"
 
     print(ready_msg)
     rospy.spin()
 
 if __name__ == "__main__":
-    local = False
+    is_local = False
 
     if "local" in sys.argv:
         print("Task handler local mode supported tasks")
         print("--> camera_stream")
-        local = True
+        is_local = True
 
     # this value is set at runtime based off how many video port devices are identified
     max_streams = 0
     # how many streams are currently on
-    stream_ctr = 0
+    active_stream_ctr = 0
 
     current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
     mcu_control_dir = current_dir + '../../mcu_control/scripts/'
