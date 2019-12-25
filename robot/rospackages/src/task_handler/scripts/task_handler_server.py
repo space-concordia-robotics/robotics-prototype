@@ -4,9 +4,9 @@ import rospy
 import os
 import time
 import sys
+import glob
 from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *
-import glob
 
 # return the response string after calling the task handling function
 def handle_task_request(req):
@@ -15,10 +15,10 @@ def handle_task_request(req):
     return response
 
 def validate_camera_task(args, status, active_stream_ctr, is_local=False):
-    """
+    '''
         Check if the camera_stream request is valid and worth processing
         return true if the request is valid
-    """
+    '''
 
     # if running local mode
     if is_local:
@@ -40,6 +40,37 @@ def validate_camera_task(args, status, active_stream_ctr, is_local=False):
     else:
         response = "Requested port not available, is the camera properly plugged into the USB port?"
         return False
+
+
+def start_camera_stream(args, active_ports, active_stream_ctr):
+    """
+        Attempt to start a camera stream
+        Returns an empty string if no issues encountered, otherwise it returns an error message
+    """
+    FAIL_MSG = 'Failed to start camera stream'
+    response = FAIL_MSG
+
+    # check if already started, if not then start it
+    if args in active_ports:
+        ##response = "Failed to start " + chosen_task
+        return response
+    else:
+        stream = Listener(scripts[4], 'bash', args, 1, True)
+        if stream.start():
+            # wait a second just in case it fails to start
+            time.sleep(1)
+
+            if stream.is_running():
+                active_ports.append(args)
+                stream.set_name(args)
+                active_streams.append(stream)
+                active_stream_ctr += 1
+                return ''
+            else:
+                response = FAIL_MSG + ' on port ' + args + ', process defunct'
+                return resonse
+        else:
+            return FAIL_MSG
 
 # process task, status and corresponding args sent from client
 # return response message
@@ -96,25 +127,8 @@ def handle_task(task, status, args):
         # process start request
         if status == 1:
             if task == "camera_stream":
-                # check if already started, if not then start it
-                if args in active_ports:
-                    response = "Failed to start " + chosen_task
-                else:
-                    stream = Listener(scripts[4], "bash", args, 1, True)
-                    if stream.start():
-                        # wait a second just in case it fails to start
-                        time.sleep(1)
-
-                        if stream.is_running():
-                            response = "Started " + chosen_task + " on port " + args
-                            active_ports.append(args)
-                            stream.set_name(args)
-                            active_streams.append(stream)
-                            active_stream_ctr += 1
-                        else:
-                            response = "Failed to start " + chosen_task + " on port " + args + ", process defunct"
-                    else:
-                        response = "Failed to start " + chosen_task
+                response_tmp = start_camera_stream(args, active_ports, active_stream_ctr)
+                response = response_tmp if response_tmp != '' else "Started camera stream on port " + args
             else:
                 if running_tasks[i].start():
                     response = "Started " + chosen_task
