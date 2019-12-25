@@ -28,4 +28,7 @@ fi
 # web_video_server node must be running in background for this to work
 # the image width & image height are hard coded to meet the requirements of ERC 2K19
 # the name of then node can't contain "/" so only use the suffix, i.e. remove preceding "/dev/"
-rosrun cv_camera cv_camera_node _device_path:=$port _image_width:=1280 _image_height:=720 __name:=${port:5}
+# so in local mode you will get topic names like 'video0Cam', 'video1Cam', and so on
+# in competition mode you will get specifically 'FrontCam', 'RearCam', and 'ArmScienceCam'
+topicName="${port:5}Cam"
+rosrun cv_camera cv_camera_node _device_path:=$port _image_width:=1280 _image_height:=720 __name:=$topicName

@@ -11,8 +11,8 @@
 # You will probably need to change the ID_PATH values if you're not testing camera streams with the Rover
 # (see the first paragraph above on how to do that)
 # After making changes to this file you should restart the computer
-SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.1:1.0", SYMLINK+="ttyArmScienceCam"
-SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.2:1.0", SYMLINK+="ttyFrontCam"
-SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.3:1.0", SYMLINK+="ttyRearCam"
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.1:1.0", SYMLINK+="videoArmScience"
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.2:1.0", SYMLINK+="videoFront"
+SUBSYSTEM=="video4linux", ENV{ID_PATH}=="platform-12110000.usb:-usb-0:1.3:1.0", SYMLINK+="videoRear"
 
 ### NOTE! If you change the camera, the ID_PATH may change (especially it is a different model webcam) ###

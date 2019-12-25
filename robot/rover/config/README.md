@@ -27,7 +27,7 @@ Then you must make sure to add the default user `odroid` to the group `gpio` wit
 ## my-webcams.rules
 
 ### Purpose
-On bootup this file will ensure that specific physical usb ports get mapped to specific names so that we can always refer to them from code accurately, assuming the devices are plugged into the appropriate usb ports.
+On bootup this file will ensure that specific physical usb ports get mapped to specific names using [symlinks](https://en.wikipedia.org/wiki/Symbolic_link) so that we can always refer to them from code accurately, assuming the devices are plugged into the appropriate usb ports.
 This was mainly done to handle multiple cameras (of the same make/model, thus virtually indistinguishable) so that they can be programmatically addressed.
 
 ### Setup
