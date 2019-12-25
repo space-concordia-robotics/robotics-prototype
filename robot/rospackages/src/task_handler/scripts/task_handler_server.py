@@ -201,8 +201,7 @@ def handle_task(task, status, args):
 
     return response + '\n'
 
-def task_handler_server():
-    global is_local
+def task_handler_server(is_local=False):
     rospy.init_node('task_handler_server')
     s = rospy.Service('task_handler', HandleTask, handle_task_request)
     ready_msg = "Ready to respond to task handling requests"
@@ -246,4 +245,4 @@ if __name__ == "__main__":
     for i in range(len(running_tasks)):
         running_tasks[i].set_name(known_tasks[i])
 
-    task_handler_server()
+    task_handler_server(is_local)
