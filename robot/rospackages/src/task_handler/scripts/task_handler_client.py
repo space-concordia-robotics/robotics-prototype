@@ -62,7 +62,7 @@ def usage():
         help_msg += "'" + "' '".join(ports) + "']"
     else:
         help_msg  += "\nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam', '/dev/ttyArmScienceCam']"
-        help_msg  += "\nTo see valid stream args in local mode run:\nrosrun task_handler task_handler_client.py camera_stream 1 /dev/video local"
+        help_msg  += "\n\nTo see valid stream args in local mode run:\nrosrun task_handler task_handler_client.py camera_stream 1 /dev/video local"
 
     return help_msg
 
