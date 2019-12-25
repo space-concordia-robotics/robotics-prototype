@@ -42,35 +42,82 @@ def validate_camera_task(args, status, active_stream_ctr, is_local=False):
         return False
 
 
-def start_camera_stream(args, active_ports, active_stream_ctr):
+def start_camera_stream(port, active_ports, active_stream_ctr):
     """
         Attempt to start a camera stream
-        Returns an empty string if no issues encountered, otherwise it returns an error message
+        Returns an empty string if no issues encountered, otherwise an error message is returned
     """
-    FAIL_MSG = 'Failed to start camera stream'
-    response = FAIL_MSG
+    FAIL_MSG = 'Failed to start camera stream on port ' + port
+    response = ''
 
     # check if already started, if not then start it
-    if args in active_ports:
-        ##response = "Failed to start " + chosen_task
-        return response
+    if port in active_ports:
+        response = FAIL_MSG + ', already active port selected'
     else:
-        stream = Listener(scripts[4], 'bash', args, 1, True)
+        stream = Listener(scripts[4], 'bash', port, 1, True)
+        
         if stream.start():
             # wait a second just in case it fails to start
             time.sleep(1)
 
             if stream.is_running():
-                active_ports.append(args)
-                stream.set_name(args)
+                active_ports.append(port)
+                stream.set_name(port)
                 active_streams.append(stream)
                 active_stream_ctr += 1
                 return ''
             else:
-                response = FAIL_MSG + ' on port ' + args + ', process defunct'
-                return resonse
+                response = FAIL_MSG + ', process defunct'
         else:
-            return FAIL_MSG
+            response = FAIL_MSG
+    
+    return response
+
+def stop_camera_task(port, active_ports, active_stream_ctr):
+    '''
+    Attempt to stop a camera stream
+    Returns an empty string if no issues are encountered, otherwise an error message is returned
+    '''
+    response = ''
+    FAIL_MSG = 'Failed to stop camera stream on port ' + port
+
+    # temp copy so no weird stuff happens in following for loop
+    active_streams_copy = active_streams.copy()
+    print('Attempting to terminate camera_stream')
+    print('active_ports: ', active_ports)
+    print('active_streams: ', active_streams)
+
+    for s in active_streams:
+        print(s.get_name())
+
+    print('active_stream_ctr: ', active_stream_ctr)
+
+    if port in active_ports:
+        for stream in active_streams_copy:
+            if stream.get_name() == port:
+                print('stream.get_name()', stream.get_name())
+                print('port', port)
+                # get everything after the '/dev/' prefix
+                node_name = port[port.rindex('/')+1:]
+
+                # keyword to filter for process to kill via ps aux | grep <pattern>
+                process_identifier = '__name:=' + node_name
+
+                if stream.stop(process_identifier):
+                    time.sleep(1)
+
+                    if not stream.is_running():
+                        active_stream_ctr -= 1
+                        active_ports.remove(port)
+                        active_streams.remove(stream)
+                    else:
+                        response = 'Failed to stop ' + chosen_task + ' on port: ' + ports
+                else:
+                    response = 'Failed to stop ' + chosen_task + ' on port: ' + port
+    else:
+        response = "No active stream found on port: " + port + ', nothing to terminate'
+
+    return response
 
 # process task, status and corresponding args sent from client
 # return response message
@@ -126,64 +173,33 @@ def handle_task(task, status, args):
 
         # process start request
         if status == 1:
-            if task == "camera_stream":
+            if task == 'camera_stream':
                 response_tmp = start_camera_stream(args, active_ports, active_stream_ctr)
-                response = response_tmp if response_tmp != '' else "Started camera stream on port " + args
+                response = response_tmp if response_tmp != '' else 'Started camera stream on port ' + args
             else:
                 if running_tasks[i].start():
-                    response = "Started " + chosen_task
+                    response = 'Started ' + chosen_task
                 else:
-                    response = "Failed to start " + chosen_task
+                    response = 'Failed to start ' + chosen_task
 
                     if running_tasks[i].is_running():
-                        response += ", already running"
+                        response += ', already running'
                     else: # in this case it is worth trying to start the chosen_task
                         if running_tasks[i].start():
-                            response = "Started " + chosen_task
+                            response = 'Started ' + chosen_task
 
         # process stop request
         elif status == 0:
-            if task == "camera_stream":
-                # temp copy so no weird stuff happens in following for loop
-                active_streams_copy = active_streams.copy()
-                print("Attempting to terminate camera_stream")
-                print("active_ports: ", active_ports)
-                print("active_streams: ", active_streams)
-
-                for s in active_streams:
-                    print(s.get_name())
-
-                print("active_stream_ctr: ", active_stream_ctr)
-
-                if args in active_ports:
-                    for stream in active_streams_copy:
-                        if stream.get_name() == args:
-                            print('stream.get_name()', stream.get_name())
-                            print('args', args)
-                            node_name = args[args.rindex('/')+1:]
-
-                            if stream.stop("__name:=" + node_name):
-                                time.sleep(1)
-                                if not stream.is_running():
-                                    response = "Stopped " + chosen_task + " on port: " + args
-                                    active_stream_ctr -= 1
-                                    active_ports.remove(args)
-                                    active_streams.remove(stream)
-                                else:
-                                    response = "Failed to stop " + chosen_task + " on port: " + args
-                            else:
-                                response = "Failed to stop " + chosen_task + " on port: " + args
-                        else:
-                            print("Not: " + stream.get_name())
-                else:
-                    response = "No active stream found on port: " + args + ", nothing to terminate"
+            if task == 'camera_stream':
+                response_tmp = stop_camera_task(args, active_ports, active_stream_ctr)
+                response = response_tmp if response_tmp != '' else 'Stopped camera stream on port ' + args
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
-                    response = "Stopped " + chosen_task
+                    response = 'Stopped ' + chosen_task
                 else:
-                    response = chosen_task + " not running, cannot terminate it"
+                    response = chosen_task + ' not running, cannot terminate it'
 
-    return response + "\n"
+    return response + '\n'
 
 def task_handler_server():
     global is_local
