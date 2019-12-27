@@ -34,7 +34,7 @@ $(document).ready(() => {
           if (msgs[1].includes('Stopped camera_stream')) {
             // succeeded to close stream
             $('img#camera-feed')[0].src =
-              '../static/images/stream-offline.jpg'
+              '../static/img/stream-offline.jpg'
             $('img#camera-feed').removeClass('rotateimg180')
           } else {
             // failed to close stream
@@ -83,7 +83,7 @@ $(document).ready(() => {
 
             // succeeded to close stream
             $('img#camera-feed')[0].src =
-              '../static/images/stream-offline.jpg'
+              '../static/img/stream-offline.jpg'
           } else {
             // failed to close stream
             appendToConsole('Failed to close stream')
@@ -148,7 +148,7 @@ $(document).ready(() => {
 
             // succeeded to close stream
             $('img#camera-feed')[0].src =
-              '../static/images/stream-offline.jpg'
+              '../static/img/stream-offline.jpg'
           } else {
             // failed to close stream
             appendToConsole('Failed to close stream')

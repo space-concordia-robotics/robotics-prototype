@@ -32,3 +32,7 @@
     border-width:thick;
     border-color:black;
 }
+
+.camera-rotr {
+    transform : scaleX(-1);
+}
