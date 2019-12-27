@@ -28,11 +28,21 @@
 
 // Camera Stream CSS
 .camera-panel {
-    border-style:solid;
-    border-width:thick;
-    border-color:black;
+    border-style: solid;
+    border-width: thick;
+    border-color: black;
+}
+
+.camera-head {
+    border-style: dotted;
+    border-width: thick;
+    border-color: black;
+}
+
+.camera-btn {
+    padding: 4px;
 }
 
 .camera-rotr {
-    transform : scaleX(-1);
+    transform: scaleX(-1);
 }
