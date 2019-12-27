@@ -25,7 +25,7 @@ def validate_camera_task(args, status, active_stream_ctr, is_local=False):
         ports = glob.glob('/dev/video[0-9]*')
     else:
         # if in competition mode or running on OBC
-        ports = glob.glob('/dev/tty[A-Za-z]*')
+        ports = glob.glob('/dev/video[A-Za-z]*')
 
     max_streams = len(ports)
 
