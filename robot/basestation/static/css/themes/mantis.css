@@ -233,6 +233,10 @@ html, body {
   color: #252931;
 }
 
+.pds-btn-text {
+  color: white;
+}
+
 .pds-stats {
   color: white;
 }
