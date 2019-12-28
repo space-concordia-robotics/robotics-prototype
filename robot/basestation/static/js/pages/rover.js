@@ -255,8 +255,8 @@ document.addEventListener('keydown', function (event) {
 })
 
 // Button coloring
-const ORANGE = 'rgb(255, 151, 44)'
-const GREEN = 'rgb(61 , 127, 127)'
+const YELLOW = 'rgb(255, 249, 148)'
+const GREEN = 'rgb(61, 127, 127)'
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
@@ -266,7 +266,7 @@ $(document).keydown(function (e) {
         lightUp('#max-throttle-increase > button')
         $('#max-throttle-increase > button').css(
           'background-color',
-          ORANGE)
+          YELLOW)
         maxSoftThrottle += maxThrottleIncrement
         if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
@@ -279,7 +279,7 @@ $(document).keydown(function (e) {
         lightUp('#max-steering-decrease > button')
         $('#max-steering-decrease > button').css(
           'background-color',
-          ORANGE)
+          YELLOW)
         maxSoftSteering -= maxSteeringIncrement
         if (maxSoftSteering < 0) {
           maxSoftSteering = 0
@@ -292,7 +292,7 @@ $(document).keydown(function (e) {
         lightUp('#max-steering-increase > button')
         $('#max-steering-increase > button').css(
           'background-color',
-          ORANGE)
+          YELLOW)
         maxSoftSteering += maxSteeringIncrement
         if (maxSoftSteering > MAX_STEERING_SPEED) {
           maxSoftSteering = MAX_STEERING_SPEED
@@ -314,7 +314,7 @@ $(document).keydown(function (e) {
         lightUp('#max-throttle-decrease > button')
         $('#max-throttle-decrease > button').css(
           'background-color',
-          ORANGE)
+          YELLOW)
         maxSoftThrottle -= maxThrottleIncrement
         if (maxSoftThrottle < 0) {
           maxSoftThrottle = 0
@@ -586,7 +586,7 @@ function gameLoop () {
       lightUp('#rover-right > button')
       $('#rover-right > button').css(
         'background-color',
-        ORANGE)
+        YELLOW)
       if (steering < 0) {
         steering += 3 * steeringIncrement
       } else {
@@ -602,7 +602,7 @@ function gameLoop () {
       lightUp('#rover-left > button')
       $('#rover-left > button').css(
         'background-color',
-        ORANGE)
+        YELLOW)
       if (steering > 0) {
         steering -= 3 * steeringIncrement
       } else {
@@ -626,7 +626,7 @@ function gameLoop () {
       lightUp('#rover-up > button')
       $('#rover-up > button').css(
         'background-color',
-        ORANGE)
+        YELLOW)
       if (throttle < 0) {
         throttle += 3 * throttleIncrement
       } else {
@@ -642,7 +642,7 @@ function gameLoop () {
       lightUp('#rover-down > button')
       $('#rover-down > button').css(
         'background-color',
-        ORANGE)
+        YELLOW)
       if (throttle > 0) {
         throttle -= 3 * throttleIncrement
       } else {

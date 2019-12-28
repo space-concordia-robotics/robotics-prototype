@@ -191,8 +191,8 @@ window.addEventListener(
 )
 
 // Button coloring
-const ORANGE = 'rgb(255, 151, 44)'
-const GREEN = 'rgb(61 , 127, 127)'
+const YELLOW = 'rgb(255, 249, 148)'
+const GREEN = 'rgb(61, 127, 127)'
 
 function gameLoop () {
   let $serialCmdInput = $('#serial-cmd-input')
@@ -206,7 +206,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor1_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -218,7 +218,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor1_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
@@ -231,7 +231,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor2_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -243,7 +243,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor2_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
@@ -256,7 +256,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor3_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -268,7 +268,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor3_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
@@ -281,7 +281,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor4_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -293,7 +293,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor4_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
@@ -306,7 +306,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor5_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -318,7 +318,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor5_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
@@ -331,7 +331,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor6_ccw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'fwd'
@@ -343,7 +343,7 @@ function gameLoop () {
       toggleToManual()
       $('#click_btn_motor6_cw > button').css(
         'background-color',
-        ORANGE
+        YELLOW
       )
 
       budgeArray[i] = 'back'
