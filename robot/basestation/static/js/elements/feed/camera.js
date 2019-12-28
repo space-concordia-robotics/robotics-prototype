@@ -48,55 +48,7 @@ $(document).ready(() => {
     }
   })
 
-  $('#rear-camera-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#rear-camera-stream-btn').is(':checked')) {
-      requestTask(
-        'camera_stream',
-        1,
-        '#rear-camera-stream-btn',
-        function (msgs) {
-          printErrToConsole(msgs)
-          console.log('rear camera ON msgs:', msgs)
-          if (msgs[1].includes('Started camera_stream')) {
-            $('img#camera-feed')[0].src =
-              'http://' +
-              getRoverIP() +
-              ':8080/stream?topic=/cv_camera/image_raw'
-          } else {
-            appendToConsole('Failed to open stream')
-            $('#rear-camera-stream-btn')[0].checked = false
-          }
-        },
-        '/dev/ttyRearCam'
-      )
-    } else {
-      requestTask(
-        'camera_stream',
-        0,
-        '#rear-camera-stream-btn',
-        function (msgs) {
-          printErrToConsole(msgs)
-          if (msgs[1].includes('Stopped camera_stream')) {
-            console.log('rear camera OFF msgs:', msgs)
-
-            // succeeded to close stream
-            $('img#camera-feed')[0].src =
-              '../static/img/stream-offline.jpg'
-          } else {
-            // failed to close stream
-            appendToConsole('Failed to close stream')
-            // $('img#camera-feed')[0].src =
-            // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
-          }
-        },
-        '/dev/ttyRearCam'
-      )
-    }
-  })
-
-  $('#save-image').on('click', function (event) {
+  $('#camera-screenshot').on('click', function (event) {
     $.ajax('/capture_image', {
       success: function (data) {
         appendToConsole(data.msg)
@@ -110,54 +62,5 @@ $(document).ready(() => {
         console.log('An error occured')
       }
     })
-  })
-
-  $('#arm-science-camera-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#arm-science-camera-stream-btn').is(':checked')) {
-      requestTask(
-        'camera_stream',
-        1,
-        '#arm-science-camera-stream-btn',
-        function (msgs) {
-          printErrToConsole(msgs)
-          console.log('arm/science camera ON msgs:', msgs)
-          if (msgs[1].includes('Started camera_stream')) {
-            $('img#camera-feed')[0].src =
-              'http://' +
-              getRoverIP() +
-              ':8080/stream?topic=/cv_camera/image_raw'
-          } else {
-            appendToConsole('Failed to open stream')
-            $('#arm-science-camera-stream-btn')[0].checked = false
-          }
-        },
-        '/dev/ttyArmScienceCam'
-      )
-    } else {
-      requestTask(
-        'camera_stream',
-        0,
-        '#arm-science-camera-stream-btn',
-        function (msgs) {
-          printErrToConsole(msgs)
-
-          if (msgs[1].includes('Stopped camera_stream')) {
-            console.log('arm science camera OFF msgs:', msgs)
-
-            // succeeded to close stream
-            $('img#camera-feed')[0].src =
-              '../static/img/stream-offline.jpg'
-          } else {
-            // failed to close stream
-            appendToConsole('Failed to close stream')
-            // $('img#camera-feed')[0].src =
-            // 'http://' + getRoverIP() + ':8080/stream?topic=/cv_camera/image_raw'
-          }
-        },
-        '/dev/ttyArmScienceCam'
-      )
-    }
   })
 })
