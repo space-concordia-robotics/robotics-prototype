@@ -254,12 +254,19 @@ document.addEventListener('keydown', function (event) {
   }
 })
 
+// Button coloring
+const YELLOW = 'rgb(255, 249, 148)'
+const GREEN = 'rgb(61, 127, 127)'
+
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
   if (!$('#servo-val').is(':focus')) {
     switch (e.which) {
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
+        $('#max-throttle-increase > button').css(
+          'background-color',
+          YELLOW)
         maxSoftThrottle += maxThrottleIncrement
         if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
@@ -270,6 +277,9 @@ $(document).keydown(function (e) {
 
       case 74: // 'j' --> decrease max steering
         lightUp('#max-steering-decrease > button')
+        $('#max-steering-decrease > button').css(
+          'background-color',
+          YELLOW)
         maxSoftSteering -= maxSteeringIncrement
         if (maxSoftSteering < 0) {
           maxSoftSteering = 0
@@ -280,6 +290,9 @@ $(document).keydown(function (e) {
 
       case 75: // 'k' --> increase max steering
         lightUp('#max-steering-increase > button')
+        $('#max-steering-increase > button').css(
+          'background-color',
+          YELLOW)
         maxSoftSteering += maxSteeringIncrement
         if (maxSoftSteering > MAX_STEERING_SPEED) {
           maxSoftSteering = MAX_STEERING_SPEED
@@ -299,6 +312,9 @@ $(document).keydown(function (e) {
 
       case 85: // 'u' --> decrease max throttle
         lightUp('#max-throttle-decrease > button')
+        $('#max-throttle-decrease > button').css(
+          'background-color',
+          YELLOW)
         maxSoftThrottle -= maxThrottleIncrement
         if (maxSoftThrottle < 0) {
           maxSoftThrottle = 0
@@ -568,6 +584,9 @@ function gameLoop () {
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-right > button')
+      $('#rover-right > button').css(
+        'background-color',
+        YELLOW)
       if (steering < 0) {
         steering += 3 * steeringIncrement
       } else {
@@ -581,6 +600,9 @@ function gameLoop () {
     // 'a' --> rover turn left
     else if (keyState[65] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-left > button')
+      $('#rover-left > button').css(
+        'background-color',
+        YELLOW)
       if (steering > 0) {
         steering -= 3 * steeringIncrement
       } else {
@@ -602,6 +624,9 @@ function gameLoop () {
     // 'w' --> rover forward
     if (keyState[87] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-up > button')
+      $('#rover-up > button').css(
+        'background-color',
+        YELLOW)
       if (throttle < 0) {
         throttle += 3 * throttleIncrement
       } else {
@@ -615,6 +640,9 @@ function gameLoop () {
     // 's' --> rover back
     else if (keyState[83] && !$('#servo-val').is(':focus')) {
       lightUp('#rover-down > button')
+      $('#rover-down > button').css(
+        'background-color',
+        YELLOW)
       if (throttle > 0) {
         throttle -= 3 * throttleIncrement
       } else {
@@ -696,3 +724,56 @@ function gameLoop () {
   setTimeout(gameLoop, 5)
 }
 gameLoop()
+
+// In any case
+// the following code just makes the buttons stop lighting up
+// when the user stops pressing the respective key
+let $serialCmdInput = $('#serial-cmd-input')
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyI') {
+    $('#max-throttle-increase > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
+    $('#max-steering-decrease > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyK') {
+    $('#max-steering-increase > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
+    $('#max-throttle-decrease > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
+    $('#rover-right > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
+    $('#rover-left > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
+    $('#rover-up > button').css('background-color', GREEN)
+  }
+})
+
+document.addEventListener('keyup', function (event) {
+  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
+    $('#rover-down > button').css('background-color', GREEN)
+  }
+})

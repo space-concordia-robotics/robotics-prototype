@@ -15,10 +15,10 @@ import time
 import datetime
 from shlex import split
 
-import stream_capture
-from stream_capture import start_recording_feed, stop_recording_feed
-import ros_utils
-from ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
+import robot.basestation.stream_capture as stream_capture
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed
+import robot.basestation.ros_utils as ros_utils
+from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 
 app = flask.Flask(__name__)
 
