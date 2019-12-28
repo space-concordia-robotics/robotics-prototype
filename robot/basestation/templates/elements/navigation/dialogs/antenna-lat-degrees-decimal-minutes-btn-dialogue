@@ -1,0 +1,9 @@
+ <span class="input-group-text font-weight-bold">Latitude </span>
+           
+           <input id = "antenna-lat-DDM-deg-input" type="text" class="form-control" placeholder="Degrees">
+           <span class="input-group-text">°</span>
+          
+           <input id = "antenna-lat-DDM-dec-min-input" type="text" class="form-control" placeholder="Decimal Mins">
+           <span class="input-group-text">'</span>
+  
+  <hr>

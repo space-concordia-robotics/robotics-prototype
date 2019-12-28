@@ -11,16 +11,18 @@
  <div class="col-md-2">
    {% with device="PDS" %}{% include "elements/feed/Console.html" %}{% endwith %}
  </div>
- <div class="col-md-3" id = "data-start">
+ <div class="col-md-4" id = "data-start">
      
-    <div id = "rover-stats">
+    <div id = "rover-stats" >
      <h4 align = "center"> Rover stats </h4>
      <ul class = "list-group" id = "rover-stats-list">
-        <li class = "list-group-item"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">Right aligned </span >  </li>
-        <li class = "list-group-item">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">Right aligned </span ></li>
-        <li class = "list-group-item"> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">Right aligned </span >  </li>
-        <li class = "list-group-item">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">Right aligned </span ></li>
-        <li class = "list-group-item">  <label for = "" > Angular Velocity</label>  <span id = "rover-speed" class="float-right">Right aligned </span ></li>
+        <div class = "row px-3  ">
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">Right</span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">Right </span ></li>
+        </div>
+        <li class = "list-group-item "> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">Right </span >  </li>
+        <li class = "list-group-item ">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">Right  </span ></li>
+        <li class = "list-group-item ">  <label for = "" > Angular Velocity</label>  <span id = "rover-speed" class="float-right">Right  </span ></li>
                 
       </ul>
     </div>   
@@ -73,16 +75,27 @@
 
               <div class = "modal-footer">
                 <button id = "antenna-confirm-btn" type = "button" class = "btn btn-success"> Confirm </button>
-                <button id = "antenna-change-btn" type = "button" class = "btn btn-warning"> Change </button>
-                  
+                <button id = "antenna-change-btn" type = "button" class = "btn btn-warning"> Change </button>                  
               </div>
+
           </div>
         </div>
     
     </div>  
   <br>
   <br>
-  
+
+  <div id = "goal-stats">
+    <ul class = "list-group" id = "goal-stats-list"> 
+      <div class = "row px-3">
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-lat" class="float-right">Right  </span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-long" class="float-right">Right  </span ></li>
+        </div>
+        <li class = "list-group-item "> <label for = "" > Distance to goal</label>  <span id = "antenna-heading" class="float-right">Right  </span >  </li>
+        <li class = "list-group-item "> <label for = "" > Recommended Rover Heading</label>  <span id = "antenna-heading" class="float-right">Right  </span >  </li>
+                
+      </ul>
+  </div>
                   
   <button type = "button" class = "btn btn-primary" data-toggle = "modal" data-target = "#goal-modal"> Goal Data </button>
     

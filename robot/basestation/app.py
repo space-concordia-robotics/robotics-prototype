@@ -115,6 +115,10 @@ def numSections():
 def initialSection():
     return '0'
 
+@app.route('/navigation/addButtons/<goalId>', methods=["POST", "GET"])
+def addButtons(goalId):
+   return flask.render_template("elements/navigation/dialogs/new-goal-btn.html", goalId = goalId)
+
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.

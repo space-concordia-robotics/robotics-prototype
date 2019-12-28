@@ -229,9 +229,13 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
     let src = `
     <hr>
       <ul class = "list-group" id = "antenna-stats-list"> 
-        <li class = "list-group-item"> <label for = "" > Antenna Latitude</label>  <span id = "antenna-lat" class="float-right">Right aligned </span >  </li>
-        <li class = "list-group-item">  <label for = "" > Antenna Longtitude</label>  <span id = "antenna-long" class="float-right">Right aligned </span ></li>
+        <div class = "row px-3"> 
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-lat" class="float-right">Right  </span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-long" class="float-right">Right  </span ></li>
+        </div>
         <li class = "list-group-item"> <label for = "" > Antenna Heading</label>  <span id = "antenna-heading" class="float-right">Right aligned </span >  </li>
+        <li class = "list-group-item"> <label for = "" > Distance to rover</label>  <span id = "antenna-dist-to-rover" class="float-right">Right aligned </span >  </li>
+        <li class = "list-group-item"> <label for = "" > Recmmeneded Antenna Angle</label>  <span id = "antenna-rec-angle" class="float-right">Right aligned </span >  </li>
                 
       </ul>
     `;
@@ -280,10 +284,14 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
             let secs = parseFloat($('#goal-long-DMS-sec-input').val());
             if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS";
 
-            logn = dec + (mins/60 + secs/3600);
+            long = dec + (mins/60 + secs/3600);
         }  
-        
+        let bearing = $("#antenna-bearing-input").val();
+        if(isNaN(bearing)) throw "Bad input bearing";
 
+          //ROS params
+          antenna_latitude.set(lat);
+          antenna_longitude.set(long);
 
           $('#antenna-stats-list').append(src);
          //disable text fields until the user wants to change them
@@ -393,7 +401,9 @@ function CreateAntennaLongtitudeHandler(){
 
 
   })
-  $('antenna-long-degrees-decimal-minutes-btn').on('click', function (event) {
+
+  $('#antenna-long-degrees-decimal-minutes-btn').on('click', function (event) {
+
     $(this).data('clicked', true);
 
     let src = `
@@ -438,54 +448,18 @@ function CreateAntennaLongtitudeHandler(){
 
 
   $("#new-goal-coordinates-btn").on('click', function(event) {
-    let src = `
-    <fieldset id = "goal-lat-fieldset-`+count + `">
-           
-    <div id = "goal-lat-input-group-` + count + `" class = "input-group">
-
-        <div class = "dropdown" >
-                  <button type="button" id = "goal-lat-select-format-btn-` + count + `" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown">Select Latitude Layout</button>
-                  <span class = "caret"> </span>
-                  <ul class = "dropdown-menu">
-                    <li class = "dropdown-header"> Select </li>
-                    <li><button id = "goal-lat-decimal-degrees-btn-` + count + `" class = "btn btn-primary btn-sm" value = ""> Decimal Degrees </button> </li>
-                    <li><button id = "goal-lat-degrees-decimal-minutes-btn-` + count + `" class = "btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
-                    <li><button id = "goal-lat-degrees-minutes-seconds-btn-` + count + `" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
-                    </ul>
-                    
-        </div>
-    </div>
-
-      <div id = "goal-long-input-group-` + count + `" class = "input-group">
-
-         <div class = "dropdown" >
-                  <button type="button" id = "goal-long-select-format-btn-` + count + `" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown">Select Longtitude Layout</button>
-                  <span class = "caret"> </span>
-                  <ul class = "dropdown-menu">
-                    <li class = "dropdown-header"> Select </li>
-                    <li><button id = "goal-long-decimal-degrees-btn-` + count + `" class = "btn btn-primary btn-sm" value = ""> Decimal Degrees </button> </li>
-                    <li><button id = "goal-long-degrees-decimal-minutes-btn-` + count + `" class = "btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
-                    <li><button id = "goal-long-degrees-minutes-seconds-btn-` + count + `" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
-                    </ul>
-                    
-        </div>
-        
-    </div>
-    </fieldset>
-    <div id = "buttons-input-group-` + count + `" class = "input-group">
-    </div>
-      <hr>
-    `
-    
-    
-    $("#goal-modal-body").append(src);
-    CreateGoalLatitudeHandler(count);
-    CreateGoalLongtitudeHandler(count);
-    CreateGoalButtons(count);
-    
-    count = count+1;
-   
+  
+    $.ajax('/navigation/addButtons/5', {
+      success: function (result) {
+        $("#goal-modal-body").append(result);
+        CreateGoalLatitudeHandler(count);
+        CreateGoalLongtitudeHandler(count);
+        CreateGoalButtons(count);
+        // UpdateGoalStats();
+        count++;    
+      }})
   })
+
   function InsertDataInQueue(current,lat_format,long_format){
     
     let lat = -1;
@@ -670,6 +644,7 @@ function CreateAntennaLongtitudeHandler(){
           <button id = "delete-btn-` + current + `" type = "button" class = "btn btn-danger "> Delete </button>
                
       `
+
       $("#buttons-input-group-" + current).append(src);
       CreateConfirmButtonHandler(current);
       CreateChangeButtonHandler(current);
@@ -680,24 +655,24 @@ function CreateAntennaLongtitudeHandler(){
   $('#confirm-btn-' + current).on('click' , function(event){
     let lat_format = -1;
     let long_format = -1;
-    if($("#goal-lat-decimal-degrees-btn").data('click'))
-      long_format = 0;
-    else if($("#goal-lat-degrees-decimal-minutes-btn").data('click'))
-      long_format = 1;
-    else if($("#goal-lat-degrees-minutes-seconds-btn").data('click'))
-      long_format = 2;
+    if($("#goal-lat-decimal-degrees-btn-"+current).data('clicked'))
+      lat_format = 0;
+    else if($("#goal-lat-degrees-decimal-minutes-btn-"+current).data('clicked'))
+      lat_format = 1;
+    else if($("#goal-lat-degrees-minutes-seconds-btn-"+current).data('clicked'))
+      lat_format = 2;
     else appendToConsole("error?");
 
-    if($("#goal-long-decimal-degrees-btn").data('click'))
+    if($("#goal-long-decimal-degrees-btn-"+current).data('clicked'))
       long_format = 0;
-    else if($("#goal-long-degrees-decimal-minutes-btn").data('click'))
+    else if($("#goal-long-degrees-decimal-minutes-btn-"+current).data('clicked'))
       long_format = 1;
-    else if($("#goal-long-degrees-minutes-seconds-btn").data('click'))
+    else if($("#goal-long-degrees-minutes-seconds-btn-"+current).data('clicked'))
       long_format = 2;
     else appendToConsole("error?");
     
     //disable text fields
-    $('#goal-lat-fieldset-' + current).prop('disabled',true);
+    $('#goal-input-fieldset-' + current).prop('disabled',true);
 
   $('#change-btn-' + current).prop('disabled', false);
   $('#confirm-btn-' + current).prop('disabled', true);
@@ -709,7 +684,7 @@ function CreateChangeButtonHandler(current) {
    $('#change-btn-' + current).on('click' , function(event){
   
   
-    $('#goal-lat-fieldset-' + current).prop('disabled',false);
+    $('#goal-input-fieldset-' + current).prop('disabled',false);
   $('#change-btn-' + current).prop('disabled', false);
   $('#confirm-btn-' + current).prop('disabled', false);  
 })
@@ -718,13 +693,13 @@ function CreateDeleteButtonHandler(current) {
 
    $('#delete-btn-' + current).on('click' , function(event){
     appendToConsole(current + ' delete was clicked')
-
+    $('#goal-input-fieldset' +current).remove();
     $('#goal-lat-input-group-' + current).remove();
     $('#goal-long-input-group-' + current).remove();
     $('#buttons-input-group-' + current).remove();
   
 
-  count = count-1;
+  //count = count-1;
   
 })  
 }
