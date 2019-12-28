@@ -26,21 +26,24 @@
   margin-bottom: 100px;
 }
 
-// Camera Stream CSS
-.camera-panel {
+.camera-head {
+        margin:5px;
+}
+
+.camera-btn {
     border-style: solid;
     border-width: thick;
     border-color: black;
 }
 
-.camera-head {
-    border-style: dotted;
-    border-width: thick;
-    border-color: black;
+.camera-btn {
+    background-color: white;
+    padding: 10px;
 }
 
-.camera-btn {
-    padding: 4px;
+.camera-label {
+    background-color: beige;
+    padding: 10px;
 }
 
 .camera-rotr {
