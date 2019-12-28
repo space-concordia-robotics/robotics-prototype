@@ -176,6 +176,13 @@ html, body {
   color: black;
 }
 
+/* Wheel Motor Table */
+.motor-table {
+  font-size:12px;
+  background:rgba(255, 255, 255, 0.8);
+  text-align: left;
+}
+
 /* Navigation */
 .navigation {
   color: #E4E1D1;
