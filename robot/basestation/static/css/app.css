@@ -26,26 +26,28 @@
   margin-bottom: 100px;
 }
 
+
 .camera-head {
-        margin:5px;
+    margin:5px;
 }
 
 .camera-btn {
     border-style: solid;
     border-width: thick;
-    border-color: black;
 }
 
 .camera-btn {
-    background-color: white;
     padding: 10px;
 }
 
 .camera-label {
-    background-color: beige;
     padding: 10px;
 }
 
 .camera-rotr {
     transform: scaleX(-1);
+}
+
+.camera-name {
+  text-align: center;
 }
