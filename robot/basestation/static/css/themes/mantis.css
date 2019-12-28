@@ -22,24 +22,24 @@ html, body {
 
 /* Whole lotta bootstrap dropdown menu styling */
 .dropdown .nav-link {
-  color:#528EA5;
+  color: #528EA5;
   text-decoration: none;
 }
 
 .dropdown .btn {
   background: #528EA5;
-  color:#fff;
+  color: white;
 }
 
 .container .dropdown .dropdown-menu a:hover {
-  color: #FFF;
-  background-color: #FFF;
+  color: white;
+  background-color: white;
   border-color: white;
 }
 
 .btn-primary.dropdown-toggle {
-    color: #FFF;
-    border-color: #FFF;
+    color: white;
+    border-color: white;
 }
 
 .bootstrap-select .dropdown-toggle:focus {
@@ -52,7 +52,7 @@ html, body {
 }
 
 .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
-  color: #FFF;
+  color: white;
   background-color: #528EA5;
   border-color: #528EA5;
 }
@@ -66,14 +66,14 @@ html, body {
 }
 
 .dropdown-item.active, .dropdown-item:active {
-    color: #FFF;
+    color: white;
     text-decoration: none;
     background-color: #BCD4DD;
 }
 
 /* Bootstrap buttons */
 .btn-primary {
-  color: #FFF;
+  color: white;
   background-color: #528EA5;
   border-color: #528EA5;
 }
@@ -87,7 +87,7 @@ html, body {
 /* Bootstrap forms */
 .form-control:focus {
   color: white;
-  background-color: #FFF;
+  background-color: white;
   border-color: white;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
@@ -153,7 +153,7 @@ html, body {
 #motor-table thead tr:first-child, #motor-table tbody th {
     background-color: #101148;
     color: #F0DAFA;
-    border: 2px solid #750000
+    border: 2px solid #750000;
 }
 
 #motor-table, #motor-table tr td {
@@ -162,7 +162,7 @@ html, body {
 }
 
 .control-main-btn {
-    border-bottom: 0px solid #05072f;
+    border-bottom: 0px solid #05072F;
 }
 
 /*Arm controls (arm.css)*/
@@ -225,7 +225,7 @@ html, body {
 }
 
 .text-white {
-  color: #FFFFFF;
+  color: white;
 }
 
 /* PDS */
@@ -234,5 +234,5 @@ html, body {
 }
 
 .pds-stats {
-  color: #FFFFFF;
+  color: white;
 }

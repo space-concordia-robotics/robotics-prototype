@@ -4,7 +4,7 @@ Regular Buttons (Green): #3D7F7F
 Table (Red): #C34641
 Table (Light Grey): #EFEFEF
 Navbar (Salmon): #A38282
-Text (Off-White): #E4E1D1
+Text (Off-FFF): #E4E1D1
 Background (Grey): #2B343B
 Button Hover (Blueish Light Grey): #BCD4DD
 */
@@ -22,22 +22,24 @@ html, body {
 
 /* Whole lotta bootstrap dropdown menu styling */
 .dropdown .nav-link {
-  color:#445B7B; text-decoration: none;
+  color:#445B7B;
+  text-decoration: none;
 }
 
 .dropdown .btn {
-  background: #445B7B; color:#fff;
+  background: #445B7B;
+  color: white;
 }
 
 .container .dropdown .dropdown-menu a:hover {
-  color: #fff;
-  background-color: #fff;
+  color: white;
+  background-color: white;
   border-color: white;
 }
 
 .btn-primary.dropdown-toggle {
-    color: #fff;
-    border-color: #fff;
+    color: white;
+    border-color: white;
 }
 
 .bootstrap-select .dropdown-toggle:focus {
@@ -50,9 +52,9 @@ html, body {
 }
 
 .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
-  color: #fff;
-  background-color: #445b7b;
-  border-color: #445b7b;
+  color: white;
+  background-color: #445B7B;
+  border-color: #445B7B;
 }
 
 .btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show>.btn-primary.dropdown-toggle:focus {
@@ -64,16 +66,16 @@ html, body {
 }
 
 .dropdown-item.active, .dropdown-item:active {
-    color: #fff;
+    color: white;
     text-decoration: none;
     background-color: #BCD4DD;
 }
 
 /* Bootstrap buttons */
 .btn-primary {
-  color: #fff;
-  background-color: #445b7b;
-  border-color: #445b7b;
+  color: white;
+  background-color: #445B7B;
+  border-color: #445B7B;
 }
 
 .btn-primary:hover {
@@ -85,7 +87,7 @@ html, body {
 /* Bootstrap forms */
 .form-control:focus {
   color: white;
-  background-color: #fff;
+  background-color: white;
   border-color: white;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
@@ -150,12 +152,12 @@ html, body {
 #motor-table thead tr:first-child, #motor-table tbody th {
     background-color: #101148;
     color: #F0DAFA;
-    border: 2px solid #750000
+    border: 2px solid #750000;
 }
 
 #motor-table, #motor-table tr td {
     border: 2px solid #750000;
-    text-align: center
+    text-align: center;
 }
 
 .control-main-btn {
@@ -177,7 +179,7 @@ html, body {
 .claw-controls {
   width:30px;
   background: none;
-  border:0px
+  border:0px;
   solid: #2B343B;
 }
 
@@ -211,7 +213,7 @@ html, body {
 }
 
 .col-md-1 {
-  color: #FFFFFF;
+  color: white;
 }
 
 .row {
@@ -219,7 +221,7 @@ html, body {
 }
 
 .text-white {
-  color: #FFFFFF;
+  color: white;
 }
 
 /* PDS */
@@ -228,5 +230,5 @@ html, body {
 }
 
 .pds-stats {
-  color: #FFFFFF;
+  color: white;
 }
