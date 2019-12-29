@@ -65,4 +65,7 @@
 
 .camera-feed { 
   height: 480px;
+  padding: 10px;
+  display:block;
+  margin:auto;
 }
