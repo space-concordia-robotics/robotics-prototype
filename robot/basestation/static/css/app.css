@@ -29,11 +29,14 @@
 
 .camera-head {
     margin:5px;
+    border-style:solid;
+    border-width:thick;
 }
+
 
 .camera-btn {
     border-style: solid;
-    border-width: thick;
+    border-width: medium;
 }
 
 .camera-btn {

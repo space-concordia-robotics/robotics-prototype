@@ -247,6 +247,10 @@ html, body {
   border-color: black;
 }
 
+.camera-head {
+  border-color: black;
+}
+
 .camera-label {
   background-color: #EFEFEF;
 }
