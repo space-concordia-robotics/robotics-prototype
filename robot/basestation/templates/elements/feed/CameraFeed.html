@@ -1,18 +1,29 @@
 <!-- @TODO: parametrize the title ("Arm Vision" doesn't make sense as a title for the science/rover pages) -->
 <h5 class="container-header">Arm Vision</h5>
-    <div class="col-md-6">
-        <select>
-            <option>/dev/video0</option>
-            <option>/dev/video1</option>
-            <option>/dev/video2</option>
-            <option>/dev/video3</option>
-            <option>/dev/video4</option>
-        </select>
+    <div class="row">
+        <div class="col-md-2">
+            <h4><span class="badge badge-primary">Local Streams</span></h4>
+        </div>
+        <div class="col-md-8">
+            <select id="local-stream-select">
+                <option>/dev/video0</option>
+                <option>/dev/video1</option>
+                <option>/dev/video2</option>
+                <option>/dev/video3</option>
+                <option>/dev/video4</option>
+            </select>
+            <button title="ON" id="local-stream-on-btn" type="button" class="btn btn-primary btn-md">
+                <strong>ON</strong>
+            </button>
+            <button title="OFF" id="local-stream-off-btn" type="button" class="btn btn-primary btn-md">
+                <strong>OFF</strong>
+            </button>
+        </div>
     </div>
-<img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
+<img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/video0Cam/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
 <div class="container">
   <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-4">
       <span>
           <strong class="title">Arm/Science Stream</strong>
       </span>
@@ -23,7 +34,7 @@
           </label>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
       <span>
           <strong class="title">Front Rover Stream</strong>
       </span>
@@ -34,7 +45,7 @@
           </label>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
       <span>
           <strong class="title">Rear Rover Stream</strong>
       </span>
@@ -44,17 +55,6 @@
             <span></span>
           </label>
       </div>
-    </div>
-    <div class="col-md-3">
-          <span>
-              <strong class="title">Local Mode</strong>
-          </span>
-          <div class="form-check checkbox-slider--a checkbox-slider-lg">
-              <label>
-                  <input id="camera-local-mode-btn" type="checkbox">
-                  <span></span>
-              </label>
-          </div>
     </div>
   </div>
 </div>

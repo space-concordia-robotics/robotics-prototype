@@ -529,22 +529,10 @@ function sendPdsCommand (cmd) {
 }
 
 /*
-returns the currently set ROS_MASTER_URI value
-
-usage:
-getRoverIP(function(callback) { // do something with the response })
+returnsthe IP portion of the currntly set ROS_MASTER_URI
 */
 function getRoverIP (callback) {
-  /*
-  let request = new ROSLIB.ServiceRequest({ ping: 'rover_ip' })
-  console.log('request', request)
-  ping_client.callService(request, function (result) {
-    let msg = result.response
-    if (result.response) {
-      callback(result.response)
-    }
-  })
-  */
-  return '172.16.1.30' // competition
-  // return '127.0.0.1' // local
+  console.log('roverIP: ' + env.ROS_MASTER_IP)
+  console.log('hostIP: ' + env.HOST_IP)
+  return env.ROS_MASTER_IP
 }

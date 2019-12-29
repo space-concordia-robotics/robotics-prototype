@@ -167,13 +167,51 @@ $(document).ready(() => {
     }
   })
 
-  $('#camera-local-mode-btn').on('click', function (event) {
-    // event.preventDefault()
+  $('#local-stream-on-btn').on('click', function (event) {
+    let localPort = $('#local-stream-select option:selected')[0].text
+    let streamTopic = localPort.split('/')
+    streamTopic = streamTopic[streamTopic.length - 1] + TOPIC_SUFFIX
+
     // click makes it checked during this time, so trying to enable
-    if ($('#camera-local-mode-btn').is(':checked')) {
-      setCookie('localCameras', '1')
-    } else {
-      setCookie('localCameras', '0')
-    }
+    requestTask(
+      CAMERA_TASK,
+      1,
+      '#local-stream-on-btn',
+      function (msgs) {
+        printErrToConsole(msgs)
+        console.log('local camera ON msgs:', msgs)
+        if (msgs[1].includes(CAMERA_START_SUCCESS_RESPONSE)) {
+          $('img#camera-feed')[0].src = getStreamURL(streamTopic)
+          console.log('asasdfasdf')
+        } else {
+          appendToConsole('Failed to open stream')
+        }
+      },
+      localPort
+    )
+  })
+
+  $('#local-stream-off-btn').on('click', function (event) {
+    let localPort = $('#local-stream-select option:selected')[0].text
+
+    requestTask(
+      CAMERA_TASK,
+      0,
+      '#arm-science-camera-stream-btn',
+      function (msgs) {
+        printErrToConsole(msgs)
+
+        if (msgs[1].includes(CAMERA_STOP_SUCCESS_RESPONSE)) {
+          console.log('local camera OFF msgs:', msgs)
+
+          // succeeded to close stream
+          $('img#camera-feed')[0].src = STREAM_OFF
+        } else {
+          // failed to close stream
+          appendToConsole('Failed to close stream')
+        }
+      },
+      localPort
+    )
   })
 })
