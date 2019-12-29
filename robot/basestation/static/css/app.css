@@ -73,9 +73,10 @@
 }
 
 .camera-controls {
-    opacity: 0.35;
+    opacity: 0.55;
     position: absolute;
     display: block;
     bottom: 15px;
     right: 15px;
+    display: none;
 }

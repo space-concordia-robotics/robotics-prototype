@@ -88,6 +88,17 @@ $(document).ready(() => {
     $(".camera-name")[0].innerHTML = selectedStream.innerHTML;
   });
 
+  $(".camera-stream").hover(inEvent => {
+    let cameraStream = $(inEvent.currentTarget);
+    let cameraControls = cameraStream.children(".camera-controls");
+    cameraControls.css("display", "block");
+
+  }, outEvent => {
+    let cameraStream = $(outEvent.currentTarget);
+    let cameraControls = cameraStream.children(".camera-controls");
+    cameraControls.css("display", "none");
+  });
+
   addIdentifiers("camera-btn");
   setStreamSelection([]);
 })
