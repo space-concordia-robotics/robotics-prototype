@@ -166,4 +166,14 @@ $(document).ready(() => {
       )
     }
   })
+
+  $('#camera-local-mode-btn').on('click', function (event) {
+    // event.preventDefault()
+    // click makes it checked during this time, so trying to enable
+    if ($('#camera-local-mode-btn').is(':checked')) {
+      setCookie('localCameras', '1')
+    } else {
+      setCookie('localCameras', '0')
+    }
+  })
 })
