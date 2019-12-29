@@ -19,5 +19,8 @@ function toggleText (button) {
 
 // Generates unique names for html elements with a common class
 function addIdentifiers(cssClass) {
-
+  $(cssClass).each((i, e) => {
+    let removedPrefix = cssClass.substr(1); 
+    $(e).addClass(removedPrefix + "-" + i);
+  });
 }

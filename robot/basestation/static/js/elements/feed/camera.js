@@ -99,6 +99,6 @@ $(document).ready(() => {
     cameraControls.css("display", "none");
   });
 
-  addIdentifiers("camera-btn");
+  addIdentifiers(".camera-panel");
   setStreamSelection([]);
 })
