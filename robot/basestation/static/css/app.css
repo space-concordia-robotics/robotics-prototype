@@ -26,17 +26,25 @@
   margin-bottom: 100px;
 }
 
+.camera-panel {
+    margin:5px;
+}
 
 .camera-head {
-    margin:5px;
+    margin:0px;
     border-style:solid;
     border-width:thick;
 }
 
 
 .camera-btn {
+}
+
+.camera-stream {
     border-style: solid;
-    border-width: medium;
+    border-width: thick;
+    border-color: black;
+    margin:0px;
 }
 
 .camera-btn {
@@ -53,4 +61,8 @@
 
 .camera-name {
   text-align: center;
+}
+
+.camera-feed { 
+  height: 480px;
 }

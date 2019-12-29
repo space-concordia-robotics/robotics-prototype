@@ -254,3 +254,7 @@ html, body {
 .camera-name {
   color: black;
 }
+
+.camera-stream {
+  background-color: #3D7F7F;
+}

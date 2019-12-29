@@ -5,20 +5,15 @@
     <img class="camera-btn camera-screenshot col-1" src="../../../static/img/camera/save_screenshot.png"/>
     <img class="camera-btn camera-recording col-1" recording="false" src="../../../static/img/camera/record_off.png"/>
     <div class="camera-label col-5">
-        <h1 class="camera-name">Super Camera</h1>
+        <h3 class="camera-name">No Stream Selected</h3>
     </div>
-    <div class="camera-select col-2">
-        <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Stream Select
+          <button class="camera-select dropdown dropdown-toggle col-2" type="button" data-toggle="dropdown">Stream Select
             <span class="caret"></span></button>
             <ul class="camera-selections dropdown-menu">
             </ul>
-        </div>
-    </div>
     <img class="camera-btn camera-power col-1" src="../../../static/img/camera/power_off.png"/>
 </div>
 <div class="camera-stream row">
-
+<img class="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/cv_camera/image_raw" alt="Camera Stream Offline" onerror="this.onerror=null;this.src='../static/img/camera/stream-offline.png';"/>
 </div>
-<img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/cv_camera/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/img/stream-offline.jpg';"/>
 </div>
