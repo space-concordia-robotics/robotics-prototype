@@ -44,7 +44,9 @@
     border-style: solid;
     border-width: thick;
     border-color: black;
-    margin:0px;
+    margin: 0px;
+    position: relative;
+
 }
 
 .camera-btn {
@@ -68,4 +70,12 @@
   padding: 10px;
   display:block;
   margin:auto;
+}
+
+.camera-controls {
+    opacity: 0.35;
+    position: absolute;
+    display: block;
+    bottom: 15px;
+    right: 15px;
 }
