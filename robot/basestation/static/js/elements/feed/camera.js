@@ -65,7 +65,7 @@ $(document).ready(() => {
   })
 
   $('.camera-rotl').click(() => {
-    $('.camera-feed').toggleClass('rotateimgccw', rotationAng);
+    $('.camera-feed').toggleClass('rotateimgccw');
     $('.camera-feed').toggleClass('stretch-down');
   });
 
