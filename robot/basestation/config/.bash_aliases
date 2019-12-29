@@ -1,4 +1,5 @@
-ROBOTICS_WS="~/Programming/robotics-prototype"
+#!/usr/bin/env bash
+ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
 BASE="$ROBOTICS_WS/robot/basestation"
 ROVER="$ROBOTICS_WS/robot/rover"
 ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
