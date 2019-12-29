@@ -65,20 +65,19 @@ $(document).ready(() => {
   })
 
   $('.camera-rotl').click(() => {
-    $('#camera-feed').toggleClass('rotateimgccw');
-    $('#camera-feed').toggleClass('stretch-down');
+    $('.camera-feed').toggleClass('rotateimgccw');
+    $('.camera-feed').toggleClass('stretch-down');
   });
 
-
   $('.camera-rotr').click(() => {
-    $('#camera-feed').toggleClass('rotateimgcw');
-    $('#camera-feed').toggleClass('stretch-down');
+    $('.camera-feed').toggleClass('rotateimgcw');
+    $('.camera-feed').toggleClass('stretch-down');
   });
 
   function setStreamSelection(availableStreams)
   {
     ["/dev/videoFrontCam", "/dev/videoRearCam", "/dev/video0"].forEach((elt) => {
-    
+
     $(".camera-selections").append('<li class="camera-selection-element">' + elt + '</li>');
     })
   }
