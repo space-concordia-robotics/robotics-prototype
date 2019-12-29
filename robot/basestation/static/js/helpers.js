@@ -112,7 +112,11 @@ function dim (selector) {
 }
 
 function isLit (selector) {
-  return ($(selector).css('background-color').toLowerCase() == 'rgb(255, 0, 0)')
+  return (
+    $(selector)
+      .css('background-color')
+      .toLowerCase() == 'rgb(255, 0, 0)'
+  )
 }
 
 function greyOut (selector) {
@@ -143,9 +147,16 @@ function getCookie (cname) {
   return ''
 }
 
+// return properly formatted camera stream URL
+function getStreamURL (topicName) {
+  return (
+    'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  )
+}
+
 // isNumeric
 function isNumeric (num) {
-    return !isNaN(num) && !(num == '') || num == 0
+  return (!isNaN(num) && !(num == '')) || num == 0
 }
 
 // AJAX
