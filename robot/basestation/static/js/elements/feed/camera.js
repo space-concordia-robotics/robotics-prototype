@@ -75,21 +75,20 @@ $(document).ready(() => {
     $('#camera-feed').toggleClass('stretch-down');
   });
 
-  addIdentifiers("camera-btn");
-
   function setStreamSelection(availableStreams)
   {
     ["/dev/videoFrontCam", "/dev/videoRearCam", "/dev/video0"].forEach((elt) => {
     
     $(".camera-selections").append('<li class="camera-selection-element">' + elt + '</li>');
     })
-
-    $.each($('.camera-selection-element'), (k, v) => {
-        console.log(k);
-        console.log(v);
-        v.click((arg) => { console.log(arg)});
-    })
   }
 
+  $(document).on('click', '.camera-selection-element', e => {
+    let selectedStream = $(e.target)[0];
+    console.log(selectedStream.innerHTML);
+    $(".camera-name")[0].innerHTML = selectedStream.innerHTML;
+  });
+
+  addIdentifiers("camera-btn");
   setStreamSelection([]);
 })
