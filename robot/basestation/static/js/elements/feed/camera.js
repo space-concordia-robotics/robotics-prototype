@@ -76,4 +76,20 @@ $(document).ready(() => {
   });
 
   addIdentifiers("camera-btn");
+
+  function setStreamSelection(availableStreams)
+  {
+    ["/dev/videoFrontCam", "/dev/videoRearCam", "/dev/video0"].forEach((elt) => {
+    
+    $(".camera-selections").append('<li class="camera-selection-element">' + elt + '</li>');
+    })
+
+    $.each($('.camera-selection-element'), (k, v) => {
+        console.log(k);
+        console.log(v);
+        v.click((arg) => { console.log(arg)});
+    })
+  }
+
+  setStreamSelection([]);
 })
