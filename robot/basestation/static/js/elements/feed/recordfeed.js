@@ -1,14 +1,21 @@
 $(document).ready(() => {
   const RECORDING_ON = "../../../static/img/camera/record_on.png";
   const RECORDING_OFF = "../../../static/img/camera/record_off.png";
-        
-  // Call on keepText function with recording buttons on page load
+
+  // Call on keepState function with recording buttons on page load
   window.onload = function () {
-    //keepText($('#record-feed-toggle'))
-    //$('#record-feed-toggle').css({ 'font-weight': 'bold' })
-    // Add more calls to keeptext when adding additional recording buttons
+    keepRecordButtonState($('.camera-recording'), "true")
+    // Add more calls to keepState when adding additional recording buttons
   }
 
+  // Keeps the state of a recording button when called on upon page load
+  function keepRecordButtonState (element, attr) {
+    if (window.localStorage.getItem(element) == attr) {
+      toggleRecordingButton(element, attr)
+    }
+  }
+
+  // Toggles the recording button's image
   function toggleRecordingButton(recordingButton, isRecording)
   {
     let recordingAttr = isRecording ? "true" : "false";
@@ -16,6 +23,7 @@ $(document).ready(() => {
 
     recordingButton.attr("recording", recordingAttr);
     recordingButton.attr("src", sourceAttr);
+    window.localStorage.setItem(recordingButton, recordingAttr)
   }
 
   // Button listener to run recording toggle with stream identifier
