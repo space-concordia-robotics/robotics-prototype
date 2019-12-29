@@ -16,3 +16,8 @@ function toggleText (button) {
     window.localStorage.setItem(button, 'text-swap')
   }
 }
+
+// Generates unique names for html elements with a common class
+function addIdentifiers(cssClass) {
+
+}

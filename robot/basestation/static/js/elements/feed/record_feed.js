@@ -1,29 +1,31 @@
 $(document).ready(() => {
   // Call on keepText function with recording buttons on page load
   window.onload = function () {
-    keepText($('#record-feed-toggle'))
-    $('#record-feed-toggle').css({ 'font-weight': 'bold' })
+    //keepText($('#record-feed-toggle'))
+    //$('#record-feed-toggle').css({ 'font-weight': 'bold' })
     // Add more calls to keeptext when adding additional recording buttons
   }
 
   // Button listener to run recording toggle with stream identifier
-  $('#record-feed-toggle').click(function () {
-    const recordingButton = $(this)
+  $('.camera-recording').click(function () {
+    const recordingButton = $(this);
     const stream = 'default'
     toggleRecording(recordingButton, stream)
-    recordingButton.css({ 'font-weight': 'bold' })
   })
 
-  // Toggle python recording functions depending on current button text and handle some errors
+  // Toggle python recording functions depending on current button state and handle some errors
   function toggleRecording (recordingButton, stream) {
-    if (recordingButton.text() != recordingButton.data('text-swap')) {
-      toggleText(recordingButton)
+    let isRecording = recordingButton.attr("recording") == 'true';
+    if (!isRecording) {
+      recordingButton.attr("recording", "true");
+      console.log("rec start");
       const ajax_url = '/initiate_feed_recording/' + stream
       $.ajax(ajax_url, {
         success: function (data) {
           appendToConsole(data.recording_log_msg)
           if (data.error_state == 1) {
-            toggleText(recordingButton)
+            recordingButton.attr("recording", "false");
+            console.log("rec aborted");
           }
         },
 
@@ -36,7 +38,7 @@ $(document).ready(() => {
       $.ajax(ajax_url, {
         success: function (data) {
           if (data.error_state == 0) {
-            toggleText(recordingButton)
+            recordingButton.attr("recording", "false");
             appendToConsole(data.recording_log_msg)
           }
         },

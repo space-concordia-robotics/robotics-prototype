@@ -48,7 +48,7 @@ $(document).ready(() => {
     }
   })
 
-  $('#camera-screenshot').on('click', function (event) {
+  $('.camera-screenshot').on('click', function (event) {
     $.ajax('/capture_image', {
       success: function (data) {
         appendToConsole(data.msg)
@@ -63,4 +63,17 @@ $(document).ready(() => {
       }
     })
   })
+
+  $('.camera-rotl').click(() => {
+    $('#camera-feed').toggleClass('rotateimgccw');
+    $('#camera-feed').toggleClass('stretch-down');
+  });
+
+
+  $('.camera-rotr').click(() => {
+    $('#camera-feed').toggleClass('rotateimgcw');
+    $('#camera-feed').toggleClass('stretch-down');
+  });
+
+  addIdentifiers("camera-btn");
 })
