@@ -17,6 +17,29 @@ function toggleText (button) {
   }
 }
 
+// Convert the index value of current angle to usable value
+function camFeedRotationAngle (rotation) {
+  rotation = rotation % 4
+  if (rotation < 0) {
+    rotation += 4
+  }
+  $('.camera-panel').attr("rotation", rotation);
+
+  angle = rotation*90
+  return angle
+}
+
+// Rotate element to given angle
+function rotateElement (element, angle) {
+  element.css({
+    transform: 'rotate(' + angle + 'deg)',
+    '-ms-transform': 'rotate(' + angle + 'deg)',
+    '-moz-transform': 'rotate(' + angle + 'deg)',
+    '-webkit-transform': 'rotate(' + angle + 'deg)',
+    '-o-transform': 'rotate(' + angle + 'deg)'
+  })
+}
+
 // Generates unique names for html elements with a common class
 function addIdentifiers(cssClass) {
   $(cssClass).each((i, e) => {
