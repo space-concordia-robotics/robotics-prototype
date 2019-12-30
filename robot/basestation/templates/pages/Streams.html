@@ -1,0 +1,14 @@
+{% extends "pages/Base.html" %}
+{% block title %}Streams{% endblock %}
+{% block head %}
+{{super()}}
+  <script src="../../static/js/elements/feed/camera.js"></script>
+  <script src="../../static/js/elements/feed/recordfeed.js"></script>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">{% include 'elements/feed/CameraFeed.html' %}</div>
+    <div class="col-md-4">{% include 'elements/feed/CameraFeed.html' %}</div>
+    <div class="col-md-4">{% include 'elements/feed/CameraFeed.html' %}</div>
+</div>
+{% endblock %}
