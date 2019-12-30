@@ -148,6 +148,7 @@ def handle_task(task, status, args):
     global running_tasks
     global active_stream_ctr
     global is_local
+    global active_streams
 
     if status in [0, 1, 2] and task in known_tasks:
         # set index for corresponding listener object in array
@@ -160,14 +161,21 @@ def handle_task(task, status, args):
 
                 # check if aleady running task or check for available ports
                 if status == 2:
-                    response = chosen_task
-                    is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
-                    args_str = ""
+                    if task == 'camera_stream':
+                        if len(active_streams) == 0:
+                            return ''
+                        else:
+                            active_stream_names = [s.get_name() for s in active_streams]
+                            return ','.join(active_stream_names)
+                    else:
+                        response = chosen_task
+                        is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
+                        args_str = ""
 
-                    if running_tasks[i].is_running() and running_tasks[i].get_args():
-                        args_str = " with args: " + running_tasks[i].get_args()
+                        if running_tasks[i].is_running() and running_tasks[i].get_args():
+                            args_str = " with args: " + running_tasks[i].get_args()
 
-                    return response + is_running_str + args_str + "\n"
+                        return response + is_running_str + args_str + "\n"
 
                 if chosen_task in known_listeners:
                     other_listeners = [x for x in known_listeners if x != chosen_task]
