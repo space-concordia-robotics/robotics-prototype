@@ -204,8 +204,8 @@ def rover_drive():
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
 # capture image
-@app.route("/capture_image", methods=["POST", "GET"])
-def capture_image():
+@app.route("/capture_image/<stream_url>", methods=["POST", "GET"])
+def capture_image(stream_url):
     stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
     #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
     # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
@@ -231,13 +231,13 @@ def capture_image():
 
     return jsonify(msg=msg)
 
-@app.route("/initiate_feed_recording/<stream>", methods=["POST", "GET"])
-def initiate_feed_recording(stream):
-    return start_recording_feed(stream)
+@app.route("/initiate_feed_recording/<stream_url>", methods=["POST", "GET"])
+def initiate_feed_recording(stream_url):
+    return start_recording_feed(stream_url)
 
-@app.route("/stop_feed_recording/<stream>", methods=["POST", "GET"])
-def stop_feed_recording(stream):
-    return stop_recording_feed(stream)
+@app.route("/stop_feed_recording/<stream_url>", methods=["POST", "GET"])
+def stop_feed_recording(stream_url):
+    return stop_recording_feed(stream_url)
 
 if __name__ == "__main__":
 
