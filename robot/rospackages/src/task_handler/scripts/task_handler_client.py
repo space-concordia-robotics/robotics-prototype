@@ -33,9 +33,9 @@ def is_valid_request(r_task, r_status, r_args):
     r_task = str(r_task)
     r_status = int(r_status)
 
-    # exception case of requesting available ports, should run regardless of comp or local mode
-    if r_task == 'camera_ports' and r_status == 2:
-        return True
+    # the only acceptable status for camera ports is to check
+    if r_task == 'camera_ports' and r_status != 2:
+        return False
 
     if is_local:
         ports = glob.glob('/dev/video[0-9]*')
@@ -44,8 +44,9 @@ def is_valid_request(r_task, r_status, r_args):
         ports = competition_ports
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
-        if r_args and r_task == "camera_stream" and not r_args in ports:
-            return False
+        if r_task == 'camera_stream':
+            if not r_status == 2 and (not r_args or not r_args in ports):
+                return False
         return True
 
     return False
@@ -61,7 +62,7 @@ def usage():
     help_msg = "USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]"
     help_msg += "\nValid task options: ["
     help_msg += "'" + "', '".join(known_tasks) + "']"
-    help_msg  += "\nValid status options: [0, 1, 2, 3]"
+    help_msg  += "\nValid status options: [0, 1, 2] where 0 = start, 1 = stop, 2 = check"
 
     if is_local:
         help_msg +="\nValid camera stream args: ["
@@ -94,8 +95,13 @@ if __name__ == '__main__':
 
     rospy.init_node("task_handler_client")
 
-    task = sys.argv[1]
-    status = int(sys.argv[2])
+    if len(sys.argv) >= 3:
+        task = sys.argv[1]
+        status = int(sys.argv[2])
+    else:
+        print('Invalid format')
+        print(usage())
+        sys.exit(0)
 
     if len(sys.argv) >= 4:
         args = sys.argv[3]
