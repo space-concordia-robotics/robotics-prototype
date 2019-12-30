@@ -34,7 +34,7 @@ def is_valid_request(r_task, r_status, r_args):
     r_status = int(r_status)
 
     # exception case of requesting available ports, should run regardless of comp or local mode
-    if r_task == 'camera_task' and r_status == 3:
+    if r_task == 'camera_ports' and r_status == 2:
         return True
 
     if is_local:
@@ -70,10 +70,10 @@ def usage():
         help_msg  += "\nValid camera stream args: ["
         help_msg += "'" + "' '".join(competition_ports) + "']"
         help_msg  += "\n\nTo see valid stream args in local mode run:\nrosrun task_handler task_handler_client.py camera_stream 1 /dev/video local"
-        help_msg  += "\nOr just use: rosrun task_handler task_handler_client.py camera_stream 3"
+        help_msg  += "\nOr just use: rosrun task_handler task_handler_client.py camera_ports 2"
     return help_msg
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # check for invalid ranges for args
     if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(usage())
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     ports = []
 
     # all known tasks to be handled by the handler
-    known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
+    known_tasks = ['arm_listener', 'rover_listener', 'science_listener', 'camera_stream', 'camera_ports']
     # symlinks fixed to specific physical usb ports
     competition_ports = ['/dev/videoFront', '/dev/videoRear', '/dev/videoArmScience']
 

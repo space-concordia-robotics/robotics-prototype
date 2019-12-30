@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import rospy
 import os
 import time
@@ -28,6 +27,7 @@ def get_available_camera_ports():
 
     return video_ports + comp_video_ports
 
+# validate camera stream starting/stopping task requests
 def validate_camera_task(args, status, active_stream_ctr, is_local=False):
     '''
         Check if the camera_stream request is valid and worth processing
@@ -142,7 +142,7 @@ def handle_task(task, status, args):
     print('status:', status)
     print('args:', args)
 
-    if task == 'camera_task' and status == 3:
+    if task == 'camera_ports' and status == 2:
         return ','.join(get_available_camera_ports()) + '\n'
 
     global running_tasks
@@ -158,7 +158,7 @@ def handle_task(task, status, args):
                 chosen_task = t
                 print('task chosen:', chosen_task)
 
-                # check if aleady running task
+                # check if aleady running task or check for available ports
                 if status == 2:
                     response = chosen_task
                     is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
@@ -256,8 +256,8 @@ if __name__ == "__main__":
     running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
 
     # expected client arguments for choosing task
-    known_tasks = ["rover_listener", "arm_listener", "science_listener", "pds_listener", "camera_stream"]
-    known_listeners = known_tasks[:-1]
+    known_tasks = ['rover_listener', 'arm_listener', 'science_listener', 'pds_listener', 'camera_stream', 'camera_ports']
+    known_listeners = known_tasks[:-2]
 
     # keep track of currently running streams
     active_ports = []
