@@ -89,6 +89,11 @@ def pds():
 def numSections():
     return '4'
 
+@app.route("/stream")
+def stream():
+    """Stream page."""
+    return flask.render_template("pages/Stream.html", roverIP=fetch_ros_master_ip())
+
 @app.route('/science/initialSection')
 def initialSection():
     return '0'

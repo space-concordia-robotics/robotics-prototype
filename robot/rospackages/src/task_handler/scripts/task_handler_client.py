@@ -2,6 +2,7 @@
 
 import sys
 import datetime
+import glob
 import rospy
 from task_handler.srv import *
 
@@ -21,17 +22,31 @@ def is_valid_request(r_task, r_status, r_args):
     Validate client request parameters
     r_task: requested task
     r_status: status ON/OFF, represented by 1 and 0 respectively
+    r_args: optional args
     """
+
+    global is_local
+    global ports
+    global competition_ports
+    global known_tasks
+
     r_task = str(r_task)
     r_status = int(r_status)
 
-    # all known tasks to be handled by the handler
-    known_tasks = ["arm_listener", "rover_listener", "science_listener", "camera_stream"]
-    camera_args = ["/dev/ttyFrontCam", "/dev/ttyRearCam", "/dev/ttyArmScienceCam"]
+    # the only acceptable status for camera ports is to check
+    if r_task == 'camera_ports' and r_status != 2:
+        return False
+
+    if is_local:
+        ports = glob.glob('/dev/video[0-9]*')
+    else:
+        # competition mode
+        ports = competition_ports
 
     if r_task in known_tasks and r_status in [0, 1, 2]:
-        if r_args and r_task == "camera_stream" and not r_args in camera_args:
-            return False
+        if r_task == 'camera_stream':
+            if not r_status == 2 and (not r_args or not r_args in ports):
+                return False
         return True
 
     return False
@@ -40,26 +55,58 @@ def usage():
     """
     Return string showcasing proper usage of this client script
     """
-    help_msg = """USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]
-                  \nValid task options: ['arm_listener', 'arm_listener', 'science_listener', 'camera_stream']
-                  \nValid status options: [0, 1, 2]
-                  \nValid camera stream args: ['/dev/ttyFrontCam', '/dev/ttyRearCam', '/dev/ttyArmScienceCam']"""
+    global ports
+    global competition_ports
+    global known_tasks
+
+    help_msg = "USAGE:\nrosrun task_handler task_handler_client.py [task] [status] optional:[args]"
+    help_msg += "\nValid task options: ["
+    help_msg += "'" + "', '".join(known_tasks) + "']"
+    help_msg  += "\nValid status options: [0, 1, 2] where 0 = start, 1 = stop, 2 = check"
+
+    if is_local:
+        help_msg +="\nValid camera stream args: ["
+        help_msg += "'" + "' '".join(ports) + "']"
+    else:
+        help_msg  += "\nValid camera stream args: ["
+        help_msg += "'" + "' '".join(competition_ports) + "']"
+        help_msg  += "\n\nTo see valid stream args in local mode run:\nrosrun task_handler task_handler_client.py camera_stream 1 /dev/video local"
+        help_msg  += "\nOr just use: rosrun task_handler task_handler_client.py camera_ports 2"
     return help_msg
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # check for invalid ranges for args
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
+    if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(usage())
         sys.exit(1)
 
+    is_local = False
+    ports = []
+
+    # all known tasks to be handled by the handler
+    known_tasks = ['arm_listener', 'rover_listener', 'science_listener', 'camera_stream', 'camera_ports']
+    # symlinks fixed to specific physical usb ports
+    competition_ports = ['/dev/videoFront', '/dev/videoRear', '/dev/videoArmScience']
+
+    if "local" in sys.argv:
+        print("supported options:")
+        print("- camera_stream")
+        is_local = True
+
     rospy.init_node("task_handler_client")
 
-    task = sys.argv[1]
-    status = int(sys.argv[2])
+    if len(sys.argv) >= 3:
+        task = sys.argv[1]
+        status = int(sys.argv[2])
+    else:
+        print('Invalid format')
+        print(usage())
+        sys.exit(0)
 
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
         args = sys.argv[3]
     else:
+        # if not enough args passed, then explicitly pass empty string for validation function to handle
         args = ""
 
     if not is_valid_request(task, status, args):
