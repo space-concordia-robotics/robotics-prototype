@@ -5,8 +5,7 @@ $(document).ready(() => {
     if ($('#front-camera-stream-btn').is(':checked')) {
       requestTask(
         'camera_stream',
-        1,
-        '#front-camera-stream-btn',
+        STATUS_START,
         function (msgs) {
           printErrToConsole(msgs)
           console.log('front camera ON msgs:', msgs)
@@ -26,8 +25,7 @@ $(document).ready(() => {
     } else {
       requestTask(
         'camera_stream',
-        0,
-        '#front-camera-stream-btn',
+        STATUS_STOP,
         function (msgs) {
           printErrToConsole(msgs)
           console.log('front camera OFF msgs:', msgs)

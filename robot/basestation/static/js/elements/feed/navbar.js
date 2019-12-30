@@ -69,8 +69,7 @@ $(document).ready(() => {
           if (serialType == 'uart') {
             requestTask(
               'rover_listener',
-              1,
-              '#toggle-rover-listener-btn',
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#toggle-rover-listener-btn')[0].checked = true
@@ -111,8 +110,7 @@ $(document).ready(() => {
           if (serialType == 'uart') {
             requestTask(
               'arm_listener',
-              1,
-              '#toggle-arm-listener-btn',
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#toggle-arm-listener-btn')[0].checked = true
@@ -153,8 +151,7 @@ $(document).ready(() => {
           if (serialType == 'uart') {
             requestTask(
               'science_listener',
-              1,
-              '#science-listener-btn',
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#science-listener-btn')[0].checked = true
