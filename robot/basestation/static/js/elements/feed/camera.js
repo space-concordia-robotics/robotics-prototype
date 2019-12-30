@@ -33,8 +33,7 @@ $(document).ready(() => {
           console.log('front camera OFF msgs:', msgs)
           if (msgs[1].includes('Stopped camera_stream')) {
             // succeeded to close stream
-            $('img#camera-feed')[0].src =
-              '../static/img/stream-offline.jpg'
+            $('img#camera-feed')[0].src = '../static/img/stream-offline.jpg'
             $('img#camera-feed').removeClass('rotateimg180')
           } else {
             // failed to close stream
@@ -64,29 +63,35 @@ $(document).ready(() => {
     })
   })
 
-  $('.camera-rotl').click(() => {
-    $('.camera-feed').toggleClass('rotateimgccw');
-    $('.camera-feed').toggleClass('stretch-down');
-  });
+// Rotate camera feed 90 degrees CCW
+  $('.camera-rotl').click(function rotate () {
+    let rotation = $('.camera-panel').attr("rotation");
+    rotation--
+    angle = camFeedRotationAngle(rotation)
+    rotateElement($('.camera-feed'), angle)
+  })
 
-  $('.camera-rotr').click(() => {
-    $('.camera-feed').toggleClass('rotateimgcw');
-    $('.camera-feed').toggleClass('stretch-down');
-  });
+// Rotate camera feed 90 degrees CW
+  $('.camera-rotr').click(function rotate () {
+    let rotation = $('.camera-panel').attr("rotation");
+    rotation++
+    angle = camFeedRotationAngle(rotation);
+    rotateElement($('.camera-feed'), angle)
+  })
 
-  function setStreamSelection(availableStreams)
-  {
-    ["/dev/videoFrontCam", "/dev/videoRearCam", "/dev/video0"].forEach((elt) => {
-
-    $(".camera-selections").append('<li class="camera-selection-element">' + elt + '</li>');
+  function setStreamSelection (availableStreams) {
+    ;['/dev/videoFrontCam', '/dev/videoRearCam', '/dev/video0'].forEach(elt => {
+      $('.camera-selections').append(
+        '<li class="camera-selection-element">' + elt + '</li>'
+      )
     })
   }
 
   $(document).on('click', '.camera-selection-element', e => {
-    let selectedStream = $(e.target)[0];
-    console.log(selectedStream.innerHTML);
-    $(".camera-name")[0].innerHTML = selectedStream.innerHTML;
-  });
+    const selectedStream = $(e.target)[0]
+    console.log(selectedStream.innerHTML)
+    $('.camera-name')[0].innerHTML = selectedStream.innerHTML
+  })
 
   $(".camera-stream").hover(inEvent => {
     let cameraStream = $(inEvent.currentTarget);
