@@ -320,7 +320,6 @@ function requestTask (
 function checkTaskStatuses () {
   if ($('#camera-local-mode-btn').length >= 1) {
     let isLocal = getCookie('localCameras')
-    console.log('yoooooo')
 
     if (isLocal == '1') {
       $('#camera-local-mode-btn')[0].checked = true
