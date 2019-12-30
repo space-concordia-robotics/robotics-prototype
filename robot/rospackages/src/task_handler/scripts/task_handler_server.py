@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import rospy
 import os
 import time
@@ -14,6 +15,19 @@ def handle_task_request(req):
 
     return response
 
+# given a regex, return all matching existing port names
+def get_ports(pattern):
+    return glob.glob(pattern)
+
+# return all available usb camera port names
+# pitfall: on odroid (and perhaps other OBCs) it will return extra unusable video ports
+# for comp mode make sure to use the non-numbered ports
+def get_available_camera_ports():
+    video_ports = get_ports('/dev/video[0-9]')
+    comp_video_ports = get_ports('/dev/video[A-Za-z]')
+
+    return video_ports + comp_video_ports
+
 def validate_camera_task(args, status, active_stream_ctr, is_local=False):
     '''
         Check if the camera_stream request is valid and worth processing
@@ -22,10 +36,10 @@ def validate_camera_task(args, status, active_stream_ctr, is_local=False):
 
     # if running local mode
     if is_local:
-        ports = glob.glob('/dev/video[0-9]*')
+        ports = get_ports('/dev/video[0-9]*')
     else:
         # if in competition mode or running on OBC
-        ports = glob.glob('/dev/video[A-Za-z]*')
+        ports = get_ports('/dev/video[A-Za-z]*')
 
     max_streams = len(ports)
 
@@ -122,7 +136,14 @@ def stop_camera_task(port, active_ports, active_stream_ctr):
 # process task, status and corresponding args sent from client
 # return response message
 def handle_task(task, status, args):
-    response = "Nothing happened"
+    response = 'Nothing happened'
+
+    print('task:', task)
+    print('status:', status)
+    print('args:', args)
+
+    if task == 'camera_task' and status == 3:
+        return ','.join(get_available_camera_ports()) + '\n'
 
     global running_tasks
     global active_stream_ctr
@@ -137,6 +158,7 @@ def handle_task(task, status, args):
                 chosen_task = t
                 print('task chosen:', chosen_task)
 
+                # check if aleady running task
                 if status == 2:
                     response = chosen_task
                     is_running_str = " is running" if running_tasks[i].is_running() else " is not running"
@@ -169,7 +191,6 @@ def handle_task(task, status, args):
                             return response + '\n'
                 break
             i += 1
-
 
         # process start request
         if status == 1:
