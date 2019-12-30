@@ -63,24 +63,30 @@ $(document).ready(() => {
     })
   })
 
-// Rotate camera feed 90 degrees CCW
-  $('.camera-rotl').click(function rotate () {
-    let rotation = $('.camera-panel').attr("rotation");
-    rotation--
-    angle = camFeedRotationAngle(rotation)
-    rotateElement($('.camera-feed'), angle)
+  // Rotate camera feed 90 degrees CCW
+  $('.camera-rotl').click(e => {
+    let cameraPanel = $(e.target).parents(".camera-panel");
+    let rotation = cameraPanel.attr("rotation");
+    rotation = negativeModulo(--rotation, 4);
+    cameraPanel.attr("rotation", rotation);
+    let angle = rotation * 90;
+    let cameraFeed = cameraPanel.find(".camera-feed");
+    rotateElement(cameraFeed, angle)
   })
 
-// Rotate camera feed 90 degrees CW
-  $('.camera-rotr').click(function rotate () {
-    let rotation = $('.camera-panel').attr("rotation");
-    rotation++
-    angle = camFeedRotationAngle(rotation);
-    rotateElement($('.camera-feed'), angle)
+  // Rotate camera feed 90 degrees CW
+  $('.camera-rotr').click(e => {
+    let cameraPanel = $(e.target).parents(".camera-panel");
+    let rotation = cameraPanel.attr("rotation");
+    rotation = negativeModulo(++rotation, 4);
+    cameraPanel.attr("rotation", rotation);
+    let angle = rotation * 90;
+    let cameraFeed = cameraPanel.find(".camera-feed");
+    rotateElement(cameraFeed, angle)
   })
 
   function setStreamSelection (availableStreams) {
-    ;['/dev/videoFrontCam', '/dev/videoRearCam', '/dev/video0'].forEach(elt => {
+    availableStreams.forEach(elt => {
       $('.camera-selections').append(
         '<li class="camera-selection-element">' + elt + '</li>'
       )
@@ -88,9 +94,10 @@ $(document).ready(() => {
   }
 
   $(document).on('click', '.camera-selection-element', e => {
-    const selectedStream = $(e.target)[0]
-    console.log(selectedStream.innerHTML)
-    $('.camera-name')[0].innerHTML = selectedStream.innerHTML
+    let selectedStream = $(e.target)[0]
+    let cameraPanel = $(e.target).parents(".camera-panel");
+    let cameraName = cameraPanel.find(".camera-name");
+    cameraName[0].innerHTML = selectedStream.innerHTML
   })
 
   $(".camera-stream").hover(inEvent => {
@@ -105,5 +112,5 @@ $(document).ready(() => {
   });
 
   addIdentifiers(".camera-panel");
-  setStreamSelection([]);
+  setStreamSelection(['/dev/videoFrontCam', '/dev/videoRearCam', '/dev/videoScienceCam', '/dev/video0', '/dev/video1']);
 })

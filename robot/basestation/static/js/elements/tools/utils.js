@@ -17,16 +17,14 @@ function toggleText (button) {
   }
 }
 
-// Convert the index value of current angle to usable value
-function camFeedRotationAngle (rotation) {
-  rotation = rotation % 4
-  if (rotation < 0) {
-    rotation += 4
+// Applies modulo and if the value is negative, cycle it.
+function negativeModulo (number, modulo) {
+  while (number < 0) {
+    number += modulo
   }
-  $('.camera-panel').attr("rotation", rotation);
 
-  angle = rotation*90
-  return angle
+  number %= modulo
+  return number;
 }
 
 // Rotate element to given angle
