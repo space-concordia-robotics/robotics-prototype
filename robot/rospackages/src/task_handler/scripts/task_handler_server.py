@@ -19,13 +19,17 @@ def get_ports(pattern):
     return glob.glob(pattern)
 
 # return all available usb camera port names
-# pitfall: on odroid (and perhaps other OBCs) it will return extra unusable video ports
-# for comp mode make sure to use the non-numbered ports
+# pitfall: on odroid (and perhaps other OBCs) if we would use the local mode regex
+# it will return extra unusable video ports, on regular computers the same issue DNE
 def get_available_camera_ports():
-    video_ports = get_ports('/dev/video[0-9]')
-    comp_video_ports = get_ports('/dev/video[A-Za-z]')
+    global is_local
 
-    return video_ports + comp_video_ports
+    if is_local:
+        video_ports = get_ports('/dev/video[0-9]')
+    else:
+        video_ports = get_ports('/dev/video[A-Za-z]')
+
+    return video_ports
 
 # validate camera stream starting/stopping task requests
 def validate_camera_task(args, status, active_stream_ctr, is_local=False):
