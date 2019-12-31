@@ -22,14 +22,16 @@ $(document).ready(() => {
   const CAMERA_STOP_SUCCESS_RESPONSE = 'Stopped camera stream'
 
   // path to stream offline image
-  const STREAM_OFF = '../../../images/stream-offline.jpg'
+  const STREAM_OFF = '../../static/img/camera/stream-offline.jpg'
+  const POWER_ON = '../../static/img/camera/power_on.png';
+  const POWER_OFF = '../../static/img/camera/power_off.png';
 
   function startCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_STREAM, STATUS_START, msgs => {
         if(msgs[0])
             successCallback();
         else
-            printErrorToConsole(msgs[1]);
+            printErrToConsole(msgs[1]);
     
     }, cameraStream);
   }
@@ -39,7 +41,7 @@ $(document).ready(() => {
         if(msgs[0])
             successCallback();
         else
-            printErrorToConsole(msgs[1]);
+            printErrToConsole(msgs[1]);
     
     }, cameraStream);
   }
@@ -96,7 +98,6 @@ $(document).ready(() => {
     let cameraPanel = $(e.target).parents(".camera-panel");
     let cameraNameElement = cameraPanel.find(".camera-name");
     let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "");
-    console.log(cameraName);
     cameraNameElement.attr("stream", cameraName);
     let cameraNameSplit = cameraName.split("/");
     console.log(cameraNameSplit);
@@ -131,5 +132,28 @@ $(document).ready(() => {
     }
   });
 
-  $('.camera-power');
+  $('.camera-power').click((e) => {
+    let cameraPower = $(e.target);
+    console.log(cameraPower);
+    let cameraPanel = cameraPower.parents(".camera-panel");
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = cameraNameElement.attr("stream");
+
+    if (cameraName == ""){
+        appendToConsole("Please select a stream");
+        return;
+    }   
+
+    let isPoweredOn = cameraPower.attr("power-on") == "true";
+    if(isPoweredOn)
+        stopCameraStream(cameraName, () => {
+            cameraPower.attr("power-on", "false");
+            cameraPower.attr("src", POWER_OFF);
+        });
+    else
+        startCameraStream(cameraName, () => {
+            cameraPower.attr("power-on", "true");
+            cameraPower.attr("src", POWER_ON);
+        });
+  }); 
 })
