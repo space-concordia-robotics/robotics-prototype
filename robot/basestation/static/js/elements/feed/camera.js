@@ -24,44 +24,25 @@ $(document).ready(() => {
   // path to stream offline image
   const STREAM_OFF = '../../../images/stream-offline.jpg'
 
-  $('#front-camera-stream-btn').on('click', function (event) {
-    event.preventDefault()
-    // click makes it checked during this time, so trying to enable
-    if ($('#front-camera-stream-btn').is(':checked')) {
-      requestTask(
-        CAMERA_STREAM,
-        STATUS_START,
-        function (msgs) {
-          printErrToConsole(msgs)
-          console.log('front camera ON msgs:', msgs)
-          if (msgs[1].includes(CAMERA_START_SUCCESS_RESPONSE)) {
-            $('img#camera-feed')[0].src = getStreamURL(FRONT_STREAM_TOPIC)
-            $('img#camera-feed').addClass('rotateimg180')
-          } else {
-            appendToConsole('Failed to open stream')
-            $('#front-camera-stream-btn')[0].checked = false
-          }
-        },
-        FRONT_PORT
-      )
-    } else {
-      requestTask(
-        CAMERA_STREAM,
-        STATUS_STOP,
-        function (msgs) {
-          printErrToConsole(msgs)
-          console.log('front camera OFF msgs:', msgs)
-          if (msgs[1].includes(CAMERA_STOP_SUCCESS_RESPONSE)) {
-            $('img#camera-feed')[0].src = STREAM_OFF
-            $('img#camera-feed').removeClass('rotateimg180')
-          } else {
-            appendToConsole('Failed to close stream')
-          }
-        },
-        FRONT_PORT
-      )
-    }
-  })
+  function startCameraStream(cameraStream, successCallback = () => {}) {
+    requestTask(CAMERA_STREAM, STATUS_START, msgs => {
+        if(msgs[0])
+            successCallback();
+        else
+            printErrorToConsole(msgs[1]);
+    
+    }, cameraStream);
+  }
+
+  function stopCameraStream(cameraStream, successCallback = () => {}) {
+    requestTask(CAMERA_STREAM, STATUS_STOP, msgs => {
+        if(msgs[0])
+            successCallback();
+        else
+            printErrorToConsole(msgs[1]);
+    
+    }, cameraStream);
+  }
 
   $('.camera-screenshot').on('click', function (event) {
     $.ajax('/capture_image', {
@@ -70,11 +51,11 @@ $(document).ready(() => {
         if (!data.msg.includes('success')) {
           appendToConsole('Something went wrong, got', data.msg)
         } else {
-          appendToConsole(data.msg)
+          appendToConsole("Successfully saved screenshot")
         }
       },
       error: function () {
-        console.log('An error occured')
+        console.log('An error occured while taking a screenshot')
       }
     })
   })
@@ -113,8 +94,13 @@ $(document).ready(() => {
   $(document).on('click', '.camera-selection-element', e => {
     let selectedStream = $(e.target)[0]
     let cameraPanel = $(e.target).parents(".camera-panel");
-    let cameraName = cameraPanel.find(".camera-name");
-    cameraName[0].innerHTML = selectedStream.innerHTML
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "");
+    console.log(cameraName);
+    cameraNameElement.attr("stream", cameraName);
+    let cameraNameSplit = cameraName.split("/");
+    console.log(cameraNameSplit);
+    cameraNameElement[0].innerHTML = cameraNameSplit[cameraNameSplit.length - 1];
   })
 
   $(".camera-stream").hover(inEvent => {
@@ -128,20 +114,14 @@ $(document).ready(() => {
     cameraControls.css("display", "none");
   });
 
-  function getAvailablePorts()
-  {
-  }
-
   $(".camera-select").click((e) => {
     let cameraSelect = $(e.target);
     let menuOpened = cameraSelect.attr("aria-expanded") == "false";
 
     if(menuOpened)
     {
-        let availablePorts = getAvailablePorts();
         requestTask(CAMERA_PORTS, STATUS_CHECK, msgs => {
-        printErrToConsole(msgs);
-        console.log(msgs);
+          printErrToConsole(msgs);
 
           if(msgs[0])
             setStreamSelection(msgs[1].split(','));
@@ -151,50 +131,5 @@ $(document).ready(() => {
     }
   });
 
-  addIdentifiers(".camera-panel");
-
-  $('#local-stream-on-btn').on('click', function (event) {
-    let localPort = $('#local-stream-select option:selected')[0].text
-    let streamTopic = localPort.split('/')
-    streamTopic = streamTopic[streamTopic.length - 1] + TOPIC_SUFFIX
-
-    // click makes it checked during this time, so trying to enable
-    requestTask(
-      CAMERA_STREAM,
-      STATUS_START,
-      function (msgs) {
-        printErrToConsole(msgs)
-        console.log('local camera ON msgs:', msgs)
-        if (msgs[1].includes(CAMERA_START_SUCCESS_RESPONSE)) {
-          $('img#camera-feed')[0].src = getStreamURL(streamTopic)
-        } else {
-          appendToConsole('Failed to open stream')
-        }
-      },
-      localPort
-    )
-  })
-
-  $('#local-stream-off-btn').on('click', function (event) {
-    let localPort = $('#local-stream-select option:selected')[0].text
-
-    requestTask(
-      CAMERA_STREAM,
-      STATUS_STOP,
-      function (msgs) {
-        printErrToConsole(msgs)
-
-        if (msgs[1].includes(CAMERA_STOP_SUCCESS_RESPONSE)) {
-          console.log('local camera OFF msgs:', msgs)
-
-          // succeeded to close stream
-          $('img#camera-feed')[0].src = STREAM_OFF
-        } else {
-          // failed to close stream
-          appendToConsole('Failed to close stream')
-        }
-      },
-      localPort
-    )
-  })
+  $('.camera-power');
 })
