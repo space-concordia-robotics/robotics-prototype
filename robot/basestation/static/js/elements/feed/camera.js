@@ -14,7 +14,8 @@ $(document).ready(() => {
   const ARM_SCIENCE_STREAM_TOPIC = TOPIC_PREFIX + 'ArmScience' + TOPIC_SUFFIX
 
   // task handler's recognized name for camera stream task
-  const CAMERA_TASK = 'camera_stream'
+  const CAMERA_STREAM = 'camera_stream'
+  const CAMERA_PORTS = 'camera_ports'
   // response messages from task handler
   // these values must not be altered unless they are updated in the task handler server
   const CAMERA_START_SUCCESS_RESPONSE = 'Started camera stream'
@@ -28,7 +29,7 @@ $(document).ready(() => {
     // click makes it checked during this time, so trying to enable
     if ($('#front-camera-stream-btn').is(':checked')) {
       requestTask(
-        CAMERA_TASK,
+        CAMERA_STREAM,
         STATUS_START,
         function (msgs) {
           printErrToConsole(msgs)
@@ -45,7 +46,7 @@ $(document).ready(() => {
       )
     } else {
       requestTask(
-        CAMERA_TASK,
+        CAMERA_STREAM,
         STATUS_STOP,
         function (msgs) {
           printErrToConsole(msgs)
@@ -101,6 +102,7 @@ $(document).ready(() => {
   })
 
   function setStreamSelection (availableStreams) {
+    $('.camera-selections').children().empty();
     availableStreams.forEach(elt => {
       $('.camera-selections').append(
         '<li class="camera-selection-element">' + elt + '</li>'
@@ -126,8 +128,30 @@ $(document).ready(() => {
     cameraControls.css("display", "none");
   });
 
+  function getAvailablePorts()
+  {
+  }
+
+  $(".camera-select").click((e) => {
+    let cameraSelect = $(e.target);
+    let menuOpened = cameraSelect.attr("aria-expanded") == "false";
+
+    if(menuOpened)
+    {
+        let availablePorts = getAvailablePorts();
+        requestTask(CAMERA_PORTS, STATUS_CHECK, msgs => {
+        printErrToConsole(msgs);
+        console.log(msgs);
+
+          if(msgs[0])
+            setStreamSelection(msgs[1].split(','));
+          else
+            setStreamSelection([]); 
+        });
+    }
+  });
+
   addIdentifiers(".camera-panel");
-  setStreamSelection(['/dev/videoFrontCam', '/dev/videoRearCam', '/dev/videoScienceCam', '/dev/video0', '/dev/video1']);
 
   $('#local-stream-on-btn').on('click', function (event) {
     let localPort = $('#local-stream-select option:selected')[0].text
@@ -136,14 +160,13 @@ $(document).ready(() => {
 
     // click makes it checked during this time, so trying to enable
     requestTask(
-      CAMERA_TASK,
+      CAMERA_STREAM,
       STATUS_START,
       function (msgs) {
         printErrToConsole(msgs)
         console.log('local camera ON msgs:', msgs)
         if (msgs[1].includes(CAMERA_START_SUCCESS_RESPONSE)) {
           $('img#camera-feed')[0].src = getStreamURL(streamTopic)
-          console.log('asasdfasdf')
         } else {
           appendToConsole('Failed to open stream')
         }
@@ -156,7 +179,7 @@ $(document).ready(() => {
     let localPort = $('#local-stream-select option:selected')[0].text
 
     requestTask(
-      CAMERA_TASK,
+      CAMERA_STREAM,
       STATUS_STOP,
       function (msgs) {
         printErrToConsole(msgs)
