@@ -46,6 +46,19 @@ $(document).ready(() => {
     }, cameraStream);
   }
 
+  function setStreamSelection (availableStreams) {
+    $('.camera-selections').children().empty();
+    availableStreams.forEach(elt => {
+      $('.camera-selections').append(
+        '<li class="camera-selection-element">' + elt + '</li>'
+      )
+    })
+  }
+
+  function getStreamURL (topicName) {
+    return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  }
+
   $('.camera-screenshot').on('click', function (event) {
     $.ajax('/capture_image', {
       success: function (data) {
@@ -84,15 +97,6 @@ $(document).ready(() => {
     rotateElement(cameraFeed, angle)
   })
 
-  function setStreamSelection (availableStreams) {
-    $('.camera-selections').children().empty();
-    availableStreams.forEach(elt => {
-      $('.camera-selections').append(
-        '<li class="camera-selection-element">' + elt + '</li>'
-      )
-    })
-  }
-
   $(document).on('click', '.camera-selection-element', e => {
     let selectedStream = $(e.target)[0]
     let cameraPanel = $(e.target).parents(".camera-panel");
@@ -100,7 +104,6 @@ $(document).ready(() => {
     let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "");
     cameraNameElement.attr("stream", cameraName);
     let cameraNameSplit = cameraName.split("/");
-    console.log(cameraNameSplit);
     cameraNameElement[0].innerHTML = cameraNameSplit[cameraNameSplit.length - 1];
   })
 
@@ -113,6 +116,11 @@ $(document).ready(() => {
     let cameraStream = $(outEvent.currentTarget);
     let cameraControls = cameraStream.children(".camera-controls");
     cameraControls.css("display", "none");
+  });
+
+  $('.camera-feed').on("error", (e) => {
+    let cameraFeed = $(e.target);
+    cameraFeed.attr("src", STREAM_OFF);
   });
 
   $(".camera-select").click((e) => {
@@ -134,26 +142,29 @@ $(document).ready(() => {
 
   $('.camera-power').click((e) => {
     let cameraPower = $(e.target);
-    console.log(cameraPower);
     let cameraPanel = cameraPower.parents(".camera-panel");
     let cameraNameElement = cameraPanel.find(".camera-name");
     let cameraName = cameraNameElement.attr("stream");
 
     if (cameraName == ""){
-        appendToConsole("Please select a stream");
-        return;
+      appendToConsole("Please select a stream");
+      return;
     }   
 
     let isPoweredOn = cameraPower.attr("power-on") == "true";
     if(isPoweredOn)
-        stopCameraStream(cameraName, () => {
-            cameraPower.attr("power-on", "false");
-            cameraPower.attr("src", POWER_OFF);
-        });
+      stopCameraStream(cameraName, () => {
+        cameraPower.attr("power-on", "false");
+        cameraPower.attr("src", POWER_OFF);
+      });
     else
-        startCameraStream(cameraName, () => {
-            cameraPower.attr("power-on", "true");
-            cameraPower.attr("src", POWER_ON);
-        });
+      startCameraStream(cameraName, () => {
+        cameraPower.attr("power-on", "true");
+        cameraPower.attr("src", POWER_ON);
+        let cameraFeed = cameraPanel.find(".camera-feed");
+        let cameraNameSplit = cameraName.split('/');
+        let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
+        cameraFeed.attr("src", getStreamURL(cameraFilename + 'Cam'));
+      });
   }); 
 })

@@ -147,12 +147,6 @@ function getCookie (cname) {
   return ''
 }
 
-// return properly formatted camera stream URL
-function getStreamURL (topicName) {
-  return (
-    'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
-  )
-}
 
 // isNumeric
 function isNumeric (num) {
