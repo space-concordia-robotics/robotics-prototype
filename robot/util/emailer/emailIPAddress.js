@@ -1,14 +1,14 @@
-const fs = require("fs").promises;
-const path = require("path");
+const fs = require('fs').promises;
+const path = require('path');
 const ip = require('ip');
 const nodemailer = require('nodemailer');
 
 const RETRY_DELAY = 3000;
 const MAX_TRIES = 40;
-const EMAILS_FILE_NAME = "emails.txt";
+const EMAILS_FILE_NAME = 'emails.txt';
 const DEFAULT_EMAILS = [
-    "davidhuculak5@gmail.com",
-    "petergranitski@gmail.com"
+    'davidhuculak5@gmail.com',
+    'petergranitski@gmail.com'
 ];
 
 let ourIP;
@@ -20,17 +20,17 @@ const getEmailsFromFile = async () => {
     const filePath = path.resolve(__dirname, EMAILS_FILE_NAME);
     let emails = DEFAULT_EMAILS;
     try {
-        const fileString = await fs.readFile(filePath, "utf-8");
-        emails = fileString.split(",").map(
-            item => item.trim()).filter(
-                item => item.length > 0);
+        const fileString = await fs.readFile(filePath, 'utf-8');
+        emails = fileString.split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
         if (emails.length < 1) {
             console.log(`Warning: no emails found in ${path.resolve(filePath)}. Falling back to default emails:`);
             console.log(DEFAULT_EMAILS);
             emails = DEFAULT_EMAILS;
         }
     } catch (e) {
-        if (e.code === "ENOENT") {
+        if (e.code === 'ENOENT') {
             console.log(`Warning: ${path.resolve(filePath)} not found. Falling back to default emails:`);
             console.log(DEFAULT_EMAILS);
         }
@@ -63,7 +63,7 @@ const tryToGetIP = () => {
 
 const sendEmail = async ip => {
 
-    let message = "The IP address is: " + ip;
+    let message = 'The IP address is: ' + ip;
 
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -78,7 +78,7 @@ const sendEmail = async ip => {
     const emails = await getEmailsFromFile();
     let mailOptions = {
         from: '"Mr. odroid sir" <concordiacourseplanner@gmail.com>', // sender address
-        to: emails.join(", "), // list of receivers
+        to: emails.join(', '), // list of receivers
         subject: 'The IP Address of the odroid', // Subject line
         html: message // html body
     };
