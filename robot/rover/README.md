@@ -140,10 +140,8 @@ The odroid will send an email with its local IP address after having run the eth
 
 This was accomplished by running `syncEmailer.sh` and setting up a systemd startup service to run `runEmailer`.
 
-Let Peter know if you want to be added to this mailing list.
-
-In order to control the mailing list, add a file called `emails.txt` containing a single line of comma-separated 
-email addresses. This file should be placed in the same folder as the emailer script itself (`emailIPAddress.js`). 
+In order to control the mailing list, add a file called `emails.txt` containing a comma-separated list of 
+email addresses. This file should be placed in the same folder as the emailer script itself (`emailIPAddress.js`).
 
 #### ROS Rover Startup service
 
