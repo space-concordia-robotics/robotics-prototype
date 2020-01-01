@@ -1,8 +1,3 @@
-html, body {
-    height: 100%;
-    background-color: #990000;
-}
-
 .container {
     height: 100%;
     min-height: 100%;
@@ -20,12 +15,12 @@ html, body {
     min-height: 100vh;
 }
 
-.table-grp, .table-grp2 {
+.auto-ctrl-grp, .manual-ctrl-grp {
     border-collapse: collapse;
     border-spacing: 0;
 }
 
-.table-grp td, .table-grp2 td {
+.auto-ctrl-grp td, .manual-ctrl-grp td {
     font-family: Arial, sans-serif;
     font-size: 14px;
     padding: 0;
@@ -33,10 +28,9 @@ html, body {
     border-width: 0;
     overflow: hidden;
     word-break: normal;
-    border-color: #990000;
 }
 
-.table-grp th, .table-grp2 th {
+.auto-ctrl-grp th, .manual-ctrl-grp th {
     font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: normal;
@@ -45,96 +39,58 @@ html, body {
     border-width: 1px;
     overflow: hidden;
     word-break: normal;
-    border-color: #990000;
     text-align: center;
-}
-
-.table-grp tr:last-child {
-    border-bottom: 0px inset #05072F;
-    color: #6768a1;
-    font-weight: bold;
-    background-color: #101148;
 }
 
 .row, .row>* {
     border: 0px solid #05072f;
 }
 
-.control-btn {
+.round-btn {
     width: 80px;
     height: 80px;
-    background-color: #4a0000;
-    border: ridge 2px #434586;
-    color: white;
-    border-radius: 10px;
 }
 
-.control-btn2 {
+.rect-btn {
     width: 80px;
     height: 80px;
-    background-color: #4a0000;
-    border: ridge 2px #434586;
-    color: white;
 }
 
-.control-btn:hover, .control-btn2:hover, #logs-btn button:hover {
-    background-color: #05072f;
+.rect-btn:hover, .rect-btn:hover, #logs-btn button:hover {
     color: white;
 }
 
 .control-btn-left {
     border-radius: 10px 0 0 10px;
-    border-right-color: #4a0000;
 }
 
 .control-btn-right {
     border-radius: 0 10px 10px 0;
-    border-left-color: #4a0000;
 }
 
 .control-btn-mid {
     width: 80px;
     height: 80px;
-    background-color: #4a0000;
-    border-top: ridge 2px #434586;
-    border-bottom: ridge 2px #434586;
-    border-left: ridge 2px #4a0000;
-    border-right: ridge 2px #4a0000;
-    color: white;
 }
 
 .container-header, thead {
-    color: #092b43;
     font-weight: bolder;
     text-align: center;
 }
 
-#motor-table thead th, .table-grp tr:first-child {
+#motor-table thead th, .auto-ctrl-grp tr:first-child {
     text-align: center;
     vertical-align: middle
 }
 
-#motor-table thead tr:first-child, #motor-table tbody th {
-    background-color: #101148;
-    color: #F0DAFA;
-    border: 2px solid #750000
-}
-
 #motor-table, #motor-table tr td {
-    border: 2px solid #750000;
     text-align: center
 }
 
 .control-main-btn {
-    border-bottom: 0px solid #05072f;
     border-top-style: none;
     border-left-style: none;
-    margin-bottom: 5px
-}
-
-#logs-btn button {
-    background-color: #4a0000;
-    border: ridge 2px #434586;
+    margin-bottom: 5px;
 }
 
 .center {
@@ -161,4 +117,11 @@ input#serial-cmd-input {
 
 .control-panel {
   width:500px;
+}
+
+.fa-3x {
+  width: 70px !important;
+  height: 55px !important;
+  vertical-align: bottom !important;
+  border-radius: 5px !important;
 }

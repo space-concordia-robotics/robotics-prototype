@@ -21,18 +21,17 @@ $(document).ready(() => {
   preferred_theme = getCookie('theme'); // getCookie() from helpers.js
   if (preferred_theme != "") {
       prefer_theme(preferred_theme);
+  } else {
+    prefer_theme("lofi");
   }
 
-  $('#theme-red').click(function () {
-      prefer_theme('red');
+  $('#theme-mantis').click(function () {
+      console.log('theme-mantis');
+      prefer_theme('mantis');
   });
-  $('#theme-green').click(function () {
-      console.log('theme-green');
-      prefer_theme('green');
-  });
-  $('#theme-blue').click(function () {
-      console.log('theme-blue');
-      prefer_theme('blue');
+  $('#theme-lofi').click(function () {
+      console.log('theme-lofi');
+      prefer_theme('lofi');
   });
 
   function isListenerOpen () {
