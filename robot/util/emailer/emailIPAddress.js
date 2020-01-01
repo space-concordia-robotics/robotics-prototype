@@ -26,13 +26,13 @@ const getEmailsFromFile = async () => {
             .map(item => item.trim())
             .filter(item => item.length > 0);
         if (emails.length < 1) {
-            console.log(`Warning: no emails found in ${path.resolve(filePath)}. Falling back to default emails:`);
+            console.log(`Warning: no emails found in ${filePath}. Falling back to default emails:`);
             console.log(DEFAULT_EMAILS);
             emails = DEFAULT_EMAILS;
         }
     } catch (e) {
         if (e.code === 'ENOENT') {
-            console.log(`Warning: ${path.resolve(filePath)} not found. Falling back to default emails:`);
+            console.log(`Warning: ${filePath} not found. Falling back to default emails:`);
             console.log(DEFAULT_EMAILS);
         }
     }
