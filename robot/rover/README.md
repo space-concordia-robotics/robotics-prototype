@@ -142,6 +142,9 @@ This was accomplished by running `syncEmailer.sh` and setting up a systemd start
 
 Let Peter know if you want to be added to this mailing list.
 
+In order to control the mailing list, add a file called `emails.txt` containing a single line of comma-separated 
+email addresses. This file should be placed in the same folder as the emailer script itself (`emailIPAddress.js`). 
+
 #### ROS Rover Startup service
 
 This service follows the IP-emailer service and executes a roslaunch file `rover.launch`, which will allow developers to easily add nodes to be launched on startup without having to create

@@ -1,28 +1,52 @@
+const fs = require("fs").promises;
+const path = require("path");
+const ip = require('ip');
+const nodemailer = require('nodemailer');
 
+const RETRY_DELAY = 3000;
+const MAX_TRIES = 40;
+const EMAILS_FILE_NAME = "emails.txt";
+const DEFAULT_EMAILS = [
+    "davidhuculak5@gmail.com",
+    "petergranitski@gmail.com"
+];
 
-
-var ip = require('ip');
-var nodemailer = require('nodemailer');
-
-var RETRY_DELAY = 3000;
-var MAX_TRIES = 40;
-
-var ourIP;
-var numTries = 1;
+let ourIP;
+let numTries = 1;
 
 console.log('Current time: ' + new Date().getTime());
 
-tryToGetIP();
+const getEmailsFromFile = async () => {
+    const filePath = path.resolve(__dirname, EMAILS_FILE_NAME);
+    let emails = DEFAULT_EMAILS;
+    try {
+        const fileString = await fs.readFile(filePath, "utf-8");
+        emails = fileString.split(",").map(
+            item => item.trim()).filter(
+                item => item.length > 0);
+        if (emails.length < 1) {
+            console.log(`Warning: no emails found in ${path.resolve(filePath)}. Falling back to default emails:`);
+            console.log(DEFAULT_EMAILS);
+            emails = DEFAULT_EMAILS;
+        }
+    } catch (e) {
+        if (e.code === "ENOENT") {
+            console.log(`Warning: ${path.resolve(filePath)} not found. Falling back to default emails:`);
+            console.log(DEFAULT_EMAILS);
+        }
+    }
+    return emails;
+};
 
-function tryToGetIP(){
+const tryToGetIP = () => {
 
     ourIP = ip.address();
 
-    if(ourIP === '127.0.0.1') {
+    if (ourIP === '127.0.0.1') {
         console.log('error getting IP address');
-        if(numTries < MAX_TRIES){
+        if (numTries < MAX_TRIES) {
             console.log('Trying again in 3 seconds... (MAX_TRIES = ' + MAX_TRIES + ')\n');
-            setTimeout(function() {
+            setTimeout(function () {
                 numTries++;
                 tryToGetIP();
             }, RETRY_DELAY);
@@ -37,11 +61,11 @@ function tryToGetIP(){
     }
 }
 
-function sendEmail(ip){
+const sendEmail = async ip => {
 
-    var message = "The IP address is: " + ip;
+    let message = "The IP address is: " + ip;
 
-    var transporter = nodemailer.createTransport({
+    let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
         secure: true, // secure:true for port 465, secure:false for port 587
@@ -51,19 +75,20 @@ function sendEmail(ip){
         }
     });
 
-    var mailOptions = {
+    const emails = await getEmailsFromFile();
+    let mailOptions = {
         from: '"Mr. odroid sir" <concordiacourseplanner@gmail.com>', // sender address
-        to: 'davidhuculak5@gmail.com, petergranitski@gmail.com', // list of receivers
+        to: emails.join(", "), // list of receivers
         subject: 'The IP Address of the odroid', // Subject line
         html: message // html body
     };
 
-    transporter.sendMail(mailOptions, function(error, info){
+    transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-            if(numTries < MAX_TRIES){
+            if (numTries < MAX_TRIES) {
                 numTries++;
                 console.log('Failed to send email. Trying again in 1 second');
-                setTimeout(function() {
+                setTimeout(function () {
                     console.log('Trying to send email again');
                     sendEmail(ip);
                 }, 1000);
@@ -73,6 +98,8 @@ function sendEmail(ip){
         } else {
             console.log('Message %s sent: %s', info.messageId, info.response);
             console.log('Current time: ' + new Date().getTime());
-        } 
+        }
     });
 }
+
+tryToGetIP();
