@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const RETRY_DELAY = 3000;
 const MAX_TRIES = 40;
 const EMAILS_FILE_NAME = 'emails.txt';
+// fallback to default emails if there's and issue with the emails file
 const DEFAULT_EMAILS = [
     'davidhuculak5@gmail.com',
     'petergranitski@gmail.com'
