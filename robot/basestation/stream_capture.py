@@ -13,12 +13,30 @@ global proc_video
 proc_video = {}
 active_recordings = []
 
+def get_stream_shortname(stream_url):
+    """ 
+    Given the format http://localhost:8080/stream?topic=/FEED_NAME/image_raw
+
+    Returns FEED_NAME
+    """
+
+    return stream_url.split("/")[-2]
+
 def start_recording_feed(stream_url):
     """
-    Setup variables and start connection check
+    Start recording a feed given by a stream URL.
+
+    Returns True if the stream starts successfully, false otherwise
     """
-    recording_log_msg = 'recording feed of ' + stream_url
-    return feed_connection_check(stream, formatted_date, recording_log_msg)
+
+    stream_is_connected = is_stream_connected(stream_url)
+
+    if stream_is_connected:
+        active_recordings.append(stream_url)
+        threading.Thread(target = start_ffmpeg_record, args = stream_url).start()
+        return True, "Successfully started stream of " + get_stream_shortname(stream_url)
+    else:
+        return False, "Failed to connect to stream" + get_stream_shortname(stream_url)
 
 def stop_recording_feed(stream_url):
     """
@@ -26,43 +44,35 @@ def stop_recording_feed(stream_url):
     """
 
     active_recordings.remove(stream_url)
-    recording_log_msg = 'saved recording of ' + stream
-    error_state = 0
+    message = "Successfully stopped recording of " + get_stream_shortname(stream_url)
+    success = True
     try:
         proc_video[stream_url].communicate(b'q')
     except (KeyError, ValueError):
-        error_state = 1
+        success = False
+        message = "Failed to stop recording of " + get_stream_shortname(stream_url)
 
-    return jsonify(recording_log_msg=recording_log_msg, error_state=error_state)
+    return success, message
 
-def is_stream_recording(stream_url):
+def is_recording_stream(stream_url):
     return stream_url in active_recordings
 
-def feed_connection_check(stream_url, recording_log_msg):
+def is_stream_connected(stream_url):
     """
     Check if video feed is up before starting start ffmpeg
-    """
-    error_state = 0
-    connection_check = os.system('ffprobe -select_streams v -i ' + stream_url)
-    if connection_check == 0:
-        threading.Thread(target = start_ffmpeg_record, args = ( stream_url, formatted_date)).start()
-        print(recording_log_msg)
-        return jsonify(recording_log_msg=recording_log_msg, error_state=error_state)
 
-    else:
-        recording_log_msg = 'failed to connect to video feed of ' + stream_url
-        error_state = 1
-        print(recording_log_msg)
-        return jsonify(recording_log_msg=recording_log_msg, error_state=error_state)
+    Returns True on success, false otherwise
+    """
+    connection_check = os.system('ffprobe -select_streams v -i ' + stream_url)
+    return connection_check == 0
 
 def start_ffmpeg_record(stream_url):
     """
     Start ffmpeg to start recording stream
     """
     formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
-    filename = 'stream_' + formatted_date
+    filename = get_stream_filename(stream_url) + '_' + formatted_date
     save_video_dir = 'rover_stream/' + stream
     subprocess.Popen(['mkdir rover_stream'], shell=True)
     subprocess.Popen(['mkdir ' + save_video_dir], shell=True)
-    active_recordings.append(stream_url)
-    proc_video[stream] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + save_video_dir + '/' + filename + '.mp4'], stdin=PIPE, shell=True)
+    proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + save_video_dir + '/' + filename + '.mp4'], stdin=PIPE, shell=True)

@@ -233,15 +233,23 @@ def capture_image():
 
 @app.route("/initiate_feed_recording/<stream_url>", methods=["POST", "GET"])
 def initiate_feed_recording(stream_url):
-    return start_recording_feed(stream_url)
+    if is_recording_stream(stream_url):
+        return jsonify(success=False, msg="Stream is already recording")
+    else:
+        success, message = start_recording_feed(stream_url);
+        return jsonify(success=success, msg=message)
 
 @app.route("/stop_feed_recording/<stream_url>", methods=["POST", "GET"])
 def stop_feed_recording(stream_url):
-    return stop_recording_feed(stream_url)
+    if is_recording_stream(stream_url):
+        success, message = stop_recording_feed(stream_url)
+        return jsonify(success=success, msg=message)
+    else:
+        return jsonify(success=False, msg="Stream was not recording")
 
 @app.route("/is_recording/<stream_url>", methods=["POST", "GET"])
 def is_recording(stream_url):
-    return is_stream_recording(stream_url)
+    return jsonify(is_recording=is_recording_stream(stream_url))
 
 if __name__ == "__main__":
 
@@ -249,12 +257,6 @@ if __name__ == "__main__":
     # the following two are used for UDP based communication with the Connection class
     global local
     local = False
-    # print("fetch_ros_master_ip:", fetch_ros_master_ip())
-    #
-    # # either local or competition
-    # ros_master_ip = fetch_ros_master_ip()
-    # if ros_master_ip in ["127.0.0.1", "localhost"]
-    #     local = True
 
     app.run(debug=True, host='0.0.0.0')
     # add param `host= '0.0.0.0'` if you want to run on your machine's IP address
