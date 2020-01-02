@@ -239,6 +239,10 @@ def initiate_feed_recording(stream_url):
 def stop_feed_recording(stream_url):
     return stop_recording_feed(stream_url)
 
+@app.route("/is_recording/<stream_url>", methods=["POST", "GET"])
+def is_recording(stream_url):
+    return is_stream_recording(stream_url)
+
 if __name__ == "__main__":
 
     # feature toggles

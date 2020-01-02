@@ -60,11 +60,16 @@ $(document).ready(() => {
   }
 
   function getCameraFilename(cameraPanel) {
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = cameraNameElement.attr("stream");
+    let cameraName = getCameraName(cameraPanel);
     let cameraNameSplit = cameraName.split('/');
     let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
     return cameraFilename;
+  }
+
+  function getCameraName(cameraPanel){
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = cameraNameElement.attr("stream");
+    return cameraName;
   }
 
   function showStreamOn(cameraPanel) {
@@ -91,17 +96,20 @@ $(document).ready(() => {
 
   $('.camera-screenshot').click(e => {
     let cameraPanel = $(e.target).parents('.camera-panel');
-    console.log(cameraPanel);
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = cameraNameElement.attr("stream");
     let cameraStreamName = getCameraFilename(cameraPanel) + 'Cam'
+    let cameraPower = cameraPanel.find('.camera-power');
+
+    if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
+      appendToConsole("Please turn on a stream");
+      return;
+    }
+
     $.ajax('/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
       success: function (data) {
         appendToConsole(data.msg)
-        if (!data.msg.includes('success')) {
-          appendToConsole('Something went wrong, got', data.msg)
-        } else {
-          appendToConsole("Successfully saved screenshot")
-        }
-      },
+        },
       error: function () {
         appendToConsole('An error occured while taking a screenshot')
       }
@@ -187,8 +195,7 @@ $(document).ready(() => {
   $('.camera-power').click((e) => {
     let cameraPower = $(e.target);
     let cameraPanel = cameraPower.parents(".camera-panel");
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = cameraNameElement.attr("stream");
+    let cameraName = getCameraName(cameraPanel);
 
     if (cameraName == ""){
       appendToConsole("Please select a stream");
@@ -204,5 +211,5 @@ $(document).ready(() => {
       startCameraStream(cameraName, () => {
         showStreamOn(cameraPanel);
       });
-  }); 
+  });
 })
