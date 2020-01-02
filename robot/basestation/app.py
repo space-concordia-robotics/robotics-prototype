@@ -204,26 +204,32 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
-# capture image
-@app.route("/capture_image/<stream_url>", methods=["POST", "GET"])
-def capture_image(stream_url):
-    print("Taking screenshot of " + stream_url);
-    output, error = run_shell('ls')
-    output = output.decode()
-    i = 0
+@app.route("/capture_image/", methods=["POST", "GET"])
+def capture_image():
+    """ Given a stream, captures an image.
 
-    if 'img' in output:
-        i = output.rfind('img')
-        i = int(output[i + 3]) + 1 # shift by 'img'
-        print('i', i)
+        stream_url : The URL of the stream to capture the image.
+    """
+    stream_url = request.args['stream_url']
+    image_directory = "stream_images"
 
-    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 img" + str(i) + ".jpg")
-    msg = "success"
+    print("Capturing image of " + stream_url);
+    
+    if not os.path.exists(image_directory):
+      os.makedirs(image_directory)
+
+    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S");
+    filename = "img_" + formatted_date
+
+    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + image_directory + "/"  + filename + ".jpg")
+
+    message = "Successfully captured image " + image_directory + "/" + filename + ".jpg"
 
     if error:
-        print("Failed to capture a screenshot of " + stream_url);
+        message = "Failed to capture image of " + stream_url
+    print(message);
 
-    return jsonify(msg=msg)
+    return jsonify(success=(not error), msg=message)
 
 @app.route("/initiate_feed_recording/<stream_url>", methods=["POST", "GET"])
 def initiate_feed_recording(stream_url):

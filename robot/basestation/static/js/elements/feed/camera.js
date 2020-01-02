@@ -93,7 +93,7 @@ $(document).ready(() => {
     let cameraPanel = $(e.target).parents('.camera-panel');
     console.log(cameraPanel);
     let cameraStreamName = getCameraFilename(cameraPanel) + 'Cam'
-    $.ajax('/capture_image/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
+    $.ajax('/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
       success: function (data) {
         appendToConsole(data.msg)
         if (!data.msg.includes('success')) {

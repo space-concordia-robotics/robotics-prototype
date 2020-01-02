@@ -17,7 +17,7 @@ def start_recording_feed(stream):
     Setup variables and start connection check
     """
     recording_log_msg = 'recording feed of ' + stream
-    formatted_date = datetime.datetime.now().strftime("%I:%M:%S_%B_%d_%Y")
+    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
     return feed_connection_check(stream, formatted_date, recording_log_msg)
 
 def stop_recording_feed(stream):
