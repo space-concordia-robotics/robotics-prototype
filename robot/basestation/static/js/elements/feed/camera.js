@@ -22,7 +22,7 @@ $(document).ready(() => {
   const CAMERA_STOP_SUCCESS_RESPONSE = 'Stopped camera stream'
 
   // path to stream offline image
-  const STREAM_OFF = '../../static/img/camera/stream-offline.jpg'
+  const STREAM_OFF = '../../static/img/camera/stream-offline.png'
   const POWER_ON = '../../static/img/camera/power_on.png';
   const POWER_OFF = '../../static/img/camera/power_off.png';
 
@@ -55,12 +55,45 @@ $(document).ready(() => {
     })
   }
 
-  function getStreamURL (topicName) {
+  function getStreamURL(topicName) {
     return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
   }
 
-  $('.camera-screenshot').on('click', function (event) {
-    $.ajax('/capture_image', {
+  function getCameraFilename(cameraPanel) {
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = cameraNameElement.attr("stream");
+    let cameraNameSplit = cameraName.split('/');
+    let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
+    return cameraFilename;
+  }
+
+  function showStreamOn(cameraPanel) {
+    let cameraFeed = cameraPanel.find(".camera-feed");
+    let cameraPower = cameraPanel.find('.camera-power');
+
+    cameraFeed.attr("src", getStreamURL(getCameraFilename(cameraPanel) + 'Cam'));
+    cameraFeed.css("padding", "0px");
+
+    cameraPower.attr("power-on", "true");
+    cameraPower.attr("src", POWER_ON);
+  }
+
+  function showStreamOff(cameraPanel) {
+    let cameraFeed = cameraPanel.find('.camera-feed');
+    let cameraPower = cameraPanel.find('.camera-power');
+
+    cameraFeed.attr("src", STREAM_OFF);
+    cameraFeed.css("padding", "10px");
+  
+    cameraPower.attr("power-on", "false");
+    cameraPower.attr("src", POWER_OFF);
+  }
+
+  $('.camera-screenshot').click(e => {
+    let cameraPanel = $(e.target).parents('.camera-panel');
+    console.log(cameraPanel);
+    let cameraStreamName = getCameraFilename(cameraPanel) + 'Cam'
+    $.ajax('/capture_image/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
       success: function (data) {
         appendToConsole(data.msg)
         if (!data.msg.includes('success')) {
@@ -70,7 +103,7 @@ $(document).ready(() => {
         }
       },
       error: function () {
-        console.log('An error occured while taking a screenshot')
+        appendToConsole('An error occured while taking a screenshot')
       }
     })
   })
@@ -105,6 +138,17 @@ $(document).ready(() => {
     cameraNameElement.attr("stream", cameraName);
     let cameraNameSplit = cameraName.split("/");
     cameraNameElement[0].innerHTML = cameraNameSplit[cameraNameSplit.length - 1];
+
+    requestTask(CAMERA_STREAM, STATUS_CHECK, msgs => {
+      if(msgs[0])
+      {
+        let activePorts = msgs[1].replace(/(\r\n|\n|\r)/gm, "").split(',');
+        if (activePorts.includes(cameraName))
+        {
+          showStreamOn(cameraPanel);
+        }
+      }
+    });
   })
 
   $(".camera-stream").hover(inEvent => {
@@ -119,8 +163,8 @@ $(document).ready(() => {
   });
 
   $('.camera-feed').on("error", (e) => {
-    let cameraFeed = $(e.target);
-    cameraFeed.attr("src", STREAM_OFF);
+    let cameraPanel = $(e.target).parents('.camera-panel');
+    showStreamOff(cameraPanel);
   });
 
   $(".camera-select").click((e) => {
@@ -154,17 +198,11 @@ $(document).ready(() => {
     let isPoweredOn = cameraPower.attr("power-on") == "true";
     if(isPoweredOn)
       stopCameraStream(cameraName, () => {
-        cameraPower.attr("power-on", "false");
-        cameraPower.attr("src", POWER_OFF);
+        showStreamOff(cameraPanel);
       });
     else
       startCameraStream(cameraName, () => {
-        cameraPower.attr("power-on", "true");
-        cameraPower.attr("src", POWER_ON);
-        let cameraFeed = cameraPanel.find(".camera-feed");
-        let cameraNameSplit = cameraName.split('/');
-        let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
-        cameraFeed.attr("src", getStreamURL(cameraFilename + 'Cam'));
+        showStreamOn(cameraPanel);
       });
   }); 
 })

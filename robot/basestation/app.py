@@ -207,14 +207,9 @@ def rover_drive():
 # capture image
 @app.route("/capture_image/<stream_url>", methods=["POST", "GET"])
 def capture_image(stream_url):
-    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
-    #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
-    # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
-    # p2 = subprocess.Popen(split("wc -l"), stdin=p1.stdout)
-    # output, error = p2.communicate()
+    print("Taking screenshot of " + stream_url);
     output, error = run_shell('ls')
     output = output.decode()
-    print('output:', output)
     i = 0
 
     if 'img' in output:
@@ -226,9 +221,7 @@ def capture_image(stream_url):
     msg = "success"
 
     if error:
-        msg = "F"
-
-    print('msg', msg)
+        print("Failed to capture a screenshot of " + stream_url);
 
     return jsonify(msg=msg)
 
