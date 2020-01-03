@@ -55,65 +55,6 @@ function printCommandsList () {
 }
 
 $(document).ready(function () {
-  // camera servos
-
-  // init camera servos
-  /*
-  // servo name: "Front camera positional tilt base"
-  $('#camera-front-lpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand(
-        // TODO: add more validation for input box
-        '!' + $('#servo-val').val()
-      )
-    }
-  })
-
-  $('#camera-front-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('!' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Front camera Side continuous servo"
-  $('#camera-front-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-front-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Rear camera positional tilt base"
-  $('#camera-back-lpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-back-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Rear camera Side continuous servo"
-  $('#camera-back-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-back-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
-  */
 
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
