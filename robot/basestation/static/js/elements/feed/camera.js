@@ -50,7 +50,7 @@ $(document).ready(() => {
   }
 
   function startRecording(stream_url, callback = () => {}) {
-    const start_recording_url = '/initiate_feed_recording/' + stream_url
+    const start_recording_url = '/initiate_feed_recording?stream_url=' + stream_url
     $.ajax(start_recording_url, {
       success: data => {
         appendToConsole(data.msg);
@@ -63,7 +63,7 @@ $(document).ready(() => {
   }
 
   function stopRecording(stream_url, callback = () => {}) {
-    const stop_recording_url = '/stop_feed_recording/' + stream_url
+    const stop_recording_url = '/stop_feed_recording?stream_url=' + stream_url
     $.ajax(stop_recording_url, {
       success: data => {
         appendToConsole(data.msg);
@@ -246,33 +246,35 @@ $(document).ready(() => {
   $('.camera-recording').click((e) => {
     let recordingButton = $(e.target)
     let cameraPanel = recordingButton.parents('.camera-panel')
-
+    let cameraPower = cameraPanel.find('.camera-power')
     let cameraName = getCameraName(cameraPanel)
-    if (cameraName == ""){
-      appendToConsole("Please select a stream");
+
+    if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
+      appendToConsole("Please turn on a stream");
       return;
-    }   
+    }
+
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + 'Cam')
 
     let isRecording = recordingButton.attr("recording") == "true"
 
     if(isRecording)
     {
-      startRecording(streamURL, (response) => {
-        if(response.success)
-        {
-          recordingButton.attr("recording", "true")
-          recordingButton.attr("src", RECORDING_ON)
-        }
-      })
-    }
-    else
-    {
       stopRecording(streamURL, (response) => {
         if(response.success)
         {
           recordingButton.attr("recording", "false")
           recordingButton.attr("src", RECORDING_OFF)
+        }
+      })
+    }
+    else
+    {
+      startRecording(streamURL, (response) => {
+        if(response.success)
+        {
+          recordingButton.attr("recording", "true")
+          recordingButton.attr("src", RECORDING_ON)
         }
       })
     }

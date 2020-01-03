@@ -28,15 +28,23 @@ def start_recording_feed(stream_url):
 
     Returns True if the stream starts successfully, false otherwise
     """
+    save_video_dir = "rover_stream/" + get_stream_shortname(stream_url)
+    if not os.path.exists(save_video_dir):
+      os.makedirs(save_video_dir)
 
     stream_is_connected = is_stream_connected(stream_url)
 
+    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
+    filename = get_stream_shortname(stream_url) + '_' + formatted_date + ".mp4"
+    filename = save_video_dir + '/' + filename
+    stream_shortname = get_stream_shortname(stream_url)
+
     if stream_is_connected:
+        threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start() 
         active_recordings.append(stream_url)
-        threading.Thread(target = start_ffmpeg_record, args = stream_url).start()
-        return True, "Successfully started stream of " + get_stream_shortname(stream_url)
+        return True, "Successfully started " + stream_shortname + " stream"
     else:
-        return False, "Failed to connect to stream" + get_stream_shortname(stream_url)
+        return False, "Failed to connect to " + stream_shortname + " stream"
 
 def stop_recording_feed(stream_url):
     """
@@ -48,7 +56,8 @@ def stop_recording_feed(stream_url):
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
-    except (KeyError, ValueError):
+    except (KeyError, ValueError) as e:
+        print(e)
         success = False
         message = "Failed to stop recording of " + get_stream_shortname(stream_url)
 
@@ -66,13 +75,8 @@ def is_stream_connected(stream_url):
     connection_check = os.system('ffprobe -select_streams v -i ' + stream_url)
     return connection_check == 0
 
-def start_ffmpeg_record(stream_url):
+def start_ffmpeg_record(stream_url, filename):
     """
     Start ffmpeg to start recording stream
     """
-    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
-    filename = get_stream_filename(stream_url) + '_' + formatted_date
-    save_video_dir = 'rover_stream/' + stream
-    subprocess.Popen(['mkdir rover_stream'], shell=True)
-    subprocess.Popen(['mkdir ' + save_video_dir], shell=True)
-    proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + save_video_dir + '/' + filename + '.mp4'], stdin=PIPE, shell=True)
+    proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)

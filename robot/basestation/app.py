@@ -16,7 +16,7 @@ import datetime
 from shlex import split
 
 import robot.basestation.stream_capture as stream_capture
-from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, is_recording_stream
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 
@@ -231,21 +231,23 @@ def capture_image():
 
     return jsonify(success=(not error), msg=message)
 
-@app.route("/initiate_feed_recording/<stream_url>", methods=["POST", "GET"])
-def initiate_feed_recording(stream_url):
+@app.route("/initiate_feed_recording/", methods=["POST", "GET"])
+def initiate_feed_recording():
+    stream_url = request.args['stream_url']
     if is_recording_stream(stream_url):
         return jsonify(success=False, msg="Stream is already recording")
     else:
         success, message = start_recording_feed(stream_url);
         return jsonify(success=success, msg=message)
 
-@app.route("/stop_feed_recording/<stream_url>", methods=["POST", "GET"])
-def stop_feed_recording(stream_url):
+@app.route("/stop_feed_recording/", methods=["POST", "GET"])
+def stop_feed_recording():
+    stream_url = request.args['stream_url']
     if is_recording_stream(stream_url):
         success, message = stop_recording_feed(stream_url)
         return jsonify(success=success, msg=message)
     else:
-        return jsonify(success=False, msg="Stream was not recording")
+        return jsonify(success=False, msg="Attempted to stop stream that was not recording")
 
 @app.route("/is_recording/<stream_url>", methods=["POST", "GET"])
 def is_recording(stream_url):
