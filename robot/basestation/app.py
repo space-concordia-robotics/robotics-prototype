@@ -249,8 +249,9 @@ def stop_feed_recording():
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")
 
-@app.route("/is_recording/<stream_url>", methods=["POST", "GET"])
-def is_recording(stream_url):
+@app.route("/is_recording/", methods=["POST", "GET"])
+def is_recording():
+    stream_url = request.args['stream_url']
     return jsonify(is_recording=is_recording_stream(stream_url))
 
 if __name__ == "__main__":

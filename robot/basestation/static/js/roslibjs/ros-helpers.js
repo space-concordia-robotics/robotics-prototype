@@ -9,9 +9,6 @@ function initRosWeb () {
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
-    if (window.location.pathname == '/rover') {
-      initNavigationPanel()
-    }
   })
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)

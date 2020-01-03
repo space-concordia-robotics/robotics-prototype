@@ -29,6 +29,23 @@ $(document).ready(() => {
   const RECORDING_ON = "../../../static/img/camera/record_on.png";
   const RECORDING_OFF = "../../../static/img/camera/record_off.png";
 
+  function getStreamURL(topicName) {
+    return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  }
+
+  function getCameraFilename(cameraPanel) {
+    let cameraName = getCameraName(cameraPanel);
+    let cameraNameSplit = cameraName.split('/');
+    let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
+    return cameraFilename;
+  }
+
+  function getCameraName(cameraPanel){
+    let cameraNameElement = cameraPanel.find(".camera-name");
+    let cameraName = cameraNameElement.attr("stream");
+    return cameraName;
+  }
+
   function startCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_STREAM, STATUS_START, msgs => {
         if(msgs[0])
@@ -75,6 +92,17 @@ $(document).ready(() => {
     });
   }
 
+  function isRecording(stream_url, callback = () => {}) {
+    const is_recording_url = 'is_recording?stream_url=' + stream_url
+    $.ajax(is_recording_url, {
+      success: data => {
+        callback(data.is_recording)
+      }, 
+      error: (jqXHR, exception)  => {
+        flaskError(jqXHR, exception, is_recording_url)
+      }
+    })
+  }
 
   function setStreamSelection (availableStreams) {
     $('.camera-selections').children().empty();
@@ -85,28 +113,11 @@ $(document).ready(() => {
     })
   }
 
-  function getStreamURL(topicName) {
-    return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
-  }
-
-  function getCameraFilename(cameraPanel) {
-    let cameraName = getCameraName(cameraPanel);
-    let cameraNameSplit = cameraName.split('/');
-    let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
-    return cameraFilename;
-  }
-
-  function getCameraName(cameraPanel){
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = cameraNameElement.attr("stream");
-    return cameraName;
-  }
-
   function showStreamOn(cameraPanel) {
     let cameraFeed = cameraPanel.find(".camera-feed");
     let cameraPower = cameraPanel.find('.camera-power');
 
-    cameraFeed.attr("src", getStreamURL(getCameraFilename(cameraPanel) + 'Cam'));
+    cameraFeed.attr("src", getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX));
     cameraFeed.css("padding", "0px");
 
     cameraPower.attr("power-on", "true");
@@ -128,7 +139,7 @@ $(document).ready(() => {
     let cameraPanel = $(e.target).parents('.camera-panel');
     let cameraNameElement = cameraPanel.find(".camera-name");
     let cameraName = cameraNameElement.attr("stream");
-    let cameraStreamName = getCameraFilename(cameraPanel) + 'Cam'
+    let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let cameraPower = cameraPanel.find('.camera-power');
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
@@ -177,6 +188,12 @@ $(document).ready(() => {
     let cameraNameSplit = cameraName.split("/");
     cameraNameElement[0].innerHTML = cameraNameSplit[cameraNameSplit.length - 1];
 
+    let cameraPower = cameraPanel.find('.camera-power')
+    cameraPower.attr("power-on", "false");
+    cameraPower.attr("src", POWER_OFF);
+
+    updateRecordingButton(cameraPanel, false)
+
     requestTask(CAMERA_STREAM, STATUS_CHECK, msgs => {
       if(msgs[0])
       {
@@ -184,10 +201,21 @@ $(document).ready(() => {
         if (activePorts.includes(cameraName))
         {
           showStreamOn(cameraPanel);
+          let streamURL = getStreamURL(getCameraName(cameraPanel) + TOPIC_SUFFIX)
+          isRecording(streamURL, is_recording => {
+            updateRecordingButton(cameraPanel, isRecording)
+          })
         }
       }
     });
   })
+
+  function updateRecordingButton(cameraPanel, isRecording)
+  {
+    let cameraRecording = cameraPanel.find('.camera-recording')
+    cameraRecording.attr("recording", isRecording ? "true" : "false")
+    cameraRecording.attr("src", isRecording ? RECORDING_ON : RECORDING_OFF)
+  }
 
   $(".camera-stream").hover(inEvent => {
     let cameraStream = $(inEvent.currentTarget);
@@ -232,11 +260,29 @@ $(document).ready(() => {
       return;
     }   
 
+    let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
     let isPoweredOn = cameraPower.attr("power-on") == "true";
     if(isPoweredOn)
-      stopCameraStream(cameraName, () => {
-        showStreamOff(cameraPanel);
-      });
+      isRecording(streamURL, is_recording => {
+        if(is_recording)
+        {
+          stopRecording(streamURL, (response) => {
+            if(response.success)
+            {
+              updateRecordingButton(cameraPanel, false)
+              stopCameraStream(cameraName, () => {
+                showStreamOff(cameraPanel);
+              });
+            }
+          })
+        }
+        else
+        {
+          stopCameraStream(cameraName, () => {
+            showStreamOff(cameraPanel);
+          });
+        }
+      })
     else
       startCameraStream(cameraName, () => {
         showStreamOn(cameraPanel);
@@ -244,8 +290,8 @@ $(document).ready(() => {
   });
 
   $('.camera-recording').click((e) => {
-    let recordingButton = $(e.target)
-    let cameraPanel = recordingButton.parents('.camera-panel')
+    let cameraRecording = $(e.target)
+    let cameraPanel = cameraRecording.parents('.camera-panel')
     let cameraPower = cameraPanel.find('.camera-power')
     let cameraName = getCameraName(cameraPanel)
 
@@ -254,28 +300,22 @@ $(document).ready(() => {
       return;
     }
 
-    let streamURL = getStreamURL(getCameraFilename(cameraPanel) + 'Cam')
+    let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
 
-    let isRecording = recordingButton.attr("recording") == "true"
+    let isRecording = cameraRecording.attr("recording") == "true"
 
     if(isRecording)
     {
       stopRecording(streamURL, (response) => {
         if(response.success)
-        {
-          recordingButton.attr("recording", "false")
-          recordingButton.attr("src", RECORDING_OFF)
-        }
+          updateRecordingButton(cameraPanel, false)
       })
     }
     else
     {
       startRecording(streamURL, (response) => {
         if(response.success)
-        {
-          recordingButton.attr("recording", "true")
-          recordingButton.attr("src", RECORDING_ON)
-        }
+          updateRecordingButton(cameraPanel, true)
       })
     }
   })
