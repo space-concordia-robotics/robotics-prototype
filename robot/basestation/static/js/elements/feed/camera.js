@@ -26,6 +26,9 @@ $(document).ready(() => {
   const POWER_ON = '../../static/img/camera/power_on.png';
   const POWER_OFF = '../../static/img/camera/power_off.png';
 
+  const RECORDING_ON = "../../../static/img/camera/record_on.png";
+  const RECORDING_OFF = "../../../static/img/camera/record_off.png";
+
   function startCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_STREAM, STATUS_START, msgs => {
         if(msgs[0])
@@ -45,6 +48,33 @@ $(document).ready(() => {
     
     }, cameraStream);
   }
+
+  function startRecording(stream_url, callback = () => {}) {
+    const start_recording_url = '/initiate_feed_recording/' + stream_url
+    $.ajax(start_recording_url, {
+      success: data => {
+        appendToConsole(data.msg);
+        callback(data);
+      }, 
+      error: (jqXHR, exception) => {
+        flaskError(jqXHR, exception, start_recording_url);
+      }
+    });
+  }
+
+  function stopRecording(stream_url, callback = () => {}) {
+    const stop_recording_url = '/stop_feed_recording/' + stream_url
+    $.ajax(stop_recording_url, {
+      success: data => {
+        appendToConsole(data.msg);
+        callback(data);
+      }, 
+      error: (jqXHR, exception) => {
+        flaskError(jqXHR, exception, stop_recording_url);
+      }
+    });
+  }
+
 
   function setStreamSelection (availableStreams) {
     $('.camera-selections').children().empty();
@@ -181,14 +211,14 @@ $(document).ready(() => {
 
     if(menuOpened)
     {
-        requestTask(CAMERA_PORTS, STATUS_CHECK, msgs => {
-          printErrToConsole(msgs);
+      requestTask(CAMERA_PORTS, STATUS_CHECK, msgs => {
+        printErrToConsole(msgs);
 
-          if(msgs[0])
-            setStreamSelection(msgs[1].split(','));
-          else
-            setStreamSelection([]); 
-        });
+        if(msgs[0])
+          setStreamSelection(msgs[1].split(','));
+        else
+          setStreamSelection([]); 
+      });
     }
   });
 
@@ -212,4 +242,39 @@ $(document).ready(() => {
         showStreamOn(cameraPanel);
       });
   });
+
+  $('.camera-recording').click((e) => {
+    let recordingButton = $(e.target)
+    let cameraPanel = recordingButton.parents('.camera-panel')
+
+    let cameraName = getCameraName(cameraPanel)
+    if (cameraName == ""){
+      appendToConsole("Please select a stream");
+      return;
+    }   
+    let streamURL = getStreamURL(getCameraFilename(cameraPanel) + 'Cam')
+
+    let isRecording = recordingButton.attr("recording") == "true"
+
+    if(isRecording)
+    {
+      startRecording(streamURL, (response) => {
+        if(response.success)
+        {
+          recordingButton.attr("recording", "true")
+          recordingButton.attr("src", RECORDING_ON)
+        }
+      })
+    }
+    else
+    {
+      stopRecording(streamURL, (response) => {
+        if(response.success)
+        {
+          recordingButton.attr("recording", "false")
+          recordingButton.attr("src", RECORDING_OFF)
+        }
+      })
+    }
+  })
 })
