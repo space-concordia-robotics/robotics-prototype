@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .DS_Store
 .idea
 *pycache*
@@ -28,3 +29,4 @@ voltage_final.csv
 rover_stream
 stream_images
 *.swp
+emails.txt
