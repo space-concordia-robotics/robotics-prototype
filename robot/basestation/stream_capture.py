@@ -12,6 +12,8 @@ from robot.basestation.ros_utils import fetch_ros_master_ip
 global proc_video
 proc_video = {}
 active_recordings = []
+ROVER_STREAM_FOLDER = "rover_stream"
+IMAGES_FOLDER = "stream_images"
 
 def get_stream_shortname(stream_url):
     """ 
@@ -32,7 +34,7 @@ def start_recording_feed(stream_url):
     global active_recordings
     stream_shortname = get_stream_shortname(stream_url)
 
-    save_video_dir = "rover_stream/" + get_stream_shortname(stream_url)
+    save_video_dir = ROVER_STREAM_FOLDER + "/" + get_stream_shortname(stream_url)
     if not os.path.exists(save_video_dir):
       os.makedirs(save_video_dir)
 
@@ -46,7 +48,7 @@ def start_recording_feed(stream_url):
         print("Started recording " + stream_shortname)
         active_recordings.append(stream_shortname)
         threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start() 
-        return True, "Successfully started " + stream_shortname + " stream"
+        return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(filename)
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
 
@@ -94,7 +96,7 @@ def stream_capture(stream_url):
 
         stream_url : The URL of the stream to capture the image.
     """
-    image_directory = "stream_images/" + get_stream_shortname(stream_url) + "/"
+    image_directory = IMAGES_FOLDER + "/" + get_stream_shortname(stream_url) + "/"
 
     print("Capturing image of " + stream_url);
     
@@ -107,7 +109,7 @@ def stream_capture(stream_url):
 
     error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + filename)
 
-    message = "Successfully captured image " + filename
+    message = "Successfully captured image " + os.path.abspath(filename)
 
     if error:
         message = "Failed to capture image of " + stream_url
