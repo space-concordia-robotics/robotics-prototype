@@ -28,6 +28,10 @@ def start_recording_feed(stream_url):
 
     Returns True if the stream starts successfully, false otherwise
     """
+
+    global active_recordings
+    stream_shortname = get_stream_shortname(stream_url)
+
     save_video_dir = "rover_stream/" + get_stream_shortname(stream_url)
     if not os.path.exists(save_video_dir):
       os.makedirs(save_video_dir)
@@ -37,11 +41,11 @@ def start_recording_feed(stream_url):
     formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
     filename = get_stream_shortname(stream_url) + '_' + formatted_date + ".mp4"
     filename = save_video_dir + '/' + filename
-    stream_shortname = get_stream_shortname(stream_url)
 
     if stream_is_connected:
+        print("Started recording " + stream_shortname)
+        active_recordings.append(stream_shortname)
         threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start() 
-        active_recordings.append(stream_url)
         return True, "Successfully started " + stream_shortname + " stream"
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
@@ -51,20 +55,24 @@ def stop_recording_feed(stream_url):
     Stop recording feed and handle potential errors
     """
 
-    active_recordings.remove(stream_url)
-    message = "Successfully stopped recording of " + get_stream_shortname(stream_url)
+    global active_recordings
+    stream_shortname = get_stream_shortname(stream_url)
+    active_recordings.remove(stream_shortname)
+    message = "Successfully stopped recording of " + stream_shortname
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
     except (KeyError, ValueError) as e:
         print(e)
         success = False
-        message = "Failed to stop recording of " + get_stream_shortname(stream_url)
+        message = "Failed to stop recording of " + stream_shortname
 
+    print(message)
     return success, message
 
 def is_recording_stream(stream_url):
-    return stream_url in active_recordings
+    global active_recordings
+    return get_stream_shortname(stream_url) in active_recordings
 
 def is_stream_connected(stream_url):
     """
