@@ -13,7 +13,8 @@ from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
 import datetime
-import utils
+import robot.util.utils as utils
+from robot.util.utils import run_shell
 from shlex import split
 
 import robot.basestation.stream_capture as stream_capture
