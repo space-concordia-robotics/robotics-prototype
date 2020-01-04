@@ -86,9 +86,8 @@ html, body {
 
 /* Bootstrap forms */
 .form-control:focus {
-  color: white;
+  color: black;
   background-color: white;
-  border-color: white;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }

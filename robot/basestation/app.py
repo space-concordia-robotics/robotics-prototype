@@ -102,10 +102,49 @@ def stream():
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
+@app.route('/navigation/inputTemplates/goal-buttons/<count>', methods= ["GET"])
+def goal_Buttons(count):
+   return flask.render_template("elements/navigation/dialogs/goal/goal-buttons.html", count =  count)
 
-@app.route('/navigation/addButtons/<goalId>', methods=["POST", "GET"])
-def addButtons(goalId):
-   return flask.render_template("elements/navigation/dialogs/new-goal-btn.html", goalId = goalId)
+
+
+@app.route('/navigation/inputTemplates/new-goal-coordinates-btn/<goalId>', methods=["GET"])
+def new_Goal_Button(goalId):
+   return flask.render_template("elements/navigation/dialogs/goal/new-goal-coordinates-btn.html", goalId = goalId)
+
+
+
+
+
+@app.route('/navigation/inputTemplates/antenna-stats', methods= ["GET"])
+def antenna_stats():
+   return flask.render_template("elements/navigation/dialogs/antenna/antenna-stats.html")
+
+
+@app.route('/navigation/inputTemplates/antenna-DD/<target>' , methods = ["GET"])
+def antenna_DD(target):
+   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DD-input-template.html", target = target)
+         
+@app.route('/navigation/inputTemplates/antenna-DDM/<target>' , methods = ["GET"])
+def antenna_DDM(target):
+   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DDM-input-template.html", target = target)
+
+@app.route('/navigation/inputTemplates/antenna-DMS/<target>' , methods = ["GET"])
+def antenna_DMS(target):
+   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DMS-input-template.html", target = target)
+
+@app.route('/navigation/inputTemplates/goal-DD/<target>/<count>' , methods = ["GET"])
+def goal_DD(target,count):
+   return flask.render_template("elements/navigation/dialogs/goal/goal-DD-input-template.html", target = target, count = count)
+
+
+@app.route('/navigation/inputTemplates/goal-DDM/<target>/<count>' , methods = ["GET"])
+def goal_DDM(target,count):
+   return flask.render_template("elements/navigation/dialogs/goal/goal-DDM-input-template.html", target = target, count = count)
+
+@app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>' , methods = ["GET"])
+def goal_DMS(target,count):
+   return flask.render_template("elements/navigation/dialogs/goal/goal-DMS-input-template.html", target = target,  count = count)
 
 @app.route("/ping_rover")
 def ping_rover():

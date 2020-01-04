@@ -17,12 +17,12 @@
      <h4 align = "center"> Rover stats </h4>
      <ul class = "list-group" id = "rover-stats-list">
         <div class = "row px-3  ">
-        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">Right</span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">Right </span ></li>
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">----</span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">----</span ></li>
         </div>
-        <li class = "list-group-item "> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">Right </span >  </li>
-        <li class = "list-group-item ">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">Right  </span ></li>
-        <li class = "list-group-item ">  <label for = "" > Angular Velocity</label>  <span id = "rover-speed" class="float-right">Right  </span ></li>
+        <li class = "list-group-item "> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">----</span >  </li>
+        <li class = "list-group-item ">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">----</span ></li>
+        <li class = "list-group-item ">  <label for = "" > Angular Velocity</label>  <span id = "rover-speed" class="float-right">----</span ></li>
                 
       </ul>
     </div>   
@@ -85,18 +85,21 @@
   <br>
   <br>
 
+
   <div id = "goal-stats">
+    <h5 align = "center"> Goal data </h4>
+  
     <ul class = "list-group" id = "goal-stats-list"> 
       <div class = "row px-3">
-        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-lat" class="float-right">Right  </span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-long" class="float-right">Right  </span ></li>
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "goal-display-lat" class="float-right">-----</span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "goal-display-long" class="float-right">-----</span ></li>
         </div>
-        <li class = "list-group-item "> <label for = "" > Distance to goal</label>  <span id = "antenna-heading" class="float-right">Right  </span >  </li>
-        <li class = "list-group-item "> <label for = "" > Recommended Rover Heading</label>  <span id = "antenna-heading" class="float-right">Right  </span >  </li>
+        <li class = "list-group-item "> <label for = "" > Distance to goal</label>  <span id = "goal-display-distance" class="float-right">-----</span >  </li>
+        <li class = "list-group-item "> <label for = "" > Recommended Rover Heading</label>  <span id = "goal-display-rover-heading" class="float-right">-----</span >  </li>
                 
       </ul>
   </div>
-                  
+               
   <button type = "button" class = "btn btn-primary" data-toggle = "modal" data-target = "#goal-modal"> Goal Data </button>
     
     <div class = "modal fade" id = "goal-modal"> 

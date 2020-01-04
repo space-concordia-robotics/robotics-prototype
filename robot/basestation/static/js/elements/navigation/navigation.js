@@ -19,6 +19,8 @@ $(document).ready(() => {
   antenna_goal_listener.subscribe(function (message) {
     //$('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
     //$('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
+    $('#antenna-display-rec-angle').text(parseFloat(message.x).toFixed(3))
+    $('#antenna-display-dist-to-rover').text(parseFloat(message.y).toFixed(2))
   })
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
@@ -43,6 +45,8 @@ $(document).ready(() => {
   rover_goal_listener.subscribe(function (message) {
     //$('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
     //$('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
+    $('#goal-display-rover-heading').text(parseFloat(message.x).toFixed(3))
+    $('#goal-display-distance').text(parseFloat(message.y).toFixed(2))
   })
   // setup gps parameters for rover goals
   let goal_latitude = new ROSLIB.Param({
@@ -56,6 +60,7 @@ $(document).ready(() => {
 
   function initNavigationPanel () {
     let hasAntennaParams = true
+    /*
     antenna_latitude.get(function (val) {
       if (val != null) {
         $('#antenna-latitude').text(val)
@@ -121,84 +126,25 @@ $(document).ready(() => {
         $('#goal-inputs').show()
         $('#goal-unchanging').hide()
       }
-    })
+    }) */
   }
   //theres probably a better place to put this, this is just a temporary fix
   initNavigationPanel();
   
-  /*$('#send-antenna-data-btn').on('click', function (event) {
-    event.preventDefault()
-    let goodInput = true
-    if (!$('#antenna-latitude-input').val()) {
-      appendToConsole('latitude field empty!')
-      goodInput = false
-    }
-    if (!$('#antenna-longitude-input').val()) {
-      appendToConsole('longitude field empty!')
-      goodInput = false
-    }
-    if (!$('#antenna-start-dir-input').val()) {
-      appendToConsole('bearing field empty!')
-      goodInput = false
-    }
-    if (goodInput) {
-      let initialLatitude = $('#antenna-latitude-input').val()
-      let initialLongitude = $('#antenna-longitude-input').val()
-      let initialBearing = $('#antenna-start-dir-input').val()
-      antenna_latitude.set(parseFloat(initialLatitude))
-      antenna_longitude.set(parseFloat(initialLongitude))
-      antenna_start_dir.set(parseFloat(initialBearing))
-      $('#antenna-latitude').text(initialLatitude)
-      $('#antenna-longitude').text(initialLongitude)
-      $('#antenna-start-dir').text(initialBearing)
-      $('#antenna-inputs').hide()
-      $('#antenna-unchanging').show()
-    }
-  })
-  $('#change-antenna-data-btn').on('click', function (event) {
-    event.preventDefault()
-    $('#antenna-inputs').show()
-    $('#antenna-unchanging').hide()
-  })
 
-  $('#send-goal-pos-btn').on('click', function (event) {
-    event.preventDefault()
-    let goodInput = true
-    if (!$('#goal-latitude-input').val()) {
-      appendToConsole('latitude field empty!')
-      goodInput = false
-    }
-    if (!$('#goal-longitude-input').val()) {
-      appendToConsole('longitude field empty!')
-      goodInput = false
-    }
-    if (goodInput) {
-      let desiredLatitude = $('#goal-latitude-input').val()
-      let desiredLongitude = $('#goal-longitude-input').val()
-      goal_latitude.set(parseFloat(desiredLatitude))
-      goal_longitude.set(parseFloat(desiredLongitude))
-      $('#goal-latitude').text(desiredLatitude)
-      $('#goal-longitude').text(desiredLongitude)
-      $('#goal-inputs').hide()
-      $('#goal-unchanging').show()
-    }
-  })
-
-  $('#change-goal-pos-btn').on('click', function (event) {
-    event.preventDefault()
-    $('#goal-inputs').show()
-    $('#goal-unchanging').hide()
-  }) 
-*/
 function NavigationQueue() {
   this.data = [];
+  let removed = 0;
   this.enqueue = function(item){
     this.data.push(item);
   }
   this.dequeue = function(){
     this.data.shift();
   }
-  
+  this.remove = function(index){
+    this.data.splice(index-removed,1);
+    removed++;
+  }
 }
 
 var navQueue = new NavigationQueue();
@@ -226,19 +172,7 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
          let lat = -1;
           let long = -1;
 
-    let src = `
-    <hr>
-      <ul class = "list-group" id = "antenna-stats-list"> 
-        <div class = "row px-3"> 
-        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-lat" class="float-right">Right  </span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-long" class="float-right">Right  </span ></li>
-        </div>
-        <li class = "list-group-item"> <label for = "" > Antenna Heading</label>  <span id = "antenna-heading" class="float-right">Right aligned </span >  </li>
-        <li class = "list-group-item"> <label for = "" > Distance to rover</label>  <span id = "antenna-dist-to-rover" class="float-right">Right aligned </span >  </li>
-        <li class = "list-group-item"> <label for = "" > Recmmeneded Antenna Angle</label>  <span id = "antenna-rec-angle" class="float-right">Right aligned </span >  </li>
-                
-      </ul>
-    `;
+    
       
       try{
         if($("#antenna-lat-decimal-degrees-btn").data('clicked') ) {
@@ -257,9 +191,9 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
         } 
         else if($("#antenna-lat-degrees-minutes-seconds-btn").data('clicked') ){
 
-            let dec = parseFloat($('#goal-lat-DMS-deg-input').val());
-            let mins = parseFloat($('#goal-lat-DMS-min-input').val());
-            let secs = parseFloat($('#goal-lat-DMS-sec-input').val());
+            let dec = parseFloat($('#antenna-lat-DMS-deg-input').val());
+            let mins = parseFloat($('#antenna-lat-DMS-min-input').val());
+            let secs = parseFloat($('#antenna-lat-DMS-sec-input').val());
             if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS";
 
             lat = dec + (mins/60 + secs/3600);
@@ -279,9 +213,9 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
             long = dec+ (min/60);
         } 
         else if($("#antenna-long-degrees-minutes-seconds-btn").data('clicked') ){
-              let dec = parseFloat($('#goal-long-DMS-deg-input').val());
-            let mins = parseFloat($('#goal-long-DMS-min-input').val());
-            let secs = parseFloat($('#goal-long-DMS-sec-input').val());
+              let dec = parseFloat($('#antenna-long-DMS-deg-input').val());
+            let mins = parseFloat($('#antenna-long-DMS-min-input').val());
+            let secs = parseFloat($('#antenna-long-DMS-sec-input').val());
             if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS";
 
             long = dec + (mins/60 + secs/3600);
@@ -293,10 +227,22 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
           antenna_latitude.set(lat);
           antenna_longitude.set(long);
 
-          $('#antenna-stats-list').append(src);
+
+          $.ajax('/navigation/inputTemplates/antenna-stats', {
+      success: function (result) {
+          
+          $('#antenna-stats-list').append(result);  
+       }})  
+
+  
          //disable text fields until the user wants to change them
           $('#antenna-fieldset').prop('disabled',true);
           $('#antenna-confirm-btn').prop('disabled', true);
+
+          //update antenna diplayed fields
+          $('#antenna-display-lat').text(lat);
+          $('#antenna-display-long').text(long);
+          $('#antenna-display-heading').text(bearing);
       }
         catch(e){
             appendToConsole(e);
@@ -316,131 +262,113 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
 
 function CreateAntennaLatitudeHandler(){
   $('#antenna-lat-decimal-degrees-btn').on('click', function (event) {
+      event.preventDefault();
+
     $(this).data('clicked', true);
+    
+    $("#antenna-select-lat-format-btn").dropdown('toggle');
+    $('#antenna-select-lat-format-btn').detach();
 
-    let src = `
-   
-          <span class="input-group-text font-weight-bold" >Latitude </span>
-          <input id = "antenna-lat-DD-dec-deg-input" type="text" class="form-control" placeholder="Decimal degrees">
-          
-         
-  <hr>
-  `
-  event.preventDefault();
-  $("#antenna-select-lat-format-btn").dropdown('toggle');
-  $('#antenna-select-lat-format-btn').detach();
 
-  $("#antenna-lat-input-group").append(src);
+    $.ajax('/navigation/inputTemplates/antenna-DD/'+'lat', {
+      success: function (result) {
+          $("#antenna-lat-input-group").append(result);
 
+       }})  
+
+
+  
 
   })
   
 $('#antenna-lat-degrees-decimal-minutes-btn').on('click', function (event) {
-    $(this).data('clicked', true);
-    let src = `
-   
-           <span class="input-group-text font-weight-bold">Latitude </span>
-           
-           <input id = "antenna-lat-DDM-deg-input" type="text" class="form-control" placeholder="Degrees">
-           <span class="input-group-text">°</span>
-          
-           <input id = "antenna-lat-DDM-dec-min-input" type="text" class="form-control" placeholder="Decimal Mins">
-           <span class="input-group-text">'</span>
-  
-  <hr>
-  `
-  event.preventDefault();
-  $("#antenna-select-lat-format-btn").dropdown('toggle');
-  $('#antenna-select-lat-format-btn').detach();
+    event.preventDefault();
 
-  $("#antenna-lat-input-group").append(src);
+    $(this).data('clicked', true);
+    
+    $("#antenna-select-lat-format-btn").dropdown('toggle');
+    $('#antenna-select-lat-format-btn').detach();
+
+
+    $.ajax('/navigation/inputTemplates/antenna-DDM/'+'lat', {
+      success: function (result) {
+          $("#antenna-lat-input-group").append(result);
+
+       }})  
+
+
 
 
   })
 $('#antenna-lat-degrees-minutes-seconds-btn').on('click', function (event) {
+     event.preventDefault();
+
     $(this).data('clicked', true);
-    let src = `
-   
-           <span class="input-group-text">Latitude </span>
+    
+    $("#antenna-select-lat-format-btn").dropdown('toggle');
+    $('#antenna-select-lat-format-btn').detach();
 
-           <input id = "antenna-lat-DMS-deg-input" type="text" class="form-control" placeholder="Degrees">
-           <span class="input-group-text">°</span>
 
-           <input id = "antenna-lat-DMS-min-input" type="text" class="form-control" placeholder="Mins">
-           <span class="input-group-text">'</span>
-           
-           <input id = "antenna-lat-DMS-sec-input" type="text" class="form-control" placeholder="Seconds">
-           <span class="input-group-text">"</span>
-          
-         
-  <hr>
-  `
-  event.preventDefault();
-  $("#antenna-select-lat-format-btn").dropdown('toggle');
-  $('#antenna-select-lat-format-btn').detach();
+    $.ajax('/navigation/inputTemplates/antenna-DMS/'+'lat', {
+      success: function (result) {
+          $("#antenna-lat-input-group").append(result);
 
-  $("#antenna-lat-input-group").append(src);
-
+       }})  
 
   })
 }
 
 function CreateAntennaLongtitudeHandler(){
-  $('#antenna-long-decimal-degrees-btn').on('click', function (event) {
-    $(this).data('clicked', true);
+     $('#antenna-long-decimal-degrees-btn').on('click', function (event) {
+          event.preventDefault();
+           $(this).data('clicked', true);
 
-    let src = `
-           <span class="input-group-text">Longtitude </span>
-           <input id = "antenna-long-DD-dec-deg-input" type="text" class="form-control" placeholder="Decimal Degrees">
-           
-  `
-  event.preventDefault();
-  $("#antenna-select-long-format-btn").dropdown('toggle');
-  $('#antenna-select-long-format-btn').detach();
-  $("#antenna-long-input-group").append(src);
+     $("#antenna-select-long-format-btn").dropdown('toggle');
+     $('#antenna-select-long-format-btn').detach();
+ 
+       $.ajax('/navigation/inputTemplates/antenna-DD/'+'long', {
+          success: function (result) {
+          $("#antenna-long-input-group").append(result);
+
+       }})  
 
 
   })
 
   $('#antenna-long-degrees-decimal-minutes-btn').on('click', function (event) {
 
+     event.preventDefault();
+
     $(this).data('clicked', true);
+    
+    $("#antenna-select-long-format-btn").dropdown('toggle');
+    $('#antenna-select-long-format-btn').detach();
 
-    let src = `
-          <span class="input-group-text">Longtitude </span>
-           <input id = "antenna-long-DDM-deg-input" type="text" class="form-control" placeholder="Degrees">
-        
-           <span class="input-group-text">°</span>
 
-           <input id = "antenna-long-DDM-dec-min-input" type="text" class="form-control" placeholder="Mins">
-           <span class="input-group-text">'</span>
-  `
-  event.preventDefault();
-  $("#antenna-select-long-format-btn").dropdown('toggle');
-  $('#antenna-select-long-format-btn').detach();
-  $("#antenna-long-input-group").append(src);
+    $.ajax('/navigation/inputTemplates/antenna-DDM/'+'long', {
+      success: function (result) {
+          $("#antenna-long-input-group").append(result);
+
+       }})  
+
 
 
   })
   $('#antenna-long-degrees-minutes-seconds-btn').on('click', function (event) {
+   
+    event.preventDefault();
+
     $(this).data('clicked', true);
+    
+    $("#antenna-select-long-format-btn").dropdown('toggle');
+    $('#antenna-select-long-format-btn').detach();
 
-    let src = `
-           <span class="input-group-text">Longtitude </span>
 
-           <input id = "antenna-long-DMS-deg-input" type="text" class="form-control" placeholder="Degrees">
-           <span class="input-group-text">°</span>
+    $.ajax('/navigation/inputTemplates/antenna-DMS/'+'long', {
+      success: function (result) {
+          $("#antenna-long-input-group").append(result);
 
-           <input id = "antenna-long-DMS-min-input" type="text" class="form-control" placeholder="Mins">
-           <span class="input-group-text">'</span>
-           
-           <input id = "antenna-long-DMS-sec-input" type="text" class="form-control" placeholder="Seconds">
-           <span class="input-group-text">"</span>
-  `
-  event.preventDefault();
-  $("#antenna-select-long-format-btn").dropdown('toggle');
-  $('#antenna-select-long-format-btn').detach();
-  $("#antenna-long-input-group").append(src);
+       }})  
 
 
   })
@@ -449,9 +377,10 @@ function CreateAntennaLongtitudeHandler(){
 
   $("#new-goal-coordinates-btn").on('click', function(event) {
   
-    $.ajax('/navigation/addButtons/5', {
+    $.ajax('/navigation/inputTemplates/new-goal-coordinates-btn/'+count, {
       success: function (result) {
         $("#goal-modal-body").append(result);
+
         CreateGoalLatitudeHandler(count);
         CreateGoalLongtitudeHandler(count);
         CreateGoalButtons(count);
@@ -464,15 +393,17 @@ function CreateAntennaLongtitudeHandler(){
     
     let lat = -1;
     let long = -1;
+    try{
     if(lat_format == 0){
       //decimal-degrees mode
       lat = parseFloat($('#goal-lat-DD-dec-deg-input-'+current).val());
-   
+      if(isNaN(lat)) throw "Bad input lat DD";
     }
     else if(lat_format == 1){
       //degrees-decimal-minutes mode
       let dec = parseFloat($('#goal-lat-DDM-deg-input-'+current).val());
       let min = parseFloat($('#goal-lat-DDM-dec-min-input-'+current).val());
+      if(isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
       lat = dec+ (min/60);
 
     }
@@ -481,18 +412,19 @@ function CreateAntennaLongtitudeHandler(){
       let dec = parseFloat($('#goal-lat-DMS-deg-input-'  + current).val());
       let mins = parseFloat($('#goal-lat-DMS-min-input-' + current).val());
       let secs = parseFloat($('#goal-lat-DMS-sec-input-' + current).val());
-
+       if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS";
       lat = dec + (mins/60 + secs/3600);
     }
     if(long_format == 0){
       //decimal-degrees mode
       long = parseFloat($('#goal-long-DD-dec-deg-input-'+current).val());
-   
+        if(isNaN(lat)) throw "Bad input lat DD";
     }
     else if(long_format == 1){
       //degrees-decimal-minutes mode
       let dec = parseFloat($('#goal-long-DDM-deg-input-'+current).val());
       let min = parseFloat($('#goal-long-DDM-dec-min-input-'+current).val());
+       if(isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
       long = dec+ (min/60);
 
     }
@@ -501,7 +433,7 @@ function CreateAntennaLongtitudeHandler(){
       let dec = parseFloat($('#goal-long-DMS-deg-input-'  + current).val());
       let mins = parseFloat($('#goal-long-DMS-min-input-' + current).val());
       let secs = parseFloat($('#goal-long-DMS-sec-input-' + current).val());
-
+       if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS";
       long = dec + (mins/60 + secs/3600);
     }
     
@@ -509,72 +441,66 @@ function CreateAntennaLongtitudeHandler(){
       latitude : lat,
       longitude : long
     }
+    $('#goal-display-lat').text(lat);
+    $('#goal-display-long').text(long);
+
     navQueue.enqueue(latlongpair);
+  }
+  catch(e){
+    appendToConsole(e);
+  }
     console.log(navQueue);
-  }   
-
-
+  }
+     
 
   function CreateGoalLatitudeHandler(current){
 
     $("#goal-lat-decimal-degrees-btn-" + current).on('click', function(event){
-      $(this).data('clicked', true);
-     let src = `
-           <span class="input-group-text">Latitude </span>
-           <input id = "goal-lat-DD-dec-deg-input-`+current+`" type="text" class="form-control" placeholder="Decimal Degrees">
-           
-           
-
-      `;
-      $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
       
-
+      event.preventDefault();
+      $(this).data('clicked', true);
+      $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
       $('#goal-lat-select-format-btn-' + current).detach();
-      $('#goal-lat-input-group-' + current).append(src);
+
+     
+      $.ajax('/navigation/inputTemplates/goal-DD/'+'lat/'+current, {
+          success: function (result) {
+          $('#goal-lat-input-group-' + current).append(result);
+  
+       }})  
+
+
 
       })
 
      $("#goal-lat-degrees-decimal-minutes-btn-" + current).on('click', function(event){
+
+      event.preventDefault();
       $(this).data('clicked', true);
-     let src = `
-           <span class="input-group-text">Latitude </span>
-           <input id = "goal-lat-DDM-deg-input-`+current+`" type="text" class="form-control" placeholder="Degrees">
-        
-           <span class="input-group-text">°</span>
-           
-
-           <input id = "goal-lat-DDM-dec-min-input-` + current + `" type="text" class="form-control" placeholder="Decimal-Mins">
-           <span class="input-group-text">'</span>
-           
-      `;
       $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
-      
-
       $('#goal-lat-select-format-btn-' + current).detach();
-      $('#goal-lat-input-group-' + current).append(src);
+
+     
+      $.ajax('/navigation/inputTemplates/goal-DDM/'+'lat/'+current, {
+          success: function (result) {
+          $('#goal-lat-input-group-' + current).append(result);
+  
+       }})  
 
 
     })
      $("#goal-lat-degrees-minutes-seconds-btn-" + current).on('click', function(event){
+      event.preventDefault();
       $(this).data('clicked', true);
-     let src = `
-           <span class="input-group-text">Latitude </span>
-
-            <input id = "goal-lat-DMS-deg-input-`+current+`" type="text" class="form-control" placeholder="Degrees">
-           <span class="input-group-text">°</span>
-
-           <input id = "goal-lat-DMS-min-input-` + current + `" type="text" class="form-control" placeholder="Mins">
-           <span class="input-group-text">'</span>
-           
-           <input id = "goal-lat-DMS-sec-input-` + current + `" type="text" class="form-control" placeholder="Seconds">
-           <span class="input-group-text">"</span>
-      `;
-
       $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
-      
-
       $('#goal-lat-select-format-btn-' + current).detach();
-      $('#goal-lat-input-group-' + current).append(src);
+
+     
+      $.ajax('/navigation/inputTemplates/goal-DMS/'+'lat/'+current, {
+          success: function (result) {
+          $('#goal-lat-input-group-' + current).append(result);
+  
+       }})  
      
     })
      
@@ -584,71 +510,67 @@ function CreateAntennaLongtitudeHandler(){
 
     function CreateGoalLongtitudeHandler(current){
     $("#goal-long-decimal-degrees-btn-" + current).on('click', function(event){
-      $(this).data('clicked', true);
       
-      let src = `
-           <span class="input-group-text">Longtitude' </span>
-           <input id = "goal-long-DD-dec-deg-input-`+current+`" type="text" class="form-control" placeholder="Decimal Degrees">
-           
-      `;
-         $('#goal-long-select-format-btn-' + current).dropdown('toggle');
+      event.preventDefault();
+      $(this).data('clicked', true);
+      $('#goal-long-select-format-btn-' + current).dropdown('toggle');
       $('#goal-long-select-format-btn-' + current).detach();
-      $('#goal-long-input-group-' + current).append(src);
 
-    })
+     
+      $.ajax('/navigation/inputTemplates/goal-DD/'+'long/'+current, {
+          success: function (result) {
+          $('#goal-long-input-group-' + current).append(result);
+  
+       }})  
+
+
+
+      })
 
     $("#goal-long-degrees-decimal-minutes-btn-" + current).on('click', function(event){
+     event.preventDefault();
       $(this).data('clicked', true);
-      
-      let src = `
-        <span class="input-group-text">Longtitude </span>
-        <input id = "goal-long-DDM-deg-input-`+current+`" type="text" class="form-control" placeholder="Degrees">
-        
-           <span class="input-group-text">°</span>
-
-           <input id = "goal-long-DDM-dec-min-input-` + current +`" type="text" class="form-control" placeholder="Decimal Mins">
-           <span class="input-group-text">'</span>
-      `;
-         $('#goal-long-select-format-btn-' + current).dropdown('toggle');
+      $('#goal-long-select-format-btn-' + current).dropdown('toggle');
       $('#goal-long-select-format-btn-' + current).detach();
-      $('#goal-long-input-group-' + current).append(src);
+
+     
+      $.ajax('/navigation/inputTemplates/goal-DDM/'+'long/'+current, {
+          success: function (result) {
+          $('#goal-long-input-group-' + current).append(result);
+  
+       }})  
+
  
     })
     $("#goal-long-degrees-minutes-seconds-btn-" + current).on('click', function(event){
-      $(this).data('clicked', true);
-      
-      let src = `
-        <span class="input-group-text">Longtitude </span>
-        <input id = "goal-long-DMS-deg-input-` + current+ `" type="text" class="form-control" placeholder="Degrees">
-        
-           <span class="input-group-text">°</span>
-           <input id = "goal-long-DMS-min-input-` + current+ `" type="text" class="form-control" placeholder="Mins">
-           <span class="input-group-text">'</span>
-           <input id = "goal-long-DMS-sec-input-` + current+ `"  type="text" class="form-control" placeholder="Seconds">
-           <span class="input-group-text">"</span>
-      `;
 
+       event.preventDefault();
+      $(this).data('clicked', true);
       $('#goal-long-select-format-btn-' + current).dropdown('toggle');
       $('#goal-long-select-format-btn-' + current).detach();
-      $('#goal-long-input-group-' + current).append(src);
+
+     
+      $.ajax('/navigation/inputTemplates/goal-DMS/'+'long/'+current, {
+          success: function (result) {
+          $('#goal-long-input-group-' + current).append(result);
+  
+       }})  
  
     })
      
 
     }
     function CreateGoalButtons(current){
-      let src = `
 
-         <button id = "confirm-btn-` + current + `" type = "button" class = "btn btn-success"> Confirm </button>
-          <button id = "change-btn-` + current + `" type = "button" class = "btn btn-warning " disabled> Change </button>
-          <button id = "delete-btn-` + current + `" type = "button" class = "btn btn-danger "> Delete </button>
-               
-      `
 
-      $("#buttons-input-group-" + current).append(src);
+      $.ajax('navigation/inputTemplates/goal-buttons/'+current, {
+          success: function (result) {
+                $("#goal-buttons-input-group-" + current).append(result);
+      
       CreateConfirmButtonHandler(current);
       CreateChangeButtonHandler(current);
-      CreateDeleteButtonHandler(current);
+      CreateDeleteButtonHandler(current);   
+       }})  
 
     }
     function CreateConfirmButtonHandler(current){
@@ -678,6 +600,9 @@ function CreateAntennaLongtitudeHandler(){
   $('#confirm-btn-' + current).prop('disabled', true);
 
    InsertDataInQueue(current,lat_format,long_format);
+
+
+
 })    
 }
 function CreateChangeButtonHandler(current) {
@@ -693,14 +618,11 @@ function CreateDeleteButtonHandler(current) {
 
    $('#delete-btn-' + current).on('click' , function(event){
     appendToConsole(current + ' delete was clicked')
-    $('#goal-input-fieldset' +current).remove();
-    $('#goal-lat-input-group-' + current).remove();
-    $('#goal-long-input-group-' + current).remove();
-    $('#buttons-input-group-' + current).remove();
-  
+    $('#new-goal-btn-'+current).remove();
 
-  //count = count-1;
-  
+  //gotta remove the data from the queue
+  navQueue.remove(current);
+  console.log(navQueue);
 })  
 }
 
