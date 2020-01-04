@@ -96,8 +96,6 @@ $(document).ready(() => {
     const is_recording_url = 'is_recording?stream_url=' + stream_url
     $.ajax(is_recording_url, {
       success: data => {
-        console.log(data)
-        console.log(data.is_recording)
         callback(data.is_recording)
       }, 
       error: (jqXHR, exception)  => {
@@ -207,6 +205,10 @@ $(document).ready(() => {
           isRecording(streamURL, is_recording => {
             updateRecordingButton(cameraPanel, is_recording)
           })
+        }
+        else
+        {
+          showStreamOff(cameraPanel)
         }
       }
     });
