@@ -13,52 +13,15 @@ from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
 import datetime
+import utils
 from shlex import split
 
 import robot.basestation.stream_capture as stream_capture
-from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, is_recording_stream
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, is_recording_stream, stream_capture
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 
 app = flask.Flask(__name__)
-
-def run_shell(cmd, args=""):
-    """Run script command supplied as string.
-
-    Returns tuple of output and error.
-    """
-    cmd_list = cmd.split()
-    arg_list = args.split()
-
-    print("arg_list:", arg_list)
-
-    for arg in arg_list:
-        cmd_list.append(str(arg))
-
-    print("cmd_list:", cmd_list)
-
-    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    return output, error
-
-def get_pid(keyword):
-    cmd = "ps aux"
-    output, error = run_shell(cmd)
-
-    ting = output.decode().split('\n')
-
-    #print(ting)
-
-    for line in ting:
-        if keyword in line:
-            #print("FOUND PID:", line)
-            words = line.split()
-            print("PID:", words[1])
-
-            return words[1]
-
-    return -1
 
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
@@ -206,30 +169,9 @@ def rover_drive():
 
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
-    """ Given a stream, captures an image.
-
-        stream_url : The URL of the stream to capture the image.
-    """
     stream_url = request.args['stream_url']
-    image_directory = "stream_images"
-
-    print("Capturing image of " + stream_url);
-    
-    if not os.path.exists(image_directory):
-      os.makedirs(image_directory)
-
-    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S");
-    filename = "img_" + formatted_date
-
-    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + image_directory + "/"  + filename + ".jpg")
-
-    message = "Successfully captured image " + image_directory + "/" + filename + ".jpg"
-
-    if error:
-        message = "Failed to capture image of " + stream_url
-    print(message);
-
-    return jsonify(success=(not error), msg=message)
+    success, message = stream_capture(stream_url)
+    return jsonify(success=success, msg=message)
 
 @app.route("/initiate_feed_recording/", methods=["POST", "GET"])
 def initiate_feed_recording():

@@ -5,7 +5,7 @@ import datetime
 import flask
 from flask import jsonify, make_response
 import threading
-
+from utils import run_shell
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_ip
 
@@ -80,3 +80,29 @@ def start_ffmpeg_record(stream_url, filename):
     Start ffmpeg to start recording stream
     """
     proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
+
+def stream_capture(stream_url):
+    """ Given a stream, captures an image.
+
+        stream_url : The URL of the stream to capture the image.
+    """
+    image_directory = "stream_images/" + get_stream_shortname(stream_url) + "/"
+
+    print("Capturing image of " + stream_url);
+    
+    if not os.path.exists(image_directory):
+      os.makedirs(image_directory)
+
+    formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S");
+    filename =  get_stream_shortname(stream_url) + "_" + formatted_date + ".jpg"
+    filename = image_directory + filename
+
+    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + filename)
+
+    message = "Successfully captured image " + filename
+
+    if error:
+        message = "Failed to capture image of " + stream_url
+    print(message);
+
+    return not error, message

@@ -190,7 +190,6 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
 
-  console.log(request)
   if (dev != '?') {
     appendToConsole(
       'Sending request to switch to channel ' + $('a' + elemID).text()
@@ -204,7 +203,6 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   mux_select_client.callService(request, function (result) {
     clearTimeout(timer)
     let latency = millisSince(sentTime)
-    console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
