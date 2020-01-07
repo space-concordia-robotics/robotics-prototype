@@ -31,6 +31,7 @@ $(document).ready(() => {
   });
   $('#theme-lofi').click(function () {
       console.log('theme-lofi');
+      console.log("swag");
       prefer_theme('lofi');
   });
 

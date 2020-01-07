@@ -50,27 +50,69 @@
     </div>
   </div>
 
-  <div class="col-md-1">
-    <div class="row border border-white text-white">
-      <div class="col-md-6">BATTERY VOLTAGE: </div>
-      <div class="col-md-6" id="battery-voltage">-</div>
+  <div class= "col-md-2">
+    <div class = "row">
+      <div class = "col-md-4 d-flex flex-row-reverse align-items-center">
+        <i class="fas fa-battery-three-quarters fa-2x text-white"></i>
+      </div>
+
+      <div class = "col-md-8">
+        <div class ="row text-white">
+          VOLTAGE: <div id = "battery-voltage">-</div>V
+        </div>
+        <div class ="row text-white">
+          TEMP: <div id = "battery-temperature">-</div>&#8451;
+        </div>
+      </div>
     </div>
   </div>
-  <div class= "col-md-1 border border-white">
-    <div class ="row text-white">
-      <div class="col-md-6">BATTERY TEMP: </div>
-      <div class="col-md-6"></div>
+
+  <div class="col-md-2">
+    <div class = "row">
+      <div class = "col-md-2 ml-auto">
+        <i class="fas fa-temperature-low fa-2x text-white"></i>
+      </div>
+
+      <div class = "col-md-10">
+        <div class = "row no-gutters text-white">
+          <div class = "col">
+            <span title="battery temp 1">T1:</span><span id="battery-temp-1">-</span>&#8451;
+          </div>
+          <div class = "col">
+            <span title="battery temp 2">T2:</span><span id="battery-temp-2">-</span>&#8451;
+          </div>
+          <div class = "col">
+            <span title="battery temp 3">T3:</span><span id="battery-temp-3">-</span>&#8451;
+          </div>
+          <!-- 
+          <span title="battery temp 1">T1:</span><div class = "border border-white" id="battery-temp-1">-</div>&#8451;
+
+          <span title="battery temp 2">T2:</span><div id="battery-temp-2">-&#8451;</div>
+          <span title="battery temp 3">T3:</span><div id="battery-temp-3">-&#8451;</div> -->
+        </div>
+      </div>
+
     </div>
   </div>
-  <div class="col-md-2 border border-white">
-    <div class="row text-white">
-	  <span title="battery temp 1">T1:</span><div class="col-md-3" id="battery-temp-1">-&#8451;</div>
-	  <span title="battery temp 2">T2:</span><div class="col-md-3" id="battery-temp-2">-&#8451;</div>
-    </div>
-    <div class="row text-white">
-	  <span title="battery temp 3">T3:</span><div class="col-md-3" id="battery-temp-3">-&#8451;</div>
-    </div>
-  </div>
-</div>
-</div>
 </nav>
+
+<!-- Modal for voltage and temperature violations -->
+<div class="modal fade" id="navModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="navModalTitle">...</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id = "navModalBody">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>

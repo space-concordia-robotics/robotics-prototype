@@ -2,6 +2,13 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
+// minimum and maximum acceptable battery voltages (volts)
+MIN_VOLTAGE = 12.5
+MAX_VOLTAGE = 16.9
+// minimum and maximum acceptable battery tempratures (degrees celcius)
+MIN_TEMP = 0
+MAX_TEMP = 85
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -158,7 +165,16 @@ function initRosWeb () {
     messageType: 'std_msgs/Float32'
   })
   battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
+    let voltage = message.data.toFixed(2)
+    $('#battery-voltage').text(voltage)
+
+    if (voltage > MAX_VOLTAGE) {
+      navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
+    } else if (voltage < MIN_VOLTAGE){
+      navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
+    } else {
+      $('#navModal').modal({show: false})
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -167,9 +183,24 @@ function initRosWeb () {
     messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
-    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
-    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+    let t1 = parseFloat(message.x).toFixed(2)
+    let t2 = parseFloat(message.y).toFixed(2)
+    let t3 = parseFloat(message.z).toFixed(2)
+
+    $('#battery-temp-1').text(t1)
+    $('#battery-temp-2').text(t2)
+    $('#battery-temp-3').text(t3)
+
+    let temperatures = [t1, t2, t3]
+
+    for (i = 1; i <= temperatures.length ; i++) {
+      temp = temperatures[i-1]
+      if (temp > MAX_TEMP) {
+        navModalMessage('Warning: Battery temperature too high', 'Decreace temperature')
+      } else if (temp < MIN_TEMP) {
+        navModalMessage('Warning: Battery temperature too low', 'Increace temperature')
+      }
+    }
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
@@ -534,4 +565,13 @@ function getRoverIP (callback) {
   console.log('roverIP: ' + env.ROS_MASTER_IP)
   console.log('hostIP: ' + env.HOST_IP)
   return env.ROS_MASTER_IP
+}
+
+/*
+
+*/
+function navModalMessage (title, body){
+  $("#navModalTitle").text(title)
+  $("#navModalBody").text(body)
+  $("#navModal").modal({show: true})
 }

@@ -9,6 +9,9 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
+
+console.log("asdasd");
+
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'p': ping arm mcu")
