@@ -38,7 +38,7 @@ sudo apt install python3.6 -y
 sudo apt install python3.6-venv git -y
 
 # Setup venv
-python3.6-venv -m venv venv
+python3.6 -m venv venv
 source venv/bin/activate
 
 
