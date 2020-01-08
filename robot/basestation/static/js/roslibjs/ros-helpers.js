@@ -169,6 +169,7 @@ function initRosWeb () {
     let color = 'white'
     if (voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) {
       color = 'red'
+      errorSound()
       if (voltage > MAX_VOLTAGE) {
         navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
       } else if (voltage < MIN_VOLTAGE){
@@ -202,6 +203,7 @@ function initRosWeb () {
 
       if (temp > MAX_TEMP || temp < MIN_TEMP) {
         color = 'red'
+        errorSound()
         if (temp > MAX_TEMP) {
           navModalMessage('Warning: Battery temperature too high', 'Decreace temperature')
         } else if (temp < MIN_TEMP) {
@@ -584,4 +586,11 @@ function navModalMessage (title, body){
   $("#navModalTitle").text(title)
   $("#navModalBody").text(body)
   $("#navModal").modal({show: true})
+}
+
+/*
+plays an error sound -> warning will not play if the doc has not been interacted with yet
+*/
+function errorSound (){
+  new Audio('../../static/sound/error.mp3').play()
 }
