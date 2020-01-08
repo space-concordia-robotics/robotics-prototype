@@ -5,7 +5,7 @@ import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
 
-output, error = run_shell("git symbolic-ref --short HEAD")
+output, error = run_shell("git symbolic-ref --short HEAD", "", False)
 branch_name = output.decode("utf8")[0:-1]
 
 def is_excluded_branch(branch_name, excluded_branches):
