@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # since only one person can run the flask server at a time
 # get current flask server host IP address from ifconfig, filter out only the IP address
