@@ -166,15 +166,18 @@ function initRosWeb () {
   })
   battery_voltage_listener.subscribe(function (message) {
     let voltage = message.data.toFixed(2)
-    $('#battery-voltage').text(voltage)
+    let color = 'white'
+    if (voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) {
+      color = 'red'
+      if (voltage > MAX_VOLTAGE) {
+        navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
+      } else if (voltage < MIN_VOLTAGE){
+        navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
+      } 
+    } 
 
-    if (voltage > MAX_VOLTAGE) {
-      navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
-    } else if (voltage < MIN_VOLTAGE){
-      navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
-    } else {
-      $('#navModal').modal({show: false})
-    }
+    $('#battery-voltage').text(voltage)
+    $('#battery-voltage').css({'color': color})
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -194,12 +197,19 @@ function initRosWeb () {
     let temperatures = [t1, t2, t3]
 
     for (i = 1; i <= temperatures.length ; i++) {
-      temp = temperatures[i-1]
-      if (temp > MAX_TEMP) {
-        navModalMessage('Warning: Battery temperature too high', 'Decreace temperature')
-      } else if (temp < MIN_TEMP) {
-        navModalMessage('Warning: Battery temperature too low', 'Increace temperature')
+      let temp = temperatures[i-1]
+      let color = 'white'
+
+      if (temp > MAX_TEMP || temp < MIN_TEMP) {
+        color = 'red'
+        if (temp > MAX_TEMP) {
+          navModalMessage('Warning: Battery temperature too high', 'Decreace temperature')
+        } else if (temp < MIN_TEMP) {
+          navModalMessage('Warning: Battery temperature too low', 'Increace temperature')
+        }
       }
+
+      $('#battery-temp-' + i).css({'color': color})
     }
   })
   // setup a subscriber for the wheel_motor_currents topic
@@ -568,7 +578,7 @@ function getRoverIP (callback) {
 }
 
 /*
-
+function to display the navbar modal with the given title and body text
 */
 function navModalMessage (title, body){
   $("#navModalTitle").text(title)
