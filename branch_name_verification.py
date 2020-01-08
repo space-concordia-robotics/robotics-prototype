@@ -41,7 +41,6 @@ def branch_name_error(branch_name, excluded_branches):
     """
     run all name verification functions and print error message if any fails
     """
-    print('test')
     trim_issue_num = re.sub(r'\d+$', '', branch_name)
     error_msg = 'Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions'
     errors = {}

@@ -37,3 +37,4 @@ def test_branch_name():
     assert branch_name_error('feat-test-branch-', excluded_branches) == True
     assert branch_name_error('fe@t-test-branch-123', excluded_branches) == True
     assert branch_name_error('feat-test-branch-123', excluded_branches) == False
+    assert branch_name_error('upgrade-ubuntu-18-304', excluded_branches) == False
