@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-from subprocess import check_output
+import robot.basestation.app as app
+from robot.basestation.app import run_shell
 import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
 
-branch_name = check_output(["git","symbolic-ref", "--short", "HEAD"]).decode("utf8")[0:-1]
+output, error = run_shell("git symbolic-ref --short HEAD")
+branch_name = output.decode("utf8")[0:-1]
 
 def is_excluded_branch(branch_name, excluded_branches):
     """
