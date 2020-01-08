@@ -1,48 +1,39 @@
-from subprocess import check_output
-import re
+import branch_name_verification
+from branch_name_verification import is_excluded_branch, has_upper_case_letters, has_hyphen_seperator, has_issue_num, has_invalid_symbols, branch_name_error
 
-def test_start_branch():
-    excluded_branches = {'master', 'develop', 'staging', 'test'}
-    invalid_symbols = {"/", "'", '!', '@', '$', '%', ',', '.', '_', '+', '£', '=', '¬', '<', '>'}
-    branch_name = check_output(["git","symbolic-ref", "--short", "HEAD"]).decode("utf8")[0:-1]
-    trim_issue_num = re.sub(r'\d+$', '', branch_name)
-    branch_name_error = False
-    error_checking(branch_name, trim_issue_num, invalid_symbols, excluded_branches, branch_name_error)
+excluded_branches = {'test-1', 'sdfsdfs', '!@dvsfosk*&*&^fs4943'}
 
-def branch_excluded_check(branch_name, excluded_branches):
-    if branch_name in excluded_branches:
-        return True
+def test_excluded_branches():
+    assert is_excluded_branch('test', excluded_branches) == False
+    assert is_excluded_branch('test-1', excluded_branches) == True
+    assert is_excluded_branch('!@dvsfosk*&*&^fs4943', excluded_branches) == True
 
-    else:
-        return False
+def test_upper_case_letters():
+    assert has_upper_case_letters('feat-test-branch-') == False
+    assert has_upper_case_letters('Feat-test-branch-') == True
+    assert has_upper_case_letters('feat-test-Branch-') == True
+    assert has_upper_case_letters('FEAT-TEST-BRANCH-') == True
 
-def upper_case_letters_check(trim_issue_num, branch_name_error):
-    if not (trim_issue_num.islower()):
-        branch_name_error = True
+def test_hyphen_seperator():
+    assert has_hyphen_seperator('feat-test-branch') == False
+    assert has_hyphen_seperator('feat-test-branch-') == True
 
-    return branch_name_error
+def test_issue_num():
+    assert has_issue_num('feat-test-branch-123') == True
+    assert has_issue_num('feat-test-branch') == False
 
-def hyphen_seperator_check(trim_issue_num, branch_name_error):
-    if not trim_issue_num.endswith('-'):
-        branch_name_error = True
+def test_invalid_symbols():
+    assert has_invalid_symbols('feat-test-branch-123') == False
+    assert has_invalid_symbols('feat-test-br/anch-123') == True
+    assert has_invalid_symbols('feat-test-b\\ranch-123') == True
+    assert has_invalid_symbols('f@eat-tes?t-b\\ranch-12?3') == True
+    assert has_invalid_symbols('feat-test-branch-12?3') == True
+    assert has_invalid_symbols('!@#$-!@$%-(*&)-)()-123') == True
 
-    return branch_name_error
-
-def issue_num_check(branch_name, branch_name_error):
-    if re.search(r'\d+$', branch_name) is None:
-        branch_name_error = True
-
-    return branch_name_error
-
-def invalid_symbols_check(branch_name, invalid_symbols, branch_name_error):
-    if (bool(set(branch_name) & invalid_symbols)) or ('\\' in branch_name):
-        branch_name_error = True
-
-    return branch_name_error
-
-def error_checking(branch_name, trim_issue_num, invalid_symbols, excluded_branches, branch_name_error):
-    if not branch_excluded_check(branch_name, excluded_branches):
-        assert upper_case_letters_check(trim_issue_num, branch_name_error) == False
-        assert hyphen_seperator_check(trim_issue_num, branch_name_error) == False
-        assert issue_num_check(branch_name, branch_name_error) == False
-        assert invalid_symbols_check(branch_name, invalid_symbols, branch_name_error) == False
+def test_branch_name():
+    assert branch_name_error('test-1', excluded_branches) == False
+    assert branch_name_error('Feat-test-branch-123', excluded_branches) == True
+    assert branch_name_error('feat-test-branch123', excluded_branches) == True
+    assert branch_name_error('feat-test-branch-', excluded_branches) == True
+    assert branch_name_error('fe@t-test-branch-123', excluded_branches) == True
+    assert branch_name_error('feat-test-branch-123', excluded_branches) == False
