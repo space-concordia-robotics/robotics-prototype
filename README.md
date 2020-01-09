@@ -10,17 +10,17 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
 ## Automatic Setup
-To use the automatic setup script you must first clone the repo into ~/Programming/robotics-prototype 
+To use the automatic setup script you must first clone the repo into `~/Programming`
 ```
+$ cd ~/Programming
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
 ```
 
-When you have cloned the repo you can then execute EnvironmentSetup.sh which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
+When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
-$ cd ~/Programming/robotics-prototype
+$ cd robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
-
 
 ## Manual setup
 If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
@@ -156,10 +156,10 @@ $ python app.py
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 
 
-### Extra
+### Final Steps
 You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-Make sure to setup the [git hooks](#setting-up-git-hooks)
+Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done with the automatic setup)
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
