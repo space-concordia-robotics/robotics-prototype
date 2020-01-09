@@ -77,7 +77,7 @@ sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
 
 
 # Build catkin
-cd ~/Programming/robotics-prototype/robot/rospackages
+cd home/$USER/Programming/robotics-prototype/robot/rospackages
 rosdep install --from-paths src/ --ignore-src -r -y
 catkin_make
 
