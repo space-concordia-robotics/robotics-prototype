@@ -17,7 +17,9 @@ FINAL_MESSAGE="The script will now exit, you should test the installation using 
 1. test python using 'pytest'
 2. verify ROS-Kinetic installation using 'roscore'
 3. test GUI by running 'rosgui' and then 'startgui'
--> to see the GUI open a browser (preferably chrome) and go to localhost:5000"
+-> to see the GUI open a browser (preferably chrome) and go to localhost:5000
+4. restart the terminal for certain changes to apply
+-> it will automatically start with virtual env activated and you will be able to use aliases that you can lookup in your ~/.bashrc file"
 
 
 ## START
@@ -86,13 +88,6 @@ sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
 
 # Run env.sh
 ./robot/basestation/env.sh > robot/basestation/static/js/env.js
-
-
-# Check if ffmpeg is already installed and install if not
-if  ! dpkg-query -W -f='${Status}' ffmpeg | grep "ok installed"
-then 
- sudo apt install ffmpeg -y
-fi
 
 
 # Setup git hooks
