@@ -21,7 +21,7 @@ FINAL_MESSAGE="The script will now exit, you should test the installation using 
 4. test GUI by running 'rosgui' and then 'startgui'
 -> to see the GUI open a browser (preferably chrome) and go to localhost:5000" 
 
-REPO=/home/$USER/Programming/robotics-prototype
+REPO="/home/$USER/Programming/robotics-prototype"
 
 ## START
 
