@@ -22,7 +22,7 @@ from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_i
 
 app = flask.Flask(__name__)
 
-def run_shell(cmd, args="", do_output=True):
+def run_shell(cmd, args="", print_output=True):
     """Run script command supplied as string.
 
     Returns tuple of output and error.
@@ -33,7 +33,7 @@ def run_shell(cmd, args="", do_output=True):
     for arg in arg_list:
         cmd_list.append(str(arg))
 
-    if do_output:
+    if print_output:
         print("arg_list:", arg_list)
         print("cmd_list:", cmd_list)
 
