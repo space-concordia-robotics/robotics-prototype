@@ -5,7 +5,7 @@ import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
 
-output, error = run_shell("git symbolic-ref --short HEAD", "", False)
+output, error = run_shell("git", "symbolic-ref --short HEAD", False)
 branch_name = output.decode("utf8")[0:-1]
 
 def is_excluded_branch(branch_name, excluded_branches):
@@ -26,11 +26,20 @@ def has_hyphen_seperator(trim_issue_num):
     """
     return trim_issue_num.endswith('-')
 
+def get_issue_num(branch_name):
+    """
+    Gets issue number from branch named
+    """
+    issue_num = re.search(r'\d+$', branch_name)
+    if issue_num is not None:
+        issue_num = issue_num.group(0)
+    return issue_num
+
 def has_issue_num(branch_name):
     """
     check if there is an issue number
     """
-    return not re.search(r'\d+$', branch_name) is None
+    return not get_issue_num(branch_name) is None
 
 def has_invalid_symbols(branch_name):
     """
@@ -45,17 +54,17 @@ def branch_name_error(branch_name, excluded_branches):
     """
     trim_issue_num = re.sub(r'\d+$', '', branch_name)
     error_msg = 'Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions'
-    errors = {}
+    is_name_valid = True
     if not is_excluded_branch(branch_name, excluded_branches):
-        errors[0] = has_upper_case_letters(trim_issue_num)
-        errors[1] = not has_hyphen_seperator(trim_issue_num)
-        errors[2] = not has_issue_num(branch_name)
-        errors[3] = has_invalid_symbols(branch_name)
+        is_name_valid = not has_upper_case_letters(trim_issue_num)\
+        and has_hyphen_seperator(trim_issue_num)\
+        and has_issue_num(branch_name)\
+        and not has_invalid_symbols(branch_name)
 
-        if not all(errors[x] == False for x in errors):
+        if not is_name_valid:
             print(error_msg)
 
-    return not all(errors[x] == False for x in errors)
+    return not is_name_valid
 
 if __name__ == "__main__":
     branch_name_error(branch_name, excluded_branches)
