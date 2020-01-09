@@ -11,7 +11,9 @@ Secondly, it is imperative you use a virtual env (instead of your system Python)
 
 ## Automatic Setup
 To use the automatic setup script you must first clone the repo into ~/Programming/robotics-prototype 
-```$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype```
+```
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+```
 
 When you have cloned the repo you can then execute EnvironmentSetup.sh which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
