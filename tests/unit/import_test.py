@@ -11,5 +11,5 @@ def test_custom_import():
 
 def test_non_existant_import():
     with pytest.raises(ImportError):
-        from robot.basestation.nonexistantmodule import nonexistantmodule
-        assert (app is None)
+        from robot.basestation.unknown import unknown
+        assert (unknown is None)
