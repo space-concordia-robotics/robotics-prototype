@@ -6,8 +6,24 @@ This repo contains the Robotics software team code.
 ## Contributing and Development Environment Instructions
 
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
-
+ 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
+
+## Automatic Setup
+To use the automatic setup script you must first clone the repo into ~/Programming/robotics-prototype 
+```$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype```
+
+When you have cloned the repo you can then execute EnvironmentSetup.sh which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
+```
+$ cd ~/Programming/robotics-prototype
+$ ./EnvironmentSetup.sh
+```
+
+
+## Manual setup
+If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
+
+
 ### Prerequisites
 Make sure you are using Ubuntu 16.04 (The ROS distribution we use doesn't support anything newer than 16.04).
 
@@ -103,6 +119,7 @@ The first catkin workspace was automatically generated during the scripted insta
 You need to setup another catkin workspace in robot/rospackages
 ```
 $ cd ~/Programming/robotics-prototype/robot/rospackages
+$ rosdep install --from-paths src/ --ignore-src -r -y
 $ catkin_make
 ```
 ### .bashrc edits
@@ -136,14 +153,9 @@ $ python app.py
 ```
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 
-### ffmpeg
 
-For the features of capturing a snapshot and recording the camera streams we require `ffmpeg`:
-```
-sudo apt install ffmpeg
-```
-
-You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
+### Extra
+You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
 Make sure to setup the [git hooks](#setting-up-git-hooks)
 
