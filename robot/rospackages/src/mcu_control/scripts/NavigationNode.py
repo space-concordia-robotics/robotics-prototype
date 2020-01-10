@@ -23,8 +23,7 @@ def subscriber_callback(message):
         rover['heading'] = message.z
         hasHeading = True
 
-    tits = rospy.get_param('has_gps_goal')
-    if tits:
+    if rospy.get_param('has_gps_goal'):
         Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
         gpsGoal['latitude'], gpsGoal['longitude'])
         Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
@@ -76,8 +75,8 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
 
-            dick = rospy.get_param('has_gps_goal')    
-            if not dick:
+                
+            if not rospy.get_param('has_gps_goal'):
                 try: #rospy.has_param(param) works but requires code rethinking
                     gpsGoal['latitude'] = rospy.get_param('goal_latitude')
                     gpsGoal['longitude'] = rospy.get_param('goal_longitude')

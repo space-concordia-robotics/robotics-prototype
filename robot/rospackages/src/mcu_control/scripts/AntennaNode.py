@@ -15,7 +15,7 @@ def subscriber_callback(message):
     rover['latitude'] = message.x
     rover['longitude'] = message.y
 
-    if gotAntennaPos:
+    if rospy.get_param('got_antenna_pos'):
         BS_to_Rover_dir = Direction(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
         BS_to_Rover_dis = Distance(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
 
@@ -28,6 +28,7 @@ def subscriber_callback(message):
         msg = Point()
         msg.x = rotatorAngle/10
         msg.y = BS_to_Rover_dis
+        rospy.loginfo(msg.y)    
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
@@ -54,12 +55,13 @@ if __name__ == '__main__':
     'antenna_longitude, antenna_start_dir) and will wait until it receives that')
     try:
         while not rospy.is_shutdown():
-            if not gotAntennaPos:
+
+            if not rospy.get_param('got_antenna_pos'):
                 try: #rospy.has_param(param) works but requires code rethinking
                     antenna['latitude'] = rospy.get_param('antenna_latitude')
                     antenna['longitude'] = rospy.get_param('antenna_longitude')
                     antenna['startDir'] = rospy.get_param('antenna_start_dir')
-                    gotAntennaPos = True
+                    rospy.set_param('got_antenna_pos',True)
                     rospy.loginfo('Got antenna starting position!')
                 except KeyError: # param not defined
                     pass

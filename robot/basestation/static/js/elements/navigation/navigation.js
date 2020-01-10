@@ -7,7 +7,7 @@ $(document).ready(() => {
   })
   rover_position_listener.subscribe(function (message) {
     $('#rover-latitude').text(message.x)
-    $('#rover-longitude').text(message.y)
+    $('#rover-longtitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
   // setup a subscriber for the antenna_goal topic
@@ -37,7 +37,10 @@ $(document).ready(() => {
     ros : ros,
     name : 'has_gps_goal'
   })
-
+  let got_antenna_pos =new ROSLIB.Param({
+    ros : ros,
+    name : 'got_antenna_pos'
+  }) 
   // setup a subscriber for the rover_goal topic
   let rover_goal_listener = new ROSLIB.Topic({
     ros: ros,
@@ -69,14 +72,11 @@ $(document).ready(() => {
       
       has_gps_goal.set(false)
 
-      console.log(goal_latitude);
-        console.log(goal_longitude);
-  
       console.log(navQueue);
    //   $('#goal-display-lat').text(navQueue.top().latitude);
     }
-    $('#goal-display-rover-heading').text(parseFloat(message.x).toFixed(3))
-    $('#goal-display-distance').text(parseFloat(message.y).toFixed(2))
+    $('#goal-rover-heading').text(parseFloat(message.x).toFixed(3))
+    $('#goal-distance').text(parseFloat(message.y).toFixed(2))
   })
   // setup gps parameters for rover goals
   let goal_latitude = new ROSLIB.Param({
@@ -90,6 +90,11 @@ $(document).ready(() => {
 
   function initNavigationPanel () {
     let hasAntennaParams = true
+    got_antenna_pos.set(false)    
+    antenna_latitude.get(function(val){
+  
+      console.log(val)
+    })
     /*
     antenna_latitude.get(function (val) {
       if (val != null) {
@@ -284,13 +289,13 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
 
             long = dec + (mins/60 + secs/3600);
         }  
-        let bearing = $("#antenna-bearing-input").val();
+        let bearing = parseFloat($("#antenna-bearing-input").val());
         if(isNaN(bearing)) throw "Bad input bearing";
 
           //ROS params
           antenna_latitude.set(lat);
           antenna_longitude.set(long);
-
+          antenna_start_dir.set(bearing);
 
           $.ajax('/navigation/inputTemplates/antenna-stats', {
       success: function (result) {
@@ -300,7 +305,11 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
             //disable text fields until the user wants to change them
           $('#antenna-fieldset').prop('disabled',true);
           $('#antenna-confirm-btn').prop('disabled', true);
+          $('#antenna-change-btn').prop('disabled',false);
 
+            got_antenna_pos.set(false)
+            
+          
           //update antenna diplayed fields
           
           $('#antenna-display-lat').text(lat);
@@ -319,6 +328,8 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
 })
      
     $('#antenna-change-btn').on('click', function(event){
+      $(this).data('clicked', true);
+
       //need to kill the children of the list, or else i wont the list wil be lost and ill lose access to it forever.
     $('#antenna-stats-list').empty();
     $('#antenna-fieldset').prop('disabled',false);
