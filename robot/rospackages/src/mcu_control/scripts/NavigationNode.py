@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
 import sys
+thismodule = sys.modules[__name__]
+thismodule.gotGpsPos = False;
+
 import time
 
 from Nav_funs import Direction, Distance, Turning
 import rospy
 from geometry_msgs.msg import Point
+
 #from mcu_control.msg import RoverPosition, RoverGoal
 
 def subscriber_callback(message):
@@ -19,7 +23,8 @@ def subscriber_callback(message):
         rover['heading'] = message.z
         hasHeading = True
 
-    if gotGpsPos:
+    tits = rospy.get_param('has_gps_goal')
+    if tits:
         Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
         gpsGoal['latitude'], gpsGoal['longitude'])
         Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
@@ -34,6 +39,10 @@ def subscriber_callback(message):
         # note that direction is based on compass directions where E is 90 and W is -90
         msg.x = Direction_adjust
         msg.y = Rov_to_des_distance
+        if(msg.y < 50):
+            rospy.loginfo('moving on to next coorinates')
+            
+        rospy.loginfo('distance : ' + str(msg.y))
         navigationPub.publish(msg)
     else:
         rospy.loginfo('Waiting for gps goal coordinate ROS parameters to be set')
@@ -52,7 +61,9 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+navigation_pub_topic+'" topic')
     navigationPub = rospy.Publisher(navigation_pub_topic, Point, queue_size=10)
 
-    gotGpsPos = False
+    #gotGpsPos = False
+    rospy.set_param('has_gps_goal',False);
+
     gpsGoal = {'latitude':None, 'longitude':None}
     rover = {'latitude':None, 'longitude':None, 'heading':None, 'distance':None}
 
@@ -60,14 +71,20 @@ if __name__ == '__main__':
     'antenna_latitude, antenna_start_dir) and will wait until it receives that')
     rospy.loginfo('This node needs the gps goal coordinates (gps_latitude, gps_longitude) '+ \
     'and will wait until it receives that')
+    i =  0;
+
     try:
         while not rospy.is_shutdown():
-            if not gotGpsPos:
+
+            dick = rospy.get_param('has_gps_goal')    
+            if not dick:
                 try: #rospy.has_param(param) works but requires code rethinking
                     gpsGoal['latitude'] = rospy.get_param('goal_latitude')
                     gpsGoal['longitude'] = rospy.get_param('goal_longitude')
-                    gotGpsPos = True
-                    rospy.loginfo('Got GPS goal coordinates!')
+                    rospy.set_param('has_gps_goal',True);
+
+                    rospy.loginfo('Got GPS goal coordinates! ' + str(i))
+                    i = i +1
                 except KeyError: # param not defined
                     pass
             else:

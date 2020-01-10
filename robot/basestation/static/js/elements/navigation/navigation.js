@@ -17,8 +17,6 @@ $(document).ready(() => {
     ros: ros
   })
   antenna_goal_listener.subscribe(function (message) {
-    //$('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
-    //$('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
     $('#antenna-display-rec-angle').text(parseFloat(message.x).toFixed(3))
     $('#antenna-display-dist-to-rover').text(parseFloat(message.y).toFixed(2))
   })
@@ -35,6 +33,10 @@ $(document).ready(() => {
     ros: ros,
     name: 'antenna_start_dir'
   })
+  let has_gps_goal = new ROSLIB.Param({
+    ros : ros,
+    name : 'has_gps_goal'
+  })
 
   // setup a subscriber for the rover_goal topic
   let rover_goal_listener = new ROSLIB.Topic({
@@ -42,9 +44,37 @@ $(document).ready(() => {
     name: 'rover_goal',
     messageType: 'geometry_msgs/Point'
   })
+
   rover_goal_listener.subscribe(function (message) {
-    //$('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
-    //$('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
+    if(parseFloat(message.y) < 50) {
+      
+      //remove the most recent coordinate pair from the GUI
+      for(i = 0 ; i < count ; i++){
+
+          if($('#new-goal-btn-'+i).length){
+            $('#new-goal-btn-'+i).remove();
+            break;
+            }
+      }
+      
+      console.log('next coordinate!');
+      navQueue.data[0] = null;
+      
+      while(navQueue.top() == null){
+      navQueue.dequeue();
+      }
+      
+      goal_latitude.set(parseFloat(navQueue.top().latitude));
+      goal_longitude.set(parseFloat(navQueue.top().longtitude));
+      
+      has_gps_goal.set(false)
+
+      console.log(goal_latitude);
+        console.log(goal_longitude);
+  
+      console.log(navQueue);
+   //   $('#goal-display-lat').text(navQueue.top().latitude);
+    }
     $('#goal-display-rover-heading').text(parseFloat(message.x).toFixed(3))
     $('#goal-display-distance').text(parseFloat(message.y).toFixed(2))
   })
@@ -131,20 +161,54 @@ $(document).ready(() => {
   //theres probably a better place to put this, this is just a temporary fix
   initNavigationPanel();
   
-
+// 0 1 2 3 4 5
 function NavigationQueue() {
   this.data = [];
-  let removed = 0;
+  this.shift = 0;
+  flag = true;  
+
   this.enqueue = function(item){
     this.data.push(item);
+    if(flag){
+      has_gps_goal.set(false)
+      goal_latitude.set(item.latitude);
+      goal_longitude.set(item.longtitude);
+      flag = false;
+    }
   }
   this.dequeue = function(){
     this.data.shift();
+    this.shift++;
   }
-  this.remove = function(index){
-    this.data.splice(index-removed,1);
-    removed++;
+  this.top = function(){
+      return this.data[0];
   }
+  this.kill = function(index){
+   this.data[index-this.shift] = null;
+
+   //if the current top is deleted, gotta adjust the goal_lat and goal_long parmamters
+   if(index - this.shift == 0) {
+     
+     while(navQueue.top() == null){
+      navQueue.dequeue();
+      }
+      
+    goal_latitude.set(this.top().latitude)
+    goal_longitude.set(this.top().longtitude)
+   }
+  }
+
+  this.change = function(index,lat,long){
+    console.log('index of change ' + index);
+    this.data[index-this.shift].latitude = lat;
+    this.data[index-this.shift].longtitude = long;
+    
+    if( (index-this.shift) ==0) {
+    goal_latitude.set(lat)
+    goal_longitude.set(long)
+    has_gps_goal.set(false)
+    }
+  } 
 }
 
 var navQueue = new NavigationQueue();
@@ -170,7 +234,7 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
  $('#antenna-confirm-btn').on('click', function(event){
     //check if the inputs are valid
          let lat = -1;
-          let long = -1;
+         let long = -1;
 
     
       
@@ -231,18 +295,21 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
           $.ajax('/navigation/inputTemplates/antenna-stats', {
       success: function (result) {
           
-          $('#antenna-stats-list').append(result);  
-       }})  
+          $('#antenna-stats-list').append(result);
 
-  
-         //disable text fields until the user wants to change them
+            //disable text fields until the user wants to change them
           $('#antenna-fieldset').prop('disabled',true);
           $('#antenna-confirm-btn').prop('disabled', true);
 
           //update antenna diplayed fields
+          
           $('#antenna-display-lat').text(lat);
           $('#antenna-display-long').text(long);
           $('#antenna-display-heading').text(bearing);
+
+
+       }})  
+
       }
         catch(e){
             appendToConsole(e);
@@ -256,7 +323,7 @@ $('#antenna-select-lat-format-btn').one('click',function(event){
     $('#antenna-stats-list').empty();
     $('#antenna-fieldset').prop('disabled',false);
     $('#antenna-confirm-btn').prop('disabled', false);
-    $('#antenna-change-btn').prop('disabled',false);
+    $('#antenna-change-btn').prop('disabled',true);
 
  })
 
@@ -439,13 +506,20 @@ function CreateAntennaLongtitudeHandler(){
     
     let latlongpair = {
       latitude : lat,
-      longitude : long
+      longtitude : long
     }
     $('#goal-display-lat').text(lat);
     $('#goal-display-long').text(long);
 
-    navQueue.enqueue(latlongpair);
-  }
+    if($("#change-btn-"+current).data('clicked')){
+      appendToConsole('changed!')
+       $(this).data('clicked', false);
+       navQueue.change(current,lat,long)      
+   }
+   else {
+          navQueue.enqueue(latlongpair);   
+        }
+    }
   catch(e){
     appendToConsole(e);
   }
@@ -596,21 +670,26 @@ function CreateAntennaLongtitudeHandler(){
     //disable text fields
     $('#goal-input-fieldset-' + current).prop('disabled',true);
 
-  $('#change-btn-' + current).prop('disabled', false);
-  $('#confirm-btn-' + current).prop('disabled', true);
+    $('#change-btn-' + current).prop('disabled', false);
+    $('#confirm-btn-' + current).prop('disabled', true);
 
+    
    InsertDataInQueue(current,lat_format,long_format);
-
+ 
 
 
 })    
 }
+
+// 0 1 2 3 4 5 6
+
 function CreateChangeButtonHandler(current) {
    $('#change-btn-' + current).on('click' , function(event){
-  
+    
+      $(this).data('clicked', true);
   
     $('#goal-input-fieldset-' + current).prop('disabled',false);
-  $('#change-btn-' + current).prop('disabled', false);
+  $('#change-btn-' + current).prop('disabled', true);
   $('#confirm-btn-' + current).prop('disabled', false);  
 })
 }
@@ -621,7 +700,7 @@ function CreateDeleteButtonHandler(current) {
     $('#new-goal-btn-'+current).remove();
 
   //gotta remove the data from the queue
-  navQueue.remove(current);
+  navQueue.kill(current);
   console.log(navQueue);
 })  
 }
