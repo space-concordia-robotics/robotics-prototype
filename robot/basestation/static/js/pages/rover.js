@@ -1,11 +1,5 @@
 // for command thoughput limiting
 const GAME_LOOP_PERIOD = 50
-const CONTINUOUS_SERVO_PERIOD = 100
-const POSITION_SERVO_PERIOD = 60
-const SERVO_STOP = 93 // tested with front servos
-const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
-const MAX_CONTINUOUS_SERVO_OFFSET = 20
-
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
@@ -20,32 +14,19 @@ let lastRearContServoCmd = 0
 
 let maxSoftThrottle = 25
 let maxSoftSteering = 39
-let maxFrontTiltPwm = 180
-let minFrontTiltPwm = 0
-let maxRearTiltPwm = 115
-let minRearTiltPwm = 0
 
 let throttle = 0 // how fast are the wheels turning in general
 let steering = 0 // values further from 0 mean sharper turning radius
 let spinning = 0 // for rotating around its centre
-let frontTiltPwm = 60
-let rearTiltPwm = 35
-let frontPanPwm = SERVO_STOP
-let rearPanPwm = SERVO_STOP
 
 let throttleIncrement = 1
 let steeringIncrement = 1
-let positionServoIncrement = 1
-let continuousServoIncrement = 2
-let continuousServoOffset = 20
 
 let maxThrottleIncrement = 1
 let maxSteeringIncrement = 1
 let movementCommanded = false
 
 sentZero = true // used to prevent the gui from sending wheel commands
-sentFrontServoStop = true // used to prevent the gui from sending servo commands
-sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
@@ -332,56 +313,6 @@ window.addEventListener(
   true
 )
 
-function handlePositionServo (
-  pwmVal,
-  minPwm,
-  maxPwm,
-  upKey,
-  downKey,
-  upBtn,
-  downBtn
-) {
-  let newCommand = false
-  if (keyState[upKey]) {
-    lightUp(upBtn)
-    if (pwmVal > minPwm) {
-      pwmVal -= positionServoIncrement
-    }
-    newCommand = true
-  } else if (keyState[downKey]) {
-    lightUp(downBtn)
-    if (pwmVal < maxPwm) {
-      pwmVal += positionServoIncrement
-    }
-    newCommand = true
-  }
-  return [newCommand, pwmVal]
-}
-
-function handleContinuousServo (pwmVal, leftKey, rightKey, leftBtn, rightBtn) {
-  if (keyState[leftKey] && !$('#servo-val').is(':focus')) {
-    lightUp(leftBtn)
-    if (pwmVal < SERVO_STOP + continuousServoOffset) {
-      pwmVal += continuousServoIncrement
-    }
-  } else if (keyState[rightKey] && !$('#servo-val').is(':focus')) {
-    lightUp(rightBtn)
-    if (pwmVal > SERVO_STOP - continuousServoOffset) {
-      pwmVal -= continuousServoIncrement
-    }
-  } else {
-    // decelerate
-    if (pwmVal < SERVO_STOP) {
-      pwmVal += continuousServoIncrement
-    } else if (pwmVal > SERVO_STOP) {
-      pwmVal -= continuousServoIncrement
-    } else {
-      // do nothing, you've stopped
-    }
-  }
-  return pwmVal
-}
-
 function gameLoop () {
   /*
   gameloop thought: what if we want more fine control on how fast the
@@ -391,136 +322,6 @@ function gameLoop () {
   decoupled from the rate at which the steering or throttle changes
   */
   if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
-    /* CAMERA SERVO CONTROL */
-    // TODO: check if the position servo code is the same for rear servo or if
-    // the directions must be reversed, because that may be annoying
-    // TODO: same thing but for the continuous servo code
-    // WARNING: the position servo limits are probably off
-    // WARNING: currently I assume that 90 deg is the home position but this may not be the case
-    // WARNING: the current implementation allows commands to two different servos to occur back-to-back
-    // with no delay. this may be bad, consider something that only allows one command per x ms
-
-    // front camera position servo (up/down, servo 1)
-    if (
-      millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      let returnVals = handlePositionServo(
-        frontTiltPwm,
-        minFrontTiltPwm,
-        maxFrontTiltPwm,
-        111,
-        104, // numpad '/' and '8'
-        '#camera-front-tilt-up-btn',
-        '#camera-front-tilt-down-btn'
-      )
-      if (returnVals[0]) {
-        frontTiltPwm = returnVals[1]
-        $('#front-tilt-pwm').text(frontTiltPwm)
-        lastFrontPosServoCmd = new Date().getTime()
-        sendRoverCommand('!' + frontTiltPwm.toString())
-      }
-    }
-    // Front camera continuous servo (left/right, servo 2)
-    if (
-      millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      // > CONTINUOUS_SERVO_PERIOD){
-      frontPanPwm = handleContinuousServo(
-        frontPanPwm,
-        105, // numpad '7' and '9'
-        103,
-        '#camera-front-lpan-btn',
-        '#camera-front-rpan-btn'
-      )
-      // check whether or not to send a new command for the continuous servo
-      if (frontPanPwm == SERVO_STOP && sentFrontServoStop) {
-      } else {
-        let frontPan = SERVO_STOP
-        if (
-          frontPanPwm > SERVO_STOP &&
-          frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        } else if (
-          frontPanPwm < SERVO_STOP &&
-          frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        } else {
-          frontPan = frontPanPwm
-        }
-        $('#front-pan-pwm').text(frontPan)
-        lastFrontContServoCmd = new Date().getTime()
-        sendRoverCommand('@' + frontPan.toString())
-        if (frontPanPwm != SERVO_STOP) {
-          sentFrontServoStop = false
-        } else {
-          sentFrontServoStop = true
-        }
-      }
-    }
-
-    // rear camera position servo (up/down, servo 1)
-    if (
-      millisSince(lastRearPosServoCmd) > POSITION_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      let returnVals = handlePositionServo(
-        rearTiltPwm,
-        minRearTiltPwm,
-        maxRearTiltPwm,
-        101,
-        98, // numpad '5' and '2'
-        '#camera-back-tilt-up-btn',
-        '#camera-back-tilt-down-btn'
-      )
-      if (returnVals[0]) {
-        rearTiltPwm = returnVals[1]
-        $('#back-tilt-pwm').text(rearTiltPwm)
-        lastRearPosServoCmd = new Date().getTime()
-        sendRoverCommand('#' + rearTiltPwm.toString())
-      }
-    }
-    // rear camera continuous servo (left/right, servo 2)
-    if (
-      millisSince(lastRearContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      // > CONTINUOUS_SERVO_PERIOD){
-      rearPanPwm = handleContinuousServo(
-        rearPanPwm,
-        97,
-        99, // numpad '1' and '3'
-        '#camera-back-lpan-btn',
-        '#camera-back-rpan-btn'
-      )
-      // check whether or not to send a new command for the continuous servo
-      if (rearPanPwm == SERVO_STOP && sentRearServoStop) {
-        // don't move the servo
-      } else {
-        let rearPan = SERVO_STOP
-        if (
-          rearPanPwm > SERVO_STOP &&
-          rearPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          rearPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        } else if (
-          rearPanPwm < SERVO_STOP &&
-          rearPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          rearPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        } else {
-          rearPan = rearPanPwm
-        }
-        $('#back-pan-pwm').text(rearPan)
-        lastRearContServoCmd = new Date().getTime()
-        sendRoverCommand('$' + rearPan.toString())
-        sentRearServoStop = rearPan == SERVO_STOP
-      }
-    }
-
     /* ROVER WHEEL CONTROL */
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {

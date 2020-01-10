@@ -1,21 +1,22 @@
 $(document).ready(() => {
-
-  const FRONT_CAM_NAME = ''
-  const BACK_CAM_NAME = ''
+  const FRONT_CAM_NAME = 'videoFrontCam'
+  const BACK_CAM_NAME = 'videoRearCam'
   const FRONT_PAN_SYM = '!'
   const FRONT_TILT_SYM = '@'
   const BACK_PAN_SYM = '#'
   const BACK_TILT_SYM = '$'
-  const SERVO_SYMBOLS = { 
-    FRONT_CAM_NAME : {
-        'pan': FRONT_PAN_SYM,
-        'tilt': FRONT_TILT_SYM
-      },
-    BACK_CAM_NAME : {
+  const SERVO_SYMBOLS = {}
+  SERVO_SYMBOLS[FRONT_CAM_NAME] = {
+      'pan': FRONT_PAN_SYM,
+      'tilt': FRONT_TILT_SYM
+    }
+  SERVO_SYMBOLS[BACK_CAM_NAME] = {
       'pan': BACK_PAN_SYM,
-      'tilt' : BACK_TILT_SYM
-      }
-  }
+      'tilt': BACK_TILT_SYM
+  } 
+
+  const SERVO_ANGLE_MIN = 0;
+  const SERVO_ANGLE_MAX = 180;
 
   function hasCameraControls(cameraName)
   {
@@ -31,49 +32,17 @@ $(document).ready(() => {
   {
     return SERVO_SYMBOLS[cameraName]['tilt']
   }
-  
-  $('#camera-front-lpan-btn').click(function () {
-      sendRoverCommand(
-        '!' + $('#servo-val').val()
-      )
-  })
-  $('#camera-front-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('!' + $('#servo-val').val())
-    }
-  })
-  // servo name: "Front camera Side continuous servo"
-  $('#camera-front-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-  $('#camera-front-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-  // servo name: "Rear camera positional tilt base"
-  $('#camera-back-lpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-  $('#camera-back-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-  // servo name: "Rear camera Side continuous servo"
-  $('#camera-back-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
 
-  $('#camera-back-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
+  function cameraPan(cameraName, degrees)
+  {
+    if(degrees > SERVO_ANGLE_MIN && degrees < SERVO_ANGLE_MAX)
+      sendRoverCommand(getPanSymbol(cameraName) + degrees);
+  }
+
+  function cameraTilt(cameraName, degrees)
+  {
+    if(degrees > SERVO_ANGLE_MIN && degrees < SERVO_ANGLE_MAX)
+      sendRoverCommand(getTiltSymbol(cameraName) + degrees);
+  }
+
 })
