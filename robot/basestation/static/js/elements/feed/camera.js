@@ -116,12 +116,17 @@ $(document).ready(() => {
   function showStreamOn(cameraPanel) {
     let cameraFeed = cameraPanel.find(".camera-feed");
     let cameraPower = cameraPanel.find('.camera-power');
+    let cameraControls = cameraPanel.find('.camera-controls');
 
-    cameraFeed.attr("src", getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX));
+    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX;
+
+    cameraFeed.attr("src", getStreamURL(cameraName));
     cameraFeed.css("padding", "0px");
 
     cameraPower.attr("power-on", "true");
     cameraPower.attr("src", POWER_ON);
+
+    cameraControls.attr("camera-name", cameraName);
   }
 
   function showStreamOff(cameraPanel) {
@@ -186,12 +191,15 @@ $(document).ready(() => {
     let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "");
     cameraNameElement.attr("stream", cameraName);
     let cameraNameSplit = cameraName.split("/");
-    cameraNameElement[0].innerHTML = cameraNameSplit[cameraNameSplit.length - 1];
+    let cameraShortName = cameraNameSplit[cameraNameSplit.length - 1]
+    cameraNameElement[0].innerHTML = cameraShortName;
 
     let cameraPower = cameraPanel.find('.camera-power')
     cameraPower.attr("power-on", "false");
     cameraPower.attr("src", POWER_OFF);
 
+    let cameraControls = cameraPanel.find('.camera-controls');
+    cameraControls.attr("camera-name", cameraShortName + 'Cam');
     updateRecordingButton(cameraPanel, false)
 
     requestTask(CAMERA_STREAM, STATUS_CHECK, msgs => {

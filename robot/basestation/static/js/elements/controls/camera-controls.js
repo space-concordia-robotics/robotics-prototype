@@ -17,6 +17,7 @@ $(document).ready(() => {
 
   const SERVO_ANGLE_MIN = 0;
   const SERVO_ANGLE_MAX = 180;
+  const SERVO_INCREMENT = 5;
 
   function hasCameraControls(cameraName)
   {
@@ -35,14 +36,64 @@ $(document).ready(() => {
 
   function cameraPan(cameraName, degrees)
   {
-    if(degrees > SERVO_ANGLE_MIN && degrees < SERVO_ANGLE_MAX)
       sendRoverCommand(getPanSymbol(cameraName) + degrees);
   }
 
   function cameraTilt(cameraName, degrees)
   {
-    if(degrees > SERVO_ANGLE_MIN && degrees < SERVO_ANGLE_MAX)
       sendRoverCommand(getTiltSymbol(cameraName) + degrees);
   }
 
+  $('.camera-tilt-up').click(e => {
+    let cameraControls = $(e.target).parents('.camera-controls')
+    let cameraName = cameraControls.attr("camera-name");
+
+    if(hasCameraControls(cameraName))
+    {
+      let tilt = cameraControls.attr("tilt");
+      tilt = clamp(parseInt(tilt) + SERVO_INCREMENT, SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
+      cameraTilt(cameraName, tilt);
+      cameraControls.attr("tilt", toString(tilt));
+    }
+
+  })
+
+  $('.camera-tilt-down').click(e => {
+    let cameraControls = $(e.target).parents('.camera-controls')
+    let cameraName = cameraControls.attr("camera-name");
+
+    if(hasCameraControls(cameraName))
+    {
+      let tilt = cameraControls.attr("tilt");
+      tilt = clamp(parseInt(tilt) - SERVO_INCREMENT, SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
+      cameraTilt(cameraName, tilt);
+      cameraControls.attr("tilt", toString(tilt));
+    }
+  })
+
+  $('.camera-pan-left').click(e => {
+    let cameraControls = $(e.target).parents('.camera-controls')
+    let cameraName = cameraControls.attr("camera-name");
+
+    if(hasCameraControls(cameraName))
+    {
+      let pan = cameraControls.attr("pan");
+      pan = clamp(parseInt(pan) - SERVO_INCREMENT, SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
+      cameraTilt(cameraName, pan);
+      cameraControls.attr("pan", toString(pan));
+    }
+  })
+
+  $('.camera-pan-right').click(e => {
+    let cameraControls = $(e.target).parents('.camera-controls')
+    let cameraName = cameraControls.attr("camera-name");
+
+    if(hasCameraControls(cameraName))
+    {
+      let pan = cameraControls.attr("pan");
+      pan = clamp(parseInt(pan) + SERVO_INCREMENT, SERVO_ANGLE_MIN, SERVO_ANGLE_MAX);
+      cameraTilt(cameraName, pan);
+      cameraControls.attr("pan", toString(pan));
+    }
+  })
 })
