@@ -53,7 +53,7 @@
   <div class= "col-md-2">
     <div class = "row">
       <div class = "col d-flex flex-row-reverse align-items-center">
-        <i class="fas fa-battery-three-quarters fa-2x text-white"></i>
+        <i class="fas fa-battery-full fa-2x text-white"></i>
       </div>
 
       <div class = "col">
@@ -76,13 +76,13 @@
       <div class = "col-md-10">
         <div class = "row no-gutters text-white">
           <div class = "col">
-            <span id="battery-temp-1">-</span>&#8451;
+            <span class = "battery-temp" id="battery-temp-1">-</span>&#8451;
           </div>
           <div class = "col">
-            <span id="battery-temp-2">-</span>&#8451;
+            <span class = "battery-temp" id="battery-temp-2">-</span>&#8451;
           </div>
           <div class = "col">
-            <span id="battery-temp-3">-</span>&#8451;
+            <span class = "battery-temp" id="battery-temp-3">-</span>&#8451;
           </div>
         </div>
       </div>
@@ -91,22 +91,4 @@
   </div>
 </nav>
 
-<!-- Modal for voltage and temperature violations -->
-<div class="modal fade" id="navModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="navModalTitle">...</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id = "navModalBody">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+{% include 'elements/feed/NavModal.html' %}

@@ -5,9 +5,11 @@ lastRotate = 0
 // minimum and maximum acceptable battery voltages (volts)
 MIN_VOLTAGE = 12.5
 MAX_VOLTAGE = 16.9
+VOLTAGE_LEEWAY = 0.5
 // minimum and maximum acceptable battery tempratures (degrees celcius)
 MIN_TEMP = 0
 MAX_TEMP = 85
+TEMP_LEEWAY = 1
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -166,19 +168,19 @@ function initRosWeb () {
   })
   battery_voltage_listener.subscribe(function (message) {
     let voltage = message.data.toFixed(2)
-    let color = 'white'
-    if (voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) {
-      color = 'red'
+    $('#battery-voltage').text(voltage)
+
+    if ((voltage >= MAX_VOLTAGE || voltage <= MIN_VOLTAGE) && $('#battery-voltage').css('color') === 'rgb(255, 255, 255)') {
+      $('#battery-voltage').css({'color': 'red'})
       errorSound()
-      if (voltage > MAX_VOLTAGE) {
+      if (voltage >= MAX_VOLTAGE) {
         navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
-      } else if (voltage < MIN_VOLTAGE){
+      } else if (voltage <= MIN_VOLTAGE){
         navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
       } 
-    } 
-
-    $('#battery-voltage').text(voltage)
-    $('#battery-voltage').css({'color': color})
+    } else if ($('#battery-voltage').css('color') === 'rgb(255, 0, 0)' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + TEMP_LEEWAY) {
+      $('#battery-voltage').css({'color': 'white'})
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -187,32 +189,26 @@ function initRosWeb () {
     messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    let t1 = parseFloat(message.x).toFixed(2)
-    let t2 = parseFloat(message.y).toFixed(2)
-    let t3 = parseFloat(message.z).toFixed(2)
+    let temps = [parseFloat(message.x).toFixed(2), parseFloat(message.y).toFixed(2), parseFloat(message.z).toFixed(2)]
 
-    $('#battery-temp-1').text(t1)
-    $('#battery-temp-2').text(t2)
-    $('#battery-temp-3').text(t3)
+    $('.battery-temp').each(function(i, obj) {
+      let $obj = $(obj)
+      let temperature = temps[i]
+      $obj.text(temperature)
 
-    let temperatures = [t1, t2, t3]
-
-    for (i = 1; i <= temperatures.length ; i++) {
-      let temp = temperatures[i-1]
-      let color = 'white'
-
-      if (temp > MAX_TEMP || temp < MIN_TEMP) {
-        color = 'red'
+      if ((overtemp = temperature >= MAX_TEMP || temperature <= MIN_TEMP) && $obj.css('color') === 'rgb(255, 255, 255)') {
+        $obj.css({'color': 'red'})
         errorSound()
-        if (temp > MAX_TEMP) {
-          navModalMessage('Warning: Battery temperature too high', 'Decreace temperature')
-        } else if (temp < MIN_TEMP) {
-          navModalMessage('Warning: Battery temperature too low', 'Increace temperature')
+        if (temperature >= MAX_TEMP) {
+          navModalMessage('Warning: Battery temperature too high', 'decreace temperature')
+        } else if (temperature <= MIN_TEMP) {
+          navModalMessage('Warning: Battery temperature too low', 'increace temperature')
         }
+      } else if ($obj.css('color') === 'rgb(255, 0, 0)' && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
+        $obj.css({'color': 'white'})
       }
+    });
 
-      $('#battery-temp-' + i).css({'color': color})
-    }
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
@@ -579,18 +575,3 @@ function getRoverIP (callback) {
   return env.ROS_MASTER_IP
 }
 
-/*
-function to display the navbar modal with the given title and body text
-*/
-function navModalMessage (title, body){
-  $("#navModalTitle").text(title)
-  $("#navModalBody").text(body)
-  $("#navModal").modal({show: true})
-}
-
-/*
-plays an error sound -> warning will not play if the doc has not been interacted with yet
-*/
-function errorSound (){
-  new Audio('../../static/sound/error.mp3').play()
-}
