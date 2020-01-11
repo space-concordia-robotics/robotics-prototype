@@ -170,7 +170,8 @@ function initRosWeb () {
     let voltage = message.data.toFixed(2)
     $('#battery-voltage').text(voltage)
 
-    if ((voltage >= MAX_VOLTAGE || voltage <= MIN_VOLTAGE) && $('#battery-voltage').css('color') === 'rgb(255, 255, 255)') {
+    if ((voltage >= MAX_VOLTAGE || voltage <= MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1') {
+      $('#battery-voltage').attr('acceptable', '0')
       $('#battery-voltage').css({'color': 'red'})
       errorSound()
       if (voltage >= MAX_VOLTAGE) {
@@ -178,7 +179,8 @@ function initRosWeb () {
       } else if (voltage <= MIN_VOLTAGE){
         navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
       } 
-    } else if ($('#battery-voltage').css('color') === 'rgb(255, 0, 0)' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + TEMP_LEEWAY) {
+    } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
+      $('#battery-voltage').attr('acceptable', '1')
       $('#battery-voltage').css({'color': 'white'})
     }
   })
@@ -196,7 +198,8 @@ function initRosWeb () {
       let temperature = temps[i]
       $obj.text(temperature)
 
-      if ((overtemp = temperature >= MAX_TEMP || temperature <= MIN_TEMP) && $obj.css('color') === 'rgb(255, 255, 255)') {
+      if ((overtemp = temperature >= MAX_TEMP || temperature <= MIN_TEMP) && $obj.attr('acceptable') === '1') {
+        $obj.attr('acceptable', '0')
         $obj.css({'color': 'red'})
         errorSound()
         if (temperature >= MAX_TEMP) {
@@ -204,7 +207,8 @@ function initRosWeb () {
         } else if (temperature <= MIN_TEMP) {
           navModalMessage('Warning: Battery temperature too low', 'increace temperature')
         }
-      } else if ($obj.css('color') === 'rgb(255, 0, 0)' && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
+      } else if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
+        $obj.attr('acceptable', '1')
         $obj.css({'color': 'white'})
       }
     });
