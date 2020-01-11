@@ -1,3 +1,4 @@
+# setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 def init_serial():
     baudrate = 115200
     # in a perfect world, you can choose the baudrate
