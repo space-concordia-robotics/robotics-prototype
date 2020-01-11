@@ -57,3 +57,4 @@ def test_branch_name():
     assert has_branch_name_error('feat-test-branch-123') == False
     assert has_branch_name_error('upgrade-ubuntu-18-304') == False
     assert has_branch_name_error('----------------------18') == True
+    assert has_branch_name_error('feat--test-branch-123') == True
