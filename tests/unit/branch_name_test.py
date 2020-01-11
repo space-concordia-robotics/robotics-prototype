@@ -11,15 +11,6 @@ def test_excluded_branches():
     assert is_excluded_branch('test-1', excluded_branches) == True
     assert is_excluded_branch('!@dvsfosk*&*&^fs4943', excluded_branches) == True
 
-def test_upper_case_letters():
-    """
-    test upper case letters checking
-    """
-    assert has_upper_case_letters('feat-test-branch-') == False
-    assert has_upper_case_letters('Feat-test-branch-') == True
-    assert has_upper_case_letters('feat-test-Branch-') == True
-    assert has_upper_case_letters('FEAT-TEST-BRANCH-') == True
-
 def test_hyphen_seperator():
     """
     test hyphen checking
@@ -54,10 +45,9 @@ def test_branch_name():
     """
     test branch name checking function
     """
-    assert branch_name_error('test-1', excluded_branches) == False
-    assert branch_name_error('Feat-test-branch-123', excluded_branches) == True
-    assert branch_name_error('feat-test-branch123', excluded_branches) == True
-    assert branch_name_error('feat-test-branch-', excluded_branches) == True
-    assert branch_name_error('fe@t-test-branch-123', excluded_branches) == True
-    assert branch_name_error('feat-test-branch-123', excluded_branches) == False
-    assert branch_name_error('upgrade-ubuntu-18-304', excluded_branches) == False
+    assert has_branch_name_error('Feat-test-branch-123') == True
+    assert has_branch_name_error('feat-test-branch123') == True
+    assert has_branch_name_error('feat-test-branch-') == True
+    assert has_branch_name_error('fe@t-test-branch-123') == True
+    assert has_branch_name_error('feat-test-branch-123') == False
+    assert has_branch_name_error('upgrade-ubuntu-18-304') == False
