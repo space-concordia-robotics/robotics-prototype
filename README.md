@@ -159,7 +159,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
 - `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
-- `cp branch_name_verification.py .git/hooks/post-checkout`
+- `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
