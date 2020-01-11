@@ -1,5 +1,5 @@
 import branch_name_verification as branch_name_verification
-from branch_name_verification import is_excluded_branch, has_upper_case_letters, has_hyphen_seperator, get_issue_num, has_issue_num, has_invalid_symbols, branch_name_error
+from branch_name_verification import is_excluded_branch, get_issue_num, has_issue_num, has_invalid_symbols, has_branch_name_error
 
 excluded_branches = {'test-1', 'sdfsdfs', '!@dvsfosk*&*&^fs4943'}
 
@@ -10,13 +10,6 @@ def test_excluded_branches():
     assert is_excluded_branch('test', excluded_branches) == False
     assert is_excluded_branch('test-1', excluded_branches) == True
     assert is_excluded_branch('!@dvsfosk*&*&^fs4943', excluded_branches) == True
-
-def test_hyphen_seperator():
-    """
-    test hyphen checking
-    """
-    assert has_hyphen_seperator('feat-test-branch') == False
-    assert has_hyphen_seperator('feat-test-branch-') == True
 
 def test_get_issue_num():
     assert get_issue_num('upgrade-ubuntu-18-304') == '304'

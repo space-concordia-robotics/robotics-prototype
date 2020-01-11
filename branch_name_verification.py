@@ -43,7 +43,7 @@ def has_branch_name_error(branch_name):
     trim_issue_num = re.sub(r'\d+$', '', branch_name)
     error_msg = 'Branch name is not named properly, please see wiki for formating: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions'
     is_name_valid = True
-    is_name_valid = not trim_issue_num.isupper()\
+    is_name_valid = trim_issue_num.islower()\
     and trim_issue_num.endswith('-')\
     and has_issue_num(branch_name)\
     and not has_invalid_symbols(branch_name)
