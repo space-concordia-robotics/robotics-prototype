@@ -15,6 +15,7 @@ def test_get_issue_num():
     assert get_issue_num('upgrade-ubuntu-18-304') == '304'
     assert get_issue_num('upgrade-ubuntu-18') == '18'
     assert get_issue_num('304-upgrade-ubuntu-18') == '18'
+    assert get_issue_num('----------------------18') == '18'
 
 def test_has_issue_num():
     """
@@ -22,6 +23,7 @@ def test_has_issue_num():
     """
     assert has_issue_num('feat-test-branch-123') == True
     assert has_issue_num('feat-test-branch') == False
+    assert has_issue_num('----------------------18') == True
 
 def test_invalid_symbols():
     """
@@ -33,6 +35,7 @@ def test_invalid_symbols():
     assert has_invalid_symbols('f@eat-tes?t-b\\ranch-12?3') == True
     assert has_invalid_symbols('feat-test-branch-12?3') == True
     assert has_invalid_symbols('!@#$-!@$%-(*&)-)()-123') == True
+    assert has_invalid_symbols('----------------------18') == False
 
 def test_branch_name():
     """
@@ -44,3 +47,4 @@ def test_branch_name():
     assert has_branch_name_error('fe@t-test-branch-123') == True
     assert has_branch_name_error('feat-test-branch-123') == False
     assert has_branch_name_error('upgrade-ubuntu-18-304') == False
+    assert has_branch_name_error('----------------------18') == True
