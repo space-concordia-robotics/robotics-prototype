@@ -36,6 +36,12 @@ def has_invalid_symbols(branch_name):
     invalid_symbols = {"/", "'", '!', '?', '@', '$', '%', ',', '.', '_', '+', '£', '=', '¬', '<', '>'}
     return (bool(set(branch_name) & invalid_symbols)) or ('\\' in branch_name)
 
+def has_double_hyphen(branch_name):
+    """
+    Checkout for double hyphens
+    """
+    return branch_name.find('--') != -1
+
 def has_branch_name_error(branch_name):
     """
     run all name verification functions and print error message if any fails
@@ -46,7 +52,8 @@ def has_branch_name_error(branch_name):
     is_name_valid = trim_issue_num.islower()\
     and trim_issue_num.endswith('-')\
     and has_issue_num(branch_name)\
-    and not has_invalid_symbols(branch_name)
+    and not has_invalid_symbols(branch_name)\
+    and not has_double_hyphen(branch_name)
 
     if not is_name_valid:
         print(error_msg)

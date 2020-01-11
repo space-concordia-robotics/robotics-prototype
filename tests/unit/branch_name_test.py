@@ -1,5 +1,5 @@
 import branch_name_verification as branch_name_verification
-from branch_name_verification import is_excluded_branch, get_issue_num, has_issue_num, has_invalid_symbols, has_branch_name_error
+from branch_name_verification import is_excluded_branch, get_issue_num, has_issue_num, has_invalid_symbols, has_double_hyphen, has_branch_name_error
 
 excluded_branches = {'test-1', 'sdfsdfs', '!@dvsfosk*&*&^fs4943'}
 
@@ -36,6 +36,15 @@ def test_invalid_symbols():
     assert has_invalid_symbols('feat-test-branch-12?3') == True
     assert has_invalid_symbols('!@#$-!@$%-(*&)-)()-123') == True
     assert has_invalid_symbols('----------------------18') == False
+
+def test_double_hyphen():
+    """
+    test double hyphen checking
+    """
+    assert has_double_hyphen('feat-test-branch-123') == False
+    assert has_double_hyphen('----------------------18') == True
+    assert has_double_hyphen('feat---------18') == True
+    assert has_double_hyphen('feat--test-branch-123') == True
 
 def test_branch_name():
     """
