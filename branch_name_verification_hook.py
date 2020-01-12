@@ -62,6 +62,8 @@ def has_branch_name_error(branch_name):
     and trim_issue_num.endswith('-')\
     and has_issue_num(branch_name)\
     and not has_invalid_symbols(branch_name)\
+    and not branch_name.startswith('-')\
+    and not branch_name.endswith('-')\
     and not has_double_hyphen(branch_name)
 
     if not is_name_valid:
