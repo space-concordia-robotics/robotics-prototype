@@ -13,6 +13,10 @@ function appendToConsole (msg, devConsole = true, guiConsole = true) {
   }
 }
 
+function printErrToConsole (msg) {
+  if (!msg[0]) appendToConsole(msg[1])
+}
+
 // Rover log
 // logs to console and scrolls to bottom
 function appendToRoverLog (msg) {
@@ -95,16 +99,28 @@ function millisSince (start) {
 }
 
 // convenience function for UI Buttons
+function color (selector, color) {
+  $(selector).css('background-color', color)
+}
+
 function lightUp (selector) {
-  $(selector).css('background-color', 'rgb(255, 0, 0)')
+  color(selector, 'rgb(255, 0, 0)')
 }
 
 function dim (selector) {
-  $(selector).css('background-color', 'rgb(74, 0, 0)')
+  color(selector, 'rgb(74, 0, 0)')
+}
+
+function isLit (selector) {
+  return (
+    $(selector)
+      .css('background-color')
+      .toLowerCase() == 'rgb(255, 0, 0)'
+  )
 }
 
 function greyOut (selector) {
-  $(selector).css('background-color', '#6c757d')
+  color(selector, '#6c757d')
 }
 
 // convenience functions for setting/getting cookies
@@ -130,6 +146,19 @@ function getCookie (cname) {
   }
   return ''
 }
+
+// return properly formatted camera stream URL
+function getStreamURL (topicName) {
+  return (
+    'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  )
+}
+
+// isNumeric
+function isNumeric (num) {
+  return (!isNaN(num) && !(num == '')) || num == 0
+}
+
 // AJAX
 // Sends request to given route, prints the JSON response object
 function sendRequest (msg) {

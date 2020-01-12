@@ -64,14 +64,17 @@ class Listener:
 
             return False
 
-    def stop(self):
+    def stop(self, p_keyword=''):
         if self.is_running():
             print("Terminating process...")
 
             if self.force_kill:
                 # edge case due to current implementation of video streamer
                 if "start_ros_stream" in self.script:
-                    real_pid = get_pid("cv_camera_node")
+                    if p_keyword:
+                        real_pid = get_pid(p_keyword)
+                    else:
+                        real_pid = get_pid("cv_camera_node")
 
                     if real_pid != -1:
                         output, error = run_shell("kill -9", str(real_pid))

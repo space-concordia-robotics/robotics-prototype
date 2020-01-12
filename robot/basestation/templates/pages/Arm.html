@@ -1,0 +1,25 @@
+{% extends "pages/Base.html" %}
+{% block title %}Arm{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../../static/js/pages/arm.js"></script>
+   <script src="../../static/js/elements/feed/console.js"></script>
+   <script src="../../static/js/elements/simulation/armposition.js"></script>
+   <script src="../../static/js/elements/feed/armtable.js"></script>
+   <script src="../../static/js/elements/feed/camera.js"></script>
+   <script src="../../static/js/elements/controls/extra-controls.js"></script>
+   <script src="../../static/js/elements/feed/record_feed.js"></script>
+   <script src="../../static/js/elements/tools/error_handling.js"></script>
+   <script src="../../static/js/elements/tools/utils.js"></script>
+{% endblock %}
+{% block content %}
+<div class="row">
+ <div class="col-md-3">{% with device="Arm" %}{% include "elements/feed/Console.html" %}{% endwith %}</div>
+ <div class="col-md-3">{% include 'elements/simulation/ArmPosition.html' %}{% include 'elements/feed/ArmMotorTable.html' %}</div>
+ <div class="col-md-6">{% include 'elements/feed/CameraFeed.html' %}</div>
+</div>
+<div class="row">
+  <div class="col-md-9">{% include 'elements/controls/ControlPanel.html' %}</div>
+  <div class="col-md-3">{% with device="Arm" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}</div>
+</div>
+{% endblock %}

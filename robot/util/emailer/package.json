@@ -1,5 +1,5 @@
 {
-  "name": "lidar",
+  "name": "emailer",
   "version": "1.0.0",
   "description": "some node deps",
   "main": "emailIPAddress.js",

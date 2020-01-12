@@ -112,20 +112,42 @@ def select_device(device):
 
     return s0_state + "\n" + s1_state
 
+def get_invalid_args(whitelisted_args, actual_args):
+    ''' Returns list of unrecognized arguments '''
+    wrong_args = []
+    for arg in actual_args:
+        if arg not in whitelisted_args:
+            wrong_args.append(arg)
+    return wrong_args
+
+def remove_ros_arguments(args):
+    ''' Returns list of arguments without ROS arguments '''
+    non_ros_args = []
+    for arg in args:
+        if ":=" not in arg:
+            non_ros_args.append(arg)
+    return non_ros_args
+
 def mux_select_server():
     global local
     local = False
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "local":
-            print("Running in local mode")
-            local = True
-        else:
-            print("Argument '" + sys.argv[1] + "' not recognized, did you mean 'local'?")
-            sys.exit(0)
+    non_ros_args = remove_ros_arguments(sys.argv)
+    wrong_args = get_invalid_args(['rosrun', __file__, 'local'], non_ros_args)
+    if len(wrong_args) > 0:
+        print('An error with passed arguments: ')
+        for arg in wrong_args:
+            print(arg)
+        print('Exiting... Perhaps you mean\'t \'local\'?')
+        sys.exit(0)
+    if 'local' in non_ros_args:
+        local = True
 
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
-    print("Ready to respond to mux select commands")
+    startup_msg = "Ready to respond to mux select commands"
+    startup_msg = startup_msg + " (local mode)" if local else startup_msg
+
+    print(startup_msg)
     rospy.spin()
 
 if __name__ == "__main__":

@@ -6,38 +6,21 @@ Flask is light-weight and modular so this is actually all we need to set up a si
 
 import os
 import subprocess
-from urllib.parse import urlparse, unquote
+from subprocess import Popen, PIPE
+from urllib.parse import unquote
 import flask
 from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
+import datetime
 from shlex import split
 
+import robot.basestation.stream_capture as stream_capture
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed
+import robot.basestation.ros_utils as ros_utils
+from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
+
 app = flask.Flask(__name__)
-
-
-def fetch_ros_master_uri():
-    """Fetch and parse ROS Master URI from environment variable.
-
-    The parsed URI is returned as a urllib.parse.ParseResult instance.
-
-    Returns:
-        urllib.parse.ParseResult: 6-tuple instance with various attributes.
-
-    Attributes (urllib.parse.ParseResult):
-    - hostname -- the ip address or the dns resolvable name
-    - port -- the port number
-    - etc...
-
-    See https://docs.python.org/3/library/urllib.parse.html?highlight=urlparse#urllib.parse.urlparse
-    """
-    return urlparse(os.environ["ROS_MASTER_URI"])
-
-
-def fetch_ros_master_ip():
-    """Fetch only the hostname (host IP) portion of the parse URI."""
-    return fetch_ros_master_uri().hostname
-
 
 def run_shell(cmd, args=""):
     """Run script command supplied as string.
@@ -82,9 +65,10 @@ def get_pid(keyword):
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
 @app.route("/")
+@app.route("/arm")
 def index():
     """Current landing page, the arm panel."""
-    return flask.render_template("Arm.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
 
 @app.route('/static/model/<path:filename>')
@@ -96,14 +80,32 @@ def serveArmModel(filename):
 @app.route("/rover")
 def rover():
     """Rover control panel."""
-    return flask.render_template("Rover.html", roverIP=fetch_ros_master_ip())
-
+    return flask.render_template("pages/Rover.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/science")
 def science():
     """Science page."""
-    return flask.render_template("Science.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Science.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/pds")
+def pds():
+    """PDS page."""
+    return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
+
+
+# routes for science page
+@app.route('/science/numSections')
+def numSections():
+    return '4'
+
+@app.route("/stream")
+def stream():
+    """Stream page."""
+    return flask.render_template("pages/Stream.html", roverIP=fetch_ros_master_ip())
+
+@app.route('/science/initialSection')
+def initialSection():
+    return '0'
 
 @app.route("/ping_rover")
 def ping_rover():
@@ -240,24 +242,13 @@ def capture_image():
 
     return jsonify(msg=msg)
 
-# routes for science page
-@app.route('/numSections')
-def numSections():
-    return '26'
+@app.route("/initiate_feed_recording/<stream>", methods=["POST", "GET"])
+def initiate_feed_recording(stream):
+    return start_recording_feed(stream)
 
-@app.route('/initialSection')
-def initialSection():
-    return '0'
-
-@app.route('/rotatePos')
-def rotatePos():
-    time.sleep(1) # wait 1 second
-    return 'done'
-
-@app.route('/rotateNeg')
-def rotateNeg():
-    time.sleep(1)
-    return 'done'
+@app.route("/stop_feed_recording/<stream>", methods=["POST", "GET"])
+def stop_feed_recording(stream):
+    return stop_recording_feed(stream)
 
 if __name__ == "__main__":
 
