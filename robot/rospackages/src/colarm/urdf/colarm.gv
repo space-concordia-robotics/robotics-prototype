@@ -1,0 +1,20 @@
+digraph G {
+node [shape=box];
+"base_link" [label="base_link"];
+"upbase_link" [label="upbase_link"];
+"prox_link" [label="prox_link"];
+"distal_link" [label="distal_link"];
+"basewrist_link" [label="basewrist_link"];
+"wrist_link" [label="wrist_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_link" -> "upbase_joint" [label="xyz: 0 0 0 \nrpy: 1.5708 -0 3.1322"]
+"upbase_joint" -> "upbase_link"
+"upbase_link" -> "prox_joint" [label="xyz: -0.0031353 0.0935 0.0050186 \nrpy: -3.14159 -0.0093664 -3.14159"]
+"prox_joint" -> "prox_link"
+"prox_link" -> "distal_joint" [label="xyz: 0.0050063 0.43 0.006154 \nrpy: 0 -0 0"]
+"distal_joint" -> "distal_link"
+"distal_link" -> "basewrist_joint" [label="xyz: -0.00021009 0.48 -0.00075716 \nrpy: 0 -0 0"]
+"basewrist_joint" -> "basewrist_link"
+"basewrist_link" -> "wrist_joint" [label="xyz: -0.00054474 0.095 -0.00075892 \nrpy: 0 1.5162 0"]
+"wrist_joint" -> "wrist_link"
+}
