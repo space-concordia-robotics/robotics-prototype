@@ -4,7 +4,7 @@ lastRotate = 0
 
 // minimum and maximum acceptable battery voltages (volts)
 MIN_VOLTAGE = 12.5
-MAX_VOLTAGE = 16.9
+MAX_VOLTAGE = 16.8
 VOLTAGE_LEEWAY = 0.5
 // minimum and maximum acceptable battery tempratures (degrees celcius)
 MIN_TEMP = 0
@@ -170,14 +170,15 @@ function initRosWeb () {
     let voltage = message.data.toFixed(2)
     $('#battery-voltage').text(voltage)
 
-    if ((voltage >= MAX_VOLTAGE || voltage <= MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1') {
+    // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1') {
       $('#battery-voltage').attr('acceptable', '0')
       $('#battery-voltage').css({'color': 'red'})
       errorSound()
-      if (voltage >= MAX_VOLTAGE) {
-        navModalMessage('Warning: Voltage too high', 'Discharge and disconnect BMS')
-      } else if (voltage <= MIN_VOLTAGE){
-        navModalMessage('Warning: Voltage too low', 'Turn robot off and disconnect BMS')
+      if (voltage > MAX_VOLTAGE) {
+        navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+      } else if (voltage < MIN_VOLTAGE){
+        navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
       } 
     } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
       $('#battery-voltage').attr('acceptable', '1')
@@ -198,14 +199,15 @@ function initRosWeb () {
       let temperature = temps[i]
       $obj.text(temperature)
 
-      if ((overtemp = temperature >= MAX_TEMP || temperature <= MIN_TEMP) && $obj.attr('acceptable') === '1') {
+      // if statement to control temperature indicator switching between acceptable(white) and unacceptable(red)
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP) && $obj.attr('acceptable') === '1') {
         $obj.attr('acceptable', '0')
         $obj.css({'color': 'red'})
         errorSound()
-        if (temperature >= MAX_TEMP) {
-          navModalMessage('Warning: Battery temperature too high', 'decreace temperature')
-        } else if (temperature <= MIN_TEMP) {
-          navModalMessage('Warning: Battery temperature too low', 'increace temperature')
+        if (temperature > MAX_TEMP) {
+          navModalMessage('Warning: Battery temperature too high', 'decrease temperature')
+        } else if (temperature < MIN_TEMP) {
+          navModalMessage('Warning: Battery temperature too low', 'increase temperature')
         }
       } else if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
         $obj.attr('acceptable', '1')

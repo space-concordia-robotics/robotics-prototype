@@ -254,7 +254,7 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
 }
 
 /*
-plays an error sound -> warning will not play if the doc has not been interacted with yet
+plays an error sound once -> warning will not play if the document has not been interacted with yet
 */
 function errorSound (){
   new Audio('../../static/sound/error.mp3').play()
