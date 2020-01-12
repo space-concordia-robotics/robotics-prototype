@@ -5,7 +5,7 @@ excluded_branches = {'test-1', 'sdfsdfs', '!@dvsfosk*&*&^fs4943'}
 
 def test_is_excluded_branch():
     """
-    test excluded branches checking
+    test the checking of excluded branches
     """
     assert not is_excluded_branch('test', excluded_branches)
     assert is_excluded_branch('test-1', excluded_branches)
