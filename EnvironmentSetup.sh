@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Setup script which install the Space Concordia Robotics Software team's development environment. 
 
-APPEND_TO_BASH= "
+APPEND_TO_BASH="
 
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
@@ -43,7 +43,6 @@ sudo apt install python3.6 python3.6-venv git -y
 python3.6 -m venv venv
 source venv/bin/activate
 
-
 # Install Requirements
 pip install -U pip
 pip install -r requirements.txt -r requirements-dev.txt
@@ -55,19 +54,21 @@ python setup.py develop
 
 # Check if ros is already installed, install it if it isn't
 ROS_VERSION=$(rosversion -d)
-
-# $? = 0 when previous command succeeds
-if [$? != 0]
+if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
 then 
     echo "You do not have ROS installed, installing..."
     
     wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
     chmod 755 ./install_ros_kinetic.sh
-    bash ./install_ros_kinetic.sh
+    bash ./install_ros_kinetic.sh -y
     rm ./install_ros_kinetic.sh
-
+	
+	source ~/.bashrc
+	
     sudo apt install ros-kinetic-rosbridge-suite -y
-elif [$ROS_VERSION != 'kinetic']
+
+elif [$ROS_VERSION != "kinetic"]
+then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
     exit 1
 fi
@@ -78,6 +79,7 @@ sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
 
 
 # Build catkin
+source /opt/ros/kinetic/setup.bash
 cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
@@ -87,17 +89,20 @@ catkin_make
 # Ensures that you can connect to someones else's ip to access GUI
 # Add aliases to terminal
 # Makes your terminal start in (venv)
-sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
+# sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
+source ~/.bashrc
 
 
 # Run env.sh
-./robot/basestation/env.sh > robot/basestation/static/js/env.js
+cd $REPO/robot/basestation
+./env.sh > static/js/env.js
 
 
 # Setup git hooks
 cd $REPO
 cp commit-message-hook.sh .git/hooks/prepare-commit-msg
 cp branch-name-verification.sh .git/hooks/post-checkout
+
 
 # Exit
 echo "$FINAL_MESSAGE"
