@@ -1,6 +1,7 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
-def init_serial():
-    baudrate = 115200
+#baud: initial baudrate, baud: baudrate for usb, type: node type
+def init_serial(int init_baud, str type):
+    baudrate = baud
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
@@ -25,6 +26,9 @@ def init_serial():
 
     startConnecting = time.time()
     if usb:
+        #add additional baudrate for PdsNode.property. (to be fixed)
+        if type = pds:
+            baudrate = 19200
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
             for portObj in ports:
@@ -77,7 +81,8 @@ def init_serial():
                     dat='';data=None
                     try:
                         dat = ser.readline().decode()
-                        data = stripFeedback(dat)
+                        if type = arm:
+                            data = stripFeedback(dat) #not present in pdsnode
                     except:
                         rospy.logwarn('trouble reading from serial port')
                     if data is not None:
@@ -91,12 +96,3 @@ def init_serial():
 
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
-
-requests = {
-    'ping' : ['pong'],
-    'who' : ['arm'],
-    'loop open' : ['open'],
-    'loop closed' : ['closed'],
-    'armspeed' : ['Alert', 'Success'],
-    'reboot' : ['rebooting']
-}
