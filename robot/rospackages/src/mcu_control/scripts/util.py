@@ -1,6 +1,10 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 #baud: initial baudrate, baud: baudrate for usb, type: node type
-def init_serial(int init_baud, str type):
+#Baudrates:
+#PdsNode = 9600
+#ArmNode = 115200
+
+def init_serial(init_baud, type):
     baudrate = baud
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
@@ -25,10 +29,10 @@ def init_serial(int init_baud, str type):
     ports = list(serial.tools.list_ports.comports())
 
     startConnecting = time.time()
+    #Change baudrate for PdsNode.py
+    if type = 'PDS':
+        baudrate = 19200
     if usb:
-        #add additional baudrate for PdsNode.property. (to be fixed)
-        if type = pds:
-            baudrate = 19200
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
             for portObj in ports:
