@@ -22,6 +22,9 @@ $ cd robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
 
+**Note:** The script will need your input originally for sudo password, and not long after you will need to press <kbd>Enter</kbd> to continue the installation.
+After that you can sit back and relax :slightly_smiling_face:
+
 ## Manual setup
 If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
 
