@@ -15,6 +15,8 @@ To use the automatic setup script you must first clone the repo into `~/Programm
 $ cd ~/Programming
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
 ```
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
+If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
 When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
@@ -55,7 +57,7 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press `Ctrl + C`**
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
 
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
@@ -98,7 +100,7 @@ $ roscore
 ```
 In the output you should see included: `* /rosdistro: kinetic`
 
-To stop a running process in the command line, press `Ctrl-C`
+To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
 
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 ```
