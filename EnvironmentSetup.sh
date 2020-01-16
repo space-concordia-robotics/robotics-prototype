@@ -89,7 +89,7 @@ catkin_make
 # Ensures that you can connect to someones else's ip to access GUI
 # Add aliases to terminal
 # Makes your terminal start in (venv)
-# sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
+sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
 source ~/.bashrc
 
 
@@ -101,7 +101,7 @@ cd $REPO/robot/basestation
 # Setup git hooks
 cd $REPO
 cp commit-message-hook.sh .git/hooks/prepare-commit-msg
-cp branch-name-verification.sh .git/hooks/post-checkout
+cp branch-name-verification.py .git/hooks/post-checkout
 
 
 # Exit
