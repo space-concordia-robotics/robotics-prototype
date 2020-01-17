@@ -1,11 +1,11 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 #baud: initial baudrate, baud: baudrate for usb, type: node type
-#Baudrates:
+#Baudrates (for init_baud):
 #PdsNode = 9600
 #ArmNode = 115200
 #ScienceNode = 115200
 #RoverNode = 115200
-#mcuName:
+#mcuName (for type):
 #PdsNode = 'PDS'
 #ArmNode = 'arm'
 #ScienceNode = 'science'
