@@ -3,9 +3,16 @@
 #Baudrates:
 #PdsNode = 9600
 #ArmNode = 115200
+#ScienceNode = 115200
+#RoverNode = 115200
+#mcuName:
+#PdsNode = 'PDS'
+#ArmNode = 'arm'
+#ScienceNode = 'science'
+#RoverNode = 'Astro'
 
 def init_serial(init_baud, type):
-    baudrate = baud
+    baudrate = init_baud
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
@@ -16,10 +23,16 @@ def init_serial(init_baud, type):
     if len(myargv) > 1:
         if myargv[1] == 'uart':
             usb=False; uart=True
-            rospy.loginfo('Using UART and 115200 baud by default')
+            if type = 'PDS':
+                rospy.loginfo('Using UART and 9600 baud by default')
+            else:
+                rospy.loginfo('Using UART and 115200 baud by default')
         elif myargv[1] == 'usb':
             usb=True; uart=False
-            rospy.loginfo('Using USB and 115200 baud by default')
+            if type = 'PDS':
+                rospy.loginfo('Using USB and 9600 baud by default')
+            else:
+                rospy.loginfo('Using USB and 115200 baud by default')
         else:
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
             sys.exit(0)
