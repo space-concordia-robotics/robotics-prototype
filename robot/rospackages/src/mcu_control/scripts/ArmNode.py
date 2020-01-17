@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from serial_init.py import init_serial()
+from util import init_serial
 import serial # pyserial
 import serial.tools.list_ports # pyserial
 #from robot.comms.uart import Uart

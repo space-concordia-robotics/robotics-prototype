@@ -1,18 +1,13 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
-#baud: initial baudrate, baud: baudrate for usb, type: node type
-#Baudrates (for init_baud):
-#PdsNode = 9600
-#ArmNode = 115200
-#ScienceNode = 115200
-#RoverNode = 115200
-#mcuName (for type):
-#PdsNode = 'PDS'
-#ArmNode = 'arm'
-#ScienceNode = 'science'
-#RoverNode = 'Astro'
+#baud: baudrate, type: node type
+#baudrate & type:
+#PdsNode = 9600, 'PDS'
+#ArmNode = 115200, 'arm'
+#ScienceNode = 115200, 'science'
+#RoverNode = 115200, 'Astro'
 
-def init_serial(init_baud, type):
-    baudrate = init_baud
+def init_serial(baud, type):
+    baudrate = baud
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
@@ -70,6 +65,9 @@ def init_serial(init_baud, type):
                                 rospy.loginfo(mcuName+" MCU identified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                                 rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
+                                if type = 'Astro':
+                                    ser.reset_input_buffer()
+                                    ser.reset_output_buffer()
                                 return
         else:
             rospy.logerr("No USB devices recognized, exiting")
