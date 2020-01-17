@@ -42,10 +42,10 @@ def init_serial(init_baud, type):
     ports = list(serial.tools.list_ports.comports())
 
     startConnecting = time.time()
-    #Change baudrate for PdsNode.py
-    if type = 'PDS':
-        baudrate = 19200
     if usb:
+        #Change baudrate for PdsNode.py
+        if type = 'PDS':
+            baudrate = 19200
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
             for portObj in ports:
