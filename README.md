@@ -10,7 +10,14 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
 ## Automatic Setup
-To use the automatic setup script you must first clone the repo into `~/Programming`
+**Notes:** 
+- Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
+- Don't forget the `--recursive` when cloining, or you might run into issues.
+- The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
+- You should be prompted once (maybe more) for sudo password.
+Apart from that, you can can sit back and relax :slightly_smiling_face:
+
+To use the automatic setup script you must first clone the repo into a directory called `Programming` in your home folder. Path should be `~/Programming`.
 ```
 $ cd ~/Programming
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
@@ -23,9 +30,6 @@ When you have cloned the repo you can then execute `EnvironmentSetup.sh` which w
 $ cd robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
-
-**Note:** The script will need your input originally for sudo password, and not long after you will need to press <kbd>Enter</kbd> to continue the installation.
-After that you can sit back and relax :slightly_smiling_face:
 
 ## Manual setup
 If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
@@ -90,7 +94,7 @@ To deactivate virtualenv, run `deactivate`.
 ```
 wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
 chmod 755 ./install_ros_kinetic.sh
-bash ./install_ros_kinetic.sh
+yes "" | bash ./install_ros_kinetic.sh
 ```
 To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
@@ -164,7 +168,7 @@ Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If 
 ### Final Steps
 You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done with the automatic setup)
+Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by executing EnvironmentSetup.sh)
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
