@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 """Flask server controller.
 
 Flask is light-weight and modular so this is actually all we need to set up a simple HTML page.
@@ -102,24 +102,18 @@ def stream():
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
+
 @app.route('/navigation/inputTemplates/goal-buttons/<count>', methods= ["GET"])
 def goal_Buttons(count):
    return flask.render_template("elements/navigation/dialogs/goal/goal-buttons.html", count =  count)
-
-
 
 @app.route('/navigation/inputTemplates/new-goal-coordinates-btn/<goalId>', methods=["GET"])
 def new_Goal_Button(goalId):
    return flask.render_template("elements/navigation/dialogs/goal/new-goal-coordinates-btn.html", goalId = goalId)
 
-
-
-
-
 @app.route('/navigation/inputTemplates/antenna-stats', methods= ["GET"])
 def antenna_stats():
    return flask.render_template("elements/navigation/dialogs/antenna/antenna-stats.html")
-
 
 @app.route('/navigation/inputTemplates/antenna-DD/<target>' , methods = ["GET"])
 def antenna_DD(target):
@@ -144,10 +138,53 @@ def goal_DDM(target,count):
 
 @app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>' , methods = ["GET"])
 def goal_DMS(target,count):
-   return flask.render_template("elements/navigation/dialogs/goal/goal-DMS-input-template.html", target = target,  count = count)
+    return flask.render_template("elements/navigation/dialogs/goal/goal-DMS-input-template.html", target = target,  count = count)
 
-@app.route("/ping_rover")
-def ping_rover():
+antenna_modal_serverHTML = ''
+antenna_stats_serverHTML = ''
+goal_modal_serverHTML = ''
+navQueue_serverHTML = ''
+@app.route('/navigation/cached_content/antenna_stats' , methods = ["POST", "GET"])
+def antenna_stats_server():
+    if request.method == 'POST':
+        global antenna_stats_serverHTML
+        antenna_stats_serverHTML = (request.get_data().decode('UTF-8'))
+        return flask.render_template_string(antenna_stats_serverHTML)
+    if request.method == 'GET':
+        return flask.render_template_string(antenna_stats_serverHTML)    
+   
+
+@app.route('/navigation/cached_content/antenna_modal' , methods = ["POST", "GET"])
+def antenna_modal_server():
+    if request.method == 'POST':
+        global antenna_modal_serverHTML
+        antenna_modal_serverHTML = (request.get_data().decode('UTF-8'))
+        return flask.render_template_string(antenna_modal_serverHTML)
+    if request.method == 'GET':
+        return flask.render_template_string(antenna_modal_serverHTML)    
+   
+@app.route('/navigation/cached_content/goal_modal' , methods = ["POST", "GET"])
+def goal_stats_server():
+    if request.method == 'POST':
+        global goal_modal_serverHTML
+        goal_modal_serverHTML = (request.get_data().decode('UTF-8'))
+        return flask.render_template_string(goal_modal_serverHTML)
+    if request.method == 'GET':
+        return flask.render_template_string(goal_modal_serverHTML)    
+   
+
+@app.route('/navigation/cached_content/navQueue' , methods = ["POST", "GET"])
+def navQueue():
+    if request.method == 'POST':
+        global navQueue_serverHTML
+        data = request.get_json()
+        navQueue_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
+    if request.method == 'GET':
+        return jsonify(navQueue_serverHTML)    
+
+    
+
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
 
     Pings rover first directly with Unix ping command,
