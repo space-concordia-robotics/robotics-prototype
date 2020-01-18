@@ -6,7 +6,7 @@
     default="False" />
   <param
     name="robot_description"
-    textfile="$(find SCRB19_MA_000-000-Arm_01.SLDASM)/urdf/SCRB19_MA_000-000-Arm_01.SLDASM.urdf" />
+    textfile="$(find astro_arm)/urdf/astro_arm.urdf" />
   <param
     name="use_gui"
     value="$(arg gui)" />
@@ -22,5 +22,5 @@
     name="rviz"
     pkg="rviz"
     type="rviz"
-    args="-d $(find SCRB19_MA_000-000-Arm_01.SLDASM)/urdf.rviz" />
+    args="-d $(find astro_arm)/urdf.rviz" />
 </launch>

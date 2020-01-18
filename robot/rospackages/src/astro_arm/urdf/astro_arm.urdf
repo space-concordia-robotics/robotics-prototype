@@ -3,7 +3,7 @@
      Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
-  name="SCRB19_MA_000-000-Arm_01.SLDASM">
+  name="astro_arm">
   <link
     name="base_link">
     <inertial>
@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/base_link.STL" />
+          filename="package://astro_arm/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/base_link.STL" />
+          filename="package://astro_arm/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -66,7 +66,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/upper_base_link.STL" />
+          filename="package://astro_arm/meshes/upper_base_link.STL" />
       </geometry>
       <material
         name="">
@@ -80,7 +80,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/upper_base_link.STL" />
+          filename="package://astro_arm/meshes/upper_base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -119,7 +119,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/proximal_link.STL" />
+          filename="package://astro_arm/meshes/proximal_link.STL" />
       </geometry>
       <material
         name="">
@@ -133,7 +133,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/proximal_link.STL" />
+          filename="package://astro_arm/meshes/proximal_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -172,7 +172,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/distal_link.STL" />
+          filename="package://astro_arm/meshes/distal_link.STL" />
       </geometry>
       <material
         name="">
@@ -186,7 +186,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/distal_link.STL" />
+          filename="package://astro_arm/meshes/distal_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -225,7 +225,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/wrist.STL" />
+          filename="package://astro_arm/meshes/wrist.STL" />
       </geometry>
       <material
         name="">
@@ -239,7 +239,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://SCRB19_MA_000-000-Arm_01.SLDASM/meshes/wrist.STL" />
+          filename="package://astro_arm/meshes/wrist.STL" />
       </geometry>
     </collision>
   </link>
