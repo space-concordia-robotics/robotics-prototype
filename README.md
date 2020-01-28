@@ -168,7 +168,7 @@ Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If 
 ### Final Steps
 You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by executing EnvironmentSetup.sh)
+Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by running ./EnvironmentSetup.sh)
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
