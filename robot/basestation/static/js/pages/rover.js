@@ -379,14 +379,18 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    keyState[e.keyCode || e.which] = true
+    if (!$('#serial-cmd-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = true
+    }
   },
   true
 )
 window.addEventListener(
   'keyup',
   function (e) {
-    keyState[e.keyCode || e.which] = false
+    if (!$('#serial-cmd-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = false
+    }
   },
   true
 )
@@ -731,49 +735,49 @@ gameLoop()
 let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyI') {
+  if (event.code === 'KeyI') {
     $('#max-throttle-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
+  if (event.code === 'KeyJ') {
     $('#max-steering-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyK') {
+  if (event.code === 'KeyK') {
     $('#max-steering-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
+  if (event.code === 'KeyU') {
     $('#max-throttle-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
+  if (event.code === 'KeyD') {
     $('#rover-right > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
+  if (event.code === 'KeyA') {
     $('#rover-left > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
+  if (event.code === 'KeyW') {
     $('#rover-up > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
+  if (event.code === 'KeyS') {
     $('#rover-down > button').css('background-color', GREEN)
   }
 })

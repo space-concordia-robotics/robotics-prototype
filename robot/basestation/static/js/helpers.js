@@ -1,6 +1,5 @@
 // Console Log
 const logConsole = '#write-to-log'
-const serialCmd = '#serial-cmd-input'
 
 // Console Log
 function appendToConsole (msg, devConsole = true, guiConsole = true) {
@@ -31,10 +30,6 @@ function appendToScienceLog (msg) {
 
 function clearLogConsole () {
   $(logConsole).html('')
-}
-
-function clearSerialCmd () {
-  $(serialCmd).val('')
 }
 
 function scrollToBottom () {

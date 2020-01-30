@@ -452,7 +452,7 @@ function checkTaskStatuses () {
   }
 }
 
-function sendIKCommand () {
+function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to IK node')
