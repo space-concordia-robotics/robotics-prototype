@@ -2,6 +2,15 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
+// minimum and maximum acceptable battery voltages (volts)
+MIN_VOLTAGE = 12.5
+MAX_VOLTAGE = 16.8
+VOLTAGE_LEEWAY = 0.5
+// minimum and maximum acceptable battery tempratures (degrees celcius)
+MIN_TEMP = 0
+MAX_TEMP = 85
+TEMP_LEEWAY = 1
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -158,7 +167,23 @@ function initRosWeb () {
     messageType: 'std_msgs/Float32'
   })
   battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
+    let voltage = message.data.toFixed(2)
+    $('#battery-voltage').text(voltage)
+
+    // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1') {
+      $('#battery-voltage').attr('acceptable', '0')
+      $('#battery-voltage').css({'color': 'red'})
+      errorSound()
+      if (voltage > MAX_VOLTAGE) {
+        navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+      } else if (voltage < MIN_VOLTAGE){
+        navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+      } 
+    } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
+      $('#battery-voltage').attr('acceptable', '1')
+      $('#battery-voltage').css({'color': 'white'})
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -167,9 +192,29 @@ function initRosWeb () {
     messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
-    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
-    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+    let temps = [parseFloat(message.x).toFixed(2), parseFloat(message.y).toFixed(2), parseFloat(message.z).toFixed(2)]
+
+    $('.battery-temp').each(function(i, obj) {
+      let $obj = $(obj)
+      let temperature = temps[i]
+      $obj.text(temperature)
+
+      // if statement to control temperature indicator switching between acceptable(white) and unacceptable(red)
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP) && $obj.attr('acceptable') === '1') {
+        $obj.attr('acceptable', '0')
+        $obj.css({'color': 'red'})
+        errorSound()
+        if (temperature > MAX_TEMP) {
+          navModalMessage('Warning: Battery temperature too high', 'decrease temperature')
+        } else if (temperature < MIN_TEMP) {
+          navModalMessage('Warning: Battery temperature too low', 'increase temperature')
+        }
+      } else if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
+        $obj.attr('acceptable', '1')
+        $obj.css({'color': 'white'})
+      }
+    });
+
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
@@ -535,3 +580,4 @@ function getRoverIP (callback) {
   console.log('hostIP: ' + env.HOST_IP)
   return env.ROS_MASTER_IP
 }
+

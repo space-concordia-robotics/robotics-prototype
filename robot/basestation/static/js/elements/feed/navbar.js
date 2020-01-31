@@ -267,3 +267,12 @@ $(document).ready(() => {
     window.open('stream');
   })
 })
+
+/*
+function to display the navbar modal with the given title and body text
+*/
+function navModalMessage (title, body){
+  $(".modal-title").text(title)
+  $(".modal-msg").text(body)
+  $(".modal").modal({show: true})
+}

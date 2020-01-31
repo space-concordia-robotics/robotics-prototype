@@ -252,3 +252,10 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   })
   lastCmdSent = new Date().getTime()
 }
+
+/*
+plays an error sound once -> warning will not play if the document has not been interacted with yet
+*/
+function errorSound (){
+  new Audio('../../static/sound/error.mp3').play()
+}

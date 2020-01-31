@@ -50,27 +50,45 @@
     </div>
   </div>
 
-  <div class="col-md-1">
-    <div class="row border border-white text-white">
-      <div class="col-md-6">BATTERY VOLTAGE: </div>
-      <div class="col-md-6" id="battery-voltage">-</div>
+  <div class= "col-md-2">
+    <div class="row">
+      <div class="col d-flex flex-row-reverse align-items-center">
+        <i class="fas fa-battery-full fa-2x text-white"></i>
+      </div>
+
+      <div class="col">
+        <div class ="row text-white">
+          <div id="battery-voltage" acceptable="1">-</div>V
+        </div>
+        <div class ="row text-white">
+          <div id="battery-temperature" acceptable="1">-</div>℃
+        </div>
+      </div>
     </div>
   </div>
-  <div class= "col-md-1 border border-white">
-    <div class ="row text-white">
-      <div class="col-md-6">BATTERY TEMP: </div>
-      <div class="col-md-6"></div>
+
+  <div class="col-md-2">
+    <div class="row">
+      <div class="col-md-2 ml-auto">
+        <i class="fas fa-temperature-low fa-2x text-white"></i>
+      </div>
+
+      <div class="col-md-10">
+        <div class="row no-gutters text-white">
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-1" acceptable="1">-</span>℃
+          </div>
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-2" acceptable="1">-</span>℃
+          </div>
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-3" acceptable="1">-</span>℃
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-  <div class="col-md-2 border border-white">
-    <div class="row text-white">
-	  <span title="battery temp 1">T1:</span><div class="col-md-3" id="battery-temp-1">-&#8451;</div>
-	  <span title="battery temp 2">T2:</span><div class="col-md-3" id="battery-temp-2">-&#8451;</div>
-    </div>
-    <div class="row text-white">
-	  <span title="battery temp 3">T3:</span><div class="col-md-3" id="battery-temp-3">-&#8451;</div>
-    </div>
-  </div>
-</div>
-</div>
 </nav>
+
+{% include 'elements/feed/NavModal.html' %}
