@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Setup script which install the Space Concordia Robotics Software team's development environment. 
 
-APPEND_TO_BASH="
+APPEND_TO_BASH_ALIASES="
 
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
@@ -15,7 +15,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
 FINAL_MESSAGE="The script will now exit, you should test the installation using these steps:
 1. restart the terminal for certain changes to apply
--> it will automatically start with virtual env activated and you will be able to use aliases that you can lookup in your ~/.bashrc file
+-> it will automatically start with virtual env activated and you will be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
 2. test python using 'pytest'
 3. verify ROS-Kinetic installation using 'roscore'
 4. test GUI by running 'rosgui' and then 'startgui'
@@ -65,6 +65,7 @@ then
     rm ./install_ros_kinetic.sh
 	
 	source ~/.bashrc
+	source ~/.bash_aliases
 	
     sudo apt install ros-kinetic-rosbridge-suite -y
 
@@ -86,12 +87,13 @@ rosdep install --from-paths src --ignore-src -r -y
 catkin_make
 
 
-# Edit ~/.bashrc
+# Edit ~/.bash_aliases
 # Ensures that you can connect to someones else's ip to access GUI
 # Add aliases to terminal
 # Makes your terminal start in (venv)
-sudo echo "$APPEND_TO_BASH" >> ~/.bashrc
+sudo echo "$APPEND_TO_BASH_ALIASES" >> ~/.bash_aliases
 source ~/.bashrc
+source ~/.bash_aliases
 
 
 # Run env.sh
