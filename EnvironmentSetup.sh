@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Setup script which install the Space Concordia Robotics Software team's development environment. 
 
-APPEND_TO_BASH_ALIASES="
+APPEND_TO_BASH="
 
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
@@ -65,7 +65,6 @@ then
     rm ./install_ros_kinetic.sh
 	
 	source ~/.bashrc
-	source ~/.bash_aliases
 	
     sudo apt install ros-kinetic-rosbridge-suite -y
 
@@ -91,9 +90,8 @@ catkin_make
 # Ensures that you can connect to someones else's ip to access GUI
 # Add aliases to terminal
 # Makes your terminal start in (venv)
-sudo echo "$APPEND_TO_BASH_ALIASES" >> ~/.bash_aliases
+echo "$APPEND_TO_BASH" >> ~/.bashrc
 source ~/.bashrc
-source ~/.bash_aliases
 
 
 # Run env.sh
