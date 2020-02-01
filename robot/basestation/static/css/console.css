@@ -1,0 +1,8 @@
+input#serial-cmd-input {
+    margin: 4px;
+    width: 50%;
+}
+
+button#send-serial-cmd {
+    transform: scale(.9);
+}
