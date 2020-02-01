@@ -16,7 +16,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 FINAL_MESSAGE="The script will now exit, you should test the installation using these steps:
 1. restart the terminal for certain changes to apply
 -> it will automatically start with virtual env activated and you will be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
-2. test python using 'pytest'
+2. test python executing 'pytest' while in the 'robotics-prototype' directory
 3. verify ROS-Kinetic installation using 'roscore'
 4. test GUI by running 'rosgui' and then 'startgui'
 -> to see the GUI open a browser (preferably chrome) and go to localhost:5000" 
