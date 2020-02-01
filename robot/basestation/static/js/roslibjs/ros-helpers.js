@@ -10,6 +10,8 @@ VOLTAGE_LEEWAY = 0.5
 MIN_TEMP = 0
 MAX_TEMP = 85
 TEMP_LEEWAY = 1
+// variable to toggle unacceptable voltage and temperature indicators
+ALERT_ENABLE = false;
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -171,7 +173,7 @@ function initRosWeb () {
     $('#battery-voltage').text(voltage)
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
-    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1') {
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
       $('#battery-voltage').attr('acceptable', '0')
       $('#battery-voltage').css({'color': 'red'})
       errorSound()
@@ -179,7 +181,7 @@ function initRosWeb () {
         navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
       } else if (voltage < MIN_VOLTAGE){
         navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
-      } 
+      }
     } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
       $('#battery-voltage').attr('acceptable', '1')
       $('#battery-voltage').css({'color': 'white'})
@@ -200,7 +202,7 @@ function initRosWeb () {
       $obj.text(temperature)
 
       // if statement to control temperature indicator switching between acceptable(white) and unacceptable(red)
-      if ((temperature > MAX_TEMP || temperature < MIN_TEMP) && $obj.attr('acceptable') === '1') {
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP) && $obj.attr('acceptable') === '1' && ALERT_ENABLE) {
         $obj.attr('acceptable', '0')
         $obj.css({'color': 'red'})
         errorSound()
@@ -580,4 +582,3 @@ function getRoverIP (callback) {
   console.log('hostIP: ' + env.HOST_IP)
   return env.ROS_MASTER_IP
 }
-
