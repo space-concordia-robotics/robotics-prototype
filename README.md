@@ -9,6 +9,7 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
  
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
+
 ## Automatic Setup
 **Notes:** 
 - Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
@@ -17,7 +18,7 @@ Secondly, it is imperative you use a virtual env (instead of your system Python)
 - You should be prompted once (maybe more) for sudo password.
 Apart from that, you can can sit back and relax :slightly_smiling_face:
 
-To use the automatic setup script you must first clone the repo using the command below. Make sure that you do not have a file named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.
+To use the automatic setup script you must first clone the repo using the command below. **Make sure that you do not have a directory named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.**
 ```
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
 ```
