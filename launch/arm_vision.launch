@@ -1,7 +1,12 @@
 <launch>
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-  </node>
-  <rosparam>
-    use_gui : true
-  </    rosparam>
+  <param
+    name="use_gui"
+    value="true" />
+  <param
+    name="robot_description"
+    textfile="$(find astro_arm)/urdf/astro_arm.urdf" />
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="state_publisher" />
 </launch>
