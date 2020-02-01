@@ -12,22 +12,21 @@ Secondly, it is imperative you use a virtual env (instead of your system Python)
 ## Automatic Setup
 **Notes:** 
 - Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
-- Don't forget the `--recursive` when cloining, or you might run into issues.
+- Don't forget the `--recursive` when cloning, or you might run into issues.
 - The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
 - You should be prompted once (maybe more) for sudo password.
 Apart from that, you can can sit back and relax :slightly_smiling_face:
 
-To use the automatic setup script you must first clone the repo into a directory called `Programming` in your home folder. Path should be `~/Programming`.
+To use the automatic setup script you must first clone the repo using the command below. Make sure that you do not have a file named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.
 ```
-$ cd ~/Programming
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
 ```
 **If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
 When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
-$ cd robotics-prototype
+$ cd ~/Programming/robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
 
