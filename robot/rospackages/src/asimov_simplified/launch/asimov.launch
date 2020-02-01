@@ -1,4 +1,0 @@
-<launch>
-  <!-- this next node sends asimov urdf to param server -->
-  <param name="robot_description" textfile="$(find asimov_simplified)/urdf/asimov_simplified.urdf" />
-</launch>
