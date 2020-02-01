@@ -1,10 +1,10 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
-#baud: baudrate, type: node type
-#baudrate & type:
-#PdsNode = 9600, 'PDS'
-#ArmNode = 115200, 'arm'
-#ScienceNode = 115200, 'science'
-#RoverNode = 115200, 'Astro'
+# baud: baudrate, type: node type
+# baudrate & type:
+# PdsNode = 9600, 'PDS'
+# ArmNode = 115200, 'arm'
+# ScienceNode = 115200, 'science'
+# RoverNode = 115200, 'Astro'
 
 def init_serial(baud, type):
     baudrate = baud
