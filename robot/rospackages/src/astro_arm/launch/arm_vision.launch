@@ -9,4 +9,8 @@
     name="robot_state_publisher"
     pkg="robot_state_publisher"
     type="state_publisher" />
+  <node
+    name="arm_states_republisher"
+    pkg="astro_arm"
+    type="arm_states_republisher.py" />
 </launch>
