@@ -70,13 +70,6 @@ def index():
     """Current landing page, the arm panel."""
     return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
-
-@app.route('/static/model/<path:filename>')
-def serveArmModel(filename):
-    """Lets ros3djs access the meshes used to render the arm model"""
-    return flask.send_from_directory('../rospackages/src/', filename)
-
-
 @app.route("/rover")
 def rover():
     """Rover control panel."""
