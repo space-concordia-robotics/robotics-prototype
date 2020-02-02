@@ -11,7 +11,7 @@ MIN_TEMP = 0
 MAX_TEMP = 85
 TEMP_LEEWAY = 1
 // variable to toggle unacceptable voltage and temperature indicators
-ALERT_ENABLE = false;
+ALERT_ENABLE = true
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -169,13 +169,14 @@ function initRosWeb () {
     messageType: 'std_msgs/Float32'
   })
   battery_voltage_listener.subscribe(function (message) {
+    // sets voltage to two decimal points
     let voltage = message.data.toFixed(2)
     $('#battery-voltage').text(voltage)
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
     if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
       $('#battery-voltage').attr('acceptable', '0')
-      $('#battery-voltage').css({'color': 'red'})
+      textColor('#battery-voltage', 'red')
       errorSound()
       if (voltage > MAX_VOLTAGE) {
         navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
@@ -184,7 +185,7 @@ function initRosWeb () {
       }
     } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
       $('#battery-voltage').attr('acceptable', '1')
-      $('#battery-voltage').css({'color': 'white'})
+      textColor('#battery-voltage', 'white')
     }
   })
   // setup a subscriber for the battery_temps topic
@@ -194,7 +195,12 @@ function initRosWeb () {
     messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    let temps = [parseFloat(message.x).toFixed(2), parseFloat(message.y).toFixed(2), parseFloat(message.z).toFixed(2)]
+    // sets temperatures to two decimal points
+    let temps = [
+      parseFloat(message.x).toFixed(2),
+      parseFloat(message.y).toFixed(2),
+      parseFloat(message.z).toFixed(2)
+    ]
 
     $('.battery-temp').each(function(i, obj) {
       let $obj = $(obj)
