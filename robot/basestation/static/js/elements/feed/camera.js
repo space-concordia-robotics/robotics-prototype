@@ -22,7 +22,7 @@ $(document).ready(() => {
   const CAMERA_STOP_SUCCESS_RESPONSE = 'Stopped camera stream'
 
   // path to stream offline image
-  const STREAM_OFF = '../../static/img/camera/stream-offline.png'
+  const STREAM_OFF = '../../static/img/camera/stream_offline.png'
   const POWER_ON = '../../static/img/camera/power_on.png'
   const POWER_OFF = '../../static/img/camera/power_off.png'
 
@@ -138,26 +138,26 @@ $(document).ready(() => {
   }
 
   function showStreamOff(cameraPanel) {
-    let cameraFeed = cameraPanel.find('.camera-feed');
-    let cameraPower = cameraPanel.find('.camera-power');
+    let cameraFeed = cameraPanel.find('.camera-feed')
+    let cameraPower = cameraPanel.find('.camera-power')
 
-    cameraFeed.attr('src', STREAM_OFF);
-    cameraFeed.css('padding', '10px');
+    cameraFeed.attr('src', STREAM_OFF)
+    cameraFeed.css('padding', '10px')
   
-    cameraPower.attr('power-on', 'false');
-    cameraPower.attr('src', POWER_OFF);
+    cameraPower.attr('power-on', 'false')
+    cameraPower.attr('src', POWER_OFF)
   }
 
   $('.camera-screenshot').click(e => {
     let cameraPanel = $(e.target).parents('.camera-panel')
     let cameraNameElement = cameraPanel.find('.camera-name')
-    let cameraName = cameraNameElement.attr('stream");
+    let cameraName = cameraNameElement.attr('stream")
     let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let cameraPower = cameraPanel.find('.camera-power')
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
-      appendToConsole("Please turn on a stream");
-      return;
+      appendToConsole("Please turn on a stream")
+      return
     }
 
     $.ajax('/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
@@ -172,51 +172,51 @@ $(document).ready(() => {
 
   // Rotate camera feed 90 degrees CCW
   $('.camera-rotl').click(e => {
-    let cameraPanel = $(e.target).parents(".camera-panel");
-    let rotation = cameraPanel.attr("rotation");
-    rotation = negativeModulo(--rotation, 4);
-    cameraPanel.attr("rotation", rotation);
-    let angle = rotation * 90;
-    let cameraFeed = cameraPanel.find(".camera-feed");
+    let cameraPanel = $(e.target).parents(".camera-panel")
+    let rotation = cameraPanel.attr("rotation")
+    rotation = negativeModulo(--rotation, 4)
+    cameraPanel.attr("rotation", rotation)
+    let angle = rotation * 90
+    let cameraFeed = cameraPanel.find(".camera-feed")
     rotateElement(cameraFeed, angle)
   })
 
   // Rotate camera feed 90 degrees CW
   $('.camera-rotr').click(e => {
-    let cameraPanel = $(e.target).parents(".camera-panel");
-    let rotation = cameraPanel.attr("rotation");
-    rotation = negativeModulo(++rotation, 4);
-    cameraPanel.attr("rotation", rotation);
-    let angle = rotation * 90;
-    let cameraFeed = cameraPanel.find(".camera-feed");
+    let cameraPanel = $(e.target).parents(".camera-panel")
+    let rotation = cameraPanel.attr("rotation")
+    rotation = negativeModulo(++rotation, 4)
+    cameraPanel.attr("rotation", rotation)
+    let angle = rotation * 90
+    let cameraFeed = cameraPanel.find(".camera-feed")
     rotateElement(cameraFeed, angle)
   })
 
   $(document).on('click', '.camera-selection-element', e => {
     let selectedStream = $(e.target)[0]
-    let cameraPanel = $(e.target).parents(".camera-panel");
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "");
-    cameraNameElement.attr("stream", cameraName);
-    let cameraNameSplit = cameraName.split("/");
+    let cameraPanel = $(e.target).parents(".camera-panel")
+    let cameraNameElement = cameraPanel.find(".camera-name")
+    let cameraName = selectedStream.innerHTML.replace(/(\r\n|\n|\r)/gm, "")
+    cameraNameElement.attr("stream", cameraName)
+    let cameraNameSplit = cameraName.split("/")
     let cameraShortName = cameraNameSplit[cameraNameSplit.length - 1]
-    cameraNameElement[0].innerHTML = cameraShortName;
+    cameraNameElement[0].innerHTML = cameraShortName
 
     let cameraPower = cameraPanel.find('.camera-power')
-    cameraPower.attr("power-on", "false");
-    cameraPower.attr("src", POWER_OFF);
+    cameraPower.attr("power-on", "false")
+    cameraPower.attr("src", POWER_OFF)
 
-    let cameraControls = cameraPanel.find('.camera-controls');
-    cameraControls.attr("camera-name", cameraShortName + 'Cam');
+    let cameraControls = cameraPanel.find('.camera-controls')
+    cameraControls.attr("camera-name", cameraShortName + 'Cam')
     updateRecordingButton(cameraPanel, false)
 
     requestTask(CAMERA_STREAM, STATUS_CHECK, msgs => {
       if(msgs[0])
       {
-        let activePorts = msgs[1].replace(/(\r\n|\n|\r)/gm, "").split(',');
+        let activePorts = msgs[1].replace(/(\r\n|\n|\r)/gm, "").split(',')
         if (activePorts.includes(cameraName))
         {
-          showStreamOn(cameraPanel);
+          showStreamOn(cameraPanel)
           let streamURL = getStreamURL(getCameraName(cameraPanel) + TOPIC_SUFFIX)
           isRecording(streamURL, is_recording => {
             updateRecordingButton(cameraPanel, is_recording)
@@ -227,7 +227,7 @@ $(document).ready(() => {
           showStreamOff(cameraPanel)
         }
       }
-    });
+    })
   })
 
   function updateRecordingButton(cameraPanel, isRecording)
@@ -238,50 +238,50 @@ $(document).ready(() => {
   }
 
   $(".camera-stream").hover(inEvent => {
-    let cameraStream = $(inEvent.currentTarget);
-    let cameraControls = cameraStream.children(".camera-controls");
-    cameraControls.css("display", "block");
+    let cameraStream = $(inEvent.currentTarget)
+    let cameraControls = cameraStream.children(".camera-controls")
+    cameraControls.css("display", "block")
 
   }, outEvent => {
-    let cameraStream = $(outEvent.currentTarget);
-    let cameraControls = cameraStream.children(".camera-controls");
-    cameraControls.css("display", "none");
-  });
+    let cameraStream = $(outEvent.currentTarget)
+    let cameraControls = cameraStream.children(".camera-controls")
+    cameraControls.css("display", "none")
+  })
 
   $('.camera-feed').on("error", (e) => {
-    let cameraPanel = $(e.target).parents('.camera-panel');
-    showStreamOff(cameraPanel);
-  });
+    let cameraPanel = $(e.target).parents('.camera-panel')
+    showStreamOff(cameraPanel)
+  })
 
   $(".camera-select").click((e) => {
-    let cameraSelect = $(e.target);
-    let menuOpened = cameraSelect.attr("aria-expanded") == "false";
+    let cameraSelect = $(e.target)
+    let menuOpened = cameraSelect.attr("aria-expanded") == "false"
 
     if(menuOpened)
     {
       requestTask(CAMERA_PORTS, STATUS_CHECK, msgs => {
-        printErrToConsole(msgs);
+        printErrToConsole(msgs)
 
         if(msgs[0])
-          setStreamSelection(msgs[1].split(','));
+          setStreamSelection(msgs[1].split(','))
         else
-          setStreamSelection([]); 
-      });
+          setStreamSelection([])
+      })
     }
-  });
+  })
 
   $('.camera-power').click((e) => {
-    let cameraPower = $(e.target);
-    let cameraPanel = cameraPower.parents(".camera-panel");
-    let cameraName = getCameraName(cameraPanel);
+    let cameraPower = $(e.target)
+    let cameraPanel = cameraPower.parents(".camera-panel")
+    let cameraName = getCameraName(cameraPanel)
 
     if (cameraName == ""){
-      appendToConsole("Please select a stream");
-      return;
+      appendToConsole("Please select a stream")
+      return
     }   
 
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
-    let isPoweredOn = cameraPower.attr("power-on") == "true";
+    let isPoweredOn = cameraPower.attr("power-on") == "true"
     if(isPoweredOn)
       isRecording(streamURL, is_recording => {
         if(is_recording)
@@ -291,23 +291,23 @@ $(document).ready(() => {
             {
               updateRecordingButton(cameraPanel, false)
               stopCameraStream(cameraName, () => {
-                showStreamOff(cameraPanel);
-              });
+                showStreamOff(cameraPanel)
+              })
             }
           })
         }
         else
         {
           stopCameraStream(cameraName, () => {
-            showStreamOff(cameraPanel);
-          });
+            showStreamOff(cameraPanel)
+          })
         }
       })
     else
       startCameraStream(cameraName, () => {
-        showStreamOn(cameraPanel);
-      });
-  });
+        showStreamOn(cameraPanel)
+      })
+  })
 
   $('.camera-recording').click((e) => {
     let cameraRecording = $(e.target)
@@ -316,8 +316,8 @@ $(document).ready(() => {
     let cameraName = getCameraName(cameraPanel)
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
-      appendToConsole("Please turn on a stream");
-      return;
+      appendToConsole("Please turn on a stream")
+      return
     }
 
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
