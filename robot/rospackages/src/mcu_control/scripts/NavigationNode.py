@@ -66,8 +66,6 @@ if __name__ == '__main__':
     gpsGoal = {'latitude':None, 'longitude':None}
     rover = {'latitude':None, 'longitude':None, 'heading':None, 'distance':None}
 
-    rospy.loginfo('This node needs the antenna starting position (antenna_longitude, '+ \
-    'antenna_latitude, antenna_start_dir) and will wait until it receives that')
     rospy.loginfo('This node needs the gps goal coordinates (gps_latitude, gps_longitude) '+ \
     'and will wait until it receives that')
     try:
