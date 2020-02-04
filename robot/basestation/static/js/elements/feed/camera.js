@@ -23,73 +23,81 @@ $(document).ready(() => {
 
   // path to stream offline image
   const STREAM_OFF = '../../static/img/camera/stream-offline.png'
-  const POWER_ON = '../../static/img/camera/power_on.png';
-  const POWER_OFF = '../../static/img/camera/power_off.png';
+  const POWER_ON = '../../static/img/camera/power_on.png'
+  const POWER_OFF = '../../static/img/camera/power_off.png'
 
-  const RECORDING_ON = '../../../static/img/camera/record_on.png';
-  const RECORDING_OFF = '../../../static/img/camera/record_off.png';
+  const RECORDING_ON = '../../../static/img/camera/record_on.png'
+  const RECORDING_OFF = '../../../static/img/camera/record_off.png'
 
   function getStreamURL(topicName) {
     return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
   }
 
   function getCameraFilename(cameraPanel) {
-    let cameraName = getCameraName(cameraPanel);
-    let cameraNameSplit = cameraName.split('/');
+    let cameraName = getCameraName(cameraPanel)
+    let cameraNameSplit = cameraName.split('/')
     let cameraFilename = cameraNameSplit[cameraNameSplit.length - 1]
-    return cameraFilename;
+    return cameraFilename
   }
 
   function getCameraName(cameraPanel){
-    let cameraNameElement = cameraPanel.find('.camera-name');
-    let cameraName = cameraNameElement.attr('stream');
-    return cameraName;
+    let cameraNameElement = cameraPanel.find('.camera-name')
+    let cameraName = cameraNameElement.attr('stream')
+    return cameraName
   }
 
   function startCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_STREAM, STATUS_START, msgs => {
         if(msgs[0])
-            successCallback();
+        {
+            successCallback()
+        }
         else
-            printErrToConsole(msgs[1]);
+        {
+            printErrToConsole(msgs[1])
+        }
     
-    }, cameraStream);
+    }, cameraStream)
   }
 
   function stopCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_STREAM, STATUS_STOP, msgs => {
         if(msgs[0])
-            successCallback();
+        {
+            successCallback()
+        }
         else
-            printErrToConsole(msgs[1]);
+        {
+            printErrToConsole(msgs[1])
+        }
     
-    }, cameraStream);
+    }, cameraStream)
   }
 
   function startRecording(stream_url, callback = () => {}) {
     const start_recording_url = '/initiate_feed_recording?stream_url=' + stream_url
     $.ajax(start_recording_url, {
       success: data => {
-        appendToConsole(data.msg);
-        callback(data);
+        appendToConsole(data.msg)
+        callback(data)
       }, 
       error: (jqXHR, exception) => {
-        flaskError(jqXHR, exception, start_recording_url);
+        flaskError(jqXHR, exception, start_recording_url)
       }
-    });
+    })
   }
 
   function stopRecording(stream_url, callback = () => {}) {
     const stop_recording_url = '/stop_feed_recording?stream_url=' + stream_url
     $.ajax(stop_recording_url, {
       success: data => {
-        appendToConsole(data.msg);
-        callback(data);
+        appendToConsole(data.msg)
+        callback(data)
       }, 
       error: (jqXHR, exception) => {
-        flaskError(jqXHR, exception, stop_recording_url);
+        flaskError(jqXHR, exception, stop_recording_url)
       }
-    });
+    })
   }
 
   function isRecording(stream_url, callback = () => {}) {
@@ -105,7 +113,7 @@ $(document).ready(() => {
   }
 
   function setStreamSelection (availableStreams) {
-    $('.camera-selections').children().empty();
+    $('.camera-selections').children().empty()
     availableStreams.forEach(elt => {
       $('.camera-selections').append(
         '<li class='camera-selection-element'>' + elt + '</li>'
@@ -114,19 +122,19 @@ $(document).ready(() => {
   }
 
   function showStreamOn(cameraPanel) {
-    let cameraFeed = cameraPanel.find('.camera-feed');
-    let cameraPower = cameraPanel.find('.camera-power');
-    let cameraControls = cameraPanel.find('.camera-controls');
+    let cameraFeed = cameraPanel.find('.camera-feed')
+    let cameraPower = cameraPanel.find('.camera-power')
+    let cameraControls = cameraPanel.find('.camera-controls')
 
-    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX;
+    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
 
-    cameraFeed.attr('src', getStreamURL(cameraName));
-    cameraFeed.css('padding', '0px');
+    cameraFeed.attr('src', getStreamURL(cameraName))
+    cameraFeed.css('padding', '0px')
 
-    cameraPower.attr('power-on', 'true');
-    cameraPower.attr('src', POWER_ON);
+    cameraPower.attr('power-on', 'true')
+    cameraPower.attr('src', POWER_ON)
 
-    cameraControls.attr('camera-name', cameraName);
+    cameraControls.attr('camera-name', cameraName)
   }
 
   function showStreamOff(cameraPanel) {
@@ -141,11 +149,11 @@ $(document).ready(() => {
   }
 
   $('.camera-screenshot').click(e => {
-    let cameraPanel = $(e.target).parents('.camera-panel');
-    let cameraNameElement = cameraPanel.find('.camera-name');
+    let cameraPanel = $(e.target).parents('.camera-panel')
+    let cameraNameElement = cameraPanel.find('.camera-name')
     let cameraName = cameraNameElement.attr('stream");
     let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
-    let cameraPower = cameraPanel.find('.camera-power');
+    let cameraPower = cameraPanel.find('.camera-power')
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
       appendToConsole("Please turn on a stream");

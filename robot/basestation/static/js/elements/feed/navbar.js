@@ -1,38 +1,38 @@
 $(document).ready(() => {
 
   function append_css(file) {
-      console.log('Append CSS: ' + file);
+      console.log('Append CSS: ' + file)
 
-      var link = document.createElement('link');
-      link.href = '/static/css/' + file + '.css';
-      link.type = 'text/css';
-      link.rel = 'stylesheet';
-      link.media = 'screen,print';
+      var link = document.createElement('link')
+      link.href = '/static/css/' + file + '.css'
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.media = 'screen,print'
 
-      document.getElementsByTagName('head')[0].appendChild(link);
+      document.getElementsByTagName('head')[0].appendChild(link)
   }
 
   function prefer_theme(name) {
-      console.log('Prefer theme: ' + name);
-      setCookie('theme', name, 365); // setCookie() from helpers.js
-      append_css('themes/' + name);
+      console.log('Prefer theme: ' + name)
+      setCookie('theme', name, 365)  // setCookie() from helpers.js
+      append_css('themes/' + name)
   }
 
-  preferred_theme = getCookie('theme'); // getCookie() from helpers.js
+  preferred_theme = getCookie('theme')  // getCookie() from helpers.js
   if (preferred_theme != '') {
-      prefer_theme(preferred_theme);
+      prefer_theme(preferred_theme)
   } else {
-    prefer_theme('lofi');
+    prefer_theme('lofi')
   }
 
   $('#theme-mantis').click(function () {
-      console.log('theme-mantis');
-      prefer_theme('mantis');
-  });
+      console.log('theme-mantis')
+      prefer_theme('mantis')
+  })
   $('#theme-lofi').click(function () {
-      console.log('theme-lofi');
-      prefer_theme('lofi');
-  });
+      console.log('theme-lofi')
+      prefer_theme('lofi')
+  })
 
   function isListenerOpen () {
     return (
@@ -245,22 +245,22 @@ $(document).ready(() => {
   })
 
   $( '#arm-page' ).click(function() {
-    window.open('/arm');
+    window.open('/arm')
   })
 
   $( '#rover-page' ).click(function() {
-    window.open('rover');
+    window.open('rover')
   })
 
   $( '#science-page' ).click(function() {
-    window.open('science');
+    window.open('science')
   })
 
   $( '#pds-page' ).click(function() {
-    window.open('pds');
+    window.open('pds')
   })
 
   $( '#streams-page' ).click(function() {
-    window.open('stream');
+    window.open('stream')
   })
 })
