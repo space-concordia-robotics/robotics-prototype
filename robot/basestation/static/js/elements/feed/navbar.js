@@ -3,13 +3,13 @@ $(document).ready(() => {
   function append_css(file) {
       console.log('Append CSS: ' + file);
 
-      var link = document.createElement("link");
-      link.href = '/static/css/' + file + ".css";
-      link.type = "text/css";
-      link.rel = "stylesheet";
-      link.media = "screen,print";
+      var link = document.createElement('link');
+      link.href = '/static/css/' + file + '.css';
+      link.type = 'text/css';
+      link.rel = 'stylesheet';
+      link.media = 'screen,print';
 
-      document.getElementsByTagName("head")[0].appendChild(link);
+      document.getElementsByTagName('head')[0].appendChild(link);
   }
 
   function prefer_theme(name) {
@@ -19,10 +19,10 @@ $(document).ready(() => {
   }
 
   preferred_theme = getCookie('theme'); // getCookie() from helpers.js
-  if (preferred_theme != "") {
+  if (preferred_theme != '') {
       prefer_theme(preferred_theme);
   } else {
-    prefer_theme("lofi");
+    prefer_theme('lofi');
   }
 
   $('#theme-mantis').click(function () {
@@ -50,7 +50,7 @@ $(document).ready(() => {
   $('#mux-0').mouseup(function () {
     // Rover
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don't change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
         printErrToConsole(msgs)
@@ -91,7 +91,7 @@ $(document).ready(() => {
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don't change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
         printErrToConsole(msgs)
@@ -132,7 +132,7 @@ $(document).ready(() => {
   $('#mux-2').mouseup(function () {
     // Science
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don't change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
         printErrToConsole(msgs)
@@ -173,7 +173,7 @@ $(document).ready(() => {
   $('#mux-3').mouseup(function () {
     // PDS
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don't change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
         printErrToConsole(msgs)
@@ -244,23 +244,23 @@ $(document).ready(() => {
     }
   })
 
-  $( "#arm-page" ).click(function() {
+  $( '#arm-page' ).click(function() {
     window.open('/arm');
   })
 
-  $( "#rover-page" ).click(function() {
+  $( '#rover-page' ).click(function() {
     window.open('rover');
   })
 
-  $( "#science-page" ).click(function() {
+  $( '#science-page' ).click(function() {
     window.open('science');
   })
 
-  $( "#pds-page" ).click(function() {
+  $( '#pds-page' ).click(function() {
     window.open('pds');
   })
 
-  $( "#streams-page" ).click(function() {
+  $( '#streams-page' ).click(function() {
     window.open('stream');
   })
 })

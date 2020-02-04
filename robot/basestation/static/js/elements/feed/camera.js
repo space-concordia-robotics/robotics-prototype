@@ -26,8 +26,8 @@ $(document).ready(() => {
   const POWER_ON = '../../static/img/camera/power_on.png';
   const POWER_OFF = '../../static/img/camera/power_off.png';
 
-  const RECORDING_ON = "../../../static/img/camera/record_on.png";
-  const RECORDING_OFF = "../../../static/img/camera/record_off.png";
+  const RECORDING_ON = '../../../static/img/camera/record_on.png';
+  const RECORDING_OFF = '../../../static/img/camera/record_off.png';
 
   function getStreamURL(topicName) {
     return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
@@ -41,8 +41,8 @@ $(document).ready(() => {
   }
 
   function getCameraName(cameraPanel){
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = cameraNameElement.attr("stream");
+    let cameraNameElement = cameraPanel.find('.camera-name');
+    let cameraName = cameraNameElement.attr('stream');
     return cameraName;
   }
 
@@ -108,42 +108,42 @@ $(document).ready(() => {
     $('.camera-selections').children().empty();
     availableStreams.forEach(elt => {
       $('.camera-selections').append(
-        '<li class="camera-selection-element">' + elt + '</li>'
+        '<li class='camera-selection-element'>' + elt + '</li>'
       )
     })
   }
 
   function showStreamOn(cameraPanel) {
-    let cameraFeed = cameraPanel.find(".camera-feed");
+    let cameraFeed = cameraPanel.find('.camera-feed');
     let cameraPower = cameraPanel.find('.camera-power');
     let cameraControls = cameraPanel.find('.camera-controls');
 
     let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX;
 
-    cameraFeed.attr("src", getStreamURL(cameraName));
-    cameraFeed.css("padding", "0px");
+    cameraFeed.attr('src', getStreamURL(cameraName));
+    cameraFeed.css('padding', '0px');
 
-    cameraPower.attr("power-on", "true");
-    cameraPower.attr("src", POWER_ON);
+    cameraPower.attr('power-on', 'true');
+    cameraPower.attr('src', POWER_ON);
 
-    cameraControls.attr("camera-name", cameraName);
+    cameraControls.attr('camera-name', cameraName);
   }
 
   function showStreamOff(cameraPanel) {
     let cameraFeed = cameraPanel.find('.camera-feed');
     let cameraPower = cameraPanel.find('.camera-power');
 
-    cameraFeed.attr("src", STREAM_OFF);
-    cameraFeed.css("padding", "10px");
+    cameraFeed.attr('src', STREAM_OFF);
+    cameraFeed.css('padding', '10px');
   
-    cameraPower.attr("power-on", "false");
-    cameraPower.attr("src", POWER_OFF);
+    cameraPower.attr('power-on', 'false');
+    cameraPower.attr('src', POWER_OFF);
   }
 
   $('.camera-screenshot').click(e => {
     let cameraPanel = $(e.target).parents('.camera-panel');
-    let cameraNameElement = cameraPanel.find(".camera-name");
-    let cameraName = cameraNameElement.attr("stream");
+    let cameraNameElement = cameraPanel.find('.camera-name');
+    let cameraName = cameraNameElement.attr('stream");
     let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let cameraPower = cameraPanel.find('.camera-power');
 
