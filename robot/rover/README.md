@@ -136,11 +136,7 @@ This was accomplished by running `syncConfigEthernet.sh` and setting up a system
 
 #### IP emailer service
 
-The odroid will send an email with its local IP address after having run the ethernet config service first, and only if it does not end up selecting the `RoverOBC` configuration.
-
-This was accomplished by running `syncEmailer.sh` and setting up a systemd startup service to run `runEmailer`.
-
-Let Peter know if you want to be added to this mailing list.
+See [sub-docs](../util/emailer/README.md)
 
 #### ROS Rover Startup service
 
