@@ -105,53 +105,54 @@ def initialSection():
 
 @app.route('/navigation/inputTemplates/goal-buttons/<count>', methods= ["GET"])
 def goal_Buttons(count):
-   return flask.render_template("elements/navigation/dialogs/goal/goal-buttons.html", count =  count)
+   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-buttons.html", count =  count)
 
 @app.route('/navigation/inputTemplates/new-goal-coordinates-btn/<goalId>', methods=["GET"])
 def new_Goal_Button(goalId):
-   return flask.render_template("elements/navigation/dialogs/goal/new-goal-coordinates-btn.html", goalId = goalId)
-
-@app.route('/navigation/inputTemplates/antenna-stats', methods= ["GET"])
-def antenna_stats():
-   return flask.render_template("elements/navigation/dialogs/antenna/antenna-stats.html")
+   return flask.render_template("elements/navigation/htmlTemplates/goal/new-goal-coordinates-btn.html", goalId = goalId)
 
 @app.route('/navigation/inputTemplates/antenna-DD/<target>' , methods = ["GET"])
 def antenna_DD(target):
-   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DD-input-template.html", target = target)
+   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DD-input-template.html", target = target)
          
 @app.route('/navigation/inputTemplates/antenna-DDM/<target>' , methods = ["GET"])
 def antenna_DDM(target):
-   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DDM-input-template.html", target = target)
+   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DDM-input-template.html", target = target)
 
 @app.route('/navigation/inputTemplates/antenna-DMS/<target>' , methods = ["GET"])
 def antenna_DMS(target):
-   return flask.render_template("elements/navigation/dialogs/antenna/antenna-DMS-input-template.html", target = target)
+   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DMS-input-template.html", target = target)
 
 @app.route('/navigation/inputTemplates/goal-DD/<target>/<count>' , methods = ["GET"])
 def goal_DD(target,count):
-   return flask.render_template("elements/navigation/dialogs/goal/goal-DD-input-template.html", target = target, count = count)
+   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DD-input-template.html", target = target, count = count)
 
 
 @app.route('/navigation/inputTemplates/goal-DDM/<target>/<count>' , methods = ["GET"])
 def goal_DDM(target,count):
-   return flask.render_template("elements/navigation/dialogs/goal/goal-DDM-input-template.html", target = target, count = count)
+   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DDM-input-template.html", target = target, count = count)
 
 @app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>' , methods = ["GET"])
 def goal_DMS(target,count):
-    return flask.render_template("elements/navigation/dialogs/goal/goal-DMS-input-template.html", target = target,  count = count)
+    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DMS-input-template.html", target = target,  count = count)
 
+# globals to store the html data in body of the request to it can be returned when another request is made to that same url.  
 antenna_modal_serverHTML = ''
 antenna_stats_serverHTML = ''
 goal_modal_serverHTML = ''
+goal_stats_serverHTML = ''
 navQueue_serverHTML = ''
+
+
 @app.route('/navigation/cached_content/antenna_stats' , methods = ["POST", "GET"])
 def antenna_stats_server():
     if request.method == 'POST':
         global antenna_stats_serverHTML
-        antenna_stats_serverHTML = (request.get_data().decode('UTF-8'))
-        return flask.render_template_string(antenna_stats_serverHTML)
+        data = request.get_json()
+        antenna_stats_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
     if request.method == 'GET':
-        return flask.render_template_string(antenna_stats_serverHTML)    
+        return jsonify(antenna_stats_serverHTML)    
    
 
 @app.route('/navigation/cached_content/antenna_modal' , methods = ["POST", "GET"])
@@ -164,13 +165,23 @@ def antenna_modal_server():
         return flask.render_template_string(antenna_modal_serverHTML)    
    
 @app.route('/navigation/cached_content/goal_modal' , methods = ["POST", "GET"])
-def goal_stats_server():
+def goal_modal_server():
     if request.method == 'POST':
         global goal_modal_serverHTML
         goal_modal_serverHTML = (request.get_data().decode('UTF-8'))
         return flask.render_template_string(goal_modal_serverHTML)
     if request.method == 'GET':
         return flask.render_template_string(goal_modal_serverHTML)    
+   
+@app.route('/navigation/cached_content/goal_stats' , methods = ["POST", "GET"])
+def goal_stats_server():
+    if request.method == 'POST':
+        global goal_stats_serverHTML
+        data = request.get_json()
+        goal_stats_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
+    if request.method == 'GET':
+        return jsonify(goal_stats_serverHTML)    
    
 
 @app.route('/navigation/cached_content/navQueue' , methods = ["POST", "GET"])

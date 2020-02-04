@@ -28,7 +28,6 @@ def subscriber_callback(message):
         msg = Point()
         msg.x = rotatorAngle/10
         msg.y = BS_to_Rover_dis
-        rospy.loginfo(msg.y)    
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
@@ -62,8 +61,8 @@ if __name__ == '__main__':
                     antenna['longitude'] = rospy.get_param('antenna_longitude')
                     antenna['startDir'] = rospy.get_param('antenna_start_dir')
                     rospy.set_param('got_antenna_pos',True)
-                    rospy.loginfo('Got antenna starting position!')
-                except KeyError: # param not defined
+                    rospy.loginfo('Got antenna starting position! ' + str(antenna['latitude']) + ' ' + str(antenna['longitude']) + ' ' + str(antenna['startDir']))
+                except KeyError: # param not define
                     pass
             else:
                 pass

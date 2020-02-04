@@ -70,8 +70,6 @@ if __name__ == '__main__':
     'antenna_latitude, antenna_start_dir) and will wait until it receives that')
     rospy.loginfo('This node needs the gps goal coordinates (gps_latitude, gps_longitude) '+ \
     'and will wait until it receives that')
-    i =  0;
-
     try:
         while not rospy.is_shutdown():
 
@@ -82,8 +80,7 @@ if __name__ == '__main__':
                     gpsGoal['longitude'] = rospy.get_param('goal_longitude')
                     rospy.set_param('has_gps_goal',True);
 
-                    rospy.loginfo('Got GPS goal coordinates! ' + str(i))
-                    i = i +1
+                    rospy.loginfo('Got GPS goal coordinates! ' + str(rospy.get_param('goal_latitude')) + " " + str(rospy.get_param('goal_longitude'))) 
                 except KeyError: # param not defined
                     pass
             else:

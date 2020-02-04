@@ -17,8 +17,9 @@ $(document).ready(() => {
     ros: ros
   })
   antenna_goal_listener.subscribe(function (message) {
-    $('#antenna-display-rec-angle').text(parseFloat(message.x).toFixed(3))
-    $('#antenna-display-dist-to-rover').text(parseFloat(message.y).toFixed(2))
+    $('#antenna-stats-rec-angle').text(parseFloat(message.x).toFixed(3))
+    $('#antenna-stats-dist-to-rover').text(parseFloat(message.y).toFixed(2))
+    SaveAntennaStatsToServer()
   })
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
@@ -60,23 +61,39 @@ $(document).ready(() => {
         }
       }
       
-      console.log('next coordinate!');
+     
       navQueue.data[0] = null;
-      
-      while(navQueue.top() == null){
+      //the elements are deleted from data, they are only set to null. The array will only get resized in this case, where those null values will be destroyed
+      while(navQueue.top() == null && (navQueue.data.length != 0)) {
         navQueue.dequeue();
       }
+      SaveGoalModalToServer();
+      SaveNavigationQueueToServer();
+
       
+      if( navQueue.top() != undefined) {
       goal_latitude.set(parseFloat(navQueue.top().latitude));
       goal_longitude.set(parseFloat(navQueue.top().longtitude));
-      
-      has_gps_goal.set(false)
 
-      console.log(navQueue);
-   //   $('#goal-display-lat').text(navQueue.top().latitude);
+      $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6));
+      $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6));
+      
+       appendToConsole('Moving to next coordinate!');
+      
+        }
+        else{
+          
+        $('#goal-stats-lat').text('----');
+        $('#goal-stats-long').text('----');
+        }
+
+      has_gps_goal.set(false)
+ 
  }
- $('#goal-rover-heading').text(parseFloat(message.x).toFixed(3))
- $('#goal-distance').text(parseFloat(message.y).toFixed(2))
+ $('#goal-stats-rover-heading').text(parseFloat(message.x).toFixed(3))
+ $('#goal-stats-distance').text(parseFloat(message.y).toFixed(2))
+ SaveGoalStatsToServer();
+
 })
   // setup gps parameters for rover goals
   let goal_latitude = new ROSLIB.Param({
@@ -91,10 +108,7 @@ $(document).ready(() => {
 var navQueue = new NavigationQueue();
 var count = 0;
 
-  function initNavigationPanel () {
-
-    let hasAntennaParams = true
-    got_antenna_pos.set(false)    
+  function initNavigationPanel () {    
 
     antenna_latitude.get(function(lat){
       if(lat != null){
@@ -103,12 +117,26 @@ var count = 0;
             antenna_start_dir.get(function(dir){
               if(dir != null){
                 appendToConsole('Antenna parameters already set')
-
+                    got_antenna_pos.set(true)
                 
                 $.get({
                   url : '/navigation/cached_content/antenna_stats',
                   success: function(result){
-                        $('#antenna-stats-list').append(result);
+                      
+                        
+                        $('#antenna-stats-lat').text(lat);
+                        $('#antenna-stats-long').text(long);
+                        $('#antenna-stats-heading').text(dir);
+                         if(! jQuery.isEmptyObject(result)) {
+
+                        $('#antenna-stats-dist-to-rover').text(JSON.parse(result).distance) 
+                        $('#antenna-stats-rec-angle').text(JSON.parse(result).heading)
+                          }
+                          else{
+                            $('#antenna-stats-dist-to-rover').text("----") 
+                            $('#antenna-stats-rec-angle').text("----")
+                            
+                          }
                   },
 
                 })
@@ -122,7 +150,6 @@ var count = 0;
                        
                       $('#antenna-modal-body').empty();
                       $('#antenna-modal-body').append(result);
-                       console.log($('#antenna-lat-fieldset').data('format'))
                       
 
                         CreateAntennaLatitudeChangeButtonHandler(data)
@@ -135,17 +162,22 @@ var count = 0;
           } 
           else{
             appendToConsole('Set antenna parameters!')
+            got_antenna_pos.set(false)
+      
           }
         })
 
           }
           else{
             appendToConsole('Set antenna parameters!')
+            got_antenna_pos.set(false)
+      
           } 
         })
       }
       else{
         appendToConsole('Set antenna parameters!')
+      got_antenna_pos.set(false)
       }
     })
 
@@ -153,21 +185,22 @@ var count = 0;
       if(lat != null){
         goal_longitude.get(function(long){
           if(long != null){
-
+                  appendToConsole('Goal coordinates already set')
+                  has_gps_goal.set(true)
                   $.get({
                   url : '/navigation/cached_content/goal_modal',
                   success:function(result){
-                    console.log(result)
 
                     $('#goal-modal-body').empty();
                     $('#goal-modal-body').append(result);
 
+                    //this variable keeps track of the number of things created, so the event handlers can properly be re-initiazed.  
                     count = $('#goal-modal-body-content').attr('count');
-                    $('#goal-stats-lat').text(lat)
-                    $('#goal-stats-long').text(long)
-
+                    
                     for( i = 0 ; i < count ; i++){
                       if($('#new-goal-btn-'+i).length){
+                        CreateGoalLatitudeHandler(i);
+                        CreateGoalLongtitudeHandler(i);
                         CreateGoalChangeButtonHandler(i);
                         CreateGoalDeleteButtonHandler(i);
                         CreateGoalConfirmButtonHandler(i);
@@ -180,19 +213,40 @@ var count = 0;
                     url : '/navigation/cached_content/navQueue',
                     success:function(result){
                       
+                      if( ! jQuery.isEmptyObject(result)) {
                       navQueue.data = JSON.parse(result).data
                       navQueue.shift = JSON.parse(result).shift
-                      console.log(navQueue)
+                      if(navQueue.data.length !=0)
+                      navQueue.flag = false
+                    }
+                    }
+                  })
+                  $.get({
+                    url : '/navigation/cached_content/goal_stats',
+                    success:function(result){
+
+                     //the first two are saved as ROS params, while the bottom two saved on the server, hence the difference 
+                     $('#goal-stats-lat').text(lat.toFixed(5))
+                     $('#goal-stats-long').text(long.toFixed(5))
+
+                     if(! jQuery.isEmptyObject(result)) {
+                     $("#goal-stats-rover-heading").text(JSON.parse(result).heading);
+                     $("#goal-stats-distance").text(JSON.parse(result).distance);
+                    }
+                      else{
+                          $("#goal-stats-rover-heading").text('----');
+                          $("#goal-stats-distance").text('----');
+                      }
                     }
                   })
           }
           else{
-            console.log("Enter goal longtitude")
+            appendToConsole("Enter goal parmameters")
           }
         })
       }
       else{
-        console.log("Enter goal latitude!")
+        appendToConsole("Enter goal paramaters")
       }
     })
   }
@@ -203,16 +257,19 @@ var count = 0;
 function NavigationQueue() {
   this.data = [];
   this.shift = 0;
-  flag = true;  
+  this.flag = true;  
 
   this.enqueue = function(item){
-    this.data.push(item);
-    if(flag){
+    
+    //the first time something is added to the queue, it should be set as current goal paramaters, so this code should only happen once 
+    if(this.flag || this.data.length == 0){
       has_gps_goal.set(false)
       goal_latitude.set(item.latitude);
       goal_longitude.set(item.longtitude);
-      flag = false;
+      this.flag = false;
     }
+    this.data.push(item);
+
   }
   this.dequeue = function(){
     this.data.shift();
@@ -221,7 +278,7 @@ function NavigationQueue() {
   this.top = function(){
     return this.data[0];
   }
-  this.kill = function(index){
+  this.remove = function(index){
    this.data[index-this.shift] = null;
 
    //if the current top is deleted, gotta adjust the goal_lat and goal_long parmamters
@@ -229,15 +286,20 @@ function NavigationQueue() {
 
      while(navQueue.top() == null){
       navQueue.dequeue();
+      if(navQueue.data.length == 0){
+        break;
+      }
     }
-
+    if(navQueue.data.length != 0) {
     goal_latitude.set(this.top().latitude)
     goal_longitude.set(this.top().longtitude)
+    has_gps_goal.set(false)
+    }
+
   }
 }
 
 this.change = function(index,lat,long){
-  console.log('index of change ' + index);
   this.data[index-this.shift].latitude = lat;
   this.data[index-this.shift].longtitude = long;
 
@@ -268,7 +330,7 @@ $('#antenna-select-long-format-btn').on('click',function(event){
 $('#antenna-confirm-btn').on('click', function(event){
 
     event.preventDefault();
-    //check if the inputs are valid
+    
     let lat = -1;
     let long = -1;
 
@@ -276,7 +338,7 @@ $('#antenna-confirm-btn').on('click', function(event){
 
     try{
       if($("#antenna-lat-fieldset").attr('format') == 'DD') {
-       // $("#antenna-lat-decimal-degrees-btn").data('clicked', false)
+
        let decdeg = parseFloat( ($("#antenna-lat-DD-dec-deg-input").val()) ) ;
        $("#antenna-lat-DD-dec-deg-input").attr("value" , decdeg);
      
@@ -284,7 +346,7 @@ $('#antenna-confirm-btn').on('click', function(event){
        lat  = decdeg;
       }
      else if($("#antenna-lat-fieldset").attr('format') == 'DDM'){
-     // $("#antenna-lat-degrees-decimal-minutes-btn").data('clicked',false) 
+
       let dec = parseFloat($('#antenna-lat-DDM-deg-input').val());
       let min = parseFloat($('#antenna-lat-DDM-dec-min-input').val());
       if( isNaN(dec) || isNaN (min)) throw "Bad input lat DDM";
@@ -296,8 +358,7 @@ $('#antenna-confirm-btn').on('click', function(event){
 
     } 
     else if($("#antenna-lat-fieldset").attr('format') == 'DMS'){
-     // $("#antenna-lat-degrees-minutes-seconds-btn").data('clicked',false)
-
+     
       let dec = parseFloat($('#antenna-lat-DMS-deg-input').val());
       let mins = parseFloat($('#antenna-lat-DMS-min-input').val());
       let secs = parseFloat($('#antenna-lat-DMS-sec-input').val());
@@ -312,7 +373,7 @@ $('#antenna-confirm-btn').on('click', function(event){
     }  
 
     if($("#antenna-long-fieldset").attr('format') == 'DD') {
-     // $("#antenna-long-decimal-degrees-btn").data('clicked',false) 
+
       let decdeg = parseFloat( ($("#antenna-long-DD-dec-deg-input").val()) ) ;
       if(isNaN(decdeg)) throw "Bad Input long DD";
       
@@ -320,7 +381,7 @@ $('#antenna-confirm-btn').on('click', function(event){
        long  = decdeg;
     }
     else if($("#antenna-long-fieldset").attr('format') == 'DDM' ){
-    //  $("#antenna-long-degrees-decimal-minutes-btn").data('clicked',false)
+
       let dec = parseFloat($('#antenna-long-DDM-deg-input').val());
       let min = parseFloat($('#antenna-long-DDM-dec-min-input').val());
       if( isNaN(dec) || isNaN (min)) throw "Bad input long DDM";
@@ -331,7 +392,7 @@ $('#antenna-confirm-btn').on('click', function(event){
       long = dec+ (min/60);
     } 
     else if($("#antenna-long-fieldset").attr('format') == 'DMS'){
-    //  $("#antenna-long-degrees-minutes-seconds-btn").data('clicked',false)
+
       let dec = parseFloat($('#antenna-long-DMS-deg-input').val());
       let mins = parseFloat($('#antenna-long-DMS-min-input').val());
       let secs = parseFloat($('#antenna-long-DMS-sec-input').val());
@@ -351,13 +412,7 @@ $('#antenna-confirm-btn').on('click', function(event){
           antenna_longitude.set(long);
           antenna_start_dir.set(bearing);
 
-          appendToConsole('antenna parmameters have been set!')
-
-          $.ajax('/navigation/inputTemplates/antenna-stats', {
-            success: function (result) {
-
-              $('#antenna-stats-list').empty();
-              $('#antenna-stats-list').append(result);
+            appendToConsole('antenna parmameters have been set!')
 
             $('.antenna-input-field').prop('disabled',true)
             $('.antenna-change-btn').prop('disabled',false);
@@ -368,32 +423,11 @@ $('#antenna-confirm-btn').on('click', function(event){
 
             got_antenna_pos.set(false)
               
+          $('#antenna-stats-lat').text(lat.toFixed(5));
+          $('#antenna-stats-long').text(long.toFixed(5));
+          $('#antenna-stats-heading').text(bearing);
 
-
-          //update antenna diplayed fields
-          
-          $('#antenna-display-lat').text(lat);
-          $('#antenna-display-long').text(long);
-          $('#antenna-display-heading').text(bearing);
-
-          $.post({
-              url: "/navigation/cached_content/antenna_stats",
-              data: $('#antenna-stats-list').html(),
-             
-            });
-          
-          $.post({
-              url: "/navigation/cached_content/antenna_modal",
-              data: $('#antenna-modal-body').html(),
-
-            });
-
-
-
-
-        }, error: function(result){
-          console.log('error : ' + result)
-        }})  
+          SaveAntennaModalToServer();
 
         }
         catch(e){
@@ -402,90 +436,33 @@ $('#antenna-confirm-btn').on('click', function(event){
 
 
       })
+function AntennaChangeButtonHandlerTemplate(mode,format,detachedData){
+    
+    $("#antenna-" + mode + "-" + format + "-change-btn").on('click', function(event){
+    event.preventDefault()
+    
+    $("#antenna-" + mode + "-input-group").detach()
+    $("#antenna-" + mode + "-fieldset").append(detachedData)
 
+    $("#antenna-confirm-btn").prop('disabled',false)
+
+    })
+
+}
 function CreateAntennaLatitudeChangeButtonHandler(detachedData){
 
-  $("#antenna-lat-DD-change-btn").on('click', function(event){
-    event.preventDefault()
+    AntennaChangeButtonHandlerTemplate("lat","DD",detachedData)
+    AntennaChangeButtonHandlerTemplate("lat","DDM",detachedData)
+    AntennaChangeButtonHandlerTemplate("lat","DMS",detachedData)
     
-    $("#antenna-lat-DD-change-btn").prop('disabled',true)
-    $("#antenna-lat-DD-dec-deg-input").prop('disabled',false)
-    
-
-    $("#antenna-lat-input-group").detach()
-    $("#antenna-lat-fieldset").append(detachedData)
-
-    $("#antenna-confirm-btn").prop('disabled',false)
-
-    //CreateAntennaLatitudeHandler(); 
-    })
-
-      $("#antenna-lat-DDM-change-btn").on('click', function(event){
-    event.preventDefault()
-    
-    $("#antenna-lat-DDM-change-btn").prop('disabled',true)
-    $("#antenna-lat-DDM-dec-deg-input").prop('disabled',false)
-    
-
-    $("#antenna-lat-input-group").detach()
-    $("#antenna-lat-fieldset").append(detachedData)
-
-    $("#antenna-confirm-btn").prop('disabled',false)
-
-    })
-      $("#antenna-lat-DMS-change-btn").on('click', function(event){
-    event.preventDefault()
-    
-    
-    $("#antenna-lat-DMS-change-btn").prop('disabled',true)
-    $("#antenna-lat-DMS-dec-deg-input").prop('disabled',false)
-    
-
-    $("#antenna-lat-input-group").detach()
-    $("#antenna-lat-fieldset").append(detachedData)
-
-    $("#antenna-confirm-btn").prop('disabled',false)
-
-    })
-  
 }
 function CreateAntennaLongtitudeChangeButtonHandler(detachedData){
 
-  $("#antenna-long-DD-change-btn").on('click', function(event){
-    event.preventDefault()
-     
-    $("#antenna-long-DD-change-btn").prop('disabled',true)
-    $("#antenna-long-DD-dec-deg-input").prop('disabled',false)
-    
-    $("#antenna-long-input-group").detach()
-    $("#antenna-long-fieldset").append(detachedData)
+    AntennaChangeButtonHandlerTemplate("long","DD",detachedData)
+    AntennaChangeButtonHandlerTemplate("long","DDM",detachedData)
+    AntennaChangeButtonHandlerTemplate("long","DMS",detachedData)
 
-    $("#antenna-confirm-btn").prop('disabled',false)
-    })
 
-    $("#antenna-long-DDM-change-btn").on('click', function(event){
-    event.preventDefault()
-     
-    $("#antenna-long-DDM-change-btn").prop('disabled',true)
-    $("#antenna-long-DDM-dec-deg-input").prop('disabled',false)
-    
-    $("#antenna-long-input-group").detach()
-    $("#antenna-long-fieldset").append(detachedData)
-
-    $("#antenna-confirm-btn").prop('disabled',false)
-    })
-
-    $("#antenna-long-DMS-change-btn").on('click', function(event){
-    event.preventDefault()
-     
-    $("#antenna-long-DMS-change-btn").prop('disabled',true)
-    $("#antenna-long-DMS-dec-deg-input").prop('disabled',false)
-    
-    $("#antenna-long-input-group").detach()
-    $("#antenna-long-fieldset").append(detachedData)
-
-    $("#antenna-confirm-btn").prop('disabled',false)
-    })
 }
 function CreateAntennaBearingChangeButtonHandler(){
   $("#antenna-bearing-change-btn").on('click' , function(event){
@@ -496,119 +473,38 @@ function CreateAntennaBearingChangeButtonHandler(){
   })
 }
 
-function CreateAntennaLatitudeHandler(){
-  
-  $('#antenna-lat-decimal-degrees-btn').unbind('click').on('click', function (event) {
+function AntennaHandlerTemplate(mode,format) {
+
+    $('#antenna-' + mode + '-' + format + '-btn').unbind('click').on('click', function (event) {
       
-    $("#antenna-lat-fieldset").attr('format', 'DD');
+    $('#antenna-' + mode + '-fieldset').attr('format', format);
     
-    $("#antenna-select-lat-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-lat-format').detach();
+    $('#antenna-select-' + mode + '-format-btn').dropdown('toggle');
 
-    console.log($("#antenna-lat-fieldset").data());
+    let detachedData = $('#antenna-select-' + mode + '-format').detach()
 
-    
-
-    $.ajax('/navigation/inputTemplates/antenna-DD/'+'lat', {
+    $.ajax('/navigation/inputTemplates/antenna-'+ format + '/' + mode , {
       success: function (result) {
-        $("#antenna-lat-fieldset").append(result);
-            CreateAntennaLatitudeChangeButtonHandler(detachedData);
+        $("#antenna-" + mode + "-fieldset").append(result);
+
+            (mode=='lat') ? CreateAntennaLatitudeChangeButtonHandler(detachedData) : CreateAntennaLongtitudeChangeButtonHandler(detachedData);
 
       }})  
   })
+}
+
+function CreateAntennaLatitudeHandler(){
+  AntennaHandlerTemplate('lat','DD');
+  AntennaHandlerTemplate('lat','DDM');
+  AntennaHandlerTemplate('lat','DMS');
   
-  $('#antenna-lat-degrees-decimal-minutes-btn').unbind('click').on('click', function (event) {
-    event.preventDefault();
-    
-    $("#antenna-lat-fieldset").attr('format', 'DDM');
-    
-    $("#antenna-select-lat-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-lat-format').detach();
-
-
-    $.ajax('/navigation/inputTemplates/antenna-DDM/'+'lat', {
-      success: function (result) {
-        $("#antenna-lat-fieldset").append(result);
-
-    CreateAntennaLatitudeChangeButtonHandler(detachedData);
-      }})  
-
-
-
-  })
-  $('#antenna-lat-degrees-minutes-seconds-btn').unbind().on('click', function (event) {
-   event.preventDefault();
-
-   $("#antenna-lat-fieldset").attr('format','DMS');
-    
-
-    $("#antenna-select-lat-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-lat-format').detach();
-
-
-   $.ajax('/navigation/inputTemplates/antenna-DMS/'+'lat', {
-    success: function (result) {
-      $("#antenna-lat-fieldset").append(result);
-
-   CreateAntennaLatitudeChangeButtonHandler(detachedData);
-    }})  
- })
 }
 
 function CreateAntennaLongtitudeHandler(){
- $('#antenna-long-decimal-degrees-btn').unbind().on('click', function (event) {
-  event.preventDefault();
-    
-    $("#antenna-long-fieldset").attr('format','DD');
-    
-    $("#antenna-select-long-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-long-format').detach();
-
-  $.ajax('/navigation/inputTemplates/antenna-DD/'+'long', {
-    success: function (result) {
-      $("#antenna-long-fieldset").append(result);
-      CreateAntennaLongtitudeChangeButtonHandler(detachedData)
-    }})  
-
-
-})
-
- $('#antenna-long-degrees-decimal-minutes-btn').unbind().on('click', function (event) {
-
-   event.preventDefault();
-
-   $("#antenna-long-fieldset").attr('format','DDM');
-    
-    $("#antenna-select-long-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-long-format').detach();
-
-
-   $.ajax('/navigation/inputTemplates/antenna-DDM/'+'long', {
-    success: function (result) {
-      
-      $("#antenna-long-fieldset").append(result);
-      CreateAntennaLongtitudeChangeButtonHandler(detachedData)
-
-    }})  
- })
- $('#antenna-long-degrees-minutes-seconds-btn').unbind().on('click', function (event) {
-
-  event.preventDefault();
-
-  $("#antenna-long-fieldset").attr('format','DMS');
-
-    $("#antenna-select-long-format-btn").dropdown('toggle');
-    detachedData = $('#antenna-select-long-format').detach();
-
-
-  $.ajax('/navigation/inputTemplates/antenna-DMS/'+'long', {
-    success: function (result) {
-      
-      $("#antenna-long-fieldset").append(result);
-      CreateAntennaLongtitudeChangeButtonHandler(detachedData)
+  AntennaHandlerTemplate('long','DD');
+  AntennaHandlerTemplate('long','DDM');
+  AntennaHandlerTemplate('long','DMS');
   
-    }})  
-})
 } 
 
 
@@ -682,7 +578,7 @@ function InsertDataInQueue(current,lat_format,long_format){
       let dec = parseFloat($('#goal-long-DMS-deg-input-'  + current).val());
       let mins = parseFloat($('#goal-long-DMS-min-input-' + current).val());
       let secs = parseFloat($('#goal-long-DMS-sec-input-' + current).val());
-      if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS";
+      if( isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS";
       long = dec + (mins/60 + secs/3600);
       $('#goal-long-DMS-deg-input-'+current).attr("value",dec);
       $('#goal-long-DMS-min-input-'+current).attr("value",mins);
@@ -697,9 +593,6 @@ function InsertDataInQueue(current,lat_format,long_format){
       latitude : lat,
       longtitude : long
     }
-          //$('#goal-stats-list').show();
-          $('#goal-stats-lat').text(lat);
-          $('#goal-stats-long').text(long);
 
           $("#goal-modal-body-content").attr("count",count)     
                 
@@ -709,20 +602,26 @@ function InsertDataInQueue(current,lat_format,long_format){
             })
 
           
-
+    //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
     if($("#change-btn-"+current).data('clicked')){
-      appendToConsole('changed!')
+      
       $(this).data('clicked', false);
       navQueue.change(current,lat,long)      
     }
     else {
       navQueue.enqueue(latlongpair);
-      $.post({
+         
+    }
+
+    
+    $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6));
+    $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6));
+
+    $.post({
             url: "/navigation/cached_content/navQueue",
             contentType: "application/json",
             data : JSON.stringify(navQueue)
-          })   
-    }
+          })
   }
   catch(e){
     appendToConsole(e);
@@ -730,112 +629,40 @@ function InsertDataInQueue(current,lat_format,long_format){
   console.log(navQueue);
 }
 
+function GoalHandlerTemplate(mode,format,current){
+
+  $("#goal-" + mode + "-" + format + "-btn-" + current).on('click', function(event){
+    
+    event.preventDefault();
+    
+    $('#goal-' + mode + '-fieldset-' + current).attr("format",format);
+
+    $('#goal-' + mode + '-select-format-btn-' + current).dropdown('toggle');
+    $('#goal-' + mode + '-select-format-btn-' + current).detach();
+
+
+    $.ajax('/navigation/inputTemplates/goal-'+format +'/'+ mode + '/' + current, {
+      success: function (result) {
+        $('#goal-' + mode + '-input-group-' + current).append(result);
+
+      }}) 
+  })
+}
 
 function CreateGoalLatitudeHandler(current){
 
-  $("#goal-lat-decimal-degrees-btn-" + current).on('click', function(event){
+  GoalHandlerTemplate('lat','DD',current)
+  GoalHandlerTemplate('lat','DDM',current)
+  GoalHandlerTemplate('lat','DMS',current)
 
-    event.preventDefault();
-    $(this).data('clicked', true);
-    $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
-    $('#goal-lat-select-format-btn-' + current).detach();
-
-
-    $.ajax('/navigation/inputTemplates/goal-DD/'+'lat/'+current, {
-      success: function (result) {
-        $('#goal-lat-input-group-' + current).append(result);
-
-      }})  
-
-
-
-  })
-
-  $("#goal-lat-degrees-decimal-minutes-btn-" + current).on('click', function(event){
-
-    event.preventDefault();
-    $(this).data('clicked', true);
-    $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
-    $('#goal-lat-select-format-btn-' + current).detach();
-
-
-    $.ajax('/navigation/inputTemplates/goal-DDM/'+'lat/'+current, {
-      success: function (result) {
-        $('#goal-lat-input-group-' + current).append(result);
-
-      }})  
-
-
-  })
-  $("#goal-lat-degrees-minutes-seconds-btn-" + current).on('click', function(event){
-    event.preventDefault();
-    $(this).data('clicked', true);
-    $('#goal-lat-select-format-btn-' + current).dropdown('toggle');
-    $('#goal-lat-select-format-btn-' + current).detach();
-
-
-    $.ajax('/navigation/inputTemplates/goal-DMS/'+'lat/'+current, {
-      success: function (result) {
-        $('#goal-lat-input-group-' + current).append(result);
-
-      }})  
-
-  })
 
 }
 
-
-
 function CreateGoalLongtitudeHandler(current){
-  $("#goal-long-decimal-degrees-btn-" + current).on('click', function(event){
 
-    event.preventDefault();
-    $(this).data('clicked', true);
-    $('#goal-long-select-format-btn-' + current).dropdown('toggle');
-    $('#goal-long-select-format-btn-' + current).detach();
-
-
-    $.ajax('/navigation/inputTemplates/goal-DD/'+'long/'+current, {
-      success: function (result) {
-        $('#goal-long-input-group-' + current).append(result);
-
-      }})  
-
-
-
-  })
-
-  $("#goal-long-degrees-decimal-minutes-btn-" + current).on('click', function(event){
-   event.preventDefault();
-   $(this).data('clicked', true);
-   $('#goal-long-select-format-btn-' + current).dropdown('toggle');
-   $('#goal-long-select-format-btn-' + current).detach();
-
-
-   $.ajax('/navigation/inputTemplates/goal-DDM/'+'long/'+current, {
-    success: function (result) {
-      $('#goal-long-input-group-' + current).append(result);
-
-    }})  
-
-
- })
-  $("#goal-long-degrees-minutes-seconds-btn-" + current).on('click', function(event){
-
-   event.preventDefault();
-   $(this).data('clicked', true);
-   $('#goal-long-select-format-btn-' + current).dropdown('toggle');
-   $('#goal-long-select-format-btn-' + current).detach();
-
-
-   $.ajax('/navigation/inputTemplates/goal-DMS/'+'long/'+current, {
-    success: function (result) {
-      $('#goal-long-input-group-' + current).append(result);
-
-    }})  
-
- })
-
+  GoalHandlerTemplate('long','DD',current)
+  GoalHandlerTemplate('long','DDM',current)
+  GoalHandlerTemplate('long','DMS',current)
 
 }
 function CreateGoalButtons(current){
@@ -855,23 +682,23 @@ function CreateGoalConfirmButtonHandler(current){
   $('#confirm-btn-' + current).on('click' , function(event){
     let lat_format = -1;
     let long_format = -1;
-    if($("#goal-lat-decimal-degrees-btn-"+current).data('clicked'))
+      
+    if($("#goal-lat-fieldset-" + current).attr("format") == 'DD')
       lat_format = 0;
-    else if($("#goal-lat-degrees-decimal-minutes-btn-"+current).data('clicked'))
+    else if($("#goal-lat-fieldset-" + current).attr("format") == 'DDM')
       lat_format = 1;
-    else if($("#goal-lat-degrees-minutes-seconds-btn-"+current).data('clicked'))
+    else if($("#goal-lat-fieldset-" + current).attr("format") == 'DMS')
       lat_format = 2;
-    else appendToConsole("error with lat format");
+    else console.log('error with goal lat')
 
-    if($("#goal-long-decimal-degrees-btn-"+current).data('clicked'))
+    if($("#goal-long-fieldset-" + current).attr("format") == 'DD')
       long_format = 0;
-    else if($("#goal-long-degrees-decimal-minutes-btn-"+current).data('clicked'))
+    else if($("#goal-long-fieldset-" + current).attr("format") == 'DDM')
       long_format = 1;
-    else if($("#goal-long-degrees-minutes-seconds-btn-"+current).data('clicked'))
+    else if($("#goal-long-fieldset-" + current).attr("format") == 'DMS')
       long_format = 2;
-    else appendToConsole("error with long format");
-    
-    //disable text fields
+    else console.log('error with goal long')
+
     $('#change-btn-' + current).prop('disabled', false);
     $('#confirm-btn-' + current).prop('disabled', true);
 
@@ -886,8 +713,50 @@ function CreateGoalConfirmButtonHandler(current){
   })    
 }
 
-// 0 1 2 3 4 5 6
 
+function SaveNavigationQueueToServer(){
+$.post({
+            url: "/navigation/cached_content/navQueue",
+            contentType: "application/json",
+            data : JSON.stringify(navQueue)
+          })
+}
+function SaveGoalModalToServer(){
+  $.post({
+              url: "/navigation/cached_content/goal_modal",
+              data: $('#goal-modal-body').html()          
+            })
+  
+}
+function SaveAntennaModalToServer(){
+  $.post({
+    url: "/navigation/cached_content/antenna_modal",
+    data: $('#antenna-modal-body').html(),
+
+  });
+}
+function SaveGoalStatsToServer(){
+  let obj = { distance : $("#goal-stats-distance").text(),
+               heading : $("#goal-stats-rover-heading").text()
+
+  }
+  $.post({
+            url: "/navigation/cached_content/goal_stats",
+            contentType: "application/json",
+            data: JSON.stringify(obj)
+  })
+}
+function SaveAntennaStatsToServer( ){
+    let obj = { distance : $("#antenna-stats-dist-to-rover").text(),
+               heading : $("#antenna-stats-rec-angle").text()
+
+  }
+  $.post({
+            url: "/navigation/cached_content/antenna_stats",
+            contentType: "application/json",
+            data: JSON.stringify(obj)
+  })
+}
 function CreateGoalChangeButtonHandler(current) {
  $('#change-btn-' + current).on('click' , function(event){
 
@@ -903,12 +772,23 @@ function CreateGoalChangeButtonHandler(current) {
 function CreateGoalDeleteButtonHandler(current) {
 
  $('#delete-btn-' + current).on('click' , function(event){
-  appendToConsole(current + ' delete was clicked')
   $('#new-goal-btn-'+current).remove();
 
-  //gotta remove the data from the queue
-  navQueue.kill(current);
-  console.log(navQueue);
+  navQueue.remove(current);
+
+  if(! (navQueue.top() == undefined)) {
+  
+  $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6));
+  $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6));
+  }
+  else{ 
+    $('#goal-stats-lat').text("----");
+    $('#goal-stats-long').text("----");  
+    appendToConsole('No coordinates left to go to!')
+  }
+  SaveGoalModalToServer();
+  SaveNavigationQueueToServer();
+  
 })  
 }
 

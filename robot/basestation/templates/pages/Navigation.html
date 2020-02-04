@@ -27,7 +27,18 @@
       </ul>
     </div>   
 
-    <div id = "antenna-stats-list"> 
+    <div id = "antenna-stats-list"> <hr>
+      <h4 align = "center"> Basestation data </h4>
+      <ul class = "list-group" id = "antenna-stats-list"> 
+        <div class = "row px-3"> 
+        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-stats-lat" class="float-right">----</span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-stats-long" class="float-right">----</span ></li>
+        </div>
+        <li class = "list-group-item"> <label for = "" > Antenna Heading</label>  <span id = "antenna-stats-heading" class="float-right">----</span >  </li>
+        <li class = "list-group-item"> <label for = "" >Distance to Rover</label>  <span id = "antenna-stats-dist-to-rover" class="float-right">----</span >  </li>
+        <li class = "list-group-item"> <label for = "" > Recommeneded Antenna Angle</label>  <span id = "antenna-stats-rec-angle" class="float-right">----</span >  </li>
+                
+      </ul>
     </div>
     <button id = "open-antenna-modal-btn" type = "button" class = "btn btn-primary" data-toggle = "modal" data-target = "#antenna-modal" > Antenna Data </button>
 
@@ -45,9 +56,9 @@
 
                 <ul class = "dropdown-menu">
                     <li class = "dropdown-header"> Select latitude format</li>
-                    <li><button id = "antenna-lat-decimal-degrees-btn" class = "btn btn-primary btn-sm" >Decimal Degrees </button></li>
-                    <li><button id = "antenna-lat-degrees-decimal-minutes-btn" class = "btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
-                    <li><button id = "antenna-lat-degrees-minutes-seconds-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
+                    <li><button id = "antenna-lat-DD-btn" class = "btn btn-primary btn-sm" >Decimal Degrees </button></li>
+                    <li><button id = "antenna-lat-DDM-btn" class = "btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
+                    <li><button id = "antenna-lat-DMS-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
                 </ul>
                 </div>
               
@@ -61,10 +72,9 @@
                 <span class = "caret"> </span>
 
                 <ul class = "dropdown-menu">
-                    <li class = "dropdown-header"> Select </li>
-                    <li><button id = "antenna-long-decimal-degrees-btn" class = "btn btn-primary btn-sm"> Decimal Degrees </button> </li>
-                    <li><button id = "antenna-long-degrees-decimal-minutes-btn" class = "btn btn-primary btn-sm">  Degrees Decimal Minutes</button></li>
-                    <li><button id = "antenna-long-degrees-minutes-seconds-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
+                    <li><button id = "antenna-long-DD-btn" class = "btn btn-primary btn-sm"> Decimal Degrees </button> </li>
+                    <li><button id = "antenna-long-DDM-btn" class = "btn btn-primary btn-sm">  Degrees Decimal Minutes</button></li>
+                    <li><button id = "antenna-long-DMS-btn" class = "btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
                 </ul>  
 
                 </div>
@@ -98,11 +108,11 @@
   
     <ul class = "list-group" id = "goal-stats-list"> 
       <div class = "row px-3">
-        <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "goal-stats-lat" class="float-right">-----</span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "goal-stats-long" class="float-right">-----</span ></li>
+        <li class = "list-group-item col-md-6"> <label for = "goal-stats-lat" > Latitude</label>  <span id = "goal-stats-lat" class="float-right">-----</span >  </li>
+        <li class = "list-group-item col-md-6">  <label for = "goal-stats-long" > Longtitude</label>  <span id = "goal-stats-long" class="float-right">-----</span ></li>
         </div>
-        <li class = "list-group-item "> <label for = "" > Distance to goal</label>  <span id = "goal-stats-distance" class="float-right">-----</span >  </li>
-        <li class = "list-group-item "> <label for = "" > Recommended Rover Heading</label>  <span id = "goal-stats-rover-heading" class="float-right">-----</span >  </li>
+        <li class = "list-group-item"> <label for = "goal-stats-distance" > Distance to goal</label>  <span id = "goal-stats-distance" class="float-right">-----</span >  </li>
+        <li class = "list-group-item"> <label for = "goal-stats-rover-heading" > Recommended Rover Heading</label>  <span id = "goal-stats-rover-heading" class="float-right">-----</span >  </li>
                 
       </ul>
 
@@ -115,16 +125,13 @@
       <div class = "modal-dialog modal-lg">
           <div class = "modal-content" id = "goal-modal-content"> 
               <div class = "modal-header" id = "goal-modal-header"> 
-                  <button id = "new-goal-coordinates-btn" class = "btn btn-primary"> Add </button>
+                  <button id = "new-goal-coordinates-btn" class = "btn btn-primary"> Add new coordinates</button>
               </div>
               <div class = "modal-body" id = "goal-modal-body"> 
               <div id = "goal-modal-body-content">
                 
               </div>
                   
-              </div>
-              <div class = "modal-footer" id = "goal-modal-footer"> 
-                  <h4> MOdal fotter </h4>
               </div>
               
                 </div> 
