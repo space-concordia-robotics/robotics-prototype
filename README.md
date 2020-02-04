@@ -34,7 +34,7 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.**
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press `Ctrl + C`**
 
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
@@ -75,7 +75,10 @@ To verify ROS-Kinetic has been successfully installed, you should do
 ```
 $ roscore
 ```
+In the output you should see included: `* /rosdistro: kinetic`
+
 To stop a running process in the command line, press `Ctrl-C`
+
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 ```
 $ sudo apt install ros-kinetic-rosbridge-suite
@@ -142,6 +145,8 @@ sudo apt install ffmpeg
 
 You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
+Make sure to setup the [git hooks](#setting-up-git-hooks)
+
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 
@@ -154,7 +159,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
 - `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
-- `cp branch-name-verification.sh .git/hooks/post-checkout`
+- `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
