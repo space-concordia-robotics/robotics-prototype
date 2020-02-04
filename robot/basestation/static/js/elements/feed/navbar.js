@@ -50,7 +50,7 @@ $(document).ready(() => {
   $('#mux-0').mouseup(function () {
     // Rover
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don't change the mux channel while a listener is open!')
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
         printErrToConsole(msgs)
@@ -91,7 +91,7 @@ $(document).ready(() => {
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don't change the mux channel while a listener is open!')
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
         printErrToConsole(msgs)
@@ -132,7 +132,7 @@ $(document).ready(() => {
   $('#mux-2').mouseup(function () {
     // Science
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don't change the mux channel while a listener is open!')
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
         printErrToConsole(msgs)
@@ -173,7 +173,7 @@ $(document).ready(() => {
   $('#mux-3').mouseup(function () {
     // PDS
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don't change the mux channel while a listener is open!')
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
         printErrToConsole(msgs)

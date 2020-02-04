@@ -14,7 +14,7 @@ $(document).ready(() => {
   const ARM_SCIENCE_STREAM_TOPIC = TOPIC_PREFIX + 'ArmScience' + TOPIC_SUFFIX
 
   // task handler's recognized name for camera stream task
-  const CAMERA_STREAM = 'camera_stream'
+  const CAMERA_TASK = 'camera_stream'
   const CAMERA_PORTS = 'camera_ports'
   // response messages from task handler
   // these values must not be altered unless they are updated in the task handler server
@@ -47,7 +47,7 @@ $(document).ready(() => {
   }
 
   function startCameraStream(cameraStream, successCallback = () => {}) {
-    requestTask(CAMERA_STREAM, STATUS_START, msgs => {
+    requestTask(CAMERA_TASK, STATUS_START, msgs => {
         if(msgs[0])
         {
             successCallback()
@@ -61,7 +61,7 @@ $(document).ready(() => {
   }
 
   function stopCameraStream(cameraStream, successCallback = () => {}) {
-    requestTask(CAMERA_STREAM, STATUS_STOP, msgs => {
+    requestTask(CAMERA_TASK, STATUS_STOP, msgs => {
         if(msgs[0])
         {
             successCallback()
@@ -116,7 +116,7 @@ $(document).ready(() => {
     $('.camera-selections').children().empty()
     availableStreams.forEach(elt => {
       $('.camera-selections').append(
-        '<li class='camera-selection-element'>' + elt + '</li>'
+        '<li class=\'camera-selection-element\'>' + elt + '</li>'
       )
     })
   }
@@ -151,7 +151,7 @@ $(document).ready(() => {
   $('.camera-screenshot').click(e => {
     let cameraPanel = $(e.target).parents('.camera-panel')
     let cameraNameElement = cameraPanel.find('.camera-name')
-    let cameraName = cameraNameElement.attr('stream")
+    let cameraName = cameraNameElement.attr('stream')
     let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let cameraPower = cameraPanel.find('.camera-power')
 
@@ -210,7 +210,7 @@ $(document).ready(() => {
     cameraControls.attr("camera-name", cameraShortName + 'Cam')
     updateRecordingButton(cameraPanel, false)
 
-    requestTask(CAMERA_STREAM, STATUS_CHECK, msgs => {
+    requestTask(CAMERA_TASK, STATUS_CHECK, msgs => {
       if(msgs[0])
       {
         let activePorts = msgs[1].replace(/(\r\n|\n|\r)/gm, "").split(',')
