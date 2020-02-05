@@ -247,7 +247,7 @@ document.addEventListener('keydown', function (event) {
   if (
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-    !$('#servo-val').is(':focus')
+    !$('#servo-val').is(':focus') && (!$('#serial-cmd-input').is(':focus'))
   ) {
     pingDevice('Rover')
     lastCmdSent = new Date().getTime()
@@ -260,7 +260,7 @@ const GREEN = 'rgb(61, 127, 127)'
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if (!$('#servo-val').is(':focus')) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-cmd-input').is(':focus'))) {
     switch (e.which) {
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
@@ -333,44 +333,46 @@ $(document).keydown(function (e) {
 // no throttling necessary as since keydown events are throttled
 // those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function (e) {
-  switch (e.which) {
-    case 79:
-      dim('#stop-motors-btn')
-      break
-    case 65: // left
-      dim('#rover-left > button')
-      break
-    case 87: // up
-      dim('#rover-up > button')
-      break
-    case 68: // right
-      dim('#rover-right > button')
-      break
-    case 83: // down
-      dim('#rover-down > button')
-      break
+  if (!$('#serial-cmd-input').is(':focus')) {
+    switch (e.which) {
+      case 79:
+        dim('#stop-motors-btn')
+        break
+      case 65: // left
+        dim('#rover-left > button')
+        break
+      case 87: // up
+        dim('#rover-up > button')
+        break
+      case 68: // right
+        dim('#rover-right > button')
+        break
+      case 83: // down
+        dim('#rover-down > button')
+        break
 
-    case 73: // increase throttle
-      dim('#max-throttle-increase > button')
-      break
-    case 85: // decrease throttle
-      dim('#max-throttle-decrease > button')
-      break
-    case 75: // increase steering
-      dim('#max-steering-increase > button')
-      break
-    case 74: // decrease steering
-      dim('#max-steering-decrease > button')
-      break
+      case 73: // increase throttle
+        dim('#max-throttle-increase > button')
+        break
+      case 85: // decrease throttle
+        dim('#max-throttle-decrease > button')
+        break
+      case 75: // increase steering
+        dim('#max-steering-increase > button')
+        break
+      case 74: // decrease steering
+        dim('#max-steering-decrease > button')
+        break
 
-    case 76: // list all rover cmds
-      dim('button#list-all-rover-cmds')
-      break
+      case 76: // list all rover cmds
+        dim('button#list-all-rover-cmds')
+        break
 
-    default:
-      return // exit this handler for other keys
+      default:
+        return // exit this handler for other keys
+    }
+    e.preventDefault() // prevent the default action (scroll / move caret)
   }
-  e.preventDefault() // prevent the default action (scroll / move caret)
 })
 
 // GAME LOOP CONTROL

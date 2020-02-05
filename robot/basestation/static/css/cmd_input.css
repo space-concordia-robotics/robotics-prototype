@@ -1,8 +1,11 @@
 input#serial-cmd-input {
     margin: 4px;
-    width: 50%;
+    width: 55%;
 }
 
 button#send-serial-cmd {
-    transform: scale(.9);
+  padding-top: 3px;
+  padding-bottom: 2px;
+  padding-right: 3px;
+  padding-left: 3px;
 }

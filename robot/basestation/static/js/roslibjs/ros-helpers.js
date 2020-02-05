@@ -185,6 +185,14 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
+
+  /* pds commands */
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
 }
 
 /* functions used in main code */
@@ -331,7 +339,6 @@ function checkTaskStatuses () {
   requestMuxChannel('?', function (currentChannel) {
     console.log('currentChannel', currentChannel)
   })
-
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
@@ -452,20 +459,6 @@ function checkTaskStatuses () {
   }
 }
 
-function sendIKCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to IK node')
-  ik_command_publisher.publish(cmd)
-}
-
-function sendArmCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to arm Teensy')
-  arm_command_publisher.publish(command)
-}
-
 function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
@@ -511,20 +504,6 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
       callback([true, msg])
     }
   })
-}
-
-function sendRoverCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
-  rover_command_publisher.publish(command)
-}
-
-function sendPdsCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
-  pds_command_publisher.publish(command)
 }
 
 /*
