@@ -15,8 +15,10 @@ $(document).ready(() => {
   }
 
   function isCMDValid(full_cmd, cmd) {
-    if ((cmd == '' && full_cmd != '') || cmd == full_cmd) {
-      appendToConsole(invalid_cmd_msg)
+    if ((cmd == '' && full_cmd != '') || (cmd == full_cmd)) {
+      if (full_cmd != '') {
+        appendToConsole(invalid_cmd_msg)
+      }
       return false
     } else {
       return true
