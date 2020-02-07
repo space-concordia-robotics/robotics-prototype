@@ -80,7 +80,7 @@ sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
 
 
 # Build catkin
-source /opt/ros/kinetic/setup.bash
+source /opt/ros/kinetic/setup.bash # gotta source this before running catkin_make or it'll fail for some reason
 cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
