@@ -122,6 +122,7 @@ def init_serial():
     rospy.logerr('Incorrect MCU connected, terminating listener')
     sys.exit(0)
 
+# define all requests to the rover MCU and their possible responses
 requests = {
     'ping' : ['pong'],
     'who' : ['Happy Astro','Paralyzed Astro'],
@@ -133,7 +134,12 @@ requests = {
     'steer-on' : ['Skid Steering is Activated'],
     'acc-on' : ['Limiter: Open'],
     'acc-off' : ['Limiter: CLose'],
-    'reboot' : ['rebooting']
+    'reboot' : ['rebooting'],
+    'indicator-on': ['indicator active'], # is there a default color set?
+    'indicator-off': ['indicator active'],
+    'indicator-manual': ['manual mode active'],
+    'indicator-autonomous' : ['autonomous mode active'],
+    'indicator-eureka' : ['goal reached']
 }
 def handle_client(req):
     # feedback to tell if script itself is responsive
