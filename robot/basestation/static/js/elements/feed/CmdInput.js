@@ -1,8 +1,8 @@
 $(document).ready(() => {
   const send_cmd = $('#send-serial-cmd')
   const cmd_input = $('#serial-cmd-input')
-  const invalid_cmd_msg = 'invalid command, please check input and try again'
-  const invalid_module_msg = 'Invalid module, please input module before command. Valid modules are rover, arm, ik and pds'
+  const INVALID_CMD_MSG = 'invalid command, please check input and try again'
+  const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, ik and pds'
 
   function getCMD() {
     const full_cmd = cmd_input.val()
@@ -17,7 +17,7 @@ $(document).ready(() => {
   function isCMDValid(full_cmd, cmd) {
     if ((cmd == '' && full_cmd != '') || (cmd == full_cmd)) {
       if (full_cmd != '') {
-        appendToConsole(invalid_cmd_msg)
+        appendToConsole(INVALID_CMD_MSG)
       }
       return false
     } else {
@@ -40,7 +40,7 @@ $(document).ready(() => {
         sendPdsCommand(cmd)
         break
       default:
-        appendToConsole(invalid_module_msg)
+        appendToConsole(INVALID_MODULE_MSG)
     }
   }
 
