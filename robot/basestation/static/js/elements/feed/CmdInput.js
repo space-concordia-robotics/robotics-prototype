@@ -6,7 +6,7 @@ $(document).ready(() => {
 
   function getCMD() {
     const full_cmd = cmd_input.val()
-    const prefix = full_cmd.split(' ').shift()
+    const prefix = full_cmd.split(' ').shift().toLowerCase()
     const cmd = full_cmd.split(' ').pop()
     if (isCMDValid(full_cmd, cmd)) {
       sendCMD(prefix, cmd)
@@ -33,10 +33,10 @@ $(document).ready(() => {
       case 'arm':
         sendArmCommand(cmd)
         break
-      case 'IK':
+      case 'ik':
         sendIKCommand(cmd)
         break
-      case 'PDS':
+      case 'pds':
         sendPdsCommand(cmd)
         break
       default:
