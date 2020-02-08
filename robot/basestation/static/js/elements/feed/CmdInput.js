@@ -2,7 +2,7 @@ $(document).ready(() => {
   const send_cmd = $('#send-serial-cmd')
   const cmd_input = $('#serial-cmd-input')
   const INVALID_CMD_MSG = 'invalid command, please check input and try again'
-  const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, ik and pds'
+  const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, IK and PDS'
 
   function getCMD() {
     const full_cmd = cmd_input.val()
@@ -33,10 +33,10 @@ $(document).ready(() => {
       case 'arm':
         sendArmCommand(cmd)
         break
-      case 'ik':
+      case 'IK':
         sendIKCommand(cmd)
         break
-      case 'pds':
+      case 'PDS':
         sendPdsCommand(cmd)
         break
       default:
