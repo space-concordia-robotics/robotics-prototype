@@ -8,8 +8,6 @@ const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
 
 
-const ROVER_LISTENER_TASK = 'rover_listener'
-
 let lastCmdSent = 0
 let lastFrontPosServoCmd = 0
 let lastFrontContServoCmd = 0

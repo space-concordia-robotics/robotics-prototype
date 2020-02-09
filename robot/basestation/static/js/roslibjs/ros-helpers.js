@@ -33,9 +33,7 @@ function initRosWeb () {
     serviceType: 'SelectMux'
   })
   // setup a client for the serial_cmd service
-  serial_cmd_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'serial_cmd',
+  serial_cmd_client = new ROSLIB.Service({ ros: ros, name: 'serial_cmd',
     serviceType: 'SerialCmd'
   })
   // setup a client for the task_handler service
@@ -247,6 +245,12 @@ function requestSerialCommand (command, callback) {
 STATUS_STOP=0
 STATUS_START=1
 STATUS_CHECK=2
+ARM_LISTENER_TASK = 'arm_listener'
+ROVER_LISTENER_TASK = 'rover_listener'
+SCIENCE_LISTENER_TASK = 'science_listener'
+PDS_LISTENER_TASK = 'pds_listener'
+CAMERA_TASK = 'camera_stream'
+CAMERA_PORTS = 'camera_ports'
 
 /**
  * Sends a request to the task handler.
@@ -324,7 +328,7 @@ function checkTaskStatuses () {
 
   if (window.location.pathname == '/') {
     // check arm listener status
-    requestTask('arm_listener', STATUS_CHECK, (msgs) => {
+    requestTask(ARM_LISTENER_TASK, STATUS_CHECK, (msgs) => {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -335,7 +339,7 @@ function checkTaskStatuses () {
       }
     })
   } else if (window.location.pathname == '/science') {
-    requestTask('science_listener', STATUS_CHECK, '#science-listener-btn', function (msgs) {
+    requestTask(SCIENCE_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -347,7 +351,7 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/pds') {
     // check rover listener status
-    requestTask('pds_listener', STATUS_CHECK, '#toggle-pds-listener-btn', function (msgs) {
+    requestTask(PDS_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
