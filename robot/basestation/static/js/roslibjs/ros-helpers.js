@@ -1,5 +1,6 @@
 REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
+const PING_THROTTLE_TIME = 1000
 lastRotate = 0
 let lastCMDSent = 0
 

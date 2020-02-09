@@ -5,7 +5,6 @@
 
 // for command thoughput limiting
 const MANUAL_CONTROL_THROTTLE_TIME = 100
-const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 
 function printCommandsList () {

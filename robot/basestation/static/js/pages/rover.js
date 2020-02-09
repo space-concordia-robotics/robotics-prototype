@@ -7,7 +7,6 @@ const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
 const MAX_CONTINUOUS_SERVO_OFFSET = 20
 
 const DRIVE_THROTTLE_TIME = 100
-const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45

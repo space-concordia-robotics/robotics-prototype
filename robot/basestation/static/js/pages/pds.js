@@ -1,4 +1,3 @@
-const PING_THROTTLE_TIME = 1000
 const PDS_REQUEST_TIMEOUT = 3000
 
 function printCommandsList () {
