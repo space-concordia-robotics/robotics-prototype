@@ -5,7 +5,9 @@ $(document).ready(() => {
   const FRONT_TILT_SYM = '@'
   const BACK_PAN_SYM = '#'
   const BACK_TILT_SYM = '$'
+
   const SERVO_SYMBOLS = {}
+  
   SERVO_SYMBOLS[FRONT_CAM_NAME] = {
       'pan': FRONT_PAN_SYM,
       'tilt': FRONT_TILT_SYM
@@ -15,8 +17,24 @@ $(document).ready(() => {
       'tilt': BACK_TILT_SYM
   } 
 
-  const SERVO_ANGLE_MIN = 0
-  const SERVO_ANGLE_MAX = 180
+  const POS_SERVO_ANGLE_LIMITS = {}
+
+  POS_SERVO_ANGLE_LIMITS[FRONT_CAM_NAME] = {
+      'min': 0,
+      'max': 180
+  }
+
+  POS_SERVO_ANGLE_LIMITS[BACK_CAM_NAME] = {
+      'min': 0,
+      'max': 180
+  }
+
+  const POS_SERVO_INC = 4
+  const CONTINUOUS_SERVO_INC = 5
+
+
+  const SERVO_HOMING_PWM = {}
+
   const SERVO_INCREMENT = 5
 
   function hasCameraControls(cameraName)

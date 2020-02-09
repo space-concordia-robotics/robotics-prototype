@@ -6,6 +6,10 @@ const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
+
+
+const ROVER_LISTENER_TASK = 'rover_listener'
+
 let lastCmdSent = 0
 let lastFrontPosServoCmd = 0
 let lastFrontContServoCmd = 0
@@ -117,9 +121,8 @@ $(document).ready(function () {
         serialType == 'usb'
       ) {
         requestTask(
-          'rover_listener',
-          1,
-          '#toggle-rover-listener-btn',
+          ROVER_LISTENER_TASK,
+          STATUS_START,
           function (msgs) {
             printErrToConsole(msgs)
             if (msgs[0]) {
@@ -138,9 +141,8 @@ $(document).ready(function () {
     } else {
       // closing rover listener
       requestTask(
-        'rover_listener',
-        0,
-        '#toggle-rover-listener-btn',
+        ROVER_LISTENER_TASK,
+        STATUS_STOP,
         function (msgs) {
           printErrToConsole(msgs)
           if (msgs.length == 2) {

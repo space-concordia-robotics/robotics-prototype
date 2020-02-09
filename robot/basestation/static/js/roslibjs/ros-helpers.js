@@ -264,7 +264,7 @@ STATUS_CHECK=2
 function requestTask (
   reqTask,
   reqStatus,
-  callback = () => {},
+  callback = arg => {},
   reqArgs = '',
   timeout = REQUEST_TIMEOUT
 ) {

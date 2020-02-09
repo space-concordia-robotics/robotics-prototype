@@ -135,6 +135,7 @@ $(document).ready(() => {
     cameraPower.attr('src', POWER_ON)
 
     cameraControls.attr('camera-name', cameraName)
+    console.log("memes")
   }
 
   function showStreamOff(cameraPanel) {
