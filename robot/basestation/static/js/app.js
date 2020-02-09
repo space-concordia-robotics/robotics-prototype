@@ -1,11 +1,6 @@
 PING_THROTTLE_TIME = 1000
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
-  // @TODO: fix this hacky workaround (refer to issue #142)
-  // https://github.com/space-concordia-robotics/robotics-prototype/issues/142
-  lastCmdSent = 0
-  // end of said hacky workaround
-
   const Site = {
     init () {
       // connect ros to the rosbridge websockets server
@@ -200,7 +195,7 @@ function printErrToConsole (msg) {
 }
 
 function pingDevice (device) {
-  if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+  if (CMDCanBeSent()) {
     switch (device) {
       case 'Arm':
         sendRequest('Arm', 'ping', printErrToConsole)
@@ -219,7 +214,7 @@ function pingDevice (device) {
         pingOdroid()
         break
     }
-    lastCmdSent = new Date().getTime()
+    setTimeSinceCMD()
   }
 }
 
@@ -250,5 +245,5 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
     },
     timeout: timeoutVal
   })
-  lastCmdSent = new Date().getTime()
+  setTimeSinceCMD()
 }

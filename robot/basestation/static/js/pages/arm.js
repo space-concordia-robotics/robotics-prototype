@@ -7,7 +7,6 @@
 const MANUAL_CONTROL_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
-let lastCmdSent = 0
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
@@ -42,10 +41,7 @@ function toggleToManual () {
 $(document).ready(function () {
   $('#ping-odroid').on('click', function (event) {
     event.preventDefault()
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
-      pingDevice('Odroid')
-      lastCmdSent = new Date().getTime()
-    }
+    pingDevice('Odroid')
   })
 
   $('#toggle-arm-listener-btn').on('click', function (event) {
@@ -165,11 +161,9 @@ $(document).ready(function () {
 document.addEventListener('keydown', function (event) {
   if (
     !$('#serial-cmd-input').is(':focus') &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+    event.code === 'KeyP'
   ) {
     pingDevice('Arm')
-    lastCmdSent = new Date().getTime()
   }
 })
 
@@ -197,7 +191,7 @@ const GREEN = 'rgb(61, 127, 127)'
 function gameLoop () {
   let $serialCmdInput = $('#serial-cmd-input')
 
-  if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
+  if (CMDCanBeSent()) {
     let budgeArray = ['~', '~', '~', '~', '~', '~']
     let i = 0
     let toBudge = false
@@ -211,7 +205,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 's' --> m1 cw
     else if (!$serialCmdInput.is(':focus') && keyState[83]) {
@@ -223,7 +217,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     i += 1
     // 'e' --> m2 ccw
@@ -236,7 +230,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'd' --> m2 cw
     else if (!$serialCmdInput.is(':focus') && keyState[68]) {
@@ -248,7 +242,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     i += 1
     // 'r' --> m3 ccw
@@ -261,7 +255,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'f' --> m3 cw
     else if (!$serialCmdInput.is(':focus') && keyState[70]) {
@@ -273,7 +267,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     i += 1
     // 't' --> m4 ccw
@@ -286,7 +280,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'g' --> m4 cw
     else if (!$serialCmdInput.is(':focus') && keyState[71]) {
@@ -298,7 +292,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     i += 1
     // 'y' --> m5 ccw
@@ -311,7 +305,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'h' --> m5 cw
     else if (!$serialCmdInput.is(':focus') && keyState[72]) {
@@ -323,7 +317,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     i += 1
     // 'u' --> m6 ccw
@@ -336,7 +330,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'j' --> m6 cw
     else if (!$serialCmdInput.is(':focus') && keyState[74]) {
@@ -348,12 +342,11 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
     // 'q' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {
       sendArmCommand('stop')
-      lastCmdSent = new Date().getTime()
     } else if (toBudge) {
       let cmd = 'budge '
       for (var motor in budgeArray) {
@@ -368,7 +361,6 @@ function gameLoop () {
     // 'o' --> reset angle values
     if (!$serialCmdInput.is(':focus') && keyState[79]) {
       sendArmCommand('reset')
-      lastCmdSent = new Date().getTime()
     }
 
     // numpad8 --> ARM UP

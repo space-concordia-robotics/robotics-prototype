@@ -123,7 +123,7 @@ $(document).ready(function () {
         console.log('An error occured')
       }
     })
-    lastCmdSent = new Date().getTime()
+    setTimeSinceCMD()
   })
 
   // ROS related stuff

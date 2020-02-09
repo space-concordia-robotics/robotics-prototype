@@ -12,7 +12,6 @@ const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
-let lastCmdSent = 0
 let lastFrontPosServoCmd = 0
 let lastFrontContServoCmd = 0
 let lastRearPosServoCmd = 0
@@ -246,11 +245,9 @@ $(document).ready(function () {
 document.addEventListener('keydown', function (event) {
   if (
     event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
     !$('#servo-val').is(':focus')
   ) {
     pingDevice('Rover')
-    lastCmdSent = new Date().getTime()
   }
 })
 
@@ -272,7 +269,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 74: // 'j' --> decrease max steering
@@ -285,7 +282,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = 0
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 75: // 'k' --> increase max steering
@@ -298,12 +295,11 @@ $(document).keydown(function (e) {
           maxSoftSteering = MAX_STEERING_SPEED
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 76: // 'l' --> list all commands
         printCommandsList()
-        lastCmdSent = new Date().getTime()
         break
 
       case 81: // 'q' --> stop
@@ -320,7 +316,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = 0
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       default:
@@ -449,7 +445,7 @@ function gameLoop () {
   have the rate (time) at which the commands are actually sent to be
   decoupled from the rate at which the steering or throttle changes
   */
-  if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
+  if (CMDCanBeSent()) {
     /* CAMERA SERVO CONTROL */
     // TODO: check if the position servo code is the same for rear servo or if
     // the directions must be reversed, because that may be annoying
@@ -595,7 +591,7 @@ function gameLoop () {
       if (steering > maxSoftSteering) {
         steering = maxSoftSteering
       }
-      // lastCmdSent = new Date().getTime()
+      // setTimeSinceCMD()
     }
     // 'a' --> rover turn left
     else if (keyState[65] && !$('#servo-val').is(':focus')) {
@@ -611,7 +607,7 @@ function gameLoop () {
       if (steering < -maxSoftSteering) {
         steering = -maxSoftSteering
       }
-      // lastCmdSent = new Date().getTime()
+      // setTimeSinceCMD()
     }
     // return to no steering angle
     else {
@@ -635,7 +631,7 @@ function gameLoop () {
       if (throttle > maxSoftThrottle) {
         throttle = maxSoftThrottle
       }
-      // lastCmdSent = new Date().getTime()
+      // setTimeSinceCMD()
     }
     // 's' --> rover back
     else if (keyState[83] && !$('#servo-val').is(':focus')) {
@@ -651,7 +647,7 @@ function gameLoop () {
       if (throttle < -maxSoftThrottle) {
         throttle = -maxSoftThrottle
       }
-      // lastCmdSent = new Date().getTime()
+      // setTimeSinceCMD()
     }
     // decelerate
     else {
@@ -692,12 +688,12 @@ function gameLoop () {
           // 'd' --> rover right
           steering = MAX_STEERING_SPEED
           // do stuff with `spinning`
-          // lastCmdSent = new Date().getTime()
+          // setTimeSinceCMD()
         } else if (keyState[65]) {
           // 'a' --> rover turn left
           steering = -MAX_STEERING_SPEED
           // do stuff with `spinning`
-          // lastCmdSent = new Date().getTime()
+          // setTimeSinceCMD()
         } else {
           steering = 0
           spinning = 0
@@ -705,14 +701,12 @@ function gameLoop () {
         $('#throttle-speed').text(spinning)
         let cmd = spinning.toString() + ':' + steering.toString()
         sendRoverCommand(cmd)
-        lastCmdSent = new Date().getTime()
       }
     } else {
       $('#throttle-speed').text(throttle)
       // the following stops sending commands if it already sent 0 throttle
       let cmd = throttle.toString() + ':' + steering.toString()
       sendRoverCommand(cmd)
-      lastCmdSent = new Date().getTime()
       if (throttle != 0) {
         sentZero = false
       } else {

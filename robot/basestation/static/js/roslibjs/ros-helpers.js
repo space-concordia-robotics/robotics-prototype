@@ -1,6 +1,19 @@
 REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
+let lastCMDSent = 0
+
+function resetTimeSinceCMD() {
+  lastCMDSent = 0
+}
+
+function setTimeSinceCMD() {
+  lastCMDSent = new Date().getTime()
+}
+
+function CMDCanBeSent() {
+  return (millisSince(lastCMDSent) > PING_THROTTLE_TIME)
+}
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -453,17 +466,23 @@ function checkTaskStatuses () {
 }
 
 function sendIKCommand () {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to IK node')
-  ik_command_publisher.publish(cmd)
+  if (CMDCanBeSent()) {
+    let command = new ROSLIB.Message({ data: cmd })
+    console.log(command)
+    appendToConsole('Sending "' + cmd + '" to IK node')
+    ik_command_publisher.publish(cmd)
+    setTimeSinceCMD()
+  }
 }
 
 function sendArmCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to arm Teensy')
-  arm_command_publisher.publish(command)
+  if (CMDCanBeSent()) {
+    let command = new ROSLIB.Message({ data: cmd })
+    console.log(command)
+    appendToConsole('Sending "' + cmd + '" to arm Teensy')
+    arm_command_publisher.publish(command)
+    setTimeSinceCMD()
+  }
 }
 
 function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
@@ -514,17 +533,23 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
 }
 
 function sendRoverCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
-  rover_command_publisher.publish(command)
+  if (CMDCanBeSent()) {
+    let command = new ROSLIB.Message({ data: cmd })
+    console.log(command)
+    appendToConsole('Sending "' + cmd + '" to rover Teensy')
+    rover_command_publisher.publish(command)
+    setTimeSinceCMD()
+  }
 }
 
 function sendPdsCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
-  pds_command_publisher.publish(command)
+  if (CMDCanBeSent()) {
+    let command = new ROSLIB.Message({ data: cmd })
+    console.log(command)
+    appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+    pds_command_publisher.publish(command)
+    setTimeSinceCMD()
+  }
 }
 
 /*

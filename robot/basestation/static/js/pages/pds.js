@@ -1,12 +1,14 @@
 const PING_THROTTLE_TIME = 1000
 const PDS_REQUEST_TIMEOUT = 3000
-let lastCmdSent = 0
 
 function printCommandsList () {
-  appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'p': ping rover mcu")
-  appendToConsole("'q': cut power to all motors")
-  appendToConsole("'l': view key commands")
+  if (CMDCanBeSent()) {
+    appendToConsole("'ctrl-alt-p': ping odroid")
+    appendToConsole("'p': ping rover mcu")
+    appendToConsole("'q': cut power to all motors")
+    appendToConsole("'l': view key commands")
+    setTimeSinceCMD()
+  }
 }
 
 $(document).ready(() => {
@@ -215,21 +217,15 @@ $(document).ready(() => {
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
+    event.code === 'KeyP'
   ) {
     pingDevice('PDS')
-    lastCmdSent = new Date().getTime()
   }
 })
 // print commands list
 document.addEventListener('keydown', function (event) {
-  if (
-    event.code === 'KeyL' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
-  ) {
+  if (event.code === 'KeyL') {
     printCommandsList()
-    lastCmdSent = new Date().getTime()
   }
 })
 
@@ -248,7 +244,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 74: // 'j' --> decrease max steering
@@ -258,7 +254,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = 0
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 75: // 'k' --> increase max steering
@@ -268,7 +264,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = MAX_STEERING_SPEED
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 
       case 85: // 'u' --> decrease max throttle
@@ -278,7 +274,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = 0
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
+        setTimeSinceCMD()
         break
 */
       default:
