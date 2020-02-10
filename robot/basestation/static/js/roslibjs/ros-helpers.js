@@ -204,20 +204,52 @@ function initRosWeb () {
 }
 
 /* functions used in main code */
-function logGeneric (logLevel, message) {
+
+function getTimestamp () {
   // next 3 lines taken from roslibjs action server example
   let currentTime = new Date()
   let secs = Math.floor(currentTime.getTime()/1000)
   let nsecs = Math.round(1000000000*(currentTime.getTime()/1000-secs))
 
+  return {secs : secs, nsecs : nsecs}
+}
+
+function logGeneric (logLevel, message) {
+  timestamp = getTimestamp()
+  timeVal = timestamp.secs + timestamp.nsecs/10e8
+  timeVal = timeVal.toFixed(3)
+
+  switch (logLevel) {
+    case ROSDEBUG:
+      break
+    case ROSINFO:
+    //floor(timestamp.nsecs/1000, 2)
+      consoleMsg = "[INFO] " + '[' + timeVal + ']' + ': ' + message
+      console.log(consoleMsg)
+      appendToConsole(consoleMsg, false)
+      break
+    case ROSWARN:
+      consoleMsg = "[WARN] " + '[' + timeVal + ']' + ': ' + message
+      console.error(consoleMsg)
+      appendToConsole(consoleMsg, false)
+      break
+    case ROSERR:
+      consoleMsg = "[ERROR] " + '[' + timeVal + ']' + ': ' + message
+      console.error(consoleMsg)
+      appendToConsole(consoleMsg, false)
+      break
+    case ROSFATAL:
+      consoleMsg = "[FATAL] " + '[' + timeVal + ']' + ': ' + message
+      console.error(consoleMsg)
+      appendToConsole(consoleMsg, false)
+      break
+  }
+  
   ros_logger.publish(
     new ROSLIB.Message({
       header : {
         // uint32 seq // sequence ID: consecutively increasing ID // seems to be automatic?
-        stamp : {
-          secs : secs,
-          nsecs : nsecs
-        }
+        stamp : timestamp
         // string frame_id // Frame this data is associated with // not relevant?
       },
       level : logLevel,
@@ -243,30 +275,16 @@ function logDebug (message) {
   // for the webpage maybe we can set it when we run initRosWeb()
   logGeneric(ROSDEBUG, message)
 }
-// @TODO console should output: "[level] [timestamp]: message"
-// where do I get the timestamp from? maybe put the logging inside logGeneric()
 function logInfo (message) {
-  consoleMsg = "[INFO] " + ': ' + message
-  console.error(consoleMsg)
-  appendToConsole(consoleMsg)
   logGeneric(ROSINFO, message)
 }
 function logWarn (message) {
-  consoleMsg = "[WARN] " + ': ' + message
-  console.error(consoleMsg)
-  appendToConsole(consoleMsg)
   logGeneric(ROSWARN, message)
 }
 function logErr (message) {
-  consoleMsg = "[ERROR] " + ': ' + message
-  console.error(consoleMsg)
-  appendToConsole(consoleMsg)
   logGeneric(ROSERROR, message)
 }
 function logFatal (message) {
-  consoleMsg = "[FATAL] " + ': ' + message
-  console.error(consoleMsg)
-  appendToConsole(consoleMsg)
   logGeneric(ROSFATAL, message)
 }
 
