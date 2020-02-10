@@ -17,16 +17,22 @@ def get_time_millis():
 
 def PDS_pub():
   try:
-    mode = sys.argv[1]
+    mode = rospy.get_param('PDS_mock_mode')
   except:
-    print('please give a mode value!')
+    print('PDS_mock_mode parameter error!')
     sys.exit()
 
   pub = rospy.Publisher('battery_voltage', Float32, queue_size=10)
   rospy.init_node('PDS_mock_pub', anonymous=True)
   rate = rospy.Rate(10) # 10hz
 
-  if (mode == 'rise'):
+  if (mode == 'stable'):
+    while not rospy.is_shutdown():
+      pub.publish(420)
+      rate.sleep()
+  elif (mode == 'rise'):
+    #start time
+    start_time = get_time_millis();
     start_vol = 4 #volts
     speed = 1 #volts per second
 
@@ -38,9 +44,11 @@ def PDS_pub():
       rate.sleep()
   else :
     print('Invalid mode!')
+    sys.exit()
 
 if __name__ == '__main__':
-  start_time = get_time_millis();
+  # Setting default mode parameter
+  rospy.set_param('PDS_mock_mode', 'stable')
 
   try:
     PDS_pub()
