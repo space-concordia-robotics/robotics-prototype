@@ -2,6 +2,13 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
+// ROS logging severity level constants
+const ROSDEBUG = 1 // debug level
+const ROSINFO = 2  // general level
+const ROSWARN = 4  // warning level
+const ROSERROR = 8 // error level
+const ROSFATAL = 16 // fatal/critical level
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -18,6 +25,15 @@ function initRosWeb () {
   })
   ros.on('close', function () {
     appendToConsole('Connection to websocket server closed.')
+  })
+
+  /* Logging */
+
+  // publishes log messages to /rosout
+  ros_logger = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rosout',
+    messageType: 'rosgraph_msgs/Log'
   })
 
   /* general controls */
@@ -188,6 +204,72 @@ function initRosWeb () {
 }
 
 /* functions used in main code */
+function logGeneric (logLevel, message) {
+  // next 3 lines taken from roslibjs action server example
+  let currentTime = new Date()
+  let secs = Math.floor(currentTime.getTime()/1000)
+  let nsecs = Math.round(1000000000*(currentTime.getTime()/1000-secs))
+
+  ros_logger.publish(
+    new ROSLIB.Message({
+      header : {
+        // uint32 seq // sequence ID: consecutively increasing ID // seems to be automatic?
+        stamp : {
+          secs : secs,
+          nsecs : nsecs
+        }
+        // string frame_id // Frame this data is associated with // not relevant?
+      },
+      level : logLevel,
+      // string name # name of the node
+      msg : message
+      // string file # file the message came from
+      // string function # function the message came from
+      // uint32 line # line the message came from
+      // string[] topics # topic names that the node publishes
+    })
+  )
+}
+
+// Copying how rospy handles the logging functions:
+// All log messages should go to the log file (but how?)
+// debug messages only go to /rosout if a value is set while initializing the js
+// info goes to stdout, warn-error-fatal go to stderr
+// rospy also takes in *args and **kwargs, how does this work and do I need to implement that?
+function logDebug (message) {
+  // @TODO only log debug messages if we set a parameter somewhere.
+  // in rospy this parameter is set when you initialize your node
+  // with: rospy.init_node(nodeName, log_level=rospy.DEBUG)
+  // for the webpage maybe we can set it when we run initRosWeb()
+  logGeneric(ROSDEBUG, message)
+}
+// @TODO console should output: "[level] [timestamp]: message"
+// where do I get the timestamp from? maybe put the logging inside logGeneric()
+function logInfo (message) {
+  consoleMsg = "[INFO] " + ': ' + message
+  console.error(consoleMsg)
+  appendToConsole(consoleMsg)
+  logGeneric(ROSINFO, message)
+}
+function logWarn (message) {
+  consoleMsg = "[WARN] " + ': ' + message
+  console.error(consoleMsg)
+  appendToConsole(consoleMsg)
+  logGeneric(ROSWARN, message)
+}
+function logErr (message) {
+  consoleMsg = "[ERROR] " + ': ' + message
+  console.error(consoleMsg)
+  appendToConsole(consoleMsg)
+  logGeneric(ROSERROR, message)
+}
+function logFatal (message) {
+  consoleMsg = "[FATAL] " + ': ' + message
+  console.error(consoleMsg)
+  appendToConsole(consoleMsg)
+  logGeneric(ROSFATAL, message)
+}
+
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
