@@ -213,9 +213,9 @@ function initRosWeb () {
         $obj.css({'color': 'red'})
         errorSound()
         if (temperature > MAX_TEMP) {
-          navModalMessage('Warning: Battery temperature too high', 'decrease temperature')
+          navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
         } else if (temperature < MIN_TEMP) {
-          navModalMessage('Warning: Battery temperature too low', 'increase temperature')
+          navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
         }
       } else if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
         $obj.attr('acceptable', '1')
