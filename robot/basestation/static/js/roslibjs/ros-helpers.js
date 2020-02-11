@@ -206,40 +206,42 @@ function initRosWeb () {
 /* functions used in main code */
 
 function getTimestamp () {
-  // next 3 lines taken from roslibjs action server example
+  // next few lines taken and adjusted from roslibjs action server example
   let currentTime = new Date()
-  let secs = Math.floor(currentTime.getTime()/1000)
-  let nsecs = Math.round(1000000000*(currentTime.getTime()/1000-secs))
+  let secs = currentTime.getTime()/1000 // seconds before truncating the decimal
+  let secsFloored = Math.floor(secs) // seconds after truncating
+  let nsecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
 
-  return {secs : secs, nsecs : nsecs}
+  // return a dictionary for the ROS log and a float for the gui console
+  return [{secs : secsFloored, nsecs : nsecs}, secs]
 }
 
 function logGeneric (logLevel, message) {
-  timestamp = getTimestamp()
-  timeVal = timestamp.secs + timestamp.nsecs/10e8
-  timeVal = timeVal.toFixed(3)
+  stamps = getTimestamp()
+  rosTimestamp = stamps[0] // dictionary for the ROS log message
+  consoleTimestamp = stamps[1].toFixed(3) // value for the console message
 
   switch (logLevel) {
     case ROSDEBUG:
       break
     case ROSINFO:
     //floor(timestamp.nsecs/1000, 2)
-      consoleMsg = "[INFO] " + '[' + timeVal + ']' + ': ' + message
+      consoleMsg = "[INFO] " + '[' + consoleTimestamp + ']' + ': ' + message
       console.log(consoleMsg)
       appendToConsole(consoleMsg, false)
       break
     case ROSWARN:
-      consoleMsg = "[WARN] " + '[' + timeVal + ']' + ': ' + message
+      consoleMsg = "[WARN] " + '[' + consoleTimestamp + ']' + ': ' + message
       console.error(consoleMsg)
       appendToConsole(consoleMsg, false)
       break
     case ROSERROR:
-      consoleMsg = "[ERROR] " + '[' + timeVal + ']' + ': ' + message
+      consoleMsg = "[ERROR] " + '[' + consoleTimestamp + ']' + ': ' + message
       console.error(consoleMsg)
       appendToConsole(consoleMsg, false)
       break
     case ROSFATAL:
-      consoleMsg = "[FATAL] " + '[' + timeVal + ']' + ': ' + message
+      consoleMsg = "[FATAL] " + '[' + consoleTimestamp + ']' + ': ' + message
       console.error(consoleMsg)
       appendToConsole(consoleMsg, false)
       break
@@ -247,18 +249,19 @@ function logGeneric (logLevel, message) {
 
   ros_logger.publish(
     new ROSLIB.Message({
+      // I'm only publishing the essentials. We could include more info if so desired
       header : {
-        // uint32 seq // sequence ID: consecutively increasing ID // seems to be automatic?
-        stamp : timestamp
-        // string frame_id // Frame this data is associated with // not relevant?
+        // seq // uint32: sequence ID, seems to increment automatically
+        stamp : rosTimestamp
+        // frame_id // string: probably only useful for tf
       },
       level : logLevel,
-      // string name # name of the node
+      name : '/web_gui', // name of the node
       msg : message
-      // string file # file the message came from
-      // string function # function the message came from
-      // uint32 line # line the message came from
-      // string[] topics # topic names that the node publishes
+      // file : // string: we could specify the js file that generated the log
+      // function // string: we could specify the parent function that generated the log
+      // line // uint32: we could specify the specific line of code that generated the log
+      // topics // string[]: topic names that the node publishes
     })
   )
 }
