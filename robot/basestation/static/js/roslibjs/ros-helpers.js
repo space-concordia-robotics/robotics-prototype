@@ -233,7 +233,7 @@ function logGeneric (logLevel, message) {
       console.error(consoleMsg)
       appendToConsole(consoleMsg, false)
       break
-    case ROSERR:
+    case ROSERROR:
       consoleMsg = "[ERROR] " + '[' + timeVal + ']' + ': ' + message
       console.error(consoleMsg)
       appendToConsole(consoleMsg, false)
@@ -244,7 +244,7 @@ function logGeneric (logLevel, message) {
       appendToConsole(consoleMsg, false)
       break
   }
-  
+
   ros_logger.publish(
     new ROSLIB.Message({
       header : {
