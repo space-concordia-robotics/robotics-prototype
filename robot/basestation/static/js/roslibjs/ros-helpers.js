@@ -213,19 +213,22 @@ function getTimestamp () {
   let nsecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
 
   // return a dictionary for the ROS log and a float for the gui console
-  return [{secs : secsFloored, nsecs : nsecs}, secs]
+  return [{secs : secsFloored, nsecs : nsecs}, currentTime]
 }
 
 function logGeneric (logLevel, message) {
   stamps = getTimestamp()
   rosTimestamp = stamps[0] // dictionary for the ROS log message
-  consoleTimestamp = stamps[1].toFixed(3) // value for the console message
+  consoleTimestamp = stamps[1].toString().split(' ')[4] // hh:mm:ss from date object
 
+  // @TODO cedric can help me refactor this
   switch (logLevel) {
     case ROSDEBUG:
+      consoleMsg = "[DEBUG] " + '[' + consoleTimestamp + ']' + ': ' + message
+      console.log(consoleMsg)
+      appendToConsole(consoleMsg, false)
       break
     case ROSINFO:
-    //floor(timestamp.nsecs/1000, 2)
       consoleMsg = "[INFO] " + '[' + consoleTimestamp + ']' + ': ' + message
       console.log(consoleMsg)
       appendToConsole(consoleMsg, false)
@@ -247,6 +250,9 @@ function logGeneric (logLevel, message) {
       break
   }
 
+  // @TODO bonus if we can determine how to generate a log file for the gui
+  // rather than simply having it show up in rosout.log
+  // an attempt was made with the name and file elements in the log message
   ros_logger.publish(
     new ROSLIB.Message({
       // I'm only publishing the essentials. We could include more info if so desired
@@ -256,9 +262,9 @@ function logGeneric (logLevel, message) {
         // frame_id // string: probably only useful for tf
       },
       level : logLevel,
-      name : '/web_gui', // name of the node
-      msg : message
-      // file : // string: we could specify the js file that generated the log
+      // name : '/web_gui', // name of the node
+      msg : message,
+      // file : 'web_gui' // string: we could specify the js file that generated the log
       // function // string: we could specify the parent function that generated the log
       // line // uint32: we could specify the specific line of code that generated the log
       // topics // string[]: topic names that the node publishes
