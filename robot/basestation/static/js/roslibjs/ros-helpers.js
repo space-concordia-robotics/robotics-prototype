@@ -216,12 +216,14 @@ function getTimestamp () {
   return [{secs : secsFloored, nsecs : nsecs}, currentTime]
 }
 
-function logGeneric (logLevel, message) {
+function rosLog (logLevel, message) {
   stamps = getTimestamp()
   rosTimestamp = stamps[0] // dictionary for the ROS log message
   consoleTimestamp = stamps[1].toString().split(' ')[4] // hh:mm:ss from date object
 
-  // @TODO cedric can help me refactor this
+  // All log messages should go to the log file: currently goes to rosout.log
+  // unlike rospy, currently debug messages we generate will get published
+  // info goes to stdout, warn-error-fatal go to stderr
   switch (logLevel) {
     case ROSDEBUG:
       consoleMsg = "[DEBUG] " + '[' + consoleTimestamp + ']' + ': ' + message
@@ -250,21 +252,18 @@ function logGeneric (logLevel, message) {
       break
   }
 
-  // @TODO bonus if we can determine how to generate a log file for the gui
-  // rather than simply having it show up in rosout.log
-  // an attempt was made with the name and file elements in the log message
-  ros_logger.publish(
+ros_logger.publish(
     new ROSLIB.Message({
       // I'm only publishing the essentials. We could include more info if so desired
       header : {
         // seq // uint32: sequence ID, seems to increment automatically
-        stamp : rosTimestamp
+        stamp : rosTimestamp // dictionary: contains truncated seconds and nanoseconds
         // frame_id // string: probably only useful for tf
       },
-      level : logLevel,
-      // name : '/web_gui', // name of the node
-      msg : message,
-      // file : 'web_gui' // string: we could specify the js file that generated the log
+      level : logLevel, // int: see log level constants above
+      // name : '/web_gui', // name of the node (proposed)
+      msg : message, // string: this is the log message
+      // file // string: we could specify the js file that generated the log
       // function // string: we could specify the parent function that generated the log
       // line // uint32: we could specify the specific line of code that generated the log
       // topics // string[]: topic names that the node publishes
@@ -272,29 +271,22 @@ function logGeneric (logLevel, message) {
   )
 }
 
-// Copying how rospy handles the logging functions:
-// All log messages should go to the log file (but how?)
-// debug messages only go to /rosout if a value is set while initializing the js
-// info goes to stdout, warn-error-fatal go to stderr
-// rospy also takes in *args and **kwargs, how does this work and do I need to implement that?
+// these functions copy the rospy logging functions
+// see the rosLog definition to see how each function's behaviour adjusted
 function logDebug (message) {
-  // @TODO only log debug messages if we set a parameter somewhere.
-  // in rospy this parameter is set when you initialize your node
-  // with: rospy.init_node(nodeName, log_level=rospy.DEBUG)
-  // for the webpage maybe we can set it when we run initRosWeb()
-  logGeneric(ROSDEBUG, message)
+  rosLog(ROSDEBUG, message)
 }
 function logInfo (message) {
-  logGeneric(ROSINFO, message)
+  rosLog(ROSINFO, message)
 }
 function logWarn (message) {
-  logGeneric(ROSWARN, message)
+  rosLog(ROSWARN, message)
 }
 function logErr (message) {
-  logGeneric(ROSERROR, message)
+  rosLog(ROSERROR, message)
 }
 function logFatal (message) {
-  logGeneric(ROSFATAL, message)
+  rosLog(ROSFATAL, message)
 }
 
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
