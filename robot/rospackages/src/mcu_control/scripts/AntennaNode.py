@@ -5,15 +5,14 @@ import time
 
 from Nav_funs import Distance, Direction
 import rospy
-from geometry_msgs.msg import Point
-#from mcu_control.msg import RoverPosition, AntennaGoal
+from mcu_control.msg import RoverPosition, AntennaGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
-    if message.x < -900 or message.y < -900:
+    if message.latitude < -900 or message.longitude < -900:
         return
-    rover['latitude'] = message.x
-    rover['longitude'] = message.y
+    rover['latitude'] = message.latitude
+    rover['longitude'] = message.longitude
 
     if gotAntennaPos:
         BS_to_Rover_dir = Direction(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
@@ -25,9 +24,9 @@ def subscriber_callback(message):
         elif rotatorAngle > 360:
             rotatorAngle -= 360
 
-        msg = Point()
-        msg.x = rotatorAngle/10
-        msg.y = BS_to_Rover_dis
+        msg = AntennaGoal()
+        msg.desiredDir = rotatorAngle/10
+        msg.distFromBase = BS_to_Rover_dis
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
@@ -40,11 +39,11 @@ if __name__ == '__main__':
 
     subscribe_topic = '/rover_position'
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    sub = rospy.Subscriber(subscribe_topic, Point, subscriber_callback)
+    sub = rospy.Subscriber(subscribe_topic, RoverPosition, subscriber_callback)
 
     antenna_pub_topic = '/antenna_goal'
     rospy.loginfo('Beginning to publish to "'+antenna_pub_topic+'" topic')
-    antennaPub = rospy.Publisher(antenna_pub_topic, Point, queue_size=10)
+    antennaPub = rospy.Publisher(antenna_pub_topic, AntennaGoal, queue_size=10)
 
     gotAntennaPos = False
     antenna = {'latitude':None, 'longitude':None, 'startDir':None, 'recommendedDir':None}
