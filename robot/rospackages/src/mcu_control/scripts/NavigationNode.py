@@ -5,18 +5,17 @@ import time
 
 from Nav_funs import Direction, Distance, Turning
 import rospy
-from geometry_msgs.msg import Point
-#from mcu_control.msg import RoverPosition, RoverGoal
+from mcu_control.msg import RoverPosition, RoverGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
     if message.x < -900 or message.y < -900:
         return
-    rover['latitude'] = message.x
-    rover['longitude'] = message.y
+    rover['latitude'] = message.latitude
+    rover['longitude'] = message.longitude
     hasHeading = False
     if message.z > -900:
-        rover['heading'] = message.z
+        rover['heading'] = message.heading
         hasHeading = True
 
     if gotGpsPos:
@@ -30,10 +29,10 @@ def subscriber_callback(message):
         else:
             Direction_adjust = -999 # no heading, give invalid number
 
-        msg = Point()
+        msg = RoverGoal()
         # note that direction is based on compass directions where E is 90 and W is -90
-        msg.x = Direction_adjust
-        msg.y = Rov_to_des_distance
+        msg.desiredDir = Direction_adjust
+        msg.distToGoal = Rov_to_des_distance
         navigationPub.publish(msg)
     else:
         rospy.loginfo('Waiting for gps goal coordinate ROS parameters to be set')
@@ -46,11 +45,11 @@ if __name__ == '__main__':
 
     subscribe_topic = '/rover_position'
     rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    sub = rospy.Subscriber(subscribe_topic, Point, subscriber_callback)
+    sub = rospy.Subscriber(subscribe_topic, RoverPosition, subscriber_callback)
 
     navigation_pub_topic = '/rover_goal'
     rospy.loginfo('Beginning to publish to "'+navigation_pub_topic+'" topic')
-    navigationPub = rospy.Publisher(navigation_pub_topic, Point, queue_size=10)
+    navigationPub = rospy.Publisher(navigation_pub_topic, RoverGoal, queue_size=10)
 
     gotGpsPos = False
     gpsGoal = {'latitude':None, 'longitude':None}
