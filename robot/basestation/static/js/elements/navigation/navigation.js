@@ -3,22 +3,22 @@ $(document).ready(() => {
   let rover_position_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_position',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/RoverPosition'
   })
   rover_position_listener.subscribe(function (message) {
-    $('#rover-latitude').text(message.x)
-    $('#rover-longitude').text(message.y)
-    $('#rover-heading').text(message.z)
+    $('#rover-latitude').text(message.latitude)
+    $('#rover-longitude').text(message.longitude)
+    $('#rover-heading').text(message.heading)
   })
   // setup a subscriber for the antenna_goal topic
   let antenna_goal_listener = new ROSLIB.Topic({
     name: 'antenna_goal',
-    messageType: 'geometry_msgs/Point',
+    messageType: 'mcu_control/AntennaGoal',
     ros: ros
   })
   antenna_goal_listener.subscribe(function (message) {
-    $('#recommended-antenna-angle').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-rover').text(parseFloat(message.y).toFixed(2))
+    $('#recommended-antenna-angle').text(parseFloat(message.desiredDir).toFixed(3))
+    $('#distance-to-rover').text(parseFloat(message.distFromBase).toFixed(2))
   })
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
@@ -38,11 +38,11 @@ $(document).ready(() => {
   let rover_goal_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_goal',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/rover_goal'
   })
   rover_goal_listener.subscribe(function (message) {
-    $('#recommended-rover-heading').text(parseFloat(message.x).toFixed(3))
-    $('#distance-to-goal').text(parseFloat(message.y).toFixed(2))
+    $('#recommended-rover-heading').text(parseFloat(message.desiredDir).toFixed(3))
+    $('#distance-to-goal').text(parseFloat(message.distToGoal).toFixed(2))
   })
   // setup gps parameters for rover goals
   let goal_latitude = new ROSLIB.Param({
