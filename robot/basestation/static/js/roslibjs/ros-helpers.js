@@ -213,52 +213,17 @@ function getTimestamp () {
   let nsecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
 
   // return a dictionary for the ROS log and a string for the gui console
-  let stampTime = currentTime.toString().split(' ')[4]
+  let stampTime = currentTime.toString().split(' ')[4] // hh:mm:ss from date object
   return [{secs : secsFloored, nsecs : nsecs}, stampTime]
 }
 
-function rosLog (logLevel, message) {
-  stamps = getTimestamp()
-  rosTimestamp = stamps[0] // dictionary for the ROS log message
-  consoleTimestamp = stamps[1] // hh:mm:ss from date object
-
-  // All log messages should go to the log file: currently goes to rosout.log
-  // unlike rospy, currently debug messages we generate will get published
-  // info goes to stdout, warn-error-fatal go to stderr
-  switch (logLevel) {
-    case ROSDEBUG:
-      consoleMsg = "[DEBUG] " + '[' + consoleTimestamp + ']' + ': ' + message
-      console.log(consoleMsg)
-      appendToConsole(consoleMsg, false)
-      break
-    case ROSINFO:
-      consoleMsg = "[INFO] " + '[' + consoleTimestamp + ']' + ': ' + message
-      console.log(consoleMsg)
-      appendToConsole(consoleMsg, false)
-      break
-    case ROSWARN:
-      consoleMsg = "[WARN] " + '[' + consoleTimestamp + ']' + ': ' + message
-      console.error(consoleMsg)
-      appendToConsole(consoleMsg, false)
-      break
-    case ROSERROR:
-      consoleMsg = "[ERROR] " + '[' + consoleTimestamp + ']' + ': ' + message
-      console.error(consoleMsg)
-      appendToConsole(consoleMsg, false)
-      break
-    case ROSFATAL:
-      consoleMsg = "[FATAL] " + '[' + consoleTimestamp + ']' + ': ' + message
-      console.error(consoleMsg)
-      appendToConsole(consoleMsg, false)
-      break
-  }
-
-ros_logger.publish(
+function publishRosLog (logLevel, timestamp, message) {
+  ros_logger.publish(
     new ROSLIB.Message({
       // I'm only publishing the essentials. We could include more info if so desired
       header : {
         // seq // uint32: sequence ID, seems to increment automatically
-        stamp : rosTimestamp // dictionary: contains truncated seconds and nanoseconds
+        stamp : timestamp // dictionary: contains truncated seconds and nanoseconds
         // frame_id // string: probably only useful for tf
       },
       level : logLevel, // int: see log level constants above
@@ -272,9 +237,50 @@ ros_logger.publish(
   )
 }
 
+function rosLog (logLevel, message) {
+  let prefix, isError
+  switch (logLevel) {
+    case ROSDEBUG:
+      // unlike rospy, currently the debug messages we generate will get published
+      prefix = '[DEBUG]'
+      isError = false
+      break
+    case ROSINFO:
+      prefix = '[INFO]'
+      isError = false
+      break
+    case ROSWARN:
+      prefix = '[WARN]'
+      isError = true
+      break
+    case ROSERROR:
+      prefix = '[ERROR]'
+      isError = true
+      break
+    case ROSFATAL:
+      prefix = '[FATAL]'
+      isError = true
+      break
+  }
+
+  stamps = getTimestamp()
+  consoleMsg = prefix + ' [' + stamps[1] + ']: ' + message
+
+  // info goes to stdout, warn-error-fatal go to stderr
+  if (!isError) {
+    console.log(consoleMsg)
+  } else {
+    console.error(consoleMsg)
+  }
+  appendToConsole(consoleMsg, false)
+
+  // All log messages should go to the log file: currently goes to rosout.log
+  publishRosLog(logLevel, stamps[0], message)
+}
+
 // these functions copy the rospy logging functions
-// see the rosLog definition to see how each function's behaviour adjusted
 function logDebug (message) {
+  // unlike rospy, currently the debug messages we generate will get published
   rosLog(ROSDEBUG, message)
 }
 function logInfo (message) {
