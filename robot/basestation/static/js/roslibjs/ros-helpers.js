@@ -212,14 +212,15 @@ function getTimestamp () {
   let secsFloored = Math.floor(secs) // seconds after truncating
   let nsecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
 
-  // return a dictionary for the ROS log and a float for the gui console
-  return [{secs : secsFloored, nsecs : nsecs}, currentTime]
+  // return a dictionary for the ROS log and a string for the gui console
+  let stampTime = currentTime.toString().split(' ')[4]
+  return [{secs : secsFloored, nsecs : nsecs}, stampTime]
 }
 
 function rosLog (logLevel, message) {
   stamps = getTimestamp()
   rosTimestamp = stamps[0] // dictionary for the ROS log message
-  consoleTimestamp = stamps[1].toString().split(' ')[4] // hh:mm:ss from date object
+  consoleTimestamp = stamps[1] // hh:mm:ss from date object
 
   // All log messages should go to the log file: currently goes to rosout.log
   // unlike rospy, currently debug messages we generate will get published
