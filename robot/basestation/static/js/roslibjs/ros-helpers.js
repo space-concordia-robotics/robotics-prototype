@@ -155,21 +155,21 @@ function initRosWeb () {
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
+    messageType: 'mcu_control/BatteryVoltage'
   })
   battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
+    $('#battery-voltage').text(message.vbat.toFixed(2))
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_temps',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/BatteryTemps'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
-    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
-    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+    $('#battery-temp-1').text(parseFloat(message.temp1).toFixed(2))
+    $('#battery-temp-2').text(parseFloat(message.temp2).toFixed(2))
+    $('#battery-temp-3').text(parseFloat(message.temp3).toFixed(2))
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
