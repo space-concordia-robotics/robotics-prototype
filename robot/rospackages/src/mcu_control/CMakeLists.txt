@@ -30,9 +30,9 @@ add_message_files(
   ## arm
   IkCommand.msg
   ## rover
-  ##RoverPosition.msg
+  RoverPosition.msg
   AntennaGoal.msg
-  ##RoverGoal.msg
+  RoverGoal.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
