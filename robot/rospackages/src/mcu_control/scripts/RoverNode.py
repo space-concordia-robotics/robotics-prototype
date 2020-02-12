@@ -12,9 +12,10 @@ import serial.tools.list_ports # pyserial
 
 import rospy
 from std_msgs.msg import String, Header, Float32
-from geometry_msgs.msg import Twist, Point
+from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
-from mcu_control.srv import *
+from mcu_control.srv import ArmRequest
+from mcu_control.msg import RoverPosition, BatteryVoltage
 
 #global ser # make global so it can be used in other parts of the code
 mcuName = 'Astro'
@@ -232,10 +233,10 @@ def publish_nav_states(message):
             rospy.logwarn('bad string, got: ' + gps)
         roverLatitude = roverLongitude = -999
 
-    msg = Point();
-    msg.x = roverLatitude
-    msg.y = roverLongitude
-    msg.z = roverHeading
+    msg = RoverPosition();
+    msg.latitude = roverLatitude
+    msg.longitude = roverLongitude
+    msg.heading = roverHeading
     navPub.publish(msg)
     return
 
@@ -263,11 +264,11 @@ if __name__ == '__main__':
     nav_pub_topic = '/rover_position'
     rospy.loginfo('Beginning to publish to "'+nav_pub_topic+'" topic')
     # will either make my own message type or use a standard one
-    navPub = rospy.Publisher(nav_pub_topic, Point, queue_size=10)
+    navPub = rospy.Publisher(nav_pub_topic, RoverPosition, queue_size=10)
 
     v_bat_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
-    vBatPub = rospy.Publisher(v_bat_topic, Float32, queue_size=10)
+    vBatPub = rospy.Publisher(v_bat_topic, BatteryVoltage, queue_size=10)
 
     feedback_pub_topic = '/rover_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
