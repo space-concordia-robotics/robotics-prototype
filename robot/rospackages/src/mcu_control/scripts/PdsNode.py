@@ -15,6 +15,7 @@ from std_msgs.msg import String, Float32
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
+from mcu_control.msg import BatteryTemps, BatteryVoltage
 
 global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
@@ -193,24 +194,24 @@ def publish_pds_data(message):
     # converts message from string to float
     dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
     # create the message to be published
-    voltage = Float32()
-    current = JointState()
-    temp = Point()
-    fanSpeeds = Point()
+    voltageMsg = BatteryVoltage()
+    currentMsg = JointState()
+    tempMsg = BatteryTemps()
+    fanSpeedsMsg = Point()
     try:
         for i in range(12):
             if i < 1:
-                voltage.data = float(dataPDS[i])
+                voltageMsg.vbat = float(dataPDS[i])
                 rospy.loginfo('voltage=' + dataPDS[i])
             elif i < 7:
-                current.effort.append(float(dataPDS[i]))
+                currentMsg.effort.append(float(dataPDS[i]))
             elif i < 10:
-                temp.x = float(dataPDS[7])
-                temp.y = float(dataPDS[8])
-                temp.z = float(dataPDS[9])
+                tempMsg.temp1 = float(dataPDS[7])
+                tempMsg.temp2 = float(dataPDS[8])
+                tempMsg.temp3 = float(dataPDS[9])
             else:
-                fanSpeeds.x = float(dataPDS[10])
-                fanSpeeds.y = float(dataPDS[11])
+                fanSpeedsMsg.x = float(dataPDS[10])
+                fanSpeedsMsg.y = float(dataPDS[11])
 
         temps = ''
         for i in [dataPDS[7], dataPDS[8], dataPDS[9]]:
@@ -220,18 +221,18 @@ def publish_pds_data(message):
 
         # motor currents
         currents = ''
-        for i in current.effort:
+        for i in currentMsg.effort:
             currents += str(i).strip() + ','
         currents = currents[:-1]
 
         rospy.loginfo('currents=' + currents)
         # battery voltage
-        voltagePub.publish(voltage)
+        voltagePub.publish(voltageMsg)
         # 6 motor currents from M0-M5
-        currentPub.publish(current)
+        currentPub.publish(currentMsg)
         # temperatures of the battery
-        tempPub.publish(temp)
-        fanSpeedsPub.publish(fanSpeeds)
+        tempPub.publish(tempMsg)
+        fanSpeedsPub.publish(fanSpeedsMsg)
         nada,firstFlag = dataPDS[12].split(' ')
         flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
         flagsPub.publish(flagsMsg)
@@ -265,7 +266,7 @@ if __name__ == '__main__':
 
     voltage_pub_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "' + voltage_pub_topic + '" topic')
-    voltagePub = rospy.Publisher(voltage_pub_topic, Float32, queue_size=10)
+    voltagePub = rospy.Publisher(voltage_pub_topic, BatteryVoltage, queue_size=10)
 
     current_pub_topic = '/wheel_motor_currents'
     rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
@@ -273,7 +274,7 @@ if __name__ == '__main__':
 
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
-    tempPub = rospy.Publisher(temp_pub_topic, Point, queue_size=10)
+    tempPub = rospy.Publisher(temp_pub_topic, BatteryTemps, queue_size=10)
 
     fan_speeds_pub_topic = '/fan_speeds'
     rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')

@@ -14,7 +14,7 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
-from mcu_control.srv import ArmRequest
+from mcu_control.srv import *
 from mcu_control.msg import RoverPosition, BatteryVoltage
 
 #global ser # make global so it can be used in other parts of the code
@@ -316,7 +316,9 @@ if __name__ == '__main__':
                         except Exception as e:
                             print("type error: " + str(e))
                         try:
-                            vBatPub.publish(float(voltage))
+                            voltageMsg = BatteryVoltage()
+                            voltageMsg.vbat = float(voltage)
+                            vBatPub.publish(voltageMsg)
                         except Exception as e:
                             print("type error: " + str(e))
                     elif 'GPS' in feedback: #use a better string? longer?

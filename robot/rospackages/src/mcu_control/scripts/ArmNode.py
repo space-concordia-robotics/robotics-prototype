@@ -11,9 +11,10 @@ import serial.tools.list_ports # pyserial
 #import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
-from std_msgs.msg import String, Header, Float32
+from std_msgs.msg import String, Header
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
+from mcu_control.msg import BatteryVoltage
 
 global ser # make global so it can be used in other parts of the code
 mcuName = 'arm'
@@ -205,7 +206,7 @@ if __name__ == '__main__':
 
     v_bat_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
-    vBatPub = rospy.Publisher(v_bat_topic, Float32, queue_size=10)
+    vBatPub = rospy.Publisher(v_bat_topic, BatteryVoltage, queue_size=10)
 
     feedback_pub_topic = '/arm_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
@@ -245,7 +246,9 @@ if __name__ == '__main__':
                         publish_joint_states(feedback)
                     elif 'battery voltage' in feedback:
                         left,voltage = feedback.split('battery voltage: ')
-                        vBatPub.publish(float(voltage))
+                        voltageMsg = BatteryVoltage()
+                        voltageMsg.vbat = float(voltage)
+                        vBatPub.publish(voltageMsg)
                     else:
                         #rospy.loginfo(feedback)
                         if reqInWaiting:
