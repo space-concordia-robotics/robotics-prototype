@@ -26,26 +26,26 @@ function initRosWeb () {
   ping_client = new ROSLIB.Service({
     ros: ros,
     name: 'ping_response',
-    serviceType: 'PingResponse'
+    serviceType: 'ping_acknowledgement/PingResponse'
   })
 
   // setup a client for the mux_select service
   mux_select_client = new ROSLIB.Service({
     ros: ros,
     name: 'mux_select',
-    serviceType: 'SelectMux'
+    serviceType: 'mux_selector/SelectMux'
   })
   // setup a client for the serial_cmd service
   serial_cmd_client = new ROSLIB.Service({
     ros: ros,
     name: 'serial_cmd',
-    serviceType: 'SerialCmd'
+    serviceType: 'serial_cmd/SerialCmd'
   })
   // setup a client for the task_handler service
   task_handler_client = new ROSLIB.Service({
     ros: ros,
     name: 'task_handler',
-    serviceType: 'HandleTask'
+    serviceType: 'task_handler/HandleTask'
   })
 
   /* arm controls */
@@ -54,7 +54,7 @@ function initRosWeb () {
   arm_request_client = new ROSLIB.Service({
     ros: ros,
     name: 'arm_request',
-    serviceType: 'ArmRequest'
+    serviceType: 'mcu_control/ArmRequest'
   })
   // setup a publisher for the arm_command topic
   arm_command_publisher = new ROSLIB.Topic({
@@ -66,7 +66,7 @@ function initRosWeb () {
   ik_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'ik_command',
-    messageType: 'IkCommand'
+    messageType: 'mcu_control/IkCommand'
   })
 
   gripper_listener = new ROSLIB.Topic({
@@ -108,7 +108,7 @@ function initRosWeb () {
   rover_request_client = new ROSLIB.Service({
     ros: ros,
     name: 'rover_request',
-    serviceType: 'ArmRequest' // for now... might change
+    serviceType: 'mcu_control/ArmRequest' // for now... might change
   })
   // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
