@@ -68,7 +68,7 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'rover_listener',
+              ROVER_LISTENER_TASK,
               STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
@@ -109,7 +109,7 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'arm_listener',
+              ARM_LISTENER_TASK,
               STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
@@ -150,7 +150,7 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'science_listener',
+              SCIENCE_LISTENER_TASK,
               STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
