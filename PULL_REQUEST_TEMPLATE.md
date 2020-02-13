@@ -9,7 +9,7 @@
 
 closes #[Insert your issue number here]
 
-Approval from at least one software team lead is necessary before merging.
+The approval from all software team leads is necessary before merging.
 
 # Reviewer Section
 
