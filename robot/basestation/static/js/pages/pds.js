@@ -17,12 +17,6 @@ $(document).ready(() => {
     name: 'pds_request',
     serviceType: 'ArmRequest' // for now... might change
   })
-  // setup a publisher for the pds_command topic
-  pds_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_command',
-    messageType: 'std_msgs/String'
-  })
 
   let error_flags_listener = new ROSLIB.Topic({
     ros: ros,

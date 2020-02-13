@@ -8,7 +8,7 @@ $(document).ready(() => {
   function getCMD() {
     const full_cmd = cmd_input.val()
     const prefix = full_cmd.split(' ').shift().toLowerCase()
-    const cmd = full_cmd.split(' ').pop()
+    const cmd = full_cmd.split(prefix + ' ').pop()
     if (isCMDValid(full_cmd, cmd)) {
       sendCMD(prefix, cmd)
     }
