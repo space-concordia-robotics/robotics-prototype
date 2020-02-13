@@ -244,7 +244,7 @@ function rosLog (logLevel, message) {
   logData[ROSWARN] = {prefix : '[WARN]', isError : true}
   logData[ROSERROR] = {prefix : '[ERROR]', isError : true}
   logData[ROSFATAL] = {prefix : '[FATAL]', isError : true}
-  console.log(message)
+
   stamps = rosTimestamp()
   consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
 
