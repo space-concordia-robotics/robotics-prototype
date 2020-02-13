@@ -205,7 +205,7 @@ function initRosWeb () {
 
 /* functions used in main code */
 
-function getTimestamp () {
+function rosTimestamp () {
   // next few lines taken and adjusted from roslibjs action server example
   let currentTime = new Date()
   let secs = currentTime.getTime()/1000 // seconds before truncating the decimal
@@ -238,49 +238,27 @@ function publishRosLog (logLevel, timestamp, message) {
 }
 
 function rosLog (logLevel, message) {
-  let prefix, isError
-  switch (logLevel) {
-    case ROSDEBUG:
-      // unlike rospy, currently the debug messages we generate will get published
-      prefix = '[DEBUG]'
-      isError = false
-      break
-    case ROSINFO:
-      prefix = '[INFO]'
-      isError = false
-      break
-    case ROSWARN:
-      prefix = '[WARN]'
-      isError = true
-      break
-    case ROSERROR:
-      prefix = '[ERROR]'
-      isError = true
-      break
-    case ROSFATAL:
-      prefix = '[FATAL]'
-      isError = true
-      break
-  }
+  logData = {}
+  logData[ROSDEBUG] = {prefix : '[DEBUG]', isError : false}
+  logData[ROSINFO] = {prefix : '[INFO]', isError : false}
+  logData[ROSWARN] = {prefix : '[WARN]', isError : true}
+  logData[ROSERROR] = {prefix : '[ERROR]', isError : true}
+  logData[ROSFATAL] = {prefix : '[FATAL]', isError : true}
+  console.log(message)
+  stamps = rosTimestamp()
+  consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
 
-  stamps = getTimestamp()
-  consoleMsg = prefix + ' [' + stamps[1] + ']: ' + message
-
-  // info goes to stdout, warn-error-fatal go to stderr
-  if (!isError) {
-    console.log(consoleMsg)
-  } else {
-    console.error(consoleMsg)
-  }
+  !logData[logLevel].isError
+    ? console.log(consoleMsg)
+    : console.error(consoleMsg)
   appendToConsole(consoleMsg, false)
-
-  // All log messages should go to the log file: currently goes to rosout.log
+  // log messages go to log file: currently rosout.log
   publishRosLog(logLevel, stamps[0], message)
 }
 
 // these functions copy the rospy logging functions
 function logDebug (message) {
-  // unlike rospy, currently the debug messages we generate will get published
+  // unlike rospy, (currently) the debug messages we generate will get published
   rosLog(ROSDEBUG, message)
 }
 function logInfo (message) {
