@@ -2,16 +2,19 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 const PING_THROTTLE_TIME = 1000
 lastRotate = 0
-let lastCMDSent = 0
+var lastCMDSent = 0
 
+// reset recorded time sent since last command
 function resetTimeSinceCMD() {
   lastCMDSent = 0
 }
 
+// get and record time of last command sent
 function setTimeSinceCMD() {
   lastCMDSent = new Date().getTime()
 }
 
+// return false if command is within time cooldown, true if outside time cooldown
 function CMDCanBeSent() {
   return (millisSince(lastCMDSent) > PING_THROTTLE_TIME)
 }

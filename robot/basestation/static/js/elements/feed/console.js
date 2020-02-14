@@ -1,6 +1,6 @@
 $(document).ready(() => {
   function pingDevice (device) {
-    if (millisSince(lastCmdSent) > PING_THROTTLE_TIME) {
+    if (CMDCanBeSent()) {
       switch (device) {
         case 'Arm':
           sendRequest('Arm', 'ping', printErrToConsole)
@@ -13,7 +13,7 @@ $(document).ready(() => {
           pingOdroid()
           break
       }
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
   }
 
@@ -44,7 +44,7 @@ $(document).ready(() => {
       },
       timeout: timeoutVal
     })
-    lastCmdSent = new Date().getTime()
+    setTimeSinceCMD()
   }
 
   document.addEventListener('keydown', function (event) {
@@ -52,11 +52,9 @@ $(document).ready(() => {
       event.ctrlKey &&
       event.altKey &&
       event.code === 'KeyP' &&
-      millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
       !$('#servo-val').is(':focus')
     ) {
       pingDevice('Odroid')
-      lastCmdSent = new Date().getTime()
     }
   })
 
@@ -64,12 +62,12 @@ $(document).ready(() => {
   document.addEventListener('keydown', function (event) {
     if (
       event.code === 'KeyL' &&
-      millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
+      CMDCanBeSent() &&
       !$('#servo-val').is(':focus')
     ) {
       $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
       printCommandsList()
-      lastCmdSent = new Date().getTime()
+      setTimeSinceCMD()
     }
   })
 })
