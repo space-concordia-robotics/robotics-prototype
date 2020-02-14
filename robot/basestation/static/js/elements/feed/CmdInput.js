@@ -40,8 +40,8 @@ $(document).ready(() => {
       case 'ik':
         sendIKCommand(cmd)
         break
-      case 'pds':
-        sendPdsCommand(cmd)
+      case 'science':
+        sendScienceCommand(cmd)
         break
       default:
         appendToConsole(INVALID_MODULE_MSG)

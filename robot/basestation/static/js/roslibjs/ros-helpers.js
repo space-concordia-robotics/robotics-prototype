@@ -193,6 +193,14 @@ function initRosWeb () {
     name: 'pds_command',
     messageType: 'std_msgs/String'
   })
+
+  /* science commands */
+  // setup a publisher for the arm_command topic
+  science_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_command',
+    messageType: 'std_msgs/String'
+  })
 }
 
 /* functions used in main code */
@@ -544,4 +552,11 @@ function sendPdsCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to PDS Teensy')
   pds_command_publisher.publish(command)
+}
+
+function sendScienceCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  console.log(command)
+  appendToConsole('Sending "' + cmd + '" to science Teensy')
+  science_command_publisher.publish(command)
 }
