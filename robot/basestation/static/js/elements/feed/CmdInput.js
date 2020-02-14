@@ -7,10 +7,11 @@ $(document).ready(() => {
   // Get full command and split into its prefix and command to send to module
   function getCMD() {
     const full_cmd = cmd_input.val()
-    const prefix = full_cmd.split(' ').shift().toLowerCase()
+    const prefix = full_cmd.split(' ').shift()
     const cmd = full_cmd.split(prefix + ' ').pop()
+    console.log(prefix)
     if (isCMDValid(full_cmd, cmd)) {
-      sendCMD(prefix, cmd)
+      sendCMD(prefix.toLowerCase(), cmd)
     }
     clearCmdInput()
   }
