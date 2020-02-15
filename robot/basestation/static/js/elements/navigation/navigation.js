@@ -7,7 +7,7 @@ $(document).ready(() => {
   })
   rover_position_listener.subscribe(function (message) {
     $('#rover-latitude').text(message.x)
-    $('#rover-longtitude').text(message.y)
+    $('#rover-longitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
   // setup a subscriber for the antenna_goal topic
@@ -50,7 +50,8 @@ $(document).ready(() => {
   })
 
   rover_goal_listener.subscribe(function (message) {
-    if(parseFloat(message.y) < 50) {
+    //the distance in meters until we are sure we are at the coordinates should be less than 0.5 meters
+    if(parseFloat(message.y) < 0.5) {
 
       //remove the most recent coordinate pair from the GUI
       for(i = 0 ; i < count ; i++){
@@ -73,16 +74,15 @@ $(document).ready(() => {
       
       if( navQueue.top() != undefined) {
       goal_latitude.set(parseFloat(navQueue.top().latitude))
-      goal_longitude.set(parseFloat(navQueue.top().longtitude))
+      goal_longitude.set(parseFloat(navQueue.top().longitude))
 
       $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-      $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6))
+      $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
       
        appendToConsole('Moving to next coordinate!')
       
         }
-        else{
-          
+        else{          
         $('#goal-stats-lat').text('----')
         $('#goal-stats-long').text('----')
         }
@@ -105,8 +105,8 @@ $(document).ready(() => {
     name: 'goal_longitude'
   })
 
-var navQueue = new NavigationQueue()
-var count = 0
+let navQueue = new NavigationQueue()
+let count = 0
 
   function initNavigationPanel () {    
 
@@ -122,43 +122,37 @@ var count = 0
                 $.get({
                   url : '/navigation/cached_content/antenna_stats',
                   success: function(result){
-                      
-                        
                         $('#antenna-stats-lat').text(lat.toFixed(6))
                         $('#antenna-stats-long').text(long.toFixed(6))
                         $('#antenna-stats-heading').text(dir)
-                         if(! jQuery.isEmptyObject(result)) {
 
+                        if(! jQuery.isEmptyObject(result)) {
                         $('#antenna-stats-dist-to-rover').text(JSON.parse(result).distance) 
                         $('#antenna-stats-rec-angle').text(JSON.parse(result).heading)
-                          }
-                          else{
+                        }
+
+                        else{
                             $('#antenna-stats-dist-to-rover').text("----") 
-                            $('#antenna-stats-rec-angle').text("----")
-                            
-                          }
+                            $('#antenna-stats-rec-angle').text("----")    
+                        }
                   },
 
                 })
                 $.get({
                   url : '/navigation/cached_content/antenna_modal',
                   success: function(result){
-                        
-                       
-                       let data =  $('#antenna-select-lat-format').detach()
-                       let data2 =  $('#antenna-select-long-format').detach()
-                       
+                      
+                      let detachedLatFormatData = $('#antenna-select-lat-format').detach()
+                      let detachedLongFormatData = $('#antenna-select-long-format').detach()
+                      
                       $('#antenna-modal-body').empty()
                       $('#antenna-modal-body').append(result)
-                      
 
-                        CreateAntennaLatitudeChangeButtonHandler(data)
-                        CreateAntennaLongtitudeChangeButtonHandler(data2)
-                        CreateAntennaBearingChangeButtonHandler()
+                      CreateAntennaLatitudeChangeButtonHandler(detachedLatFormatData)
+                      CreateAntennaLongitudeChangeButtonHandler(detachedLongFormatData)
+                      CreateAntennaBearingChangeButtonHandler()
                   }
-                  
                 })
-              
           } 
           else{
             appendToConsole('Enter antenna parameters')
@@ -200,7 +194,7 @@ var count = 0
                     for( i = 0 ; i < count ; i++){
                       if($('#new-goal-btn-'+i).length){
                         CreateGoalLatitudeHandler(i)
-                        CreateGoalLongtitudeHandler(i)
+                        CreateGoalLongitudeHandler(i)
                         CreateGoalChangeButtonHandler(i)
                         CreateGoalDeleteButtonHandler(i)
                         CreateGoalConfirmButtonHandler(i)
@@ -265,7 +259,7 @@ function NavigationQueue() {
     if(this.flag || this.data.length == 0){
       has_gps_goal.set(false)
       goal_latitude.set(item.latitude)
-      goal_longitude.set(item.longtitude)
+      goal_longitude.set(item.longitude)
       this.flag = false
     }
     this.data.push(item)
@@ -292,7 +286,7 @@ function NavigationQueue() {
     }
     if(navQueue.data.length != 0) {
     goal_latitude.set(this.top().latitude)
-    goal_longitude.set(this.top().longtitude)
+    goal_longitude.set(this.top().longitude)
     has_gps_goal.set(false)
     }
 
@@ -301,7 +295,7 @@ function NavigationQueue() {
 
 this.change = function(index,lat,long){
   this.data[index-this.shift].latitude = lat
-  this.data[index-this.shift].longtitude = long
+  this.data[index-this.shift].longitude = long
 
   if( (index-this.shift) ==0) {
     goal_latitude.set(lat)
@@ -321,7 +315,7 @@ $('#antenna-select-lat-format-btn').on('click',function(event){
 })                
 $('#antenna-select-long-format-btn').on('click',function(event){
   event.preventDefault()
-  CreateAntennaLongtitudeHandler()
+  CreateAntennaLongitudeHandler()
 
 
 })             
@@ -456,7 +450,7 @@ function CreateAntennaLatitudeChangeButtonHandler(detachedData){
     AntennaChangeButtonHandlerTemplate("lat","DMS",detachedData)
     
 }
-function CreateAntennaLongtitudeChangeButtonHandler(detachedData){
+function CreateAntennaLongitudeChangeButtonHandler(detachedData){
 
     AntennaChangeButtonHandlerTemplate("long","DD",detachedData)
     AntennaChangeButtonHandlerTemplate("long","DDM",detachedData)
@@ -488,7 +482,7 @@ function AntennaHandlerTemplate(mode,format) {
         $("#antenna-" + mode + "-fieldset").append(result)
 
             if(mode=='lat') CreateAntennaLatitudeChangeButtonHandler(detachedData) 
-              else CreateAntennaLongtitudeChangeButtonHandler(detachedData)
+              else CreateAntennaLongitudeChangeButtonHandler(detachedData)
 
       }})  
   })
@@ -501,7 +495,7 @@ function CreateAntennaLatitudeHandler(){
   
 }
 
-function CreateAntennaLongtitudeHandler(){
+function CreateAntennaLongitudeHandler(){
   AntennaHandlerTemplate('long','DD')
   AntennaHandlerTemplate('long','DDM')
   AntennaHandlerTemplate('long','DMS')
@@ -516,7 +510,7 @@ $("#new-goal-coordinates-btn").on('click', function(event) {
       $("#goal-modal-body-content").append(result)
 
       CreateGoalLatitudeHandler(count)
-      CreateGoalLongtitudeHandler(count)
+      CreateGoalLongitudeHandler(count)
       CreateGoalButtons(count)
 
         count++    
@@ -592,7 +586,7 @@ function InsertDataInQueue(current,lat_format,long_format){
   
     let latlongpair = {
       latitude : lat,
-      longtitude : long
+      longitude : long
     }
 
           $("#goal-modal-body-content").attr("count",count)     
@@ -613,7 +607,7 @@ function InsertDataInQueue(current,lat_format,long_format){
     }
 
     $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-    $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6))
+    $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
 
     SaveNavigationQueueToServer()
   }
@@ -654,7 +648,7 @@ function CreateGoalLatitudeHandler(current){
 
 }
 
-function CreateGoalLongtitudeHandler(current){
+function CreateGoalLongitudeHandler(current){
 
   GoalHandlerTemplate('long','DD',current)
   GoalHandlerTemplate('long','DDM',current)
@@ -775,7 +769,7 @@ function CreateGoalDeleteButtonHandler(current) {
   if(! (navQueue.top() == undefined)) {
   
   $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-  $('#goal-stats-long').text(navQueue.top().longtitude.toFixed(6))
+  $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
   }
   else{ 
     $('#goal-stats-lat').text("----")

@@ -24,20 +24,20 @@ def subscriber_callback(message):
         hasHeading = True
 
     if rospy.get_param('has_gps_goal'):
-        Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
+        rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
         gpsGoal['latitude'], gpsGoal['longitude'])
-        Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
+        rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
         gpsGoal['latitude'], gpsGoal['longitude'])
 
         if hasHeading:
-            Direction_adjust = Turning(Rov_to_des_direction, rover['heading'])
+            direction_adjust = Turning(rov_to_des_direction, rover['heading'])
         else:
-            Direction_adjust = -999 # no heading, give invalid number
+            direction_adjust = -999 # no heading, give invalid number
 
         msg = Point()
         # note that direction is based on compass directions where E is 90 and W is -90
-        msg.x = Direction_adjust
-        msg.y = Rov_to_des_distance
+        msg.x = direction_adjust
+        msg.y = rov_to_des_distance
         if(msg.y < 50):
             rospy.loginfo('moving on to next coorinates')
             

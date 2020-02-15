@@ -18,7 +18,7 @@
      <ul class = "list-group" id = "rover-stats-list">
         <div class = "row px-3  ">
         <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "rover-latitude" class="float-right">----</span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "rover-longtitude" class="float-right">----</span ></li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longitude</label>  <span id = "rover-longitude" class="float-right">----</span ></li>
         </div>
         <li class = "list-group-item "> <label for = "" > Heading</label>  <span id = "rover-heading" class="float-right">----</span >  </li>
         <li class = "list-group-item ">  <label for = "" > Speed</label>  <span id = "rover-speed" class="float-right">----</span ></li>
@@ -28,11 +28,11 @@
     </div>   
 
     <div id = "antenna-stats-list"> <hr>
-      <h4 align = "center"> Basestation data </h4>
+      <h4 align = "center"> Antenna data </h4>
       <ul class = "list-group" id = "antenna-stats-list"> 
         <div class = "row px-3"> 
         <li class = "list-group-item col-md-6"> <label for = "" > Latitude</label>  <span id = "antenna-stats-lat" class="float-right">----</span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "" > Longtitude</label>  <span id = "antenna-stats-long" class="float-right">----</span ></li>
+        <li class = "list-group-item col-md-6">  <label for = "" > Longitude</label>  <span id = "antenna-stats-long" class="float-right">----</span ></li>
         </div>
         <li class = "list-group-item"> <label for = "" > Antenna Heading</label>  <span id = "antenna-stats-heading" class="float-right">----</span >  </li>
         <li class = "list-group-item"> <label for = "" >Distance to Rover</label>  <span id = "antenna-stats-dist-to-rover" class="float-right">----</span >  </li>
@@ -46,7 +46,7 @@
         <div class = "modal-dialog modal-lg">
           <div class = "modal-content">
               <div class = "modal-header"> 
-                  <h4> Basestation Menu </h4>
+                  <h4> Antenna Menu </h4>
               </div>
               <div class = "modal-body" id = "antenna-modal-body">
                   <fieldset id = "antenna-lat-fieldset"> 
@@ -67,7 +67,7 @@
 
                 <fieldset id = "antenna-long-fieldset">  
                 <div id = "antenna-select-long-format">
-                <button type = "button" id = "antenna-select-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Longtitude Format</button> 
+                <button type = "button" id = "antenna-select-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle = "dropdown"> Select Longitude Format</button> 
                 
                 <span class = "caret"> </span>
 
@@ -109,7 +109,7 @@
     <ul class = "list-group" id = "goal-stats-list"> 
       <div class = "row px-3">
         <li class = "list-group-item col-md-6"> <label for = "goal-stats-lat" > Latitude</label>  <span id = "goal-stats-lat" class="float-right">-----</span >  </li>
-        <li class = "list-group-item col-md-6">  <label for = "goal-stats-long" > Longtitude</label>  <span id = "goal-stats-long" class="float-right">-----</span ></li>
+        <li class = "list-group-item col-md-6">  <label for = "goal-stats-long" > Longitude</label>  <span id = "goal-stats-long" class="float-right">-----</span ></li>
         </div>
         <li class = "list-group-item"> <label for = "goal-stats-distance" > Distance to goal</label>  <span id = "goal-stats-distance" class="float-right">-----</span >  </li>
         <li class = "list-group-item"> <label for = "goal-stats-rover-heading" > Recommended Rover Heading</label>  <span id = "goal-stats-rover-heading" class="float-right">-----</span >  </li>
@@ -127,78 +127,19 @@
               <div class = "modal-header" id = "goal-modal-header"> 
                   <button id = "new-goal-coordinates-btn" class = "btn btn-primary"> Add new coordinates</button>
               </div>
-              <div class = "modal-body" id = "goal-modal-body"> 
-              <div id = "goal-modal-body-content">
-                
-              </div>
-                  
-              </div>
               
-                </div> 
-            </div>
-        </div>
+              <div class = "modal-body" id = "goal-modal-body"> 
+                <div id = "goal-modal-body-content">
+                
+                </div>  
+              </div>
+          </div> 
+      </div>
+    </div>
  </div>
+
  <div class="col-md-4">
 
  </div>
 </div>
 {% endblock %}
-
-
-
-
-
-
-
-
-<!-- <h5 class="container-header">Navigation Data</h5>
-<div style="display: block" id="rover-unchanging">
-  <h5>speed: <span id="rover-speed">-</span></h5>
-  <h5>heading: <span id="rover-heading">-</span></h5>
-  <h5>angular velocity: <span id="rover-angular-velocity">-</span></h5>
-  <h5 >lat: <span id="rover-latitude">-</span></h5>
-  <h5 >long: <span id="rover-longitude">-</span></h5>
-</div>
-<div style="display: block" id="antenna-inputs" class="input-group input-group-sm" >
-  <div class="input-group-prepend">
-    <span class="input-group-text">lat, long, bearing (Antenna)</span><br>
-  </div>
-  <input type="text" id="antenna-latitude-input">
-  <input type="text" id="antenna-longitude-input">
-  <input type="text" id="antenna-start-dir-input">
-  <br>
-  <button type="button" id="send-antenna-data-btn" class="btn btn-primary">Send antenna data</button>
-</div>
-<div style="display: none" id="antenna-unchanging">
-  <h6>Antenna coords:</h6>
-  <h5>lat: <span id="antenna-latitude">-</span></h5>
-  <h5>long: <span id="antenna-longitude">-</span></h5>
-  <h5>bearing: <span id="antenna-start-dir">-</span></h5>
-  <div>
-    <h6>Direct antenna to:</h6>
-    <h5>angle: <span id="recommended-antenna-angle">-</span></h3>
-    <h5>dist (m): <span id="distance-to-rover">-</span></h3>
-    
-    <button type="button" id="change-antenna-data-btn" class="btn btn-primary">Change antenna data</button>
-  </div>
-</div>
-<div style="display: block" id="goal-inputs" class="input-group input-group-sm" >
-  <div class="input-group-prepend">
-    <span class="input-group-text">lat, long (Destination)</span><br>
-  </div>
-  <input type="text" id="goal-latitude-input">
-  <input type="text" id="goal-longitude-input">
-  <br>
-  <button type="button" id="send-goal-pos-btn" class="btn btn-primary">Send</button>
-</div>
-<div style="display: none" id="goal-unchanging">
-  <h6>Destination coords:</h6>
-  <h5>lat: <span id="goal-latitude">-</span></h5>
-  <h5>long: <span id="goal-longitude">-</span></h5>
-  <div>
-    <h6>Direct rover to:</h6>
-    <h5>dir: <span id="recommended-rover-heading">-</span></h5>
-    <h5>dist (m): <span id="distance-to-goal">-</span></h5>
-    <button type="button" id="change-goal-pos-btn" class="btn btn-primary">Change goal coords</button>
-  </div>
-</div> -->

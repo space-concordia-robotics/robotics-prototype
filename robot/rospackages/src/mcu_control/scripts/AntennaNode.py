@@ -16,10 +16,10 @@ def subscriber_callback(message):
     rover['longitude'] = message.y
 
     if rospy.get_param('got_antenna_pos'):
-        BS_to_Rover_dir = Direction(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
-        BS_to_Rover_dis = Distance(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
+        antenna_to_Rover_dir = Direction(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
+        antenna_to_Rover_dis = Distance(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
 
-        rotatorAngle = BS_to_Rover_dir - antenna['startDir'] + 180
+        rotatorAngle = antenna_to_Rover_dir - antenna['startDir'] + 180
         if rotatorAngle < 0:
             rotatorAngle += 360
         elif rotatorAngle > 360:
@@ -27,7 +27,7 @@ def subscriber_callback(message):
 
         msg = Point()
         msg.x = rotatorAngle/10
-        msg.y = BS_to_Rover_dis
+        msg.y = antenna_to_Rover_dis
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')

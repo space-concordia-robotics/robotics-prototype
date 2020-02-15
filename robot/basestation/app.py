@@ -1,4 +1,4 @@
-    #!/usr/bin/env python
+#!/usr/bin/env python
 """Flask server controller.
 
 Flask is light-weight and modular so this is actually all we need to set up a simple HTML page.
