@@ -71,6 +71,7 @@
 .control-btn-mid {
     width: 80px;
     height: 80px;
+    margin-right: 5px;
 }
 
 .container-header, thead {
