@@ -6,34 +6,30 @@ $(document).ready(() => {
   const BACK_PAN_SYM = '#'
   const BACK_TILT_SYM = '$'
 
+  // Pan -> Continuous Servo
+  // Tilt -> Position Servo
+
   const SERVO_SYMBOLS = {}
   
   SERVO_SYMBOLS[FRONT_CAM_NAME] = {
-      'pan': FRONT_PAN_SYM,
-      'tilt': FRONT_TILT_SYM
+      pan: FRONT_PAN_SYM,
+      tilt: FRONT_TILT_SYM
     }
   SERVO_SYMBOLS[BACK_CAM_NAME] = {
-      'pan': BACK_PAN_SYM,
-      'tilt': BACK_TILT_SYM
+      pan: BACK_PAN_SYM,
+      tilt: BACK_TILT_SYM
   } 
 
-  const POS_SERVO_ANGLE_LIMITS = {}
-
-  POS_SERVO_ANGLE_LIMITS[FRONT_CAM_NAME] = {
-      'min': 0,
-      'max': 180
-  }
-
-  POS_SERVO_ANGLE_LIMITS[BACK_CAM_NAME] = {
-      'min': 0,
-      'max': 180
-  }
+  const POS_SERVO_ANGLE_LIMITS = {min : 0, max : 180}
+  const CONTINUOUS_SERVO_THROTTLE_LIMITS = [-1,1] // Backend actually accepts map between 0 and 180
 
   const POS_SERVO_INC = 4
   const CONTINUOUS_SERVO_INC = 5
 
 
   const SERVO_HOMING_PWM = {}
+  SERVO_HOMING_PWN[FRONT_CAM_NAME] = 93
+  SERVO_HOMIN_PWN[BACK_CAM_NAME] = 93
 
   const SERVO_INCREMENT = 5
 
@@ -44,12 +40,12 @@ $(document).ready(() => {
 
   function getPanSymbol(cameraName)
   {
-    return SERVO_SYMBOLS[cameraName]['pan']
+    return SERVO_SYMBOLS[cameraName].pan
   }
 
   function getTiltSymbol(cameraName)
   {
-    return SERVO_SYMBOLS[cameraName]['tilt']
+    return SERVO_SYMBOLS[cameraName].tilt
   }
 
   function cameraPan(cameraName, degrees)
