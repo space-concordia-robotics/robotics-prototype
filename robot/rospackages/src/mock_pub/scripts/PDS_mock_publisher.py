@@ -3,20 +3,15 @@ import time
 import rospy
 from std_msgs.msg import Float32
 
-#decimals for all pubs
-DECIMALS = 2
-
 # temp values -> should be extracted from the js file later
-voltage_max = 14;
-voltage_min = 3;
+max_voltage = 16.5
+min_voltage = 12.5
+
+voltage_current = max_voltage - min_voltage
 
 def get_time_millis():
   millis = int(round(time.time() * 1000))
   return millis
-
-def generate_mock_val():
-  
-
 
 def PDS_pub():
   try:
@@ -29,29 +24,27 @@ def PDS_pub():
   rospy.init_node('PDS_mock_pub', anonymous=True)
   rate = rospy.Rate(10) # 10hz
 
-  if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
-    while not rospy.is_shutdown():
-      pub.publish(420)
-      rate.sleep()
-  elif (mode == 'rise'): #rise indefinetly
-    #start time
-    start_time = get_time_millis();
-    start_vol = 4 #volts
-    speed = 1 #volts per second
+  global voltage_current
 
-    while not rospy.is_shutdown():
-      time_now = get_time_millis()
-      pub_vol = round(start_vol +  speed * ((time_now - start_time) / 1000), DECIMALS)
-      pub.publish(pub_vol)
-      print(pub_vol)
+  while not rospy.is_shutdown():
+      if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
+        continue
+      elif (mode == 'rise'): #rise indefinetly
+        voltage_current += 1
+      elif (mode == 'fall'):
+        voltage_current -= 1
+      else :
+        print('Invalid mode!')
+        sys.exit()
+
+      pub.publish(voltage_current)
+      print(voltage_current)
       rate.sleep()
-  else :
-    print('Invalid mode!')
-    sys.exit()
+
 
 if __name__ == '__main__':
   # Setting default mode parameter
-  rospy.set_param('PDS_mock_mode', 'stable')
+  rospy.set_param('PDS_mock_mode', 'fall')
 
   try:
     PDS_pub()
