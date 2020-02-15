@@ -14,6 +14,9 @@ def get_time_millis():
   millis = int(round(time.time() * 1000))
   return millis
 
+def generate_mock_val():
+  
+
 
 def PDS_pub():
   try:
@@ -26,11 +29,11 @@ def PDS_pub():
   rospy.init_node('PDS_mock_pub', anonymous=True)
   rate = rospy.Rate(10) # 10hz
 
-  if (mode == 'stable'):
+  if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
     while not rospy.is_shutdown():
       pub.publish(420)
       rate.sleep()
-  elif (mode == 'rise'):
+  elif (mode == 'rise'): #rise indefinetly
     #start time
     start_time = get_time_millis();
     start_vol = 4 #volts
