@@ -190,9 +190,10 @@ function initRosWeb () {
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
     if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
+      textColor('#battery-voltage', 'red')
+
       if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
         $('#battery-voltage').attr('acceptable', '0')
-        textColor('#battery-voltage', 'red')
         errorSound()
         if (voltage > MAX_VOLTAGE) {
           navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
@@ -200,17 +201,23 @@ function initRosWeb () {
           navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
         }
       }
-    } else {
-      if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
-        $('#battery-voltage').attr('acceptable', '1')
+    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){ //hmm??
+      if ($('#battery-voltage').attr('acceptable') === '0') {
+        textColor('#battery-voltage', 'red')
+      } else {
+        textColor('#battery-voltage', 'orange')
       }
 
-      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING || voltage > MAX_VOLTAGE - VOLTAGE_WARNING){
+    } else { 
+      if (voltage > MAX_VOLTAGE - VOLTAGE_WARNING || voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
+
       } else {
         textColor('#battery-voltage', 'white')
       }
-    } 
+
+      if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
