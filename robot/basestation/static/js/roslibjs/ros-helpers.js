@@ -201,7 +201,7 @@ function initRosWeb () {
           navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
         }
       }
-    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){ //hmm??
+    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
       if ($('#battery-voltage').attr('acceptable') === '0') {
         textColor('#battery-voltage', 'red')
       } else {
@@ -238,11 +238,11 @@ function initRosWeb () {
       let temperature = temps[i]
       $obj.text(temperature)
 
-      // if statement to control temperature indicator switching between acceptable(white) and unacceptable(red)
       if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
+        $obj.css({'color': 'red'})
+
         if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
           $obj.attr('acceptable', '0')
-          $obj.css({'color': 'red'})
           errorSound()
           if (temperature > MAX_TEMP) {
             navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
@@ -250,17 +250,23 @@ function initRosWeb () {
             navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
           }
         }
-      } else {
-        if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
-          $obj.attr('acceptable', '1')
+      } else if (temperature > MAX_TEMP - TEMP_LEEWAY || temperature < MIN_TEMP + TEMP_LEEWAY){
+        if ($obj.attr('acceptable') === '0') {
+          $obj.css({'color': 'red'})
+        } else {
+          $obj.css({'color': 'orange'})
         }
 
-        if (temperature < MIN_TEMP + TEMP_WARNING || temperature > MAX_TEMP - TEMP_WARNING){
+      } else { 
+        if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
+
         } else {
           $obj.css({'color': 'white'})
         }
-      } 
+
+        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
+      }
     });
 
   })
