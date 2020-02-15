@@ -6,10 +6,12 @@ lastRotate = 0
 MIN_VOLTAGE = 12.5
 MAX_VOLTAGE = 16.8
 VOLTAGE_LEEWAY = 0.5
+VOLTAGE_WARNING = 1
 // minimum and maximum acceptable battery tempratures (degrees celcius)
 MIN_TEMP = 0
 MAX_TEMP = 85
 TEMP_LEEWAY = 1
+TEMP_WARNING = 10
 // variable to toggle unacceptable voltage and temperature indicators
 ALERT_ENABLE = true
 
@@ -187,19 +189,28 @@ function initRosWeb () {
     $('#battery-voltage').text(voltage)
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
-    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE) && $('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
-      $('#battery-voltage').attr('acceptable', '0')
-      textColor('#battery-voltage', 'red')
-      errorSound()
-      if (voltage > MAX_VOLTAGE) {
-        navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
-      } else if (voltage < MIN_VOLTAGE){
-        navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
+      if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
+        $('#battery-voltage').attr('acceptable', '0')
+        textColor('#battery-voltage', 'red')
+        errorSound()
+        if (voltage > MAX_VOLTAGE) {
+          navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+        } else if (voltage < MIN_VOLTAGE){
+          navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+        }
       }
-    } else if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
-      $('#battery-voltage').attr('acceptable', '1')
-      textColor('#battery-voltage', 'white')
-    }
+    } else {
+      if ($('#battery-voltage').attr('acceptable') === '0' && voltage < MAX_VOLTAGE - VOLTAGE_LEEWAY && voltage > MIN_VOLTAGE + VOLTAGE_LEEWAY) {
+        $('#battery-voltage').attr('acceptable', '1')
+      }
+
+      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING || voltage > MAX_VOLTAGE - VOLTAGE_WARNING){
+        textColor('#battery-voltage', 'orange')
+      } else {
+        textColor('#battery-voltage', 'white')
+      }
+    } 
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -221,19 +232,28 @@ function initRosWeb () {
       $obj.text(temperature)
 
       // if statement to control temperature indicator switching between acceptable(white) and unacceptable(red)
-      if ((temperature > MAX_TEMP || temperature < MIN_TEMP) && $obj.attr('acceptable') === '1' && ALERT_ENABLE) {
-        $obj.attr('acceptable', '0')
-        $obj.css({'color': 'red'})
-        errorSound()
-        if (temperature > MAX_TEMP) {
-          navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
-        } else if (temperature < MIN_TEMP) {
-          navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
+        if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
+          $obj.attr('acceptable', '0')
+          $obj.css({'color': 'red'})
+          errorSound()
+          if (temperature > MAX_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
+          } else if (temperature < MIN_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
+          }
         }
-      } else if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
-        $obj.attr('acceptable', '1')
-        $obj.css({'color': 'white'})
-      }
+      } else {
+        if ($obj.attr('acceptable', '0') && temperature < MAX_TEMP - TEMP_LEEWAY && temperature > MIN_TEMP + TEMP_LEEWAY) {
+          $obj.attr('acceptable', '1')
+        }
+
+        if (temperature < MIN_TEMP + TEMP_WARNING || temperature > MAX_TEMP - TEMP_WARNING){
+          $obj.css({'color': 'orange'})
+        } else {
+          $obj.css({'color': 'white'})
+        }
+      } 
     });
 
   })
