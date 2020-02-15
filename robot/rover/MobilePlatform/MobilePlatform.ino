@@ -1,3 +1,9 @@
+#include <Adafruit_NeoPixel.h>
+
+//#ifdef __AVR__
+//  #include <avr/power.h>
+//#endif
+
 #include "pins.h"
 #include "motors.h"
 #include <Servo.h>
@@ -18,6 +24,12 @@
 #define SERVO_STOP 93
 #define FRONT_BASE_DEFAULT_PWM 65
 #define REAR_BASE_DEFAULT_PWM 35
+
+/* Activity Indicator */
+#define PIN 6
+#define NUMLED 16
+// uint32_t ledColor;
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLED, PIN, NEO_GRB + NEO_KHZ800);
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -125,6 +137,11 @@ void setup() {
     bluetooth.setTimeout(50);
     delay(300); // NECSSARY. Give time for serial port to set up
 
+    //Activity Indicator
+    pixels.begin();
+    pixels.setBrightness(40);
+    pixels.show();
+    
     initPins();
     initEncoders();
     initPids();
@@ -178,7 +195,7 @@ void loop() {
         
         sinceMC = 0;
     }
-
+    
     if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
         if (Cmds.isEnc) {
             print("ASTRO Motor Speeds: ");
@@ -214,6 +231,12 @@ void loop() {
             println(String(LB.desiredVelocity));
         }
         sinceFeedbackPrint = 0;
+    }
+    if(!(Cmds.isLedOn) || cmd == Cmds.ledOn_cmd){
+        statusLED(Cmds.ledColor[0], Cmds.ledColor[1], Cmds.ledColor[2]);    
+    }
+    else{
+        pixels.show();   
     }
 }
 
@@ -481,3 +504,11 @@ void lb_encoder_interrupt(void) {
     LB.prevTime = micros();
     LB.encoderCount++;
 }
+
+void statusLED(uint8_t r,uint8_t g,uint8_t b){
+    for(uint16_t i = 0; i < pixels.numPixels(); i++){
+      pixels.setPixelColor(i, r, g, b);
+      pixels.show();
+    }
+}
+

@@ -35,9 +35,16 @@ public:
     String ttoOff_cmd = "tto-off";
     String status_cmd = "status";
     String stop_cmd = "stop";
+    String ledOn_cmd = "indicator-on";
+    String ledOff_cmd = "indicator-off";
+    String ledManCtrl_cmd = "indicator-manual";
+    String ledAutoCtrl_cmd = "indicator-autonomous";
+    String ledEureka_cmd = "indicator-eureka";
 
     elapsedMillis sinceThrottle; // timer for reading battery, gps and imu data
 
+    uint8_t ledColor[3] = {0,0,0};
+    bool isLedOn = false;
 
     bool isActivated = false;
     bool isOpenLoop = false; //  PID controller
@@ -86,6 +93,11 @@ public:
     void stop(bool timeout = false);
     void controlWheelMotors(String cmd);
     void controlCameraMotors(String cmd);
+    void ledOn(void);
+    void ledOff(void);
+    void ledManCtrl(void);
+    void ledAutoCtrl(void);
+    void ledEureka(void);
 };
 
 void Commands::setupMessage(void) {
@@ -166,6 +178,21 @@ void Commands::handler(String cmd, String sender) {
     }
     else if (cmd[0] == '!' || cmd[0] == '@' || cmd[0] == '#' || cmd[0] == '$') {
         controlCameraMotors (cmd);
+    }
+    else if(cmd == ledOn_cmd){
+          ledOn();
+    }
+    else if(cmd == ledOff_cmd){
+          ledOff();
+    }
+    else if(cmd == ledManCtrl_cmd){
+          ledManCtrl();
+    }
+    else if(cmd == ledAutoCtrl_cmd){
+          ledAutoCtrl();
+    }
+    else if(cmd == ledEureka_cmd){
+          ledEureka();
     }
     else {
         println("ASTRO BOOOOOOO!!! Wrong command, try a different one, BIAAAAAA");
@@ -666,4 +693,29 @@ void Commands::stop(bool timeout) {
 
 }
 
+void Commands::ledOn(void){
+    isLedOn = true;
+}
+
+void Commands::ledOff(void){
+    isLedOn = false;
+}
+
+void Commands::ledManCtrl(void){
+    ledColor[0] = 0; // Blue
+    ledColor[1] = 0;
+    ledColor[2] = 255;
+}
+
+void Commands::ledAutoCtrl(void){
+    ledColor[0] = 255; // Red
+    ledColor[1] = 0;
+    ledColor[2] = 0;
+}
+
+void Commands::ledEureka(void){
+    ledColor[0] = 0; // Green
+    ledColor[1] = 255;
+    ledColor[2] = 0;
+}
 #endif
