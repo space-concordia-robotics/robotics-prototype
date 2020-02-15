@@ -6,6 +6,20 @@
 # ScienceNode = 115200, 'science'
 # RoverNode = 115200, 'Astro'
 
+node_baudrate = {
+  "pds": 9600,
+  "arm": 115200,
+  "science": 115200,
+  "rover": 115200
+}
+
+node_type = {
+  "pds": 'PDS',
+  "arm": 'arm',
+  "science": 'science',
+  "rover": 'Astro'
+}
+
 def init_serial(baud, type):
     baudrate = baud
     # in a perfect world, you can choose the baudrate

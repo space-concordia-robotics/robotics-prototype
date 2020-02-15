@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from util import init_serial
+from robot.rospackages.src.mcu_control.scripts.serial_util import init_serial
 import serial  # pyserial
 import serial.tools.list_ports  # pyserial
 #from robot.comms.uart import Uart
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
-    init_serial(9600,mcuName)
+    init_serial(node_baudrate.get(pds),node_type.get(pds))
 
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser

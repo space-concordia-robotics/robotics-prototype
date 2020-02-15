@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from util import init_serial
+from robot.rospackages.src.mcu_control.scripts.serial_util import init_serial
 import serial # pyserial
 import serial.tools.list_ports # pyserial
 #from robot.comms.uart import Uart
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(115200, mcuName)
+    init_serial(node_baudrate.get(arm),node_type.get(arm))
 
     angle_pub_topic = '/arm_joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
