@@ -22,8 +22,9 @@
 #define REAR_BASE_DEFAULT_PWM 35
 
 /* Activity Indicator */
-#define PIN 6
+#define PIN 15
 #define NUMLED 16
+#define EUREKA_LED_INTERVAL 2000
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLED, PIN, NEO_GRB + NEO_KHZ800);
 
 /*
@@ -57,6 +58,7 @@ elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery 
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
+elapsedMillis sinceEurekaToggle;
 String cmd;
 
 float maxOutputSignal, minOutputSignal;
@@ -228,10 +230,19 @@ void loop() {
         sinceFeedbackPrint = 0;
     }
     if(Cmds.ledStatus == true){
+        if(Cmds.ledColor[1] == 255){
+          if(sinceEurekaToggle > LED__BLINK_INTERVAL){
+            statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]));
+          }
+          if(sinceEurekaToggle > EUREKA_LED_INTERVAL){
+            statusLED(pixels.Color(0,0,0));
+            sinceLedToggle = 0;
+          }
+        }
         statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]), Cmds.ledStatus);
     }
     else{
-      pixels.show(); // set led off
+        statusLED(pixels.Color(0,0,0)); // set led off
     }
 }
 
@@ -506,4 +517,3 @@ void statusLED(uint32_t color){
       pixels.show(); // set led on
     }
 }
-
