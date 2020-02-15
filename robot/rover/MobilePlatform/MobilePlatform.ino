@@ -1,9 +1,5 @@
 #include <Adafruit_NeoPixel.h>
 
-//#ifdef __AVR__
-//  #include <avr/power.h>
-//#endif
-
 #include "pins.h"
 #include "motors.h"
 #include <Servo.h>
@@ -28,7 +24,6 @@
 /* Activity Indicator */
 #define PIN 6
 #define NUMLED 16
-// uint32_t ledColor;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLED, PIN, NEO_GRB + NEO_KHZ800);
 
 /*
@@ -232,11 +227,11 @@ void loop() {
         }
         sinceFeedbackPrint = 0;
     }
-    if(!(Cmds.isLedOn) || cmd == Cmds.ledOn_cmd){
-        statusLED(Cmds.ledColor[0], Cmds.ledColor[1], Cmds.ledColor[2]);    
+    if(Cmds.ledStatus == true){
+        statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]), Cmds.ledStatus);
     }
     else{
-        pixels.show();   
+      pixels.show(); // set led off
     }
 }
 
@@ -505,10 +500,10 @@ void lb_encoder_interrupt(void) {
     LB.encoderCount++;
 }
 
-void statusLED(uint8_t r,uint8_t g,uint8_t b){
+void statusLED(uint32_t color){
     for(uint16_t i = 0; i < pixels.numPixels(); i++){
-      pixels.setPixelColor(i, r, g, b);
-      pixels.show();
+      pixels.setPixelColor(i, color);
+      pixels.show(); // set led on
     }
 }
 

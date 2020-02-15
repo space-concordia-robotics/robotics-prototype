@@ -44,7 +44,7 @@ public:
     elapsedMillis sinceThrottle; // timer for reading battery, gps and imu data
 
     uint8_t ledColor[3] = {0,0,0};
-    bool isLedOn = false;
+    bool ledStatus = false;
 
     bool isActivated = false;
     bool isOpenLoop = false; //  PID controller
@@ -180,10 +180,14 @@ void Commands::handler(String cmd, String sender) {
         controlCameraMotors (cmd);
     }
     else if(cmd == ledOn_cmd){
-          ledOn();
+          if(ledStatus == false){
+            ledOn();
+          }
     }
     else if(cmd == ledOff_cmd){
-          ledOff();
+          if(ledStatus == true){
+            ledOff();
+          }
     }
     else if(cmd == ledManCtrl_cmd){
           ledManCtrl();
@@ -694,11 +698,11 @@ void Commands::stop(bool timeout) {
 }
 
 void Commands::ledOn(void){
-    isLedOn = true;
+    ledStatus = true;
 }
 
 void Commands::ledOff(void){
-    isLedOn = false;
+    ledStatus = false;
 }
 
 void Commands::ledManCtrl(void){
