@@ -66,8 +66,9 @@ def init_serial(baud, type):
                 while ser.in_waiting:
                     ser.readline()
 
+                attempts = 5
                 rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-                for i in range(5):
+                for i in range(attempts):
                     rospy.loginfo('attempt #%d...', i+1)
                     startListening = time.time()
                     ser.write(str.encode('who\n'))
@@ -101,8 +102,9 @@ def init_serial(baud, type):
             ser.readline()
 
         rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-        for i in range(1,6):
-            rospy.loginfo('attempt #%d...', i)
+        attempts = 5
+        for i in range(attempts):
+            rospy.loginfo('attempt #%d...', i+1)
             startListening = time.time()
             ser.write(str.encode('who\n'))
             while (time.time()-startListening < timeout):
