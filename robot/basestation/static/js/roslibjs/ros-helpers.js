@@ -13,6 +13,13 @@ TEMP_LEEWAY = 1
 // variable to toggle unacceptable voltage and temperature indicators
 ALERT_ENABLE = true
 
+// ROS logging severity level constants
+const ROSDEBUG = 1 // debug level
+const ROSINFO = 2  // general level
+const ROSWARN = 4  // warning level
+const ROSERROR = 8 // error level
+const ROSFATAL = 16 // fatal/critical level
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -20,15 +27,21 @@ function initRosWeb () {
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
-    if (window.location.pathname == '/rover') {
-      initNavigationPanel()
-    }
   })
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)
   })
   ros.on('close', function () {
     appendToConsole('Connection to websocket server closed.')
+  })
+
+  /* Logging */
+
+  // publishes log messages to /rosout
+  ros_logger = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rosout',
+    messageType: 'rosgraph_msgs/Log'
   })
 
   /* general controls */
@@ -241,6 +254,121 @@ function initRosWeb () {
 }
 
 /* functions used in main code */
+
+/**
+ * Gets the current time and formats it for ROS and the GUI.
+ * @return array of two variables: ROS time object, string containing hh:mm:ss
+*/
+function rosTimestamp () {
+  // next few lines taken and adjusted from roslibjs action server example
+  let currentTime = new Date()
+  let secs = currentTime.getTime()/1000 // seconds before truncating the decimal
+  let secsFloored = Math.floor(secs) // seconds after truncating
+  let nanoSecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
+
+  // return a dictionary for the ROS log and a string for the gui console
+  let stampTime = currentTime.toString().split(' ')[4] // hh:mm:ss from date object
+  return [{secs : secsFloored, nsecs : nanoSecs}, stampTime]
+}
+
+/**
+ * Creates and publishes a ROS log message to /rosout based on the parameters
+ * @param logLevel one of the ROS loglevel constants defined above
+ * @param timestamp ros time object containing seconds and nanoseconds
+ * @param message the log message
+*/
+function publishRosLog (logLevel, timestamp, message) {
+  ros_logger.publish(
+    new ROSLIB.Message({
+      // I'm only publishing the essentials. We could include more info if so desired
+      header : {
+        // seq // uint32: sequence ID, seems to increment automatically
+        stamp : timestamp // dictionary: contains truncated seconds and nanoseconds
+        // frame_id // string: probably only useful for tf
+      },
+      level : logLevel, // int: see log level constants above
+      // name : '/web_gui', // name of the node (proposed)
+      msg : message, // string: this is the log message
+      // file // string: we could specify the js file that generated the log
+      // function // string: we could specify the parent function that generated the log
+      // line // uint32: we could specify the specific line of code that generated the log
+      // topics // string[]: topic names that the node publishes
+    })
+  )
+}
+
+/**
+ * Prints the log message to the GUI and chrome console.
+ * Also calls publishRosLog with the message and parameters.
+ * @param logLevel one of the ROS loglevel constants defined above
+ * @param message the log message
+*/
+function rosLog (logLevel, message) {
+  logData = {}
+  logData[ROSDEBUG] = {prefix : '[DEBUG]', type : 'log'}
+  logData[ROSINFO] = {prefix : '[INFO]', type : 'log'}
+  logData[ROSWARN] = {prefix : '[WARN]', type : 'warn'}
+  logData[ROSERROR] = {prefix : '[ERROR]', type : 'error'}
+  logData[ROSFATAL] = {prefix : '[FATAL]', type : 'error'}
+
+  stamps = rosTimestamp()
+  consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
+
+  if (logData[logLevel].type === 'log') {
+    console.log(consoleMsg)
+  } else if (logData[logLevel].type === 'warn') {
+    console.warn(consoleMsg)
+  } else if (logData[logLevel].type === 'error') {
+    console.error(consoleMsg)
+  }
+  appendToConsole(consoleMsg, false)
+  // log messages go to log file: currently rosout.log
+  publishRosLog(logLevel, stamps[0], message)
+}
+
+// these functions copy the rospy logging functions
+/**
+ * Sends a debug message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logDebug (message) {
+  // unlike rospy, (currently) the debug messages we generate will get published
+  rosLog(ROSDEBUG, message)
+}
+/**
+ * Sends an info message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logInfo (message) {
+  rosLog(ROSINFO, message)
+}
+/**
+ * Sends a warning message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logWarn (message) {
+  rosLog(ROSWARN, message)
+}
+/**
+ * Sends an error message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logErr (message) {
+  rosLog(ROSERROR, message)
+}
+/**
+ * Sends a fatal error message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logFatal (message) {
+  rosLog(ROSFATAL, message)
+}
+
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
