@@ -71,9 +71,8 @@ $(document).ready(function () {
         serialType == 'usb'
       ) {
         requestTask(
-          'arm_listener',
-          1,
-          '#toggle-arm-listener-btn',
+          ARM_LISTENER_TASK,
+          STATUS_START,
           function (msgs) {
             printErrToConsole(msgs)
             if (msgs[0]) {
@@ -92,7 +91,9 @@ $(document).ready(function () {
       }
     } else {
       // closing arm listener
-      requestTask('arm_listener', 0, '#toggle-arm-listener-btn', function (
+      requestTask(ARM_LISTENER_TASK, 
+          STATUS_STOP, 
+          function (
         msgs
       ) {
         printErrToConsole(msgs)
