@@ -42,8 +42,6 @@
     text-align: center;
 }
 
-}
-
 .row, .row>* {
     border: 0px solid #05072f;
 }
@@ -62,8 +60,6 @@
     color: white;
 }
 
-}
-
 .control-btn-left {
     border-radius: 10px 0 0 10px;
 }
@@ -72,7 +68,7 @@
     border-radius: 0 10px 10px 0;
 }
 
-.control-btn-mid {
+.control-btn-mid, .arm-control-btn {
     width: 80px;
     height: 80px;
     margin-right: 5px;
