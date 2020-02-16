@@ -202,8 +202,6 @@ function initRosWeb () {
     } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
       if ($('#battery-voltage').attr('acceptable') === '0') {
         textColor('#battery-voltage', 'red')
-      } else {
-        textColor('#battery-voltage', 'orange')
       }
 
     } else { 
