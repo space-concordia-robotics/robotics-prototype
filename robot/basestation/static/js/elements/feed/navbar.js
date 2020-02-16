@@ -43,7 +43,7 @@ $(document).ready(() => {
     if (url == '/rover') {
         listener = ROVER_LISTENER_TASK
         toggleButtonID += 'rover-listener-btn'
-    } else if (url == '/') {
+    } else if (url == '/' || url == '/arm') {
         listener = ARM_LISTENER_TASK
         toggleButtonID += 'arm-listener-btn'
     } else if (url == '/science') {
