@@ -40,7 +40,7 @@ public:
 
 
     bool isActivated = false;
-    bool isOpenLoop = false; //  PID controller
+    bool isOpenLoop = true; //  PID controller
     bool bluetoothMode = true;//true;
     bool isJoystickMode = true;
     bool isSteering = true;
