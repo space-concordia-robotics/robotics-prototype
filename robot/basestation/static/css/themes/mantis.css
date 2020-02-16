@@ -240,3 +240,25 @@ html, body {
 .pds-stats {
   color: white;
 }
+
+/* Camera */
+.camera-btn {
+  background-color: #528EA5;
+  border-color: black;
+}
+
+.camera-head {
+  border-color: black;
+}
+
+.camera-label {
+  background-color: #EFEFEF;
+}
+
+.camera-name {
+  color: black; 
+}
+
+.camera-stream {
+  background-color: #656F8C;
+}
