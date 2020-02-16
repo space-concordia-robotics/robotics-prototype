@@ -12,4 +12,4 @@ You can read more on the workings of arm vision template [here](http://wiki.ros.
 Some research should be done to understand why `venv` must be deactivated.
 
 ## ROS packages
-Two packages needed to display robots in the GUI are `tf2_web_republisher` and `rosbridge_suite`. For `rosbridge_suite` you simply run `sudo apt-get install ros-kinetic-rosbridge-suite`. Further reading for `tf2_web_republisher` [here](https://subscription.packtpub.com/book/hardware_and_creative/9781783554713/12/ch12lvl1sec105/installing-tf2-web-republisher-on-ros-kinetic)
+One required package not included in the default install script is `tf2_web_republisher`, and to learn how to install it [click here] (https://subscription.packtpub.com/book/hardware_and_creative/9781783554713/12/ch12lvl1sec105/installing-tf2-web-republisher-on-ros-kinetic)
