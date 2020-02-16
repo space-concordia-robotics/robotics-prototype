@@ -30,7 +30,7 @@ public:
     volatile unsigned long prevTime2;
     float gearRatio, gearRatioReciprocal; // calculating this beforehand improves speed of floating point calculations
     float encoderResolutionReciprocal; // calculating this beforehand improves speed of floating point calculations
-    bool isOpenLoop = false; // decides whether to use the PID or not
+    bool isOpenLoop = true; // decides whether to use the PID or not
     volatile int rotationDirection = CCW;
     PidController pidController; // used for speed and angle control
     // these variables change during the main loop
