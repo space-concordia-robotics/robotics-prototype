@@ -16,7 +16,9 @@ def handle_task_request(req):
 
 # given a regex, return all matching existing port names
 def get_ports(pattern):
-    return glob.glob(pattern)
+    ports = glob.glob(pattern)
+    print('ports', ports)
+    return ports
 
 # return all available usb camera port names
 # pitfall: on odroid (and perhaps other OBCs) if we would use the local mode regex
@@ -25,9 +27,12 @@ def get_available_camera_ports():
     global is_local
 
     if is_local:
+        print('local port check')
         video_ports = get_ports('/dev/video[0-9]')
     else:
-        video_ports = get_ports('/dev/video[A-Za-z]')
+        print('comp port check')
+        # this regex makes sure to get our symlinks for camera ports
+        video_ports = get_ports('/dev/video[A-Z][a-z]*')
 
     return video_ports
 
