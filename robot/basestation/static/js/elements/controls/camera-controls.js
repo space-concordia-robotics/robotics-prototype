@@ -28,8 +28,6 @@ $(document).ready(() => {
 
 
   const SERVO_HOMING_PWM = {}
-  SERVO_HOMING_PWN[FRONT_CAM_NAME] = 93
-  SERVO_HOMIN_PWN[BACK_CAM_NAME] = 93
 
   const SERVO_INCREMENT = 5
 
