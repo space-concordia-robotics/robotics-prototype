@@ -209,7 +209,7 @@ function initRosWeb () {
       }
 
     } else { 
-      if (voltage > MAX_VOLTAGE - VOLTAGE_WARNING || voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
+      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
 
       } else {
