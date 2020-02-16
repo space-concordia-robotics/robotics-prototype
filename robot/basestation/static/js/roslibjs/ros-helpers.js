@@ -2,6 +2,19 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
+// minimum and maximum acceptable battery voltages (volts)
+MIN_VOLTAGE = 12.5
+MAX_VOLTAGE = 16.8
+VOLTAGE_LEEWAY = 0.5
+VOLTAGE_WARNING = 1
+// minimum and maximum acceptable battery tempratures (degrees celcius)
+MIN_TEMP = 0
+MAX_TEMP = 85
+TEMP_LEEWAY = 1
+TEMP_WARNING = 10
+// variable to toggle unacceptable voltage and temperature indicators
+ALERT_ENABLE = true
+
 // ROS logging severity level constants
 const ROSDEBUG = 1 // debug level
 const ROSINFO = 2  // general level
@@ -9,7 +22,6 @@ const ROSWARN = 4  // warning level
 const ROSERROR = 8 // error level
 const ROSFATAL = 16 // fatal/critical level
 
-//
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -170,7 +182,40 @@ function initRosWeb () {
     messageType: 'std_msgs/Float32'
   })
   battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
+    // sets voltage to two decimal points
+    let voltage = message.data.toFixed(2)
+    $('#battery-voltage').text(voltage)
+
+    // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
+      textColor('#battery-voltage', 'red')
+
+      if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
+        $('#battery-voltage').attr('acceptable', '0')
+        errorSound()
+        if (voltage > MAX_VOLTAGE) {
+          navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+        } else if (voltage < MIN_VOLTAGE){
+          navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+        }
+      }
+    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
+      if ($('#battery-voltage').attr('acceptable') === '0') {
+        textColor('#battery-voltage', 'red')
+      } else {
+        textColor('#battery-voltage', 'orange')
+      }
+
+    } else { 
+      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
+        textColor('#battery-voltage', 'orange')
+
+      } else {
+        textColor('#battery-voltage', 'white')
+      }
+
+      if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
@@ -179,9 +224,49 @@ function initRosWeb () {
     messageType: 'geometry_msgs/Point'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
-    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
-    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+    // sets temperatures to two decimal points
+    let temps = [
+      parseFloat(message.x).toFixed(2),
+      parseFloat(message.y).toFixed(2),
+      parseFloat(message.z).toFixed(2)
+    ]
+
+    $('.battery-temp').each(function(i, obj) {
+      let $obj = $(obj)
+      let temperature = temps[i]
+      $obj.text(temperature)
+
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
+        $obj.css({'color': 'red'})
+
+        if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
+          $obj.attr('acceptable', '0')
+          errorSound()
+          if (temperature > MAX_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
+          } else if (temperature < MIN_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
+          }
+        }
+      } else if (temperature > MAX_TEMP - TEMP_LEEWAY || temperature < MIN_TEMP + TEMP_LEEWAY){
+        if ($obj.attr('acceptable') === '0') {
+          $obj.css({'color': 'red'})
+        } else {
+          $obj.css({'color': 'orange'})
+        }
+
+      } else { 
+        if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
+          $obj.css({'color': 'orange'})
+
+        } else {
+          $obj.css({'color': 'white'})
+        }
+
+        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
+      }
+    });
+
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({

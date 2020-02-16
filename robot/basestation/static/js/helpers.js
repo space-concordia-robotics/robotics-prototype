@@ -131,6 +131,11 @@ function greyOut (selector) {
   color(selector, '#6c757d')
 }
 
+// convenience function for setting text color of elements
+function textColor (selector, color) {
+  $(selector).css('color', color)
+}
+
 // convenience functions for setting/getting cookies
 function setCookie (cname, cvalue, exdays) {
   var d = new Date()
