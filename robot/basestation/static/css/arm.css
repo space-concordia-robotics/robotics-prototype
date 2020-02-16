@@ -64,9 +64,10 @@
     border-radius: 0 10px 10px 0;
 }
 
-.control-btn-mid {
+.control-btn-mid, .arm-control-btn {
     width: 80px;
     height: 80px;
+    margin-right: 5px;
 }
 
 .container-header, thead {
@@ -120,4 +121,5 @@ input#serial-cmd-input {
   height: 55px !important;
   vertical-align: bottom !important;
   border-radius: 5px !important;
+  padding-bottom:100px;
 }
