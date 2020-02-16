@@ -50,9 +50,7 @@ function initRosWeb () {
     serviceType: 'SelectMux'
   })
   // setup a client for the serial_cmd service
-  serial_cmd_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'serial_cmd',
+  serial_cmd_client = new ROSLIB.Service({ ros: ros, name: 'serial_cmd',
     serviceType: 'SerialCmd'
   })
   // setup a client for the task_handler service
@@ -322,7 +320,6 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
 
-  console.log(request)
   if (dev != '?') {
     appendToConsole(
       'Sending request to switch to channel ' + $('a' + elemID).text()
@@ -336,7 +333,6 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   mux_select_client.callService(request, function (result) {
     clearTimeout(timer)
     let latency = millisSince(sentTime)
-    console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
@@ -377,32 +373,46 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
+
+STATUS_STOP=0
+STATUS_START=1
+STATUS_CHECK=2
+ARM_LISTENER_TASK = 'arm_listener'
+ROVER_LISTENER_TASK = 'rover_listener'
+SCIENCE_LISTENER_TASK = 'science_listener'
+PDS_LISTENER_TASK = 'pds_listener'
+CAMERA_TASK = 'camera_stream'
+CAMERA_PORTS = 'camera_ports'
+
+/**
+ * Sends a request to the task handler.
+ * 
+ * STATUS_STOP stops the task
+ * STATUS_START starts the task
+ * STATUS_CHECK obtains insight on the task
+ * 
+ * @reqTask The task related to the request
+ * @reqStatus The status of the request
+ * @callback Callback on success
+ * @reqArgs Arguments of the request
+ * @timeout Timeout of the request
+ */
 function requestTask (
   reqTask,
   reqStatus,
-  buttonID,
-  callback,
+  callback = arg => {},
   reqArgs = '',
   timeout = REQUEST_TIMEOUT
 ) {
-  var request
-  if (reqArgs == '') {
-    request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
-  } else {
-    request = new ROSLIB.ServiceRequest({
-      task: reqTask,
-      status: reqStatus,
-      args: reqArgs
-    })
-  }
+
+  let request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus, args: reqArgs })
   let sentTime = new Date().getTime()
 
-  console.log('request:', request)
-  if (reqStatus == 0) {
+  if (reqStatus == STATUS_STOP) {
     appendToConsole('Sending request to stop ' + reqTask + ' task')
-  } else if (reqStatus == 1) {
+  } else if (reqStatus == STATUS_START) {
     appendToConsole('Sending request to start ' + reqTask + ' task')
-  } else if (reqStatus == 2) {
+  } else if (reqStatus == STATUS_CHECK) {
     appendToConsole('Sending request to check ' + reqTask + ' task status')
   }
 
@@ -413,7 +423,6 @@ function requestTask (
   task_handler_client.callService(request, function (result) {
     clearTimeout(timer)
     let latency = millisSince(sentTime)
-    console.log('result:', result)
     let msg = result.response
     if (
       msg.includes('Failed') ||
@@ -422,7 +431,6 @@ function requestTask (
       msg.includes('is already running') ||
       msg.includes('not available')
     ) {
-      // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
       callback([false, msg])
     } else {
@@ -430,17 +438,6 @@ function requestTask (
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
 
-      if (reqStatus == 0) {
-        $(buttonID)[0].checked = false
-      } else if (reqStatus == 1) {
-        $(buttonID)[0].checked = true
-      } else if (reqStatus == 2) {
-        if (msg.includes('not')) {
-          $(buttonID)[0].checked = false
-        } else {
-          $(buttonID)[0].checked = true
-        }
-      }
       callback([true, msg])
     }
   })
@@ -463,7 +460,7 @@ function checkTaskStatuses () {
 
   if (window.location.pathname == '/') {
     // check arm listener status
-    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
+    requestTask(ARM_LISTENER_TASK, STATUS_CHECK, (msgs) => {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -473,90 +470,8 @@ function checkTaskStatuses () {
         }
       }
     })
-    // check all camera stream status
-    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyArmScienceCam')
-        ) {
-          $('#camera-feed').removeClass('rotateimg180')
-          $('#arm-science-camera-stream-btn')[0].checked = true
-          $('#rear-camera-stream-btn')[0].checked = false
-          $('#front-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyFrontCam')
-        ) {
-          $('#camera-feed').addClass('rotateimg180')
-          $('#front-camera-stream-btn')[0].checked = true
-          $('#arm-science-camera-stream-btn')[0].checked = false
-          $('#rear-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyRearCam')
-        ) {
-          $('#camera-feed').addClass('rotateimg180')
-          $('#rear-camera-stream-btn')[0].checked = true
-          $('#front-camera-stream-btn')[0].checked = false
-          $('#arm-science-camera-stream-btn')[0].checked = false
-        }
-      }
-    })
-  } else if (window.location.pathname == '/rover') {
-    // check rover listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (msgs[1].includes('not running')) {
-          $('#toggle-rover-listener-btn')[0].checked = false
-        } else if (msgs[1].includes('running')) {
-          $('#toggle-rover-listener-btn')[0].checked = true
-        }
-      }
-    })
-
-    // check all camera stream status
-    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyArmScienceCam')
-        ) {
-          $('#front-camera-stream-btn').removeClass('rotateimg180')
-          $('#arm-science-camera-stream-btn')[0].checked = true
-          $('#rear-camera-stream-btn')[0].checked = false
-          $('#front-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyFrontCam')
-        ) {
-          $('#front-camera-stream-btn').addClass('rotateimg180')
-          $('#front-camera-stream-btn')[0].checked = true
-          $('#arm-science-camera-stream-btn')[0].checked = false
-          $('#rear-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyRearCam')
-        ) {
-          $('#front-camera-stream-btn').removeClass('rotateimg180')
-          $('#rear-camera-stream-btn')[0].checked = true
-          $('#front-camera-stream-btn')[0].checked = false
-          $('#arm-science-camera-stream-btn')[0].checked = false
-        }
-      }
-    })
   } else if (window.location.pathname == '/science') {
-    console.log('science page')
-    requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
+    requestTask(SCIENCE_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -568,7 +483,7 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/pds') {
     // check rover listener status
-    requestTask('pds_listener', 2, '#toggle-pds-listener-btn', function (msgs) {
+    requestTask(PDS_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {

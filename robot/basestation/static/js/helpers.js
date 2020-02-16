@@ -5,8 +5,16 @@ const serialCmd = '#serial-cmd-input'
 // Console Log
 function appendToConsole (msg, devConsole = true, guiConsole = true) {
   if (guiConsole) {
-    $(logConsole).append(msg + '\n')
-    $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+    if($(logConsole)[0] != undefined)
+    {
+      $(logConsole).append(msg + '\n')
+      $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+    }
+    else
+    {
+      console.log('Can\'t append message to log console. Logged messaged to chrome console')
+      console.log(msg)
+    }
   }
   if (devConsole) {
     console.log(msg + '\n')
@@ -147,12 +155,6 @@ function getCookie (cname) {
   return ''
 }
 
-// return properly formatted camera stream URL
-function getStreamURL (topicName) {
-  return (
-    'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
-  )
-}
 
 // isNumeric
 function isNumeric (num) {
