@@ -42,6 +42,8 @@
     text-align: center;
 }
 
+}
+
 .row, .row>* {
     border: 0px solid #05072f;
 }
@@ -58,6 +60,8 @@
 
 .rect-btn:hover, .rect-btn:hover, #logs-btn button:hover {
     color: white;
+}
+
 }
 
 .control-btn-left {
