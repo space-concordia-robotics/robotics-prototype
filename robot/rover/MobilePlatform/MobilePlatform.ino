@@ -229,6 +229,7 @@ void loop() {
         }
         sinceFeedbackPrint = 0;
     }
+    
     if(Cmds.ledStatus == true){
         if(Cmds.ledColor[1] == 255){
           if(sinceEurekaToggle > LED__BLINK_INTERVAL){
@@ -239,7 +240,7 @@ void loop() {
             sinceLedToggle = 0;
           }
         }
-        statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]), Cmds.ledStatus);
+        statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]));
     }
     else{
         statusLED(pixels.Color(0,0,0)); // set led off
