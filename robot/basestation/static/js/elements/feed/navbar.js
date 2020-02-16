@@ -34,6 +34,45 @@ $(document).ready(() => {
       prefer_theme('lofi')
   })
 
+
+  function checkListenerStates() {
+    let listener = ''
+    let url = window.location.pathname
+    let toggleButtonID = 'toggle-'
+
+    if (url == '/rover') {
+        listener = ROVER_LISTENER_TASK
+        toggleButtonID += 'rover-listener-btn'
+    } else if (url == '/') {
+        listener = ARM_LISTENER_TASK
+        toggleButtonID += 'arm-listener-btn'
+    } else if (url == '/science') {
+        listener = SCIENCE_LISTENER_TASK
+        toggleButtonID += 'science-listener-btn'
+    } else if (url == '/pds') {
+        listener = PDS_LISTENER_TASK
+        toggleButtonID += 'pds-listener-btn'
+    }
+
+    let serialType = $('#serial-type').text()
+
+    requestTask(
+      listener,
+      STATUS_CHECK,
+      function (msgs) {
+        console.log('msgs', msgs)
+        if (msgs[1].includes('not')) {
+          $('#' + toggleButtonID)[0].checked = false
+        } else {
+          $('#' + toggleButtonID)[0].checked = true
+        }
+      },
+      serialType
+    )
+  }
+
+  checkListenerStates()
+
   function isListenerOpen () {
     return (
       (window.location.pathname == '/rover' &&
