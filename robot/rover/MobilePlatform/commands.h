@@ -37,14 +37,14 @@ public:
     String stop_cmd = "stop";
     String ledOn_cmd = "indicator-on";
     String ledOff_cmd = "indicator-off";
-    String ledManCtrl_cmd = "indicator-manual";
+    String ledManualCtrl_cmd = "indicator-manual";
     String ledAutoCtrl_cmd = "indicator-autonomous";
     String ledEureka_cmd = "indicator-eureka";
 
     elapsedMillis sinceThrottle; // timer for reading battery, gps and imu data
 
-    uint8_t ledColor[3] = {0,0,0};
-    bool ledStatus = false;
+    uint8_t indicatorRgbArray[3] = {0,0,0};
+    bool isLedOn = false;
 
     bool isActivated = false;
     bool isOpenLoop = false; //  PID controller
@@ -95,7 +95,7 @@ public:
     void controlCameraMotors(String cmd);
     void ledOn(void);
     void ledOff(void);
-    void ledManCtrl(void);
+    void ledManualCtrl(void);
     void ledAutoCtrl(void);
     void ledEureka(void);
 };
@@ -180,17 +180,17 @@ void Commands::handler(String cmd, String sender) {
         controlCameraMotors (cmd);
     }
     else if(cmd == ledOn_cmd){
-          if(ledStatus == false){
+          if(isLedOn == false){
             ledOn();
           }
     }
     else if(cmd == ledOff_cmd){
-          if(ledStatus == true){
+          if(isLedOn == true){
             ledOff();
           }
     }
-    else if(cmd == ledManCtrl_cmd){
-          ledManCtrl();
+    else if(cmd == ledManualCtrl_cmd){
+          ledManualCtrl();
     }
     else if(cmd == ledAutoCtrl_cmd){
           ledAutoCtrl();
@@ -698,28 +698,28 @@ void Commands::stop(bool timeout) {
 }
 
 void Commands::ledOn(void){
-    ledStatus = true;
+    isLedOn = true;
 }
 
 void Commands::ledOff(void){
-    ledStatus = false;
+    isLedOn = false;
 }
 
-void Commands::ledManCtrl(void){
-    ledColor[0] = 0; // Blue
-    ledColor[1] = 0;
-    ledColor[2] = 255;
+void Commands::ledManualCtrl(void){
+    indicatorRgbArray[0] = 0; // Blue
+    indicatorRgbArray[1] = 0;
+    indicatorRgbArray[2] = 255;
 }
 
 void Commands::ledAutoCtrl(void){
-    ledColor[0] = 255; // Red
-    ledColor[1] = 0;
-    ledColor[2] = 0;
+    indicatorRgbArray[0] = 255; // Red
+    indicatorRgbArray[1] = 0;
+    indicatorRgbArray[2] = 0;
 }
 
 void Commands::ledEureka(void){
-    ledColor[0] = 0; // Green
-    ledColor[1] = 255;
-    ledColor[2] = 0;
+    indicatorRgbArray[0] = 0; // Green
+    indicatorRgbArray[1] = 255;
+    indicatorRgbArray[2] = 0;
 }
 #endif

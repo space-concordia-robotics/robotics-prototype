@@ -22,10 +22,10 @@
 #define REAR_BASE_DEFAULT_PWM 35
 
 /* Activity Indicator */
-#define PIN 15
-#define NUMLED 16
-#define EUREKA_LED_INTERVAL 2000
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMLED, PIN, NEO_GRB + NEO_KHZ800);
+#define INDICATOR_LED_COUNT 16
+#define EUREKA_LED_INTERVAL 2000 
+#define INDICATOR_LED_BRIGHTNESS 255
+Adafruit_NeoPixel activityIndicator = Adafruit_NeoPixel(INDICATOR_LED_COUNT, INDICATOR_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 /*
   choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
@@ -58,7 +58,7 @@ elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery 
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
-elapsedMillis sinceEurekaToggle;
+elapsedMillis sinceEurekaToggle; // timer for "task-complete" mode on the indicator led
 String cmd;
 
 float maxOutputSignal, minOutputSignal;
@@ -134,10 +134,10 @@ void setup() {
     bluetooth.setTimeout(50);
     delay(300); // NECSSARY. Give time for serial port to set up
 
-    //Activity Indicator
-    pixels.begin();
-    pixels.setBrightness(40);
-    pixels.show();
+    // Initilizes activity indicator
+    activityIndicator.begin(); // Prepares the data in pin on the NeoPixel Ring
+    activityIndicator.setBrightness(INDICATOR_LED_BRIGHTNESS); // Sets the brightness of the LEDs
+    activityIndicator.show(); // Initize all pixels to off
     
     initPins();
     initEncoders();
@@ -230,20 +230,20 @@ void loop() {
         sinceFeedbackPrint = 0;
     }
     
-    if(Cmds.ledStatus == true){
-        if(Cmds.ledColor[1] == 255){
-          if(sinceEurekaToggle > LED__BLINK_INTERVAL){
-            statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]));
+    if(Cmds.isLedOn){ // Checks to see if indicator LED is currently on
+        if(Cmds.indicatorRgbArray[1] == 255){ // Checks to see if 'eureka mode' is running
+          if(sinceEurekaToggle > LED_BLINK_INTERVAL){ // Set LEDs ON after 1000ms  
+            setIndicatorMode(activityIndicator.Color(Cmds.indicatorRgbArray[0],Cmds.indicatorRgbArray[1],Cmds.indicatorRgbArray[2]));
           }
-          if(sinceEurekaToggle > EUREKA_LED_INTERVAL){
-            statusLED(pixels.Color(0,0,0));
-            sinceLedToggle = 0;
+          if(sinceEurekaToggle > EUREKA_LED_INTERVAL){ // Set LEDs OFF after 2000ms
+            setIndicatorMode(activityIndicator.Color(0,0,0)); // Code to turn off all LEDs by setting RGB values to 0
+            sinceLedToggle = 0; // Reset blink timer
           }
         }
-        statusLED(pixels.Color(Cmds.ledColor[0],Cmds.ledColor[1],Cmds.ledColor[2]));
+        setIndicatorMode(activityIndicator.Color(Cmds.indicatorRgbArray[0],Cmds.indicatorRgbArray[1],Cmds.indicatorRgbArray[2])); // Set indicator LED RGB values to requested values
     }
     else{
-        statusLED(pixels.Color(0,0,0)); // set led off
+        setIndicatorMode(activityIndicator.Color(0,0,0)); // Set LEDs OFF
     }
 }
 
@@ -512,9 +512,10 @@ void lb_encoder_interrupt(void) {
     LB.encoderCount++;
 }
 
-void statusLED(uint32_t color){
-    for(uint16_t i = 0; i < pixels.numPixels(); i++){
-      pixels.setPixelColor(i, color);
-      pixels.show(); // set led on
+void setIndicatorMode(uint32_t color){
+    // Loop cycles through each LED setting color then displaying it
+    for(uint16_t i = 0; i < activityIndicator.numPixels(); i++){
+      activityIndicator.setPixelColor(i, color);
+      activityIndicator.show(); // Set LEDs on
     }
 }

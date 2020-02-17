@@ -3,6 +3,8 @@
 
 #define V_SENSE_PIN 39 // for reading battery voltage
 
+#define INDICATOR_LED_PIN 15 // for data to indicator LED
+
 /***** MOTORS *****/
 
 // R/L (right/left), F/M/B (forward, middle, back)
