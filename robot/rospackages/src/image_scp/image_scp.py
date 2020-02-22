@@ -1,15 +1,21 @@
 from paramiko import SSHClient
 from scp import SCPClient, SCPException
 import argparse
-from congif import (host, user, remote_path_1, local)
+from config import (host, user, remote_path_1)
+"""
+Script takes in the image as a command line argument.
+SSH keys need to be configured on both remote and local machine in order for the script to work.
+Host name, user nmae, and remote path are all imported from a config file. Update the information there 
+so that this script is portable .
 
+"""
 class remote_connection:
     def __init__(self, host, user, remote_path, file_name):
         self.host = host
         self.user = user
         self.remote_path = remote_path
         self.file_name = file_name
-
+#initiate the connection to the host machine
     def connect(self):
         self.client = SSHClient()
         self.client.load_system_host_keys()
@@ -27,6 +33,7 @@ class remote_connection:
             raise error
 
 if __name__ == "__main__":
+    #takes the image as a command line argument
     parser = argparse.ArgumentParser(description="the file that gets sent")
     parser.add_argument("image_file", action="append")
     args = parser.parse_args()
@@ -36,16 +43,3 @@ if __name__ == "__main__":
     sender.connect()
     sender.send_image(sender.file_name)
     sender.disconnect()
-
-
-    print(args.image_file[0])
-
-
-#ssh = SSHClient()
-#ssh.load_system_host_keys()
-#ssh.connect(hostname="login.encs.concordia.ca", username='user')
-
-#scp = SCPClient(ssh.get_transport())
-
-#scp.put('/test2.png', recursive=True,
- #       remo te_path='remotepath    e)
