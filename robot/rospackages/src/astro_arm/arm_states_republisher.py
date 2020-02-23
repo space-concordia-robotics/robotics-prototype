@@ -8,21 +8,15 @@ def subscriber_callback(data):
     msg = JointState()
     msg.header = data.header
     # joint names taken from the urdf file
-    msg.name.append("upbase_joint")
-    msg.name.append("prox_joint")
-    msg.name.append("distal_joint")
-    msg.name.append("wrist_flex_joint")
-    msg.name.append("wrist_twist_joint")
-    msg.name.append("finger1_joint")
-    msg.name.append("finger2_joint")
+    msg.name.append("motor1")
+    msg.name.append("motor2")
+    msg.name.append("motor3")
+    msg.name.append("motor4")
 
     msg.position.append(radians(data.position[0]))
     msg.position.append(radians(data.position[1]))
     msg.position.append(radians(data.position[2]))
     msg.position.append(radians(data.position[3]))
-    msg.position.append(radians(data.position[4]))
-    msg.position.append(radians(data.position[5]))
-    msg.position.append(msg.position[5])
 
     anglePub.publish(msg)
 

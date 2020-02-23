@@ -1,8 +1,5 @@
 <launch>
   <param
-    name="use_gui"
-    value="true" />
-  <param
     name="robot_description"
     textfile="$(find astro_arm)/urdf/astro_arm.urdf" />
   <node
