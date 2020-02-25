@@ -5,7 +5,10 @@ from ping_acknowledgment.srv import *
 import rospy
 
 def handle_ping(req):
-    with open(os.environ['HOME'] + '/Programming/robotics-prototype/robot/rospackages/src/ping_acknowledgment/scripts/meme.txt', 'r') as meme:
+    script_dir = os.path.dirname(__file__)
+    file_path = 'meme.txt'
+    full_path = os.path.join(script_dir, file_path)
+    with open(full_path) as meme:
         returnmsg = meme.read()
 
     if req.ping == "rover_ip":
