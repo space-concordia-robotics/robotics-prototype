@@ -1,7 +1,7 @@
 $(document).ready(() => {
 
   function append_css(file) {
-      console.log('Append CSS: ' + file)
+      logInfo('Using theme : ' + file)
 
       var link = document.createElement('link')
       link.href = '/static/css/' + file + '.css'
@@ -13,7 +13,7 @@ $(document).ready(() => {
   }
 
   function prefer_theme(name) {
-      console.log('Prefer theme: ' + name)
+      logInfo('Found theme : ' + name)
       setCookie('theme', name, 365)  // setCookie() from helpers.js
       append_css('themes/' + name)
   }
@@ -26,11 +26,9 @@ $(document).ready(() => {
   }
 
   $('#theme-mantis').click(function () {
-      console.log('theme-mantis')
       prefer_theme('mantis')
   })
   $('#theme-lofi').click(function () {
-      console.log('theme-lofi')
       prefer_theme('lofi')
   })
 
