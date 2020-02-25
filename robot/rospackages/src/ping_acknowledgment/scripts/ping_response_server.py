@@ -5,11 +5,14 @@ from ping_acknowledgment.srv import *
 import rospy
 
 def handle_ping(req):
+    with open(os.environ['HOME'] + '/Programming/robotics-prototype/robot/rospackages/src/ping_acknowledgment/scripts/meme.txt', 'r') as meme:
+        returnmsg = meme.read()
+
     if req.ping == "rover_ip":
         response = os.environ["ROS_MASTER_URI"].split(":")
         response = response[0] + ":" + response[1]
     else:
-        response = "To your '{:s}', I say 'suh dude'".format(req.ping)
+        response = "To your '{:s}', I say \n".format(req.ping) + returnmsg
 
     print("Returning '" + response + "'")
     return response
