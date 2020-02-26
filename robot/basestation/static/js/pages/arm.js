@@ -190,7 +190,7 @@ const GREEN = 'rgb(61, 127, 127)'
 function gameLoop () {
   let $serialCmdInput = $('#serial-cmd-input')
 
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     let budgeArray = ['~', '~', '~', '~', '~', '~']
     let i = 0
     let toBudge = false

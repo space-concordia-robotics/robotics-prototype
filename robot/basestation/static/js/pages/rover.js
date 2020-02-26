@@ -1,5 +1,4 @@
 // for command thoughput limiting
-const GAME_LOOP_PERIOD = 50
 const CONTINUOUS_SERVO_PERIOD = 100
 const POSITION_SERVO_PERIOD = 60
 const SERVO_STOP = 93 // tested with front servos
@@ -444,7 +443,7 @@ function gameLoop () {
   have the rate (time) at which the commands are actually sent to be
   decoupled from the rate at which the steering or throttle changes
   */
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     /* CAMERA SERVO CONTROL */
     // TODO: check if the position servo code is the same for rear servo or if
     // the directions must be reversed, because that may be annoying

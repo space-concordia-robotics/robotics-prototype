@@ -194,7 +194,7 @@ function printErrToConsole (msg) {
 }
 
 function pingDevice (device) {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     switch (device) {
       case 'Arm':
         sendRequest('Arm', 'ping', printErrToConsole)

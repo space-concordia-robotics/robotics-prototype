@@ -1,7 +1,7 @@
 const PDS_REQUEST_TIMEOUT = 3000
 
 function printCommandsList () {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     appendToConsole("'ctrl-alt-p': ping odroid")
     appendToConsole("'p': ping rover mcu")
     appendToConsole("'q': cut power to all motors")

@@ -2,20 +2,21 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 const PING_THROTTLE_TIME = 1000
 lastRotate = 0
-var lastCMDSent = 0
+let lastCMDSent = 0
 
-// reset recorded time sent since last command
+// reset time to 0ms
 function resetTimeSinceCMD() {
   lastCMDSent = 0
 }
 
-// get and record time of last command sent
+// get and record time of last command in ms
 function setTimeSinceCMD() {
   lastCMDSent = new Date().getTime()
+  console.log(lastCMDSent)
 }
 
 // return false if command is within time cooldown, true if outside time cooldown
-function CMDCanBeSent() {
+function canSendCommand() {
   return (millisSince(lastCMDSent) > PING_THROTTLE_TIME)
 }
 
@@ -470,7 +471,7 @@ function checkTaskStatuses () {
 }
 
 function sendIKCommand () {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     let command = new ROSLIB.Message({ data: cmd })
     console.log(command)
     appendToConsole('Sending "' + cmd + '" to IK node')
@@ -480,7 +481,7 @@ function sendIKCommand () {
 }
 
 function sendArmCommand (cmd) {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     let command = new ROSLIB.Message({ data: cmd })
     console.log(command)
     appendToConsole('Sending "' + cmd + '" to arm Teensy')
@@ -537,7 +538,7 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
 }
 
 function sendRoverCommand (cmd) {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     let command = new ROSLIB.Message({ data: cmd })
     console.log(command)
     appendToConsole('Sending "' + cmd + '" to rover Teensy')
@@ -547,7 +548,7 @@ function sendRoverCommand (cmd) {
 }
 
 function sendPdsCommand (cmd) {
-  if (CMDCanBeSent()) {
+  if (canSendCommand()) {
     let command = new ROSLIB.Message({ data: cmd })
     console.log(command)
     appendToConsole('Sending "' + cmd + '" to PDS Teensy')

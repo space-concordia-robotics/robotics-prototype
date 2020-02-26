@@ -1,6 +1,6 @@
 $(document).ready(() => {
   function pingDevice (device) {
-    if (CMDCanBeSent()) {
+    if (canSendCommand()) {
       switch (device) {
         case 'Arm':
           sendRequest('Arm', 'ping', printErrToConsole)
@@ -62,7 +62,7 @@ $(document).ready(() => {
   document.addEventListener('keydown', function (event) {
     if (
       event.code === 'KeyL' &&
-      CMDCanBeSent() &&
+      canSendCommand() &&
       !$('#servo-val').is(':focus')
     ) {
       $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
