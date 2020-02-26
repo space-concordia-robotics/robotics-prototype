@@ -35,7 +35,7 @@ $(document).ready(() => {
             'Odroid ping timeout after ' +
             timeoutVal / 1000 +
             ' seconds. ' +
-            "Check if the websockets server is running. If not, there's either a network issue " +
+            'Check if the websockets server is running. If not, there\'s either a network issue ' +
             'or the Odroid and possibly the whole rover has shut down unexpectedly.'
           appendToConsole(msg)
         } else {

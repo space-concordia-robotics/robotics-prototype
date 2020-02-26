@@ -73,9 +73,8 @@ $(document).ready(() => {
           .includes('PDS')
       ) {
       requestTask(
-          'pds_listener',
-          1,
-          '#toggle-pds-listener-btn',
+          PDS_LISTENER_TASK
+          STATUS_START,
           function (msgs) {
             if (msgs[0]) {
               $('#toggle-pds-listener-btn')[0].checked = true
@@ -93,9 +92,8 @@ $(document).ready(() => {
     } else {
       // closing PDS listener
       requestTask(
-        'pds_listener',
-        0,
-        '#toggle-pds-listener-btn',
+        PDS_LISTENER_TASK,
+        STATUS_STOP,
         function (msgs) {
           console.log('msgs[0]', msgs[0])
           if (msgs.length == 2) {

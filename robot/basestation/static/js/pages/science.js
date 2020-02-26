@@ -1,4 +1,5 @@
 $(document).ready(function () {
+
   /* science commands */
 
   // setup a client for the science_request service
@@ -150,8 +151,8 @@ $(document).ready(function () {
         serialType == 'usb'
       ) {
         requestTask(
-          'science_listener',
-          1,
+          SCIENCE_LISTENER_TASK,
+          STATUS_START,
           '#science-listener-btn',
           function (msgs) {
             console.log(msgs)
@@ -172,7 +173,8 @@ $(document).ready(function () {
       }
     } else {
       // closing arm listener
-      requestTask('science_listener', 0, '#science-listener-btn', function (
+      requestTask(SCIENCE_LISTENER_TASK,
+          STATUS_STOP, function (
         msgs
       ) {
         console.log('msgs[0]', msgs[0])
