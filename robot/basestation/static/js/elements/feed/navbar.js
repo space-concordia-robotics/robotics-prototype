@@ -1,4 +1,29 @@
 $(document).ready(() => {
+  defaultChannelSerial()
+
+  // default device channel and serialtype on page load
+  function defaultChannelSerial() {
+    currentWindow = window.location.pathname
+    switch(currentWindow) {
+      case '/rover':
+        mux0()
+        setSerialUsb()
+        break;
+      case ('/'):
+      case ('/arm'):
+        mux1()
+        setSerialUsb()
+        break;
+      case '/science':
+        mux2()
+        setSerialUsb()
+        break;
+      case '/pds':
+        mux3()
+        setSerialUart()
+        break;
+    }
+  }
 
   function append_css(file) {
       console.log('Append CSS: ' + file)
@@ -86,7 +111,12 @@ $(document).ready(() => {
   }
 
   // select mux channel using mux_select service
-  $('#mux-0').mouseup(function () {
+  $('#mux-0').mouseup(mux0)
+  $('#mux-1').mouseup(mux1)
+  $('#mux-2').mouseup(mux2)
+  $('#mux-3').mouseup(mux3)
+
+  function mux0 () {
     // Rover
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
@@ -125,9 +155,9 @@ $(document).ready(() => {
         }
       })
     }
-  })
+  }
 
-  $('#mux-1').mouseup(function () {
+  function mux1 () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
@@ -166,9 +196,9 @@ $(document).ready(() => {
         }
       })
     }
-  })
+  }
 
-  $('#mux-2').mouseup(function () {
+  function mux2 () {
     // Science
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
@@ -207,9 +237,9 @@ $(document).ready(() => {
         }
       })
     }
-  })
+  }
 
-  $('#mux-3').mouseup(function () {
+  function mux3 () {
     // PDS
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
@@ -218,19 +248,24 @@ $(document).ready(() => {
         printErrToConsole(msgs)
       })
     }
-  })
+  }
 
-  $('#uart').mouseup(function () {
+  // set serialtype
+  $('#uart').mouseup(setSerialUart)
+  $('#usb').mouseup(setSerialUsb)
+
+  function setSerialUart () {
     $('#serial-type').text('uart')
     setCookie('serialType', 'uart', 3)
     appendToConsole('setting cookie to uart')
-  })
+  }
 
-  $('#usb').mouseup(function () {
+  function setSerialUsb () {
     $('#serial-type').text('usb')
     setCookie('serialType', 'usb', 3)
     appendToConsole('setting cookie to usb')
-  })
+  }
+
 
   // send serial command based on mux channel and current page
   // beware that if choosing a different mux channel than the current page,
