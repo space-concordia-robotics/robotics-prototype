@@ -56,7 +56,7 @@ $(document).ready(() => {
         {
             printErrToConsole(msgs[1])
         }
-    
+
     }, cameraStream)
   }
 
@@ -70,7 +70,7 @@ $(document).ready(() => {
         {
             printErrToConsole(msgs[1])
         }
-    
+
     }, cameraStream)
   }
 
@@ -80,7 +80,7 @@ $(document).ready(() => {
       success: data => {
         appendToConsole(data.msg)
         callback(data)
-      }, 
+      },
       error: (jqXHR, exception) => {
         flaskError(jqXHR, exception, start_recording_url)
       }
@@ -93,7 +93,7 @@ $(document).ready(() => {
       success: data => {
         appendToConsole(data.msg)
         callback(data)
-      }, 
+      },
       error: (jqXHR, exception) => {
         flaskError(jqXHR, exception, stop_recording_url)
       }
@@ -105,7 +105,7 @@ $(document).ready(() => {
     $.ajax(is_recording_url, {
       success: data => {
         callback(data.is_recording)
-      }, 
+      },
       error: (jqXHR, exception)  => {
         flaskError(jqXHR, exception, is_recording_url)
       }
@@ -144,7 +144,7 @@ $(document).ready(() => {
 
     cameraFeed.attr('src', STREAM_OFF)
     cameraFeed.css('padding', '10px')
-  
+
     cameraPower.attr('power-on', 'false')
     cameraPower.attr('src', POWER_OFF)
   }
@@ -279,7 +279,7 @@ $(document).ready(() => {
     if (cameraName == ""){
       appendToConsole("Please select a stream")
       return
-    }   
+    }
 
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
     let isPoweredOn = cameraPower.attr("power-on") == "true"
@@ -339,5 +339,9 @@ $(document).ready(() => {
           updateRecordingButton(cameraPanel, true)
       })
     }
+  })
+
+  $('.camera-popup' ).click(function() {
+    window.open('/testpanel',"", "width=1500, height=1000")
   })
 })
