@@ -4,12 +4,6 @@ import rospy
 from std_msgs.msg import Float32
 
 def PDS_pub():
-  try:
-    mode = rospy.get_param('PDS_mock_mode')
-  except:
-    print('PDS_mock_mode parameter error!')
-    sys.exit()
-
   pub = rospy.Publisher('battery_voltage', Float32, queue_size=10)
   rospy.init_node('PDS_mock_pub', anonymous=True)
   rate = rospy.Rate(10) # 10hz
@@ -24,26 +18,33 @@ def PDS_pub():
   voltage_target = voltage_safe
 
   while not rospy.is_shutdown():
-      if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
-        voltage_target = voltage_safe
-      elif (mode == 'rise'): #rise indefinetly
-        voltage_target = voltage_max
-      elif (mode == 'fall'):
-        voltage_target = voltage_min
-      else :
-        print('Invalid mode!')
-        sys.exit()
+    try:
+      mode = rospy.get_param('PDS_mock_mode')
+    except:
+      print('PDS_mock_mode parameter error!')
+      sys.exit()
+      
 
-      direction = voltage_target - voltage_current
-      if (direction >= speed):
-        if direction > 0:
-          voltage_current += speed
-        elif direction < 0:
-          voltage_current -= speed
+    if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
+      voltage_target = voltage_safe
+    elif (mode == 'rise'): #rise indefinetly
+      voltage_target = voltage_max
+    elif (mode == 'fall'):
+      voltage_target = voltage_min
+    else :
+      print('Invalid mode!')
+      sys.exit()
 
-      pub.publish(voltage_current)
-      print(voltage_current)
-      rate.sleep()
+    direction = voltage_target - voltage_current
+    if (direction >= speed):
+      if direction > 0:
+        voltage_current += speed
+      elif direction < 0:
+        voltage_current -= speed
+
+    pub.publish(voltage_current)
+    print(voltage_current)
+    rate.sleep()
 
 
 if __name__ == '__main__':
