@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 import sys
 import time
 import rospy
 from std_msgs.msg import Float32
+
 
 def PDS_pub():
   pub = rospy.Publisher('battery_voltage', Float32, queue_size=10)
@@ -15,7 +17,7 @@ def PDS_pub():
   speed = 0.1
 
   voltage_current = voltage_safe # starting voltage
-  voltage_target = voltage_safe
+  voltage_target = voltage_safe # default value
 
   while not rospy.is_shutdown():
     try:
@@ -23,11 +25,10 @@ def PDS_pub():
     except:
       print('PDS_mock_mode parameter error!')
       sys.exit()
-      
 
-    if (mode == 'stable'): #rise until reaches max, then declines until min then rises, so on
+    if (mode == 'stable'):
       voltage_target = voltage_safe
-    elif (mode == 'rise'): #rise indefinetly
+    elif (mode == 'rise'): 
       voltage_target = voltage_max
     elif (mode == 'fall'):
       voltage_target = voltage_min
@@ -46,12 +47,13 @@ def PDS_pub():
     print(voltage_current)
     rate.sleep()
 
-
 if __name__ == '__main__':
-  # Setting default mode parameter
   rospy.set_param('PDS_mock_mode', 'rise')
-
   try:
-    PDS_pub()
+    PDS_pub();
   except rospy.ROSInterruptException:
     pass
+      
+
+
+
