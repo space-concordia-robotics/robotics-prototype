@@ -38,3 +38,17 @@ function clamp(number, lower, upper) {
   }
   return number;
 }
+
+function getDeviceNameByMuxID (id) {
+  switch(id) {
+    case 'mux-0':
+      return 'Rover'
+      break;
+    case 'mux-1':
+      return 'Arm'
+      break;
+    case 'mux-2':
+      return 'Science'
+      break
+  }
+}
