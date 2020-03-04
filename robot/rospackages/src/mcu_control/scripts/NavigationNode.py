@@ -9,12 +9,12 @@ from mcu_control.msg import RoverPosition, RoverGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
-    if message.x < -900 or message.y < -900:
+    if message.latitude < -900 or message.longitude < -900:
         return
     rover['latitude'] = message.latitude
     rover['longitude'] = message.longitude
     hasHeading = False
-    if message.z > -900:
+    if message.heading > -900:
         rover['heading'] = message.heading
         hasHeading = True
 
