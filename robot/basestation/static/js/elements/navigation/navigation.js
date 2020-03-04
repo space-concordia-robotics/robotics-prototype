@@ -10,6 +10,16 @@ $(document).ready(() => {
     $('#rover-longitude').text(message.longitude)
     $('#rover-heading').text(message.heading)
   })
+  // setup a subscriber for the rover_twist topic
+  rover_twist_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_twist',
+    messageType: 'geometry_msgs/Twist'
+  })
+  rover_twist_listener.subscribe(function (message) {
+    $('#rover-speed').text(message.linear.x)
+    $('#rover-angular-velocity').text(message.angular.x)
+  })
   // setup a subscriber for the antenna_goal topic
   let antenna_goal_listener = new ROSLIB.Topic({
     name: 'antenna_goal',
@@ -38,7 +48,7 @@ $(document).ready(() => {
   let rover_goal_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_goal',
-    messageType: 'mcu_control/rover_goal'
+    messageType: 'mcu_control/RoverGoal'
   })
   rover_goal_listener.subscribe(function (message) {
     $('#recommended-rover-heading').text(parseFloat(message.desiredDir).toFixed(3))

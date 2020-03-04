@@ -157,16 +157,6 @@ function initRosWeb () {
     $('#left-rear-rpm').text(message.velocity[5])
   })
 
-  // setup a subscriber for the rover_twist topic
-  rover_twist_listener = new ROSLIB.Topic({
-    ros: ros,
-    name: 'rover_twist',
-    messageType: 'geometry_msgs/Twist'
-  })
-  rover_twist_listener.subscribe(function (message) {
-    $('#rover-speed').text(message.linear.x)
-    $('#rover-angular-velocity').text(message.angular.x)
-  })
   // setup a subscriber for the rover_feedback topic
   rover_feedback_listener = new ROSLIB.Topic({
     ros: ros,
