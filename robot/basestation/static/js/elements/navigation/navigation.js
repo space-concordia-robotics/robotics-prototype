@@ -187,4 +187,5 @@ $(document).ready(() => {
     $('#goal-inputs').show()
     $('#goal-unchanging').hide()
   })
+  initNavigationPanel()
 })
