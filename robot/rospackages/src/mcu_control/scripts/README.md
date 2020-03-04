@@ -37,8 +37,10 @@ It can be run directly via SSH, through the task_handler, or through the `app.py
 ## Navigation
 
 ### AntennaNode.py
+This node waits until ROS parameters `antenna_latitude`, `antenna_longitude`, and `antenna_start_dir` are set. Once this is done, it listens for `/rover_position` and uses `Nav_funs.py` to calculate the direction the antenna should point in as well as the distance between the rover and the antenna. The node then publishes `/antenna_goal` which contains the value that should be displayed on our antenna director, as well as the distance between the rover and the antenna.
 
 ### NavigationNode.py
+This node waits until ROS parameters `goal_latitude` and `goal_longitude` are set. Once this is done, it listens for `/rover_position` and uses `Nav_funs.py` to calculate the direction the rover should point in as well as the distance between the rover and the goal. The node then publishes `/rover_goal` which contains the delta_theta that the rover needs to apply to itself, as well as the distance between the rover and the goal.
 
 ### Nav_funs.py
 

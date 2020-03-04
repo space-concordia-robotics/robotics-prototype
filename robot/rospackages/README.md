@@ -66,7 +66,7 @@ This package contains a server to be run on the Odroid and a client to be run an
 
 This package contains multiple ROS nodes both for the basestation and the Odroid related to communicating with microcontrollers (MCUs). It also contains example scripts which were used to test different types of ROS node scripts.
 
-Notably, this package holds nodes for communicating with the arm, science, rover and PDS MCUs. It also holds inverse kinematics, navigation, and joystick controller nodes. See the package for more details.
+Notably, this package holds nodes for communicating with the arm, science, rover and PDS MCUs. It also holds inverse kinematics, navigation, antenna, and joystick controller nodes. See the package for more details.
 
 ### Usage
 
