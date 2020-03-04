@@ -37,8 +37,8 @@ $(document).ready(() => {
       case 'arm':
         sendArmCommand(cmd)
         break
-      case 'ik':
-        sendIKCommand(cmd)
+      case 'pds':
+        sendPdsCommand(cmd)
         break
       case 'science':
         sendScienceCommand(cmd)
