@@ -17,6 +17,10 @@ from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 from mcu_control.msg import BatteryTemps, BatteryVoltage
 
+#If you get a reading lower or higher than these values, it's invalid
+minValidVbat = -100; maxValidVbat = 100
+minValidTemp = -200; maxValidTemp = 200
+
 global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
 
@@ -33,19 +37,16 @@ def init_serial():
     # in a perfect world, you can choose the baudrate
     rospy.loginfo('Using %d baud by default', baudrate)
     # in a perfect world, usb vs uart will be set by ROS params
-    usb = False
-    uart = True
+    usb = False; uart = True
     myargv = rospy.myargv(argv=sys.argv)
     if len(myargv) == 1:
         rospy.loginfo('Using UART by default')
     if len(myargv) > 1:
         if myargv[1] == 'uart':
-            usb = False
-            uart = True
+            usb = False; uart = True
             rospy.loginfo('Using UART and 9600 baud by default')
         elif myargv[1] == 'usb':
-            usb = True
-            uart = False
+            usb = True; uart = False
             rospy.loginfo('Using USB and 9600 baud by default')
         else:
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
@@ -196,42 +197,52 @@ def publish_pds_data(message):
     # create the message to be published
     voltageMsg = BatteryVoltage()
     currentMsg = JointState()
-    tempMsg = BatteryTemps()
+    tempsMsg = BatteryTemps()
     fanSpeedsMsg = Point()
     try:
         for i in range(12):
             if i < 1:
-                voltageMsg.vbat = float(dataPDS[i])
-                rospy.loginfo('voltage=' + dataPDS[i])
+                voltageFloat = float(dataPDS[i])
+                if minValidVbat < voltageFloat < maxValidVbat:
+                    voltageMsg.vbat = voltageFloat
+                    voltageMsg.isValid = True
+                else:
+                    voltageMsg.isValid = False
             elif i < 7:
                 currentMsg.effort.append(float(dataPDS[i]))
             elif i < 10:
-                tempMsg.temp1 = float(dataPDS[7])
-                tempMsg.temp2 = float(dataPDS[8])
-                tempMsg.temp3 = float(dataPDS[9])
+                tempsMsg.isValid = True
+                for j in range(7,10):
+                    tempsFloat = dataPDS[j]
+                    if  tempsFloat < minValidTemp or tempsFloat > maxValidTemp:
+                        tempsMsg.isValid = False
+                        break
+                if tempsMsg.isValid:
+                    tempsMsg.temp1 = float(dataPDS[7])
+                    tempsMsg.temp2 = float(dataPDS[8])
+                    tempsMsg.temp3 = float(dataPDS[9])
             else:
                 fanSpeedsMsg.x = float(dataPDS[10])
                 fanSpeedsMsg.y = float(dataPDS[11])
 
+        # battery voltage
+        rospy.loginfo('voltage=' + dataPDS[i])
+        voltagePub.publish(voltageMsg)
+        # temperatures of the battery
         temps = ''
         for i in [dataPDS[7], dataPDS[8], dataPDS[9]]:
             temps += i.strip() + ','
         temps = temps[:-1]
         rospy.loginfo('temps=' + temps)
-
-        # motor currents
+        tempsPub.publish(tempsMsg)
+        # 6 motor currents from M0-M5
         currents = ''
         for i in currentMsg.effort:
             currents += str(i).strip() + ','
         currents = currents[:-1]
-
         rospy.loginfo('currents=' + currents)
-        # battery voltage
-        voltagePub.publish(voltageMsg)
-        # 6 motor currents from M0-M5
         currentPub.publish(currentMsg)
-        # temperatures of the battery
-        tempPub.publish(tempMsg)
+        # elec bay fan speeds
         fanSpeedsPub.publish(fanSpeedsMsg)
         nada,firstFlag = dataPDS[12].split(' ')
         flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
@@ -272,9 +283,9 @@ if __name__ == '__main__':
     rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
     currentPub = rospy.Publisher(current_pub_topic, JointState, queue_size=10)
 
-    temp_pub_topic = '/battery_temps'
+    temps_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
-    tempPub = rospy.Publisher(temp_pub_topic, BatteryTemps, queue_size=10)
+    tempsPub = rospy.Publisher(temps_pub_topic, BatteryTemps, queue_size=10)
 
     fan_speeds_pub_topic = '/fan_speeds'
     rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')

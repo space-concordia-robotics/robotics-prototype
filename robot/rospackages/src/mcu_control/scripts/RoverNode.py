@@ -17,13 +17,15 @@ from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 from mcu_control.msg import RoverPosition, BatteryVoltage
 
+#If you get a voltage lower or higher than these values, it's invalid
+minValidVbat = -100; maxValidVbat = 100
+
 #global ser # make global so it can be used in other parts of the code
 mcuName = 'Astro'
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
 
-# todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
@@ -202,41 +204,37 @@ def publish_joint_states(message):
     return
 
 def publish_nav_states(message):
+    msg = RoverPosition()
+    msg.gotGps = False
+    msg.gotHeading = False
     heading,gps = message.split(' -- ')
-    # parse heading, give -999 if invalid heading
+    # parse heading, set gotHeading to True if valid data
     if 'OK' in heading:
         try:
             left,heading = heading.split(' ')
-            roverHeading = float(heading)
+            msg.heading = float(heading)
+            msg.gotHeading = True
         except:
-            roverHeading = -999
             rospy.logwarn('bad string, got: ' + heading)
     else:
         if 'N/A' in heading:
             rospy.logwarn('IMU heading data unavailable')
         else:
             rospy.logwarn('bad string, got: ' + heading)
-        roverHeading = -999
-    # parse gps, give -999 for lat and long if invalid coords
+    # parse gps, set gotGps to True if valid data
     if 'OK' in gps:
         try:
             left,tempLat,tempLong = gps.split(' ')
-            roverLatitude = float(tempLat)
-            roverLongitude = float(tempLong)
+            msg.latitude = roverLatitude
+            msg.longitude = roverLongitude
+            msg.gotGps = True
         except:
-            roverLatitude = roverLongitude = -999
             rospy.logwarn('bad string, got: ' + gps)
     else:
         if 'N/A' in gps:
             rospy.logwarn('GPS data unavailable')
         else:
             rospy.logwarn('bad string, got: ' + gps)
-        roverLatitude = roverLongitude = -999
-
-    msg = RoverPosition();
-    msg.latitude = roverLatitude
-    msg.longitude = roverLongitude
-    msg.heading = roverHeading
     navPub.publish(msg)
     return
 
@@ -317,7 +315,12 @@ if __name__ == '__main__':
                             print("type error: " + str(e))
                         try:
                             voltageMsg = BatteryVoltage()
-                            voltageMsg.vbat = float(voltage)
+                            voltageFloat = float(voltage)
+                            if minValidVbat < voltageFloat < maxValidVbat:
+                                voltageMsg.vbat = voltageFloat
+                                voltageMsg.isValid = True
+                            else:
+                                voltageMsg.isValid = False
                             vBatPub.publish(voltageMsg)
                         except Exception as e:
                             print("type error: " + str(e))

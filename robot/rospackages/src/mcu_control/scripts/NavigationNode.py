@@ -9,30 +9,30 @@ from mcu_control.msg import RoverPosition, RoverGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
-    if message.latitude < -900 or message.longitude < -900:
-        return
-    rover['latitude'] = message.latitude
-    rover['longitude'] = message.longitude
-    hasHeading = False
-    if message.heading > -900:
+    if message.gotGps:
+        rover['latitude'] = message.latitude
+        rover['longitude'] = message.longitude
+    if message.gotHeading:
         rover['heading'] = message.heading
-        hasHeading = True
 
-    if gotGpsPos:
-        Rov_to_des_distance = Distance(rover['latitude'], rover['longitude'], \
-        gpsGoal['latitude'], gpsGoal['longitude'])
-        Rov_to_des_direction = Direction(rover['latitude'], rover['longitude'], \
-        gpsGoal['latitude'], gpsGoal['longitude'])
-
-        if hasHeading:
-            Direction_adjust = Turning(Rov_to_des_direction, rover['heading'])
-        else:
-            Direction_adjust = -999 # no heading, give invalid number
-
+    if gotGpsGoal:
         msg = RoverGoal()
-        # note that direction is based on compass directions where E is 90 and W is -90
-        msg.desiredDir = Direction_adjust
-        msg.distToGoal = Rov_to_des_distance
+        msg.gotDist = False
+        msg.gotDir = False
+        if message.gotGps:
+            Rov_to_des_distance = Distance(rover['latitude'], \
+            rover['longitude'], gpsGoal['latitude'], gpsGoal['longitude'])
+
+            msg.distToGoal = Rov_to_des_distance
+            msg.gotDist = True
+            if message.gotHeading:
+                # note that direction is based on compass directions where E is 90 and W is -90
+                Rov_to_des_direction = Direction(rover['latitude'], \
+                rover['longitude'], gpsGoal['latitude'], gpsGoal['longitude'])
+
+                Direction_adjust = Turning(Rov_to_des_direction, rover['heading'])
+                msg.desiredDir = Direction_adjust
+                msg.gotDir = True
         navigationPub.publish(msg)
     else:
         rospy.loginfo('Waiting for gps goal coordinate ROS parameters to be set')
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+navigation_pub_topic+'" topic')
     navigationPub = rospy.Publisher(navigation_pub_topic, RoverGoal, queue_size=10)
 
-    gotGpsPos = False
+    gotGpsGoal = False
     gpsGoal = {'latitude':None, 'longitude':None}
     rover = {'latitude':None, 'longitude':None, 'heading':None, 'distance':None}
 
@@ -61,11 +61,11 @@ if __name__ == '__main__':
     'and will wait until it receives that')
     try:
         while not rospy.is_shutdown():
-            if not gotGpsPos:
+            if not gotGpsGoal:
                 try: #rospy.has_param(param) works but requires code rethinking
                     gpsGoal['latitude'] = rospy.get_param('goal_latitude')
                     gpsGoal['longitude'] = rospy.get_param('goal_longitude')
-                    gotGpsPos = True
+                    gotGpsGoal = True
                     rospy.loginfo('Got GPS goal coordinates!')
                 except KeyError: # param not defined
                     pass

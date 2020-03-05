@@ -16,13 +16,15 @@ from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 from mcu_control.msg import BatteryVoltage
 
+#If you get a voltage lower or higher than these values, it's invalid
+minValidVbat = -100; maxValidVbat = 100
+
 global ser # make global so it can be used in other parts of the code
 mcuName = 'arm'
 
 # 300 ms timeout... could potentially be even less, needs testing
 timeout = 0.3 # to wait for a response from the MCU
 
-# todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
@@ -247,7 +249,12 @@ if __name__ == '__main__':
                     elif 'battery voltage' in feedback:
                         left,voltage = feedback.split('battery voltage: ')
                         voltageMsg = BatteryVoltage()
-                        voltageMsg.vbat = float(voltage)
+                        voltageFloat = float(voltage)
+                        if minValidVbat < voltageFloat < maxValidVbat:
+                            voltageMsg.vbat = voltageFloat
+                            voltageMsg.isValid = True
+                        else:
+                            voltageMsg.isValid = False
                         vBatPub.publish(voltageMsg)
                     else:
                         #rospy.loginfo(feedback)

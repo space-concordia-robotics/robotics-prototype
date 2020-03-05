@@ -9,25 +9,30 @@ from mcu_control.msg import RoverPosition, AntennaGoal
 
 def subscriber_callback(message):
     rospy.loginfo(message)
-    if message.latitude < -900 or message.longitude < -900:
-        return
-    rover['latitude'] = message.latitude
-    rover['longitude'] = message.longitude
+    if message.gotGps:
+        rover['latitude'] = message.latitude
+        rover['longitude'] = message.longitude
 
     if gotAntennaPos:
-        BS_to_Rover_dir = Direction(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
-        BS_to_Rover_dis = Distance(antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
-
-        rotatorAngle = BS_to_Rover_dir - antenna['startDir'] + 180
-        if rotatorAngle < 0:
-            rotatorAngle += 360
-        elif rotatorAngle > 360:
-            rotatorAngle -= 360
-
         msg = AntennaGoal()
-        msg.desiredDir = rotatorAngle/10
-        msg.distFromBase = BS_to_Rover_dis
-        antennaPub.publish(msg)
+        msg.gotGoal = False
+        if message.gotGps:
+            BS_to_Rover_dis = Distance(antenna['latitude'], \
+            antenna['longitude'], rover['latitude'], rover['longitude'])
+            msg.distFromBase = BS_to_Rover_dis
+
+            BS_to_Rover_dir = Direction(antenna['latitude'], \
+            antenna['longitude'], rover['latitude'], rover['longitude'])
+
+            rotatorAngle = BS_to_Rover_dir - antenna['startDir'] + 180
+            if rotatorAngle < 0:
+                rotatorAngle += 360
+            elif rotatorAngle > 360:
+                rotatorAngle -= 360
+            msg.desiredDir = rotatorAngle/10
+
+            msg.gotGoal = True
+            antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
     return
