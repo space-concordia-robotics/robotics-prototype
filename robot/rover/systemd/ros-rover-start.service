@@ -4,11 +4,11 @@ After=ip-emailer.service
 Wants=ip-emailer.service
 
 [Service]
-#User=odroid
+User=nvidia
 # For some unkown reason this service stopped working when running as user odroid
-User=root
+#User=root
 Type=simple
-ExecStart=/home/odroid/Programming/robotics-prototype/robot/util/rosRoverStart/runRosRoverStart.sh
+ExecStart=/home/$USER/Programming/robotics-prototype/robot/util/rosRoverStart/runRosRoverStart.sh
 
 [Install]
 WantedBy=multi-user.target

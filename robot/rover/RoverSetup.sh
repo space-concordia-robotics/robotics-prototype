@@ -3,6 +3,7 @@
 
 APPEND_TO_BASH="
 
+. ~/Programming/robotics-prototype/venv/bin/activate
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
@@ -27,9 +28,10 @@ fi
 #install prereqs
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
-sudo apt install python3.6 python3.6-venv git nodejs -y
+sudo apt install python3.6 python3.6-venv git nodejs npm -y
 
 # Setup venv
+cd $REPO
 python3.6 -m venv venv
 source venv/bin/activate
 
@@ -94,6 +96,7 @@ cp commit-message-hook.sh .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 # Setup systemd services
+cd $REPO/robot/rover
 sudo cp systemd/config-ethernet.service /etc/systemd/system/config-ethernet.service
 sudo cp systemd/ip-emailer.service /etc/systemd/system/ip-emailer.service
 sudo cp systemd/ros-rover-start.service /etc/systemd/system/ros-rover-start.service
@@ -102,8 +105,9 @@ sudo systemctl enable ip-emailer.service
 sudo systemctl enable ros-rover-start.service
 
 # Setup ethernet and emailer service scripts
-sudo cp ../util/configEthernet/runConfigEthernet.sh /usr/bin/runConfigEthernet.sh
-sudo cp ../util/emailer/runEmailer.sh /usr/bin/runEmailer.sh
+cd $REPO/robot/util
+sudo cp configEthernet/runConfigEthernet.sh /usr/bin/runConfigEthernet.sh
+sudo cp emailer/runEmailer.sh /usr/bin/runEmailer.sh
 
 # Exit
 echo "$FINAL_MESSAGE"
