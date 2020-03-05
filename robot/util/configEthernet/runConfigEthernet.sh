@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-bash /home/$USER/configEthernet/configEthernet.sh > /home/$USER/configEthernet/configEthernet.log
+bash /home/nvidia/configEthernet/configEthernet.sh > /home/nvidia/configEthernet/configEthernet.log
