@@ -174,37 +174,41 @@ function initRosWeb () {
     messageType: 'mcu_control/BatteryVoltage'
   })
   battery_voltage_listener.subscribe(function (message) {
-    // sets voltage to two decimal points
-    let voltage = message.vbat.toFixed(2)
-    $('#battery-voltage').text(voltage)
+    if (message.gotVoltage) {
+      // sets voltage to two decimal points
+      let voltage = message.vbat.toFixed(2)
+      $('#battery-voltage').text(voltage)
 
-    // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
-    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
-      textColor('#battery-voltage', 'red')
-
-      if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
-        $('#battery-voltage').attr('acceptable', '0')
-        errorSound()
-        if (voltage > MAX_VOLTAGE) {
-          navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
-        } else if (voltage < MIN_VOLTAGE){
-          navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
-        }
-      }
-    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
-      if ($('#battery-voltage').attr('acceptable') === '0') {
+      // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
+      if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
         textColor('#battery-voltage', 'red')
-      }
 
-    } else {
-      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
-        textColor('#battery-voltage', 'orange')
+        if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
+          $('#battery-voltage').attr('acceptable', '0')
+          errorSound()
+          if (voltage > MAX_VOLTAGE) {
+            navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+          } else if (voltage < MIN_VOLTAGE){
+            navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+          }
+        }
+      } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
+        if ($('#battery-voltage').attr('acceptable') === '0') {
+          textColor('#battery-voltage', 'red')
+        }
 
       } else {
-        textColor('#battery-voltage', 'white')
-      }
+        if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
+          textColor('#battery-voltage', 'orange')
 
-      if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+        } else {
+          textColor('#battery-voltage', 'white')
+        }
+
+        if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+      }
+    } else {
+      $('#battery-voltage').text('N/A')
     }
   })
   // setup a subscriber for the battery_temps topic
@@ -214,49 +218,54 @@ function initRosWeb () {
     messageType: 'mcu_control/BatteryTemps'
   })
   battery_temps_listener.subscribe(function (message) {
-    // sets temperatures to two decimal points
-    let temps = [
-      parseFloat(message.temp1).toFixed(2),
-      parseFloat(message.temp2).toFixed(2),
-      parseFloat(message.temp3).toFixed(2)
-    ]
+    if (message.gotTemps) {
+      // sets temperatures to two decimal points
+      let temps = [
+        parseFloat(message.temp1).toFixed(2),
+        parseFloat(message.temp2).toFixed(2),
+        parseFloat(message.temp3).toFixed(2)
+      ]
 
-    $('.battery-temp').each(function(i, obj) {
-      let $obj = $(obj)
-      let temperature = temps[i]
-      $obj.text(temperature)
+      $('.battery-temp').each(function(i, obj) {
+        let $obj = $(obj)
+        let temperature = temps[i]
+        $obj.text(temperature)
 
-      if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
-        $obj.css({'color': 'red'})
-
-        if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
-          $obj.attr('acceptable', '0')
-          errorSound()
-          if (temperature > MAX_TEMP) {
-            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
-          } else if (temperature < MIN_TEMP) {
-            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
-          }
-        }
-      } else if (temperature > MAX_TEMP - TEMP_LEEWAY || temperature < MIN_TEMP + TEMP_LEEWAY){
-        if ($obj.attr('acceptable') === '0') {
+        if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
           $obj.css({'color': 'red'})
+
+          if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
+            $obj.attr('acceptable', '0')
+            errorSound()
+            if (temperature > MAX_TEMP) {
+              navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
+            } else if (temperature < MIN_TEMP) {
+              navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
+            }
+          }
+        } else if (temperature > MAX_TEMP - TEMP_LEEWAY || temperature < MIN_TEMP + TEMP_LEEWAY){
+          if ($obj.attr('acceptable') === '0') {
+            $obj.css({'color': 'red'})
+          } else {
+            $obj.css({'color': 'orange'})
+          }
+
         } else {
-          $obj.css({'color': 'orange'})
+          if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
+            $obj.css({'color': 'orange'})
+
+          } else {
+            $obj.css({'color': 'white'})
+          }
+
+          if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
         }
-
-      } else {
-        if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
-          $obj.css({'color': 'orange'})
-
-        } else {
-          $obj.css({'color': 'white'})
-        }
-
-        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
-      }
-    });
-
+      });
+    } else {
+      $('#battery-temp-1').text('N/A')
+      $('#battery-temp-2').text('N/A')
+      $('#battery-temp-3').text('N/A')
+    }
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
