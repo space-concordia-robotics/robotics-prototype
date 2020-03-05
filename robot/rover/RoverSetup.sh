@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Setup script which installs the Space Concordia Robotics Software team's rover environment. 
+# Setup script which installs the Space Concordia Robotics Software team's rover environment.
 
 APPEND_TO_BASH="
 
@@ -8,7 +8,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
 "
 
-FINAL_MESSAGE="The script will now exit" 
+FINAL_MESSAGE="The script will now exit"
 
 REPO="/home/$USER/Programming/robotics-prototype"
 
@@ -22,12 +22,16 @@ then
    echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
    exit 1
 fi
-   
-   
+
+
 #install prereqs
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
-sudo apt install python3.6 git nodejs -y
+sudo apt install python3.6 python3.6-venv git nodejs -y
+
+# Setup venv
+python3.6 -m venv venv
+source venv/bin/activate
 
 # Install Requirements
 pip install -U pip
@@ -41,16 +45,16 @@ python setup.py develop
 # Check if ros is already installed, install it if it isn't
 ROS_VERSION=$(rosversion -d)
 if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
-then 
+then
     echo "You do not have ROS installed, installing..."
-    
+
     wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
     chmod 755 ./install_ros_kinetic.sh
     yes "" | bash ./install_ros_kinetic.sh
     rm ./install_ros_kinetic.sh
-	
+
 	source ~/.bashrc
-	
+
     sudo apt install ros-kinetic-rosbridge-suite -y
 
 elif [$ROS_VERSION != "kinetic"]
@@ -96,6 +100,10 @@ sudo cp systemd/ros-rover-start.service /etc/systemd/system/ros-rover-start.serv
 sudo systemctl enable config-ethernet.service
 sudo systemctl enable ip-emailer.service
 sudo systemctl enable ros-rover-start.service
+
+# Setup ethernet and emailer service scripts
+sudo cp ../util/configEthernet/runConfigEthernet.sh /usr/bin/runConfigEthernet.sh
+sudo cp ../util/emailer/runEmailer.sh /usr/bin/runEmailer.sh
 
 # Exit
 echo "$FINAL_MESSAGE"

@@ -1,4 +1,4 @@
-ETHERNET_CONFIG_DIR="/home/odroid/configEthernet"
+ETHERNET_CONFIG_DIR="/home/$USER/configEthernet"
 
 if [ ! -d $ETHERNET_CONFIG_DIR ]; then
     mkdir $ETHERNET_CONFIG_DIR;
