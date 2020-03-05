@@ -30,9 +30,9 @@ def subscriber_callback(message):
             elif rotatorAngle > 360:
                 rotatorAngle -= 360
             msg.desiredDir = rotatorAngle/10
-
             msg.gotGoal = True
-            antennaPub.publish(msg)
+            
+        antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
     return

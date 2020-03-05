@@ -6,9 +6,18 @@ $(document).ready(() => {
     messageType: 'mcu_control/RoverPosition'
   })
   rover_position_listener.subscribe(function (message) {
-    $('#rover-latitude').text(message.latitude)
-    $('#rover-longitude').text(message.longitude)
-    $('#rover-heading').text(message.heading)
+    if (message.gotGps) {
+      $('#rover-latitude').text(message.latitude)
+      $('#rover-longitude').text(message.longitude)
+    } else {
+      $('#rover-latitude').text('N/A')
+      $('#rover-longitude').text('N/A')
+    }
+    if (message.gotHeading) {
+      $('#rover-heading').text(message.heading)
+    } else {
+      $('#rover-heading').text('N/A')
+    }
   })
   // setup a subscriber for the rover_twist topic
   rover_twist_listener = new ROSLIB.Topic({
@@ -27,8 +36,13 @@ $(document).ready(() => {
     ros: ros
   })
   antenna_goal_listener.subscribe(function (message) {
-    $('#recommended-antenna-angle').text(parseFloat(message.desiredDir).toFixed(3))
-    $('#distance-to-rover').text(parseFloat(message.distFromBase).toFixed(2))
+    if (message.gotGoal) {
+      $('#recommended-antenna-angle').text(parseFloat(message.desiredDir).toFixed(3))
+      $('#distance-to-rover').text(parseFloat(message.distFromBase).toFixed(2))
+    } else {
+      $('#recommended-antenna-angle').text('N/A')
+      $('#distance-to-rover').text('N/A')
+    }
   })
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
@@ -51,8 +65,16 @@ $(document).ready(() => {
     messageType: 'mcu_control/RoverGoal'
   })
   rover_goal_listener.subscribe(function (message) {
-    $('#recommended-rover-heading').text(parseFloat(message.desiredDir).toFixed(3))
-    $('#distance-to-goal').text(parseFloat(message.distToGoal).toFixed(2))
+    if (message.gotDir) {
+      $('#recommended-rover-heading').text(parseFloat(message.desiredDir).toFixed(3))
+    } else {
+      $('#recommended-rover-heading').text('N/A')
+    }
+    if (message.gotDist) {
+      $('#distance-to-goal').text(parseFloat(message.distToGoal).toFixed(2))
+    } else {
+      $('#distance-to-goal').text('N/A')
+    }
   })
   // setup gps parameters for rover goals
   let goal_latitude = new ROSLIB.Param({
