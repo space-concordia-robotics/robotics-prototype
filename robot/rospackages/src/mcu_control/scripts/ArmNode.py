@@ -252,9 +252,9 @@ if __name__ == '__main__':
                         voltageFloat = float(voltage)
                         if minValidVbat < voltageFloat < maxValidVbat:
                             voltageMsg.vbat = voltageFloat
-                            voltageMsg.isValid = True
+                            voltageMsg.gotVoltage = True
                         else:
-                            voltageMsg.isValid = False
+                            voltageMsg.gotVoltage = False
                         vBatPub.publish(voltageMsg)
                     else:
                         #rospy.loginfo(feedback)

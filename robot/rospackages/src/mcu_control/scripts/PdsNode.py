@@ -205,19 +205,19 @@ def publish_pds_data(message):
                 voltageFloat = float(dataPDS[i])
                 if minValidVbat < voltageFloat < maxValidVbat:
                     voltageMsg.vbat = voltageFloat
-                    voltageMsg.isValid = True
+                    voltageMsg.gotVoltage = True
                 else:
-                    voltageMsg.isValid = False
+                    voltageMsg.gotVoltage = False
             elif i < 7:
                 currentMsg.effort.append(float(dataPDS[i]))
             elif i < 10:
-                tempsMsg.isValid = True
+                tempsMsg.gotTemps = True
                 for j in range(7,10):
                     tempsFloat = dataPDS[j]
                     if  tempsFloat < minValidTemp or tempsFloat > maxValidTemp:
-                        tempsMsg.isValid = False
+                        tempsMsg.gotTemps = False
                         break
-                if tempsMsg.isValid:
+                if tempsMsg.gotTemps:
                     tempsMsg.temp1 = float(dataPDS[7])
                     tempsMsg.temp2 = float(dataPDS[8])
                     tempsMsg.temp3 = float(dataPDS[9])

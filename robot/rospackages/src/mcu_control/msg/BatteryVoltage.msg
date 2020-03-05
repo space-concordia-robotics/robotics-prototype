@@ -1,2 +1,2 @@
 float64 vbat
-bool isValid
+bool gotVoltage
