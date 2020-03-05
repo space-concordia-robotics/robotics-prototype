@@ -204,7 +204,7 @@ function initRosWeb () {
         textColor('#battery-voltage', 'red')
       }
 
-    } else { 
+    } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
 
@@ -253,7 +253,7 @@ function initRosWeb () {
           $obj.css({'color': 'orange'})
         }
 
-      } else { 
+      } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
 
@@ -332,7 +332,7 @@ function publishRosLog (logLevel, timestamp, message) {
  * @param logLevel one of the ROS loglevel constants defined above
  * @param message the log message
 */
-function rosLog (logLevel, message) {
+function rosLog (logLevel, message, devConsole = true, guiConsole = true) {
   logData = {}
   logData[ROSDEBUG] = {prefix : '[DEBUG]', type : 'log'}
   logData[ROSINFO] = {prefix : '[INFO]', type : 'log'}
@@ -343,14 +343,19 @@ function rosLog (logLevel, message) {
   stamps = rosTimestamp()
   consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
 
-  if (logData[logLevel].type === 'log') {
-    console.log(consoleMsg)
-  } else if (logData[logLevel].type === 'warn') {
-    console.warn(consoleMsg)
-  } else if (logData[logLevel].type === 'error') {
-    console.error(consoleMsg)
+  if (devConsole) {
+    if (logData[logLevel].type === 'log') {
+      console.log(consoleMsg)
+    } else if (logData[logLevel].type === 'warn') {
+      console.warn(consoleMsg)
+    } else if (logData[logLevel].type === 'error') {
+      console.error(consoleMsg)
+    }
   }
-  appendToConsole(consoleMsg, false)
+  if (guiConsole) {
+    // false means don't append (again) to the dev console
+    appendToConsole(consoleMsg, false)
+  }
   // log messages go to log file: currently rosout.log
   publishRosLog(logLevel, stamps[0], message)
 }
@@ -361,41 +366,41 @@ function rosLog (logLevel, message) {
  * Also publishes it to /rosout.
  * @param message the log message
 */
-function logDebug (message) {
+function logDebug (message, devConsole = true, guiConsole = true) {
   // unlike rospy, (currently) the debug messages we generate will get published
-  rosLog(ROSDEBUG, message)
+  rosLog(ROSDEBUG, message, devConsole, guiConsole)
 }
 /**
  * Sends an info message with timestamp to the GUI and chrome consoles.
  * Also publishes it to /rosout.
  * @param message the log message
 */
-function logInfo (message) {
-  rosLog(ROSINFO, message)
+function logInfo (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSINFO, message, devConsole, guiConsole)
 }
 /**
  * Sends a warning message with timestamp to the GUI and chrome consoles.
  * Also publishes it to /rosout.
  * @param message the log message
 */
-function logWarn (message) {
-  rosLog(ROSWARN, message)
+function logWarn (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSWARN, message, devConsole, guiConsole)
 }
 /**
  * Sends an error message with timestamp to the GUI and chrome consoles.
  * Also publishes it to /rosout.
  * @param message the log message
 */
-function logErr (message) {
-  rosLog(ROSERROR, message)
+function logErr (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSERROR, message, devConsole, guiConsole)
 }
 /**
  * Sends a fatal error message with timestamp to the GUI and chrome consoles.
  * Also publishes it to /rosout.
  * @param message the log message
 */
-function logFatal (message) {
-  rosLog(ROSFATAL, message)
+function logFatal (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSFATAL, message, devConsole, guiConsole)
 }
 
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
@@ -469,11 +474,11 @@ CAMERA_PORTS = 'camera_ports'
 
 /**
  * Sends a request to the task handler.
- * 
+ *
  * STATUS_STOP stops the task
  * STATUS_START starts the task
  * STATUS_CHECK obtains insight on the task
- * 
+ *
  * @reqTask The task related to the request
  * @reqStatus The status of the request
  * @callback Callback on success
