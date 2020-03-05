@@ -178,6 +178,7 @@ function initRosWeb () {
       // sets voltage to two decimal points
       let voltage = message.vbat.toFixed(2)
       $('#battery-voltage').text(voltage)
+      $('#battery-voltage').siblings().show()
 
       // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
       if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
@@ -209,6 +210,7 @@ function initRosWeb () {
       }
     } else {
       $('#battery-voltage').text('N/A')
+      $('#battery-voltage').siblings().hide()
     }
   })
   // setup a subscriber for the battery_temps topic
@@ -230,6 +232,7 @@ function initRosWeb () {
         let $obj = $(obj)
         let temperature = temps[i]
         $obj.text(temperature)
+        $obj.siblings().show()
 
         if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
           $obj.css({'color': 'red'})
@@ -263,8 +266,11 @@ function initRosWeb () {
       });
     } else {
       $('#battery-temp-1').text('N/A')
+      $('#battery-temp-1').siblings().hide()
       $('#battery-temp-2').text('N/A')
+      $('#battery-temp-2').siblings().hide()
       $('#battery-temp-3').text('N/A')
+      $('#battery-temp-3').siblings().hide()
     }
   })
   // setup a subscriber for the wheel_motor_currents topic
