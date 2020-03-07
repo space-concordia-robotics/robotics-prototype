@@ -3,25 +3,27 @@ import sys
 import time
 import rospy
 from std_msgs.msg import Float32
+from decimal import *
 
+getcontext().prec = 4
 
 def PDS_pub():
   pub = rospy.Publisher('battery_voltage', Float32, queue_size=10)
   rospy.init_node('PDS_mock_pub', anonymous=True)
-  rate = rospy.Rate(10) # 10hz
+  rate = rospy.Rate(10) #hz
 
   # temp values -> should be extracted from the js file later
-  voltage_max = 16.8
-  voltage_min = 12.5
-  voltage_safe = 15
-  speed = 0.1
+  voltage_max = Decimal(20.0)
+  voltage_min = Decimal(10.0)
+  voltage_safe = Decimal(15.0)
+  speed = Decimal((0, (0, 1), -1))
 
-  voltage_current = voltage_safe # starting voltage
-  voltage_target = voltage_safe # default value
+  voltage_current = voltage_safe #starting voltage
+  voltage_target = voltage_safe #default value
 
   while not rospy.is_shutdown():
     try:
-      mode = rospy.get_param('PDS_mock_mode')
+      mode = rospy.get_param('PDS_mock_mode_voltage')
     except:
       print('PDS_mock_mode parameter error!')
       sys.exit()
@@ -37,6 +39,7 @@ def PDS_pub():
       sys.exit()
 
     direction = voltage_target - voltage_current
+    print(voltage_current)
     if (abs(direction) >= speed):
       if direction > 0:
         voltage_current += speed
@@ -44,11 +47,10 @@ def PDS_pub():
         voltage_current -= speed
 
     pub.publish(voltage_current)
-    print(voltage_current)
     rate.sleep()
 
 if __name__ == '__main__':
-  rospy.set_param('PDS_mock_mode', 'rise')
+  rospy.set_param('PDS_mock_mode_voltage', 'stable')
   try:
     PDS_pub();
   except rospy.ROSInterruptException:
