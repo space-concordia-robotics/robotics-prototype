@@ -101,7 +101,6 @@ def subscriber_callback(message):
     ser.write(command) # send command to teensy
     return
 
-"""
 def publish_joint_states(message):
     # parse the data received from Teensy
     lhs,message = message.split('Science Data: ')
@@ -119,7 +118,6 @@ def publish_joint_states(message):
     anglePub.publish(msg)
     rospy.logdebug(msg.position)
     return
-"""
 
 def stripFeedback(data):
     startStrip=mcuName.upper() + ' '
@@ -136,7 +134,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-    init_serial(node_baudrate.get(science),node_type.get(science))
+    init_serial(115200, 'science')
 
     feedback_pub_topic = '/science_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')

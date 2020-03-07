@@ -6,47 +6,29 @@
 # ScienceNode = 115200, 'science'
 # RoverNode = 115200, 'Astro'
 
-node_baudrate = {
-  "pds": 9600,
-  "arm": 115200,
-  "science": 115200,
-  "rover": 115200
-}
+def attempt_usb():
+    return 0
 
-node_type = {
-  "pds": 'PDS',
-  "arm": 'arm',
-  "science": 'science',
-  "rover": 'Astro'
-}
+def attempt_uart():
+    return 0
 
-def init_serial(baud, type):
-    baudrate = baud
-    # in a perfect world, you can choose the baudrate
+PROTOCOL_USB = 1
+PROTOCOL_UART = 2
+
+def init_serial(baudrate, type):
     rospy.loginfo('Using %d baud by default', baudrate)
-    # in a perfect world, usb vs uart will be set by ROS params
-    usb = False; uart = True
-    myargv = rospy.myargv(argv=sys.argv)
-    if len(myargv) == 1:
+    cmd_args = rospy.myargv(argv=sys.argv)
+    if len(cmd_args) == 1:
+        protocol = PROTOCOL_UART
         rospy.loginfo('Using UART by default')
-    if len(myargv) > 1:
-        if myargv[1] == 'uart':
-            usb=False; uart=True
-            if type == 'PDS':
-                rospy.loginfo('Using UART and 9600 baud by default')
-            else:
-                rospy.loginfo('Using UART and 115200 baud by default')
-        elif myargv[1] == 'usb':
-            usb=True; uart=False
-            if type == 'PDS':
-                rospy.loginfo('Using USB and 9600 baud by default')
-            else:
-                rospy.loginfo('Using USB and 115200 baud by default')
+    elif len(cmd_args) > 1:
+        if cmd_args[1] == 'usb':
+            protocol = PROTOCOL_USB
         else:
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
             sys.exit(0)
 
-    global ser #make global so it can be used in other parts of the code
+    global ser
 
     ports = list(serial.tools.list_ports.comports())
 
