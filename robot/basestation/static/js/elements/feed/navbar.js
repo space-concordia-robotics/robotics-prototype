@@ -6,20 +6,20 @@ $(document).ready(() => {
     currentWindow = window.location.pathname
     switch(currentWindow) {
       case '/rover':
-        setMuxUsb('mux-0')
+        setMuxChannel('mux-0')
         setSerialUsb()
         break;
       case ('/'):
       case ('/arm'):
-        setMuxUsb('mux-1')
+        setMuxChannel('mux-1')
         setSerialUsb()
         break;
       case '/science':
-        setMuxUsb('mux-2')
+        setMuxChannel('mux-2')
         setSerialUsb()
         break;
       case '/pds':
-        setMuxUart('mux-3')
+        setMuxChannel('mux-3')
         setSerialUart()
         break;
     }
@@ -113,16 +113,11 @@ $(document).ready(() => {
   // select mux channel using mux_select service
   $("a[id^='mux-']").mouseup(e => {
     let muxId = $(e.target).attr("id")
-    if (muxId != 'mux-3') {
-      setMuxUsb(muxId)
-    }
-    else {
-      setMuxUart(muxId)
-    }
+    setMuxChannel(muxId)
   })
 
   // Set device channel
-  function setMuxUsb (muxId) {
+  function setMuxChannel (muxId) {
     deviceName = getDeviceNameByMuxID(muxId)
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
@@ -130,45 +125,37 @@ $(document).ready(() => {
       requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
 
-        if (msgs[0]) {
-          rosLog(ROSINFO, 'Activating ' + deviceName + ' Listener Node')
+        if (muxId != 'mux-3') {
+          if (msgs[0]) {
+            rosLog(ROSINFO, 'Activating ' + deviceName + ' Listener Node')
 
-          let serialType = getCookie('serialType')
+            let serialType = getCookie('serialType')
 
-          if (serialType == '') {
-            appendToConsole('Serial type not yet defined!')
-            return
-          }
+            if (serialType == '') {
+              appendToConsole('Serial type not yet defined!')
+              return
+            }
 
-          // automating opening listener and sending MCU ping in UART mode
-          if (serialType == 'uart') {
-            requestTask(
-              ROVER_LISTENER_TASK,
-              STATUS_START,
-              function (msgs) {
-                if (msgs[0]) {
-                  $('#toggle-rover-listener-btn')[0].checked = true
-                  // try pinging MCU
-                  wait(1000)
-                  sendRequest(deviceName, 'ping', printErrToConsole)
-                } else {
-                  $('#toggle-rover-listener-btn')[0].checked = false
-                }
-              },
-              serialType
-            )
+            // automating opening listener and sending MCU ping in UART mode
+            if (serialType == 'uart') {
+              requestTask(
+                ROVER_LISTENER_TASK,
+                STATUS_START,
+                function (msgs) {
+                  if (msgs[0]) {
+                    $('#toggle-rover-listener-btn')[0].checked = true
+                    // try pinging MCU
+                    wait(1000)
+                    sendRequest(deviceName, 'ping', printErrToConsole)
+                  } else {
+                    $('#toggle-rover-listener-btn')[0].checked = false
+                  }
+                },
+                serialType
+              )
+            }
           }
         }
-      })
-    }
-  }
-
-  function setMuxUart (muxId) {
-    if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
-    } else {
-      requestMuxChannel('#' + muxId, function (msgs) {
-        printErrToConsole(msgs)
       })
     }
   }
