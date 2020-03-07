@@ -49,11 +49,12 @@
 </head>
 <body>
     <div id="content">
-      {% block navbar %}{% include 'elements/feed/Navbar.html' %}{% endblock %}
+      {% block navbar %}{% include 'elements/feed/Navbar.html' %}
       <br>
       <br>
       <br>
       <br>
+      {% endblock %}
       {% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}

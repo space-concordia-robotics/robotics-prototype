@@ -342,6 +342,6 @@ $(document).ready(() => {
   })
 
   $('.camera-popup' ).click(function() {
-    window.open('/testpanel',"", "width=1500, height=1000")
+    window.open('/camerapanel',"", 'height='+screen.height+', width='+screen.width);
   })
 })

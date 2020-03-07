@@ -32,10 +32,10 @@ def index():
     """Current landing page, the arm panel."""
     return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
-@app.route("/testpanel")
+@app.route("/camerapanel")
 def testpanel():
     """Camera Panel."""
-    return flask.render_template("pages/camerapanel_page.html", roverIP=fetch_ros_master_ip())
+    return flask.render_template("pages/Camerapanel.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/rover")
 def rover():
