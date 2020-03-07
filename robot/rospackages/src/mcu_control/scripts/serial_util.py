@@ -32,13 +32,13 @@ def init_serial(baud, type):
     if len(myargv) > 1:
         if myargv[1] == 'uart':
             usb=False; uart=True
-            if type = 'PDS':
+            if type == 'PDS':
                 rospy.loginfo('Using UART and 9600 baud by default')
             else:
                 rospy.loginfo('Using UART and 115200 baud by default')
         elif myargv[1] == 'usb':
             usb=True; uart=False
-            if type = 'PDS':
+            if type == 'PDS':
                 rospy.loginfo('Using USB and 9600 baud by default')
             else:
                 rospy.loginfo('Using USB and 115200 baud by default')
@@ -53,7 +53,7 @@ def init_serial(baud, type):
     startConnecting = time.time()
     if usb:
         #Change baudrate for PdsNode.py
-        if type = 'PDS':
+        if type == 'PDS':
             baudrate = 19200
         if len(ports) > 0:
             rospy.loginfo("%d USB device(s) detected", len(ports))
@@ -80,7 +80,7 @@ def init_serial(baud, type):
                                 rospy.loginfo(mcuName+" MCU identified!")
                                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                                 rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
-                                if type = 'Astro':
+                                if type == 'Astro':
                                     ser.reset_input_buffer()
                                     ser.reset_output_buffer()
                                 return
@@ -112,7 +112,7 @@ def init_serial(baud, type):
                     dat='';data=None
                     try:
                         dat = ser.readline().decode()
-                        if type = arm:
+                        if type == arm:
                             data = stripFeedback(dat) #not present in pdsnode
                     except:
                         rospy.logwarn('trouble reading from serial port')
