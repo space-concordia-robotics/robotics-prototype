@@ -37,7 +37,7 @@ def PDS_pub():
       sys.exit()
 
     direction = voltage_target - voltage_current
-    if (direction >= speed):
+    if (abs(direction) >= speed):
       if direction > 0:
         voltage_current += speed
       elif direction < 0:
