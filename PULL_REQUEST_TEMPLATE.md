@@ -4,8 +4,13 @@
 [Write a summary of the changes included in this Pull Request]
 
 [If applicable, include a list of main points]
-- [ ] Example bug fixed.
-- [ ] Added example function with the responsibility of example.
+- Example bug fixed.
+- Added example function with the responsibility of example.
+
+[Write all the steps necessary to test the feature(s)]
+1) Example: Start the GUI with `rosgui` and `startgui`
+2) Example: Open a terminal and subscribe to x topic`
+3) Example: If in local mode, do x differently
 
 closes #[Insert your issue number here]
 
