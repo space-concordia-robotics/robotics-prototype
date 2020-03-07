@@ -550,7 +550,7 @@ void Commands::controlWheelMotors(String cmd) {
             int motorSpeed = getValue(cmd, ':', 1).toFloat();
             steering = 0;
             int dir = 1;
-            if (throttle < 0 ) {
+            if (motorSpeed < 0 ) {
                 dir = - 1;
             }
             sinceThrottle = 0;
