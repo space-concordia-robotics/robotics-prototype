@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.serial_util import init_serial
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial
 import serial # pyserial
 import serial.tools.list_ports # pyserial
 #from robot.comms.uart import Uart
