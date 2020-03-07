@@ -112,27 +112,26 @@ $(document).ready(() => {
 
   // select mux channel using mux_select service
   $("a[id^='mux-']").mouseup(e => {
-    console.log($(e.target).attr("id"))
-    id = $(e.target).attr("id")
-    if (id != 'mux-3') {
-      setMuxUsb(id)
+    let muxId = $(e.target).attr("id")
+    if (muxId != 'mux-3') {
+      setMuxUsb(muxId)
     }
     else {
-      setMuxUart(id)
+      setMuxUart(muxId)
     }
   })
 
   // Set device channel
-  function setMuxUsb (id) {
-    deviceName = getDeviceNameByMuxID(id)
+  function setMuxUsb (muxId) {
+    deviceName = getDeviceNameByMuxID(muxId)
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
-      requestMuxChannel('#' + id, function (msgs) {
+      requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
 
         if (msgs[0]) {
-          console.log('Activating ' + deviceName + ' Listener Node')
+          rosLog(ROSINFO, 'Activating ' + deviceName + ' Listener Node')
 
           let serialType = getCookie('serialType')
 
@@ -164,11 +163,11 @@ $(document).ready(() => {
     }
   }
 
-  function setMuxUart (id) {
+  function setMuxUart (muxId) {
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
       appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
-      requestMuxChannel('#' + id, function (msgs) {
+      requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
       })
     }
