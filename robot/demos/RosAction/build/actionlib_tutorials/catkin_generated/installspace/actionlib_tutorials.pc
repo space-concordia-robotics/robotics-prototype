@@ -1,0 +1,8 @@
+prefix=/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/install
+
+Name: actionlib_tutorials
+Description: Description of actionlib_tutorials
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: actionlib_msgs

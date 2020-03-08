@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d7b31/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d7b31.dir/build.make CMakeFiles/cmTC_d7b31.dir/build
+make[1]: Entering directory '/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d7b31.dir/CheckSymbolExists.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_d7b31.dir/CheckSymbolExists.c.o   -c /home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_d7b31
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d7b31.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_d7b31.dir/CheckSymbolExists.c.o  -o cmTC_d7b31 -rdynamic 
+CMakeFiles/cmTC_d7b31.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_d7b31.dir/build.make:97: recipe for target 'cmTC_d7b31' failed
+make[1]: *** [cmTC_d7b31] Error 1
+make[1]: Leaving directory '/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d7b31/fast' failed
+make: *** [cmTC_d7b31/fast] Error 2
+
+File /home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_edb91/fast"
+/usr/bin/make -f CMakeFiles/cmTC_edb91.dir/build.make CMakeFiles/cmTC_edb91.dir/build
+make[1]: Entering directory '/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_edb91.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_edb91.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_edb91
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_edb91.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_edb91.dir/CheckFunctionExists.c.o  -o cmTC_edb91 -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_edb91.dir/build.make:97: recipe for target 'cmTC_edb91' failed
+make[1]: *** [cmTC_edb91] Error 1
+make[1]: Leaving directory '/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_edb91/fast' failed
+make: *** [cmTC_edb91/fast] Error 2
+
+
