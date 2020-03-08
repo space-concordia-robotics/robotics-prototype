@@ -61,6 +61,7 @@ def clear_buffer():
 def search_uart():
     port = 'ttySAC0'
     rospy.loginfo('Attempting to connect to /dev/'+port)
+    rospy.loginfo('Using %d baud', baudrate)
     try:
         ser = serial.Serial('/dev/' + port, baudrate)
     except:
@@ -76,6 +77,7 @@ def search_uart():
 
 def search_usb(baudrate, ports, node_type):
     rospy.loginfo("%d USB device(s) detected", len(ports))
+    rospy.loginfo('Using %d baud', baudrate)
     for p in ports:
         port = p.name
         rospy.loginfo('Attempting to connect to /dev/'+port)
@@ -94,7 +96,6 @@ def search_usb(baudrate, ports, node_type):
             attempt_usb(node_type)
 
 def init_serial(baudrate, node_type):
-    rospy.loginfo('Using %d baud by default', baudrate)
     cmd_args = rospy.myargv(argv=sys.argv)
     if len(cmd_args) == 1: 
         if node_type == 'PDS':
