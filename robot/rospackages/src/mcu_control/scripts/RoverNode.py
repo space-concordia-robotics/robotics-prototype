@@ -6,10 +6,6 @@ import time
 import re
 
 from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial
-import serial # pyserial
-import serial.tools.list_ports # pyserial
-#from robot.comms.uart import Uart
-#import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -159,7 +155,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(node_baudrate.get(115200, 'Astro')
+    init_serial(115200, 'Astro')
 
     speed_pub_topic = '/rover_joint_states'
     rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')

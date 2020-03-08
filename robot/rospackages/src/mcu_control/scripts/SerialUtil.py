@@ -6,6 +6,11 @@
 # ScienceNode = 115200, 'science'
 # RoverNode = 115200, 'Astro'
 
+import rospy
+import sys
+import serial
+import serial.tools.list_ports
+
 PROTOCOL_USB = 1
 PROTOCOL_UART = 2
 
@@ -91,12 +96,20 @@ def search_usb(baudrate, ports, node_type):
 def init_serial(baudrate, node_type):
     rospy.loginfo('Using %d baud by default', baudrate)
     cmd_args = rospy.myargv(argv=sys.argv)
-    if len(cmd_args) == 1:
-        protocol = PROTOCOL_UART
-        rospy.loginfo('Using UART by default')
+    if len(cmd_args) == 1: 
+        if node_type == 'PDS':
+            protocol = PROTOCOL_UART
+            rospy.loginfo('Using UART by default')
+        else:
+            protocol = PROTOCOL_USB
+            rospy.loginfo('Using USB by default')
     elif len(cmd_args) > 1:
         if cmd_args[1] == 'usb':
             protocol = PROTOCOL_USB
+            rospy.loginfo('Communication will be via USB')
+        elif cmd_args[1] == 'uart':
+            protocol = PROTOCOL_UART
+            rospy.loginfo('Communication will be via UART')
         else:
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
             sys.exit(0)
@@ -105,15 +118,14 @@ def init_serial(baudrate, node_type):
 
     ports = list(serial.tools.list_ports.comports())
     if len(ports) == 0:
-        rospy.logerr("No USB devices recognized, exiting")
+        rospy.logerr("No devices found, exiting")
         sys.exit(0)
 
     startConnecting = time.time()
     if protocol == PROTOCOL_USB:
-        search_usb(node_type == 'PDS' ? 19200 : baudrate, ports, node_type)
+        search_usb(19200 if node_type == 'PDS' else baudrate, ports, node_type)
     elif protocol == PROTOCOL_UART:
         search_uart(node_type, ports, node_type)
-    elif uart:
-
-    rospy.logerr('Incorrect MCU connected, terminating listener')
-    sys.exit(0)
+    else:
+        rospy.logerr('Incorrect MCU connected, terminating listener')
+        sys.exit(0)
