@@ -5,18 +5,14 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
 import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
-global ser # make global so it can be used in other parts of the code
 mcuName = 'arm'
-
-# 300 ms timeout... could potentially be even less, needs testing
-timeout = 0.3 # to wait for a response from the MCU
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -30,8 +26,9 @@ requests = {
     'armspeed' : ['Alert', 'Success'],
     'reboot' : ['rebooting']
 }
+
 def handle_client(req):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     global reqFeedback
     global reqInWaiting
     armResponse = ArmRequestResponse()
@@ -61,11 +58,10 @@ def handle_client(req):
     return armResponse
 
 def subscriber_callback(message):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serail()
     rospy.loginfo('received: '+message.data+' command from GUI, sending to arm Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
-    return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
@@ -83,7 +79,6 @@ def publish_joint_states(message):
     # publish it
     anglePub.publish(msg)
     rospy.logdebug(msg.position)
-    return
 
 def stripFeedback(data):
     startStrip='ARM '
@@ -100,7 +95,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(115200, 'arm')
+    init_serial(115200, mcuName)
 
     angle_pub_topic = '/arm_joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
@@ -124,7 +119,7 @@ if __name__ == '__main__':
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     # service requests are implicitly handled but only at the rate the node publishes at
-    global ser
+    ser = get_serial()
     global reqFeedback
     reqFeedback=''
     global reqInWaiting

@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, ser
 
 import rospy
 from std_msgs.msg import String, Float32
@@ -13,11 +13,7 @@ from geometry_msgs.msg import Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
-global ser  # make global so it can be used in other parts of the code
 mcuName = 'PDS'
-
-# 300 ms timeout... could potentially be even less, needs testing
-timeout = 1  # to wait for a response from the MCU
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -41,7 +37,7 @@ requests = {
     'PDS M 6 0' : ['toggling']
 }
 def handle_client(req):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     global reqFeedback
     global reqInWaiting
     pdsResponse = ArmRequestResponse()
@@ -70,7 +66,7 @@ def handle_client(req):
     return pdsResponse
 
 def subscriber_callback(message):
-    global ser  # specify that it's global so it can be used properly
+    ser = get_serial()
     rospy.loginfo('received: ' + message.data + ' command from GUI, sending to PDS')
     command = str.encode(message.data + '\n')
     ser.write(command)  # send command to PDS
@@ -183,10 +179,10 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
-    init_serial(9600, 'PDS')
+    init_serial(9600, mcuName)
 
     # service requests are implicitly handled but only at the rate the node publishes at
-    global ser
+    ser = get_serial()
     global reqFeedback
     reqFeedback = ''
     global reqInWaiting

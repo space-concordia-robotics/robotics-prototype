@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -13,11 +13,7 @@ from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
-#global ser # make global so it can be used in other parts of the code
 mcuName = 'Astro'
-
-# 300 ms timeout... could potentially be even less, needs testing
-timeout = 0.3 # to wait for a response from the MCU
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
@@ -41,7 +37,7 @@ def handle_client(req):
     if req.msg == 'ping':
         feedbackPub.publish('listener received ping request')
 
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     global reqFeedback
     global reqInWaiting
     roverResponse = ArmRequestResponse()
@@ -71,7 +67,7 @@ def handle_client(req):
     return roverResponse
 
 def subscriber_callback(message):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
@@ -155,7 +151,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(115200, 'Astro')
+    init_serial(115200, mcuName)
 
     speed_pub_topic = '/rover_joint_states'
     rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')
@@ -188,7 +184,8 @@ if __name__ == '__main__':
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     # service requests are implicitly handled but only at the rate the node publishes at
-    global ser
+    ser = get_serial()
+
     global reqFeedback
     reqFeedback=''
     global reqInWaiting
