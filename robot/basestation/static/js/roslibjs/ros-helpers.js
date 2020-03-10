@@ -24,7 +24,7 @@ const ROSFATAL = 16 // fatal/critical level
 
 
 // logs below this level will not be published or printed. Issue #202 will allow the user to set this value
-const MINIMUM_LOG_LEVEL = 2 
+const MINIMUM_LOG_LEVEL = ROSINFO 
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
