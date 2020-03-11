@@ -12,7 +12,7 @@
 2) Example: Open a terminal and subscribe to x topic`
 3) Example: If in local mode, do x differently
 
-closes #[Insert your issue number here]
+closes #[Insert your issue number here and remove square brackets]
 
 The approval from all software team leads is necessary before merging.
 
