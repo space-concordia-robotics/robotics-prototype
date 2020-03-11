@@ -50,5 +50,8 @@ function getDeviceNameByMuxID (id) {
     case 'mux-2':
       return 'Science'
       break
+    case 'mux-3':
+      return 'PDS'
+      break;
   }
 }

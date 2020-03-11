@@ -120,7 +120,7 @@ $(document).ready(() => {
   function setMuxChannel (muxId) {
     deviceName = getDeviceNameByMuxID(muxId)
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole('Don\'t change the mux channel while a listener is open!')
+      rosLog(ROSINFO, 'Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
@@ -132,7 +132,7 @@ $(document).ready(() => {
             let serialType = getCookie('serialType')
 
             if (serialType == '') {
-              appendToConsole('Serial type not yet defined!')
+              rosLog(ROSINFO, 'Serial type not yet defined!')
               return
             }
 
@@ -167,13 +167,13 @@ $(document).ready(() => {
   function setSerialUart () {
     $('#serial-type').text('uart')
     setCookie('serialType', 'uart', 3)
-    appendToConsole('setting cookie to uart')
+    rosLog(ROSINFO, 'setting cookie to uart')
   }
 
   function setSerialUsb () {
     $('#serial-type').text('usb')
     setCookie('serialType', 'usb', 3)
-    appendToConsole('setting cookie to usb')
+    rosLog(ROSINFO, 'setting cookie to usb')
   }
 
 
