@@ -2,12 +2,13 @@
 import time
 import rospy
 from std_msgs.msg import Float32
+from geometry_msgs.msg import Point
 from decimal import *
 
 getcontext().prec = 4
 
 
-def shift_val(val, publisher, state_param_name, min_val, max_val, safe, speed):
+def shift_val(val, state_param_name, min_val, max_val, safe, speed):
     try:
       mode = rospy.get_param(state_param_name)
     except:
@@ -31,7 +32,6 @@ def shift_val(val, publisher, state_param_name, min_val, max_val, safe, speed):
       elif direction < 0:
         val -= speed
     
-    publisher.publish(val)
     return val
 
 def PDS_pub():
@@ -46,15 +46,26 @@ def PDS_pub():
   voltage_speed = Decimal((0, (0, 1), -1))#0.1
   voltage_current = voltage_safe
 
+  pub_temperature = rospy.Publisher('battery_temps', Point, queue_size=10)
+  
   # temperature values
   temperature_max = Decimal(100.0)
   temperature_min = Decimal(-20.0)
   temperature_safe = Decimal(50.0)
-  speed_temperature = Decimal(1)  
+  temperature_speed = Decimal(1)  
+  temperature1_current = temperature_safe 
+  temperature2_current = temperature_safe 
+  temperature3_current = temperature_safe 
 
   while not rospy.is_shutdown():
-    voltage_current = shift_val(voltage_current, pub_voltage, 'PDS_mock_mode_voltage', voltage_min, voltage_max, voltage_safe, voltage_speed)
-    
+    #shift values
+    voltage_current = shift_val(voltage_current, 'PDS_mock_mode_voltage', voltage_min, voltage_max, voltage_safe, voltage_speed)
+    #temperajhgt
+        
+    #publish values
+    pub_voltage.publish(voltage_current)    
+    pub_temperature.publish(Point(1, 2, 3))
+
     rate.sleep()
 
 if __name__ == '__main__':
