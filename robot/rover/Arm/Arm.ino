@@ -439,7 +439,10 @@ void loop() {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
                   UART_PORT.print("ARM $E,Error: requested motor ");
                   UART_PORT.print(i + 1);
-                  UART_PORT.println(" angle is not within angle limits.");
+                  UART_PORT.print(" angle is not within angle limits: ");
+                  UART_PORT.print(motorArray[i] -> minJointAngle);
+                  UART_PORT.print(" and ");
+                  UART_PORT.println(motorArray[i] -> maxJointAngle);
 #elif defined(DEBUG_MODE) || defined(USER_MODE)
                   // this is SUPER DUPER GROSS
                   int tempVal = i + 1;
