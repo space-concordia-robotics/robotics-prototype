@@ -27,10 +27,6 @@ function Direction(p1_lat, p1_lon, p2_lat, p2_lon) {
 }
 
 
-
-
-
-
 function Distance(p1_lat, p1_lon, p2_lat, p2_lon) {
 	/*
 	This is a function to calculate the distance between p1 (point1) to p2 (point2)
