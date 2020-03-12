@@ -1,80 +1,74 @@
-let rotationValue = 0;
-let zoomValue = 1;
-let x = 0
-let y = 0;
-let headingElt;
+let map_rotation_deg = 0;
+let zoom_value = 1;
+let rover_x = 0
+let rover_y = 0;
+let canvas_pos;
+let keys = {'r': 82, 'w': 87, 'a': 65, 's': 83, 'd': 68} //javascript keycodes
+
 
 function setup(){
     let canvas = createCanvas(450,300);
     canvas.parent('#canvasContainer');
+    canvas_pos = $('#defaultCanvas0').offset();
     angleMode(DEGREES);
 }
 
 
 function draw() {
-    // keycodes
-    // q = 81, e = 69, r = 82, w = 87, a = 65, s = 83, d = 68
-    if (keyIsDown(82)) {rotationValue = 0; zoomValue = 1; x = y = 0;} //reset position
-    if (keyIsDown(65)) {rotationValue += 1} // spin ccw
-    if (keyIsDown(68)) {rotationValue -= 1} // spin cw
-    adjustRotationValue(); // keep rotationValue within 0-360
-    if (keyIsDown(87)) {x+=sin(rotationValue) ; y+=cos(rotationValue);} // move forward
-    if (keyIsDown(83)) {x-=sin(rotationValue) ; y-=cos(rotationValue);} // move backward
+    if (keyIsDown(keys['r'])) {map_rotation_deg = 0; zoom_value = 1; rover_x = rover_y = 0;} //reset position
+    
+    if (keyIsDown(keys['a'])) {map_rotation_deg += 1} // spin ccw
+    if (keyIsDown(keys['d'])) {map_rotation_deg -= 1} // spin cw
+    adjustmap_rotation_deg(); // keep map_rotation_deg within 0-360
+    
+    if (keyIsDown(keys['w'])) {rover_x += sin(map_rotation_deg); rover_y += cos(map_rotation_deg);} // move forward
+    if (keyIsDown(keys['s'])) {rover_x -= sin(map_rotation_deg); rover_y -= cos(map_rotation_deg);} // move backward
     
     background(225); // draw background
-    translate(width/2, height/2) // make the (0,0) the center point
-    scale(zoomValue); // scale to given value
+    translate(width/2, height/2) // make the (0,0) point the center of canvas
+    scale(zoom_value); // zoom to given value
     
-    triangle(0,-15,10,10,-10,10); // draw triangle
+    triangle(0,-15,10,10,-10,10); // draw triangle rover
     
-    rotate(rotationValue); // rotate everything but triangle
-    translate(x, y); // move everything but triangle
+    rotate(map_rotation_deg); // rotate everything relative to rover
+    translate(rover_x, rover_y); // move everything relative to rover
     
     drawGrid(); // draw the grid for reference
-    //headingElt.html("Heading: " + -rotationValue + '&#176;'); // Set the heading value in the HTML
+    circle(0,0,10); // draw circle base station
 }
 
-// function to draw the line and values on canvas
-function drawGrid() {
-    push();
+// function to draw the lines and values on canvas
+function drawGrid(message) {
 	stroke(200);
 	fill(120);
-	for (var x=-width; x < width; x+=50) {
+	for (let x=-width; x < width; x+=50) {
 		line(x, -height, x, height);
 		text(x, x+1, 12);
 	}
-	for (var y=-height; y < height; y+=50) {
+	for (let y=-height; y < height; y+=50) {
 		line(-width, y, width, y);
 		text(y, 1, y+12);
 	}
-    pop();
 }
+
 
 // register mouse wheel event and do the zoom
 function mouseWheel(e) {
-    let newZoomValue = zoomValue + e.delta/500;
-    if (newZoomValue >= 0.5 && newZoomValue <= 2) {
-        zoomValue = newZoomValue;
-        return false;
+    if (winMouseX > canvas_pos['left'] && winMouseX < canvas_pos['left'] + width && winMouseY > canvas_pos['top'] && winMouseY < canvas_pos['top'] + height) {
+        let newzoom_value = zoom_value - e.delta/500;
+        if (newzoom_value >= 0.25 && newzoom_value <= 4) {
+            zoom_value = newzoom_value;
+            return false;
+        }
     }
 }
         
 // function which keeps heading within 0-360
-function adjustRotationValue() {
-    if (-rotationValue < 0) {
-        rotationValue -= 360;
+function adjustmap_rotation_deg() {
+    if (-map_rotation_deg < 0) {
+        map_rotation_deg -= 360;
     }
-    if (-rotationValue == 360) {
-        rotationValue += 360;
+    if (-map_rotation_deg == 360) {
+        map_rotation_deg += 360;
     } 
-}
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+}   
