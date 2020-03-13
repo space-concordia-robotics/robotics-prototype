@@ -107,7 +107,8 @@ function drawRover() {
 function mouseWheel(e) {
     if (winMouseX > canvasPosition['left'] && winMouseX < canvasPosition['left'] +
         width && winMouseY > canvasPosition['top'] && winMouseY < canvasPosition['top'] + height) {
-        let newZoomValue = zoomValue - e.delta / 500 // delta is too big for the scale() fn, so must be divided by 500 to reduce amount fo zoom per scroll
+        // delta is too big for the scale() fn, so must be divided by 500 to reduce amount of zoom per scroll
+        let newZoomValue = zoomValue - e.delta / 500
         if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
             zoomValue = newZoomValue
             return false
