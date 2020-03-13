@@ -1,4 +1,5 @@
-ROBOTICS_WS="~/Programming/robotics-prototype"
+#!/usr/bin/env bash
+ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
 BASE="$ROBOTICS_WS/robot/basestation"
 ROVER="$ROBOTICS_WS/robot/rover"
 ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
@@ -23,7 +24,7 @@ alias editnani="nano $NANORC"
 alias nani=". $NANORC"
 
 # to start the gui
-alias updateEnv="sh $BASE/env.sh > $BASE/static/js/env.js"
+alias updateEnv="bash $BASE/env.sh > $BASE/static/js/env.js"
 alias roverenv=". $ROBOTICS_WS/venv/bin/activate"
 alias startgui="updateEnv && roverenv && cd $BASE && python app.py"
 # we have to deactivate venv for this launch file to not break, bug to be resolved eventually

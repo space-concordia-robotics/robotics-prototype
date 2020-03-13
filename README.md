@@ -6,8 +6,35 @@ This repo contains the Robotics software team code.
 ## Contributing and Development Environment Instructions
 
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
-
+ 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
+
+
+## Automatic Setup
+**Notes:** 
+- Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
+- Don't forget the `--recursive` when cloning, or you might run into issues.
+- The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
+- You should be prompted once (maybe more) for sudo password.
+Apart from that, you can can sit back and relax :slightly_smiling_face:
+
+To use the automatic setup script you must first clone the repo using the command below. **Make sure that you do not have a directory named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.**
+```
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
+```
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
+If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
+
+When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
+```
+$ cd ~/Programming/robotics-prototype
+$ ./EnvironmentSetup.sh
+```
+
+## Manual setup
+If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
+
+
 ### Prerequisites
 Make sure you are using Ubuntu 16.04 (The ROS distribution we use doesn't support anything newer than 16.04).
 
@@ -34,7 +61,7 @@ $ git clone --recursive https://github.com/space-concordia-robotics/robotics-pro
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.**
+**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
 
 If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
@@ -75,7 +102,10 @@ To verify ROS-Kinetic has been successfully installed, you should do
 ```
 $ roscore
 ```
-To stop a running process in the command line, press `Ctrl-C`
+In the output you should see included: `* /rosdistro: kinetic`
+
+To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
+
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 ```
 $ sudo apt install ros-kinetic-rosbridge-suite
@@ -100,6 +130,7 @@ The first catkin workspace was automatically generated during the scripted insta
 You need to setup another catkin workspace in robot/rospackages
 ```
 $ cd ~/Programming/robotics-prototype/robot/rospackages
+$ rosdep install --from-paths src/ --ignore-src -r -y
 $ catkin_make
 ```
 ### .bashrc edits
@@ -133,14 +164,11 @@ $ python app.py
 ```
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 
-### ffmpeg
 
-For the features of capturing a snapshot and recording the camera streams we require `ffmpeg`:
-```
-sudo apt install ffmpeg
-```
+### Final Steps
+You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
+Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by running ./EnvironmentSetup.sh)
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
@@ -154,7 +182,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
 - `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
-- `cp branch-name-verification.sh .git/hooks/post-checkout`
+- `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 

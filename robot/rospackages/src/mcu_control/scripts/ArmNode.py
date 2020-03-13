@@ -17,7 +17,6 @@ mcuName = 'arm'
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
-
 requests = {
     'ping' : ['pong'],
     'who' : ['arm'],

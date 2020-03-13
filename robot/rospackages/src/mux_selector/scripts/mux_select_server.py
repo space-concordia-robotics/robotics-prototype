@@ -140,9 +140,8 @@ def mux_select_server():
         print('Exiting... Perhaps you mean\'t \'local\'?')
         sys.exit(0)
     if 'local' in non_ros_args:
-        print("Running in local mode")
         local = True
-    
+
     rospy.init_node('mux_select_server')
     s = rospy.Service('mux_select', SelectMux, handle_mux_select)
     startup_msg = "Ready to respond to mux select commands"
