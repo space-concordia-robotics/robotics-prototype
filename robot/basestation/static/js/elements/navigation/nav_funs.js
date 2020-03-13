@@ -3,7 +3,7 @@ This is a piece of code created by @Waleed-HM which I converted to JS
 */
 
 
-function direction_to_rover(p1_lat, p1_lon, p2_lat, p2_lon) {
+function directionToRover(p1_lat, p1_lon, p2_lat, p2_lon) {
     /*
     This is a function to calculate the direction from p1 (point1) to p2 (point2)
     It uses the Haverside formulas
@@ -23,17 +23,17 @@ function direction_to_rover(p1_lat, p1_lon, p2_lat, p2_lon) {
     let X = Math.cos(p2_lat) * Math.sin(delta_lon)
     let Y = Math.cos(p1_lat) * Math.sin(p2_lat) - Math.sin(p1_lat) * Math.cos(p2_lat) * Math.cos(delta_lon)
 
-    let Real_dir = Math.atan2(X, Y)
-    Real_dir = Real_dir * 180 / Math.PI
+    let realDir = Math.atan2(X, Y)
+    realDir = realDir * 180 / Math.PI
 
-    if (Real_dir < 0) {
-        Real_dir += 360
+    if (realDir < 0) {
+        realDir += 360
     }
-    return Real_dir;
+    return realDir;
 }
 
 
-function distance_to_rover(p1_lat, p1_lon, p2_lat, p2_lon) {
+function distanceToRover(p1_lat, p1_lon, p2_lat, p2_lon) {
     /*
     This is a function to calculate the distance between p1 (point1) to p2 (point2)
     It uses the Haverside formulas
