@@ -37,7 +37,8 @@ def attempt_usb(mcuName):
                 if mcuName == 'Astro':
                     ser.reset_input_buffer()
                     ser.reset_output_buffer()
-                return
+                return True
+    return False
 
 def attempt_uart(mcuName):
     startListening = time.time()
@@ -56,19 +57,20 @@ def attempt_uart(mcuName):
                     rospy.loginfo(mcuName+" MCU identified!")
                     rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                     # rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
-                    return
+                    return True
             else:
                 rospy.loginfo('got raw message: '+dat)
+    return False
 
 def clear_buffer():
     rospy.loginfo("clearing buffer...")
     while ser.in_waiting:
         ser.readline()
 
-def search_uart(baudrate, ports, mcuName):
+def search_uart(baudrate, mcuName):
     global ser
     port = 'ttySAC0'
-    rospy.loginfo('Attempting to connect to /dev/'+port)
+    rospy.loginfo('Attempting to connect to /dev/'+ port)
     rospy.loginfo('Using %d baud', baudrate)
     try:
         ser = serial.Serial('/dev/' + port, baudrate)
@@ -81,7 +83,10 @@ def search_uart(baudrate, ports, mcuName):
     rospy.loginfo("identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
     for i in range(COMMUNICATION_ATTEMPTS):
         rospy.loginfo('attempt #%d...', i+1)
-        attempt_uart(mcuName)
+        if attempt_uart(mcuName):
+            return True
+
+    return False
 
 def search_usb(baudrate, ports, mcuName):
     global ser
@@ -101,7 +106,9 @@ def search_usb(baudrate, ports, mcuName):
         rospy.loginfo("identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
         for i in range(COMMUNICATION_ATTEMPTS):
             rospy.loginfo('attempt #%d...', i+1)
-            attempt_usb(mcuName)
+            if attempt_usb(mcuName):
+                return True
+    return False
 
 def init_serial(baudrate, mcuName):
     cmd_args = rospy.myargv(argv=sys.argv)
@@ -129,10 +136,15 @@ def init_serial(baudrate, mcuName):
         sys.exit(0)
 
     startConnecting = time.time()
+
+    search_success = False
     if protocol == PROTOCOL_USB:
-        search_usb(19200 if mcuName == 'PDS' else baudrate, ports, mcuName)
+        search_success = search_usb(19200 if mcuName == 'PDS' else baudrate, ports, mcuName)
     elif protocol == PROTOCOL_UART:
-        search_uart(mcuName, ports, mcuName)
+        search_success = search_uart(baudrate, mcuName)
     else:
         rospy.logerr('Incorrect MCU connected, terminating listener')
         sys.exit(0)
+
+    if not search_success:
+        print("Search Unsuccessful")

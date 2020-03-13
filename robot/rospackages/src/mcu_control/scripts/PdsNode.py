@@ -5,7 +5,7 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, ser
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
 import rospy
 from std_msgs.msg import String, Float32
