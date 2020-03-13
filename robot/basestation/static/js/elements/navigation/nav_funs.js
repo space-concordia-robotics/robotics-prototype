@@ -1,9 +1,9 @@
 /*
-This is a piece of code created by Waleed which I converted to JS
+This is a piece of code created by @Waleed-HM which I converted to JS
 */
 
 
-function Direction(p1_lat, p1_lon, p2_lat, p2_lon) {
+function direction_to_rover(p1_lat, p1_lon, p2_lat, p2_lon) {
     /*
     This is a function to calculate the direction from p1 (point1) to p2 (point2)
     It uses the Haverside formulas
@@ -33,7 +33,7 @@ function Direction(p1_lat, p1_lon, p2_lat, p2_lon) {
 }
 
 
-function Distance(p1_lat, p1_lon, p2_lat, p2_lon) {
+function distance_to_rover(p1_lat, p1_lon, p2_lat, p2_lon) {
     /*
     This is a function to calculate the distance between p1 (point1) to p2 (point2)
     It uses the Haverside formulas
@@ -55,42 +55,3 @@ function Distance(p1_lat, p1_lon, p2_lat, p2_lon) {
     let C = 2 * Math.atan2(Math.sqrt(A), Math.sqrt(1 - A))
     return (R * C)
 }
-
-
-function Turning(Dest_dir, heading) {
-    /*
-    This function is to determine the needed adjustment in direction to go to destination
-    Input is the direction to destination and rover heading in degrees
-    Output is the needed adjustment in degrees
-    if the output is positive number, it means the rover needs to turn right
-    if the output is negative number, it means the rover needs to turn left
-    */
-
-    let shift = Dest_dir - heading
-    if (shift > 0 && shift < 180) {
-        return shift
-    } else if (shift > 180 && shift < 360) {
-        return (shift - 360)
-    } else if (shift < 0 && shift > -180) {
-        return shift
-    } else if (shift < -180 && shift > -360) {
-        return (shift + 360)
-    } else if (shift == 360 || shift == -360) {
-        return 0
-    }
-}
-
-
-//BS = {'lat':0 , 'lon':0}
-//Rover = {'lat':0 , 'lon':0}
-
-//BS['lat'] = float(input("Enter BS latitude :"))
-//BS['lon'] = float(input("Enter BS longitude :"))
-//Rover['lat'] = float(input("Enter Rover latitude :"))
-//Rover['lon'] = float(input("Enter Rover longitude :"))
-
-//Dir = Direction(BS['lat'],BS['lon'],Rover['lat'],Rover['lon'])
-//Dis = Distance(BS['lat'],BS['lon'],Rover['lat'],Rover['lon'])
-
-//print('The direction is : {} degrees'.format(round(Dir)))
-//print('The Distance is : {} meters'.format(round(Dis)))
