@@ -7,6 +7,7 @@
 - Example bug fixed.
 - Added example function with the responsibility of example.
 
+### Steps for Testing
 [Write all the steps necessary to test the feature(s)]
 1) Example: Start the GUI with `rosgui` and `startgui`
 2) Example: Open a terminal and subscribe to x topic`
