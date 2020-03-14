@@ -9,6 +9,13 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
 "
 
+APPEND_TO_HOSTS="
+
+172.16.1.30     nvidia
+127.0.0.1       nvidia
+172.16.1.70     Ninjaweeaboo
+"
+
 FINAL_MESSAGE="The script will now exit"
 
 REPO="/home/$USER/Programming/robotics-prototype"
@@ -86,16 +93,8 @@ catkin_make
 echo "$APPEND_TO_BASH" >> ~/.bashrc
 source ~/.bashrc
 
-
-# Run env.sh
-cd $REPO/robot/basestation
-./env.sh > static/js/env.js
-
-
-# Setup git hooks
-cd $REPO
-cp commit-message-hook.sh .git/hooks/prepare-commit-msg
-cp branch_name_verification_hook.py .git/hooks/post-checkout
+# Edit /etc/hosts file for rover connections
+sudo echo "APPEND_TO_HOSTS" >> /etc/hosts
 
 # Setup systemd services
 cd $REPO/robot/rover
