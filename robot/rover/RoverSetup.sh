@@ -59,7 +59,8 @@ then
 	source ~/.bashrc
 
     sudo apt install ros-kinetic-rosbridge-suite -y
-
+    sudo rosdep fix-permissions
+    rosdep update
 elif [$ROS_VERSION != "kinetic"]
 then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
