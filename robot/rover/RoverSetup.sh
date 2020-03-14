@@ -3,17 +3,9 @@
 
 APPEND_TO_BASH="
 
-. ~/Programming/robotics-prototype/venv/bin/activate
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
-"
-
-APPEND_TO_HOSTS="
-
-172.16.1.30     nvidia
-127.0.0.1       nvidia
-172.16.1.70     Ninjaweeaboo
 "
 
 FINAL_MESSAGE="The script will now exit"
@@ -38,15 +30,10 @@ sudo apt update -y
 sudo apt install python3.6 python3.6-venv git nodejs npm openssh-server -y
 sudo ufw allow ssh
 
-# Setup venv
-cd $REPO
-python3.6 -m venv venv
-source venv/bin/activate
-
 # Install Requirements
+cd $REPO
 pip install -U pip
 pip install -r requirements.txt -r requirements-dev.txt
-
 
 # Setup python and allow for module imports from within repo
 python setup.py develop
@@ -92,9 +79,6 @@ catkin_make
 # Makes your terminal start in (venv)
 echo "$APPEND_TO_BASH" >> ~/.bashrc
 source ~/.bashrc
-
-# Edit /etc/hosts file for rover connections
-sudo echo "APPEND_TO_HOSTS" >> /etc/hosts
 
 # Setup systemd services
 cd $REPO/robot/rover
