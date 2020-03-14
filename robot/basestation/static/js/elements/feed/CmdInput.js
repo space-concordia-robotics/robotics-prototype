@@ -2,7 +2,7 @@ $(document).ready(() => {
   const send_cmd = $('#send-serial-cmd')
   const cmd_input = $('#serial-cmd-input')
   const INVALID_CMD_MSG = 'invalid command, please check input and try again'
-  const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, IK and PDS'
+  const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, science and PDS'
 
   // Get full command and split into its prefix and command to send to module
   function getCMD() {
