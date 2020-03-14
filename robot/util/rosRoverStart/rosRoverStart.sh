@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-HOME="/home/$USER"
+HOME="/home/nvidia"
 REPO_HOME="$HOME/Programming/robotics-prototype"
 ETHERNET_CONFIG_STATUS="$HOME/configEthernet/status_done"
 #CATKIN_WS_SETUP="$HOME/catkin_ws/devel/setup.bash" # catkin ws only for isolated prototyping
