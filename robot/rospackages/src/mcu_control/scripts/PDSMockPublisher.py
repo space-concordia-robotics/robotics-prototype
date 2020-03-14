@@ -36,7 +36,6 @@ def shift_val(val, state_param_name, min_val, max_val, safe, speed):
 
 
 def PDS_pub():
-    pub_voltage = rospy.Publisher('battery_voltage', Float32, queue_size=10)
     rospy.init_node('PDS_mock_pub', anonymous=True)
     rate = rospy.Rate(10)  #hz
 
@@ -46,8 +45,7 @@ def PDS_pub():
     voltage_safe = Decimal(15.0)
     voltage_speed = Decimal((0, (0, 1), -1))  #0.1
     voltage_current = voltage_safe
-
-    pub_temperature = rospy.Publisher('battery_temps', Point, queue_size=10)
+    pub_voltage = rospy.Publisher('battery_voltage', Float32, queue_size=10)
 
     # temperature values
     temperature_max = Decimal(100.0)
@@ -57,6 +55,7 @@ def PDS_pub():
     temperature1_current = temperature_safe
     temperature2_current = temperature_safe
     temperature3_current = temperature_safe
+    pub_temperature = rospy.Publisher('battery_temps', Point, queue_size=10)
 
     while not rospy.is_shutdown():
         #shift values
