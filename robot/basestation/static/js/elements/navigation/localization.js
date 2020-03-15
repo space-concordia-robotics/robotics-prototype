@@ -42,7 +42,6 @@ let sketch = function(sketch) {
     sketch.setup = function() {
         canvas = sketch.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas.parent('#canvasContainer')
-        canvasPosition = $('#defaultCanvas0').offset()
         sketch.angleMode(sketch.DEGREES) // makes p5.js use DEG instead of RAD
     }
 
@@ -105,16 +104,14 @@ let sketch = function(sketch) {
     }
 
     // register mouse wheel event and do the zoom
-    function mouseWheel(e) {
-        if (sketch.winMouseX > canvasPosition['left'] && sketch.winMouseX < canvasPosition['left'] +
-            sketch.width && sketch.winMouseY > canvasPosition['top'] && sketch.winMouseY < canvasPosition['top'] + sketch.height) {
-            // delta is too big for the scale() function, so must be divided by 500 to reduce amount of zoom per scroll
-            let newZoomValue = zoomValue - e.delta / 500
-            if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
-                zoomValue = newZoomValue
-                return false
-            }
+    sketch.mouseWheel = function(e) {
+      if (sketch.mouseX > 0 && sketch.mouseX < sketch.width && sketch.mouseY > 0 && sketch.mouseY < sketch.height) {
+        let newZoomValue = zoomValue - e.delta / 500
+        if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
+            zoomValue = newZoomValue
+            return false
         }
+      }
     }
 
 
