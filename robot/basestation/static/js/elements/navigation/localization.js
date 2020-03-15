@@ -4,9 +4,6 @@ I recommend using the reference: https://p5js.org/reference/#/p5/
 before doing any work on this script as it will greatly facilitate the process.
 */
 
-
-
-
 $(document).ready(() => {
     myp5 = new p5(sketch)
 })
@@ -78,9 +75,6 @@ let sketch = function(sketch) {
     }
 
     // function to draw the lines and values on canvas
-    // this grid can be drawn of any size, doesn't have to follow canvas values
-    // i.e. we can make it so that 10px = 1m and make the grid go from -1km to 1km (-10000 to 10000 pixels)
-    // shouldn't forget to adjust the scaling min/max so the whole grid can fit into the small canvas if needed
     function drawGrid(message) {
         sketch.stroke(200)
         sketch.fill(120)
@@ -94,15 +88,6 @@ let sketch = function(sketch) {
         }
     }
 
-    function drawRover() {
-        sketch.push()
-        sketch.translate(roverX, roverY)
-        sketch.rotate(roverHeading)
-        // 3 points (x, y, x, y, x ,y)
-        sketch.triangle(0, -15, 10, 10, -10, 10)
-        sketch.pop()
-    }
-
     // register mouse wheel event and do the zoom
     sketch.mouseWheel = function(e) {
       if (sketch.mouseX > 0 && sketch.mouseX < sketch.width && sketch.mouseY > 0 && sketch.mouseY < sketch.height) {
@@ -114,6 +99,15 @@ let sketch = function(sketch) {
       }
     }
 
+    // draws rover at the apropriate coordinates and heading
+    function drawRover() {
+        sketch.push()
+        sketch.translate(roverX, roverY)
+        sketch.rotate(roverHeading)
+        // 3 points (x, y, x, y, x ,y)
+        sketch.triangle(0, -15, 10, 10, -10, 10)
+        sketch.pop()
+    }
 
     // function which converts the values into something usable by the canvas
     function adjustValuesToCartesian(roverLat, roverLong) {
