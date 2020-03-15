@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import robot.basestation.app as app
-from robot.basestation.app import run_shell
+from robot.util.utils import run_shell
 import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
