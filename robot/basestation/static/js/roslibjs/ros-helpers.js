@@ -206,7 +206,9 @@ function initRosWeb () {
           textColor('#battery-voltage', 'white')
         }
 
-        if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+        if ($('#battery-voltage').attr('acceptable') === '0') {
+          $('#battery-voltage').attr('acceptable', '1')
+        }
       }
     } else {
       $('#battery-voltage').text('N/A')
