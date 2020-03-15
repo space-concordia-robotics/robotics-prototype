@@ -34,7 +34,7 @@ let sketch = function(sketch) {
         roverLat = message.x
         roverLong = message.y
         roverHeading = message.z
-        adjustValuesToCartesian(roverLat, roverLong, roverHeading)
+        adjustValuesToCartesian(roverLat, roverLong)
     })
 
 
@@ -119,7 +119,7 @@ let sketch = function(sketch) {
 
 
     // function which converts the values into something usable by the canvas
-    function adjustValuesToCartesian(roverLat, roverLong, roverHeading) {
+    function adjustValuesToCartesian(roverLat, roverLong) {
         let direction = directionToRover(baseLat, baseLong, roverLat, roverLong) // angle in degrees
         let distance = distanceToRover(baseLat, baseLong, roverLat, roverLong) // distance in meters
 
