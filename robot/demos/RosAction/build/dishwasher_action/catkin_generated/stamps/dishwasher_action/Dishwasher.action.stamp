@@ -1,8 +1,0 @@
-#goal definition
-int32 dirtyDishes
----
-#result definition
-string dishesWashed
----
-#feedback definition
-float32 percentComplete

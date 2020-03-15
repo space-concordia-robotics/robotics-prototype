@@ -27,3 +27,5 @@
 **/voltage_final.csv
 **/rover_stream
 **/emails.txt
+**/robot/demos/RosAction/build/
+**/robot/demos/RosAction/devel/

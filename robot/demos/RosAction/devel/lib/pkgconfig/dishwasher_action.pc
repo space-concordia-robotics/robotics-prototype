@@ -1,8 +1,0 @@
-prefix=/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/devel
-
-Name: dishwasher_action
-Description: Description of dishwasher_action
-Version: 0.0.0
-Cflags: -I/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/devel/include
-Libs: -L${prefix}/lib 
-Requires: actionlib_msgs

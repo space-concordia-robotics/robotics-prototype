@@ -1,2 +1,0 @@
-actionlib_tutorials:dishwasher_action
--DCATKIN_DEVEL_PREFIX=/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/devel -DCMAKE_INSTALL_PREFIX=/home/koa/Desktop/ConcordiaRobotics/robotics-prototype/robot/demos/RosAction/install -G Unix Makefiles
