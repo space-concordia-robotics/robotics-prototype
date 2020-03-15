@@ -8,6 +8,10 @@ before doing any work on this script as it will greatly facilitate the process.
 
 
 $(document).ready(() => {
+    myp5 = new p5(sketch)
+})
+
+let sketch = function(sketch) {
     roverHeading = 0
     roverX = 0
     roverY = 0
@@ -19,58 +23,58 @@ $(document).ready(() => {
         's': 83,
         'd': 68
     }
-    PIXELS_PER_METER = 5
-    baseLat = $('#antenna-latitude').text()
-    baseLong = $('#antenna-longitude').text()
+
     MAX_ZOOM = 2
     MIN_ZOOM = 0.15
     CANVAS_HEIGHT = 300
     CANVAS_WIDTH = 450
-
+    baseLat = 0
+    baseLong = 0
     rover_position_listener.subscribe(function(message) {
         roverLat = message.x
         roverLong = message.y
         roverHeading = message.z
+        adjustValuesToCartesian(roverLat, roverLong, roverHeading)
     })
 
 
 
-    function setup() {
-        canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
+    sketch.setup = function() {
+        canvas = sketch.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas.parent('#canvasContainer')
         canvasPosition = $('#defaultCanvas0').offset()
-        angleMode(DEGREES) // makes p5.js use DEG instead of RAD
+        sketch.angleMode(sketch.DEGREES) // makes p5.js use DEG instead of RAD
     }
 
-    function draw() {
+    sketch.draw = function() {
         // all of the manual controls
-        if (keyIsDown(keys['r'])) { //reset position
-            roverHeading = 0;
-            zoomValue = 1;
-            roverX = roverY = 0;
+        if (sketch.keyIsDown(keys['r'])) { //reset position
+            roverHeading = 0
+            zoomValue = 1
+            roverX = roverY = 0
         }
-        if (keyIsDown(keys['a'])) { // spin ccw
+        if (sketch.keyIsDown(sketch.LEFT_ARROW)) { // spin ccw
             roverHeading -= 1
         }
-        if (keyIsDown(keys['d'])) { // spin cw
+        if (sketch.keyIsDown(sketch.RIGHT_ARROW)) { // spin cw
             roverHeading += 1
         }
-        if (keyIsDown(keys['w'])) { // move forward
-            roverX += sin(roverHeading);
-            roverY -= cos(roverHeading);
+        if (sketch.keyIsDown(sketch.UP_ARROW)) { // move forward
+            roverX += sketch.sin(roverHeading)
+            roverY -= sketch.cos(roverHeading)
         }
-        if (keyIsDown(keys['s'])) { // move backward
-            roverX -= sin(roverHeading);
-            roverY += cos(roverHeading);
+        if (sketch.keyIsDown(sketch.DOWN_ARROW)) { // move backward
+            roverX -= sketch.sin(roverHeading)
+            roverY += sketch.cos(roverHeading)
         }
 
-        background(225)
-        translate(width / 2, height / 2)
+        sketch.background(225)
+        sketch.translate(sketch.width / 2, sketch.height / 2)
 
-        scale(zoomValue)
+        sketch.scale(zoomValue)
         drawGrid()
         // (x,y,diameter)
-        circle(0, 0, 10)
+        sketch.circle(0, 0, 10)
         drawRover()
     }
 
@@ -79,32 +83,31 @@ $(document).ready(() => {
     // i.e. we can make it so that 10px = 1m and make the grid go from -1km to 1km (-10000 to 10000 pixels)
     // shouldn't forget to adjust the scaling min/max so the whole grid can fit into the small canvas if needed
     function drawGrid(message) {
-        stroke(200)
-        fill(120)
+        sketch.stroke(200)
+        sketch.fill(120)
         for (let x = -10000; x < 10000; x += 100) {
-            line(x, -10000, x, 10000)
-            text(x, x + 1, 12)
+            sketch.line(x, -10000, x, 10000)
+            sketch.text(x, x + 1, 12)
         }
         for (let y = -10000; y < 10000; y += 100) {
-            line(-10000, y, 10000, y)
-            text(y, 1, y + 12)
+            sketch.line(-10000, y, 10000, y)
+            sketch.text(y, 1, y + 12)
         }
     }
 
     function drawRover() {
-        //checkRoverPosition()
-        push()
-        translate(roverX, roverY)
-        rotate(roverHeading)
+        sketch.push()
+        sketch.translate(roverX, roverY)
+        sketch.rotate(roverHeading)
         // 3 points (x, y, x, y, x ,y)
-        triangle(0, -15, 10, 10, -10, 10)
-        pop()
+        sketch.triangle(0, -15, 10, 10, -10, 10)
+        sketch.pop()
     }
 
     // register mouse wheel event and do the zoom
     function mouseWheel(e) {
-        if (winMouseX > canvasPosition['left'] && winMouseX < canvasPosition['left'] +
-            width && winMouseY > canvasPosition['top'] && winMouseY < canvasPosition['top'] + height) {
+        if (sketch.winMouseX > canvasPosition['left'] && sketch.winMouseX < canvasPosition['left'] +
+            sketch.width && sketch.winMouseY > canvasPosition['top'] && sketch.winMouseY < canvasPosition['top'] + sketch.height) {
             // delta is too big for the scale() function, so must be divided by 500 to reduce amount of zoom per scroll
             let newZoomValue = zoomValue - e.delta / 500
             if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
@@ -114,21 +117,13 @@ $(document).ready(() => {
         }
     }
 
-    // function that gets the data from the rover_position topic
-    function checkRoverPosition() {
-        let roverLat = $('#rover-latitude').text()
-        let roverLong = $('#rover-longitude').text()
-        roverHeading = $('#rover-heading').text()
-
-        adjustValuesToCartesian(roverLat, roverLong, roverHeading)
-    }
 
     // function which converts the values into something usable by the canvas
     function adjustValuesToCartesian(roverLat, roverLong, roverHeading) {
         let direction = directionToRover(baseLat, baseLong, roverLat, roverLong) // angle in degrees
         let distance = distanceToRover(baseLat, baseLong, roverLat, roverLong) // distance in meters
 
-        roverX = PIXELS_PER_METER * distance * Math.cos(direction)
-        roverY = PIXELS_PER_METER * distance * Math.sin(direction)
+        roverX = distance * Math.cos(direction)
+        roverY = distance * Math.sin(direction)
     }
-})
+}
