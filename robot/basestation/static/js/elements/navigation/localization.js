@@ -34,8 +34,6 @@ let sketch = function(sketch) {
         adjustValuesToCartesian(roverLat, roverLong)
     })
 
-
-
     sketch.setup = function() {
         canvas = sketch.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas.parent('#canvasContainer')
@@ -90,13 +88,13 @@ let sketch = function(sketch) {
 
     // register mouse wheel event and do the zoom
     sketch.mouseWheel = function(e) {
-      if (sketch.mouseX > 0 && sketch.mouseX < sketch.width && sketch.mouseY > 0 && sketch.mouseY < sketch.height) {
-        let newZoomValue = zoomValue - e.delta / 500
-        if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
-            zoomValue = newZoomValue
-            return false
+        if (sketch.mouseX > 0 && sketch.mouseX < sketch.width && sketch.mouseY > 0 && sketch.mouseY < sketch.height) {
+            let newZoomValue = zoomValue - e.delta / 500
+            if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
+                zoomValue = newZoomValue
+                return false
+            }
         }
-      }
     }
 
     // draws rover at the apropriate coordinates and heading
