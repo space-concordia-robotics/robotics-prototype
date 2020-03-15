@@ -13,52 +13,16 @@ from flask import jsonify, request
 from robot.comms.connection import Connection
 import time
 import datetime
+import robot.util.utils as utils
+from robot.util.utils import run_shell
 from shlex import split
 
 import robot.basestation.stream_capture as stream_capture
-from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, is_recording_stream, stream_capture
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 
 app = flask.Flask(__name__)
-
-def run_shell(cmd, args=""):
-    """Run script command supplied as string.
-
-    Returns tuple of output and error.
-    """
-    cmd_list = cmd.split()
-    arg_list = args.split()
-
-    print("arg_list:", arg_list)
-
-    for arg in arg_list:
-        cmd_list.append(str(arg))
-
-    print("cmd_list:", cmd_list)
-
-    process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
-    output, error = process.communicate()
-
-    return output, error
-
-def get_pid(keyword):
-    cmd = "ps aux"
-    output, error = run_shell(cmd)
-
-    ting = output.decode().split('\n')
-
-    #print(ting)
-
-    for line in ting:
-        if keyword in line:
-            #print("FOUND PID:", line)
-            words = line.split()
-            print("PID:", words[1])
-
-            return words[1]
-
-    return -1
 
 # Once we launch this, this will route us to the "/" page or index page and
 # automatically render the Robot GUI
@@ -83,16 +47,15 @@ def pds():
     """PDS page."""
     return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/stream")
+def stream():
+    """Streams page."""
+    return flask.render_template("pages/Streams.html", roverIP=fetch_ros_master_ip())
 
 # routes for science page
 @app.route('/science/numSections')
 def numSections():
     return '4'
-
-@app.route("/stream")
-def stream():
-    """Stream page."""
-    return flask.render_template("pages/Stream.html", roverIP=fetch_ros_master_ip())
 
 @app.route('/science/initialSection')
 def initialSection():
@@ -205,41 +168,34 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
-# capture image
-@app.route("/capture_image", methods=["POST", "GET"])
+@app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
-    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
-    #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
-    # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
-    # p2 = subprocess.Popen(split("wc -l"), stdin=p1.stdout)
-    # output, error = p2.communicate()
-    output, error = run_shell('ls')
-    output = output.decode()
-    print('output:', output)
-    i = 0
+    stream_url = request.args['stream_url']
+    success, message = stream_capture(stream_url)
+    return jsonify(success=success, msg=message)
 
-    if 'img' in output:
-        i = output.rfind('img')
-        i = int(output[i + 3]) + 1 # shift by 'img'
-        print('i', i)
+@app.route("/initiate_feed_recording/", methods=["POST", "GET"])
+def initiate_feed_recording():
+    stream_url = request.args['stream_url']
+    if is_recording_stream(stream_url):
+        return jsonify(success=False, msg="Stream is already recording")
+    else:
+        success, message = start_recording_feed(stream_url);
+        return jsonify(success=success, msg=message)
 
-    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 img" + str(i) + ".jpg")
-    msg = "success"
+@app.route("/stop_feed_recording/", methods=["POST", "GET"])
+def stop_feed_recording():
+    stream_url = request.args['stream_url']
+    if is_recording_stream(stream_url):
+        success, message = stop_recording_feed(stream_url)
+        return jsonify(success=success, msg=message)
+    else:
+        return jsonify(success=False, msg="Attempted to stop stream that was not recording")
 
-    if error:
-        msg = "F"
-
-    print('msg', msg)
-
-    return jsonify(msg=msg)
-
-@app.route("/initiate_feed_recording/<stream>", methods=["POST", "GET"])
-def initiate_feed_recording(stream):
-    return start_recording_feed(stream)
-
-@app.route("/stop_feed_recording/<stream>", methods=["POST", "GET"])
-def stop_feed_recording(stream):
-    return stop_recording_feed(stream)
+@app.route("/is_recording/", methods=["POST", "GET"])
+def is_recording():
+    stream_url = request.args['stream_url']
+    return jsonify(is_recording=is_recording_stream(stream_url))
 
 if __name__ == "__main__":
 
@@ -247,12 +203,6 @@ if __name__ == "__main__":
     # the following two are used for UDP based communication with the Connection class
     global local
     local = False
-    # print("fetch_ros_master_ip:", fetch_ros_master_ip())
-    #
-    # # either local or competition
-    # ros_master_ip = fetch_ros_master_ip()
-    # if ros_master_ip in ["127.0.0.1", "localhost"]
-    #     local = True
 
     app.run(debug=True, host='0.0.0.0')
     # add param `host= '0.0.0.0'` if you want to run on your machine's IP address

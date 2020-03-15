@@ -12,8 +12,8 @@ install:
   - pip install -e .
 
 script:
-  # - cd tests/unit/ # unnecessary
-  - pytest
+  # run all tests even if errors appear
+  - pytest --continue-on-collection-errors
 
 # bypass submodules because gitlab requires authentication for pull
 git:

@@ -236,3 +236,25 @@ html, body {
 .pds-stats {
   color: white;
 }
+
+/* Camera */
+.camera-head {
+  border-color: black;
+}
+
+.camera-btn {
+  background-color: #445B7B;
+  border-color: black;
+}
+
+.camera-label {
+  background-color: #EFEFEF;
+}
+
+.camera-name {
+  color: black;
+}
+
+.camera-stream {
+  background-color: #3D7F7F;
+}

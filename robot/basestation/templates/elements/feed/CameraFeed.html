@@ -1,60 +1,19 @@
-<!-- @TODO: parametrize the title ("Arm Vision" doesn't make sense as a title for the science/rover pages) -->
-<h5 class="container-header">Arm Vision</h5>
-    <div class="row">
-        <div class="col-md-2">
-            <h4><span class="badge badge-primary">Local Streams</span></h4>
-        </div>
-        <div class="col-md-8">
-            <select id="local-stream-select">
-                <option>/dev/video0</option>
-                <option>/dev/video1</option>
-                <option>/dev/video2</option>
-                <option>/dev/video3</option>
-                <option>/dev/video4</option>
-            </select>
-            <button title="ON" id="local-stream-on-btn" type="button" class="btn btn-primary btn-md">
-                <strong>ON</strong>
-            </button>
-            <button title="OFF" id="local-stream-off-btn" type="button" class="btn btn-primary btn-md">
-                <strong>OFF</strong>
-            </button>
-        </div>
+<div class="camera-panel container-fluid" rotation=0>
+<div class="camera-head row">
+    <img class="camera-btn camera-rotl col-1" src="../../../static/img/camera/rotate_left.png"/>
+    <img class="camera-btn camera-rotr col-1" src="../../../static/img/camera/rotate_left.png"/>
+    <img class="camera-btn camera-screenshot col-1" src="../../../static/img/camera/save_screenshot.png"/>
+    <img class="camera-btn camera-recording col-1" recording="false" src="../../../static/img/camera/record_off.png"/>
+    <div class="camera-label col-5">
+        <h3 class="camera-name" stream="">No Stream</h3>
     </div>
-<img id="camera-feed" src="http://{{ roverIP }}:8080/stream?topic=/video0Cam/image_raw" class="mx-auto d-block" alt="Arm Camera Stream Offline" onerror="this.onerror=null;this.src='../static/images/stream-offline.jpg';"/>
-<div class="container">
-  <div class="row">
-    <div class="col-md-4">
-      <span>
-          <strong class="title">Arm/Science Stream</strong>
-      </span>
-      <div class="form-check checkbox-slider--a checkbox-slider-lg">
-          <label>
-              <input id="arm-science-camera-stream-btn" type="checkbox">
-              <span></span>
-          </label>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <span>
-          <strong class="title">Front Rover Stream</strong>
-      </span>
-      <div class="form-check checkbox-slider--a checkbox-slider-lg">
-          <label>
-              <input id="front-camera-stream-btn" type="checkbox">
-              <span></span>
-          </label>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <span>
-          <strong class="title">Rear Rover Stream</strong>
-      </span>
-      <div class="form-check checkbox-slider--a checkbox-slider-lg">
-          <label>
-            <input id="rear-camera-stream-btn" type="checkbox">
-            <span></span>
-          </label>
-      </div>
-    </div>
-  </div>
+          <button class="camera-select dropdown dropdown-toggle col-2" type="button" data-toggle="dropdown" aria-expanded="false">Stream Select
+            <span class="caret"></span></button>
+            <ul class="camera-selections dropdown-menu">
+            </ul>
+    <img class="camera-btn camera-power col-1" power-on="false" src="../../../static/img/camera/power_off.png"/>
+</div>
+<div class="camera-stream row">
+        <img class="camera-feed" src="../../../static/img/camera/stream_offline.png" >{% include 'elements/controls/CameraControls.html' %}</img>
+</div>
 </div>
