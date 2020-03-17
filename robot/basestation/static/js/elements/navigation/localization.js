@@ -158,9 +158,9 @@ let sketch = function(sketch) {
     // implements manual controls.
     function controls() {
         if (sketch.keyIsDown(keys['r'])) { //reset position
-            roverHeading = 0
+            //roverHeading = 0
             zoomValue = 1
-            roverX = roverY = 0
+            //roverX = roverY = 0
             dragDiffX = dragDiffY = 0
             sketch.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         }
