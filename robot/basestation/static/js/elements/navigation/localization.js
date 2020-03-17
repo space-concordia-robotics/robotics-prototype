@@ -44,7 +44,6 @@ let sketch = function(sketch) {
     }
 
     sketch.draw = function() {
-
         if (sketch.keyIsPressed == true) {
             controls()
         }
@@ -53,9 +52,10 @@ let sketch = function(sketch) {
         drawResizeButton()
         sketch.translate(sketch.width / 2 + dragDiffX, sketch.height / 2 + dragDiffY)
         sketch.scale(zoomValue)
+        sketch.stroke(200)
+        sketch.fill(120)
         drawGrid()
-        // (x, y, diameter)
-        sketch.circle(0, 0, 10)
+        drawBase()
         drawRover()
     }
 
@@ -63,20 +63,25 @@ let sketch = function(sketch) {
     FUNCTIONS THAT DRAW THINGS
     */
 
+    function drawBase() {
+        sketch.push()
+        sketch.scale(1 / zoomValue)
+        // (x, y, diameter)
+        sketch.circle(0, 0, 10)
+        sketch.pop()
+    }
+
     function drawRover() {
         sketch.push()
         sketch.translate(roverX, roverY)
         sketch.rotate(roverHeading)
+        sketch.scale(1 / zoomValue)
         // 3 points (x, y, x, y, x ,y)
         sketch.triangle(0, -15, 10, 10, -10, 10)
         sketch.pop()
     }
 
     function drawGrid() {
-        sketch.push()
-        sketch.stroke(200)
-        sketch.fill(120)
-
         for (let x = -10000; x < 10000; x += 100) {
             sketch.line(x, -10000, x, 10000)
             sketch.text(x, x + 1, 12)
@@ -86,8 +91,6 @@ let sketch = function(sketch) {
             sketch.line(-10000, y, 10000, y)
             sketch.text(y, 1, y + 12)
         }
-
-        sketch.pop()
     }
 
     function drawResizeButton() {
@@ -128,7 +131,7 @@ let sketch = function(sketch) {
     // resize canvas
     sketch.mouseClicked = function() {
         let r = 10 // button radius
-        let d = sketch.dist(sketch.mouseX, sketch.mouseY, sketch.width, sketch.height)
+        let d = sketch.dist(sketch.mouseX, sketch.mouseY, sketch.width, sketch.height) // distance between mouse and lower right corner
 
         if (d < r) {
             toggle = !toggle
@@ -137,7 +140,6 @@ let sketch = function(sketch) {
         if (toggle) {
             sketch.resizeCanvas(sketch.mouseX, sketch.mouseY)
         }
-        return false
     }
 
 
@@ -150,6 +152,7 @@ let sketch = function(sketch) {
         let direction = directionToRover(baseLat, baseLong, roverLat, roverLong) // angle in degrees
         let distance = distanceToRover(baseLat, baseLong, roverLat, roverLong) // distance in meters
 
+        // currently 1px = 1m
         roverX = distance * Math.cos(direction)
         roverY = distance * Math.sin(direction)
     }
@@ -157,9 +160,7 @@ let sketch = function(sketch) {
     // implements manual controls.
     function controls() {
         if (sketch.keyIsDown(keys['r'])) { //reset position
-            //roverHeading = 0
             zoomValue = 1
-            //roverX = roverY = 0
             dragDiffX = dragDiffY = 0
             sketch.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         }
