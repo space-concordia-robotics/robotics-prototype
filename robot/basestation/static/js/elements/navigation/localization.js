@@ -12,6 +12,8 @@ let sketch = function(sketch) {
     roverHeading = 0
     roverX = 0
     roverY = 0
+    dragDiffX = 0
+    dragDiffY = 0
     zoomValue = 1
     keys = { //javascript keycodes
         'r': 82,
@@ -20,6 +22,7 @@ let sketch = function(sketch) {
         's': 83,
         'd': 68
     }
+    toggle = false
 
     MAX_ZOOM = 2
     MIN_ZOOM = 0.15
@@ -48,7 +51,7 @@ let sketch = function(sketch) {
 
         sketch.background(225)
         drawResizeButton()
-        sketch.translate(sketch.width / 2, sketch.height / 2)
+        sketch.translate(sketch.width / 2 + dragDiffX, sketch.height / 2 + dragDiffY)
         sketch.scale(zoomValue)
         drawGrid()
         // (x, y, diameter)
@@ -89,8 +92,12 @@ let sketch = function(sketch) {
 
     function drawResizeButton() {
         sketch.push()
-        sketch.fill(250, 0, 0)
-        sketch.arc(sketch.width, sketch.height, 20, 20, 180, 270, sketch.PIE)
+        if (toggle) {
+            sketch.fill(0, 250, 0) // rgb
+        } else {
+            sketch.fill(250, 0, 0) // rgb
+        }
+        sketch.arc(sketch.width, sketch.height, 20, 20, 180, 270, sketch.PIE) // (x, y, width, height, start, stop, mode)
         sketch.pop()
     }
 
@@ -105,24 +112,35 @@ let sketch = function(sketch) {
             let newZoomValue = zoomValue - e.delta / 500
             if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
                 zoomValue = newZoomValue
-                return false
+
             }
+            return false
         }
     }
 
-    // checks if mouse is being dragged accross screen
+    // drag canvas view
     sketch.mouseDragged = function() {
+        if (sketch.mouseX > 0 && sketch.mouseX < sketch.width - 10 && sketch.mouseY > 0 && sketch.mouseY < sketch.height - 10) {
+            dragDiffX += sketch.movedX
+            dragDiffY += sketch.movedY
+        }
+    }
 
-        // canvas resize
-        let r = 10
+    // resize canvas
+    sketch.mouseClicked = function() {
+        let r = 10 // button radius
         let d = sketch.dist(sketch.mouseX, sketch.mouseY, sketch.width, sketch.height)
+
         if (d < r) {
-            sketch.mouseReleased = function() {
-                sketch.resizeCanvas(sketch.mouseX, sketch.mouseY)
-            }
+            toggle = !toggle
+        }
+
+        if (toggle) {
+            sketch.resizeCanvas(sketch.mouseX, sketch.mouseY)
         }
         return false
     }
+
 
     /* ----------------------------------------
     UTILITY FUNCTIONS
@@ -143,6 +161,8 @@ let sketch = function(sketch) {
             roverHeading = 0
             zoomValue = 1
             roverX = roverY = 0
+            dragDiffX = dragDiffY = 0
+            sketch.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         }
         if (sketch.keyIsDown(sketch.LEFT_ARROW)) { // spin ccw
             roverHeading -= 1
