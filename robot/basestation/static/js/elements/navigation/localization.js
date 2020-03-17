@@ -31,8 +31,8 @@ let sketch = function(sketch) {
     baseLat = 0
     baseLong = 0
     rover_position_listener.subscribe(function(message) {
-        roverLat = message.x
-        roverLong = message.y
+        roverLong = message.x
+        roverLat = message.y
         roverHeading = message.z
         adjustValuesToCartesian(roverLat, roverLong)
     })
