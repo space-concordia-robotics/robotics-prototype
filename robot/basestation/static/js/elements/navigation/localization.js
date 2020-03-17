@@ -112,7 +112,6 @@ let sketch = function(sketch) {
             let newZoomValue = zoomValue - e.delta / 500
             if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
                 zoomValue = newZoomValue
-
             }
             return false
         }
