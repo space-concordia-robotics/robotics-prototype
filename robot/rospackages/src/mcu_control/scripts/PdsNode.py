@@ -205,9 +205,18 @@ def publish_pds_data(message):
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
             elif i < 10:
-                temp.x = float(dataPDS[7])
-                temp.y = float(dataPDS[8])
-                temp.z = float(dataPDS[9])
+                if float(dataPDS[7]) == 999.9:
+                    temp.x = 'N/A'
+                else:
+                    temp.x = float(dataPDS[7])
+                if float(dataPDS[8]) == 999.9:
+                    temp.y = 'N/A'
+                else:
+                    temp.y = float(dataPDS[8])
+                if float(dataPDS[9]) == 999.9:
+                    temp.z = 'N/A'
+                else:
+                    temp.z = float(dataPDS[9])
             else:
                 fanSpeeds.x = float(dataPDS[10])
                 fanSpeeds.y = float(dataPDS[11])
