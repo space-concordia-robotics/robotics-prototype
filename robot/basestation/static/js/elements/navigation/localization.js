@@ -8,20 +8,14 @@ $(document).ready(() => {
     myp5 = new p5(sketch)
 })
 
-let sketch = function(sketch) {
+let sketch = function(p) {
     roverHeading = 0
-    roverX = 0
+    roverX = 0 // cartesian coordinates of rover in pixels
     roverY = 0
     dragDiffX = 0
     dragDiffY = 0
     zoomValue = 1
-    keys = { //javascript keycodes
-        'r': 82,
-        'w': 87,
-        'a': 65,
-        's': 83,
-        'd': 68
-    }
+    r = 82 // JS keycode
     toggle = false
 
     MAX_ZOOM = 2
@@ -37,23 +31,23 @@ let sketch = function(sketch) {
         adjustValuesToCartesian(roverLat, roverLong)
     })
 
-    sketch.setup = function() {
-        canvas = sketch.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
+    p.setup = function() {
+        canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         canvas.parent('#canvasContainer')
-        sketch.angleMode(sketch.DEGREES) // makes p5.js use DEG instead of RAD
+        p.angleMode(p.DEGREES) // makes p5.js use DEG instead of RAD
     }
 
-    sketch.draw = function() {
-        if (sketch.keyIsPressed == true) {
+    p.draw = function() {
+        if (p.keyIsPressed) {
             controls()
         }
 
-        sketch.background(225)
+        p.background(225)
         drawResizeButton()
-        sketch.translate(sketch.width / 2 + dragDiffX, sketch.height / 2 + dragDiffY)
-        sketch.scale(zoomValue)
-        sketch.stroke(200)
-        sketch.fill(120)
+        p.translate(p.width / 2 + dragDiffX, p.height / 2 + dragDiffY)
+        p.scale(zoomValue)
+        p.stroke(200)
+        p.fill(120)
         drawGrid()
         drawBase()
         drawRover()
@@ -64,44 +58,42 @@ let sketch = function(sketch) {
     */
 
     function drawBase() {
-        sketch.push()
-        sketch.scale(1 / zoomValue)
-        // (x, y, diameter)
-        sketch.circle(0, 0, 10)
-        sketch.pop()
+        p.push()
+        p.scale(1 / zoomValue)
+        p.circle(0, 0, 10) // (x, y, diameter)
+        p.pop()
     }
 
     function drawRover() {
-        sketch.push()
-        sketch.translate(roverX, roverY)
-        sketch.rotate(roverHeading)
-        sketch.scale(1 / zoomValue)
-        // 3 points (x, y, x, y, x ,y)
-        sketch.triangle(0, -15, 10, 10, -10, 10)
-        sketch.pop()
+        p.push()
+        p.translate(roverX, roverY)
+        p.rotate(roverHeading)
+        p.scale(1 / zoomValue)
+        p.triangle(0, -15, 10, 10, -10, 10) // 3 points (x, y, x, y, x ,y)
+        p.pop()
     }
 
     function drawGrid() {
         for (let x = -10000; x < 10000; x += 100) {
-            sketch.line(x, -10000, x, 10000)
-            sketch.text(x, x + 1, 12)
+            p.line(x, -10000, x, 10000)
+            p.text(x, x + 1, 12)
         }
 
         for (let y = -10000; y < 10000; y += 100) {
-            sketch.line(-10000, y, 10000, y)
-            sketch.text(y, 1, y + 12)
+            p.line(-10000, y, 10000, y)
+            p.text(y, 1, y + 12)
         }
     }
 
     function drawResizeButton() {
-        sketch.push()
+        p.push()
         if (toggle) {
-            sketch.fill(0, 250, 0) // rgb
+            p.fill(0, 250, 0) // rgb
         } else {
-            sketch.fill(250, 0, 0) // rgb
+            p.fill(250, 0, 0) // rgb
         }
-        sketch.arc(sketch.width, sketch.height, 20, 20, 180, 270, sketch.PIE) // (x, y, width, height, start, stop, mode)
-        sketch.pop()
+        p.arc(p.width, p.height, 20, 20, 180, 270, p.PIE) // (x, y, width, height, start, stop, mode)
+        p.pop()
     }
 
 
@@ -110,8 +102,8 @@ let sketch = function(sketch) {
     */
 
     // register mouse wheel event and zoom accordingly
-    sketch.mouseWheel = function(e) {
-        if (sketch.mouseX > 0 && sketch.mouseX < sketch.width && sketch.mouseY > 0 && sketch.mouseY < sketch.height) {
+    p.mouseWheel = function(e) {
+        if (p.mouseX > 0 && p.mouseX < p.width && p.mouseY > 0 && p.mouseY < p.height) {
             let newZoomValue = zoomValue - e.delta / 500
             if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
                 zoomValue = newZoomValue
@@ -121,24 +113,24 @@ let sketch = function(sketch) {
     }
 
     // drag canvas view
-    sketch.mouseDragged = function() {
-        if (sketch.mouseX > 0 && sketch.mouseX < sketch.width - 10 && sketch.mouseY > 0 && sketch.mouseY < sketch.height - 10) {
-            dragDiffX += sketch.movedX
-            dragDiffY += sketch.movedY
+    p.mouseDragged = function() {
+        if (p.mouseX > 0 && p.mouseX < p.width - 10 && p.mouseY > 0 && p.mouseY < p.height - 10) {
+            dragDiffX += p.movedX
+            dragDiffY += p.movedY
         }
     }
 
     // resize canvas
-    sketch.mouseClicked = function() {
+    p.mouseClicked = function() {
         let r = 10 // button radius
-        let d = sketch.dist(sketch.mouseX, sketch.mouseY, sketch.width, sketch.height) // distance between mouse and lower right corner
+        let d = p.dist(p.mouseX, p.mouseY, p.width, p.height) // distance between mouse and lower right corner
 
         if (d < r) {
             toggle = !toggle
         }
 
         if (toggle) {
-            sketch.resizeCanvas(sketch.mouseX, sketch.mouseY)
+            p.resizeCanvas(p.mouseX, p.mouseY)
         }
     }
 
@@ -159,24 +151,24 @@ let sketch = function(sketch) {
 
     // implements manual controls.
     function controls() {
-        if (sketch.keyIsDown(keys['r'])) { //reset position
+        if (p.keyIsDown(r)) { //reset position
             zoomValue = 1
             dragDiffX = dragDiffY = 0
-            sketch.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
+            p.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
         }
-        if (sketch.keyIsDown(sketch.LEFT_ARROW)) { // spin ccw
+        if (p.keyIsDown(p.LEFT_ARROW)) { // spin ccw
             roverHeading -= 1
         }
-        if (sketch.keyIsDown(sketch.RIGHT_ARROW)) { // spin cw
+        if (p.keyIsDown(p.RIGHT_ARROW)) { // spin cw
             roverHeading += 1
         }
-        if (sketch.keyIsDown(sketch.UP_ARROW)) { // move forward
-            roverX += sketch.sin(roverHeading)
-            roverY -= sketch.cos(roverHeading)
+        if (p.keyIsDown(p.UP_ARROW)) { // move forward
+            roverX += p.sin(roverHeading)
+            roverY -= p.cos(roverHeading)
         }
-        if (sketch.keyIsDown(sketch.DOWN_ARROW)) { // move backward
-            roverX -= sketch.sin(roverHeading)
-            roverY += sketch.cos(roverHeading)
+        if (p.keyIsDown(p.DOWN_ARROW)) { // move backward
+            roverX -= p.sin(roverHeading)
+            roverY += p.cos(roverHeading)
         }
     }
 }
