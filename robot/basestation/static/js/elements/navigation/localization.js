@@ -33,6 +33,8 @@ let sketch = function(p) {
     MIN_ZOOM = 0.15
     CANVAS_HEIGHT = 300
     CANVAS_WIDTH = 450
+    GRID_RADIUS = 1000 // max distance from 0,0 to draw grid
+    GRID_RATE = 100 // draw line every GRID_RATE pixels
 
 
     p.setup = function() {
@@ -78,15 +80,16 @@ let sketch = function(p) {
     }
 
     function drawGrid() {
+        let r = GRID_RADIUS
         // draw a line every 100 pixels for 1000 pixels
-        for (let x = -1000; x < 1000; x += 100) {
-            p.line(x, -1000, x, 1000)
-            p.text(x, x + 1, 12)
+        for (let x = -r; x < r; x += GRID_RATE) {
+            p.line(x, -r, x, r)
+            p.text(x, x + 1, 12) //
         }
 
-        for (let y = -1000; y < 1000; y += 100) {
-            p.line(-1000, y, 1000, y)
-            p.text(y, 1, y + 12)
+        for (let y = -r; y < r; y += GRID_RATE) {
+            p.line(-r, y, r, y)
+            p.text(y, 1, y + 12) // (str, x, y)
         }
     }
 
