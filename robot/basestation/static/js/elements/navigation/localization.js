@@ -12,9 +12,20 @@ let sketch = function(p) {
     roverHeading = 0
     roverX = 0 // cartesian coordinates of rover in pixels
     roverY = 0
+    baseLat = null
+    baseLong = null
+    rover_position_listener.subscribe(function(message) {
+        roverLong = message.x
+        roverLat = message.y
+        roverHeading = message.z
+        initializeBase(message.x, message.y)
+        adjustValuesToCartesian(roverLat, roverLong)
+    })
+
     dragDiffX = 0
     dragDiffY = 0
     zoomValue = 1
+
     r = 82 // JS keycode
     toggle = false
 
@@ -22,14 +33,7 @@ let sketch = function(p) {
     MIN_ZOOM = 0.15
     CANVAS_HEIGHT = 300
     CANVAS_WIDTH = 450
-    baseLat = 0
-    baseLong = 0
-    rover_position_listener.subscribe(function(message) {
-        roverLong = message.x
-        roverLat = message.y
-        roverHeading = message.z
-        adjustValuesToCartesian(roverLat, roverLong)
-    })
+
 
     p.setup = function() {
         canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
@@ -74,13 +78,14 @@ let sketch = function(p) {
     }
 
     function drawGrid() {
-        for (let x = -10000; x < 10000; x += 100) {
-            p.line(x, -10000, x, 10000)
+        // draw a line every 100 pixels for 1000 pixels
+        for (let x = -1000; x < 1000; x += 100) {
+            p.line(x, -1000, x, 1000)
             p.text(x, x + 1, 12)
         }
 
-        for (let y = -10000; y < 10000; y += 100) {
-            p.line(-10000, y, 10000, y)
+        for (let y = -1000; y < 1000; y += 100) {
+            p.line(-1000, y, 1000, y)
             p.text(y, 1, y + 12)
         }
     }
@@ -143,10 +148,14 @@ let sketch = function(p) {
     function adjustValuesToCartesian(roverLat, roverLong) {
         let direction = directionToRover(baseLat, baseLong, roverLat, roverLong) // angle in degrees
         let distance = distanceToRover(baseLat, baseLong, roverLat, roverLong) // distance in meters
+        let directionInRad = direction * Math.PI / 180 // convert for Math in JS
 
-        // currently 1px = 1m
-        roverX = distance * Math.cos(direction)
-        roverY = distance * Math.sin(direction)
+        roverX = distance * Math.sin(directionInRad)
+        roverY = -distance * Math.cos(directionInRad)
+        console.log('distance: ' + distance)
+        console.log('direction: ' + direction)
+        console.log('x: ' + roverX)
+        console.log('y: ' + roverY)
     }
 
     // implements manual controls.
@@ -169,6 +178,13 @@ let sketch = function(p) {
         if (p.keyIsDown(p.DOWN_ARROW)) { // move backward
             roverX -= p.sin(roverHeading)
             roverY += p.cos(roverHeading)
+        }
+    }
+
+    function initializeBase(x, y) {
+        if (baseLat == null && baseLong == null) {
+            baseLong = x
+            baseLat = y
         }
     }
 }
