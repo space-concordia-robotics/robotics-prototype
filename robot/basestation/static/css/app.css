@@ -64,11 +64,9 @@
 }
 
 .camera-feed {
-  height: 40%;
-  width: 60%;
+  height: 60%;
+  width: 100%;
   padding: 2%;
-  display:block;
-  margin:auto;
 }
 
 .camera-controls {
