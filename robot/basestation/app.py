@@ -22,6 +22,7 @@ from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_i
 
 app = flask.Flask(__name__)
 
+
 def run_shell(cmd, args="", print_output=True):
     """Run script command supplied as string.
 
@@ -42,13 +43,14 @@ def run_shell(cmd, args="", print_output=True):
 
     return output, error
 
+
 def get_pid(keyword):
     cmd = "ps aux"
     output, error = run_shell(cmd)
 
     ting = output.decode().split('\n')
 
-    #print(ting)
+    # print(ting)
 
     for line in ting:
         if keyword in line:
@@ -68,24 +70,28 @@ def index():
     """Current landing page, the arm panel."""
     return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
+
 @app.route("/rover")
 def rover():
     """Rover control panel."""
     return flask.render_template("pages/Rover.html", roverIP=fetch_ros_master_ip())
+
 
 @app.route("/science")
 def science():
     """Science page."""
     return flask.render_template("pages/Science.html", roverIP=fetch_ros_master_ip())
 
+
 @app.route("/pds")
 def pds():
     """PDS page."""
     return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
 
+
 @app.route("/navigation")
 def navigation():
-    """PDS page."""
+    """Navigation page."""
     return flask.render_template("pages/Navigation.html", roverIP=fetch_ros_master_ip())
 
 
@@ -94,49 +100,59 @@ def navigation():
 def numSections():
     return '4'
 
+
 @app.route("/stream")
 def stream():
     """Stream page."""
     return flask.render_template("pages/Stream.html", roverIP=fetch_ros_master_ip())
 
+
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
 
-@app.route('/navigation/inputTemplates/goal-buttons/<count>', methods= ["GET"])
+# routes for navigation pages
+@app.route('/navigation/inputTemplates/goal-buttons/<count>', methods=["GET"])
 def goal_Buttons(count):
-   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-buttons.html", count =  count)
+    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-buttons.html", count=count)
+
 
 @app.route('/navigation/inputTemplates/new-goal-coordinates-btn/<goalId>', methods=["GET"])
 def new_Goal_Button(goalId):
-   return flask.render_template("elements/navigation/htmlTemplates/goal/new-goal-coordinates-btn.html", goalId = goalId)
+    return flask.render_template("elements/navigation/htmlTemplates/goal/new-goal-coordinates-btn.html", goalId=goalId)
 
-@app.route('/navigation/inputTemplates/antenna-DD/<target>' , methods = ["GET"])
+
+@app.route('/navigation/inputTemplates/antenna-DD/<target>', methods=["GET"])
 def antenna_DD(target):
-   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DD-input-template.html", target = target)
-         
-@app.route('/navigation/inputTemplates/antenna-DDM/<target>' , methods = ["GET"])
+    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DD-input-template.html", target=target)
+
+
+@app.route('/navigation/inputTemplates/antenna-DDM/<target>', methods=["GET"])
 def antenna_DDM(target):
-   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DDM-input-template.html", target = target)
+    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DDM-input-template.html", target=target)
 
-@app.route('/navigation/inputTemplates/antenna-DMS/<target>' , methods = ["GET"])
+
+@app.route('/navigation/inputTemplates/antenna-DMS/<target>', methods=["GET"])
 def antenna_DMS(target):
-   return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DMS-input-template.html", target = target)
-
-@app.route('/navigation/inputTemplates/goal-DD/<target>/<count>' , methods = ["GET"])
-def goal_DD(target,count):
-   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DD-input-template.html", target = target, count = count)
+    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DMS-input-template.html", target=target)
 
 
-@app.route('/navigation/inputTemplates/goal-DDM/<target>/<count>' , methods = ["GET"])
-def goal_DDM(target,count):
-   return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DDM-input-template.html", target = target, count = count)
+@app.route('/navigation/inputTemplates/goal-DD/<target>/<count>', methods=["GET"])
+def goal_DD(target, count):
+    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DD-input-template.html", target=target, count=count)
 
-@app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>' , methods = ["GET"])
-def goal_DMS(target,count):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DMS-input-template.html", target = target,  count = count)
 
-# globals to store the html data in body of the request to it can be returned when another request is made to that same url.  
+@app.route('/navigation/inputTemplates/goal-DDM/<target>/<count>', methods=["GET"])
+def goal_DDM(target, count):
+    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DDM-input-template.html", target=target, count=count)
+
+
+@app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>', methods=["GET"])
+def goal_DMS(target, count):
+    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DMS-input-template.html", target=target,  count=count)
+
+
+# globals to store the html data in body of the request to it can be returned when another request is made to that same url.
 antenna_modal_serverHTML = ''
 antenna_stats_serverHTML = ''
 goal_modal_serverHTML = ''
@@ -144,7 +160,7 @@ goal_stats_serverHTML = ''
 navQueue_serverHTML = ''
 
 
-@app.route('/navigation/cached_content/antenna_stats' , methods = ["POST", "GET"])
+@app.route('/navigation/cached_content/antenna_stats', methods=["POST", "GET"])
 def antenna_stats_server():
     if request.method == 'POST':
         global antenna_stats_serverHTML
@@ -152,28 +168,30 @@ def antenna_stats_server():
         antenna_stats_serverHTML = flask.json.dumps(data)
         return jsonify(success=True)
     if request.method == 'GET':
-        return jsonify(antenna_stats_serverHTML)    
-   
+        return jsonify(antenna_stats_serverHTML)
 
-@app.route('/navigation/cached_content/antenna_modal' , methods = ["POST", "GET"])
+
+@app.route('/navigation/cached_content/antenna_modal', methods=["POST", "GET"])
 def antenna_modal_server():
     if request.method == 'POST':
         global antenna_modal_serverHTML
         antenna_modal_serverHTML = (request.get_data().decode('UTF-8'))
         return flask.render_template_string(antenna_modal_serverHTML)
     if request.method == 'GET':
-        return flask.render_template_string(antenna_modal_serverHTML)    
-   
-@app.route('/navigation/cached_content/goal_modal' , methods = ["POST", "GET"])
+        return flask.render_template_string(antenna_modal_serverHTML)
+
+
+@app.route('/navigation/cached_content/goal_modal', methods=["POST", "GET"])
 def goal_modal_server():
     if request.method == 'POST':
         global goal_modal_serverHTML
         goal_modal_serverHTML = (request.get_data().decode('UTF-8'))
         return flask.render_template_string(goal_modal_serverHTML)
     if request.method == 'GET':
-        return flask.render_template_string(goal_modal_serverHTML)    
-   
-@app.route('/navigation/cached_content/goal_stats' , methods = ["POST", "GET"])
+        return flask.render_template_string(goal_modal_serverHTML)
+
+
+@app.route('/navigation/cached_content/goal_stats', methods=["POST", "GET"])
 def goal_stats_server():
     if request.method == 'POST':
         global goal_stats_serverHTML
@@ -181,10 +199,10 @@ def goal_stats_server():
         goal_stats_serverHTML = flask.json.dumps(data)
         return jsonify(success=True)
     if request.method == 'GET':
-        return jsonify(goal_stats_serverHTML)    
-   
+        return jsonify(goal_stats_serverHTML)
 
-@app.route('/navigation/cached_content/navQueue' , methods = ["POST", "GET"])
+
+@app.route('/navigation/cached_content/navQueue', methods=["POST", "GET"])
 def navQueue():
     if request.method == 'POST':
         global navQueue_serverHTML
@@ -192,9 +210,7 @@ def navQueue():
         navQueue_serverHTML = flask.json.dumps(data)
         return jsonify(success=True)
     if request.method == 'GET':
-        return jsonify(navQueue_serverHTML)    
-
-    
+        return jsonify(navQueue_serverHTML)
 
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
 
@@ -222,7 +238,8 @@ def navQueue():
     if error:
         print("Error: " + error.decode())
 
-    ros_output, error = run_shell("rosrun ping_acknowledgment ping_response_client.py hello")
+    ros_output, error = run_shell(
+        "rosrun ping_acknowledgment ping_response_client.py hello")
     ros_output = ros_output.decode()
 
     print("Pinging rover")
@@ -304,7 +321,8 @@ def rover_drive():
 # capture image
 @app.route("/capture_image", methods=["POST", "GET"])
 def capture_image():
-    stream_url = "http://" + fetch_ros_master_ip() + ":8080/stream?topic=/cv_camera/image_raw"
+    stream_url = "http://" + fetch_ros_master_ip() + \
+        ":8080/stream?topic=/cv_camera/image_raw"
     #lserror, lsoutput = run_shell("ls -1q img* | wc -l")
     # p1 = subprocess.Popen(split("ls -1q img*"), stdout=subprocess.PIPE)
     # p2 = subprocess.Popen(split("wc -l"), stdin=p1.stdout)
@@ -316,10 +334,11 @@ def capture_image():
 
     if 'img' in output:
         i = output.rfind('img')
-        i = int(output[i + 3]) + 1 # shift by 'img'
+        i = int(output[i + 3]) + 1  # shift by 'img'
         print('i', i)
 
-    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 img" + str(i) + ".jpg")
+    error, output = run_shell("ffmpeg -i " + stream_url +
+                              " -ss 00:00:01.500 -f image2 -vframes 1 img" + str(i) + ".jpg")
     msg = "success"
 
     if error:
@@ -329,13 +348,16 @@ def capture_image():
 
     return jsonify(msg=msg)
 
+
 @app.route("/initiate_feed_recording/<stream>", methods=["POST", "GET"])
 def initiate_feed_recording(stream):
     return start_recording_feed(stream)
 
+
 @app.route("/stop_feed_recording/<stream>", methods=["POST", "GET"])
 def stop_feed_recording(stream):
     return stop_recording_feed(stream)
+
 
 if __name__ == "__main__":
 
