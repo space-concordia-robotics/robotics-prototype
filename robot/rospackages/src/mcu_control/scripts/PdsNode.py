@@ -246,7 +246,7 @@ def publish_pds_data(message):
     return
 
 def checkTempErrorCase(x):
-    if math.isclose(999.9, x, rel_tol=0.01, abs_tol=0.0):
+    if math.isclose(999.9, x, rel_tol=0.0001, abs_tol=0.0):
         return 'N/A'
     else:
         return x
