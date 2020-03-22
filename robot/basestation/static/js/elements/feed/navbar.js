@@ -1,49 +1,222 @@
 $(document).ready(() => {
 
-    function append_css(file) {
-        console.log('Append CSS: ' + file);
+  function append_css(file) {
+      console.log('Append CSS: ' + file)
 
-        var link = document.createElement("link");
-        link.href = '/static/css/' + file + ".css";
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        link.media = "screen,print";
+      var link = document.createElement('link')
+      link.href = '/static/css/' + file + '.css'
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.media = 'screen,print'
 
-        document.getElementsByTagName("head")[0].appendChild(link);
+      document.getElementsByTagName('head')[0].appendChild(link)
+  }
+
+  function prefer_theme(name) {
+      console.log('Prefer theme: ' + name)
+      setCookie('theme', name, 365)  // setCookie() from helpers.js
+      append_css('themes/' + name)
+  }
+
+  preferred_theme = getCookie('theme')  // getCookie() from helpers.js
+  if (preferred_theme != '') {
+      prefer_theme(preferred_theme)
+  } else {
+    prefer_theme('lofi')
+  }
+
+  $('#theme-mantis').click(function () {
+      console.log('theme-mantis')
+      prefer_theme('mantis')
+  })
+  $('#theme-lofi').click(function () {
+      console.log('theme-lofi')
+      prefer_theme('lofi')
+  })
+
+
+  function checkListenerStates() {
+    let listener = ''
+    let url = window.location.pathname
+    let toggleButtonID = 'toggle-'
+
+    if (url == '/rover') {
+        listener = ROVER_LISTENER_TASK
+        toggleButtonID += 'rover-listener-btn'
+    } else if (url == '/' || url == '/arm') {
+        listener = ARM_LISTENER_TASK
+        toggleButtonID += 'arm-listener-btn'
+    } else if (url == '/science') {
+        listener = SCIENCE_LISTENER_TASK
+        toggleButtonID += 'science-listener-btn'
+    } else if (url == '/pds') {
+        listener = PDS_LISTENER_TASK
+        toggleButtonID += 'pds-listener-btn'
     }
 
-    function prefer_theme(name) {
-        console.log('Prefer theme: ' + name);
-        setCookie('theme', name, 365); // setCookie() from helpers.js
-        append_css('themes/' + name);
-    }
+    let serialType = $('#serial-type').text()
 
-    preferred_theme = getCookie('theme'); // getCookie() from helpers.js
-    if (preferred_theme != "") {
-        prefer_theme(preferred_theme);
+    requestTask(
+      listener,
+      STATUS_CHECK,
+      function (msgs) {
+        console.log('msgs', msgs)
+        if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
+          $('#' + toggleButtonID)[0].checked = false
+        } else {
+          $('#' + toggleButtonID)[0].checked = true
+        }
+      },
+      serialType
+    )
+  }
+
+  checkListenerStates()
+
+  function isListenerOpen () {
+    return (
+      (window.location.pathname == '/rover' &&
+        $('#toggle-rover-listener-btn')[0].checked == true) ||
+      (window.location.pathname == '/' &&
+        $('#toggle-arm-listener-btn')[0].checked == true) ||
+      (window.location.pathname == '/science' &&
+        $('#science-listener-btn')[0].checked == true)
+      // pds Listener
+    )
+  }
+
+  // select mux channel using mux_select service
+  $('#mux-0').mouseup(function () {
+    // Rover
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
-        prefer_theme("lofi");
+      requestMuxChannel('#mux-0', function (msgs) {
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/rover') {
+          console.log('Activating Rover Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              ROVER_LISTENER_TASK,
+              STATUS_START,
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-rover-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Rover', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-rover-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
+        }
+      })
+    }
+  })
+
+  $('#mux-1').mouseup(function () {
+    // Arm
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-1', function (msgs) {
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/') {
+          console.log('Activating Arm Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              ARM_LISTENER_TASK,
+              STATUS_START,
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#toggle-arm-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Arm', 'ping', printErrToConsole)
+                } else {
+                  $('#toggle-arm-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
+        }
+      })
+    }
+  })
+
+  $('#mux-2').mouseup(function () {
+    // Science
+    if (isListenerOpen() && getCookie('serialType') == 'uart') {
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
+    } else {
+      requestMuxChannel('#mux-2', function (msgs) {
+        printErrToConsole(msgs)
+
+        if (msgs[0] == true && window.location.pathname == '/science') {
+          console.log('Activating Science Listener Node')
+
+          let serialType = getCookie('serialType')
+
+          if (serialType == '') {
+            appendToConsole('Serial type not yet defined!')
+            return
+          }
+
+          // automating opening listener and sending MCU ping in UART mode
+          if (serialType == 'uart') {
+            requestTask(
+              SCIENCE_LISTENER_TASK,
+              STATUS_START,
+              function (msgs) {
+                if (msgs[0]) {
+                  $('#science-listener-btn')[0].checked = true
+                  // try pinging MCU
+                  wait(1000)
+                  sendRequest('Science', 'ping', printErrToConsole)
+                } else {
+                  $('#science-listener-btn')[0].checked = false
+                }
+              },
+              serialType
+            )
+          }
+        }
+      })
     }
 
-    $('#theme-mantis').click(function() {
-        console.log('theme-mantis');
-        prefer_theme('mantis');
-    });
-    $('#theme-lofi').click(function() {
-        console.log('theme-lofi');
-        prefer_theme('lofi');
-    });
-
-    function isListenerOpen() {
-        return (
-            (window.location.pathname == '/rover' &&
-                $('#toggle-rover-listener-btn')[0].checked == true) ||
-            (window.location.pathname == '/' &&
-                $('#toggle-arm-listener-btn')[0].checked == true) ||
-            (window.location.pathname == '/science' &&
-                $('#science-listener-btn')[0].checked == true)
-            // pds Listener
-        )
+    $('#mux-3').mouseup(function () {
+      // PDS
+      if (isListenerOpen() && getCookie('serialType') == 'uart') {
+        appendToConsole('Don\'t change the mux channel while a listener is open!')
+      } else {
+        requestMuxChannel('#mux-3', function (msgs) {
+          printErrToConsole(msgs)
+        })
+      }
     }
 
     // select mux channel using mux_select service
@@ -85,101 +258,6 @@ $(document).ready(() => {
                         )
                     }
                 }
-            })
-        }
-    })
-
-    $('#mux-1').mouseup(function() {
-        // Arm
-        if (isListenerOpen() && getCookie('serialType') == 'uart') {
-            appendToConsole("Don't change the mux channel while a listener is open!")
-        } else {
-            requestMuxChannel('#mux-1', function(msgs) {
-                printErrToConsole(msgs)
-
-                if (msgs[0] == true && window.location.pathname == '/') {
-                    console.log('Activating Arm Listener Node')
-
-                    let serialType = getCookie('serialType')
-
-                    if (serialType == '') {
-                        appendToConsole('Serial type not yet defined!')
-                        return
-                    }
-
-                    // automating opening listener and sending MCU ping in UART mode
-                    if (serialType == 'uart') {
-                        requestTask(
-                            'arm_listener',
-                            1,
-                            '#toggle-arm-listener-btn',
-                            function(msgs) {
-                                if (msgs[0]) {
-                                    $('#toggle-arm-listener-btn')[0].checked = true
-                                    // try pinging MCU
-                                    wait(1000)
-                                    sendRequest('Arm', 'ping', printErrToConsole)
-                                } else {
-                                    $('#toggle-arm-listener-btn')[0].checked = false
-                                }
-                            },
-                            serialType
-                        )
-                    }
-                }
-            })
-        }
-    })
-
-    $('#mux-2').mouseup(function() {
-        // Science
-        if (isListenerOpen() && getCookie('serialType') == 'uart') {
-            appendToConsole("Don't change the mux channel while a listener is open!")
-        } else {
-            requestMuxChannel('#mux-2', function(msgs) {
-                printErrToConsole(msgs)
-
-                if (msgs[0] == true && window.location.pathname == '/science') {
-                    console.log('Activating Science Listener Node')
-
-                    let serialType = getCookie('serialType')
-
-                    if (serialType == '') {
-                        appendToConsole('Serial type not yet defined!')
-                        return
-                    }
-
-                    // automating opening listener and sending MCU ping in UART mode
-                    if (serialType == 'uart') {
-                        requestTask(
-                            'science_listener',
-                            1,
-                            '#science-listener-btn',
-                            function(msgs) {
-                                if (msgs[0]) {
-                                    $('#science-listener-btn')[0].checked = true
-                                    // try pinging MCU
-                                    wait(1000)
-                                    sendRequest('Science', 'ping', printErrToConsole)
-                                } else {
-                                    $('#science-listener-btn')[0].checked = false
-                                }
-                            },
-                            serialType
-                        )
-                    }
-                }
-            })
-        }
-    })
-
-    $('#mux-3').mouseup(function() {
-        // PDS
-        if (isListenerOpen() && getCookie('serialType') == 'uart') {
-            appendToConsole("Don't change the mux channel while a listener is open!")
-        } else {
-            requestMuxChannel('#mux-3', function(msgs) {
-                printErrToConsole(msgs)
             })
         }
     })
@@ -232,10 +310,7 @@ $(document).ready(() => {
                     console.log(msgs)
                     if (msgs[0]) {
                         console.log('nice')
-                    } else {
-                        console.log('not nice')
-                    }
-                })
+                    } else { console.log('not nice') } })
             }
         }
     })
@@ -248,7 +323,7 @@ $(document).ready(() => {
     })
 
     $("#arm-page").click(function() {
-        window.open('/arm');
+        window.open('arm');
     })
 
     $("#rover-page").click(function() {
@@ -267,6 +342,15 @@ $(document).ready(() => {
         window.open('stream');
     })
     $("#navigation-page").click(function() {
-        window.open('/navigation');
+        window.open('navigation');
     })
 })
+
+/*
+function to display the navbar modal with the given title and body text
+*/
+function navModalMessage (title, body){
+  $('.modal-title').text(title)
+  $('.modal-msg').text(body)
+  $('.modal').modal({show: true})
+}

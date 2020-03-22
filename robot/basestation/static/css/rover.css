@@ -56,10 +56,6 @@ html, body {
     background-color: #101148;
 }
 
-.row, .row>* {
-    border: 0px solid #05072f;
-}
-
 .round-btn {
     width: 80px;
     height: 80px;

@@ -5,7 +5,7 @@ import subprocess
 import os
 import sys
 import time
-from robot.basestation.app import run_shell, get_pid
+from robot.util.utils import run_shell, get_pid
 
 class Listener:
     def __init__(self, script, type, args='', force_kill=False, children=0):

@@ -779,4 +779,5 @@ $(document).ready(() => {
         })
     }
 
+  initNavigationPanel()
 })
