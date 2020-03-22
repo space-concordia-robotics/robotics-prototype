@@ -205,18 +205,12 @@ def publish_pds_data(message):
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
             elif i < 10:
-                if float(dataPDS[7]) == 999.9:
-                    temp.x = 'N/A'
-                else:
-                    temp.x = float(dataPDS[7])
-                if float(dataPDS[8]) == 999.9:
-                    temp.y = 'N/A'
-                else:
-                    temp.y = float(dataPDS[8])
-                if float(dataPDS[9]) == 999.9:
-                    temp.z = 'N/A'
-                else:
-                    temp.z = float(dataPDS[9])
+                if i == 7:
+                    temp.x = checkTempErrorCase(float(dataPDS[i]))
+                if i == 8:
+                    temp.y = checkTempErrorCase(float(dataPDS[i]))
+                if i == 9:
+                    temp.z = checkTempErrorCase(float(dataPDS[i]))
             else:
                 fanSpeeds.x = float(dataPDS[10])
                 fanSpeeds.y = float(dataPDS[11])
@@ -249,6 +243,12 @@ def publish_pds_data(message):
         rospy.logwarn('trouble parsing PDS sensor data')
         return
     return
+
+def checkTempErrorCase(x):
+    if isclose(999.9, x, rel_tol=0.01, abs_tol=0.0):
+        return 'N/A'
+    else:
+        return x
 
 def stripFeedback(data):
     startStrips = ['PDS ', 'Command', 'Motor']
