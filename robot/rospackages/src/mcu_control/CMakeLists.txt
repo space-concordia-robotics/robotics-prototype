@@ -32,7 +32,7 @@ add_message_files(
   ## rover
   ##RoverPosition.msg
   AntennaGoal.msg
-  ##RoverGoal.msg
+  RoverGoal.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
