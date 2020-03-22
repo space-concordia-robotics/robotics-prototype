@@ -1,78 +1,79 @@
 <nav class="navbar navbar-expand-md fixed-top">
-  <div class="col-md-1">
-      <a class="navbar-brand" href="{{ url_for('index') }}">
-          <img src="../static/img/sclogo_header.png">
-      </a>
-  </div>
+    <div class="col-md-1">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="../static/img/sclogo_header.png">
+        </a>
+    </div>
 
-  <div class="dropdown col-md-2">
-    <button id="page-select" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
-      Page Selection
-    </button>
-    <div class="dropdown-menu">
-      <a id="rover-page" class="dropdown-item">Rover<img style="float:right;" src="static/img/navbar/rover.png"></a>
-      <a id="arm-page" class="dropdown-item">Arm<img style="float:right;" src="static/img/navbar/arm.png"></a>
-      <a id="science-page" class="dropdown-item">Science<img style="float:right;" src="static/img/navbar/science.png"></a>
-      <a id="pds-page" class="dropdown-item">PDS<img style="float:right;" src="static/img/navbar/pds.png"></a>
-      <a id="streams-page" class="dropdown-item">Streams<img style="float:right;" src="static/img/navbar/streams.png"></a>
-      <a id="navigation-page" class="dropdown-item">Navigation<img style="float:right;" src="static/img/navbar/navigation.png"></a>
-      
-    </div>
-  </div>
+    <div class="dropdown col-md-2">
+        <button id="page-select" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
+            Page Selection
+        </button>
+        <div class="dropdown-menu">
+            <a id="rover-page" class="dropdown-item">Rover<img style="float:right;" src="static/img/navbar/rover.png"></a>
+            <a id="arm-page" class="dropdown-item">Arm<img style="float:right;" src="static/img/navbar/arm.png"></a>
+            <a id="science-page" class="dropdown-item">Science<img style="float:right;" src="static/img/navbar/science.png"></a>
+            <a id="pds-page" class="dropdown-item">PDS<img style="float:right;" src="static/img/navbar/pds.png"></a>
+            <a id="streams-page" class="dropdown-item">Streams<img style="float:right;" src="static/img/navbar/streams.png"></a>
+            <a id="navigation-page" class="dropdown-item">Navigation<img style="float:right;" src="static/img/navbar/navigation.png"></a>
 
-  <div class="dropdown col-md-2">
-    <button id="mux" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
-      Device Channel
-    </button>
-    <div class="dropdown-menu">
-      <a id="mux-0" class="dropdown-item">0: Rover</a>
-      <a id="mux-1" class="dropdown-item">1: Arm</a>
-      <a id="mux-2" class="dropdown-item">2: Science</a>
-      <a id="mux-3" class="dropdown-item">3: PDS</a>
+        </div>
     </div>
-  </div>
 
-  <div class="dropdown col-md-2">
-    <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
-      Serial Type
-    </button>
-    <div class="dropdown-menu">
-      <a id="uart" class="dropdown-item">uart</a>
-      <a id="usb" class="dropdown-item">usb</a>
+    <div class="dropdown col-md-2">
+        <button id="mux" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
+            Device Channel
+        </button>
+        <div class="dropdown-menu">
+            <a id="mux-0" class="dropdown-item">0: Rover</a>
+            <a id="mux-1" class="dropdown-item">1: Arm</a>
+            <a id="mux-2" class="dropdown-item">2: Science</a>
+            <a id="mux-3" class="dropdown-item">3: PDS</a>
+        </div>
     </div>
-  </div>
 
-  <div class="dropdown col-md-1">
-    <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
-      Theme
-    </button>
-    <div class="dropdown-menu">
-      <a id="theme-mantis" class="dropdown-item">mantis</a>
-      <a id="theme-lofi" class="dropdown-item">lofi</a>
+    <div class="dropdown col-md-2">
+        <button id="serial-type" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
+            Serial Type
+        </button>
+        <div class="dropdown-menu">
+            <a id="uart" class="dropdown-item">uart</a>
+            <a id="usb" class="dropdown-item">usb</a>
+        </div>
     </div>
-  </div>
 
-  <div class="col-md-1">
-    <div class="row border border-white text-white">
-      <div class="col-md-6">BATTERY VOLTAGE: </div>
-      <div class="col-md-6" id="battery-voltage">-</div>
+    <div class="dropdown col-md-1">
+        <button id="theme-button" type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown">
+            Theme
+        </button>
+        <div class="dropdown-menu">
+            <a id="theme-mantis" class="dropdown-item">mantis</a>
+            <a id="theme-lofi" class="dropdown-item">lofi</a>
+        </div>
     </div>
-  </div>
-  <div class= "col-md-1 border border-white">
-    <div class ="row text-white">
-      <div class="col-md-6">BATTERY TEMP: </div>
-      <div class="col-md-6"></div>
+
+    <div class="col-md-1">
+        <div class="row border border-white text-white">
+            <div class="col-md-6">BATTERY VOLTAGE: </div>
+            <div class="col-md-6" id="battery-voltage">-</div>
+        </div>
     </div>
-  </div>
-  <div class="col-md-2 border border-white">
-    <div class="row text-white">
-	  <span title="battery temp 1">T1:</span><div class="col-md-3" id="battery-temp-1">-&#8451;</div>
-	  <span title="battery temp 2">T2:</span><div class="col-md-3" id="battery-temp-2">-&#8451;</div>
+    <div class="col-md-1 border border-white">
+        <div class="row text-white">
+            <div class="col-md-6">BATTERY TEMP: </div>
+            <div class="col-md-6"></div>
+        </div>
     </div>
-    <div class="row text-white">
-	  <span title="battery temp 3">T3:</span><div class="col-md-3" id="battery-temp-3">-&#8451;</div>
+    <div class="col-md-2 border border-white">
+        <div class="row text-white">
+            <span title="battery temp 1">T1:</span>
+            <div class="col-md-3" id="battery-temp-1">-&#8451;</div>
+            <span title="battery temp 2">T2:</span>
+            <div class="col-md-3" id="battery-temp-2">-&#8451;</div>
+        </div>
+        <div class="row text-white">
+            <span title="battery temp 3">T3:</span>
+            <div class="col-md-3" id="battery-temp-3">-&#8451;</div>
+        </div>
     </div>
-  </div>
-</div>
-</div>
 </nav>
