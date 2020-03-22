@@ -4,6 +4,7 @@ import sys
 import traceback
 import time
 import re
+import math
 
 import serial  # pyserial
 import serial.tools.list_ports  # pyserial
@@ -245,7 +246,7 @@ def publish_pds_data(message):
     return
 
 def checkTempErrorCase(x):
-    if isclose(999.9, x, rel_tol=0.01, abs_tol=0.0):
+    if math.isclose(999.9, x, rel_tol=0.01, abs_tol=0.0):
         return 'N/A'
     else:
         return x
