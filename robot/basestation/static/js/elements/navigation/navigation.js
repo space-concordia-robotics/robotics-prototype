@@ -73,7 +73,6 @@ $(document).ready(() => {
                 }
             }
 
-
             navQueue.data[0] = null
             //the elements are deleted from data, they are only set to null. The array will only get resized in this case, where those null values will be destroyed
             while (navQueue.top() == null && (navQueue.data.length != 0)) {
@@ -81,7 +80,6 @@ $(document).ready(() => {
             }
             saveGoalModalToServer()
             saveNavigationQueueToServer()
-
 
             if (navQueue.top() != undefined) {
                 goal_latitude.set(parseFloat(navQueue.top().latitude))
@@ -98,12 +96,12 @@ $(document).ready(() => {
             }
 
             has_gps_goal.set(false)
-
         }
+
         $('#goal-stats-rover-heading').text(parseFloat(message.x).toFixed(3))
         $('#goal-stats-distance').text(parseFloat(message.y).toFixed(2))
-        saveGoalStatsToServer()
 
+        saveGoalStatsToServer()
     })
     // setup gps parameters for rover goals
     let goal_latitude = new ROSLIB.Param({
@@ -119,7 +117,6 @@ $(document).ready(() => {
     let count = 0
 
     function initNavigationPanel() {
-
         antenna_latitude.get(function(lat) {
             if (lat != null) {
                 antenna_longitude.get(function(long) {
@@ -144,7 +141,6 @@ $(document).ready(() => {
                                             $('#antenna-stats-rec-angle').text("----")
                                         }
                                     },
-
                                 })
                                 $.get({
                                     url: '/navigation/cached_content/antenna_modal',
@@ -164,14 +160,11 @@ $(document).ready(() => {
                             } else {
                                 appendToConsole('Enter antenna parameters')
                                 got_antenna_pos.set(false)
-
                             }
                         })
-
                     } else {
                         appendToConsole('Enter antenna parameters')
                         got_antenna_pos.set(false)
-
                     }
                 })
             } else {
@@ -205,13 +198,11 @@ $(document).ready(() => {
                                         createGoalConfirmButtonHandler(i)
                                     }
                                 }
-
                             }
                         })
                         $.get({
                             url: '/navigation/cached_content/navQueue',
                             success: function(result) {
-
                                 if (!jQuery.isEmptyObject(result)) {
                                     navQueue.data = JSON.parse(result).data
                                     navQueue.shift = JSON.parse(result).shift
@@ -265,21 +256,22 @@ $(document).ready(() => {
                 this.flag = false
             }
             this.data.push(item)
-
         }
+
         this.dequeue = function() {
             this.data.shift()
             this.shift++
         }
+
         this.top = function() {
             return this.data[0]
         }
+
         this.remove = function(index) {
             this.data[index - this.shift] = null
 
             //if the current top is deleted, gotta adjust the goal_lat and goal_long parmamters
             if (index - this.shift == 0) {
-
                 while (navQueue.top() == null) {
                     navQueue.dequeue()
                     if (navQueue.data.length == 0) {
@@ -291,7 +283,6 @@ $(document).ready(() => {
                     goal_longitude.set(this.top().longitude)
                     has_gps_goal.set(false)
                 }
-
             }
         }
 
@@ -307,55 +298,43 @@ $(document).ready(() => {
         }
     }
 
-
-
-
     $('#antenna-select-lat-format-btn').on('click', function(event) {
         event.preventDefault()
         createAntennaLatitudeHandler()
-
     })
     $('#antenna-select-long-format-btn').on('click', function(event) {
         event.preventDefault()
         createAntennaLongitudeHandler()
-
-
     })
-
-
     $('#antenna-confirm-btn').on('click', function(event) {
-
         event.preventDefault()
 
         let lat = -1
         let long = -1
 
-
-
         try {
             if ($("#antenna-lat-fieldset").attr('format') == 'DD') {
-
                 let decdeg = parseFloat(($("#antenna-lat-DD-dec-deg-input").val()))
                 $("#antenna-lat-DD-dec-deg-input").attr("value", decdeg)
 
                 if (isNaN(decdeg)) throw "Bad Input lat DD"
+
                 lat = decdeg
             } else if ($("#antenna-lat-fieldset").attr('format') == 'DDM') {
-
                 let dec = parseFloat($('#antenna-lat-DDM-deg-input').val())
                 let min = parseFloat($('#antenna-lat-DDM-dec-min-input').val())
+
                 if (isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
 
                 $("#antenna-lat-DDM-deg-input").attr("value", dec)
                 $("#antenna-lat-DDM-dec-min-input").attr("value", min)
 
                 lat = dec + (min / 60)
-
             } else if ($("#antenna-lat-fieldset").attr('format') == 'DMS') {
-
                 let dec = parseFloat($('#antenna-lat-DMS-deg-input').val())
                 let mins = parseFloat($('#antenna-lat-DMS-min-input').val())
                 let secs = parseFloat($('#antenna-lat-DMS-sec-input').val())
+
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS"
 
                 $("#antenna-lat-DMS-deg-input").attr("value", dec)
@@ -363,20 +342,20 @@ $(document).ready(() => {
                 $("#antenna-lat-DMS-sec-input").attr("value", secs)
 
                 lat = dec + (mins / 60 + secs / 3600)
-
             }
 
             if ($("#antenna-long-fieldset").attr('format') == 'DD') {
-
                 let decdeg = parseFloat(($("#antenna-long-DD-dec-deg-input").val()))
+
                 if (isNaN(decdeg)) throw "Bad Input long DD"
 
                 $("#antenna-long-DD-dec-deg-input").attr("value", decdeg)
+
                 long = decdeg
             } else if ($("#antenna-long-fieldset").attr('format') == 'DDM') {
-
                 let dec = parseFloat($('#antenna-long-DDM-deg-input').val())
                 let min = parseFloat($('#antenna-long-DDM-dec-min-input').val())
+
                 if (isNaN(dec) || isNaN(min)) throw "Bad input long DDM"
 
                 $("#antenna-long-DDM-deg-input").attr("value", dec)
@@ -384,10 +363,10 @@ $(document).ready(() => {
 
                 long = dec + (min / 60)
             } else if ($("#antenna-long-fieldset").attr('format') == 'DMS') {
-
                 let dec = parseFloat($('#antenna-long-DMS-deg-input').val())
                 let mins = parseFloat($('#antenna-long-DMS-min-input').val())
                 let secs = parseFloat($('#antenna-long-DMS-sec-input').val())
+
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS"
 
                 $("#antenna-long-DMS-deg-input").attr("value", dec)
@@ -398,7 +377,9 @@ $(document).ready(() => {
             }
             let bearing = parseFloat($("#antenna-bearing-input").val())
             if (isNaN(bearing)) throw "Bad input bearing"
+
             $("#antenna-bearing-input").attr("value", bearing)
+
             //ROS params
             antenna_latitude.set(lat)
             antenna_longitude.set(long)
@@ -408,10 +389,9 @@ $(document).ready(() => {
 
             $('.antenna-input-field').prop('disabled', true)
             $('.antenna-change-btn').prop('disabled', false)
-
             $('#antenna-confirm-btn').prop('disabled', true)
-            createAntennaBearingChangeButtonHandler()
 
+            createAntennaBearingChangeButtonHandler()
 
             got_antenna_pos.set(false)
 
@@ -420,48 +400,35 @@ $(document).ready(() => {
             $('#antenna-stats-heading').text(bearing)
 
             saveAntennaModalToServer()
-
         } catch (e) {
             appendToConsole(e)
         }
-
-
     })
 
     function antennaChangeButtonHandlerTemplate(mode, format, detachedData) {
-
         $("#antenna-" + mode + "-" + format + "-change-btn").on('click', function(event) {
             event.preventDefault()
 
             $("#antenna-" + mode + "-input-group").detach()
             $("#antenna-" + mode + "-fieldset").append(detachedData)
-
             $("#antenna-confirm-btn").prop('disabled', false)
-
         })
-
     }
 
     function createAntennaLatitudeChangeButtonHandler(detachedData) {
-
         antennaChangeButtonHandlerTemplate("lat", "DD", detachedData)
         antennaChangeButtonHandlerTemplate("lat", "DDM", detachedData)
         antennaChangeButtonHandlerTemplate("lat", "DMS", detachedData)
-
     }
 
     function createAntennaLongitudeChangeButtonHandler(detachedData) {
-
         antennaChangeButtonHandlerTemplate("long", "DD", detachedData)
         antennaChangeButtonHandlerTemplate("long", "DDM", detachedData)
         antennaChangeButtonHandlerTemplate("long", "DMS", detachedData)
-
-
     }
 
     function createAntennaBearingChangeButtonHandler() {
         $("#antenna-bearing-change-btn").on('click', function(event) {
-
             $("#antenna-bearing-input").prop('disabled', false)
             $("#antenna-bearing-change-btn").prop('disabled', false)
             $("#antenna-confirm-btn").prop('disabled', false)
@@ -469,11 +436,8 @@ $(document).ready(() => {
     }
 
     function antennaHandlerTemplate(mode, format) {
-
         $('#antenna-' + mode + '-' + format + '-btn').unbind('click').on('click', function(event) {
-
             $('#antenna-' + mode + '-fieldset').attr('format', format)
-
             $('#antenna-select-' + mode + '-format-btn').dropdown('toggle')
 
             let detachedData = $('#antenna-select-' + mode + '-format').detach()
@@ -484,7 +448,6 @@ $(document).ready(() => {
 
                     if (mode == 'lat') createAntennaLatitudeChangeButtonHandler(detachedData)
                     else createAntennaLongitudeChangeButtonHandler(detachedData)
-
                 }
             })
         })
@@ -494,19 +457,16 @@ $(document).ready(() => {
         antennaHandlerTemplate('lat', 'DD')
         antennaHandlerTemplate('lat', 'DDM')
         antennaHandlerTemplate('lat', 'DMS')
-
     }
 
     function createAntennaLongitudeHandler() {
         antennaHandlerTemplate('long', 'DD')
         antennaHandlerTemplate('long', 'DDM')
         antennaHandlerTemplate('long', 'DMS')
-
     }
 
 
     $("#new-goal-coordinates-btn").on('click', function(event) {
-
         $.ajax('/navigation/inputTemplates/new-goal-coordinates-btn/' + count, {
             success: function(result) {
                 $("#goal-modal-body-content").append(result)
@@ -514,29 +474,33 @@ $(document).ready(() => {
                 createGoalLatitudeHandler(count)
                 createGoalLongitudeHandler(count)
                 createGoalButtons(count)
-
                 count++
             }
         })
     })
 
     function insertDataInQueue(current, lat_format, long_format) {
-
         let lat = null
         let long = null
         try {
             if (lat_format == 0) {
                 //decimal-degrees mode
                 decdeg = parseFloat($('#goal-lat-DD-dec-deg-input-' + current).val())
+
                 if (isNaN(decdeg)) throw "Bad input lat DD"
+
                 $('#goal-lat-DD-dec-deg-input-' + current).attr("value", decdeg)
+
                 lat = decdeg
             } else if (lat_format == 1) {
                 //degrees-decimal-minutes mode
                 let dec = parseFloat($('#goal-lat-DDM-deg-input-' + current).val())
                 let min = parseFloat($('#goal-lat-DDM-dec-min-input-' + current).val())
+
                 if (isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
+
                 lat = dec + (min / 60)
+
                 $('#goal-lat-DDM-deg-input-' + current).attr("value", dec)
                 $('#goal-lat-DDM-dec-min-input-' + current).attr("value", min)
 
@@ -545,18 +509,21 @@ $(document).ready(() => {
                 let dec = parseFloat($('#goal-lat-DMS-deg-input-' + current).val())
                 let mins = parseFloat($('#goal-lat-DMS-min-input-' + current).val())
                 let secs = parseFloat($('#goal-lat-DMS-sec-input-' + current).val())
+
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS"
+
                 lat = dec + (mins / 60 + secs / 3600)
+
                 $('#goal-lat-DMS-deg-input-' + current).attr("value", dec)
                 $('#goal-lat-DMS-min-input-' + current).attr("value", mins)
                 $('#goal-lat-DMS-sec-input-' + current).attr("value", secs)
-
             } else {
                 throw "You didn't enter anything for lat"
             }
             if (long_format == 0) {
                 //decimal-degrees mode
                 long = parseFloat($('#goal-long-DD-dec-deg-input-' + current).val())
+
                 if (isNaN(long)) throw "Bad input long DD"
 
                 $('#goal-long-DD-dec-deg-input-' + current).attr("value", long)
@@ -564,8 +531,11 @@ $(document).ready(() => {
                 //degrees-decimal-minutes mode
                 let dec = parseFloat($('#goal-long-DDM-deg-input-' + current).val())
                 let min = parseFloat($('#goal-long-DDM-dec-min-input-' + current).val())
+
                 if (isNaN(dec) || isNaN(min)) throw "Bad input long DDM"
+
                 long = dec + (min / 60)
+
                 $('#goal-long-DDM-deg-input-' + current).attr("value", dec)
                 $('#goal-long-DDM-dec-min-input-' + current).attr("value", min)
 
@@ -574,12 +544,14 @@ $(document).ready(() => {
                 let dec = parseFloat($('#goal-long-DMS-deg-input-' + current).val())
                 let mins = parseFloat($('#goal-long-DMS-min-input-' + current).val())
                 let secs = parseFloat($('#goal-long-DMS-sec-input-' + current).val())
+
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS"
+
                 long = dec + (mins / 60 + secs / 3600)
+
                 $('#goal-long-DMS-deg-input-' + current).attr("value", dec)
                 $('#goal-long-DMS-min-input-' + current).attr("value", mins)
                 $('#goal-long-DMS-sec-input-' + current).attr("value", secs)
-
             } else {
                 throw "You didn't enter anything for long"
             }
@@ -597,16 +569,14 @@ $(document).ready(() => {
 
             saveGoalModalToServer()
 
-
             //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
             if ($("#goal-change-btn-" + current).data('clicked')) {
-
                 $(this).data('clicked', false)
                 navQueue.change(current, lat, long)
             } else {
                 if (navQueue.data.length == 0) appendToConsole('Goal data set!')
-                navQueue.enqueue(latlongpair)
 
+                navQueue.enqueue(latlongpair)
             }
 
             $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
@@ -614,80 +584,57 @@ $(document).ready(() => {
 
             saveNavigationQueueToServer()
 
-
-
-
-
             /*----------------------------------\
             this section implements ROS goal node
             \----------------------------------*/
             let rosGoalName = $('#goal-name-' + current).val()
             let rosGoalLong = long
             let rosGoalLat = lat
-
             let goal_data = new ROSLIB.Message({
-                name : rosGoalName,
-                long : rosGoalLong,
-                lat : rosGoalLat
+                name: rosGoalName,
+                long: rosGoalLong,
+                lat: rosGoalLat
             })
 
             goal_publisher.publish(goal_data)
-
-
-
-
-
-
-
         } catch (e) {
             $('#goal-confirm-btn-' + current).prop('disabled', false)
             $('#goal-change-btn-' + current).prop('disabled', true)
+
             appendToConsole(e)
         }
         console.log(navQueue)
     }
 
     function goalHandlerTemplate(mode, format, current) {
-
         $("#goal-" + mode + "-" + format + "-btn-" + current).on('click', function(event) {
-
             event.preventDefault()
 
             $('#goal-' + mode + '-fieldset-' + current).attr("format", format)
-
             $('#goal-' + mode + '-select-format-btn-' + current).dropdown('toggle')
             $('#goal-' + mode + '-select-format-btn-' + current).detach()
-
 
             $.ajax('/navigation/inputTemplates/goal-' + format + '/' + mode + '/' + current, {
                 success: function(result) {
                     $('#goal-' + mode + '-input-group-' + current).append(result)
-
                 }
             })
         })
     }
 
     function createGoalLatitudeHandler(current) {
-
         goalHandlerTemplate('lat', 'DD', current)
         goalHandlerTemplate('lat', 'DDM', current)
         goalHandlerTemplate('lat', 'DMS', current)
-
-
     }
 
     function createGoalLongitudeHandler(current) {
-
         goalHandlerTemplate('long', 'DD', current)
         goalHandlerTemplate('long', 'DDM', current)
         goalHandlerTemplate('long', 'DMS', current)
-
     }
 
     function createGoalButtons(current) {
-
-
         $.ajax('navigation/inputTemplates/goal-buttons/' + current, {
             success: function(result) {
                 $("#goal-buttons-input-group-" + current).append(result)
@@ -697,7 +644,6 @@ $(document).ready(() => {
                 createGoalDeleteButtonHandler(current)
             }
         })
-
     }
 
     function createGoalConfirmButtonHandler(current) {
@@ -727,11 +673,7 @@ $(document).ready(() => {
             $('#goal-lat-select-format-' + current).detach()
             $('#goal-long-select-format-' + current).detach()
 
-
             insertDataInQueue(current, lat_format, long_format)
-
-
-
         })
     }
 
@@ -749,14 +691,12 @@ $(document).ready(() => {
             url: "/navigation/cached_content/goal_modal",
             data: $('#goal-modal-body').html()
         })
-
     }
 
     function saveAntennaModalToServer() {
         $.post({
             url: "/navigation/cached_content/antenna_modal",
             data: $('#antenna-modal-body').html(),
-
         })
     }
 
@@ -764,8 +704,8 @@ $(document).ready(() => {
         let obj = {
             distance: $("#goal-stats-distance").text(),
             heading: $("#goal-stats-rover-heading").text()
-
         }
+
         $.post({
             url: "/navigation/cached_content/goal_stats",
             contentType: "application/json",
@@ -777,8 +717,8 @@ $(document).ready(() => {
         let obj = {
             distance: $("#antenna-stats-dist-to-rover").text(),
             heading: $("#antenna-stats-rec-angle").text()
-
         }
+
         $.post({
             url: "/navigation/cached_content/antenna_stats",
             contentType: "application/json",
@@ -788,7 +728,6 @@ $(document).ready(() => {
 
     function createGoalChangeButtonHandler(current) {
         $('#goal-change-btn-' + current).on('click', function(event) {
-
             $(this).data('clicked', true)
 
             $('#goal-lat-fieldset-' + current).prop('disabled', false)
@@ -800,14 +739,12 @@ $(document).ready(() => {
     }
 
     function createGoalDeleteButtonHandler(current) {
-
         $('#goal-delete-btn-' + current).on('click', function(event) {
             $('#new-goal-btn-' + current).remove()
 
             navQueue.remove(current)
 
             if (!(navQueue.top() == undefined)) {
-
                 $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
                 $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
             } else {
@@ -815,11 +752,11 @@ $(document).ready(() => {
                 $('#goal-stats-long').text("----")
                 appendToConsole('No coordinates left to go to!')
             }
+
             saveGoalModalToServer()
             saveNavigationQueueToServer()
-
         })
     }
-
+    
     initNavigationPanel()
 })
