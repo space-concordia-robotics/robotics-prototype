@@ -113,6 +113,67 @@ def goal_DMS(target, count):
     return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DMS-input-template.html", target=target,  count=count)
 
 
+# globals to store the html data in body of the request to it can be returned when another request is made to that same url.
+antenna_modal_serverHTML = ''
+antenna_stats_serverHTML = ''
+goal_modal_serverHTML = ''
+goal_stats_serverHTML = ''
+navQueue_serverHTML = ''
+
+
+@app.route('/navigation/cached_content/antenna_stats', methods=["POST", "GET"])
+def antenna_stats_server():
+    if request.method == 'POST':
+        global antenna_stats_serverHTML
+        data = request.get_json()
+        antenna_stats_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
+    if request.method == 'GET':
+        return jsonify(antenna_stats_serverHTML)
+
+
+@app.route('/navigation/cached_content/antenna_modal', methods=["POST", "GET"])
+def antenna_modal_server():
+    if request.method == 'POST':
+        global antenna_modal_serverHTML
+        antenna_modal_serverHTML = (request.get_data().decode('UTF-8'))
+        return flask.render_template_string(antenna_modal_serverHTML)
+    if request.method == 'GET':
+        return flask.render_template_string(antenna_modal_serverHTML)
+
+
+@app.route('/navigation/cached_content/goal_modal', methods=["POST", "GET"])
+def goal_modal_server():
+    if request.method == 'POST':
+        global goal_modal_serverHTML
+        goal_modal_serverHTML = (request.get_data().decode('UTF-8'))
+        return flask.render_template_string(goal_modal_serverHTML)
+    if request.method == 'GET':
+        return flask.render_template_string(goal_modal_serverHTML)
+
+
+@app.route('/navigation/cached_content/goal_stats', methods=["POST", "GET"])
+def goal_stats_server():
+    if request.method == 'POST':
+        global goal_stats_serverHTML
+        data = request.get_json()
+        goal_stats_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
+    if request.method == 'GET':
+        return jsonify(goal_stats_serverHTML)
+
+
+@app.route('/navigation/cached_content/navQueue', methods=["POST", "GET"])
+def navQueue():
+    if request.method == 'POST':
+        global navQueue_serverHTML
+        data = request.get_json()
+        navQueue_serverHTML = flask.json.dumps(data)
+        return jsonify(success=True)
+    if request.method == 'GET':
+        return jsonify(navQueue_serverHTML)
+
+
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
