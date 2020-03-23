@@ -50,10 +50,12 @@ def pds():
     """PDS page."""
     return flask.render_template("pages/PDS.html", roverIP=fetch_ros_master_ip())
 
+
 @app.route("/stream")
 def stream():
     """Streams page."""
     return flask.render_template("pages/Streams.html", roverIP=fetch_ros_master_ip())
+
 
 @app.route("/navigation")
 def navigation():
@@ -282,11 +284,13 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
+
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
     stream_url = request.args['stream_url']
     success, message = stream_capture(stream_url)
     return jsonify(success=success, msg=message)
+
 
 @app.route("/initiate_feed_recording/", methods=["POST", "GET"])
 def initiate_feed_recording():
@@ -294,8 +298,9 @@ def initiate_feed_recording():
     if is_recording_stream(stream_url):
         return jsonify(success=False, msg="Stream is already recording")
     else:
-        success, message = start_recording_feed(stream_url);
+        success, message = start_recording_feed(stream_url)
         return jsonify(success=success, msg=message)
+
 
 @app.route("/stop_feed_recording/", methods=["POST", "GET"])
 def stop_feed_recording():
@@ -305,6 +310,7 @@ def stop_feed_recording():
         return jsonify(success=success, msg=message)
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")
+
 
 @app.route("/is_recording/", methods=["POST", "GET"])
 def is_recording():
