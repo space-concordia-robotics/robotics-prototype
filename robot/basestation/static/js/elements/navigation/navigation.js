@@ -757,6 +757,6 @@ $(document).ready(() => {
             saveNavigationQueueToServer()
         })
     }
-    
+
     initNavigationPanel()
 })
