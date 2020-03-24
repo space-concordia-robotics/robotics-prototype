@@ -22,7 +22,7 @@ $(document).ready(() => {
         saveAntennaStatsToServer()
     })
     // setup topics to communicate with GoalsNode
-    let goal_publisher = new ROSLIB.Topic({
+    let create_goal_publisher = new ROSLIB.Topic({
         ros: ros,
         name: 'create_goal',
         messageType: 'mcu_control/RoverGoal'
@@ -31,6 +31,11 @@ $(document).ready(() => {
         ros: ros,
         name: 'goal_list',
         messageType: 'mcu_control/RoverGoalList'
+    })
+    let delete_goal_publisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'delete_goal',
+        messageType: 'std_msgs/String'
     })
     // setup gps parameters for antenna directing
     let antenna_latitude = new ROSLIB.Param({
@@ -590,13 +595,13 @@ $(document).ready(() => {
             let rosGoalName = $('#goal-name-' + current).val()
             let rosGoalLong = long
             let rosGoalLat = lat
-            let goal_data = new ROSLIB.Message({
+            let goalData = new ROSLIB.Message({
                 name: rosGoalName,
                 long: rosGoalLong,
                 lat: rosGoalLat
             })
 
-            goal_publisher.publish(goal_data)
+            create_goal_publisher.publish(goalData)
         } catch (e) {
             $('#goal-confirm-btn-' + current).prop('disabled', false)
             $('#goal-change-btn-' + current).prop('disabled', true)
@@ -740,8 +745,18 @@ $(document).ready(() => {
 
     function createGoalDeleteButtonHandler(current) {
         $('#goal-delete-btn-' + current).on('click', function(event) {
-            $('#new-goal-btn-' + current).remove()
 
+            /*------------------------\
+            implement ROS goal deleting
+            \------------------------*/
+            let goalName = $('#goal-name-' + current).val()
+            let msg = new ROSLIB.Message({
+                data: goalName
+            })
+            delete_goal_publisher.publish(msg)
+
+
+            $('#new-goal-btn-' + current).remove()
             navQueue.remove(current)
 
             if (!(navQueue.top() == undefined)) {
