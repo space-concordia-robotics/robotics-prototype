@@ -204,7 +204,7 @@ function initRosWeb () {
         textColor('#battery-voltage', 'red')
       }
 
-    } else { 
+    } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
 
@@ -253,7 +253,7 @@ function initRosWeb () {
           $obj.css({'color': 'orange'})
         }
 
-      } else { 
+      } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
 
@@ -279,6 +279,11 @@ function initRosWeb () {
     $('#left-front-current').text(parseFloat(message.effort[3]).toFixed(3))
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
+  })
+  goal_list_subscriber = new ROSLIB.Topic({
+      ros: ros,
+      name: 'goal_list',
+      messageType: 'mcu_control/RoverGoalList'
   })
 }
 
@@ -469,11 +474,11 @@ CAMERA_PORTS = 'camera_ports'
 
 /**
  * Sends a request to the task handler.
- * 
+ *
  * STATUS_STOP stops the task
  * STATUS_START starts the task
  * STATUS_CHECK obtains insight on the task
- * 
+ *
  * @reqTask The task related to the request
  * @reqStatus The status of the request
  * @callback Callback on success
