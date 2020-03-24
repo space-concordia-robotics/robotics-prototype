@@ -4,11 +4,19 @@ import sys
 import time
 import rospy
 from mcu_control.msg import RoverGoal, RoverGoalList
+from std_msgs.msg import String
 
 
-def subscriber_callback(message):
+def create_goal_callback(message):
     goal = RoverGoal(message.name, message.long, message.lat)
     goal_list.append(goal)
+
+
+def delete_goal_callback(message):
+    name = message.data
+    for goal in goal_list:
+        if goal.name == name:
+            goal_list.remove(goal)
 
 
 if __name__ == '__main__':
@@ -18,12 +26,15 @@ if __name__ == '__main__':
     rospy.loginfo('Initialized "' + node_name +
                   '" node for pub/sub/service functionality')
 
-    goal_sub_topic = 'create_goal'
-    goal_sub = rospy.Subscriber(goal_sub_topic, RoverGoal, subscriber_callback)
+    create_goal_sub_topic = 'create_goal'
+    create_goal_sub = rospy.Subscriber(create_goal_sub_topic, RoverGoal, create_goal_callback)
 
-    goal_pub_topic = 'goal_list'
-    rospy.loginfo('Beginning to publish to "' + goal_pub_topic + '" topic')
-    goal_pub = rospy.Publisher(goal_pub_topic, RoverGoalList, queue_size=1)
+    delete_goal_sub_topic = 'delete_goal'
+    delete_goal_sub = rospy.Subscriber(delete_goal_sub_topic, String, delete_goal_callback)
+
+    goal_list_pub_topic = 'goal_list'
+    rospy.loginfo('Beginning to publish to "' + goal_list_pub_topic + '" topic')
+    goal_pub = rospy.Publisher(goal_list_pub_topic, RoverGoalList, queue_size=1)
     rate = rospy.Rate(1)  # 1Hz
 
     goal_list = []
