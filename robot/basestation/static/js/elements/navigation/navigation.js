@@ -27,15 +27,13 @@ $(document).ready(() => {
         name: 'create_goal',
         messageType: 'mcu_control/RoverGoal'
     })
-    let goal_list_subscriber = new ROSLIB.Topic({
-        ros: ros,
-        name: 'goal_list',
-        messageType: 'mcu_control/RoverGoalList'
-    })
     let delete_goal_publisher = new ROSLIB.Topic({
         ros: ros,
         name: 'delete_goal',
         messageType: 'std_msgs/String'
+    })
+    goal_list_subscriber.subscribe(function(message) {
+        goalList = message.goal_list
     })
     // setup gps parameters for antenna directing
     let antenna_latitude = new ROSLIB.Param({
@@ -87,11 +85,11 @@ $(document).ready(() => {
             saveNavigationQueueToServer()
 
             if (navQueue.top() != undefined) {
-                goal_latitude.set(parseFloat(navQueue.top().latitude))
-                goal_longitude.set(parseFloat(navQueue.top().longitude))
+                goal_latitude.set(parseFloat(navQueue.top().lat))
+                goal_longitude.set(parseFloat(navQueue.top().long))
 
-                $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-                $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
+                $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
+                $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
 
                 appendToConsole('Moving to next coordinate!')
 
@@ -120,6 +118,7 @@ $(document).ready(() => {
 
     let navQueue = new navigationQueue()
     let count = 0
+    let goalList = []
 
     function initNavigationPanel() {
         antenna_latitude.get(function(lat) {
@@ -209,7 +208,7 @@ $(document).ready(() => {
                             url: '/navigation/cached_content/navQueue',
                             success: function(result) {
                                 if (!jQuery.isEmptyObject(result)) {
-                                    navQueue.data = JSON.parse(result).data
+                                    navQueue.data = goalList
                                     navQueue.shift = JSON.parse(result).shift
                                     if (navQueue.data.length != 0)
                                         navQueue.flag = false
@@ -256,8 +255,8 @@ $(document).ready(() => {
             //the first time something is added to the queue, it should be set as current goal paramaters, so this code should only happen once
             if (this.flag || this.data.length == 0) {
                 has_gps_goal.set(false)
-                goal_latitude.set(item.latitude)
-                goal_longitude.set(item.longitude)
+                goal_latitude.set(item.lat)
+                goal_longitude.set(item.long)
                 this.flag = false
             }
             this.data.push(item)
@@ -284,16 +283,16 @@ $(document).ready(() => {
                     }
                 }
                 if (navQueue.data.length != 0) {
-                    goal_latitude.set(this.top().latitude)
-                    goal_longitude.set(this.top().longitude)
+                    goal_latitude.set(this.top().lat)
+                    goal_longitude.set(this.top().long)
                     has_gps_goal.set(false)
                 }
             }
         }
 
         this.change = function(index, lat, long) {
-            this.data[index - this.shift].latitude = lat
-            this.data[index - this.shift].longitude = long
+            this.data[index - this.shift].lat = lat
+            this.data[index - this.shift].long = long
 
             if ((index - this.shift) == 0) {
                 goal_latitude.set(lat)
@@ -561,13 +560,17 @@ $(document).ready(() => {
                 throw "You didn't enter anything for long"
             }
 
+            goalName = $('#goal-name-' + current).val()
+            if (goalName.length != 0) $('#goal-name-' + current).attr('value', goalName)
+            else $('#goal-name-' + current).attr('value', 'Goal-'+current)
+
             $('#goal-name-fieldset-' + current).prop('disabled', true)
             $('#goal-lat-fieldset-' + current).prop('disabled', true)
             $('#goal-long-fieldset-' + current).prop('disabled', true)
 
             let latlongpair = {
-                latitude: lat,
-                longitude: long
+                lat: lat,
+                long: long
             }
 
             $("#goal-modal-body-content").attr("count", count)
@@ -584,8 +587,8 @@ $(document).ready(() => {
                 navQueue.enqueue(latlongpair)
             }
 
-            $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-            $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
+            $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
+            $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
 
             saveNavigationQueueToServer()
 
@@ -760,8 +763,8 @@ $(document).ready(() => {
             navQueue.remove(current)
 
             if (!(navQueue.top() == undefined)) {
-                $('#goal-stats-lat').text(navQueue.top().latitude.toFixed(6))
-                $('#goal-stats-long').text(navQueue.top().longitude.toFixed(6))
+                $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
+                $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
             } else {
                 $('#goal-stats-lat').text("----")
                 $('#goal-stats-long').text("----")
@@ -773,5 +776,5 @@ $(document).ready(() => {
         })
     }
 
-    initNavigationPanel()
+    //initNavigationPanel()
 })
