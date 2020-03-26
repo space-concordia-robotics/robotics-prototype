@@ -8,10 +8,6 @@ import sys
 thismodule = sys.modules[__name__]
 thismodule.gotGpsPos = False
 
-
-#from mcu_control.msg import RoverPosition, RoverGoal
-
-
 def subscriber_callback(message):
     rospy.loginfo(message)
     if message.x < -900 or message.y < -900:
