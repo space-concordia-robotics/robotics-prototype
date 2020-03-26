@@ -52,9 +52,18 @@ $(document).ready(() => {
         ros: ros,
         name: 'has_gps_goal'
     })
-    let got_antenna_pos = new ROSLIB.Param({
+    // let got_antenna_pos = new ROSLIB.Param({
+    //     ros: ros,
+    //     name: 'got_antenna_pos'
+    // })
+    // setup gps parameters for rover goals
+    let goal_latitude = new ROSLIB.Param({
         ros: ros,
-        name: 'got_antenna_pos'
+        name: 'goal_latitude'
+    })
+    let goal_longitude = new ROSLIB.Param({
+        ros: ros,
+        name: 'goal_longitude'
     })
     // setup a subscriber for the rover_goal topic
     let rover_goal_listener = new ROSLIB.Topic({
@@ -67,240 +76,111 @@ $(document).ready(() => {
         //the distance in meters until we are sure we are at the coordinates should be less than 0.5 meters
         if (parseFloat(message.y) < 0.5) {
 
-            //remove the most recent coordinate pair from the GUI
-            for (i = 0; i < count; i++) {
+            // delete the closest goal
+            // update goal ROS parameters
 
-                if ($('#new-goal-btn-' + i).length) {
-                    $('#new-goal-btn-' + i).remove()
-                    break
-                }
-            }
+            // if nothing is left, display -----
 
-            navQueue.data[0] = null
-            //the elements are deleted from data, they are only set to null. The array will only get resized in this case, where those null values will be destroyed
-            while (navQueue.top() == null && (navQueue.data.length != 0)) {
-                navQueue.dequeue()
-            }
-            saveGoalModalToServer()
-            saveNavigationQueueToServer()
+            // $('#goal-stats-lat').text('----')
+            // $('#goal-stats-long').text('----')
 
-            if (navQueue.top() != undefined) {
-                goal_latitude.set(parseFloat(navQueue.top().lat))
-                goal_longitude.set(parseFloat(navQueue.top().long))
-
-                $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
-                $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
-
-                appendToConsole('Moving to next coordinate!')
-
-            } else {
-                $('#goal-stats-lat').text('----')
-                $('#goal-stats-long').text('----')
-            }
-
-            has_gps_goal.set(false)
+            // and set the has_gps_goal param to false
+            // has_gps_goal.set(false)
         }
-
-        $('#goal-stats-rover-heading').text(parseFloat(message.x).toFixed(3))
-        $('#goal-stats-distance').text(parseFloat(message.y).toFixed(2))
-
-        saveGoalStatsToServer()
-    })
-    // setup gps parameters for rover goals
-    let goal_latitude = new ROSLIB.Param({
-        ros: ros,
-        name: 'goal_latitude'
-    })
-    let goal_longitude = new ROSLIB.Param({
-        ros: ros,
-        name: 'goal_longitude'
     })
 
-    let navQueue = new navigationQueue()
     let count = 0
     let goalList = []
 
+    initNavigationPanel()
+
     function initNavigationPanel() {
         antenna_latitude.get(function(lat) {
-            if (lat != null) {
-                antenna_longitude.get(function(long) {
-                    if (long != null) {
-                        antenna_start_dir.get(function(dir) {
-                            if (dir != null) {
-                                appendToConsole('Antenna parameters already set')
-                                got_antenna_pos.set(true)
-
-                                $.get({
-                                    url: '/navigation/cached_content/antenna_stats',
-                                    success: function(result) {
-                                        $('#antenna-stats-lat').text(lat.toFixed(6))
-                                        $('#antenna-stats-long').text(long.toFixed(6))
-                                        $('#antenna-stats-heading').text(dir)
-
-                                        if (!jQuery.isEmptyObject(result)) {
-                                            $('#antenna-stats-dist-to-rover').text(JSON.parse(result).distance)
-                                            $('#antenna-stats-rec-angle').text(JSON.parse(result).heading)
-                                        } else {
-                                            $('#antenna-stats-dist-to-rover').text("----")
-                                            $('#antenna-stats-rec-angle').text("----")
-                                        }
-                                    },
-                                })
-                                $.get({
-                                    url: '/navigation/cached_content/antenna_modal',
-                                    success: function(result) {
-
-                                        let detachedLatFormatData = $('#antenna-select-lat-format').detach()
-                                        let detachedLongFormatData = $('#antenna-select-long-format').detach()
-
-                                        $('#antenna-modal-body').empty()
-                                        $('#antenna-modal-body').append(result)
-
-                                        createAntennaLatitudeChangeButtonHandler(detachedLatFormatData)
-                                        createAntennaLongitudeChangeButtonHandler(detachedLongFormatData)
-                                        createAntennaBearingChangeButtonHandler()
-                                    }
-                                })
-                            } else {
-                                appendToConsole('Enter antenna parameters')
-                                got_antenna_pos.set(false)
-                            }
-                        })
+            antenna_longitude.get(function(long) {
+                antenna_start_dir.get(function(heading) {
+                    if (lat && long && heading) {
+                        appendToConsole('Antenna parameters already set')
+                        //got_antenna_pos.set(true)
+                        setupAntennaStats(lat, long, heading)
                     } else {
-                        appendToConsole('Enter antenna parameters')
-                        got_antenna_pos.set(false)
+                        appendToConsole('Enter all antenna parameters')
+                        //got_antenna_pos.set(false)
                     }
                 })
-            } else {
-                appendToConsole('Enter antenna parameters')
-                got_antenna_pos.set(false)
-            }
+            })
         })
 
         goal_latitude.get(function(lat) {
-            if (lat != null) {
-                goal_longitude.get(function(long) {
-                    if (long != null) {
-                        appendToConsole('Goal coordinates already set')
-                        has_gps_goal.set(true)
-                        $.get({
-                            url: '/navigation/cached_content/goal_modal',
-                            success: function(result) {
-
-                                $('#goal-modal-body').empty()
-                                $('#goal-modal-body').append(result)
-
-                                //this variable keeps track of the number of things created, so the event handlers can properly be re-initiazed.
-                                count = $('#goal-modal-body-content').attr('count')
-
-                                for (i = 0; i < count; i++) {
-                                    if ($('#new-goal-btn-' + i).length) {
-                                        createGoalLatitudeHandler(i)
-                                        createGoalLongitudeHandler(i)
-                                        createGoalChangeButtonHandler(i)
-                                        createGoalDeleteButtonHandler(i)
-                                        createGoalConfirmButtonHandler(i)
-                                    }
-                                }
-                            }
-                        })
-                        $.get({
-                            url: '/navigation/cached_content/navQueue',
-                            success: function(result) {
-                                if (!jQuery.isEmptyObject(result)) {
-                                    navQueue.data = goalList
-                                    navQueue.shift = JSON.parse(result).shift
-                                    if (navQueue.data.length != 0)
-                                        navQueue.flag = false
-                                }
-                            }
-                        })
-                        $.get({
-                            url: '/navigation/cached_content/goal_stats',
-                            success: function(result) {
-
-                                //the first two are saved as ROS params, while the bottom two saved on the server, hence the difference
-                                $('#goal-stats-lat').text(lat.toFixed(6))
-                                $('#goal-stats-long').text(long.toFixed(6))
-
-                                if (!jQuery.isEmptyObject(result)) {
-                                    $("#goal-stats-rover-heading").text(JSON.parse(result).heading)
-                                    $("#goal-stats-distance").text(JSON.parse(result).distance)
-                                } else {
-                                    $("#goal-stats-rover-heading").text('----')
-                                    $("#goal-stats-distance").text('----')
-                                }
-                            }
-                        })
-                    } else {
-                        appendToConsole("Enter goal parmameters")
-                    }
-                })
-            } else {
-                appendToConsole("Enter goal paramaters")
-            }
+            goal_longitude.get(function(long) {
+                if (lat && long) {
+                    has_gps_goal.set(true)
+                    appendToConsole('Goal coordinates already set')
+                    setupGoalStats(lat, long)
+                } else {
+                    appendToConsole('Add a goal to get nav data')
+                }
+            })
         })
+
+        // $.get({
+        //     url: '/navigation/cached_content/antenna_modal',
+        //     success: function(result) {
+        //
+        //         let detachedLatFormatData = $('#antenna-select-lat-format').detach()
+        //         let detachedLongFormatData = $('#antenna-select-long-format').detach()
+        //
+        //         $('#antenna-modal-body').empty()
+        //         $('#antenna-modal-body').append(result)
+        //
+        //         createAntennaLatitudeChangeButtonHandler(detachedLatFormatData)
+        //         createAntennaLongitudeChangeButtonHandler(detachedLongFormatData)
+        //         createAntennaBearingChangeButtonHandler()
+        //     }
+        // })
+        function setupAntennaStats(lat, long, heading) {
+                $('#antenna-stats-lat').text(lat.toFixed(6))
+                $('#antenna-stats-long').text(long.toFixed(6))
+                $('#antenna-stats-heading').text(heading + '°')
+        }
+
+        function setupGoalStats(lat, long) {
+                $('#goal-stats-lat').text(lat)
+                $('#goal-stats-long').text(long)
+        }
+
+
+        // we want to build the goal-modal-body body using the current goal list.        $('#goal-modal-body').append()
+        // then we want to create the handlers with the appropriate ids.
+        // the ids will always start at 0 since this is just for the ui and the ROS thing works by name.
+
+        // these are the button handlers
+        // instead of going to count we will go up to the length of the goal list
+
+        // for (i = 0; i < count; i++) {
+        //     if ($('#new-goal-btn-' + i).length) {
+        //         createGoalLatitudeHandler(i)
+        //         createGoalLongitudeHandler(i)
+        //         createGoalChangeButtonHandler(i)
+        //         createGoalDeleteButtonHandler(i)
+        //         createGoalConfirmButtonHandler(i)
+        //     }
+        // }
+
+
+        // -------------------------------------------------------------
+        // for the goal stats we will generate them dynamically from a default of '----'
+        // no need of saving anything...
+        // this will use the navigationNode
+        // basically it checks if has_gps_goal is true, and returns some stats about the bearing and distance
+
+        // $("#goal-stats-rover-heading").text('----')
+        // $("#goal-stats-distance").text('----')
+        //
+        // $('#goal-stats-lat').text()
+        // $('#goal-stats-long').text()
     }
-    //theres probably a better place to put this, this is just a temporary fix
-    initNavigationPanel()
 
-    // 0 1 2 3 4 5
-    function navigationQueue() {
-        this.data = []
-        this.shift = 0
-        this.flag = true
 
-        this.enqueue = function(item) {
-
-            //the first time something is added to the queue, it should be set as current goal paramaters, so this code should only happen once
-            if (this.flag || this.data.length == 0) {
-                has_gps_goal.set(false)
-                goal_latitude.set(item.lat)
-                goal_longitude.set(item.long)
-                this.flag = false
-            }
-            this.data.push(item)
-        }
-
-        this.dequeue = function() {
-            this.data.shift()
-            this.shift++
-        }
-
-        this.top = function() {
-            return this.data[0]
-        }
-
-        this.remove = function(index) {
-            this.data[index - this.shift] = null
-
-            //if the current top is deleted, gotta adjust the goal_lat and goal_long parmamters
-            if (index - this.shift == 0) {
-                while (navQueue.top() == null) {
-                    navQueue.dequeue()
-                    if (navQueue.data.length == 0) {
-                        break
-                    }
-                }
-                if (navQueue.data.length != 0) {
-                    goal_latitude.set(this.top().lat)
-                    goal_longitude.set(this.top().long)
-                    has_gps_goal.set(false)
-                }
-            }
-        }
-
-        this.change = function(index, lat, long) {
-            this.data[index - this.shift].lat = lat
-            this.data[index - this.shift].long = long
-
-            if ((index - this.shift) == 0) {
-                goal_latitude.set(lat)
-                goal_longitude.set(long)
-                has_gps_goal.set(false)
-            }
-        }
-    }
 
     $('#antenna-select-lat-format-btn').on('click', function(event) {
         event.preventDefault()
@@ -384,12 +264,6 @@ $(document).ready(() => {
 
             $("#antenna-bearing-input").attr("value", bearing)
 
-            //ROS params
-            antenna_latitude.set(lat)
-            antenna_longitude.set(long)
-            antenna_start_dir.set(bearing)
-
-            appendToConsole('antenna parmameters have been set!')
 
             $('.antenna-input-field').prop('disabled', true)
             $('.antenna-change-btn').prop('disabled', false)
@@ -397,13 +271,16 @@ $(document).ready(() => {
 
             createAntennaBearingChangeButtonHandler()
 
-            got_antenna_pos.set(false)
+            //got_antenna_pos.set(false)
 
+            //ROS params
+            antenna_latitude.set(lat)
+            antenna_longitude.set(long)
+            antenna_start_dir.set(bearing)
             $('#antenna-stats-lat').text(lat.toFixed(6))
             $('#antenna-stats-long').text(long.toFixed(6))
             $('#antenna-stats-heading').text(bearing)
-
-            saveAntennaModalToServer()
+            appendToConsole('Antenna parmameters have been set!')
         } catch (e) {
             appendToConsole(e)
         }
@@ -471,6 +348,8 @@ $(document).ready(() => {
 
 
     $("#new-goal-coordinates-btn").on('click', function(event) {
+        // this call appends the inputTemplate to the goal-modal-body-content
+        // which we can keep, just chnage the count situation to use the list
         $.ajax('/navigation/inputTemplates/new-goal-coordinates-btn/' + count, {
             success: function(result) {
                 $("#goal-modal-body-content").append(result)
@@ -484,6 +363,9 @@ $(document).ready(() => {
     })
 
     function insertDataInQueue(current, lat_format, long_format) {
+        // the queue doesn't exist anymore you fuck
+        // just send the data to the node
+        // maybe rename this function into confirmGoalData or something
         let lat = null
         let long = null
         try {
@@ -562,7 +444,7 @@ $(document).ready(() => {
 
             goalName = $('#goal-name-' + current).val()
             if (goalName.length != 0) $('#goal-name-' + current).attr('value', goalName)
-            else $('#goal-name-' + current).attr('value', 'Goal-'+current)
+            else $('#goal-name-' + current).attr('value', 'Goal-' + current)
 
             $('#goal-name-fieldset-' + current).prop('disabled', true)
             $('#goal-lat-fieldset-' + current).prop('disabled', true)
@@ -573,24 +455,23 @@ $(document).ready(() => {
                 long: long
             }
 
+            // maybe put the rest of this in a separate function
+
             $("#goal-modal-body-content").attr("count", count)
 
-            saveGoalModalToServer()
 
             //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
             if ($("#goal-change-btn-" + current).data('clicked')) {
                 $(this).data('clicked', false)
-                navQueue.change(current, lat, long)
+                // maybe make a change goal option here
             } else {
-                if (navQueue.data.length == 0) appendToConsole('Goal data set!')
-
-                navQueue.enqueue(latlongpair)
+                // add the goal to data
             }
 
-            $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
-            $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
+            //change stats to next goal
+            $('#goal-stats-lat').text()
+            $('#goal-stats-long').text()
 
-            saveNavigationQueueToServer()
 
             /*----------------------------------\
             this section implements ROS goal node
@@ -605,13 +486,13 @@ $(document).ready(() => {
             })
 
             create_goal_publisher.publish(goalData)
+
         } catch (e) {
             $('#goal-confirm-btn-' + current).prop('disabled', false)
             $('#goal-change-btn-' + current).prop('disabled', true)
 
             appendToConsole(e)
         }
-        console.log(navQueue)
     }
 
     function goalHandlerTemplate(mode, format, current) {
@@ -685,55 +566,6 @@ $(document).ready(() => {
         })
     }
 
-
-    function saveNavigationQueueToServer() {
-        $.post({
-            url: "/navigation/cached_content/navQueue",
-            contentType: "application/json",
-            data: JSON.stringify(navQueue)
-        })
-    }
-
-    function saveGoalModalToServer() {
-        $.post({
-            url: "/navigation/cached_content/goal_modal",
-            data: $('#goal-modal-body').html()
-        })
-    }
-
-    function saveAntennaModalToServer() {
-        $.post({
-            url: "/navigation/cached_content/antenna_modal",
-            data: $('#antenna-modal-body').html(),
-        })
-    }
-
-    function saveGoalStatsToServer() {
-        let obj = {
-            distance: $("#goal-stats-distance").text(),
-            heading: $("#goal-stats-rover-heading").text()
-        }
-
-        $.post({
-            url: "/navigation/cached_content/goal_stats",
-            contentType: "application/json",
-            data: JSON.stringify(obj)
-        })
-    }
-
-    function saveAntennaStatsToServer() {
-        let obj = {
-            distance: $("#antenna-stats-dist-to-rover").text(),
-            heading: $("#antenna-stats-rec-angle").text()
-        }
-
-        $.post({
-            url: "/navigation/cached_content/antenna_stats",
-            contentType: "application/json",
-            data: JSON.stringify(obj)
-        })
-    }
-
     function createGoalChangeButtonHandler(current) {
         $('#goal-change-btn-' + current).on('click', function(event) {
             $(this).data('clicked', true)
@@ -760,8 +592,8 @@ $(document).ready(() => {
 
 
             $('#new-goal-btn-' + current).remove()
-            navQueue.remove(current)
 
+            // set new stats to the new goal and update params..
             if (!(navQueue.top() == undefined)) {
                 $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
                 $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
@@ -770,11 +602,6 @@ $(document).ready(() => {
                 $('#goal-stats-long').text("----")
                 appendToConsole('No coordinates left to go to!')
             }
-
-            saveGoalModalToServer()
-            saveNavigationQueueToServer()
         })
     }
-
-    //initNavigationPanel()
 })
