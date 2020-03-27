@@ -40,8 +40,8 @@ $(document).ready(() => {
         if (count > 0) {
             goal_latitude.set(goalList[0].lat)
             goal_longitude.set(goalList[0].long)
-            $('#goal-stats-lat').text(goalList[0].lat)
-            $('#goal-stats-long').text(goalList[0].long)
+            $('#goal-stats-lat').text(goalList[0].lat.toFixed(6))
+            $('#goal-stats-long').text(goalList[0].long.toFixed(6))
         } else {
             goal_latitude.set(false)
             goal_longitude.set(false)
@@ -140,40 +140,9 @@ $(document).ready(() => {
         }
 
         function setupGoalStats(lat, long) {
-            $('#goal-stats-lat').text(lat)
-            $('#goal-stats-long').text(long)
+            $('#goal-stats-lat').text(lat.toFixed(6))
+            $('#goal-stats-long').text(long.toFixed(6))
         }
-
-        for (i = 0; i < count; i++) {
-            console.log(i)
-
-            // $.get('/navigation/inputTemplates/new-goal-coordinates-btn/' + i, {
-            //     success: function(result) {
-            //         $("#goal-modal-body-content").append(result)
-            //
-            //         createGoalLatitudeHandler(i)
-            //         createGoalLongitudeHandler(i)
-            //         createGoalButtons(i)
-            //     }
-            // })
-        }
-
-        // we want to build the goal-modal-body body using the current goal list.        $('#goal-modal-body').append()
-        // then we want to create the handlers with the appropriate ids.
-        // the ids will always start at 0 since this is just for the ui and the ROS thing works by name.
-
-        // these are the button handlers
-        // instead of going to count we will go up to the length of the goal list
-
-        // for (i = 0; i < count; i++) {
-        //     if ($('#new-goal-btn-' + i).length) {
-        //         createGoalLatitudeHandler(i)
-        //         createGoalLongitudeHandler(i)
-        //         createGoalChangeButtonHandler(i)
-        //         createGoalDeleteButtonHandler(i)
-        //         createGoalConfirmButtonHandler(i)
-        //     }
-        // }
 
 
         // -------------------------------------------------------------
@@ -361,31 +330,21 @@ $(document).ready(() => {
 
     $('#toggle-goal-modal-btn').on('click', function(event) {
         $("#goal-modal-body-content").empty()
+        let goalTemplate = $('#created-goal-template').html()
         for (i = 0; i < count; i++) {
-            (function(i) {
+            $("#goal-modal-body-content").append(goalTemplate)
+            $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
+            $(".goal-" + i).find('*').addClass('goal-' + i)
 
-                $.ajax('/navigation/inputTemplates/new-goal-coordinates-btn/' + i, {
-                    success: function(result) {
-                        $("#goal-modal-body-content").append(result)
+            createGoalButtons(i)
 
-                        createGoalLatitudeHandler(i)
-                        createGoalLongitudeHandler(i)
-                        createGoalButtons(i)
+            $('#goal-name.goal-' + i).val(goalList[i].name)
+            $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
+            $('#goal-change-btn.goal-' + i).prop('disabled', false)
+            $('div.goal-' + i + ' fieldset').prop('disabled', true)
+            $('#goal-DD-dec-deg-input.lat.goal-' + i).val(goalList[i].lat)
+            $('#goal-DD-dec-deg-input.long.goal-' + i).val(goalList[i].long)
 
-
-                        $('#goal-lat-select-format-btn-' + i).click()
-                        $('#goal-lat-DD-btn-' + i).click()
-                        $('#goal-long-select-format-btn-' + i).click()
-                        $('#goal-long-DD-btn-' + i).click()
-
-                        $('#goal-name-' + i).val(goalList[i].name)
-                        $('#goal-confirm-btn-' + i).prop('disabled', true)
-                        $('#goal-lat-DD-dec-deg-input-' + i).val(goalList[i].lat)
-                        $('#goal-long-DD-dec-deg-input-' + i).val(goalList[i].long)
-
-                    }
-                })
-            })(i)
         }
     })
 
@@ -397,108 +356,111 @@ $(document).ready(() => {
 
 
     $("#new-goal-coordinates-btn").on('click', function(event) {
-        // this call appends the inputTemplate to the goal-modal-body-content
-        // which we can keep, just chnage the count situation to use the list
+        let newGoalTemplate = $('#add-goal-coordinates').html()
 
+        $("#goal-modal-body-content").append(newGoalTemplate)
+        $("#goal-modal-body-content .goal").addClass('goal-' + count).removeClass('goal')
+        $(".goal-" + count).find('*').addClass('goal-' + count)
 
-        $.ajax('/navigation/inputTemplates/new-goal-coordinates-btn/' + count, {
-            success: function(result) {
-                $("#goal-modal-body-content").append(result)
-
-                createGoalLatitudeHandler(count)
-                createGoalLongitudeHandler(count)
-                createGoalButtons(count)
-            }
-        })
+        createGoalLatitudeHandler(count)
+        createGoalLongitudeHandler(count)
+        createGoalButtons(count)
     })
 
-    function insertDataInQueue(current, lat_format, long_format) {
+    function saveGoalData(current, lat_format, long_format) {
         // the queue doesn't exist anymore you fuck
         // just send the data to the node
         // maybe rename this function into confirmGoalData or something
         let lat = null
         let long = null
         try {
+            for (i = 0; i < count; i++) {
+                if ($('#goal-name.goal-' + current).val() == goalList[i].name) {
+                    //alert("Please choose another name")
+                    throw 'Enter different name'
+                }
+            }
             if (lat_format == 0) {
                 //decimal-degrees mode
-                decdeg = parseFloat($('#goal-lat-DD-dec-deg-input-' + current).val())
+                decdeg = parseFloat($('#goal-DD-dec-deg-input.lat.goal-' + current).val())
 
                 if (isNaN(decdeg)) throw "Bad input lat DD"
 
-                $('#goal-lat-DD-dec-deg-input-' + current).attr("value", decdeg)
+                $('#goal-DD-dec-deg-input.lat.goal-' + current).attr("value", decdeg)
 
                 lat = decdeg
             } else if (lat_format == 1) {
                 //degrees-decimal-minutes mode
-                let dec = parseFloat($('#goal-lat-DDM-deg-input-' + current).val())
-                let min = parseFloat($('#goal-lat-DDM-dec-min-input-' + current).val())
+                let dec = parseFloat($('#goal-DDM-deg-input.lat.goal-' + current).val())
+                let min = parseFloat($('#goal-DDM-dec-min-input.lat.goal-' + current).val())
 
                 if (isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
 
                 lat = dec + (min / 60)
 
-                $('#goal-lat-DDM-deg-input-' + current).attr("value", dec)
-                $('#goal-lat-DDM-dec-min-input-' + current).attr("value", min)
+                $('#goal-DDM-deg-input.lat.goal-' + current).attr("value", dec)
+                $('#goal-DDM-dec-min-input.lat.goal-' + current).attr("value", min)
 
             } else if (lat_format == 2) {
                 //degress-minutes-seconds mode
-                let dec = parseFloat($('#goal-lat-DMS-deg-input-' + current).val())
-                let mins = parseFloat($('#goal-lat-DMS-min-input-' + current).val())
-                let secs = parseFloat($('#goal-lat-DMS-sec-input-' + current).val())
+                let dec = parseFloat($('#goal-DMS-deg-input.lat.goal-' + current).val())
+                let mins = parseFloat($('#goal-DMS-min-input.lat.goal-' + current).val())
+                let secs = parseFloat($('#goal-DMS-sec-input.lat.goal-' + current).val())
 
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS"
 
                 lat = dec + (mins / 60 + secs / 3600)
 
-                $('#goal-lat-DMS-deg-input-' + current).attr("value", dec)
-                $('#goal-lat-DMS-min-input-' + current).attr("value", mins)
-                $('#goal-lat-DMS-sec-input-' + current).attr("value", secs)
+                $('#goal-DMS-deg-input.lat.goal-' + current).attr("value", dec)
+                $('#goal-DMS-min-input.lat.goal-' + current).attr("value", mins)
+                $('#goal-DMS-sec-input.lat.goal-' + current).attr("value", secs)
             } else {
                 throw "You didn't enter anything for lat"
             }
             if (long_format == 0) {
                 //decimal-degrees mode
-                long = parseFloat($('#goal-long-DD-dec-deg-input-' + current).val())
+                long = parseFloat($('#goal-DD-dec-deg-input.long.goal-' + current).val())
 
                 if (isNaN(long)) throw "Bad input long DD"
 
-                $('#goal-long-DD-dec-deg-input-' + current).attr("value", long)
+                $('#goal-DD-dec-deg-input.long.goal-' + current).attr("value", long)
             } else if (long_format == 1) {
                 //degrees-decimal-minutes mode
-                let dec = parseFloat($('#goal-long-DDM-deg-input-' + current).val())
-                let min = parseFloat($('#goal-long-DDM-dec-min-input-' + current).val())
+                let dec = parseFloat($('#goal-DDM-deg-input.long.goal-' + current).val())
+                let min = parseFloat($('#goal-DDM-dec-min-input.long.goal-' + current).val())
 
                 if (isNaN(dec) || isNaN(min)) throw "Bad input long DDM"
 
                 long = dec + (min / 60)
 
-                $('#goal-long-DDM-deg-input-' + current).attr("value", dec)
-                $('#goal-long-DDM-dec-min-input-' + current).attr("value", min)
+                $('#goal-DDM-deg-input.long.goal-' + current).attr("value", dec)
+                $('#goal-DDM-dec-min-input.long.goal-' + current).attr("value", min)
 
             } else if (long_format == 2) {
                 //degress-minutes-seconds mode
-                let dec = parseFloat($('#goal-long-DMS-deg-input-' + current).val())
-                let mins = parseFloat($('#goal-long-DMS-min-input-' + current).val())
-                let secs = parseFloat($('#goal-long-DMS-sec-input-' + current).val())
+                let dec = parseFloat($('#goal-DMS-deg-input.long.goal-' + current).val())
+                let mins = parseFloat($('#goal-DMS-min-input.long.goal-' + current).val())
+                let secs = parseFloat($('#goal-DMS-sec-input.long.goal-' + current).val())
 
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS"
 
                 long = dec + (mins / 60 + secs / 3600)
 
-                $('#goal-long-DMS-deg-input-' + current).attr("value", dec)
-                $('#goal-long-DMS-min-input-' + current).attr("value", mins)
-                $('#goal-long-DMS-sec-input-' + current).attr("value", secs)
+                $('#goal-DMS-deg-input.long.goal-' + current).attr("value", dec)
+                $('#goal-DMS-min-input.long.goal-' + current).attr("value", mins)
+                $('#goal-DMS-sec-input.long.goal-' + current).attr("value", secs)
             } else {
                 throw "You didn't enter anything for long"
             }
 
-            goalName = $('#goal-name-' + current).val()
-            if (goalName.length != 0) $('#goal-name-' + current).attr('value', goalName)
-            else $('#goal-name-' + current).attr('value', 'Goal-' + current)
+            let goalElem = $('#goal-name.goal-' + current)
+            let goalName = goalElem.val()
+            if (goalName.length != 0) goalElem.attr('value', goalName)
+            else goalElem.attr('value', 'Goal-' + current)
 
-            $('#goal-name-fieldset-' + current).prop('disabled', true)
-            $('#goal-lat-fieldset-' + current).prop('disabled', true)
-            $('#goal-long-fieldset-' + current).prop('disabled', true)
+            $('#goal-name-fieldset.goal-' + current).prop('disabled', true)
+            $('#goal-lat-fieldset.goal-' + current).prop('disabled', true)
+            $('#goal-long-fieldset.goal-' + current).prop('disabled', true)
 
             let latlongpair = {
                 lat: lat,
@@ -507,7 +469,7 @@ $(document).ready(() => {
 
             // maybe put the rest of this in a separate function
             //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
-            if ($("#goal-change-btn-" + current).data('clicked')) {
+            if ($("#goal-change-btn.goal" + current).data('clicked')) {
                 $(this).data('clicked', false)
                 // maybe make a change goal option here
             } else {
@@ -518,38 +480,34 @@ $(document).ready(() => {
             /*----------------------------------\
             this section implements ROS goal node
             \----------------------------------*/
-            // let rosGoalName = $('#goal-name-' + current).val()
-            // let rosGoalLong = long
-            // let rosGoalLat = lat
-            // let goalData = new ROSLIB.Message({
-            //     name: rosGoalName,
-            //     long: rosGoalLong,
-            //     lat: rosGoalLat
-            // })
-            //
-            // create_goal_publisher.publish(goalData)
+            let goalData = new ROSLIB.Message({
+                name: goalName,
+                long: long,
+                lat: lat
+            })
+
+            create_goal_publisher.publish(goalData)
 
         } catch (e) {
-            $('#goal-confirm-btn-' + current).prop('disabled', false)
-            $('#goal-change-btn-' + current).prop('disabled', true)
+            $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
+            $('#goal-change-btn.goal-' + current).prop('disabled', true)
 
             appendToConsole(e)
         }
     }
 
     function goalHandlerTemplate(mode, format, current) {
-        $("#goal-" + mode + "-" + format + "-btn-" + current).on('click', function(event) {
+        $("#goal-" + mode + "-" + format + "-btn.goal-" + current).on('click', function(event) {
             event.preventDefault()
 
-            $('#goal-' + mode + '-fieldset-' + current).attr("format", format)
-            $('#goal-' + mode + '-select-format-btn-' + current).dropdown('toggle')
-            $('#goal-' + mode + '-select-format-btn-' + current).detach()
+            $('#goal-' + mode + '-fieldset.goal-' + current).attr("format", format)
+            $('#goal-' + mode + '-select-format.goal-' + current).dropdown('toggle')
+            $('#goal-' + mode + '-select-format.goal-' + current).detach()
 
-            $.ajax('/navigation/inputTemplates/goal-' + format + '/' + mode + '/' + current, {
-                success: function(result) {
-                    $('#goal-' + mode + '-input-group-' + current).append(result)
-                }
-            })
+            let inputTemplate = $('#goal-' + format + '-input-template').html()
+            $('#goal-' + mode + '-input-group.goal-' + current).append(inputTemplate)
+            $('#goal-' + mode + '-input-group.goal-' + current).find('input').addClass('goal-' + current + ' ' + mode)
+            $('#goal-' + mode + '-input-group.goal-' + current + ' span.input-group-text:first').text(mode)
         })
     }
 
@@ -566,84 +524,73 @@ $(document).ready(() => {
     }
 
     function createGoalButtons(current) {
-        $.ajax('navigation/inputTemplates/goal-buttons/' + current, {
-            success: function(result) {
-                $("#goal-buttons-input-group-" + current).append(result)
+        let goalButtons = $("#goal-buttons").html()
+        $("#goal-buttons-input-group.goal-" + current).append(goalButtons)
+        $("#goal-buttons-input-group.goal-" + current).find('*').addClass('goal-' + current)
 
-                createGoalConfirmButtonHandler(current)
-                createGoalChangeButtonHandler(current)
-                createGoalDeleteButtonHandler(current)
-            }
-        })
+        createGoalConfirmButtonHandler(current)
+        createGoalChangeButtonHandler(current)
+        createGoalDeleteButtonHandler(current)
     }
 
     function createGoalConfirmButtonHandler(current) {
-        $('#goal-confirm-btn-' + current).on('click', function(event) {
+        $('#goal-confirm-btn.goal-' + current).on('click', function(event) {
             let lat_format = -1
             let long_format = -1
 
-            if ($("#goal-lat-fieldset-" + current).attr("format") == 'DD')
+            if ($("#goal-lat-fieldset.goal-" + current).attr("format") == 'DD')
                 lat_format = 0
-            else if ($("#goal-lat-fieldset-" + current).attr("format") == 'DDM')
+            else if ($("#goal-lat-fieldset.goal-" + current).attr("format") == 'DDM')
                 lat_format = 1
-            else if ($("#goal-lat-fieldset-" + current).attr("format") == 'DMS')
+            else if ($("#goal-lat-fieldset.goal-" + current).attr("format") == 'DMS')
                 lat_format = 2
             else console.log('error with goal lat')
 
-            if ($("#goal-long-fieldset-" + current).attr("format") == 'DD')
+            if ($("#goal-long-fieldset.goal-" + current).attr("format") == 'DD')
                 long_format = 0
-            else if ($("#goal-long-fieldset-" + current).attr("format") == 'DDM')
+            else if ($("#goal-long-fieldset.goal-" + current).attr("format") == 'DDM')
                 long_format = 1
-            else if ($("#goal-long-fieldset-" + current).attr("format") == 'DMS')
+            else if ($("#goal-long-fieldset.goal-" + current).attr("format") == 'DMS')
                 long_format = 2
             else console.log('error with goal long')
 
-            $('#goal-change-btn-' + current).prop('disabled', false)
-            $('#goal-confirm-btn-' + current).prop('disabled', true)
+            $('#goal-change-btn.goal-' + current).prop('disabled', false)
+            $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
 
-            $('#goal-lat-select-format-' + current).detach()
-            $('#goal-long-select-format-' + current).detach()
+            $('#goal-lat-select-format.goal-' + current).detach()
+            $('#goal-long-select-format.goal-' + current).detach()
 
-            //insertDataInQueue(current, lat_format, long_format)
+            saveGoalData(current, lat_format, long_format)
         })
     }
 
     function createGoalChangeButtonHandler(current) {
-        $('#goal-change-btn-' + current).on('click', function(event) {
+        $('#goal-change-btn.goal-' + current).on('click', function(event) {
             $(this).data('clicked', true)
 
-            $('#goal-lat-fieldset-' + current).prop('disabled', false)
-            $('#goal-long-fieldset-' + current).prop('disabled', false)
+            $('.goal-' + current + ' fieldset').prop('disabled', false)
+            // $('#goal-name-fieldset.goal-' + current).prop('disabled', false)
+            // $('#goal-lat-fieldset.goal-' + current).prop('disabled', false)
+            // $('#goal-long-fieldset.goal-' + current).prop('disabled', false)
 
-            $('#goal-change-btn-' + current).prop('disabled', true)
-            $('#goal-confirm-btn-' + current).prop('disabled', false)
+            $('#goal-change-btn.goal-' + current).prop('disabled', true)
+            $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
         })
     }
 
     function createGoalDeleteButtonHandler(current) {
-        $('#goal-delete-btn-' + current).on('click', function(event) {
+        $('#goal-delete-btn.goal-' + current).on('click', function(event) {
 
             /*------------------------\
             implement ROS goal deleting
             \------------------------*/
-            let goalName = $('#goal-name-' + current).val()
+            let goalName = $('#goal-name.goal-' + current).val()
             let msg = new ROSLIB.Message({
                 data: goalName
             })
             delete_goal_publisher.publish(msg)
 
-
-            $('#new-goal-btn-' + current).remove()
-
-            // set new stats to the new goal and update params..
-            // if (!(navQueue.top() == undefined)) {
-            //     $('#goal-stats-lat').text(navQueue.top().lat.toFixed(6))
-            //     $('#goal-stats-long').text(navQueue.top().long.toFixed(6))
-            // } else {
-            //     $('#goal-stats-lat').text("----")
-            //     $('#goal-stats-long').text("----")
-            //     appendToConsole('No coordinates left to go to!')
-            // }
+            $('.goal-' + current).remove()
         })
     }
 })
