@@ -176,64 +176,64 @@ $(document).ready(() => {
 
         try {
             if ($("#antenna-lat-fieldset").attr('format') == 'DD') {
-                let decdeg = parseFloat(($("#antenna-lat-DD-dec-deg-input").val()))
-                $("#antenna-lat-DD-dec-deg-input").attr("value", decdeg)
+                let decdeg = parseFloat(($("#antenna-DD-dec-deg-input.lat").val()))
+                $("#antenna-DD-dec-deg-input.lat").attr("value", decdeg)
 
                 if (isNaN(decdeg)) throw "Bad Input lat DD"
 
                 lat = decdeg
             } else if ($("#antenna-lat-fieldset").attr('format') == 'DDM') {
-                let dec = parseFloat($('#antenna-lat-DDM-deg-input').val())
-                let min = parseFloat($('#antenna-lat-DDM-dec-min-input').val())
+                let dec = parseFloat($('#antenna-DDM-deg-input.lat').val())
+                let min = parseFloat($('#antenna-DDM-dec-min-input.lat').val())
 
                 if (isNaN(dec) || isNaN(min)) throw "Bad input lat DDM"
 
-                $("#antenna-lat-DDM-deg-input").attr("value", dec)
-                $("#antenna-lat-DDM-dec-min-input").attr("value", min)
+                $("#antenna-DDM-deg-input.lat").attr("value", dec)
+                $("#antenna-DDM-dec-min-input.lat").attr("value", min)
 
                 lat = dec + (min / 60)
             } else if ($("#antenna-lat-fieldset").attr('format') == 'DMS') {
-                let dec = parseFloat($('#antenna-lat-DMS-deg-input').val())
-                let mins = parseFloat($('#antenna-lat-DMS-min-input').val())
-                let secs = parseFloat($('#antenna-lat-DMS-sec-input').val())
+                let dec = parseFloat($('#antenna-DMS-deg-input.lat').val())
+                let mins = parseFloat($('#antenna-DMS-min-input.lat').val())
+                let secs = parseFloat($('#antenna-DMS-sec-input.lat').val())
 
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input lat DMS"
 
-                $("#antenna-lat-DMS-deg-input").attr("value", dec)
-                $("#antenna-lat-DMS-min-input").attr("value", mins)
-                $("#antenna-lat-DMS-sec-input").attr("value", secs)
+                $("#antenna-DMS-deg-input.lat").attr("value", dec)
+                $("#antenna-DMS-min-input.lat").attr("value", mins)
+                $("#antenna-DMS-sec-input.lat").attr("value", secs)
 
                 lat = dec + (mins / 60 + secs / 3600)
             }
 
             if ($("#antenna-long-fieldset").attr('format') == 'DD') {
-                let decdeg = parseFloat(($("#antenna-long-DD-dec-deg-input").val()))
+                let decdeg = parseFloat(($("#antenna-DD-dec-deg-input.long").val()))
 
                 if (isNaN(decdeg)) throw "Bad Input long DD"
 
-                $("#antenna-long-DD-dec-deg-input").attr("value", decdeg)
+                $("#antenna-DD-dec-deg-input.long").attr("value", decdeg)
 
                 long = decdeg
             } else if ($("#antenna-long-fieldset").attr('format') == 'DDM') {
-                let dec = parseFloat($('#antenna-long-DDM-deg-input').val())
-                let min = parseFloat($('#antenna-long-DDM-dec-min-input').val())
+                let dec = parseFloat($('#antenna-DDM-deg-input.long').val())
+                let min = parseFloat($('#antenna-DDM-dec-min-input.long').val())
 
                 if (isNaN(dec) || isNaN(min)) throw "Bad input long DDM"
 
-                $("#antenna-long-DDM-deg-input").attr("value", dec)
-                $("#antenna-long-DDM-dec-min-input").attr("value", min)
+                $("#antenna-DDM-deg-input.long").attr("value", dec)
+                $("#antenna-DDM-dec-min-input.long").attr("value", min)
 
                 long = dec + (min / 60)
             } else if ($("#antenna-long-fieldset").attr('format') == 'DMS') {
-                let dec = parseFloat($('#antenna-long-DMS-deg-input').val())
-                let mins = parseFloat($('#antenna-long-DMS-min-input').val())
-                let secs = parseFloat($('#antenna-long-DMS-sec-input').val())
+                let dec = parseFloat($('#antenna-DMS-deg-input.long').val())
+                let mins = parseFloat($('#antenna-DMS-min-input.long').val())
+                let secs = parseFloat($('#antenna-DMS-sec-input.long').val())
 
                 if (isNaN(dec) || isNaN(mins) || isNaN(secs)) throw "Bad input long DMS"
 
-                $("#antenna-long-DMS-deg-input").attr("value", dec)
-                $("#antenna-long-DMS-min-input").attr("value", mins)
-                $("#antenna-long-DMS-sec-input").attr("value", secs)
+                $("#antenna-DMS-deg-input.long").attr("value", dec)
+                $("#antenna-DMS-min-input.long").attr("value", mins)
+                $("#antenna-DMS-sec-input.long").attr("value", secs)
 
                 long = dec + (mins / 60 + secs / 3600)
             }
@@ -263,10 +263,10 @@ $(document).ready(() => {
     })
 
     function antennaChangeButtonHandlerTemplate(mode, format, detachedData) {
-        $("#antenna-" + mode + "-" + format + "-change-btn").on('click', function(event) {
+        $("#antenna-" + format + "-change-btn." + mode).on('click', function(event) {
             event.preventDefault()
 
-            $("#antenna-" + mode + "-input-group").detach()
+            $("#antenna-" + mode + "-input-group").empty()
             $("#antenna-" + mode + "-fieldset").append(detachedData)
             $("#antenna-confirm-btn").prop('disabled', false)
         })
@@ -296,17 +296,16 @@ $(document).ready(() => {
         $('#antenna-' + mode + '-' + format + '-btn').unbind('click').on('click', function(event) {
             $('#antenna-' + mode + '-fieldset').attr('format', format)
             $('#antenna-select-' + mode + '-format-btn').dropdown('toggle')
-
             let detachedData = $('#antenna-select-' + mode + '-format').detach()
+            $("#antenna-" + mode + "-fieldset").empty()
 
-            $.ajax('/navigation/inputTemplates/antenna-' + format + '/' + mode, {
-                success: function(result) {
-                    $("#antenna-" + mode + "-fieldset").append(result)
+            let antennaInputTemplate = $("div." + format + "template").html()
+            $("#antenna-" + mode + "-fieldset").append(antennaInputTemplate).find('*').addClass(format + " " + mode)
+            $("#antenna-" + mode + "-fieldset span." + format + ":first").text(mode)
+            $('.antenna-input-field.' + mode).prop('disabled', false)
 
-                    if (mode == 'lat') createAntennaLatitudeChangeButtonHandler(detachedData)
-                    else createAntennaLongitudeChangeButtonHandler(detachedData)
-                }
-            })
+            if (mode == 'lat') createAntennaLatitudeChangeButtonHandler(detachedData)
+            else createAntennaLongitudeChangeButtonHandler(detachedData)
         })
     }
 
