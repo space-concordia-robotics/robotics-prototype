@@ -75,16 +75,6 @@ def initialSection():
 
 
 # routes for navigation pages
-@app.route('/navigation/inputTemplates/goal-buttons/<count>', methods=["GET"])
-def goal_Buttons(count):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-buttons.html", count=count)
-
-
-@app.route('/navigation/inputTemplates/new-goal-coordinates-btn/<goalId>', methods=["GET"])
-def new_Goal_Button(goalId):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/new-goal-coordinates-btn.html", goalId=goalId)
-
-
 @app.route('/navigation/inputTemplates/antenna-DD/<target>', methods=["GET"])
 def antenna_DD(target):
     return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DD-input-template.html", target=target)
@@ -98,21 +88,6 @@ def antenna_DDM(target):
 @app.route('/navigation/inputTemplates/antenna-DMS/<target>', methods=["GET"])
 def antenna_DMS(target):
     return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DMS-input-template.html", target=target)
-
-
-@app.route('/navigation/inputTemplates/goal-DD/<target>/<count>', methods=["GET"])
-def goal_DD(target, count):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DD-input-template.html", target=target, count=count)
-
-
-@app.route('/navigation/inputTemplates/goal-DDM/<target>/<count>', methods=["GET"])
-def goal_DDM(target, count):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DDM-input-template.html", target=target, count=count)
-
-
-@app.route('/navigation/inputTemplates/goal-DMS/<target>/<count>', methods=["GET"])
-def goal_DMS(target, count):
-    return flask.render_template("elements/navigation/htmlTemplates/goal/goal-DMS-input-template.html", target=target,  count=count)
 
 
 @app.route("/ping_rover")
