@@ -13,133 +13,233 @@
     <div class="col-md-4" id="data-start">
 
         <div id="rover-stats">
-            <h4 align="center"> Rover data </h4>
+            <h4 align="center">Rover data</h4>
             <ul class="list-group" id="rover-stats-list">
-                <div class="row px-3  ">
-                    <li class="list-group-item col-md-6"> <label for="">Latitude</label> <span id="rover-latitude" class="float-right">----</span> </li>
-                    <li class="list-group-item col-md-6"> <label for="">Longitude</label> <span id="rover-longitude" class="float-right">----</span></li>
+                <div class="row px-3">
+                    <li class="list-group-item col-md-6"><label>Latitude</label><span id="rover-latitude" class="float-right">----</span></li>
+                    <li class="list-group-item col-md-6"><label>Longitude</label><span id="rover-longitude" class="float-right">----</span></li>
                 </div>
-                <li class="list-group-item "> <label for="">Heading</label> <span id="rover-heading" class="float-right">----</span> </li>
-                <li class="list-group-item "> <label for="">Speed</label> <span id="rover-speed" class="float-right">----</span></li>
-                <li class="list-group-item "> <label for="">Angular Velocity</label> <span id="rover-angular-velocity" class="float-right">----</span></li>
+                <li class="list-group-item"><label>Heading</label><span id="rover-heading" class="float-right">----</span></li>
+                <li class="list-group-item"><label>Speed</label> <span id="rover-speed" class="float-right">----</span></li>
+                <li class="list-group-item"><label>Angular Velocity</label> <span id="rover-angular-velocity" class="float-right">----</span></li>
 
             </ul>
         </div>
 
         <div id="antenna-stats-list">
             <hr>
-            <h4 align="center"> Antenna data </h4>
+            <h4 align="center">Antenna data</h4>
             <ul class="list-group" id="antenna-stats-list">
                 <div class="row px-3">
-                    <li class="list-group-item col-md-6"> <label for=""> Latitude</label> <span id="antenna-stats-lat" class="float-right">----</span> </li>
-                    <li class="list-group-item col-md-6"> <label for=""> Longitude</label> <span id="antenna-stats-long" class="float-right">----</span></li>
+                    <li class="list-group-item col-md-6"><label>Latitude</label><span id="antenna-stats-lat" class="float-right">----</span></li>
+                    <li class="list-group-item col-md-6"><label>Longitude</label><span id="antenna-stats-long" class="float-right">----</span></li>
                 </div>
-                <li class="list-group-item"> <label for=""> Antenna Heading</label> <span id="antenna-stats-heading" class="float-right">----</span> </li>
-                <li class="list-group-item"> <label for="">Distance to Rover</label> <span id="antenna-stats-dist-to-rover" class="float-right">----</span> </li>
-                <li class="list-group-item"> <label for=""> Recommended Antenna Angle</label> <span id="antenna-stats-rec-angle" class="float-right">----</span> </li>
-
+                <li class="list-group-item"><label"> Antenna Heading</label><span id="antenna-stats-heading" class="float-right">----</span> </li>
+                <li class="list-group-item"><label>Distance to Rover</label> <span id="antenna-stats-dist-to-rover" class="float-right">----</span></li>
+                <li class="list-group-item"><label> Recommended Antenna Angle</label> <span id="antenna-stats-rec-angle" class="float-right">----</span></li>
             </ul>
         </div>
-        <button id="open-antenna-modal-btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#antenna-modal"> Antenna Data </button>
+        <button id="open-antenna-modal-btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#antenna-modal">Antenna Data</button>
 
         <div class="modal fade" id="antenna-modal">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4> Antenna Menu </h4>
+                        <h4>Antenna Menu</h4>
                     </div>
                     <div class="modal-body" id="antenna-modal-body">
                         <fieldset id="antenna-lat-fieldset">
                             <div id="antenna-select-lat-format">
-                                <button type="button" id="antenna-select-lat-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown"> Select Latitude Format</button>
-                                <span class="caret"> </span>
-
+                                <button type="button" id="antenna-select-lat-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Format</button>
+                                <span class="caret"></span>
                                 <ul class="dropdown-menu">
                                     <li class="dropdown-header"></li>
-                                    <li><button id="antenna-lat-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees </button></li>
-                                    <li><button id="antenna-lat-DDM-btn" class="btn btn-primary btn-sm"> Degrees Decimal Minutes </button> </li>
-                                    <li><button id="antenna-lat-DMS-btn" class="btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
+                                    <li><button id="antenna-lat-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                                    <li><button id="antenna-lat-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                                    <li><button id="antenna-lat-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                                 </ul>
                             </div>
-
                         </fieldset>
                         <hr>
-
                         <fieldset id="antenna-long-fieldset">
                             <div id="antenna-select-long-format">
-                                <button type="button" id="antenna-select-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown"> Select Longitude Format</button>
-
-                                <span class="caret"> </span>
-
+                                <button type="button" id="antenna-select-long-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Format</button>
+                                <span class="caret"></span>
                                 <ul class="dropdown-menu">
-                                    <li><button id="antenna-long-DD-btn" class="btn btn-primary btn-sm"> Decimal Degrees </button> </li>
-                                    <li><button id="antenna-long-DDM-btn" class="btn btn-primary btn-sm"> Degrees Decimal Minutes</button></li>
-                                    <li><button id="antenna-long-DMS-btn" class="btn btn-primary btn-sm"> Degrees Minutes Seconds</button> </li>
+                                    <li><button id="antenna-long-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                                    <li><button id="antenna-long-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                                    <li><button id="antenna-long-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                                 </ul>
-
                             </div>
                         </fieldset>
-
                         <hr>
                         <fieldset id="antenna-bearing-fieldset">
                             <div class="input-group" id="antenna-bearing-input-group">
-                                <span class="input-group-text"> Bearing </span>
+                                <span class="input-group-text">Bearing</span>
                                 <input id="antenna-bearing-input" type="text" class="form-control antenna-input-field" placeholder="Enter">
-                                <button id="antenna-bearing-change-btn" class="btn btn-warning antenna-change-btn"> Change </button>
+                                <button id="antenna-bearing-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
                             </div>
                         </fieldset>
-
                     </div>
-
                     <div class="modal-footer">
-                        <button id="antenna-confirm-btn" type="button" class="btn btn-success"> Confirm </button>
+                        <button id="antenna-confirm-btn" type="button" class="btn btn-success">Confirm</button>
                     </div>
-
                 </div>
             </div>
-
         </div>
         <br>
         <br>
-
-
         <div id="goal-stats-list">
             <h4 align="center">Goals</h4>
 
             <ul class="list-group" id="goal-stats-list">
                 <div class="row px-3">
-                    <li class="list-group-item col-md-6"> <label for="goal-stats-lat"> Latitude</label> <span id="goal-stats-lat" class="float-right">----</span> </li>
-                    <li class="list-group-item col-md-6"> <label for="goal-stats-long"> Longitude</label> <span id="goal-stats-long" class="float-right">----</span></li>
+                    <li class="list-group-item col-md-6"><label for="goal-stats-lat">Latitude</label><span id="goal-stats-lat" class="float-right">----</span></li>
+                    <li class="list-group-item col-md-6"><label for="goal-stats-long">Longitude</label><span id="goal-stats-long" class="float-right">----</span></li>
                 </div>
-                <li class="list-group-item"> <label for="goal-stats-distance"> Distance to goal</label> <span id="goal-stats-distance" class="float-right">----</span> </li>
-                <li class="list-group-item"> <label for="goal-stats-rover-heading"> Recommended Rover Heading</label> <span id="goal-stats-rover-heading" class="float-right">----</span> </li>
-
+                <li class="list-group-item"><label for="goal-stats-distance">Distance to goal</label><span id="goal-stats-distance" class="float-right">----</span></li>
+                <li class="list-group-item"><label for="goal-stats-rover-heading">Recommended Rover Heading</label><span id="goal-stats-rover-heading" class="float-right">----</span></li>
             </ul>
-
         </div>
 
-        <button type="button" id="toggle-goal-modal-btn" class="btn btn-primary" data-toggle="modal" data-target="#goal-modal"> Add Goal </button>
+        <button type="button" id="toggle-goal-modal-btn" class="btn btn-primary" data-toggle="modal" data-target="#goal-modal">Add Goal</button>
 
         <div class="modal fade" id="goal-modal">
-
             <div class="modal-dialog modal-lg">
                 <div class="modal-content" id="goal-modal-content">
                     <div class="modal-header" id="goal-modal-header">
-                        <button id="new-goal-coordinates-btn" class="btn btn-primary"> Add new coordinates</button>
+                        <button id="new-goal-coordinates-btn" class="btn btn-primary">Add new coordinates</button>
                     </div>
-
                     <div class="modal-body" id="goal-modal-body">
                         <div id="goal-modal-body-content">
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="col-md-4">
+    </div>
+</div>
 
+
+<!----------------------------------------------------------------------------------------------------
+The following elements are for templates so we don't have to ajax them from different files and stuff.
+Just call the div and modify the contents
+----------------------------------------------------------------------------------------------------->
+
+<div id="goal-buttons" hidden>
+    <button id="goal-confirm-btn" type="button" class="btn btn-success">Confirm</button>
+    <button id="goal-change-btn" type="button" class="btn btn-warning" disabled>Change</button>
+    <button id="goal-delete-btn" type="button" class="btn btn-danger">Delete</button>
+</div>
+
+
+
+
+<div id="goal-DD-input-template" hidden>
+    <span class="input-group-text"></span>
+    <input id="goal-DD-dec-deg-input" type="text" class="form-control" placeholder="Decimal Degrees">
+</div>
+
+
+
+
+<div id="goal-DDM-input-template" hidden>
+    <span class="input-group-text"></span>
+
+    <input id="goal-DDM-deg-input" type="text" class="form-control" placeholder="Degrees">
+    <span class="input-group-text">°</span>
+
+    <input id="goal-DDM-dec-min-input" type="text" class="form-control" placeholder="Decimal Mins">
+    <span class="input-group-text">'</span>
+</div>
+
+
+
+
+<div id="goal-DMS-input-template" hidden>
+    <span class="input-group-text"></span>
+
+    <input id="goal-DMS-deg-input" type="text" class="form-control" placeholder="Degrees">
+    <span class="input-group-text">°</span>
+
+    <input id="goal-DMS-min-input" type="text" class="form-control" placeholder="Mins">
+    <span class="input-group-text">'</span>
+
+    <input id="goal-DMS-sec-input" type="text" class="form-control" placeholder="Seconds">
+    <span class="input-group-text">"</span>
+</div>
+
+
+
+
+<div id="add-goal-coordinates" hidden>
+    <div class='goal'>
+        <fieldset id="goal-name-fieldset">
+            <div class="input-group">
+                <span class="input-group-text">name</span>
+                <input id="goal-name" type="text" class="form-control" placeholder="Goal">
+            </div>
+        </fieldset>
+        <fieldset id="goal-lat-fieldset">
+            <div id="goal-lat-input-group" class="input-group">
+                <div id="goal-lat-select-format" class="dropdown">
+                    <button type="button" id="goal-lat-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Layout</button>
+                    <span class="caret"></span>
+                    <ul class="dropdown-menu">
+                        <li><button id="goal-lat-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="goal-lat-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="goal-lat-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset id="goal-long-fieldset">
+            <div id="goal-long-input-group" class="input-group">
+                <div id="goal-long-select-format" class="dropdown">
+                    <button type="button" id="goal-long-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Layout</button>
+                    <span class="caret"> </span>
+                    <ul class="dropdown-menu">
+                        <li><button id="goal-long-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="goal-long-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="goal-long-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <div id="goal-buttons-input-group" class="input-group">
+        </div>
+        <hr>
+    </div>
+</div>
+
+
+
+
+<div id="created-goal-template" hidden>
+    <div class="goal">
+        <fieldset id="goal-name-fieldset">
+            <div class="input-group">
+                <span class="input-group-text">name</span>
+                <input id="goal-name" type="text" class="form-control" placeholder="Goal Name">
+            </div>
+        </fieldset>
+        <fieldset id="goal-lat-fieldset" format='DD'>
+            <div class="input-group">
+                <span class="input-group-text">lat</span>
+                <input id="goal-DD-dec-deg-input" type="text" class="form-control lat" placeholder="Decimal Degrees">
+            </div>
+        </fieldset>
+        <fieldset id="goal-long-fieldset" format='DD'>
+            <div class="input-group">
+                <span class="input-group-text">long</span>
+                <input id="goal-DD-dec-deg-input" type="text" class="form-control long" placeholder="Decimal Degrees">
+            </div>
+        </fieldset>
+        <div id="goal-buttons-input-group" class="input-group">
+        </div>
+        <hr>
     </div>
 </div>
 {% endblock %}
