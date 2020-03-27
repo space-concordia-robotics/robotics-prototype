@@ -66,10 +66,6 @@ $(document).ready(() => {
         ros: ros,
         name: 'has_gps_goal'
     })
-    // let got_antenna_pos = new ROSLIB.Param({
-    //     ros: ros,
-    //     name: 'got_antenna_pos'
-    // })
     // setup gps parameters for rover goals
     let goal_latitude = new ROSLIB.Param({
         ros: ros,
@@ -84,22 +80,6 @@ $(document).ready(() => {
         ros: ros,
         name: 'rover_goal',
         messageType: 'geometry_msgs/Point'
-    })
-
-    rover_goal_listener.subscribe(function(message) {
-        //the distance in meters until we are sure we are at the coordinates should be less than 0.5 meters
-        if (parseFloat(message.y) < 0.5) {
-
-            // delete the closest goal
-
-            // if nothing is left, display -----
-
-            // $('#goal-stats-lat').text('----')
-            // $('#goal-stats-long').text('----')
-
-            // and set the has_gps_goal param to false
-            // has_gps_goal.set(false)
-        }
     })
 
     goalList = []
@@ -143,22 +123,7 @@ $(document).ready(() => {
             $('#goal-stats-lat').text(lat.toFixed(6))
             $('#goal-stats-long').text(long.toFixed(6))
         }
-
-
-        // -------------------------------------------------------------
-        // for the goal stats we will generate them dynamically from a default of '----'
-        // no need of saving anything...
-        // this will use the navigationNode
-        // basically it checks if has_gps_goal is true, and returns some stats about the bearing and distance
-
-        // $("#goal-stats-rover-heading").text('----')
-        // $("#goal-stats-distance").text('----')
-        //
-        // $('#goal-stats-lat').text()
-        // $('#goal-stats-long').text()
     }
-
-
 
     $('#antenna-select-lat-format-btn').on('click', function(event) {
         event.preventDefault()
@@ -321,12 +286,6 @@ $(document).ready(() => {
         antennaHandlerTemplate('long', 'DMS')
     }
 
-
-
-
-
-
-
     $('#toggle-goal-modal-btn').on('click', function(event) {
         $("#goal-modal-body-content").empty()
         let goalTemplate = $('#created-goal-template').html()
@@ -347,13 +306,6 @@ $(document).ready(() => {
         }
     })
 
-
-
-
-
-
-
-
     $("#new-goal-coordinates-btn").on('click', function(event) {
         let newGoalTemplate = $('#add-goal-coordinates').html()
 
@@ -367,9 +319,6 @@ $(document).ready(() => {
     })
 
     function saveGoalData(current, lat_format, long_format) {
-        // the queue doesn't exist anymore you fuck
-        // just send the data to the node
-        // maybe rename this function into confirmGoalData or something
         let lat = null
         let long = null
         try {
@@ -466,7 +415,6 @@ $(document).ready(() => {
                 long: long
             }
 
-            // maybe put the rest of this in a separate function
             //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
             if ($("#goal-change-btn.goal" + current).data('clicked')) {
                 $(this).data('clicked', false)
@@ -568,9 +516,6 @@ $(document).ready(() => {
             $(this).data('clicked', true)
 
             $('.goal-' + current + ' fieldset').prop('disabled', false)
-            // $('#goal-name-fieldset.goal-' + current).prop('disabled', false)
-            // $('#goal-lat-fieldset.goal-' + current).prop('disabled', false)
-            // $('#goal-long-fieldset.goal-' + current).prop('disabled', false)
 
             $('#goal-change-btn.goal-' + current).prop('disabled', true)
             $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
