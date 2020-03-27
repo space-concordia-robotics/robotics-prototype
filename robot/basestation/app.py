@@ -74,22 +74,6 @@ def initialSection():
     return '0'
 
 
-# routes for navigation pages
-@app.route('/navigation/inputTemplates/antenna-DD/<target>', methods=["GET"])
-def antenna_DD(target):
-    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DD-input-template.html", target=target)
-
-
-@app.route('/navigation/inputTemplates/antenna-DDM/<target>', methods=["GET"])
-def antenna_DDM(target):
-    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DDM-input-template.html", target=target)
-
-
-@app.route('/navigation/inputTemplates/antenna-DMS/<target>', methods=["GET"])
-def antenna_DMS(target):
-    return flask.render_template("elements/navigation/htmlTemplates/antenna/antenna-DMS-input-template.html", target=target)
-
-
 @app.route("/ping_rover")
 def ping_rover():
     """Pings ROS_MASTER_URI and return response object with resulting outputs.
