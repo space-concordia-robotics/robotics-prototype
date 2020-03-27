@@ -10,7 +10,7 @@
     <div class="col-md-2">
         {% include "elements/feed/Console.html" %}
     </div>
-    <div class="col-md-4" id="data-start">
+    <div class="col-md-3" id="data-start">
 
         <div id="rover-stats">
             <h4 align="center">Rover data</h4>
@@ -34,7 +34,9 @@
                     <li class="list-group-item col-md-6"><label>Latitude</label><span id="antenna-stats-lat" class="float-right">----</span></li>
                     <li class="list-group-item col-md-6"><label>Longitude</label><span id="antenna-stats-long" class="float-right">----</span></li>
                 </div>
-                <li class="list-group-item"><label"> Antenna Heading</label><span id="antenna-stats-heading" class="float-right">----</span> </li>
+                <li class="list-group-item">
+                    <label"> Antenna Heading</label><span id="antenna-stats-heading" class="float-right">----</span>
+                </li>
                 <li class="list-group-item"><label>Distance to Rover</label> <span id="antenna-stats-dist-to-rover" class="float-right">----</span></li>
                 <li class="list-group-item"><label> Recommended Antenna Angle</label> <span id="antenna-stats-rec-angle" class="float-right">----</span></li>
             </ul>
@@ -125,9 +127,55 @@
 
 <!----------------------------------------------------------------------------------------------------
 The following elements are for templates so we don't have to ajax them from different files and stuff.
-Just call the div and modify the contents
+Just query the div and modify the contents
 ----------------------------------------------------------------------------------------------------->
 
+<!-- ANTENNA TEMPLATES -->
+<div class="DDtemplate" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+        <input id="antenna-DD-dec-deg-input" type="text" class="form-control antenna-input-field" placeholder="Decimal degrees">
+        <button id="antenna-DD-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+
+<div class="DDMtemplate" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+
+        <input id="antenna-DDM-deg-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+        <span class="input-group-text">°</span>
+
+        <input id="antenna-DDM-dec-min-input" type="text" class="form-control antenna-input-field" placeholder="Decimal Mins">
+        <span class="input-group-text">'</span>
+        <button id="antenna-DDM-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+<div class="DMStemplate" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+        <input id="antenna-DMS-deg-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+
+        <span class="input-group-text">°</span>
+        <input id="antenna-DMS-min-input" type="text" class="form-control antenna-input-field" placeholder="Mins">
+
+        <span class="input-group-text">'</span>
+        <input id="antenna-DMS-sec-input" type="text" class="form-control antenna-input-field" placeholder="Seconds">
+
+        <span class="input-group-text">"</span>
+        <button id="antenna-DMS-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+
+
+
+<!-- GOAL TEMPLATEs -->
 <div id="goal-buttons" hidden>
     <button id="goal-confirm-btn" type="button" class="btn btn-success">Confirm</button>
     <button id="goal-change-btn" type="button" class="btn btn-warning" disabled>Change</button>
