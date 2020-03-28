@@ -10,6 +10,9 @@
     <div class="col-md-2">
         {% include "elements/feed/Console.html" %}
     </div>
+    <div class="col-md-7">
+      <!-- Rover Map -->
+    </div>
     <div class="col-md-3" id="data-start">
 
         <div id="rover-stats">
@@ -120,14 +123,12 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
     </div>
 </div>
 
 
 <!----------------------------------------------------------------------------------------------------
-The following elements are for templates so we don't have to ajax them from different files and stuff.
-Just query the div and modify the contents
+The following elements are hidden HTML elements. This HTML is appended to dynamically create elements on the web page.
 ----------------------------------------------------------------------------------------------------->
 
 <!-- ANTENNA TEMPLATES -->
@@ -261,9 +262,6 @@ Just query the div and modify the contents
         <hr>
     </div>
 </div>
-
-
-
 
 <div id="created-goal-template" hidden>
     <div class="goal">
