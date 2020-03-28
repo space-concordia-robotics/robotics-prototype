@@ -71,5 +71,14 @@ target_compile_options(teensycore_c PUBLIC ${ARM_GCC_C_FLAGS})
 add_library(core $<TARGET_OBJECTS:teensycore_s> $<TARGET_OBJECTS:teensycore_c> ${TEENSY_CORE_CXX_FILES})
 target_compile_options(core PUBLIC ${ARM_GXX_FLAGS})
 
-add_subdirectory(science "../science/build")
+
+#file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.ino)
+#foreach(path ${INOFILES})
+# message("<<${path}>>")
+# get_filename_component(cmake_list_path ${path} DIRECTORY)
+# message("--${cmake_list_path}--")
+# add_subdirectory(${cmake_list_path})
+#endforeach()
+
+add_subdirectory(science "${CMAKE_BINARY_DIR}/obj")
 

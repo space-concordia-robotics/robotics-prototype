@@ -1,7 +1,14 @@
+
+file(MAKE_DIRECTORY build)
+set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
+
 cmake_minimum_required(VERSION 3.17.0)
 project(science)
 
-set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
+
+message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS ${CMAKE_BINARY_DIR})
+
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
