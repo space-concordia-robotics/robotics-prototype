@@ -1,80 +1,75 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.17.0)
+set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(AVR_UPLOADTOOL avrdude)
-set(AVR_PROGRAMMER avrispmkII)
-set(AVR_UPLOADTOOL_PORT usb)
 
-set(AVR_MCU atmega32)
-set(AVR_H_FUSE 0xd9)
-set(AVR_L_FUSE 0xc3)
+#set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
-include(generic-gcc-avr.cmake)
+set(ARDUINO_PATH /home/niko/Software/arduino-1.8.12)
+set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
+set(TEENSY_CORE ${ARDUINO_PATH}/hardware/teensy/avr/cores)
+set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
+set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
+set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
+set(CMAKE_C_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-g++)
 
-project(SCIENCE-ROBOTICS CXX)
+SET(CMAKE_C_COMPILER_WORKS 1)
+SET(CMAKE_CXX_COMPILER_WORKS 1)
 
-message(STATUS "Current uploadtool is: ${AVR_UPLOADTOOL}")
-message(STATUS "Current programmer is: ${AVR_PROGRAMMER}")
-message(STATUS "Current upload port is: ${AVR_UPLOADTOOL_PORT}")
-message(STATUS "Current uploadtool options are: ${AVR_UPLOADTOOL_OPTIONS}")
-message(STATUS "Current MCU is set to: ${AVR_MCU}")
-message(STATUS "Current H_FUSE is set to: ${AVR_H_FUSE}")
-message(STATUS "Current L_FUSE is set to: ${AVR_L_FUSE}")
+project(rover)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+#SET UTILITIES
+#set(CMAKE_OBJCOPY ${ARM_TOOLS}/arm-none-eabi-objcopy)
 
-if(DEFINED ENV{AVR_FIND_ROOT_PATH})
-    set(CMAKE_FIND_ROOT_PATH $ENV{AVR_FIND_ROOT_PATH})
-else(DEFINED ENV{AVR_FIND_ROOT_PATH})
-    if(EXISTS "/opt/local/avr")
-      set(CMAKE_FIND_ROOT_PATH "/opt/local/avr")
-    elseif(EXISTS "/usr/avr")
-      set(CMAKE_FIND_ROOT_PATH "/usr/avr")
-    elseif(EXISTS "/usr/lib/avr")
-      set(CMAKE_FIND_ROOT_PATH "/usr/lib/avr")
-    elseif(EXISTS "/usr/local/CrossPack-AVR")
-      set(CMAKE_FIND_ROOT_PATH "/usr/local/CrossPack-AVR")
-    else(EXISTS "/opt/local/avr")
-      message(FATAL_ERROR "Please set AVR_FIND_ROOT_PATH in your environment.")
-    endif(EXISTS "/opt/local/avr")
-endif(DEFINED ENV{AVR_FIND_ROOT_PATH})
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
 
-set(CMAKE_SYSTEM_INCLUDE_PATH "${CMAKE_FIND_ROOT_PATH}/include")
-set(CMAKE_SYSTEM_LIBRARY_PATH "${CMAKE_FIND_ROOT_PATH}/lib")
+#FIND ALL SOURCE FILES
+file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
+file(GLOB TEENSY_CORE_C_FILES ${TEENSY_CORE}/teensy3/*.c )
+file(GLOB TEENSY_CORE_CXX_FILES ${TEENSY_CORE}/teensy3/*.cpp)
+file(GLOB TEENSY_USED_LIBRARIES ${TEENSY_LIB}/Servo/Servo.cpp)
 
-message(STATUS "Set CMAKE_FIND_ROOT_PATH to ${CMAKE_FIND_ROOT_PATH}")
-message(STATUS "Set CMAKE_SYSTEM_INCLUDE_PATH to ${CMAKE_SYSTEM_INCLUDE_PATH}")
-message(STATUS "Set CMAKE_SYSTEM_LIBRARY_PATH to ${CMAKE_SYSTEM_LIBRARY_PATH}")
+include_directories(
+ 	${TEENSY_CORE}
+	${TEENSY_CORE}/teensy3
+	${TEENSY_LIB}/Servo
+	${ARM_TOOLS}/arm/arm-none-eabi/include/
+)
 
-if(CMAKE_BUILD_TYPE MATCHES Release)
-   set(CMAKE_C_FLAGS_RELEASE "-Os")
-   set(CMAKE_CXX_FLAGS_RELEASE "-Os")
-endif(CMAKE_BUILD_TYPE MATCHES Release)
+#ALL COMPILERS USE COMMON DEFINES
+add_definitions(
+-D__MK66FX1M0__
+-DTEENSYDUINO=151
+-DARDUINO=10812
+-DARDUINO_TEENSY36
+-DF_CPU=180000000
+-DUSB_SERIAL
+-DLAYOUT_US_ENGLISH
+)
+#COMPILER FLAGS
+set(ARM_GCC_S_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -nostdlib -MMD -x assembler-with-cpp -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
+set(ARM_GCC_C_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
+set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 
-if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-Os -save-temps -g -gdwarf-3 -gstrict-dwarf")
-   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os -save-temps -g -gdwarf-3 -gstrict-dwarf")
-endif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+#LINKER FLAGS
+set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/mk66fx1m0.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-   set(CMAKE_C_FLAGS_DEBUG "-O0 -save-temps -g -gdwarf-3 -gstrict-dwarf")
-   set(CMAKE_CXX_FLAGS_DEBUG "-O0 -save-temps -g -gdwarf-3 -gstrict-dwarf")
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
+#not used for now(only for hexing)
+#set(ARM_GCC_OBJCOPY_FLAGS "-O ihex -R .eeprom ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}.ino.elf hexfile.hex")
 
-add_definitions("-DF_CPU=${MCU_SPEED}")
-add_definitions("-fpack-struct")
-add_definitions("-fshort-enums")
-add_definitions("-Wall")
-add_definitions("-Werror")
-add_definitions("-pedantic")
-add_definitions("-pedantic-errors")
-add_definitions("-funsigned-char")
-add_definitions("-funsigned-bitfields")
-add_definitions("-ffunction-sections")
-add_definitions("-c")
+#S FILES
+add_library(teensycore_s  OBJECT ${TEENSY_CORE_S_FILES})
+target_compile_options(teensycore_s PUBLIC ${ARM_GCC_S_FLAGS})
+set_target_properties(teensycore_s PROPERTIES LINKER_LANGUAGE C)
 
-add_subdirectory(science)
+#C FILES
+add_library(teensycore_c OBJECT ${TEENSY_CORE_C_FILES})
+target_compile_options(teensycore_c PUBLIC ${ARM_GCC_C_FLAGS})
+
+#MATH LIBRARIES
+add_library(core $<TARGET_OBJECTS:teensycore_s> $<TARGET_OBJECTS:teensycore_c> ${TEENSY_CORE_CXX_FILES})
+target_compile_options(core PUBLIC ${ARM_GXX_FLAGS})
+
+add_subdirectory(science "../science/build")
+
