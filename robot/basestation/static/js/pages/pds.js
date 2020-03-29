@@ -1,7 +1,7 @@
 const PDS_REQUEST_TIMEOUT = 3000
 
 function printCommandsList () {
-  if (canSendCommand()) {
+  if (canSendCommand(PING_THROTTLE_TIME)) {
     appendToConsole("'ctrl-alt-p': ping odroid")
     appendToConsole("'p': ping rover mcu")
     appendToConsole("'q': cut power to all motors")
@@ -73,7 +73,7 @@ $(document).ready(() => {
           .includes('PDS')
       ) {
       requestTask(
-          PDS_LISTENER_TASK
+          PDS_LISTENER_TASK,
           STATUS_START,
           function (msgs) {
             if (msgs[0]) {

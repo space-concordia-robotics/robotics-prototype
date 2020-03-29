@@ -195,7 +195,7 @@ function printErrToConsole (msg) {
 }
 
 function pingDevice (device) {
-  if (canSendCommand()) {
+  if (canSendCommand(PING_THROTTLE_TIME)) {
     switch (device) {
       case 'Arm':
         sendRequest('Arm', 'ping', printErrToConsole)

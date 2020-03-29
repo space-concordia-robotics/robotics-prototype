@@ -27,10 +27,13 @@ let movementCommanded = false
 sentZero = true // used to prevent the gui from sending wheel commands
 
 function printCommandsList () {
-  appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'p': ping rover mcu")
-  appendToConsole("'q': emergency stop all motors")
-  appendToConsole("'l': view key commands")
+  if (canSendCommand(PING_THROTTLE_TIME)) {
+    appendToConsole("'ctrl-alt-p': ping odroid")
+    appendToConsole("'p': ping rover mcu")
+    appendToConsole("'q': emergency stop all motors")
+    appendToConsole("'l': view key commands")
+    setTimeSinceCMD()
+  }
 }
 
 $(document).ready(function () {
@@ -314,7 +317,7 @@ function gameLoop () {
   have the rate (time) at which the commands are actually sent to be
   decoupled from the rate at which the steering or throttle changes
   */
-  if (canSendCommand()) {
+  if (canSendCommand(GAME_LOOP_PERIOD)) {
     /* ROVER WHEEL CONTROL */
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {

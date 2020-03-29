@@ -1,6 +1,6 @@
 $(document).ready(() => {
   function pingDevice (device) {
-    if (canSendCommand()) {
+    if (canSendCommand(PING_THROTTLE_TIME)) {
       switch (device) {
         case 'Arm':
           sendRequest('Arm', 'ping', printErrToConsole)
@@ -62,12 +62,10 @@ $(document).ready(() => {
   document.addEventListener('keydown', function (event) {
     if (
       event.code === 'KeyL' &&
-      canSendCommand() &&
       !$('#servo-val').is(':focus')
     ) {
       $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
       printCommandsList()
-      setTimeSinceCMD()
     }
   })
 })

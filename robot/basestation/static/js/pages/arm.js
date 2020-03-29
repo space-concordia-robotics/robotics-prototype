@@ -4,17 +4,19 @@
 // setInterval(updateOdroidRx, 1000);
 
 // for command thoughput limiting
-const MANUAL_CONTROL_THROTTLE_TIME = 100
 const MCU_FEEDBACK_THROTTLE = 1000
 
 function printCommandsList () {
-  appendToConsole("'ctrl-alt-p': ping odroid")
-  appendToConsole("'p': ping arm mcu")
-  appendToConsole("'q': emergency stop all motors")
-  appendToConsole("'o': reset memorized angle values")
-  appendToConsole("'l': view key commands")
-  appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
-  appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
+  if (canSendCommand(PING_THROTTLE_TIME)) {
+    appendToConsole("'ctrl-alt-p': ping odroid")
+    appendToConsole("'p': ping arm mcu")
+    appendToConsole("'q': emergency stop all motors")
+    appendToConsole("'o': reset memorized angle values")
+    appendToConsole("'l': view key commands")
+    appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
+    appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
+    setTimeSinceCMD()
+  }
 }
 
 function manualControl () {
@@ -86,8 +88,8 @@ $(document).ready(function () {
       }
     } else {
       // closing arm listener
-      requestTask(ARM_LISTENER_TASK, 
-          STATUS_STOP, 
+      requestTask(ARM_LISTENER_TASK,
+          STATUS_STOP,
           function (
         msgs
       ) {
@@ -191,7 +193,7 @@ const GREEN = 'rgb(61, 127, 127)'
 function gameLoop () {
   let $serialCmdInput = $('#serial-cmd-input')
 
-  if (canSendCommand()) {
+  if (canSendCommand(MANUAL_CONTROL_THROTTLE_TIME)) {
     let budgeArray = ['~', '~', '~', '~', '~', '~']
     let i = 0
     let toBudge = false
