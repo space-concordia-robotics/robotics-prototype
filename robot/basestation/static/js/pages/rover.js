@@ -1,6 +1,3 @@
-// for command thoughput limiting
-const DRIVE_THROTTLE_TIME = 100
-const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45

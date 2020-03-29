@@ -6,6 +6,10 @@ const GAME_LOOP_PERIOD = 50
 lastRotate = 0
 let lastCMDSent = 0
 
+// for command thoughput limiting
+const DRIVE_THROTTLE_TIME = 100
+const MCU_FEEDBACK_THROTTLE = 1000
+
 // reset time to 0ms
 function resetTimeSinceCMD() {
   lastCMDSent = 0

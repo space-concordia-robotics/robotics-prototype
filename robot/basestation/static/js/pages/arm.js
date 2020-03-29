@@ -3,9 +3,6 @@
 // update odroid rx data every second
 // setInterval(updateOdroidRx, 1000);
 
-// for command thoughput limiting
-const MCU_FEEDBACK_THROTTLE = 1000
-
 function printCommandsList () {
   if (canSendCommand(PING_THROTTLE_TIME)) {
     appendToConsole("'ctrl-alt-p': ping odroid")
