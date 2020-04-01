@@ -17,7 +17,7 @@ function resetTimeSinceCMD() {
 
 // get and record time of last command in ms
 function setTimeSinceCMD() {
-  lastCMDSent = new Date().getTime()
+  lastCMDSent = Date.now()
 }
 
 // return false if command is within time cooldown, true if outside time cooldown
