@@ -1,37 +1,22 @@
-
 file(MAKE_DIRECTORY build)
 set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 cmake_minimum_required(VERSION 3.17.0)
-project(science)
+project(@Project_Name@)
 
-
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS ${CMAKE_BINARY_DIR})
-
+set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#USER LIBARIES
 add_library(user ${TEENSY_USED_LIBRARIES})
 target_compile_options(user PUBLIC ${ARM_GXX_FLAGS})
 
-#CREATE EXE, LINK TO IT, AND OUTPUT AN ELF 
-add_executable(${PROJECT_NAME} science.ino.cpp)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
 
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C LINK_FLAGS ${ARM_GCC_LINKER_FLAGS} OUTPUT_NAME ${PROJECT_NAME}.elf)
 target_link_libraries(${PROJECT_NAME} user core -lm) 
-
-
-
-
-
-
-
-
-

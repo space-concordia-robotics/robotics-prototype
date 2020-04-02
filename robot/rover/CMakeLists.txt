@@ -18,6 +18,7 @@ SET(CMAKE_CXX_COMPILER_WORKS 1)
 
 project(rover)
 
+set(ROVER_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 #SET UTILITIES
 #set(CMAKE_OBJCOPY ${ARM_TOOLS}/arm-none-eabi-objcopy)
 
@@ -72,13 +73,15 @@ add_library(core $<TARGET_OBJECTS:teensycore_s> $<TARGET_OBJECTS:teensycore_c> $
 target_compile_options(core PUBLIC ${ARM_GXX_FLAGS})
 
 
-#file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.ino)
-#foreach(path ${INOFILES})
-# message("<<${path}>>")
-# get_filename_component(cmake_list_path ${path} DIRECTORY)
-# message("--${cmake_list_path}--")
-# add_subdirectory(${cmake_list_path})
-#endforeach()
+file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.ino)
+foreach(path ${INOFILES})
+ get_filename_component(project_dir ${path} DIRECTORY)
+ get_filename_component(name ${path} NAME_WE)
+ 
+ set(Project_Name ${name})
+ configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
+ #file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt)
+endforeach()
 
-add_subdirectory(science "${CMAKE_BINARY_DIR}/obj")
+#add_subdirectory(science "${CMAKE_BINARY_DIR}/obj")
 
