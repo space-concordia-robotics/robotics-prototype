@@ -19,7 +19,7 @@ def ping_response_client(msg):
 
 
 def usage():
-    return "{:s} [msg]".format(sys.argv[0])
+    return "usage: {:s} [msg]".format(sys.argv[0])
 
 
 if __name__ == "__main__":
@@ -36,6 +36,8 @@ if __name__ == "__main__":
             msg = sys.argv[1]
     else:
         msg = 'silence'
+        print("Warning: no message argument, sending 'silence' to ping response server")
+        print(usage())
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
