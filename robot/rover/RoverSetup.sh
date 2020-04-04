@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Setup script which installs the Space Concordia Robotics Software team's rover environment.
+# Script which setups the Space Concordia Robotics Software team's OBC.
 
 APPEND_TO_BASH="
 
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_HOSTNAME=$USER
+
 . ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+. ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
 "
 
-FINAL_MESSAGE="The script will now exit"
+FINAL_MESSAGE="The script will now exit, ensure that ros is install correctly and that
+all of the rospackages are present. Reboot to run systemd services."
 
 REPO="/home/$USER/Programming/robotics-prototype"
 
@@ -27,13 +32,17 @@ fi
 #install prereqs
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
-sudo apt install python3.6 python3.6-venv git nodejs npm openssh-server -y
+sudo apt install python3.6 python3.6-venv nodejs npm openssh-server -y
 sudo ufw allow ssh
 
-# Install Requirements
+# Setup venv
 cd $REPO
+python3.6 -m venv venv
+source venv/bin/activate
+
+# Install Requirements
 pip install -U pip
-pip install -r requirements.txt -r requirements-dev.txt
+pip install pyserial
 
 # Setup python and allow for module imports from within repo
 python setup.py develop
@@ -58,7 +67,8 @@ then
 elif [$ROS_VERSION != "kinetic"]
 then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
-    exit 1
+    exit 1# Script which setups the Space Concordia Robotics Software team's OBC.
+
 fi
 
 
@@ -74,7 +84,6 @@ catkin_make
 
 
 # Edit ~/.bash_aliases
-# Ensures that you can connect to someones else's ip to access GUI
 # Add aliases to terminal
 # Makes your terminal start in (venv)
 echo "$APPEND_TO_BASH" >> ~/.bashrc
