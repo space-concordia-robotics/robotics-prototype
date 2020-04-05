@@ -9,7 +9,8 @@ const EMAILS_FILE_NAME = 'emails.txt'
 // fallback to default emails if there's and issue with the emails file
 const DEFAULT_EMAILS = [
     'davidhuculak5@gmail.com',
-    'petergranitski@gmail.com'
+    'petergranitski@gmail.com',
+    'william.wells@spaceconcordia.ca'
 ]
 
 let ourIP

@@ -20,5 +20,5 @@ else
     # WARNING: when adding this script to be run on startup whether using cronjob or systemd services
     # make sure to replace the beginning "node" with the direct path which you can check with the output of `which node`
     # otherwise it will not work. Example: "/home/nvidia/.nvm/versions/node/v10.13.0/bin/node"
-    #node /home/nvidia/emailer/emailIPAddress.js >> $EMAILER_LOG
+    node /home/nvidia/emailer/emailIPAddress.js >> $EMAILER_LOG
 fi
