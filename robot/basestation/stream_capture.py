@@ -16,7 +16,7 @@ ROVER_STREAM_FOLDER = "rover_stream"
 IMAGES_FOLDER = "stream_images"
 
 def get_stream_shortname(stream_url):
-    """ 
+    """
     Given the format http://localhost:8080/stream?topic=/FEED_NAME/image_raw
 
     Returns FEED_NAME
@@ -47,7 +47,7 @@ def start_recording_feed(stream_url):
     if stream_is_connected:
         print("Started recording " + stream_shortname)
         active_recordings.append(stream_shortname)
-        threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start() 
+        threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start()
         return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(filename)
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
@@ -91,7 +91,19 @@ def start_ffmpeg_record(stream_url, filename):
     """
     proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
 
-def stream_capture(stream_url):
+def rotate_number(rotation):
+    """Gets the rotation value used to rotate image"""
+    if rotation == '1':
+        return '3'
+    elif rotation == '2':
+        return '2,transpose=2'
+    elif rotation == '3':
+        return '1'
+    elif rotation == '0':
+        return 'empty'
+
+
+def stream_capture(stream_url, camera_rotation):
     """ Given a stream, captures an image.
 
         stream_url : The URL of the stream to capture the image.
@@ -99,7 +111,7 @@ def stream_capture(stream_url):
     image_directory = IMAGES_FOLDER + "/" + get_stream_shortname(stream_url) + "/"
 
     print("Capturing image of " + stream_url);
-    
+
     if not os.path.exists(image_directory):
       os.makedirs(image_directory)
 
@@ -108,6 +120,12 @@ def stream_capture(stream_url):
     filename = image_directory + filename
 
     error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + filename)
+
+    # Rotate image
+
+    if rotate_number(camera_rotation) != 'empty':
+        error, output = run_shell('ffmpeg -y -i ' + filename + ' -vf ' + 'transpose=' + rotate_number(camera_rotation) + ' ' + filename)
+
 
     message = "Successfully captured image " + os.path.abspath(filename)
 

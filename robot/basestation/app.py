@@ -170,8 +170,10 @@ def rover_drive():
 
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
-    stream_url = request.args['stream_url']
-    success, message = stream_capture(stream_url)
+    print(request.args['camera_rotation'])
+    stream_url= request.args['stream_url']
+    rotation = request.args['camera_rotation']
+    success, message = stream_capture(stream_url, rotation)
     return jsonify(success=success, msg=message)
 
 @app.route("/initiate_feed_recording/", methods=["POST", "GET"])
