@@ -52,7 +52,7 @@ def start_recording_feed(stream_url):
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
 
-def stop_recording_feed(stream_url):
+def stop_recording_feed(stream_url, camera_rotation):
     """
     Stop recording feed and handle potential errors
     """
@@ -64,7 +64,7 @@ def stop_recording_feed(stream_url):
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
-    except (KeyError, ValueError) as e:
+
         print(e)
         success = False
         message = "Failed to stop recording of " + stream_shortname

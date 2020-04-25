@@ -170,7 +170,6 @@ def rover_drive():
 
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
-    print(request.args['camera_rotation'])
     stream_url= request.args['stream_url']
     rotation = request.args['camera_rotation']
     success, message = stream_capture(stream_url, rotation)
@@ -188,8 +187,10 @@ def initiate_feed_recording():
 @app.route("/stop_feed_recording/", methods=["POST", "GET"])
 def stop_feed_recording():
     stream_url = request.args['stream_url']
+    rotation = request.args['camera_rotation']
     if is_recording_stream(stream_url):
-        success, message = stop_recording_feed(stream_url)
+        print(rotation + 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
+        success, message = stop_recording_feed(stream_url, rotation)
         return jsonify(success=success, msg=message)
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")
