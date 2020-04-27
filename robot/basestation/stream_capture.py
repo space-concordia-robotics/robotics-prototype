@@ -137,7 +137,6 @@ def stream_capture(stream_url, camera_rotation):
 
     error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + image_filename)
 
-    # Rotate image
     if camera_rotation != '0':
         rotate_stream(image_filename, camera_rotation)
 
