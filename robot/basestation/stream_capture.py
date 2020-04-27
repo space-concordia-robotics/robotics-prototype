@@ -66,7 +66,8 @@ def stop_recording_feed(stream_url, camera_rotation):
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
-        rotatestream(video_filename, camera_rotation)
+        if camera_rotation != '0':
+            rotate_stream(video_filename, camera_rotation)
 
     except (KeyError, ValueError) as e:
         print(e)
@@ -76,10 +77,15 @@ def stop_recording_feed(stream_url, camera_rotation):
     print(message)
     return success, message
 
-def rotatestream(filename, rotation):
+def rotate_stream(filename, rotation):
     """
     Rotate stream to the rotation of the GUI
     """
+    if 'jpg' in filename:
+        temp_filename = filename + '.jpg'
+    elif 'mp4' in filename:
+        temp_filename = filename + '.mp4'
+
     stream = ffmpeg.input(filename)
     # If rotation is 180 degrees, use vflip. Else use transpose filter
     if rotation == '1':
@@ -89,9 +95,10 @@ def rotatestream(filename, rotation):
     elif rotation == '3':
         stream = ffmpeg.filter_(stream, 'transpose', 2)
 
-    stream = ffmpeg.output(stream, filename)
-    stream = ffmpeg.overwrite_output(stream)
+    stream = ffmpeg.output(stream, temp_filename)
     ffmpeg.run(stream)
+    os.remove(filename)
+    os.rename(temp_filename, filename)
 
 def is_recording_stream(stream_url):
     global active_recordings
@@ -144,7 +151,7 @@ def stream_capture(stream_url, camera_rotation):
 
     # Rotate image
     if camera_rotation != '0':
-        rotatestream(image_filename, camera_rotation)
+        rotate_stream(image_filename, camera_rotation)
 
     message = "Successfully captured image " + os.path.abspath(image_filename)
 
