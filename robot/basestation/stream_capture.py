@@ -119,18 +119,6 @@ def start_ffmpeg_record(stream_url, filename):
     """
     proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
 
-def rotate_number(rotation):
-    """Gets the rotation value used to rotate image"""
-    if rotation == '1':
-        return '3'
-    elif rotation == '2':
-        return '2,transpose=2'
-    elif rotation == '3':
-        return '1'
-    elif rotation == '0':
-        return 'empty'
-
-
 def stream_capture(stream_url, camera_rotation):
     """ Given a stream, captures an image.
 

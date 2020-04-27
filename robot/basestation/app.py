@@ -189,7 +189,6 @@ def stop_feed_recording():
     stream_url = request.args['stream_url']
     rotation = request.args['camera_rotation']
     if is_recording_stream(stream_url):
-        print(rotation + 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW')
         success, message = stop_recording_feed(stream_url, rotation)
         return jsonify(success=success, msg=message)
     else:
