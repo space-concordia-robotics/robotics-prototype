@@ -8,6 +8,7 @@ import threading
 from robot.util.utils import run_shell
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_ip
+import ffmpeg
 
 global proc_video
 proc_video = {}
@@ -32,6 +33,7 @@ def start_recording_feed(stream_url):
     """
 
     global active_recordings
+    global video_filename
     stream_shortname = get_stream_shortname(stream_url)
 
     save_video_dir = ROVER_STREAM_FOLDER + "/" + get_stream_shortname(stream_url)
@@ -41,14 +43,14 @@ def start_recording_feed(stream_url):
     stream_is_connected = is_stream_connected(stream_url)
 
     formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
-    filename = get_stream_shortname(stream_url) + '_' + formatted_date + ".mp4"
-    filename = save_video_dir + '/' + filename
+    video_filename = get_stream_shortname(stream_url) + '_' + formatted_date + ".mp4"
+    video_filename = save_video_dir + '/' + video_filename
 
     if stream_is_connected:
         print("Started recording " + stream_shortname)
         active_recordings.append(stream_shortname)
-        threading.Thread(target = start_ffmpeg_record, args = (stream_url, filename)).start()
-        return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(filename)
+        threading.Thread(target = start_ffmpeg_record, args = (stream_url, video_filename)).start()
+        return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(video_filename)
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
 
@@ -64,13 +66,32 @@ def stop_recording_feed(stream_url, camera_rotation):
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
+        rotatestream(video_filename, camera_rotation)
 
+    except (KeyError, ValueError) as e:
         print(e)
         success = False
         message = "Failed to stop recording of " + stream_shortname
 
     print(message)
     return success, message
+
+def rotatestream(filename, rotation):
+    """
+    Rotate stream to the rotation of the GUI
+    """
+    stream = ffmpeg.input(filename)
+    # If rotation is 180 degrees, use vflip. Else use transpose filter
+    if rotation == '1':
+        stream = ffmpeg.filter_(stream, 'transpose', 1)
+    elif rotation == '2':
+        stream = ffmpeg.filter_(stream, 'vflip')
+    elif rotation == '3':
+        stream = ffmpeg.filter_(stream, 'transpose', 2)
+
+    stream = ffmpeg.output(stream, filename)
+    stream = ffmpeg.overwrite_output(stream)
+    ffmpeg.run(stream)
 
 def is_recording_stream(stream_url):
     global active_recordings
@@ -116,18 +137,16 @@ def stream_capture(stream_url, camera_rotation):
       os.makedirs(image_directory)
 
     formatted_date = datetime.datetime.now().strftime("%Y_%m_%d_%I_%M_%S");
-    filename =  get_stream_shortname(stream_url) + "_" + formatted_date + ".jpg"
-    filename = image_directory + filename
+    image_filename =  get_stream_shortname(stream_url) + "_" + formatted_date + ".jpg"
+    image_filename = image_directory + image_filename
 
-    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + filename)
+    error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + image_filename)
 
     # Rotate image
+    if camera_rotation != '0':
+        rotatestream(image_filename, camera_rotation)
 
-    if rotate_number(camera_rotation) != 'empty':
-        error, output = run_shell('ffmpeg -y -i ' + filename + ' -vf ' + 'transpose=' + rotate_number(camera_rotation) + ' ' + filename)
-
-
-    message = "Successfully captured image " + os.path.abspath(filename)
+    message = "Successfully captured image " + os.path.abspath(image_filename)
 
     if error:
         message = "Failed to capture image of " + stream_url
