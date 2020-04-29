@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # Script which setups the Space Concordia Robotics Software team's OBC.
 
+REPO="/home/$USER/Programming/robotics-prototype"
+
 APPEND_TO_BASH="
 
 export ROS_MASTER_URI=http://localhost:11311
 export ROS_HOSTNAME=$USER
 
-. ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
-. ~/Programming/robotics-prototype/venv/bin/activate
-source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
+. $REPO/robot/rospackages/devel/setup.bash
+. $REPO/venv/bin/activate
+source $REPO/robot/basestation/config/.bash_aliases
 
 "
 
 FINAL_MESSAGE="The script will now exit, ensure that ros is install correctly and that
 all of the rospackages are present. Reboot to run systemd services."
-
-REPO="/home/$USER/Programming/robotics-prototype"
 
 ## START
 
@@ -42,7 +42,7 @@ source venv/bin/activate
 
 # Install Requirements
 pip install -U pip
-pip install pyserial
+pip install pyserial==3.4
 
 # Setup python and allow for module imports from within repo
 python setup.py develop

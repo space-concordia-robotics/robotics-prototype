@@ -10,7 +10,8 @@ const EMAILS_FILE_NAME = 'emails.txt'
 const DEFAULT_EMAILS = [
     'davidhuculak5@gmail.com',
     'petergranitski@gmail.com',
-    'william.wells@spaceconcordia.ca'
+    'william.wells@spaceconcordia.ca',
+    'cedric.martens@spaceconcordia.ca'
 ]
 
 let ourIP
