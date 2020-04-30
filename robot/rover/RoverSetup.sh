@@ -102,7 +102,8 @@ sudo systemctl enable ros-rover-start.service
 cd $REPO/robot/util
 sudo cp configEthernet/runConfigEthernet.sh /usr/bin/runConfigEthernet.sh
 sudo cp emailer/runEmailer.sh /usr/bin/runEmailer.sh
-bash configEthernet/synchConfigEthernet.sh && bash emailer/syncEmailer.sh
+cd $REPO/robot/util/configEthernet && bash synchConfigEthernet.sh
+cd $REPO/robot/util/emailer/ && bash syncEmailer.sh
 
 # Exit
 echo "$FINAL_MESSAGE"
