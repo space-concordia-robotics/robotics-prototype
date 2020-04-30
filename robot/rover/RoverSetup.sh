@@ -42,7 +42,7 @@ source venv/bin/activate
 
 # Install Requirements
 pip install -U pip
-pip install pyserial==3.4
+pip install pyserial==3.4 rospkg==1.1.7
 
 # Setup python and allow for module imports from within repo
 python setup.py develop
@@ -67,7 +67,7 @@ then
 elif [$ROS_VERSION != "kinetic"]
 then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
-    exit 1# Script which setups the Space Concordia Robotics Software team's OBC.
+    exit 1
 
 fi
 
