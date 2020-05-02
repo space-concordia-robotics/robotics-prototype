@@ -342,6 +342,6 @@ $(document).ready(() => {
   })
 
   $('.camera-popup' ).click(function() {
-    window.open('/camerapopup',"", 'height='+screen.height+', width='+screen.width);
+    window.open('/camerapopup', "", 'height=' + screen.height + ', width=' + screen.width);
   })
 })
