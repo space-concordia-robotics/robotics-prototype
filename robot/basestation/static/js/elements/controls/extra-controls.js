@@ -1,5 +1,4 @@
 $(document).ready(() => {
-
   $('#homing-button').on('click', function (event) {
     event.preventDefault()
     // TODO: uncomment this when homing is confirmed to work properly
@@ -28,19 +27,5 @@ $(document).ready(() => {
     event.preventDefault()
     sendArmCommand('reboot')
     sendRoverCommand('stop')
-  })
-
-  $('#flip-stream').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimg180')
-  })
-
-  $('#flip-stream-ccw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgccw')
-    $('#camera-feed').toggleClass('stretch-down')
-  })
-
-  $('#flip-stream-cw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgcw')
-    $('#camera-feed').toggleClass('stretch-down')
   })
 })

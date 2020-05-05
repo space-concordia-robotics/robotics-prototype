@@ -1,39 +1,77 @@
 $(document).ready(() => {
 
   function append_css(file) {
-      console.log('Append CSS: ' + file);
+      console.log('Append CSS: ' + file)
 
-      var link = document.createElement("link");
-      link.href = '/static/css/' + file + ".css";
-      link.type = "text/css";
-      link.rel = "stylesheet";
-      link.media = "screen,print";
+      var link = document.createElement('link')
+      link.href = '/static/css/' + file + '.css'
+      link.type = 'text/css'
+      link.rel = 'stylesheet'
+      link.media = 'screen,print'
 
-      document.getElementsByTagName("head")[0].appendChild(link);
+      document.getElementsByTagName('head')[0].appendChild(link)
   }
 
   function prefer_theme(name) {
-      console.log('Prefer theme: ' + name);
-      setCookie('theme', name, 365); // setCookie() from helpers.js
-      append_css('themes/' + name);
+      console.log('Prefer theme: ' + name)
+      setCookie('theme', name, 365)  // setCookie() from helpers.js
+      append_css('themes/' + name)
   }
 
-  preferred_theme = getCookie('theme'); // getCookie() from helpers.js
-  if (preferred_theme != "") {
-      prefer_theme(preferred_theme);
+  preferred_theme = getCookie('theme')  // getCookie() from helpers.js
+  if (preferred_theme != '') {
+      prefer_theme(preferred_theme)
+  } else {
+    prefer_theme('lofi')
   }
 
-  $('#theme-red').click(function () {
-      prefer_theme('red');
-  });
-  $('#theme-green').click(function () {
-      console.log('theme-green');
-      prefer_theme('green');
-  });
-  $('#theme-blue').click(function () {
-      console.log('theme-blue');
-      prefer_theme('blue');
-  });
+  $('#theme-mantis').click(function () {
+      console.log('theme-mantis')
+      prefer_theme('mantis')
+  })
+  $('#theme-lofi').click(function () {
+      console.log('theme-lofi')
+      prefer_theme('lofi')
+  })
+
+
+  function checkListenerStates() {
+    let listener = ''
+    let url = window.location.pathname
+    let toggleButtonID = 'toggle-'
+
+    if (url == '/rover') {
+        listener = ROVER_LISTENER_TASK
+        toggleButtonID += 'rover-listener-btn'
+    } else if (url == '/' || url == '/arm') {
+        listener = ARM_LISTENER_TASK
+        toggleButtonID += 'arm-listener-btn'
+    } else if (url == '/science') {
+        listener = SCIENCE_LISTENER_TASK
+        toggleButtonID += 'science-listener-btn'
+    } else if (url == '/pds') {
+        listener = PDS_LISTENER_TASK
+        toggleButtonID += 'pds-listener-btn'
+    }
+
+    let serialType = $('#serial-type').text()
+
+    requestTask(
+      listener,
+      STATUS_CHECK,
+      function (msgs) {
+        console.log('msgs', msgs)
+        if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
+          $('#' + toggleButtonID)[0].checked = false
+        } else {
+          $('#' + toggleButtonID)[0].checked = true
+        }
+      },
+      serialType
+    )
+  }
+
+  checkListenerStates()
 
   function isListenerOpen () {
     return (
@@ -51,7 +89,7 @@ $(document).ready(() => {
   $('#mux-0').mouseup(function () {
     // Rover
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-0', function (msgs) {
         printErrToConsole(msgs)
@@ -69,9 +107,8 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'rover_listener',
-              1,
-              '#toggle-rover-listener-btn',
+              ROVER_LISTENER_TASK,
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#toggle-rover-listener-btn')[0].checked = true
@@ -90,24 +127,10 @@ $(document).ready(() => {
     }
   })
 
-  $('#flip-stream').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimg180')
-  })
-
-  $('#flip-stream-ccw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgccw')
-    $('#camera-feed').toggleClass('stretch-down')
-  })
-
-  $('#flip-stream-cw').on('click', function () {
-    $('#camera-feed').toggleClass('rotateimgcw')
-    $('#camera-feed').toggleClass('stretch-down')
-  })
-
   $('#mux-1').mouseup(function () {
     // Arm
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-1', function (msgs) {
         printErrToConsole(msgs)
@@ -125,9 +148,8 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'arm_listener',
-              1,
-              '#toggle-arm-listener-btn',
+              ARM_LISTENER_TASK,
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#toggle-arm-listener-btn')[0].checked = true
@@ -149,7 +171,7 @@ $(document).ready(() => {
   $('#mux-2').mouseup(function () {
     // Science
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-2', function (msgs) {
         printErrToConsole(msgs)
@@ -167,9 +189,8 @@ $(document).ready(() => {
           // automating opening listener and sending MCU ping in UART mode
           if (serialType == 'uart') {
             requestTask(
-              'science_listener',
-              1,
-              '#science-listener-btn',
+              SCIENCE_LISTENER_TASK,
+              STATUS_START,
               function (msgs) {
                 if (msgs[0]) {
                   $('#science-listener-btn')[0].checked = true
@@ -191,7 +212,7 @@ $(document).ready(() => {
   $('#mux-3').mouseup(function () {
     // PDS
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      appendToConsole("Don't change the mux channel while a listener is open!")
+      appendToConsole('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#mux-3', function (msgs) {
         printErrToConsole(msgs)
@@ -262,23 +283,32 @@ $(document).ready(() => {
     }
   })
 
-  $( "#arm-page" ).click(function() {
-    window.open('/arm');
+  $( '#arm-page' ).click(function() {
+    window.open('/arm')
   })
 
-  $( "#rover-page" ).click(function() {
-    window.open('rover');
+  $( '#rover-page' ).click(function() {
+    window.open('rover')
   })
 
-  $( "#science-page" ).click(function() {
-    window.open('science');
+  $( '#science-page' ).click(function() {
+    window.open('science')
   })
 
-  $( "#pds-page" ).click(function() {
-    window.open('pds');
+  $( '#pds-page' ).click(function() {
+    window.open('pds')
   })
 
-  $( "#streams-page" ).click(function() {
-    window.open('stream');
+  $( '#streams-page' ).click(function() {
+    window.open('stream')
   })
 })
+
+/*
+function to display the navbar modal with the given title and body text
+*/
+function navModalMessage (title, body){
+  $('.modal-title').text(title)
+  $('.modal-msg').text(body)
+  $('.modal').modal({show: true})
+}

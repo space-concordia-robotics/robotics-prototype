@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand-md fixed-top">
   <div class="col-md-1">
       <a class="navbar-brand" href="{{ url_for('index') }}">
           <img src="../static/img/sclogo_header.png">
@@ -45,33 +45,50 @@
       Theme
     </button>
     <div class="dropdown-menu">
-      <a id="theme-red" class="dropdown-item">Red</a>
-      <a id="theme-green" class="dropdown-item">Green</a>
-      <a id="theme-blue" class="dropdown-item">Blue</a>
+      <a id="theme-mantis" class="dropdown-item">mantis</a>
+      <a id="theme-lofi" class="dropdown-item">lofi</a>
     </div>
   </div>
 
-  <!-- <div class="col-md-6">
-       <input type="text" id="serial-cmd-input">
-     </div>
-     <div class="col-md-1">
-       <button type="button" id="send-serial-btn" class="btn btn-primary">Send serial cmd</button>
-     </div> -->
+  <div class= "col-md-2">
+    <div class="row">
+      <div class="col d-flex flex-row-reverse align-items-center">
+        <i class="fa fa-battery-full fa-2x text-white"></i>
+      </div>
 
- <div class="col-md-4">
-   <div class="row" style="color:white">
-     <div class="col-md-2">BATTERY VOLTAGE: </div>
-     <div class="col-md-2" id="battery-voltage">-</div>
-     <div class="col-md-2">BATTERY TEMPS: </div>
-     <div class="col-md-6">
-       <div class="row">
-         T2:<div class="col-md-3" id="battery-temp-1">-</div>&#8451;
-         T1:<div class="col-md-3" id="battery-temp-2">-</div>&#8451;
-       </div>
-       <div class=row>
-         T3:<div class="col-md-3" id="battery-temp-3">-</div>&#8451;
-       </div>
-     </div>
-   </div>
- </div>
+      <div class="col">
+        <div class ="row text-white">
+          <div id="battery-voltage" acceptable="1">-</div>V
+        </div>
+        <div class ="row text-white">
+          <div id="battery-temperature" acceptable="1">-</div>℃
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-2">
+    <div class="row">
+      <div class="col-md-2 ml-auto">
+        <i class="fa fa-thermometer-three-quarters fa-2x text-white"></i>
+      </div>
+
+      <div class="col-md-10">
+        <div class="row no-gutters text-white">
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-1" acceptable="1" sensorName = "T1">-</span>℃
+          </div>
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-2" acceptable="1" sensorName = "T2">-</span>℃
+          </div>
+          <div class="col">
+            <span class="battery-temp" id="battery-temp-3" acceptable="1" sensorName = "T3">-</span>℃
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </nav>
+
+{% include 'elements/feed/NavModal.html' %}
