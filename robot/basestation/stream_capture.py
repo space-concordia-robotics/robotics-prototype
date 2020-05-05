@@ -66,8 +66,7 @@ def stop_recording_feed(stream_url, camera_rotation):
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
-        if camera_rotation != '0':
-            rotate_stream(video_filename, camera_rotation)
+        rotate_stream(video_filename, camera_rotation)
 
     except (KeyError, ValueError) as e:
         print(e)
@@ -81,6 +80,9 @@ def rotate_stream(filename, rotation):
     """
     Rotate stream to the rotation of the GUI
     """
+
+    rotation = int(rotation)
+
     if 'jpg' in filename:
         temp_filename = filename + '.jpg'
     elif 'mp4' in filename:
@@ -88,17 +90,20 @@ def rotate_stream(filename, rotation):
 
     stream = ffmpeg.input(filename)
     # If rotation is 180 degrees, use vflip. Else use transpose filter
-    if rotation == '1':
+    if rotation == 0:
+        pass
+    if rotation == 1:
         stream = ffmpeg.filter_(stream, 'transpose', 1)
-    elif rotation == '2':
+    elif rotation == 2:
         stream = ffmpeg.filter_(stream, 'vflip')
-    elif rotation == '3':
+    elif rotation == 3:
         stream = ffmpeg.filter_(stream, 'transpose', 2)
+    else:
+        raise ValueError('Rotation value is not valid')
 
     stream = ffmpeg.output(stream, temp_filename)
     ffmpeg.run(stream)
-    os.remove(filename)
-    os.rename(temp_filename, filename)
+    os.remove(temp_filename)
 
 def is_recording_stream(stream_url):
     global active_recordings
@@ -120,9 +125,12 @@ def start_ffmpeg_record(stream_url, filename):
     proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
 
 def stream_capture(stream_url, camera_rotation):
-    """ Given a stream, captures an image.
+    """ Given a stream, captures an image and rotates it as shown in GUI
 
         stream_url : The URL of the stream to capture the image.
+        camera_rotation : The rotation value (0,1,2,3) of the stream as shown
+        in the GUI. 0 = no rotation. 1 = clockwise 90 degrees
+        2 = 180 degrees. 3 = counterclockwise 90 degrees
     """
     image_directory = IMAGES_FOLDER + "/" + get_stream_shortname(stream_url) + "/"
 
@@ -137,8 +145,7 @@ def stream_capture(stream_url, camera_rotation):
 
     error, output = run_shell("ffmpeg -i " + stream_url + " -ss 00:00:01.500 -f image2 -vframes 1 " + image_filename)
 
-    if camera_rotation != '0':
-        rotate_stream(image_filename, camera_rotation)
+    rotate_stream(image_filename, camera_rotation)
 
     message = "Successfully captured image " + os.path.abspath(image_filename)
 
