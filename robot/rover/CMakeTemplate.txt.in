@@ -4,19 +4,50 @@ set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 cmake_minimum_required(VERSION 3.17.0)
 project(@Project_Name@)
 
-set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
-
-configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_library(user ${TEENSY_USED_LIBRARIES})
-target_compile_options(user PUBLIC ${ARM_GXX_FLAGS})
+
+file(GLOB ${PROJECT_NAME}_external_source ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) 
+
+set(SUBDIRECTORIES "")
+
+getIncludeDirectories(SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+if(NOT ${${PROJECT_NAME}_external_source} STREQUAL "")
+add_library(${PROJECT_NAME}_external ${${PROJECT_NAME}_external_source})
+target_include_directories(${PROJECT_NAME}_external PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(${PROJECT_NAME}_external PUBLIC ${ARM_GXX_FLAGS})	
+endif()
+
+
+configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
+
+
+add_library(${PROJECT_NAME}_user_teensy ${USED_TEENSY_LIBRARIES})
+target_compile_options(${PROJECT_NAME}_user_teensy PUBLIC ${ARM_GXX_FLAGS})
+target_include_directories(${PROJECT_NAME}_user_teensy PRIVATE ${TEENSY_INCLUDE_DIRECTORIES})
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${SUBDIRECTORIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TEENSY_INCLUDE_DIRECTORIES})
 
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C LINK_FLAGS ${ARM_GCC_LINKER_FLAGS} OUTPUT_NAME ${PROJECT_NAME}.elf)
-target_link_libraries(${PROJECT_NAME} user core -lm) 
+set_target_properties(
+${PROJECT_NAME} PROPERTIES 
+LINKER_LANGUAGE C 
+LINK_FLAGS ${ARM_GCC_LINKER_FLAGS} 
+OUTPUT_NAME ${PROJECT_NAME}.elf
+)
+
+target_link_libraries(
+${PROJECT_NAME} 
+${PROJECT_NAME}_user_teensy 
+$<$<BOOL:${${PROJECT_NAME}_external_source}>:${PROJECT_NAME}_external> 
+core 
+-lm
+) 
