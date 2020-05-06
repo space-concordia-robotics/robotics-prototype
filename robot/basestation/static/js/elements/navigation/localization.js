@@ -26,8 +26,8 @@ let sketch = function(p) {
     dragDiffY = 0
     zoomValue = 1
 
-    r = 82 // JS keycode
-    toggle = false
+    rKeycode = 82
+    canvasResizeToggle = false
 
     MAX_ZOOM = 2
     MIN_ZOOM = 0.15
@@ -95,7 +95,7 @@ let sketch = function(p) {
 
     function drawResizeButton() {
         p.push()
-        if (toggle) {
+        if (canvasResizeToggle) {
             p.fill(0, 250, 0) // rgb
         } else {
             p.fill(250, 0, 0) // rgb
@@ -163,7 +163,7 @@ let sketch = function(p) {
 
     // implements manual controls.
     function controls() {
-        if (p.keyIsDown(r)) { //reset position
+        if (p.keyIsDown(rKeycode)) { //reset position
             zoomValue = 1
             dragDiffX = dragDiffY = 0
             p.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
