@@ -12,7 +12,7 @@ import ffmpeg
 
 global proc_video
 proc_video = {}
-active_recordings = []
+active_recordings = {}
 ROVER_STREAM_FOLDER = "rover_stream"
 IMAGES_FOLDER = "stream_images"
 
@@ -33,7 +33,6 @@ def start_recording_feed(stream_url):
     """
 
     global active_recordings
-    global video_filename
     stream_shortname = get_stream_shortname(stream_url)
 
     save_video_dir = ROVER_STREAM_FOLDER + "/" + get_stream_shortname(stream_url)
@@ -48,25 +47,27 @@ def start_recording_feed(stream_url):
 
     if stream_is_connected:
         print("Started recording " + stream_shortname)
-        active_recordings.append(stream_shortname)
+        active_recordings[stream_shortname] = [video_filename]
         threading.Thread(target = start_ffmpeg_record, args = (stream_url, video_filename)).start()
         return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(video_filename)
     else:
         return False, "Failed to connect to " + stream_shortname + " stream"
 
-def stop_recording_feed(stream_url, camera_rotation):
+def stop_recording_feed(stream_url):
     """
     Stop recording feed and handle potential errors
     """
 
     global active_recordings
     stream_shortname = get_stream_shortname(stream_url)
-    active_recordings.remove(stream_shortname)
+    video_filename = active_recordings[stream_shortname][0]
+    rotation = active_recordings[stream_shortname][1]
+    del active_recordings[stream_shortname]
     message = "Successfully stopped recording of " + stream_shortname
     success = True
     try:
         proc_video[stream_url].communicate(b'q')
-        rotate_stream(video_filename, camera_rotation)
+        rotate_stream(video_filename, rotation)
 
     except (KeyError, ValueError) as e:
         print(e)
@@ -76,9 +77,34 @@ def stop_recording_feed(stream_url, camera_rotation):
     print(message)
     return success, message
 
+def add_rotation(stream_url,rotation):
+    """
+    Add rotation value to the value of the key (stream_url) in active recordings
+    Converts the list to a tuple and handles errors
+    """
+    global active_recordings
+
+    stream_shortname = get_stream_shortname(stream_url)
+    success = True
+    message = "Successfully added rotation value"
+
+    try:
+        active_recordings[stream_shortname].append(rotation)
+        tuple(active_recordings[stream_shortname])
+    except (KeyError):
+        success = False
+        message = "Could not add rotation value of " + get_stream_shortname(stream_url)
+    return success, message
+
+
 def rotate_stream(filename, rotation):
     """
-    Rotate stream to the rotation of the GUI
+    Rotate stream so that it looks like the rotation of the GUI
+    The rotation value as seen on the GUI is defined as the following:
+    0: No rotation
+    1: 90 degrees clockwise rotation
+    2: 180 degrees rotation
+    3: 90 degrees counterclockwise rotation
     """
 
     rotation = int(rotation)
@@ -103,7 +129,8 @@ def rotate_stream(filename, rotation):
 
     stream = ffmpeg.output(stream, temp_filename)
     ffmpeg.run(stream)
-    os.remove(temp_filename)
+    os.remove(filename)
+    os.rename(temp_filename, filename)
 
 def is_recording_stream(stream_url):
     global active_recordings
