@@ -3,6 +3,7 @@
 import sys
 import datetime
 import rospy
+from std_msgs.msg import Float32
 from ping_acknowledgment.srv import *
 
 
@@ -51,4 +52,5 @@ if __name__ == "__main__":
 
     diff = received - sent
     print("Latency: " + str(diff.total_seconds() * 1000) + " ms")
-    rospy.set_param('ping_value', int(diff.total_seconds() * 1000))
+    ping = rospy.Publisher('/ping_value', Float32, queue_size=10, latch=True)
+    ping.publish(Float32(diff.total_seconds() * 1000))
