@@ -36,8 +36,7 @@ if __name__ == "__main__":
             msg = sys.argv[1]
     else:
         msg = 'silence'
-        print("Warning: no message argument, sending 'silence' to ping response server")
-        print(usage())
+        print("Warning: no message argument, sending 'silence' to ping response server\n" + usage())
 
     sent = datetime.datetime.now()
     sent_ts = sent.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (sent.microsecond / 10000))
@@ -52,3 +51,4 @@ if __name__ == "__main__":
 
     diff = received - sent
     print("Latency: " + str(diff.total_seconds() * 1000) + " ms")
+    rospy.set_param('ping_value', int(diff.total_seconds() * 1000))
