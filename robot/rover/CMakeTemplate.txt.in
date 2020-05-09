@@ -8,33 +8,30 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-file(GLOB ${PROJECT_NAME}_external_source ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) 
+file(GLOB ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) 
 
-set(SUBDIRECTORIES "")
+set(PROJECT_SUBDIRECTORIES "")
 
-getIncludeDirectories(SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+getIncludeDirectories(PROJECT_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-if(NOT ${${PROJECT_NAME}_external_source} STREQUAL "")
-add_library(${PROJECT_NAME}_external ${${PROJECT_NAME}_external_source})
-target_include_directories(${PROJECT_NAME}_external PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(${PROJECT_NAME}_external PUBLIC ${ARM_GXX_FLAGS})	
+if(NOT ${${PROJECT_NAME}_user_sources} STREQUAL "")
+add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
+target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 endif()
 
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
 
-add_library(${PROJECT_NAME}_user_teensy ${USED_TEENSY_LIBRARIES})
-target_compile_options(${PROJECT_NAME}_user_teensy PUBLIC ${ARM_GXX_FLAGS})
-target_include_directories(${PROJECT_NAME}_user_teensy PRIVATE ${TEENSY_INCLUDE_DIRECTORIES})
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${SUBDIRECTORIES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${TEENSY_INCLUDE_DIRECTORIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SUBDIRECTORIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${EXTERNAL_LIBARRIES_INCLUDE_DIRS})
 
 
 set_target_properties(
@@ -46,8 +43,8 @@ OUTPUT_NAME ${PROJECT_NAME}.elf
 
 target_link_libraries(
 ${PROJECT_NAME} 
-${PROJECT_NAME}_user_teensy 
-$<$<BOOL:${${PROJECT_NAME}_external_source}>:${PROJECT_NAME}_external> 
-core 
+${EXTERNAL_LIBRARIES}
+$<$<BOOL:${${PROJECT_NAME}_user_sources}>:${PROJECT_NAME}_user> 
+teensycore
 -lm
 ) 
