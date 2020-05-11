@@ -134,10 +134,10 @@ let sketch = function(p) {
         let d = p.dist(p.mouseX, p.mouseY, p.width, p.height) // distance between mouse and lower right corner
 
         if (d < r) {
-            toggle = !toggle
+        canvasResizeToggle = !canvasResizeToggle
         }
 
-        if (toggle) {
+        if (canvasResizeToggle) {
             p.resizeCanvas(p.mouseX, p.mouseY)
         }
     }
