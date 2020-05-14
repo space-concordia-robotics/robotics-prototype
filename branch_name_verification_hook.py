@@ -5,8 +5,9 @@ import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
 
-output, error = run_shell('git', 'symbolic-ref --short HEAD', False)
-branch_name = output.decode('utf8')[:-1]
+def get_branch_name():
+    output, error = run_shell('git', 'symbolic-ref --short HEAD', False)
+    return output.decode('utf8')[:-1]
 
 def is_excluded_branch(branch_name, excluded_branches):
     """
@@ -72,5 +73,6 @@ def has_branch_name_error(branch_name):
     return not is_name_valid
 
 if __name__ == '__main__':
+    branch_name = get_branch_name()
     if not is_excluded_branch(branch_name, excluded_branches):
         has_branch_name_error(branch_name)
