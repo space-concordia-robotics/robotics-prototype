@@ -15,7 +15,7 @@ def add_commit_issue_num(branch_name):
     issue_num = get_issue_num(branch_name)
 
     if not get_issue_num(branch_name) is None:
-        run_shell('sed', '-i.bak -e "1s/^/[#' + issue_num + '] /"' + sys.argv[1], False)
+        run_shell('echo', '-i.bak -e 1s/^/[#' + issue_num + '] / ' + sys.argv[1], False)
     else:
         print(error_msg)
 
