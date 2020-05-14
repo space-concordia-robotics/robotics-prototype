@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import robot.basestation.app as app
-from robot.util.utils import run_shell
+from robot.util.utils import run_shell, write_to_file
 from branch_name_verification_hook import is_excluded_branch, get_issue_num, excluded_branches, get_branch_name
 import re
 import sys
@@ -15,7 +15,7 @@ def add_commit_issue_num(branch_name):
     issue_num = get_issue_num(branch_name)
 
     if not get_issue_num(branch_name) is None:
-        run_shell('echo', '-i.bak -e 1s/^/[#' + issue_num + '] / ' + sys.argv[1], False)
+        write_to_file(sys.argv[1], '[#' + issue_num + '] ', 0, 0)
     else:
         print(error_msg)
 
