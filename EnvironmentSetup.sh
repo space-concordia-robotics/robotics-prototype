@@ -2,7 +2,7 @@
 # Setup script which install the Space Concordia Robotics Software team's development environment.
 
 APPEND_TO_BASH="
-
+#\n\n ------ ROBOTICS SETTINGS ------
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
 #export ROS_HOSTNAME=$USER
@@ -58,12 +58,9 @@ ROS_VERSION=$(rosversion -d)
 if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
 then
     echo "You do not have ROS installed, installing..."
-
-    wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-    chmod 755 ./install_ros_kinetic.sh
-    yes "" | bash ./install_ros_kinetic.sh
-    rm ./install_ros_kinetic.sh
-
+    
+    ./install_ros_kinetic.sh
+    
 	source ~/.bashrc
 
     sudo apt install ros-kinetic-rosbridge-suite -y
