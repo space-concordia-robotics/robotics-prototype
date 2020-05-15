@@ -101,7 +101,7 @@ cd $REPO/robot/basestation
 
 # Setup git hooks
 cd $REPO
-cp commit-message-hook.sh .git/hooks/prepare-commit-msg
+cp commit_message_hook.py .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 
