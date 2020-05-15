@@ -59,7 +59,7 @@ if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command 
 then
     echo "You do not have ROS installed, installing..."
     
-    ./install_ros_kinetic.sh
+    bash install_ros_kinetic.sh
     
 	source ~/.bashrc
 
