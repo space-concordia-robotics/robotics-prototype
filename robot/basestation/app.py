@@ -173,6 +173,7 @@ def rover_drive():
 def capture_image():
     stream_url= request.args['stream_url']
     rotation = request.args['camera_rotation']
+    rotation = int(rotation)
     success, message = stream_capture(stream_url, rotation)
     return jsonify(success=success, msg=message)
 
@@ -189,6 +190,7 @@ def initiate_feed_recording():
 def stop_feed_recording():
     stream_url = request.args['stream_url']
     rotation = request.args['camera_rotation']
+    rotation = int(rotation)
     if is_recording_stream(stream_url):
         success, message = add_rotation(stream_url, rotation)
         success, message = stop_recording_feed(stream_url)

@@ -107,8 +107,6 @@ def rotate_stream(filename, rotation):
     3: 90 degrees counterclockwise rotation
     """
 
-    rotation = int(rotation)
-
     if 'jpg' in filename:
         temp_filename = filename + '.jpg'
     elif 'mp4' in filename:
@@ -156,8 +154,11 @@ def stream_capture(stream_url, camera_rotation):
 
         stream_url : The URL of the stream to capture the image.
         camera_rotation : The rotation value (0,1,2,3) of the stream as shown
-        in the GUI. 0 = no rotation. 1 = clockwise 90 degrees
-        2 = 180 degrees. 3 = counterclockwise 90 degrees
+        in the GUI.
+        0 = no rotation.
+        1 = clockwise 90 degrees
+        2 = 180 degrees.
+        3 = counterclockwise 90 degrees
     """
     image_directory = IMAGES_FOLDER + "/" + get_stream_shortname(stream_url) + "/"
 
