@@ -53,6 +53,9 @@ $(document).ready(() => {
         listener = PDS_LISTENER_TASK
           toggleButtonID += 'pds-listener-btn'
       }
+      else{
+        return; // Pages that don't have this button should not run the code below (See #367)
+      }
 
     let serialType = $('#serial-type').text()
 
@@ -348,8 +351,8 @@ $(document).ready(() => {
 })
 
 /*
-   function to display the navbar modal with the given title and body text
-   */
+  Display the navbar modal with the given title and body text
+*/
 function navModalMessage (title, body){
   $('.modal-title').text(title)
     $('.modal-msg').text(body)
