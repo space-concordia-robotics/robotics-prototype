@@ -68,6 +68,10 @@ def clear_buffer():
         ser.readline()
 
 def search_uart(baudrate, mcuName):
+    """ Attempts to communicate with port ttySAC0 through UART at a specified baud rate.
+    
+        Returns true if the communication is successful, false otherwise.
+    """
     global ser
     port = 'ttySAC0'
     rospy.loginfo('Attempting to connect to /dev/'+ port)
@@ -75,20 +79,24 @@ def search_uart(baudrate, mcuName):
     try:
         ser = serial.Serial('/dev/' + port, baudrate)
     except:
-        rospy.logerr('No UART device recognized, terminating arm node')
+        rospy.logerr('No UART device recognized. Exiting')
         sys.exit(0)
 
     clear_buffer()
 
-    rospy.loginfo("identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
-    for i in range(COMMUNICATION_ATTEMPTS):
-        rospy.loginfo('attempt #%d...', i+1)
+    rospy.loginfo("Identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
+    for attempt in range(COMMUNICATION_ATTEMPTS):
+        rospy.loginfo('Attempt #%d...', attempt+1)
         if attempt_uart(mcuName):
             return True
 
     return False
 
 def search_usb(baudrate, ports, mcuName):
+    """ Searches provided USB ports for an MCU with a certain name 
+    
+        Returns true if the MCU is found, false otherwise.
+    """
     global ser
     rospy.loginfo("%d USB device(s) detected", len(ports))
     rospy.loginfo('Using %d baud', baudrate)
@@ -98,14 +106,14 @@ def search_usb(baudrate, ports, mcuName):
         try:
             ser = serial.Serial('/dev/' + port, baudrate)
         except:
-            rospy.logerr('No UART device recognized, terminating arm node')
+            rospy.logerr('No USB device recognized. Exiting')
             sys.exit(0)
 
         clear_buffer()
 
-        rospy.loginfo("identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
-        for i in range(COMMUNICATION_ATTEMPTS):
-            rospy.loginfo('attempt #%d...', i+1)
+        rospy.loginfo("Identifying MCU by sending 'who' every %d ms", COMM_TIMEOUT*1000)
+        for attempt in range(COMMUNICATION_ATTEMPTS):
+            rospy.loginfo('Attempt #%d...', attempt+1)
             if attempt_usb(mcuName):
                 return True
     return False
