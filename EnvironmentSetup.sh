@@ -2,7 +2,9 @@
 # Setup script which install the Space Concordia Robotics Software team's development environment.
 
 APPEND_TO_BASH="
-#\n\n ------ ROBOTICS SETTINGS ------
+
+
+#------ ROBOTICS SETTINGS ------
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
 #export ROS_HOSTNAME=$USER
