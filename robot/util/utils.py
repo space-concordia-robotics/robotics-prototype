@@ -36,8 +36,8 @@ def get_pid(keyword):
 
     return -1
 
-def write_to_file(filename, text, locationx, locationy):
+def append_to_file(filename, text):
     with open(filename, 'r+') as f:
         content = f.read()
-        f.seek(locationx, locationy)
+        f.seek(0, 0)
         f.write(text.rstrip('\r\n') + content)

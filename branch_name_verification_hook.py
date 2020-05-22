@@ -5,9 +5,6 @@ import re
 
 excluded_branches = {'master', 'develop', 'staging', 'test'}
 
-wiki_url = 'https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions'
-error_msg = 'Branch name is not named properly, please see wiki for formating: ' + wiki_url
-
 def get_branch_name():
     output, error = run_shell('git', 'symbolic-ref --short HEAD', False)
     return output.decode('utf8')[:-1]
@@ -53,11 +50,13 @@ def has_double_hyphen(branch_name):
     """
     return branch_name.find('--') != -1
 
-def has_branch_name_error(branch_name, error_msg):
+def has_branch_name_error(branch_name):
     """
     run all name verification functions and print error message if any fails
     return true if branch name has error
     """
+    wiki_url = 'https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions'
+    error_msg = 'Branch name is not named properly, please see wiki for formating: ' + wiki_url
     trim_issue_num = re.sub(r'\d+$', '', branch_name)
     is_name_valid = True
     is_name_valid = trim_issue_num.islower()\
@@ -76,4 +75,4 @@ def has_branch_name_error(branch_name, error_msg):
 if __name__ == '__main__':
     branch_name = get_branch_name()
     if not is_excluded_branch(branch_name, excluded_branches):
-        has_branch_name_error(branch_name, error_msg)
+        has_branch_name_error(branch_name)
