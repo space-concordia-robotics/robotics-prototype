@@ -29,6 +29,8 @@ set(WIRE_PATH ${TEENSY_LIB}/Wire)
 set(ARDUINOBLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
 set(SPARKFUN_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
 set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
+set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
+
 project(rover)
 
 
@@ -106,7 +108,7 @@ add_definitions(
 #COMPILER FLAGS
 set(ARM_GCC_S_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -nostdlib -MMD -x assembler-with-cpp -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 set(ARM_GCC_C_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
-set(ARM_GXX_FLAGS -Idir${ARM_GCC_INCLUDE_DIR} -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors  -Istring -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
+set(ARM_GXX_FLAGS -Idir${ARM_GCC_INCLUDE_DIR} -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 
 #LINKER FLAGS
 set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/mk66fx1m0.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
@@ -132,7 +134,11 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 
 function(createCppLibrary sources libraryName includes)
 add_library(${libraryName} ${sources})
-#target_include_directories(${libraryName} PRIVATE ${includes})
+
+if(NOT ${includes} STREQUAL "")
+target_include_directories(${libraryName} PRIVATE ${includes})
+endif()
+
 target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
@@ -145,7 +151,8 @@ createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/
 #EXTERNAL LIBARIES INSTALLED USING THE ARDUINO IDE
 createCppLibrary(${ARDUINOBLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
-#createCppLibrary(${SPARKFUN_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS)
+CreateCppLibrary(${SPARKFUN_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
+CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
@@ -174,7 +181,10 @@ foreach(path ${INOFILES})
  continue()
 
  elseif(${name} STREQUAL "MobilePlatform")
- continue()
+ 
+ set(EXTERNAL_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
+ set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH})
+
  
  elseif(${name} STREQUAL "path_send_test")
  continue()
@@ -190,7 +200,6 @@ foreach(path ${INOFILES})
 
  elseif(${name} STREQUAL "MultipleConstructors")
 
-
  elseif(${name} STREQUAL "science")
 
  endif()
@@ -202,7 +211,7 @@ foreach(path ${INOFILES})
 
 endforeach()
 
- #THIS BUILDS A TARGET, WHICH CAN BE BUILT IN COMMNAD LINE TO REMOVE ALL THE GENERATED FILES FROM CMAKE 
+ #THIS BUILDS A TARGET, WHICH CAN BE BUILT IN COMMAND LINE TO REMOVE ALL THE GENERATED FILES FROM CMAKE 
   
  add_custom_target(cleanup
  COMMENT "cleaning up..."

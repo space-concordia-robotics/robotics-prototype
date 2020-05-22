@@ -17,8 +17,10 @@ getIncludeDirectories(PROJECT_SUBDIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(NOT ${${PROJECT_NAME}_user_sources} STREQUAL "")
 add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
+
 target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
+
 endif()
 
 
