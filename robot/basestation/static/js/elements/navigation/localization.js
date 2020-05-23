@@ -44,9 +44,6 @@ let sketch = function(p) {
     }
 
     p.draw = function() {
-        if (p.keyIsPressed) {
-            controls()
-        }
 
         p.background(225) // RGB
         drawResizeButton()
@@ -155,29 +152,6 @@ let sketch = function(p) {
 
         roverX = distance * Math.sin(directionInRad)
         roverY = -distance * Math.cos(directionInRad)
-    }
-
-    // implements manual controls.
-    function controls() {
-        if (p.keyIsDown(rKeycode)) { //reset position
-            zoomValue = 1
-            dragDiffX = dragDiffY = 0
-            p.resizeCanvas(CANVAS_WIDTH, CANVAS_HEIGHT)
-        }
-        if (p.keyIsDown(p.LEFT_ARROW)) { // spin ccw
-            roverHeading -= 1
-        }
-        if (p.keyIsDown(p.RIGHT_ARROW)) { // spin cw
-            roverHeading += 1
-        }
-        if (p.keyIsDown(p.UP_ARROW)) { // move forward
-            roverX += p.sin(roverHeading)
-            roverY -= p.cos(roverHeading)
-        }
-        if (p.keyIsDown(p.DOWN_ARROW)) { // move backward
-            roverX -= p.sin(roverHeading)
-            roverY += p.cos(roverHeading)
-        }
     }
 
     function initializeBase(x, y) {
