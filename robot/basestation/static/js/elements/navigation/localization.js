@@ -48,12 +48,12 @@ let sketch = function(p) {
             controls()
         }
 
-        p.background(225)
+        p.background(225) // RGB
         drawResizeButton()
         p.translate(p.width / 2 + dragDiffX, p.height / 2 + dragDiffY)
         p.scale(zoomValue)
-        p.stroke(200)
-        p.fill(120)
+        p.stroke(200) // RGB
+        p.fill(120) // RGB
         drawGrid()
         drawBase()
         drawRover()
@@ -84,7 +84,7 @@ let sketch = function(p) {
         // draw a line every 100 pixels for 1000 pixels
         for (let x = -r; x < r; x += GRID_RATE) {
             p.line(x, -r, x, r)
-            p.text(x, x + 1, 12) //
+            p.text(x, x + 1, 12)
         }
 
         for (let y = -r; y < r; y += GRID_RATE) {
@@ -134,7 +134,7 @@ let sketch = function(p) {
         let d = p.dist(p.mouseX, p.mouseY, p.width, p.height) // distance between mouse and lower right corner
 
         if (d < r) {
-        canvasResizeToggle = !canvasResizeToggle
+            canvasResizeToggle = !canvasResizeToggle
         }
 
         if (canvasResizeToggle) {
@@ -155,10 +155,6 @@ let sketch = function(p) {
 
         roverX = distance * Math.sin(directionInRad)
         roverY = -distance * Math.cos(directionInRad)
-        console.log('distance: ' + distance)
-        console.log('direction: ' + direction)
-        console.log('x: ' + roverX)
-        console.log('y: ' + roverY)
     }
 
     // implements manual controls.
