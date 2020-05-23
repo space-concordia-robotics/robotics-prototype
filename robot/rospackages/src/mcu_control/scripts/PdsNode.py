@@ -206,9 +206,10 @@ def publish_pds_data(message):
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
             elif i < 10:
-                    temp.x = checkTempErrorCase(float(dataPDS[i]))
-                    temp.y = checkTempErrorCase(float(dataPDS[i]))
-                    temp.z = checkTempErrorCase(float(dataPDS[i]))
+                temp.x = checkTempErrorCase(float(dataPDS[7]))
+                temp.y = checkTempErrorCase(float(dataPDS[8]))
+                temp.z = checkTempErrorCase(float(dataPDS[9]))
+                i = 9
             else:
                 fanSpeeds.x = float(dataPDS[10])
                 fanSpeeds.y = float(dataPDS[11])
@@ -242,8 +243,8 @@ def publish_pds_data(message):
         return
     return
 
-# This function checks if the temp values from serial are equal to 999.9 (deafult error state) and replaces them with 'N/A' if they are.
-# It is necessary because if the temperature is at the default error state, the front end will scream at you with a warning. 
+# This function checks if the temp values from serial are equal to 999.9 (default error state) and replaces them with 'N/A' if they are.
+# It is necessary because if the temperature is at the default error state, the front end will scream at you with a horrendous windows sound warning. 
 # Changing it to 'N/A' prevents being assaulted by UI.
 def checkTempErrorCase(x):
     if math.isclose(999.9, x, rel_tol=0.0001, abs_tol=0.0):
