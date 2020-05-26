@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-find_path(ARDUINO_PATH
-NAMES "arduino-linux-setup.sh"
-PATHS ${ARDUINO}
-PATH_SUFFIXES "/arduino-1.8.12" 
+#execute a shell script to find the arduino directory. It uses the setup.sh file as every arduino version has that in there in the 1st level dir
+execute_process(
+COMMAND find / -name "arduino-linux-setup.sh" -print -quit
+OUTPUT_VARIABLE ARDUINO_SAMPLE_FILE
+OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-if(${ARDUINO_PATH} STREQUAL "ARDUINO_PATH-NOTFOUND")
-message(FATAL_ERROR "Arduino path not found...")
-endif() 
+
+get_filename_component(ARDUINO_PATH ${ARDUINO_SAMPLE_FILE} DIRECTORY)
+message(STATUS "Path to Arduino : ${ARDUINO_PATH}")
+
 
 #paths to important utilities
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
@@ -41,7 +43,6 @@ set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 
 project(rover)
 
-set(ROVER_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
@@ -181,7 +182,8 @@ foreach(path ${INOFILES})
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
 
  endif()
-
+ 
+ #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
  add_subdirectory(${project_dir}) 
 
@@ -192,7 +194,7 @@ endforeach()
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
  #the command is cmake --build . --target clean
 
- #you'd think you could give the function a list of dependies rather than this manual listing of commands which we see here, but I havent found a way of doing this...
+ #you'd think you could give the function a list of dependecies rather than this manual listing of dependecies which we see here, but I havent found a way of doing this...
  add_custom_target(cleanup
  COMMENT "cleaning up..."
  COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/*
