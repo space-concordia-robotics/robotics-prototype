@@ -11,7 +11,6 @@ OUTPUT_STRIP_TRAILING_WHITESPACE
 get_filename_component(ARDUINO_PATH ${ARDUINO_SAMPLE_FILE} DIRECTORY)
 message(STATUS "Path to Arduino : ${ARDUINO_PATH}")
 
-
 #paths to important utilities
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
 set(TEENSY_CORE ${ARDUINO_PATH}/hardware/teensy/avr/cores)
@@ -40,10 +39,7 @@ set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Contr
 set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 
-
 project(rover)
-
-
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -187,8 +183,6 @@ foreach(path ${INOFILES})
  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
  add_subdirectory(${project_dir}) 
 
- 
-
 endforeach()
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
@@ -204,7 +198,6 @@ endforeach()
  DEPENDS EncoderFunc_cleanup
  DEPENDS MultipleConstructors_cleanup
  DEPENDS science_cleanup
-
  )
 
 
