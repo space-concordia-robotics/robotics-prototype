@@ -1,30 +1,4 @@
 $(document).ready(() => {
-  defaultChannelSerial()
-
-  // default device channel and serialtype on page load
-  function defaultChannelSerial() {
-    currentWindow = window.location.pathname
-    switch(currentWindow) {
-      case '/rover':
-        setMuxChannel('mux-0')
-        setSerialUsb()
-        break;
-      case ('/'):
-      case ('/arm'):
-        setMuxChannel('mux-1')
-        setSerialUsb()
-        break;
-      case '/science':
-        setMuxChannel('mux-2')
-        setSerialUsb()
-        break;
-      case '/pds':
-        setMuxChannel('mux-3')
-        setSerialUart()
-        break;
-    }
-  }
-
   function append_css(file) {
       console.log('Append CSS: ' + file)
 
@@ -124,38 +98,6 @@ $(document).ready(() => {
     } else {
       requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
-
-        if (muxId != 'mux-3') {
-          if (msgs[0]) {
-            rosLog(ROSINFO, 'Activating ' + deviceName + ' Listener Node')
-
-            let serialType = getCookie('serialType')
-
-            if (serialType == '') {
-              rosLog(ROSINFO, 'Serial type not yet defined!')
-              return
-            }
-
-            // automating opening listener and sending MCU ping in UART mode
-            if (serialType == 'uart') {
-              requestTask(
-                ROVER_LISTENER_TASK,
-                STATUS_START,
-                function (msgs) {
-                  if (msgs[0]) {
-                    $('#toggle-rover-listener-btn')[0].checked = true
-                    // try pinging MCU
-                    wait(1000)
-                    sendRequest(deviceName, 'ping', printErrToConsole)
-                  } else {
-                    $('#toggle-rover-listener-btn')[0].checked = false
-                  }
-                },
-                serialType
-              )
-            }
-          }
-        }
       })
     }
   }
@@ -166,13 +108,13 @@ $(document).ready(() => {
 
   function setSerialUart () {
     $('#serial-type').text('uart')
-    setCookie('serialType', 'uart', 3)
+    setCookie('serialType', 'uart', 356)
     rosLog(ROSINFO, 'setting cookie to uart')
   }
 
   function setSerialUsb () {
     $('#serial-type').text('usb')
-    setCookie('serialType', 'usb', 3)
+    setCookie('serialType', 'usb', 356)
     rosLog(ROSINFO, 'setting cookie to usb')
   }
 
