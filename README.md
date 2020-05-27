@@ -6,12 +6,12 @@ This repo contains the Robotics software team code.
 ## Contributing and Development Environment Instructions
 
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
- 
+
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
 
 ## Automatic Setup
-**Notes:** 
+**Notes:**
 - Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
 - Don't forget the `--recursive` when cloning, or you might run into issues.
 - The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
@@ -150,7 +150,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 You will need to provide the IP that the GUI will work with. By running this script, everything is handled.
 
 ```
-./robot/basestation/env.sh > robot/basestation/static/js/env.js
+./robot/basestation/env.sh >| robot/basestation/static/js/env.js
 ```
 
 ### Run the GUI
