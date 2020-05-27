@@ -515,7 +515,7 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
 }
 
 /*
-returnsthe IP portion of the currntly set ROS_MASTER_URI
+returns the IP portion of the currently set ROS_MASTER_URI
 */
 function getRoverIP (callback) {
   console.log('roverIP: ' + env.ROS_MASTER_IP)

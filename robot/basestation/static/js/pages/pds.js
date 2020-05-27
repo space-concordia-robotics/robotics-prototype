@@ -209,7 +209,7 @@ $(document).ready(() => {
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    event.code === 'KeyP' && (!$('#serial-cmd-input').is(':focus')) &&
+    event.code === 'KeyP' && (!$('#serial-command-input').is(':focus')) &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     pingDevice('PDS')
@@ -219,7 +219,7 @@ document.addEventListener('keydown', function (event) {
 // print commands list
 document.addEventListener('keydown', function (event) {
   if (
-    event.code === 'KeyL' && (!$('#serial-cmd-input').is(':focus')) &&
+    event.code === 'KeyL' && (!$('#serial-command-input').is(':focus')) &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
     printCommandsList()
@@ -229,7 +229,7 @@ document.addEventListener('keydown', function (event) {
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if ((!$('#servo-val').is(':focus')) && (!$('#serial-cmd-input').is(':focus'))) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
       case 81: // 'q' --> cut all power
         sendPdsCommand('PDS S')

@@ -9,8 +9,6 @@ const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 let lastCmdSent = 0
 
-const cmd_input = $('#serial-cmd-input')
-
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
   appendToConsole("'p': ping arm mcu")
@@ -166,7 +164,7 @@ $(document).ready(function () {
 // arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    !$('#serial-cmd-input').is(':focus') &&
+    !$('#serial-command-input').is(':focus') &&
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -180,7 +178,7 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    if (!$('#serial-cmd-input').is(':focus')) {
+    if (!$('#serial-command-input').is(':focus')) {
       keyState[e.keyCode || e.which] = true
     }
   },
@@ -189,7 +187,7 @@ window.addEventListener(
 window.addEventListener(
   'keyup',
   function (e) {
-    if (!$('#serial-cmd-input').is(':focus')) {
+    if (!$('#serial-command-input').is(':focus')) {
       keyState[e.keyCode || e.which] = false
     }
   },
@@ -421,7 +419,6 @@ gameLoop()
 // In any case
 // the following code just makes the buttons stop lighting up
 // when the user stops pressing the respective key
-let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
   if (event.code === 'KeyW') {

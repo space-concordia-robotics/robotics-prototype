@@ -247,7 +247,7 @@ document.addEventListener('keydown', function (event) {
   if (
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-    !$('#servo-val').is(':focus') && (!$('#serial-cmd-input').is(':focus'))
+    !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
   ) {
     pingDevice('Rover')
     lastCmdSent = new Date().getTime()
@@ -260,7 +260,7 @@ const GREEN = 'rgb(61, 127, 127)'
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if ((!$('#servo-val').is(':focus')) && (!$('#serial-cmd-input').is(':focus'))) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
@@ -333,7 +333,7 @@ $(document).keydown(function (e) {
 // no throttling necessary as since keydown events are throttled
 // those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function (e) {
-  if (!$('#serial-cmd-input').is(':focus')) {
+  if (!$('#serial-command-input').is(':focus')) {
     switch (e.which) {
       case 79:
         dim('#stop-motors-btn')
@@ -381,7 +381,7 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    if (!$('#serial-cmd-input').is(':focus')) {
+    if (!$('#serial-command-input').is(':focus')) {
       keyState[e.keyCode || e.which] = true
     }
   },
@@ -390,7 +390,7 @@ window.addEventListener(
 window.addEventListener(
   'keyup',
   function (e) {
-    if (!$('#serial-cmd-input').is(':focus')) {
+    if (!$('#serial-command-input').is(':focus')) {
       keyState[e.keyCode || e.which] = false
     }
   },
@@ -734,7 +734,6 @@ gameLoop()
 // In any case
 // the following code just makes the buttons stop lighting up
 // when the user stops pressing the respective key
-let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
   if (event.code === 'KeyI') {

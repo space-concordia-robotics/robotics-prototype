@@ -201,7 +201,7 @@ $(document).ready(() => {
   // commands will probably mess something up until this is done in a smart manner
   $('#send-serial-btn').mouseup(function () {
     // b
-    let cmd = $('#serial-cmd-input').val()
+    let command = $('#serial-command-input').val()
     let buttonText = $('button#mux').text()
     if (buttonText.includes('Select Device Channel')) {
       appendToConsole(
@@ -213,22 +213,22 @@ $(document).ready(() => {
         buttonText.includes('Rover') &&
         $('#toggle-rover-listener-btn')[0].checked == true
       ) {
-        // sendRoverCommand(cmd) // rover commands not yet implemented
+        // sendRoverCommand(command) // rover commands not yet implemented
       } else if (
         buttonText.includes('Arm') &&
         $('#toggle-arm-listener-btn')[0].checked == true
       ) {
-        sendArmCommand(cmd)
+        sendArmCommand(command)
       } else if (buttonText.includes('Science')) {
         // science buttons unknown
-        // sendScienceCommand(cmd) // science commands not yet implemented
+        // sendScienceCommand(command) // science commands not yet implemented
       } else if (buttonText.includes('PDS')) {
         // pds buttons unknown
-        // sendPdsCommand(cmd) // pds commands not yet implemented
+        // sendPdsCommand(command) // pds commands not yet implemented
       }
       // no listener is open, send generic request
       else if (!buttonText.includes('Select Device Channel')) {
-        requestSerialCommand(cmd, function (msgs) {
+        requestSerialCommand(command, function (msgs) {
           console.log(msgs)
           if (msgs[0]) {
             console.log('nice')
@@ -240,7 +240,7 @@ $(document).ready(() => {
     }
   })
 
-  $('#serial-cmd-input').on('keyup', function (e) {
+  $('#serial-command-input').on('keyup', function (e) {
     if (e.keyCode == 13) {
       // enter key
       // copy code from above

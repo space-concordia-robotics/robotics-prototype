@@ -1,9 +1,9 @@
-input#serial-cmd-input {
+input#serial-command-input {
     margin: 4px;
     width: 55%;
 }
 
-button#send-serial-cmd {
+button#send-serial-command {
   padding-top: 3px;
   padding-bottom: 2px;
   padding-right: 3px;
