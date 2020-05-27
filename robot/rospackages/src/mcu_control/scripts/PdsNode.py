@@ -196,23 +196,22 @@ def publish_pds_data(message):
     # create the message to be published
     voltage = Float32()
     current = JointState()
+
     temp = Point()
+    temp.x = checkTempErrorCase(float(dataPDS[7]))
+    temp.y = checkTempErrorCase(float(dataPDS[8]))
+    temp.z = checkTempErrorCase(float(dataPDS[9]))
+
     fanSpeeds = Point()
+    fanSpeeds.x = float(dataPDS[10])
+    fanSpeeds.y = float(dataPDS[11])
     try:
-        for i in range(12):
+        for i in range(7):
             if i < 1:
                 voltage.data = float(dataPDS[i])
                 rospy.loginfo('voltage=' + dataPDS[i])
             elif i < 7:
                 current.effort.append(float(dataPDS[i]))
-            elif i < 10:
-                temp.x = checkTempErrorCase(float(dataPDS[7]))
-                temp.y = checkTempErrorCase(float(dataPDS[8]))
-                temp.z = checkTempErrorCase(float(dataPDS[9]))
-                i = 9
-            else:
-                fanSpeeds.x = float(dataPDS[10])
-                fanSpeeds.y = float(dataPDS[11])
 
         temps = ''
         for i in [dataPDS[7], dataPDS[8], dataPDS[9]]:
