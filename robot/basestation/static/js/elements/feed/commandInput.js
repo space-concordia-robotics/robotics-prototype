@@ -1,7 +1,7 @@
 $(document).ready(() => {
   const sendCommand = $('#send-serial-command')
   const commandInput = $('#serial-command-input')
-  const INVALID_CMD_MSG = 'Invalid command, please check input and try again'
+  const INVALID_COMMAND_MSG = 'Invalid command, please check input and try again'
   const INVALID_MODULE_MSG = 'Invalid module, please input module before command. Valid modules are rover, arm, science and pds'
 
   // Get full command and split into its prefix and command to send to module
@@ -19,7 +19,7 @@ $(document).ready(() => {
   function isCommandValid(fullCommand, command) {
     if ((command == '' && fullCommand != '') || (command == fullCommand)) {
       if (fullCommand != '') {
-        appendToConsole(INVALID_CMD_MSG)
+        rosLog(ROSERROR, INVALID_COMMAND_MSG)
       }
       return false
     }
@@ -42,7 +42,7 @@ $(document).ready(() => {
         sendScienceCommand(command)
         break
       default:
-        appendToConsole(INVALID_MODULE_MSG)
+        rosLog(ROSERROR, INVALID_MODULE_MSG)
     }
   }
 

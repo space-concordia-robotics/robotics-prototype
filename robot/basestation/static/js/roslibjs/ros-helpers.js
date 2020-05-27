@@ -204,7 +204,7 @@ function initRosWeb () {
         textColor('#battery-voltage', 'red')
       }
 
-    } else { 
+    } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
 
@@ -253,7 +253,7 @@ function initRosWeb () {
           $obj.css({'color': 'orange'})
         }
 
-      } else { 
+      } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
 
@@ -485,11 +485,11 @@ CAMERA_PORTS = 'camera_ports'
 
 /**
  * Sends a request to the task handler.
- * 
+ *
  * STATUS_STOP stops the task
  * STATUS_START starts the task
  * STATUS_CHECK obtains insight on the task
- * 
+ *
  * @reqTask The task related to the request
  * @reqStatus The status of the request
  * @callback Callback on success
@@ -656,34 +656,34 @@ command sending
 function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to IK node')
+  rosLog(ROSINFO, 'Sending "' + cmd + '" to IK node')
   ik_command_publisher.publish(cmd)
 }
 
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to arm Teensy')
+  rosLog(ROSINFO, 'Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
 
 function sendRoverCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
+  rosLog(ROSINFO, 'Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+  rosLog(ROSINFO, 'Sending "' + cmd + '" to PDS')
   pds_command_publisher.publish(command)
 }
 
 function sendScienceCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
-  appendToConsole('Sending "' + cmd + '" to science Teensy')
+  rosLog(ROSINFO, 'Sending "' + cmd + '" to science Teensy')
   science_command_publisher.publish(command)
 }
