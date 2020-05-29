@@ -66,7 +66,7 @@ $(document).ready(() => {
           .includes('PDS')
       ) {
       requestTask(
-          PDS_LISTENER_TASK
+          PDS_LISTENER_TASK,
           STATUS_START,
           function (msgs) {
             if (msgs[0]) {

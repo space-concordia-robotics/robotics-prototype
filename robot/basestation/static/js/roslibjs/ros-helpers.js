@@ -140,6 +140,14 @@ function initRosWeb () {
     name: 'rover_command',
     messageType: 'std_msgs/String'
   })
+
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+
   // setup a subscriber for the rover_joint_states topic
   rover_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
