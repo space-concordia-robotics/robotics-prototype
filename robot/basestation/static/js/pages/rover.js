@@ -24,13 +24,10 @@ let movementCommanded = false
 sentZero = true // used to prevent the gui from sending wheel commands
 
 function printCommandsList () {
-  if (canSendCommand(PING_THROTTLE_TIME)) {
-    appendToConsole("'ctrl-alt-p': ping odroid")
-    appendToConsole("'p': ping rover mcu")
-    appendToConsole("'q': emergency stop all motors")
-    appendToConsole("'l': view key commands")
-    setTimeSinceCMD()
-  }
+  appendToConsole("'ctrl-alt-p': ping odroid")
+  appendToConsole("'p': ping rover mcu")
+  appendToConsole("'q': emergency stop all motors")
+  appendToConsole("'l': view key commands")
 }
 
 $(document).ready(function () {
@@ -188,7 +185,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 74: // 'j' --> decrease max steering
@@ -201,7 +198,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = 0
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 75: // 'k' --> increase max steering
@@ -214,7 +211,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = MAX_STEERING_SPEED
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 76: // 'l' --> list all commands
@@ -235,7 +232,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = 0
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       default:
@@ -330,7 +327,7 @@ function gameLoop () {
       if (steering > maxSoftSteering) {
         steering = maxSoftSteering
       }
-      // setTimeSinceCMD()
+      // setTimeSinceCommand()
     }
     // 'a' --> rover turn left
     else if (keyState[65] && !$('#servo-val').is(':focus')) {
@@ -346,7 +343,7 @@ function gameLoop () {
       if (steering < -maxSoftSteering) {
         steering = -maxSoftSteering
       }
-      // setTimeSinceCMD()
+      // setTimeSinceCommand()
     }
     // return to no steering angle
     else {
@@ -370,7 +367,7 @@ function gameLoop () {
       if (throttle > maxSoftThrottle) {
         throttle = maxSoftThrottle
       }
-      // setTimeSinceCMD()
+      // setTimeSinceCommand()
     }
     // 's' --> rover back
     else if (keyState[83] && !$('#servo-val').is(':focus')) {
@@ -386,7 +383,7 @@ function gameLoop () {
       if (throttle < -maxSoftThrottle) {
         throttle = -maxSoftThrottle
       }
-      // setTimeSinceCMD()
+      // setTimeSinceCommand()
     }
     // decelerate
     else {
@@ -427,12 +424,12 @@ function gameLoop () {
           // 'd' --> rover right
           steering = MAX_STEERING_SPEED
           // do stuff with `spinning`
-          // setTimeSinceCMD()
+          // setTimeSinceCommand()
         } else if (keyState[65]) {
           // 'a' --> rover turn left
           steering = -MAX_STEERING_SPEED
           // do stuff with `spinning`
-          // setTimeSinceCMD()
+          // setTimeSinceCommand()
         } else {
           steering = 0
           spinning = 0

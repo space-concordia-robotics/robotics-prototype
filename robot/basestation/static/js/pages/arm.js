@@ -4,16 +4,13 @@
 // setInterval(updateOdroidRx, 1000);
 
 function printCommandsList () {
-  if (canSendCommand(PING_THROTTLE_TIME)) {
-    appendToConsole("'ctrl-alt-p': ping odroid")
-    appendToConsole("'p': ping arm mcu")
-    appendToConsole("'q': emergency stop all motors")
-    appendToConsole("'o': reset memorized angle values")
-    appendToConsole("'l': view key commands")
-    appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
-    appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
-    setTimeSinceCMD()
-  }
+  appendToConsole("'ctrl-alt-p': ping odroid")
+  appendToConsole("'p': ping arm mcu")
+  appendToConsole("'q': emergency stop all motors")
+  appendToConsole("'o': reset memorized angle values")
+  appendToConsole("'l': view key commands")
+  appendToConsole("Keys 'w' to 'u': move motors 1-6 forwards")
+  appendToConsole("Keys 's' to 'j': move motors 1-6 backwards")
 }
 
 function manualControl () {
@@ -204,7 +201,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 's' --> m1 cw
     else if (!$serialCmdInput.is(':focus') && keyState[83]) {
@@ -216,7 +213,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     i += 1
     // 'e' --> m2 ccw
@@ -229,7 +226,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'd' --> m2 cw
     else if (!$serialCmdInput.is(':focus') && keyState[68]) {
@@ -241,7 +238,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     i += 1
     // 'r' --> m3 ccw
@@ -254,7 +251,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'f' --> m3 cw
     else if (!$serialCmdInput.is(':focus') && keyState[70]) {
@@ -266,7 +263,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     i += 1
     // 't' --> m4 ccw
@@ -279,7 +276,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'g' --> m4 cw
     else if (!$serialCmdInput.is(':focus') && keyState[71]) {
@@ -291,7 +288,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     i += 1
     // 'y' --> m5 ccw
@@ -304,7 +301,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'h' --> m5 cw
     else if (!$serialCmdInput.is(':focus') && keyState[72]) {
@@ -316,7 +313,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     i += 1
     // 'u' --> m6 ccw
@@ -329,7 +326,7 @@ function gameLoop () {
 
       budgeArray[i] = 'fwd'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'j' --> m6 cw
     else if (!$serialCmdInput.is(':focus') && keyState[74]) {
@@ -341,7 +338,7 @@ function gameLoop () {
 
       budgeArray[i] = 'back'
       toBudge = true
-      setTimeSinceCMD()
+      setTimeSinceCommand()
     }
     // 'q' --> stop all motors
     if (!$serialCmdInput.is(':focus') && keyState[81]) {

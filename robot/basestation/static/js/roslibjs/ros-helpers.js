@@ -4,25 +4,25 @@ const PING_THROTTLE_TIME = 1000
 const MANUAL_CONTROL_THROTTLE_TIME = 100
 const GAME_LOOP_PERIOD = 50
 lastRotate = 0
-let lastCMDSent = 0
+let lastCommandSent = 0
 
 // for command thoughput limiting
 const DRIVE_THROTTLE_TIME = 100
 const MCU_FEEDBACK_THROTTLE = 1000
 
 // reset time to 0ms
-function resetTimeSinceCMD() {
-  lastCMDSent = 0
+function resetTimeSinceCommand() {
+  lastCommandSent = 0
 }
 
 // get and record time of last command in ms
-function setTimeSinceCMD() {
-  lastCMDSent = Date.now()
+function setTimeSinceCommand() {
+  lastCommandSent = Date.now()
 }
 
 // return false if command is within time cooldown, true if outside time cooldown
-function canSendCommand(COOL_DOWN) {
-  return (millisSince(lastCMDSent) > COOL_DOWN)
+function canSendCommand(coolDown) {
+  return (millisSince(lastCommandSent) > coolDown)
 }
 
 // minimum and maximum acceptable battery voltages (volts)
@@ -602,12 +602,12 @@ function checkTaskStatuses () {
   }
 }
 
-function sendIKCommand () {
+function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to IK node')
   ik_command_publisher.publish(cmd)
-  setTimeSinceCMD()
+  setTimeSinceCommand()
 }
 
 function sendArmCommand (cmd) {
@@ -615,7 +615,7 @@ function sendArmCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
-  setTimeSinceCMD()
+  setTimeSinceCommand()
 }
 
 function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
@@ -670,7 +670,7 @@ function sendRoverCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
-  setTimeSinceCMD()
+  setTimeSinceCommand()
 }
 
 function sendPdsCommand (cmd) {
@@ -678,7 +678,7 @@ function sendPdsCommand (cmd) {
   console.log(command)
   appendToConsole('Sending "' + cmd + '" to PDS Teensy')
   pds_command_publisher.publish(command)
-  setTimeSinceCMD()
+  setTimeSinceCommand()
 }
 
 /*

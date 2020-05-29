@@ -1,3 +1,8 @@
+function printCommandsList () {
+  appendToConsole("'l': view key commands")
+  appendToConsole("'q': emergency stop all motors")
+}
+
 $(document).ready(function () {
 
   /* science commands */
@@ -124,7 +129,7 @@ $(document).ready(function () {
         console.log('An error occured')
       }
     })
-    setTimeSinceCMD()
+    setTimeSinceCommand()
   })
 
   // ROS related stuff

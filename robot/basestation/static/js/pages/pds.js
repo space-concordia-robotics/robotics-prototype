@@ -1,13 +1,10 @@
 const PDS_REQUEST_TIMEOUT = 3000
 
 function printCommandsList () {
-  if (canSendCommand(PING_THROTTLE_TIME)) {
-    appendToConsole("'ctrl-alt-p': ping odroid")
-    appendToConsole("'p': ping rover mcu")
-    appendToConsole("'q': cut power to all motors")
-    appendToConsole("'l': view key commands")
-    setTimeSinceCMD()
-  }
+  appendToConsole("'ctrl-alt-p': ping odroid")
+  appendToConsole("'p': ping rover mcu")
+  appendToConsole("'q': cut power to all motors")
+  appendToConsole("'l': view key commands")
 }
 
 $(document).ready(() => {
@@ -241,7 +238,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = MAX_THROTTLE_SPEED
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 74: // 'j' --> decrease max steering
@@ -251,7 +248,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = 0
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 75: // 'k' --> increase max steering
@@ -261,7 +258,7 @@ $(document).keydown(function (e) {
           maxSoftSteering = MAX_STEERING_SPEED
         }
         $('#max-steering-speed').text(maxSoftSteering)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 
       case 85: // 'u' --> decrease max throttle
@@ -271,7 +268,7 @@ $(document).keydown(function (e) {
           maxSoftThrottle = 0
         }
         $('#max-throttle-speed').text(maxSoftThrottle)
-        setTimeSinceCMD()
+        setTimeSinceCommand()
         break
 */
       default:
