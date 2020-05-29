@@ -281,20 +281,11 @@ function initRosWeb () {
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
 
-  /* pds commands */
-  // setup a publisher for the pds_command topic
-  pds_command_publisher = new ROSLIB.Topic({
+  // setup a subcriber function for rover_position topic
+  rover_position_listener = new ROSLIB.Topic({
     ros: ros,
-    name: 'pds_command',
-    messageType: 'std_msgs/String'
-  })
-
-  /* science commands */
-  // setup a publisher for the arm_command topic
-  science_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'science_command',
-    messageType: 'std_msgs/String'
+    name: 'rover_position',
+    messageType: 'geometry_msgs/Point'
   })
 }
 
