@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-#execute a shell script to find the arduino directory. It uses the setup.sh file as every arduino version has that in there in the 1st level dir
-execute_process(
-COMMAND find / -name "arduino-linux-setup.sh" -print -quit
-OUTPUT_VARIABLE ARDUINO_SAMPLE_FILE
-OUTPUT_STRIP_TRAILING_WHITESPACE
-)
 
-get_filename_component(ARDUINO_PATH ${ARDUINO_SAMPLE_FILE} DIRECTORY)
-message(STATUS "Path to Arduino : ${ARDUINO_PATH}")
+if(DEFINED ENV{ARDUINO_PATH})
+message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
+else()
+message(FATAL_ERROR "Arduino path not configured correctly...")
+endif()
+
+set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 
 #paths to important utilities
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
@@ -18,6 +17,7 @@ set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
 set(ARDUINO_EXTERNAL_LIB ~/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
+
 
 #Set the compilers for c and c++
 set(CMAKE_C_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-gcc)
