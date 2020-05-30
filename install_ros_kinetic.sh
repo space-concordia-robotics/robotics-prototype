@@ -2,6 +2,9 @@
 # Apache License 2.0
 # Copyright (c) 2017, ROBOTIS CO., LTD.
 
+# This script is adapted to be the Space Concordia Robotics Division needs
+# Changes were made to not set up catkin_ws, update the bashrc edits, and remove the confirmation check
+
 echo "[Set the target OS, ROS version"
 name_os_version=${name_os_version:="xenial"}
 name_ros_version=${name_ros_version:="kinetic"}
