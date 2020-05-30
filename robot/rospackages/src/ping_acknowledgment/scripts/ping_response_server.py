@@ -9,9 +9,9 @@ def handle_ping(req):
         response = os.environ["ROS_MASTER_URI"].split(":")
         response = response[0] + ":" + response[1]
     else:
-        response = "To your '{:s}', I say 'suh dude'".format(req.ping)
+        response = ""
 
-    print("Returning '" + response + "'")
+    print("Received ping")
     return response
 
 def ping_response_server():
