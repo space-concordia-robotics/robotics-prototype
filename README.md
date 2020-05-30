@@ -92,8 +92,6 @@ Running `pytest` without doing `python setup.py develop` will give a ModuleNotFo
 To deactivate virtualenv, run `deactivate`.
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
-wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-chmod 755 ./install_ros_kinetic.sh
 bash ./install_ros_kinetic.sh
 ```
 To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
