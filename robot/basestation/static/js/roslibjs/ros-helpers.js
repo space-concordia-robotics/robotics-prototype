@@ -134,6 +134,7 @@ function initRosWeb () {
     name: 'rover_request',
     serviceType: 'ArmRequest' // for now... might change
   })
+
   // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
     ros: ros,
@@ -145,6 +146,13 @@ function initRosWeb () {
   pds_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+
+  // setup a publisher for the science_command topic
+  science_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_command',
     messageType: 'std_msgs/String'
   })
 
