@@ -11,7 +11,6 @@ $(document).ready(() => {
     const command = fullCommand.split(prefix + ' ').pop()
     if (isCommandValid(fullCommand, command)) {
       sendInputCommand(prefix.toLowerCase(), command)
-      clearCommandInput()
     }
   }
 
@@ -31,15 +30,19 @@ $(document).ready(() => {
     switch(prefix) {
       case 'rover':
         sendRoverCommand(command)
+        clearCommandInput()
         break
       case 'arm':
         sendArmCommand(command)
+        clearCommandInput()
         break
       case 'pds':
         sendPdsCommand(command)
+        clearCommandInput()
         break
       case 'science':
         sendScienceCommand(command)
+        clearCommandInput()
         break
       default:
         rosLog(ROSERROR, INVALID_MODULE_MSG)
