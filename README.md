@@ -31,6 +31,8 @@ $ cd ~/Programming/robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
 
+If you want to code in C++ using a Teensy, you will need to read [this wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino).
+
 ## Manual setup
 If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
 
