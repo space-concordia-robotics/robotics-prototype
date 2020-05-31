@@ -6,12 +6,12 @@ This repo contains the Robotics software team code.
 ## Contributing and Development Environment Instructions
 
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
- 
+
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
 
 ## Automatic Setup
-**Notes:** 
+**Notes:**
 - Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
 - Don't forget the `--recursive` when cloning, or you might run into issues.
 - The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
@@ -92,8 +92,6 @@ Running `pytest` without doing `python setup.py develop` will give a ModuleNotFo
 To deactivate virtualenv, run `deactivate`.
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
-wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-chmod 755 ./install_ros_kinetic.sh
 bash ./install_ros_kinetic.sh
 ```
 To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
@@ -150,7 +148,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 You will need to provide the IP that the GUI will work with. By running this script, everything is handled.
 
 ```
-./robot/basestation/env.sh > robot/basestation/static/js/env.js
+./robot/basestation/env.sh >| robot/basestation/static/js/env.js
 ```
 
 ### Run the GUI
@@ -181,7 +179,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
+- `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
 - `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
