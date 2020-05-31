@@ -57,9 +57,9 @@ def handle_client(req):
     return armResponse
 
 def subscriber_callback(message):
-    ser = get_serail()
-    rospy.loginfo('received: '+message.data+' command from GUI, sending to arm Teensy')
-    command = str.encode(message.data+'\n')
+    ser = get_serial()
+    rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
+    command = str.encode(message.data + '\n')
     ser.write(command) # send command to teensy
 
 def publish_joint_states(message):
