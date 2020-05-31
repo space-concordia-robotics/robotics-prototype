@@ -16,7 +16,7 @@ from geometry_msgs.msg import Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
-global ser  # make global so it can be used in other parts of the code
+ser = None # Initialise variable for future use
 mcuName = 'PDS'
 
 # 300 ms timeout... could potentially be even less, needs testing
@@ -50,7 +50,7 @@ def init_serial():
             rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
             sys.exit(0)
 
-    global ser  #make global so it can be used in other parts of the code
+    global ser  # make global so it can be used in this scope 
 
     ports = list(serial.tools.list_ports.comports())
 
@@ -94,6 +94,7 @@ def init_serial():
     elif uart:
         port = 'ttySAC0'
         rospy.loginfo('Attempting to connect to /dev/' + port)
+
         try:
             ser = serial.Serial('/dev/' + port, baudrate)
         except:
@@ -101,33 +102,32 @@ def init_serial():
             sys.exit(0)
 
         rospy.loginfo("clearing buffer...")
+
         while ser.in_waiting:
             ser.readline()
 
         rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout * 1000)
+
         for i in range(1, 6):
             rospy.loginfo('attempt #%d...', i)
             startListening = time.time()
             ser.write(str.encode('who\n'))
+
             while time.time() - startListening < timeout:
                 if ser.in_waiting:
                     dat = ''
                     data = None
                     try:
-                        #dat = ser.readline().decode()
                         data = ser.readline().decode()
-                        #data = stripFeedback(dat)
                     except Exception as e:
                         print("type error: " + str(e))
                         rospy.logwarn('trouble reading from serial port')
+
                     if data is not None:
                         if mcuName in data:
                             rospy.loginfo(mcuName + " MCU identified!")
                             rospy.loginfo('timeout: %f ms', (time.time() - startListening) * 1000)
-                            rospy.loginfo(
-                                'took %f ms to find the ' + mcuName + ' MCU',
-                                (time.time() - startConnecting) * 1000
-                            )
+                            rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time() - startConnecting) * 1000)
                             return
                     else:
                         rospy.loginfo('got raw message: ' + dat)
@@ -152,36 +152,42 @@ requests = {
     'PDS M 6 1' : ['toggling'],
     'PDS M 6 0' : ['toggling']
 }
+
+
 def handle_client(req):
     global ser # specify that it's global so it can be used properly
     global reqFeedback
     global reqInWaiting
+
     pdsResponse = ArmRequestResponse()
     timeout = 0.3 # 300ms timeout
     reqInWaiting = True
     sinceRequest = time.time()
+
     rospy.loginfo('received '+req.msg+' request from GUI, sending to PDS MCU')
     ser.write(str.encode(req.msg+'\n')) # ping the teensy
+
     while pdsResponse.success is False and (time.time()-sinceRequest < timeout):
         if reqFeedback is not '':
             for request in requests:
                 for response in requests[request]:
                     if request == req.msg and response in reqFeedback:
                         pdsResponse.response = reqFeedback
-                        pdsResponse.success = True #a valid request and a valid response from the
+                        pdsResponse.success = True # a valid request and a valid response from the
                         break
             if pdsResponse.success:
                 break
             else:
                 pdsResponse.response = reqFeedback
         rospy.Rate(100).sleep()
+
     rospy.loginfo('took '+str(time.time()-sinceRequest)+' seconds, sending this back to GUI: ')
     rospy.loginfo(pdsResponse)
     reqFeedback=''
     reqInWaiting=False
     return pdsResponse
 
-def subscriber_callback(message):
+def pds_command_subscriber_callback(message):
     global ser  # specify that it's global so it can be used properly
     rospy.loginfo('received: ' + message.data + ' command from GUI, sending to PDS')
     command = str.encode(message.data + '\n')
@@ -191,50 +197,42 @@ def subscriber_callback(message):
 def publish_pds_data(message):
     # parse the data received from PDS
     # converts message from string to float
-    dataPDS = message.split(',')  ###returns an array of ALL data from the PDS
+    dataPDS = message.split(',')  # returns an array of ALL data from the PDS
     # create the message to be published
     voltage = Float32()
     current = JointState()
     temp = Point()
-    fanSpeeds = Point()
+    fanSpeed = Point()
+
     try:
-        for i in range(12):
-            if i < 1:
-                voltage.data = float(dataPDS[i])
-                rospy.loginfo('voltage=' + dataPDS[i])
-            elif i < 7:
-                current.effort.append(float(dataPDS[i]))
-            elif i < 10:
-                temp.x = float(dataPDS[7])
-                temp.y = float(dataPDS[8])
-                temp.z = float(dataPDS[9])
-            else:
-                fanSpeeds.x = float(dataPDS[10])
-                fanSpeeds.y = float(dataPDS[11])
+        voltage.data = float(dataPDS[0])
 
-        temps = ''
-        for i in [dataPDS[7], dataPDS[8], dataPDS[9]]:
-            temps += i.strip() + ','
-        temps = temps[:-1]
-        rospy.loginfo('temps=' + temps)
+        current.effort = [float(data) for data in dataPDS[1:7]] # sexy list comprehension
+        currents = ','.join(str(x) for x in current.effort)
 
-        # motor currents
-        currents = ''
-        for i in current.effort:
-            currents += str(i).strip() + ','
-        currents = currents[:-1]
+        temp.x = float(dataPDS[7])
+        temp.y = float(dataPDS[8])
+        temp.z = float(dataPDS[9])
+        temps = ','.join([str(x) for x in [temp.x, temp.y, temp.z]) # more sexy
 
-        rospy.loginfo('currents=' + currents)
-        # battery voltage
+        fanSpeed.x = float(dataPDS[10])
+        fanSpeed.y = float(dataPDS[11])
+        fanSpeeds = ','.join([str(x) for x in [fanSpeed.x, fanSpeed.y])
+
+        firstFlag = dataPDS[12].split(' ')
+        flagsMsg = ','.join(firstFlag, dataPDS[13], dataPDS[14].strip('\r'))
+
+        rospy.loginfo('voltage= ' + voltage.data)
+        rospy.loginfo('temps= ' + temps)
+        rospy.loginfo('currents= ' + currents)
+        rospy.loginfo('fan speeds= ' + fanSpeeds)
+
         voltagePub.publish(voltage)
-        # 6 motor currents from M0-M5
         currentPub.publish(current)
-        # temperatures of the battery
         tempPub.publish(temp)
-        fanSpeedsPub.publish(fanSpeeds)
-        nada,firstFlag = dataPDS[12].split(' ')
-        flagsMsg = firstFlag+','+dataPDS[13]+','+dataPDS[14].strip('\r')
+        fanSpeedsPub.publish(fanSpeed)
         flagsPub.publish(flagsMsg)
+
     except Exception as e:
         print("type error: " + str(e))
         rospy.logwarn('trouble parsing PDS sensor data')
@@ -246,15 +244,7 @@ def stripFeedback(data):
     endStrips = ['\r\n', '\n']
     for strip in startStrips:
         if data.startswith(strip) and data.count(strip) == 1:
-            try:
-                data, right = data.split(endStrips[0])
-            except:
-                pass
-            try:
-                data, right = data.split(endStrips[1])
-            except:
-                pass
-            #left, data = data.split(startStrip)
+            data = re.split('\r\n|\n', data)
             return data
     return None
 
@@ -289,7 +279,7 @@ if __name__ == '__main__':
 
     subscribe_topic = '/pds_command'
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
-    sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+    sub = rospy.Subscriber(subscribe_topic, String, pds_command_subscriber_callback)
 
     service_name = '/pds_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
@@ -319,7 +309,7 @@ if __name__ == '__main__':
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
                     if feedback.startswith('PDS '):
-                        nada,feedback=feedback.split('PDS ')
+                        feedback=feedback.split('PDS ')
                         publish_pds_data(feedback)
                     else:
                         if reqInWaiting:
