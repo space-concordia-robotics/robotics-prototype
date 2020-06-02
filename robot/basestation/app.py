@@ -107,7 +107,7 @@ def ping_rover():
         print("Error: " + error.decode())
 
     ros_output, error = run_shell(
-        "rosrun ping_acknowledgment ping_response_client.py hello")
+        "rosrun ping_acknowledgment ping_response_client.py")
     ros_output = ros_output.decode()
 
     print("Pinging rover")
