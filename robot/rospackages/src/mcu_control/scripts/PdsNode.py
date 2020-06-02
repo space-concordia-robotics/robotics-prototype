@@ -199,6 +199,7 @@ def publish_pds_data(message):
     # converts message from string to float
     dataPDS = message.split(',')  # returns an array of ALL data from the PDS
     # create the message to be published
+
     voltage = Float32()
     current = JointState()
     temp = Point()
@@ -244,7 +245,7 @@ def stripFeedback(data):
     endStrips = ['\r\n', '\n']
     for strip in startStrips:
         if data.startswith(strip) and data.count(strip) == 1:
-            data = re.split('\r\n|\n', data)
+            data = re.split('\r\n|\n', data)[0]
             return data
     return None
 
@@ -309,7 +310,7 @@ if __name__ == '__main__':
                      rospy.logwarn('trouble reading from serial port')
                 if feedback is not None:
                     if feedback.startswith('PDS '):
-                        feedback=feedback.split('PDS ')
+                        feedback=feedback.split('PDS ')[1]
                         publish_pds_data(feedback)
                     else:
                         if reqInWaiting:
