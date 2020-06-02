@@ -34,8 +34,9 @@ def subscriber_callback(message):
         # note that direction is based on compass directions where E is 90 and W is -90
         msg.x = direction_adjust
         msg.y = rov_to_des_distance
+
         if(msg.y < 50):
-            rospy.loginfo('moving on to next coorinates')
+            rospy.loginfo('moving on to next coordinates')
 
         rospy.loginfo('distance : ' + str(msg.y))
         navigationPub.publish(msg)
