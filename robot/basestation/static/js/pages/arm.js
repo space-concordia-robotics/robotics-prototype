@@ -83,7 +83,6 @@ $(document).ready(function () {
           },
           serialType
         )
-        // console.log('returnVals', returnVals)
       } else {
         appendToConsole(
           'UART MODE: Cannot turn arm listener on if not in arm mux channel!'
@@ -98,7 +97,6 @@ $(document).ready(function () {
       ) {
         printErrToConsole(msgs)
         if (msgs.length == 2) {
-          console.log('msgs[1]', msgs[1])
           if (msgs[1].includes('already running')) {
             $('#toggle-arm-listener-btn')[0].checked = true
           } else {
@@ -500,7 +498,6 @@ document.addEventListener('keyup', function (event) {
 })
 
 document.addEventListener('keyup', function (event) {
-  console.log('event.code:', event.code)
   if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad8') {
     dim('#arm-up-btn > button')
   }

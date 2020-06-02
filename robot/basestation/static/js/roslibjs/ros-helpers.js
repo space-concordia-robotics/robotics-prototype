@@ -22,6 +22,10 @@ const ROSWARN = 4  // warning level
 const ROSERROR = 8 // error level
 const ROSFATAL = 16 // fatal/critical level
 
+
+// logs below this level will not be published or printed. Issue #202 will allow the user to set this value
+const MINIMUM_LOG_LEVEL = ROSINFO 
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -284,6 +288,11 @@ function initRosWeb () {
       ros: ros,
       name: 'goal_list',
       messageType: 'mcu_control/RoverGoalList'
+  // setup a subcriber function for rover_position topic
+  rover_position_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_position',
+    messageType: 'geometry_msgs/Point'
   })
 }
 
@@ -347,17 +356,20 @@ function rosLog (logLevel, message) {
 
   stamps = rosTimestamp()
   consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
+  if(logLevel >= MINIMUM_LOG_LEVEL)
+  {
+    if (logData[logLevel].type === 'log') {
+      console.log(consoleMsg)
+    } else if (logData[logLevel].type === 'warn') {
+      console.warn(consoleMsg)
+    } else if (logData[logLevel].type === 'error') {
+      console.error(consoleMsg)
+    }
 
-  if (logData[logLevel].type === 'log') {
-    console.log(consoleMsg)
-  } else if (logData[logLevel].type === 'warn') {
-    console.warn(consoleMsg)
-  } else if (logData[logLevel].type === 'error') {
-    console.error(consoleMsg)
+    appendToConsole(consoleMsg, false)
+    // log messages go to log file: currently rosout.log
+    publishRosLog(logLevel, stamps[0], message)
   }
-  appendToConsole(consoleMsg, false)
-  // log messages go to log file: currently rosout.log
-  publishRosLog(logLevel, stamps[0], message)
 }
 
 // these functions copy the rospy logging functions
@@ -442,8 +454,7 @@ function requestSerialCommand (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command + '\n' })
   let sentTime = new Date().getTime()
 
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  logInfo('Sending request to execute command "' + command + '"')
 
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
@@ -497,11 +508,11 @@ function requestTask (
   let sentTime = new Date().getTime()
 
   if (reqStatus == STATUS_STOP) {
-    appendToConsole('Sending request to stop ' + reqTask + ' task')
+    logInfo('Sending request to stop ' + reqTask + ' task')
   } else if (reqStatus == STATUS_START) {
-    appendToConsole('Sending request to start ' + reqTask + ' task')
+    logInfo('Sending request to start ' + reqTask + ' task')
   } else if (reqStatus == STATUS_CHECK) {
-    appendToConsole('Sending request to check ' + reqTask + ' task status')
+    logInfo('Sending request to check ' + reqTask + ' task status')
   }
 
   let timer = setTimeout(function () {
@@ -585,16 +596,14 @@ function checkTaskStatuses () {
 }
 
 function sendIKCommand () {
+  logDebug('Sending "' + cmd + '" to IK node')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to IK node')
   ik_command_publisher.publish(cmd)
 }
 
 function sendArmCommand (cmd) {
+  logDebug('Sending "' + cmd + '" to Arm Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
 
@@ -602,8 +611,7 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  logInfo('Sending request to execute command "' + command + '"')
 
   let timer = setTimeout(function () {
     callback([false, command + ' timeout after ' + timeout / 1000 + ' seconds'])
@@ -646,16 +654,14 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
 }
 
 function sendRoverCommand (cmd) {
+  logDebug('Sending "' + cmd + '" to Rover Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
+  logDebug('Sending "' + cmd + '" to PDS Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
   pds_command_publisher.publish(command)
 }
 
@@ -663,7 +669,7 @@ function sendPdsCommand (cmd) {
 returnsthe IP portion of the currntly set ROS_MASTER_URI
 */
 function getRoverIP (callback) {
-  console.log('roverIP: ' + env.ROS_MASTER_IP)
-  console.log('hostIP: ' + env.HOST_IP)
+  logDebug('roverIP: ' + env.ROS_MASTER_IP)
+  logDebug('hostIP: ' + env.HOST_IP)
   return env.ROS_MASTER_IP
 }

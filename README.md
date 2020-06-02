@@ -92,8 +92,6 @@ Running `pytest` without doing `python setup.py develop` will give a ModuleNotFo
 To deactivate virtualenv, run `deactivate`.
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
-wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-chmod 755 ./install_ros_kinetic.sh
 bash ./install_ros_kinetic.sh
 ```
 To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
@@ -181,7 +179,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
+- `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
 - `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
