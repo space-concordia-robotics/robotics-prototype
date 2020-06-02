@@ -35,7 +35,7 @@ if __name__ == '__main__':
     goal_list_pub_topic = 'goal_list'
     rospy.loginfo('Beginning to publish to "' + goal_list_pub_topic + '" topic')
     goal_pub = rospy.Publisher(goal_list_pub_topic, RoverGoalList, queue_size=1)
-    rate = rospy.Rate(2)  # 1Hz
+    rate = rospy.Rate(2)  # 2Hz
 
     goal_list = []
 
