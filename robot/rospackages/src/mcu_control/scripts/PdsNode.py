@@ -198,8 +198,8 @@ def publish_pds_data(message):
     # parse the data received from PDS
     # converts message from string to float
     dataPDS = message.split(',')  # returns an array of ALL data from the PDS
-    # create the message to be published
 
+    # create the message to be published
     voltage = Float32()
     current = JointState()
     temp = Point()
