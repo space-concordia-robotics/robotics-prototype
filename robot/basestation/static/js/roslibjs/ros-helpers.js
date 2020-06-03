@@ -288,6 +288,7 @@ function initRosWeb () {
       ros: ros,
       name: 'goal_list',
       messageType: 'mcu_control/RoverGoalList'
+  })
   // setup a subcriber function for rover_position topic
   rover_position_listener = new ROSLIB.Topic({
     ros: ros,
