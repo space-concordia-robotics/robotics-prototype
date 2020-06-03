@@ -35,7 +35,7 @@ def subscriber_callback(message):
         msg.x = direction_adjust
         msg.y = rov_to_des_distance
 
-        if(msg.y < 50):
+        if(msg.y < 10):
             rospy.loginfo('moving on to next coordinates')
 
         rospy.loginfo('distance : ' + str(msg.y))
