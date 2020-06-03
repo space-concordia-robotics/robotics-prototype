@@ -31,9 +31,8 @@ def subscriber_callback(message):
             direction_adjust = -999  # no heading, give invalid number
 
         msg = Point()
-        # note that direction is based on compass directions where E is 90 and W is -90
-        msg.x = direction_adjust
-        msg.y = rov_to_des_distance
+        msg.x = direction_adjust # note that direction is based on compass directions where E is 90 and W is -90
+        msg.y = rov_to_des_distance # this value is in meters
 
         if(msg.y < 10):
             rospy.loginfo('moving on to next coordinates')
