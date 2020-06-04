@@ -1,19 +1,33 @@
 os: linux
 sudo: false
-dist: trusty
+dist: xenial
 language: python
+before_install:
+    # Taken from this tutorial https://learn.adafruit.com/continuous-integration-arduino-and-you/testing-your-project
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget http://downloads.arduino.cc/arduino-1.8.12-linux64.tar.xz
+  - tar xf arduino-1.8.12-linux64.tar.xz
+  - sudo mv arduino-1.8.12 /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+  - export ARDUINO_PATH="/usr/local/share/arduino"
+install:
+#  - arduino --install-library "Adafruit SleepyDog Library,Adafruit MQTT Library"
+  - pip install -r requirements.txt
+  - pip install -e .
+script:
+  - pytest --continue-on-collection-errors
+notifications:
+  email:
+    recipients:
+      - cedricmartens98@gmail.com
+    on_success: change
+    on_failure: change
+
 python:
   #- "2.7" # not supported
   - "3.6"
-
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-  - pip install -e .
-
-script:
-  # run all tests even if errors appear
-  - pytest --continue-on-collection-errors
 
 # bypass submodules because gitlab requires authentication for pull
 git:
