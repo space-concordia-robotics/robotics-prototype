@@ -48,6 +48,9 @@ $(document).ready(() => {
             $('#goal-stats-lat').text('----')
             $('#goal-stats-long').text('----')
         }
+
+        // this is a meme implementation of a loop to update the params without resorting to a message type + subscriber + publisher
+        updateAntennaParams()
     })
     // setup gps parameters for antenna directing
     let antenna_latitude = new ROSLIB.Param({
@@ -537,4 +540,20 @@ $(document).ready(() => {
             $('.goal-' + current).remove()
         })
     }
+
+    function updateAntennaParams() {
+        antenna_latitude.get(function(lat) {
+            antenna_longitude.get(function(long) {
+                antenna_start_dir.get(function(heading) {
+                    if (lat && long && heading) {
+                        $('#antenna-stats-lat').text(lat.toFixed(6))
+                        $('#antenna-stats-long').text(long.toFixed(6))
+                        $('#antenna-stats-heading').text(heading + '°')
+                    } 
+                })
+            })
+        })
+    }
 })
+
+
