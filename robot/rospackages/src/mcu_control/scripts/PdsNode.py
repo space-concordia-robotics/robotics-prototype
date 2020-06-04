@@ -221,7 +221,7 @@ def publish_pds_data(message):
         fanSpeeds = ','.join([str(x) for x in [fanSpeed.fan1, fanSpeed.fan2]])
 
         firstFlag = dataPDS[12].split(' ')
-        flagsMsg = ','.join(firstFlag, dataPDS[13], dataPDS[14].strip('\r'))
+        flagsMsg = ','.join([firstFlag, dataPDS[13], dataPDS[14].strip('\r')])
 
         rospy.loginfo('voltage= ' + voltage.data)
         rospy.loginfo('temps= ' + temps)
