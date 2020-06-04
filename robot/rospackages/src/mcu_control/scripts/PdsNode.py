@@ -218,7 +218,7 @@ def publish_pds_data(message):
 
         fanSpeed.fan1 = float(dataPDS[10])
         fanSpeed.fan2 = float(dataPDS[11])
-        fanSpeeds = ','.join([str(x) for x in [fanSpeed.fan1, fanSpeed.fan2])
+        fanSpeeds = ','.join([str(x) for x in [fanSpeed.fan1, fanSpeed.fan2]])
 
         firstFlag = dataPDS[12].split(' ')
         flagsMsg = ','.join(firstFlag, dataPDS[13], dataPDS[14].strip('\r'))
