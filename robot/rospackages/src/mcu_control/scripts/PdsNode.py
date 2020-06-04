@@ -256,19 +256,19 @@ if __name__ == '__main__':
 
     voltage_pub_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "' + voltage_pub_topic + '" topic')
-    voltagePub = rospy.Publisher(voltage_pub_topic, Float32, queue_size=10)
+    voltagePub = rospy.Publisher(voltage_pub_topic, Voltage, queue_size=10)
 
     current_pub_topic = '/wheel_motor_currents'
     rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
-    currentPub = rospy.Publisher(current_pub_topic, JointState, queue_size=10)
+    currentPub = rospy.Publisher(current_pub_topic, Currents, queue_size=10)
 
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
-    tempPub = rospy.Publisher(temp_pub_topic, Point, queue_size=10)
+    tempPub = rospy.Publisher(temp_pub_topic, ThermistorTemps, queue_size=10)
 
     fan_speeds_pub_topic = '/fan_speeds'
     rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
-    fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, Point, queue_size=10)
+    fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, FanSpeeds, queue_size=10)
 
     error_flags_topic = '/pds_flags'
     rospy.loginfo('Beginning to publish to "' + error_flags_topic + '" topic')
