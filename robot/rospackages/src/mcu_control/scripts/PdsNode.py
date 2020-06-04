@@ -13,7 +13,7 @@ import serial.tools.list_ports  # pyserial
 import rospy
 from std_msgs.msg import String, Float32
 from geometry_msgs.msg import Point
-from sensor_msgs.msg import JointState
+from mcu_control.msg import ThermistorTemps, FanSpeeds, Voltage, Currents
 from mcu_control.srv import *
 
 ser = None # Initialise variable for future use
@@ -200,10 +200,10 @@ def publish_pds_data(message):
     dataPDS = message.split(',')  # returns an array of ALL data from the PDS
 
     # create the message to be published
-    voltage = Float32()
-    current = JointState()
-    temp = Point()
-    fanSpeed = Point()
+    voltage = Voltage()
+    current = Currents()
+    temp = ThermistorTemps()
+    fanSpeed = FanSpeeds()
 
     try:
         voltage.data = float(dataPDS[0])
@@ -211,14 +211,14 @@ def publish_pds_data(message):
         current.effort = [float(data) for data in dataPDS[1:7]] # sexy list comprehension
         currents = ','.join(str(x) for x in current.effort)
 
-        temp.x = float(dataPDS[7])
-        temp.y = float(dataPDS[8])
-        temp.z = float(dataPDS[9])
-        temps = ','.join([str(x) for x in [temp.x, temp.y, temp.z]) # more sexy
+        temp.therm1 = float(dataPDS[7])
+        temp.therm2 = float(dataPDS[8])
+        temp.therm3 = float(dataPDS[9])
+        temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]) # more sexy
 
-        fanSpeed.x = float(dataPDS[10])
-        fanSpeed.y = float(dataPDS[11])
-        fanSpeeds = ','.join([str(x) for x in [fanSpeed.x, fanSpeed.y])
+        fanSpeed.fan1 = float(dataPDS[10])
+        fanSpeed.fan2 = float(dataPDS[11])
+        fanSpeeds = ','.join([str(x) for x in [fanSpeed.fan1, fanSpeed.fan2])
 
         firstFlag = dataPDS[12].split(' ')
         flagsMsg = ','.join(firstFlag, dataPDS[13], dataPDS[14].strip('\r'))
