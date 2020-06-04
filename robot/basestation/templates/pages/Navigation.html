@@ -4,6 +4,9 @@
 {{ super() }}
 <script src="../../static/js/elements/navigation/navigation.js"></script>
 <script src="../../static/js/elements/feed/console.js"></script>
+<script src="../../static/js/p5.min.js"></script>
+<script src='../../../static/js/elements/navigation/localization.js'></script>
+<script src='../../../static/js/elements/navigation/navigationUtilities.js'></script>
 {% endblock %}
 {% block content %}
 <div class="row">
@@ -11,7 +14,7 @@
         {% include "elements/feed/Console.html" %}
     </div>
     <div class="col-md-7">
-      <!-- Rover Map -->
+        {% include "elements/navigation/GPS.html" %}
     </div>
     <div class="col-md-3" id="data-start">
        {% include "elements/navigation/NavigationData.html" %}

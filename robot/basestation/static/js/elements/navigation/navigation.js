@@ -92,10 +92,10 @@ $(document).ready(() => {
             antenna_longitude.get(function(long) {
                 antenna_start_dir.get(function(heading) {
                     if (lat && long && heading) {
-                        rosLog('ROSINFO', 'Antenna parameters already set')
+                        logInfo('Found antenna parameters to set')
                         setupAntennaStats(lat, long, heading)
                     } else {
-                        rosLog('ROSINFO', 'Add antenna parameters for nav data')
+                        logInfo('Antenna parameters were not found')
                     }
                 })
             })
@@ -105,10 +105,10 @@ $(document).ready(() => {
             goal_longitude.get(function(long) {
                 if (lat && long) {
                     has_gps_goal.set(true)
-                    rosLog('ROSINFO', 'Goal coordinates already set')
+                    logInfo('Found goal coordinates to set')
                     setupGoalStats(lat, long)
                 } else {
-                    rosLog('ROSINFO', 'Add a goal for nav data')
+                    logInfo('Goal parameters not found')
                 }
             })
         })
@@ -221,9 +221,9 @@ $(document).ready(() => {
             $('#antenna-stats-lat').text(lat.toFixed(6))
             $('#antenna-stats-long').text(long.toFixed(6))
             $('#antenna-stats-heading').text(bearing)
-            rosLog('ROSINFO', 'Antenna parmameters have been set!')
+            logInfo('Antenna parameters have been set!')
         } catch (e) {
-            rosLog('ROSWARN', e)
+            logErr(e)
         }
     })
 
@@ -491,7 +491,7 @@ $(document).ready(() => {
                 lat_format = 1
             else if ($("#goal-lat-fieldset.goal-" + current).attr("format") == 'DMS')
                 lat_format = 2
-            else rosLog('ROSINFO', 'error with goal lat')
+            else logErr('Error with goal latitude format')
 
             if ($("#goal-long-fieldset.goal-" + current).attr("format") == 'DD')
                 long_format = 0
@@ -499,7 +499,7 @@ $(document).ready(() => {
                 long_format = 1
             else if ($("#goal-long-fieldset.goal-" + current).attr("format") == 'DMS')
                 long_format = 2
-            else rosLog('ROSINFO', 'error with goal long')
+            else logErr('Error with goal longitude format')
 
             $('#goal-change-btn.goal-' + current).prop('disabled', false)
             $('#goal-confirm-btn.goal-' + current).prop('disabled', true)

@@ -31,8 +31,8 @@ let sketch = function(p) {
 
     MAX_ZOOM = 2
     MIN_ZOOM = 0.15
-    CANVAS_HEIGHT = 300
-    CANVAS_WIDTH = 450
+    CANVAS_HEIGHT = 800
+    CANVAS_WIDTH = 1100
     GRID_RADIUS = 1000 // max distance from 0,0 to draw grid
     GRID_RATE = 100 // draw line every GRID_RATE pixels
 
