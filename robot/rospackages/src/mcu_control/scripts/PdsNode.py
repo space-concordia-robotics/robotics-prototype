@@ -209,7 +209,7 @@ def publish_pds_data(message):
         voltage.data = float(dataPDS[0])
 
         current.effort = [float(data) for data in dataPDS[1:7]] # sexy list comprehension
-        currents = ','.join(str(x) for x in current.effort)
+        currents = ','.join([str(x) for x in current.effort])
 
         temp.therm1 = float(dataPDS[7])
         temp.therm2 = float(dataPDS[8])
