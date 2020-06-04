@@ -223,11 +223,11 @@ def publish_pds_data(message):
         firstFlag = dataPDS[12].split(' ')
         flagsMsg = ','.join([str(x) for x in firstFlag + [data[13], dataPDS[14].strip('\r')]])
 
-        rospy.loginfo('voltage= ' + voltage.data)
-        rospy.loginfo('temps= ' + temps)
-        rospy.loginfo('currents= ' + currents)
-        rospy.loginfo('fan speeds= ' + fanSpeeds)
-
+        rospy.loginfo('voltage= ' + str(voltage.data))
+        rospy.loginfo('temps= ' + str(temps))
+        rospy.loginfo('currents= ' + str(currents))
+        rospy.loginfo('fan speeds= ' + str(fanSpeeds))
+        
         voltagePub.publish(voltage)
         currentPub.publish(current)
         tempPub.publish(temp)
