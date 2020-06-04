@@ -1,6 +1,6 @@
 os: linux
 sudo: false
-dist: xenial
+dist: trusty # Ubuntu 14
 language: python
 before_install:
     # Taken from this tutorial https://github.com/newdigate/teensy-blink
