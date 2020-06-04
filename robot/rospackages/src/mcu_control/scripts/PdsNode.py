@@ -214,7 +214,7 @@ def publish_pds_data(message):
         temp.therm1 = float(dataPDS[7])
         temp.therm2 = float(dataPDS[8])
         temp.therm3 = float(dataPDS[9])
-        temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]) # more sexy
+        temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]]) # more sexy
 
         fanSpeed.fan1 = float(dataPDS[10])
         fanSpeed.fan2 = float(dataPDS[11])
