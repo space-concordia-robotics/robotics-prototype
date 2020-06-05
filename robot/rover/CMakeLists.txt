@@ -18,6 +18,21 @@ set(ARDUINO_EXTERNAL_LIB ~/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 
+macro(checkLibraries lib_name lib_version)
+
+find_file(lib 
+NAME lib_name
+PATHS ${ARDUINO_EXTERNAL_LIB}
+)
+
+message(STATUS ${lib})
+if(${lib} STREQUAL lib-NOTFOUND)
+message(WARNING "Library ${lib_name} not found in ${ARDUINO_EXTERNAL_LIB}")
+
+endif()
+endmacro()
+
+checkLibraries(test 1.1.0)
 
 #Set the compilers for c and c++
 set(CMAKE_C_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-gcc)
