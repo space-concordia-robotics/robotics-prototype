@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Servo.h>
+
 //#include <SoftwareSerial.h>
 
 #define DEVEL_MODE_1       1     //Use with USB
@@ -107,6 +108,7 @@ void turnTable (int cuvette, int desiredPosition);// sends the wanted cuvette to
 void debouncing(void); //pure magic
 float photoChoice(int led); // choses the photoresistor from which to read the voltage
 String getValue(String data, char separator, int index);//splits input string to feed multiple variables
+int getCount(String data, char target);
 
 Servo table;
 
@@ -376,7 +378,7 @@ void loop() {
       }
       else if (cmd == "eup") {
         // sets elevator direction clockwise
-        elevatorDirection = 1- 0;
+        elevatorDirection = 1 - 0;
         digitalWrite(ELEVATOR_DIRECTION, 1 - elevatorDirection);
         UART_PORT.println("SCIENCE eup done");
       }
@@ -716,7 +718,7 @@ void elevatorBottomInterrupt () {
   }
   analogWrite(ELEVATOR, 0);
   previousElevatorState = 'n';
-  elevatorDirection = 1- 0;
+  elevatorDirection = 1 - 0;
 }
 
 void cuvettePosition() {
