@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_SYSTEM_PROCESSOR arm)
+include(ExternalProject)
 
 
 if(DEFINED ENV{ARDUINO_PATH})
@@ -50,9 +51,17 @@ set(WIRE_PATH ${TEENSY_LIB}/Wire)
 
 #External Libaries paths
 set(ARDUINO_BLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
+set(ARDUINO_BLUE_INSTALL_PATH https://github.com/purwar2016/ArduinoBlue-library)
+
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
+set(SPARKFUN_GPS_GITHUB https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
+
+
 set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
+set(ADAFRUIT_GITHUB https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
+
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
+set(LSM303_GITHUB https://github.com/pololu/lsm303-arduino)
 
 project(rover)
 
