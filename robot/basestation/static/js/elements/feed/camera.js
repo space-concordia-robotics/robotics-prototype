@@ -22,7 +22,7 @@ $(document).ready(() => {
   const CAMERA_STOP_SUCCESS_RESPONSE = 'Stopped camera stream'
 
   // path to stream offline image
-  const STREAM_OFF = '../../static/img/camera/stream_andoffline.png'
+  const STREAM_OFF = '../../static/img/camera/stream_offline.png'
   const POWER_ON = '../../static/img/camera/power_on.png'
   const POWER_OFF = '../../static/img/camera/power_off.png'
 
