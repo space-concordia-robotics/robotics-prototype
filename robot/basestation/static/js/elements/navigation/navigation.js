@@ -79,11 +79,11 @@ $(document).ready(() => {
         name: 'goal_longitude'
     })
     // setup a subscriber for the rover_goal topic
-    let rover_goal_listener = new ROSLIB.Topic({
+    new ROSLIB.Topic({
         ros: ros,
         name: 'rover_goal',
         messageType: 'geometry_msgs/Point'
-    })
+    });
 
     goalList = []
     count = 0;
@@ -353,7 +353,7 @@ $(document).ready(() => {
                 $('#goal-DDM-dec-min-input.lat.goal-' + current).attr("value", min)
 
             } else if (lat_format == 2) {
-                //degress-minutes-seconds mode
+                //degrees-minutes-seconds mode
                 let dec = parseFloat($('#goal-DMS-deg-input.lat.goal-' + current).val())
                 let mins = parseFloat($('#goal-DMS-min-input.lat.goal-' + current).val())
                 let secs = parseFloat($('#goal-DMS-sec-input.lat.goal-' + current).val())
@@ -388,7 +388,7 @@ $(document).ready(() => {
                 $('#goal-DDM-dec-min-input.long.goal-' + current).attr("value", min)
 
             } else if (long_format == 2) {
-                //degress-minutes-seconds mode
+                //degrees-minutes-seconds mode
                 let dec = parseFloat($('#goal-DMS-deg-input.long.goal-' + current).val())
                 let mins = parseFloat($('#goal-DMS-min-input.long.goal-' + current).val())
                 let secs = parseFloat($('#goal-DMS-sec-input.long.goal-' + current).val())
@@ -413,12 +413,9 @@ $(document).ready(() => {
             $('#goal-lat-fieldset.goal-' + current).prop('disabled', true)
             $('#goal-long-fieldset.goal-' + current).prop('disabled', true)
 
-            let latlongpair = {
-                lat: lat,
-                long: long
-            }
 
-            //the confirm button's functionality will change depending on wether or not the change button was clicked before it.
+
+            //the confirm button's functionality will change depending on whether or not the change button was clicked before it.
             if ($("#goal-change-btn.goal" + current).data('clicked')) {
                 $(this).data('clicked', false)
                 // maybe make a change goal option here
