@@ -7,8 +7,8 @@ from config import (host, user, remote_path_1)
 """
 Script takes in the image as a command line argument.
 SSH keys need to be configured on both remote and local machine in order for the script to work.
-Host name, user nmae, and remote path are all imported from a config file. Update the information there
-so that this script is portable .
+Host name, user nmae, and remote path are all imported from a config file. Update the information
+there so that this script is portable .
 
 """
 
@@ -36,40 +36,43 @@ class remote_connection:
         except SCPException as error:
             raise error
 
-    def send_batch_images(self, image_file):
-        bulk_tranfer = [self.send_image(self, f) for f in image_file]
+    def send_batch_images(self, image_directory):
+        bulk_tranfer = [self.send_image(image) for image in image_directory]
         print(len(bulk_transfer) + "Images have been transfered")
 
 
 if __name__ == "__main__":
 
-    holder = []
+  #takes the image as a command line argument
+    parser = argparse.ArgumentParser(description="the file that gets sent")
+    parser.add_argument("image_directory", action="append")
+    args = parser.parse_args()
+    to_transfer = args.image_directory[0]
+
+    image_files = []
+
     #Takes in a directory name from which a config file and jpeg files are extracted
     for name in os.listdir('test-file/'):
         if fnmatch.fnmatch(name, '*.txt'):
             config = 'test-file/' + name
         elif fnmatch.fnmatch(name, '*.jpeg'):
-            holder.append(name)
+            image_files.append(name)
     #reads and splits the config file so that the variables can be used
     file_content = [line.split() for line in open(config, "r") if "#" not in line]
     flat_file_content = [i for flat in file_content for i in flat]
 
     username_index = flat_file_content.index("Username")+1
     userpath_index = flat_file_content.index("Userpath")+1
-
+    remote_path_index = flat_file_content.index("Remote_path")+1
     #variables that can then be passed to the next function
-    username = flat_file_content[username_index]
-    user_path = flat_file_content[userpath_index]
+    user = flat_file_content[username_index]
+    host = flat_file_content[userpath_index]
+    remote_path = flat_file_content[remote_path_index]
 
-
-    #takes the image as a command line argument
-    parser = argparse.ArgumentParser(description="the file that gets sent")
-    parser.add_argument("image_file", action="append")
-    args = parser.parse_args()
-    to_transfer = args.image_file[0]
-
-    sender = remote_connection(host, user, remote_path_1, to_transfer)
+    sender = remote_connection(host, user, remote_path)
     sender.connect()
-    #if()
-    sender.send_image(sender.file_name)
+    if len(image_files) > 1:
+        sender.send_batch_images(image_files)
+    else:
+        sender.send_image(image_files[0])
     sender.disconnect()
