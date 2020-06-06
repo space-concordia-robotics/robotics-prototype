@@ -586,7 +586,7 @@ void Commands::controlWheelMotors(String cmd) {
                 println("ASTRO " + String(LB.motorName) + String("'s desired speed: ") + String(LB.desiredVelocity) + String(" PWM "));
             }
             else {
-                println("ASTRO invalid motor  number")
+                println("ASTRO invalid motor  number");
             }
 //            motorList[motorNumber].desiredVelocity = motorSpeed;
 //            motorList[motorNumber].desiredDirection = dir;
