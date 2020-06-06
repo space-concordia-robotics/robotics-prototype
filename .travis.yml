@@ -7,7 +7,7 @@ before_install:
   - export ARDUINO_IDE_VERSION="1.8.12"
   - export TEENSYDUINO_VERSION="152"
   - mkdir -p $ARDUINO_PATH
-  - mkdir -p robotics-prototype/robot/rover/build
+  - mkdir -p robot/rover/build
   - mkdir -p ~/Arduino/libraries
   - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
   - tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz -C $ARDUINO_PATH
@@ -30,7 +30,7 @@ install:
   - pip install -r requirements.txt
   - pip install -e .
 script:
-  - cd robotics-prototype/robot/rover/build
+  - cd robot/rover/build
   - cmake ..
   - make
   - cd ../../..
