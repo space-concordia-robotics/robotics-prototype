@@ -22,10 +22,10 @@ install:
   - curl -fsSlL https://github.com/purwar2016/ArduinoBlue-library/archive/3.0.1.tar.gz > ArduinoBlue-library.tar.gz
   - curl -fsSlL https://github.com/pololu/lsm303-arduino/archive/3.0.1.tar.gz > lsm303-arduino.tar.gz
   - curl -fsSlL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v1.0.2.tar.gz > SparkFun_I2C_GPS_Arduino_Library.tar.gz
-  - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library
-  - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries/ArduinoBlue
-  - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries/LSM303
-  - tar xf SparkFun_I2C_GPS_Arduino_Library.tar.gz -C ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
+  - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries
+  - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries
+  - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries
+  - tar xf SparkFun_I2C_GPS_Arduino_Library.tar.gz -C ~/Arduino/libraries
   - pip install -r requirements.txt
   - pip install -e .
 script:
