@@ -22,5 +22,5 @@ def add_commit_issue_num(branch_name):
 if __name__ == '__main__':
     branch_name = get_branch_name()
     #If there is already a commit message this hook is disabled
-    if not is_excluded_branch(branch_name, excluded_branches) and sys.argv[2] != 'commit' and read_from_file(sys.argv[1], 5) != '#[':
+    if not is_excluded_branch(branch_name, excluded_branches) and sys.argv[2] != 'commit' and read_from_file(sys.argv[1], 2) != '#[':
         add_commit_issue_num(branch_name)

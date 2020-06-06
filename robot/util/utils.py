@@ -45,4 +45,4 @@ def append_to_file(filename, text):
 def read_from_file(filename, num_char):
     with open(filename, 'r+') as f:
         f.seek(0, 0)
-        return f.read(2)
+        return f.read(num_char)
