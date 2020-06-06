@@ -116,7 +116,7 @@ def rotate_stream(filename, rotation):
     # If rotation is 180 degrees, use vflip. Else use transpose filter
     if rotation == 0:
         pass
-    if rotation == 1:
+    elif rotation == 1:
         stream = ffmpeg.filter_(stream, 'transpose', 1)
     elif rotation == 2:
         stream = ffmpeg.filter_(stream, 'vflip')
