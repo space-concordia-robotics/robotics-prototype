@@ -18,10 +18,10 @@ before_install:
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH/arduino-$ARDUINO_IDE_VERSION
 install:
   # Manually installing the required libraries, to remove after #362 is merged as cmake will automatically install this.
-  - curl -fsSl https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library/archive/1.0.9.tar.gz -o Adafruit_Motor_Shield_V2_Library.tar.gz
-  - curl -fsSl https://github.com/purwar2016/ArduinoBlue-library/archive/3.0.1.tar.gz -o ArduinoBlue-library.tar.gz
-  - curl -fsSl https://github.com/pololu/lsm303-arduino/archive/3.0.1.tar.gz -o lsm303-arduino.tar.gz
-  - curl -fsSl https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v1.0.2.tar.gz -o SparkFun_I2C_GPS_Arduino_Library.tar.gz
+  - curl -fsSlL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library/archive/1.0.9.tar.gz > Adafruit_Motor_Shield_V2_Library.tar.gz
+  - curl -fsSlL https://github.com/purwar2016/ArduinoBlue-library/archive/3.0.1.tar.gz > ArduinoBlue-library.tar.gz
+  - curl -fsSlL https://github.com/pololu/lsm303-arduino/archive/3.0.1.tar.gz > lsm303-arduino.tar.gz
+  - curl -fsSlL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v1.0.2.tar.gz > SparkFun_I2C_GPS_Arduino_Library.tar.gz
   - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library
   - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries/ArduinoBlue
   - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries/LSM303
@@ -38,10 +38,10 @@ notifications:
   email:
     recipients:
       - cedricmartens98@gmail.com
-#      - william.wells@spaceconcordia.ca
-#      - tim.freiman@spaceconcordia.ca
-#      - peter.granitski@spaceconcordia.ca
-#      - joshua.glazer@spaceconcordia.ca
+      - william.wells@spaceconcordia.ca
+      - tim.freiman@spaceconcordia.ca
+      - peter.granitski@spaceconcordia.ca
+      - joshua.glazer@spaceconcordia.ca
     on_success: change
     on_failure: change
 
