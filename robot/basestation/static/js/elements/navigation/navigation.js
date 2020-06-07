@@ -413,16 +413,6 @@ $(document).ready(() => {
             $('#goal-long-fieldset.goal-' + current).prop('disabled', true)
 
 
-
-            //the confirm button's functionality will change depending on whether or not the change button was clicked before it.
-            if ($("#goal-change-btn.goal" + current).data('clicked')) {
-                $(this).data('clicked', false)
-                // maybe make a change goal option here
-            } else {
-                // add the goal to data
-            }
-
-
             /*----------------------------------\
             this section implements ROS goal node
             \----------------------------------*/
@@ -475,7 +465,7 @@ $(document).ready(() => {
         $("#goal-buttons-input-group.goal-" + current).find('*').addClass('goal-' + current)
 
         createGoalConfirmButtonHandler(current)
-        createGoalChangeButtonHandler(current)
+        //createGoalChangeButtonHandler(current)
         createGoalDeleteButtonHandler(current)
     }
 
