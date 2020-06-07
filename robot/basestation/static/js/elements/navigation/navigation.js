@@ -33,11 +33,11 @@ $(document).ready(() => {
     })
     goal_list_subscriber.subscribe(function(message) {
         goalList = message.goal_list
-        if (count != goalList.length) {
-            count = goalList.length
+        if (goalCount != goalList.length) {
+            goalCount = goalList.length
 
         }
-        if (count > 0) {
+        if (goalCount > 0) {
             goal_latitude.set(goalList[0].lat)
             goal_longitude.set(goalList[0].long)
             $('#goal-stats-lat').text(goalList[0].lat.toFixed(6))
@@ -86,7 +86,7 @@ $(document).ready(() => {
     });
 
     goalList = []
-    count = 0;
+    goalCount = 0;
 
     initNavigationPanel()
 
@@ -292,7 +292,7 @@ $(document).ready(() => {
     $('#toggle-goal-modal-btn').on('click', function(event) {
         $("#goal-modal-body-content").empty()
         let goalTemplate = $('#created-goal-template').html()
-        for (i = 0; i < count; i++) {
+        for (i = 0; i < goalCount; i++) {
             $("#goal-modal-body-content").append(goalTemplate)
             $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
             $(".goal-" + i).find('*').addClass('goal-' + i)
@@ -313,21 +313,20 @@ $(document).ready(() => {
         let newGoalTemplate = $('#add-goal-coordinates').html()
 
         $("#goal-modal-body-content").append(newGoalTemplate)
-        $("#goal-modal-body-content .goal").addClass('goal-' + count).removeClass('goal')
-        $(".goal-" + count).find('*').addClass('goal-' + count)
+        $("#goal-modal-body-content .goal").addClass('goal-' + goalCount).removeClass('goal')
+        $(".goal-" + goalCount).find('*').addClass('goal-' + goalCount)
 
-        createGoalLatitudeHandler(count)
-        createGoalLongitudeHandler(count)
-        createGoalButtons(count)
+        createGoalLatitudeHandler(goalCount)
+        createGoalLongitudeHandler(goalCount)
+        createGoalButtons(goalCount)
     })
 
     function saveGoalData(current, lat_format, long_format) {
         let lat = null
         let long = null
         try {
-            for (i = 0; i < count; i++) {
+            for (i = 0; i < goalCount; i++) {
                 if ($('#goal-name.goal-' + current).val() == goalList[i].name) {
-                    //alert("Please choose another name")
                     throw 'Enter different name'
                 }
             }
