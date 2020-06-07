@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ~/Arduino/libraries/LSM303;~/Arduino/libraries/ArduinoBlue/src;~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control/src)
+target_include_directories(${PROJECT_NAME} PRIVATE /home/niko/Arduino/libraries/LSM303;/home/niko/Arduino/libraries/ArduinoBlue/src;/home/niko/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control/src)
 
 set_target_properties(
 ${PROJECT_NAME} PROPERTIES 

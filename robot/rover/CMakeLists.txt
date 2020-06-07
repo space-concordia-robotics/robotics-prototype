@@ -15,25 +15,25 @@ set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
 set(TEENSY_CORE ${ARDUINO_PATH}/hardware/teensy/avr/cores)
 set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
-set(ARDUINO_EXTERNAL_LIB ~/Arduino/libraries)
+set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 
-macro(checkLibraries lib_name lib_version)
+macro(checkLibraries lib_name lib_version lib_github)
 
-find_file(lib 
-NAME lib_name
-PATHS ${ARDUINO_EXTERNAL_LIB}
-)
 
-message(STATUS ${lib})
-if(${lib} STREQUAL lib-NOTFOUND)
-message(WARNING "Library ${lib_name} not found in ${ARDUINO_EXTERNAL_LIB}")
+install_library("${lib_name}" ${lib_github})
+
+if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})	
 
 endif()
+
 endmacro()
 
-checkLibraries(test 1.1.0)
+macro (install_library lib_name lib_github)
+
+
+endmacro()
 
 #Set the compilers for c and c++
 set(CMAKE_C_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-gcc)
@@ -51,7 +51,7 @@ set(WIRE_PATH ${TEENSY_LIB}/Wire)
 
 #External Libaries paths
 set(ARDUINO_BLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
-set(ARDUINO_BLUE_INSTALL_PATH https://github.com/purwar2016/ArduinoBlue-library)
+set(ARDUINO_BLUE_GITHUB https://github.com/purwar2016/ArduinoBlue-library)
 
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
 set(SPARKFUN_GPS_GITHUB https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
@@ -63,7 +63,17 @@ set(ADAFRUIT_GITHUB https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_GITHUB https://github.com/pololu/lsm303-arduino)
 
+
+
+ 
+
 project(rover)
+
+#checkLibraries(ArduinoBlue 1.1.0 ${ARDUINO_BLUE_GITHUB})
+execute_process(
+COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test.sh ArduinoBlue 3.0.1 ${ARDUINO_BLUE_GITHUB}
+)
+
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -138,6 +148,8 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 function(createCppLibrary sources libraryName includes)
 add_library(${libraryName} ${sources})
 
+#add_dependencies(${libaryName} blue)
+
 if(NOT ${includes} STREQUAL "")
 target_include_directories(${libraryName} PRIVATE ${includes})
 endif()
@@ -153,6 +165,7 @@ createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/
 
 #create the additionnal libraries installed thru the Teensyduino library manager
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
+
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
@@ -223,5 +236,8 @@ endforeach()
  DEPENDS MultipleConstructors_cleanup
  DEPENDS science_cleanup
  )
+
+
+
 
 

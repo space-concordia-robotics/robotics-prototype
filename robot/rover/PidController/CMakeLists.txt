@@ -24,7 +24,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library)
+target_include_directories(${PROJECT_NAME} PRIVATE /home/niko/Arduino/libraries/Adafruit_Motor_Shield_V2_Library)
 
 set_target_properties(
 ${PROJECT_NAME} PROPERTIES 
