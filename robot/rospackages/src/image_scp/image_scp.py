@@ -7,8 +7,8 @@ from config import (host, user, remote_path_1)
 """
 Script takes in the image as a command line argument.
 SSH keys need to be configured on both remote and local machine in order for the script to work.
-Host name, user nmae, and remote path are all imported from a config file. Update the information
-there so that this script is portable .
+Host name, user name, and remote path are all imported from a config file. Update the information
+there so that this script is portable.
 
 """
 
@@ -19,8 +19,8 @@ class remote_connection:
         self.user = user
         self.remote_path = remote_path
         self.file_name = file_name
-#initiate the connection to the host machine
     def connect(self):
+        """initiate the connection to the host machine""""
         self.client = SSHClient()
         self.client.load_system_host_keys()
         self.client.connect(hostname=self.host, username=self.user)
@@ -34,16 +34,16 @@ class remote_connection:
         try:
             self.scp.put(image, recursive=True, remote_path=self.remote_path)
         except SCPException as error:
-            raise error
+            print(error)
 
     def send_batch_images(self, image_directory):
         bulk_tranfer = [self.send_image(image) for image in image_directory]
-        print(len(bulk_transfer) + "Images have been transfered")
+        print(len(bulk_transfer) + " images have been transfered")
 
 
 if __name__ == "__main__":
 
-  #takes the image as a command line argument
+    #takes the image as a command line argument
     parser = argparse.ArgumentParser(description="the file that gets sent")
     parser.add_argument("image_directory", action="append")
     args = parser.parse_args()
