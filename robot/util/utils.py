@@ -41,8 +41,3 @@ def append_to_file(filename, text):
         content = f.read()
         f.seek(0, 0)
         f.write(text.rstrip('\r\n') + content)
-
-def read_from_file(filename, num_char):
-    with open(filename, 'r+') as f:
-        f.seek(0, 0)
-        return f.read(num_char)

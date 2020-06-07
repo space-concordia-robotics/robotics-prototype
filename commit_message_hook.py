@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import robot.basestation.app as app
-from robot.util.utils import run_shell, append_to_file, read_from_file
+from robot.util.utils import run_shell, append_to_file
 from branch_name_verification_hook import is_excluded_branch, get_issue_num, get_branch_name, excluded_branches
 import re
 import sys
+import os
+from os import path
 
 def add_commit_issue_num(branch_name):
     """
@@ -21,6 +23,6 @@ def add_commit_issue_num(branch_name):
 
 if __name__ == '__main__':
     branch_name = get_branch_name()
-    #If there is already a commit message this hook is disabled
-    if not is_excluded_branch(branch_name, excluded_branches) and read_from_file(sys.argv[1], 2) != '[#':
+    #If there is already a commit message or if cherry-picking, this hook is disabled
+    if not is_excluded_branch(branch_name, excluded_branches) and sys.argv[2] != 'commit' and not path.exists('.git/CHERRY_PICK_HEAD'):
         add_commit_issue_num(branch_name)
