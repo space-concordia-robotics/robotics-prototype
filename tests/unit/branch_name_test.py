@@ -17,6 +17,7 @@ def test_get_issue_num():
     test get issue number function
     """
     assert get_issue_num('upgrade-ubuntu-18-304') == '304'
+    assert get_issue_num('setup-tx2-initialization-275') == '275'
     assert get_issue_num('upgrade-ubuntu-18') == '18'
     assert get_issue_num('304-upgrade-ubuntu-18') == '18'
     assert get_issue_num('----------------------18') == '18'
