@@ -20,8 +20,7 @@ set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 
 #given a name, will check if the library exists in the proper directory, otherwise run install_library.sh which will install it
-macro(checkLibraries lib_name lib_version lib_url)
-
+function(checkLibraries lib_name lib_version lib_url)
 
 if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})
 execute_process(
@@ -29,7 +28,7 @@ COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_library.sh ${lib_name} ${lib_version
 )
 endif()
 
-endmacro()
+endfunction()
 
 
 #Set the compilers for c and c++
@@ -49,27 +48,25 @@ set(WIRE_PATH ${TEENSY_LIB}/Wire)
 #External Libaries paths
 set(ARDUINO_BLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
 set(ARDUINO_BLUE_URL https://github.com/purwar2016/ArduinoBlue-library)
+set(ARDUINO_BLUE_VERSION 3.0.1) 
 
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
 set(SPARKFUN_GPS_URL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
-
+set(SPARKFUN_GPS_VERSION v1.0.2)
 
 set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
 set(ADAFRUIT_URL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
+set(ADAFRUIT_VERSION 1.0.9)
 
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_URL https://github.com/pololu/lsm303-arduino)
-
-
-
- 
+set(LSM303_VERSION 3.0.1) 
 
 project(rover)
-checkLibraries(ArduinoBlue 3.0.1 ${ARDUINO_BLUE_URL})
-checkLibraries(Adafruit_Motor_Shield_V2_Library 1.0.9 ${ADAFRUIT_URL})
-checkLibraries(LSM303 3.0.1 ${LSM303_URL})
-checkLibraries(SparkFun_I2C_GPS_Reading_and_Control v1.0.2 ${SPARKFUN_GPS_URL})
-
+checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
+checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
+checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
+checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -93,7 +90,6 @@ endif()
 endforeach()
 set(${result} ${dirList})
 endmacro()
-
 
 #find paths for all pre-installed teensy libraries, so that all projects have access to these paths
 getSubdirectories(TEENSY_LIBRARIES ${TEENSY_LIB})
@@ -144,7 +140,6 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 function(createCppLibrary sources libraryName includes)
 add_library(${libraryName} ${sources})
 
-#add_dependencies(${libaryName} blue)
 
 if(NOT ${includes} STREQUAL "")
 target_include_directories(${libraryName} PRIVATE ${includes})
