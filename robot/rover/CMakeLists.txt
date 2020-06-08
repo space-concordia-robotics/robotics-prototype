@@ -19,21 +19,18 @@ set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 
-macro(checkLibraries lib_name lib_version lib_github)
+#given a name, will check if the library exists in the proper directory, otherwise run install_library.sh which will install it
+macro(checkLibraries lib_name lib_version lib_url)
 
 
-install_library("${lib_name}" ${lib_github})
-
-if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})	
-
+if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})
+execute_process(
+COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_library.sh ${lib_name} ${lib_version} ${lib_url}
+)
 endif()
 
 endmacro()
 
-macro (install_library lib_name lib_github)
-
-
-endmacro()
 
 #Set the compilers for c and c++
 set(CMAKE_C_COMPILER ${ARM_TOOLS}/arm/bin/arm-none-eabi-gcc)
@@ -51,28 +48,27 @@ set(WIRE_PATH ${TEENSY_LIB}/Wire)
 
 #External Libaries paths
 set(ARDUINO_BLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
-set(ARDUINO_BLUE_GITHUB https://github.com/purwar2016/ArduinoBlue-library)
+set(ARDUINO_BLUE_URL https://github.com/purwar2016/ArduinoBlue-library)
 
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
-set(SPARKFUN_GPS_GITHUB https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
+set(SPARKFUN_GPS_URL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
 
 
 set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
-set(ADAFRUIT_GITHUB https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
+set(ADAFRUIT_URL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
 
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
-set(LSM303_GITHUB https://github.com/pololu/lsm303-arduino)
+set(LSM303_URL https://github.com/pololu/lsm303-arduino)
 
 
 
  
 
 project(rover)
-
-#checkLibraries(ArduinoBlue 1.1.0 ${ARDUINO_BLUE_GITHUB})
-execute_process(
-COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test.sh ArduinoBlue 3.0.1 ${ARDUINO_BLUE_GITHUB}
-)
+checkLibraries(ArduinoBlue 3.0.1 ${ARDUINO_BLUE_URL})
+checkLibraries(Adafruit_Motor_Shield_V2_Library 1.0.9 ${ADAFRUIT_URL})
+checkLibraries(LSM303 3.0.1 ${LSM303_URL})
+checkLibraries(SparkFun_I2C_GPS_Reading_and_Control v1.0.2 ${SPARKFUN_GPS_URL})
 
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
