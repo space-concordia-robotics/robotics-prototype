@@ -53,14 +53,14 @@ source /opt/ros/$name_ros_version/setup.sh
 sudo apt-get install -y python-rosinstall
 
 echo "[Set the ROS evironment]"
-sh -c "echo -e \"\n\n#------ POST ROS INSTALLATION ------\" >> ~/.bashrc"
+sh -c "echo \"\n\n#------ POST ROS INSTALLATION ------\" >> ~/.bashrc"
 sh -c "echo \"alias eb='nano ~/.bashrc'\" >> ~/.bashrc"
 sh -c "echo \"alias sb='source ~/.bashrc'\" >> ~/.bashrc"
 sh -c "echo \"alias gs='git status'\" >> ~/.bashrc"
 sh -c "echo \"alias gp='git pull'\" >> ~/.bashrc"
-sh -c "echo -e \"\nalias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'\" >> ~/.bashrc"
+sh -c "echo \"\nalias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'\" >> ~/.bashrc"
 sh -c "echo \"alias cm='cw && catkin_make'\" >> ~/.bashrc"
-sh -c "echo -e \"\nexport ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
+sh -c "echo \"\nexport ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
 sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
 
 source $HOME/.bashrc
