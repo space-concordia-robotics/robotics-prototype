@@ -28,7 +28,7 @@ def dishwasher_client():
     client.wait_for_result()
 
     # Prints out the result of executing the action
-    return client.get_result()  # A FibonacciResult
+    return client.get_result()  # A DishwasherResult
 
 if __name__ == '__main__':
     try:
