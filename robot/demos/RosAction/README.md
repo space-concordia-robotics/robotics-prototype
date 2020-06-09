@@ -27,11 +27,13 @@ will solve for the first 5 numbers in the fibonacci sequence
 For example if goal is set to order=5, then result will get published to this topic in the form of sequence: [0, 1, 1, 3, 5]
 
 Example Two: Dishwasher Action
-1) Run roscore
+1) Run steps 1 to 3 from `Example One: Fibonacci Sequence` above
 
-2) Run dishwasher_action dishwasher_server.py
+2) In a new terminal, run `dishwasher_action dishwasher_server.py`
 
-3) Run dishwasher_action dishwasher_client.py
+3) In a new terminal, run `rostopic echo dishwasher/feedback`
+
+4) In a new terminal, run `dishwasher_action dishwasher_client.py`
 
 ******************************************************************
 Important Note: before trying to echo one of these topics, make sure to source devel/setup.bash
