@@ -1,13 +1,20 @@
 This package includes two action client/action server demos.
 
-In order to run them, copy the src folder into a catkin_ws, cd into the catkin_ws, and run catkin_make
-
 Example One: Fibonacci Sequence
-1) Run roscore
 
-2) Run rosrun actionlib_tutorials fibonacci_server.py - this server will perform the action
+Keep in mind that you can use double tab to help autocomplete `rosrun` commands, this usually only works after sourcing the appropriate `setup.bash` file.
 
-3) Run rosrun actionlib_tutorials fibonacci_client.py - this client sends the action to the server
+1) `cd` into `robotics-prototype/robot/demos/RosAction`, run `catkin_make`
+
+2) Run `source devel/setup.bash` - this must be done each time you open a new terminal
+
+3) Run `roscore`
+
+4) In a new terminal run `rosrun actionlib_tutorials fibonacci_server.py` - this server will perform the action
+
+5) In a new terminal run `rostopic echo fibonacci/feedback` - this will allow you to monitor the feedback
+
+6) In a new terminal run` rosrun actionlib_tutorials fibonacci_client.py` - this client sends the action to the server
 
 There are three topics that we care about:
 /fibonacci/goal - this is how many numbers in the fibonacci sequence we want to solve for
