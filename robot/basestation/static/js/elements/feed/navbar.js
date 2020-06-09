@@ -57,7 +57,7 @@ $(document).ready(() => {
       listener,
       STATUS_CHECK,
       function (msgs) {
-        console.log('msgs', msgs)
+        logInfo('msgs', msgs)
         if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
           $('#' + toggleButtonID)[0].checked = false
         } else {
@@ -92,7 +92,7 @@ $(document).ready(() => {
   function setMuxChannel (muxId) {
     deviceName = getDeviceNameByMuxID(muxId)
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      rosLog(ROSINFO, 'Don\'t change the mux channel while a listener is open!')
+      logInfo('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
@@ -107,13 +107,13 @@ $(document).ready(() => {
   function setSerialUart () {
     $('#serial-type').text('uart')
     setCookie('serialType', 'uart', 356)
-    rosLog(ROSINFO, 'setting cookie to uart')
+    logInfo('setting cookie to uart')
   }
 
   function setSerialUsb () {
     $('#serial-type').text('usb')
     setCookie('serialType', 'usb', 356)
-    rosLog(ROSINFO, 'setting cookie to usb')
+    logInfo('setting cookie to usb')
   }
 
 
@@ -134,7 +134,7 @@ $(document).ready(() => {
         buttonText.includes('Rover') &&
         $('#toggle-rover-listener-btn')[0].checked == true
       ) {
-        // sendRoverCommand(command) // rover commands not yet implemented
+        sendRoverCommand(command)
       } else if (
         buttonText.includes('Arm') &&
         $('#toggle-arm-listener-btn')[0].checked == true
@@ -142,20 +142,15 @@ $(document).ready(() => {
         sendArmCommand(command)
       } else if (buttonText.includes('Science')) {
         // science buttons unknown
-        // sendScienceCommand(command) // science commands not yet implemented
+        sendScienceCommand(command)
       } else if (buttonText.includes('PDS')) {
         // pds buttons unknown
-        // sendPdsCommand(command) // pds commands not yet implemented
+        sendPdsCommand(command)
       }
       // no listener is open, send generic request
       else if (!buttonText.includes('Select Device Channel')) {
         requestSerialCommand(command, function (msgs) {
-          console.log(msgs)
-          if (msgs[0]) {
-            console.log('nice')
-          } else {
-            console.log('not nice')
-          }
+          logInfo(msgs)
         })
       }
     }

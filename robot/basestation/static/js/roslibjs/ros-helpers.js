@@ -24,7 +24,7 @@ const ROSFATAL = 16 // fatal/critical level
 
 
 // logs below this level will not be published or printed. Issue #202 will allow the user to set this value
-const MINIMUM_LOG_LEVEL = ROSINFO 
+const MINIMUM_LOG_LEVEL = ROSINFO
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -657,8 +657,8 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
 returns the IP portion of the currently set ROS_MASTER_URI
 */
 function getRoverIP (callback) {
-  console.log('roverIP: ' + env.ROS_MASTER_IP)
-  console.log('hostIP: ' + env.HOST_IP)
+  logInfo('roverIP: ' + env.ROS_MASTER_IP)
+  logInfo('hostIP: ' + env.HOST_IP)
   return env.ROS_MASTER_IP
 }
 
@@ -667,14 +667,14 @@ command sending
 */
 function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  rosLog(ROSINFO, 'Sending "' + cmd + '" to IK node')
+  logInfo(command)
+  logInfo('Sending "' + cmd + '" to IK node')
   ik_command_publisher.publish(cmd)
 }
 
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
+  logInfo(command)
   rosLog(ROSINFO, 'Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
@@ -682,22 +682,22 @@ function sendArmCommand (cmd) {
 function sendRoverCommand (cmd) {
   logDebug('Sending "' + cmd + '" to Rover Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  rosLog(ROSINFO, 'Sending "' + cmd + '" to rover Teensy')
+  logInfo(command)
+  logInfo('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
   logDebug('Sending "' + cmd + '" to PDS Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  rosLog(ROSINFO, 'Sending "' + cmd + '" to PDS')
+  logInfo(command)
+  logInfo('Sending "' + cmd + '" to PDS')
   pds_command_publisher.publish(command)
 }
 
 function sendScienceCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  rosLog(ROSINFO, 'Sending "' + cmd + '" to science Teensy')
+  logInfo(command)
+  logInfo('Sending "' + cmd + '" to science Teensy')
   science_command_publisher.publish(command)
 }
