@@ -667,22 +667,19 @@ command sending
 */
 function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  logInfo(command)
   logInfo('Sending "' + cmd + '" to IK node')
   ik_command_publisher.publish(cmd)
 }
 
 function sendArmCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  logInfo(command)
-  rosLog(ROSINFO, 'Sending "' + cmd + '" to arm Teensy')
+  logInfo('Sending "' + cmd + '" to arm Teensy')
   arm_command_publisher.publish(command)
 }
 
 function sendRoverCommand (cmd) {
   logDebug('Sending "' + cmd + '" to Rover Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  logInfo(command)
   logInfo('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
@@ -690,14 +687,12 @@ function sendRoverCommand (cmd) {
 function sendPdsCommand (cmd) {
   logDebug('Sending "' + cmd + '" to PDS Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  logInfo(command)
   logInfo('Sending "' + cmd + '" to PDS')
   pds_command_publisher.publish(command)
 }
 
 function sendScienceCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  logInfo(command)
   logInfo('Sending "' + cmd + '" to science Teensy')
   science_command_publisher.publish(command)
 }

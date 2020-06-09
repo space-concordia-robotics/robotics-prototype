@@ -18,7 +18,7 @@ $(document).ready(() => {
   function isCommandValid(fullCommand, command) {
     if ((command == '' && fullCommand != '') || (command == fullCommand)) {
       if (fullCommand != '') {
-        rosLog(ROSERROR, INVALID_COMMAND_MSG)
+        logErr(INVALID_COMMAND_MSG)
       }
       return false
     }
@@ -45,7 +45,7 @@ $(document).ready(() => {
         clearCommandInput()
         break
       default:
-        rosLog(ROSERROR, INVALID_MODULE_MSG)
+        logErr(INVALID_MODULE_MSG)
     }
   }
 
