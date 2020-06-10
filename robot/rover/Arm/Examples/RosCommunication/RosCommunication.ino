@@ -54,7 +54,7 @@ the "pong" response is logged as info.
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 // ROS includes
-#include <ros.h>
+#include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
 // homemade includes
