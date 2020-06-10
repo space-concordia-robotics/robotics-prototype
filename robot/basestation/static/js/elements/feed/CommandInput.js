@@ -54,12 +54,10 @@ $(document).ready(() => {
     $(commandInput).val('')
   }
 
-  // Run getCMD in order to process command inputted in field, when send command button is clicked
   sendCommand.click(processCommand)
 
-  // Run getCMD in order to process command inputted into box, when enter key is pressed while focused on input field
-  document.getElementById('serial-command-input').addEventListener('keyup', function (event) {
-    if (event.code === 'Enter') {
+  $('#serial-command-input').on('keyup', function (event) {
+    if (event.key === 'Enter') {
       processCommand()
     }
   })
