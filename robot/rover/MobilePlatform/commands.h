@@ -550,46 +550,43 @@ void Commands::controlWheelMotors(String cmd) {
             int motorSpeed = getValue(cmd, ':', 1).toFloat();
             steering = 0;
             int dir = 1;
-            if (throttle < 0 ) {
+            if (motorSpeed < 0 ) {
                 dir = - 1;
             }
             sinceThrottle = 0;
 
-            if (motorNumber == 0){
+            if (motorNumber == 1){
                 RF.calcCurrentVelocity();
                 RF.setVelocity(dir , abs(motorSpeed), RF.getCurrentVelocity());
                 println("ASTRO " + String(RF.motorName) + String("'s desired speed: ") + String(RF.desiredVelocity) + String(" PWM "));
-
             }
-            if (motorNumber == 1){
+            else if (motorNumber == 2){
                 RM.calcCurrentVelocity();
                 RM.setVelocity(dir , abs(motorSpeed), RM.getCurrentVelocity());
                 println("ASTRO " + String(RM.motorName) + String("'s desired speed: ") + String(RM.desiredVelocity) + String(" PWM "));
-
             }
-            if (motorNumber == 2){
+            else if (motorNumber == 3){
                 RB.calcCurrentVelocity();
                 RB.setVelocity(dir , abs(motorSpeed), RB.getCurrentVelocity());
                 println("ASTRO " + String(RB.motorName) + String("'s desired speed: ") + String(RB.desiredVelocity) + String(" PWM "));
-
             }
-            if (motorNumber == 3){
+            else if (motorNumber == 4){
                 LF.calcCurrentVelocity();
                 LF.setVelocity(dir , abs(motorSpeed), LF.getCurrentVelocity());
                 println("ASTRO " + String(LF.motorName) + String("'s desired speed: ") + String(LF.desiredVelocity) + String(" PWM "));
-
             }
-            if (motorNumber == 4){
+            else if (motorNumber == 5){
                 LM.calcCurrentVelocity();
                 LM.setVelocity(dir , abs(motorSpeed), LM.getCurrentVelocity());
                 println("ASTRO " + String(LM.motorName) + String("'s desired speed: ") + String(LM.desiredVelocity) + String(" PWM "));
-
             }
-            if (motorNumber == 5){
+            else if (motorNumber == 6){
                 LB.calcCurrentVelocity();
                 LB.setVelocity(dir , abs(motorSpeed), LB.getCurrentVelocity());
                 println("ASTRO " + String(LB.motorName) + String("'s desired speed: ") + String(LB.desiredVelocity) + String(" PWM "));
-
+            }
+            else {
+                println("ASTRO invalid motor  number");
             }
 //            motorList[motorNumber].desiredVelocity = motorSpeed;
 //            motorList[motorNumber].desiredDirection = dir;
