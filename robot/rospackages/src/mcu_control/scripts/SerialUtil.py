@@ -29,9 +29,9 @@ def attempt_usb(mcuName):
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             response = ser.readline().decode()
-            rospy.loginfo('response: '+response)
+            rospy.loginfo('response: ' + response)
             if mcuName in response:
-                rospy.loginfo(mcuName+" MCU identified!")
+                rospy.loginfo(mcuName + " MCU identified!")
                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                 # rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
                 if mcuName == 'Astro':
@@ -147,8 +147,9 @@ def init_serial(baudrate, mcuName):
     startConnecting = time.time()
 
     search_success = False
+
     if protocol == PROTOCOL_USB:
-        search_success = search_usb(19200 if mcuName == 'PDS' else baudrate, ports, mcuName)
+        search_success = search_usb(baudrate, ports, mcuName)
     elif protocol == PROTOCOL_UART:
         search_success = search_uart(baudrate, mcuName)
     else:
@@ -157,3 +158,5 @@ def init_serial(baudrate, mcuName):
 
     if not search_success:
         print("Search Unsuccessful")
+        
+    return search_success

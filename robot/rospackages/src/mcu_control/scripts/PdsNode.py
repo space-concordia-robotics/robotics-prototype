@@ -170,7 +170,10 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     serv = rospy.Service(service_name, ArmRequest, handle_client)
 
-    init_serial(9600, mcuName)
+    search_success = init_serial(19200, mcuName)
+
+    if not search_success:
+        sys.exit(1)
 
     # service requests are implicitly handled but only at the rate the node publishes at
     ser = get_serial()

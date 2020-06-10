@@ -151,7 +151,10 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(115200, mcuName)
+    search_success = init_serial(115200, mcuName)
+    
+    if not search_success:
+        sys.exit(1)
 
     speed_pub_topic = '/rover_joint_states'
     rospy.loginfo('Beginning to publish to "'+speed_pub_topic+'" topic')
