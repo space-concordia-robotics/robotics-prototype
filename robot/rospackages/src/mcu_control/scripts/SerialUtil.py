@@ -1,7 +1,7 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 # baud: baudrate, mcuName
 # baudrate & mcuName:
-# PdsNode = 9600, 'PDS'
+# PdsNode = 19200, 'PDS'
 # ArmNode = 115200, 'arm'
 # ScienceNode = 115200, 'science'
 # RoverNode = 115200, 'Astro'
@@ -25,13 +25,13 @@ def get_serial():
 
 def attempt_usb(mcuName):
     startListening = time.time() 
-    ser.write(str.encode('who\n'))
+    ser.write(str.encode(mcuName + ' who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             response = ser.readline().decode()
-            rospy.loginfo('response: '+response)
+            rospy.loginfo('response: ' + response)
             if mcuName in response:
-                rospy.loginfo(mcuName+" MCU identified!")
+                rospy.loginfo(mcuName + " MCU identified!")
                 rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
                 # rospy.loginfo('took %f ms to find the '+mcuName+' MCU', (time.time()-startConnecting)*1000)
                 if mcuName == 'Astro':
@@ -42,10 +42,11 @@ def attempt_usb(mcuName):
 
 def attempt_uart(mcuName):
     startListening = time.time()
-    ser.write(str.encode('who\n'))
+    ser.write(str.encode(mcuName + ' who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
-            dat='';data=None
+            dat=''
+            data=None
             try:
                 dat = ser.readline().decode()
                 if type == arm:
@@ -146,8 +147,9 @@ def init_serial(baudrate, mcuName):
     startConnecting = time.time()
 
     search_success = False
+
     if protocol == PROTOCOL_USB:
-        search_success = search_usb(19200 if mcuName == 'PDS' else baudrate, ports, mcuName)
+        search_success = search_usb(baudrate, ports, mcuName)
     elif protocol == PROTOCOL_UART:
         search_success = search_uart(baudrate, mcuName)
     else:
@@ -156,3 +158,5 @@ def init_serial(baudrate, mcuName):
 
     if not search_success:
         print("Search Unsuccessful")
+        
+    return search_success

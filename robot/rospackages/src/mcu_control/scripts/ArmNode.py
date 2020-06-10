@@ -94,7 +94,10 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
-    init_serial(115200, mcuName)
+    search_success = init_serial(115200, mcuName)
+    
+    if not search_success:
+        sys.exit(1)
 
     angle_pub_topic = '/arm_joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
