@@ -85,15 +85,20 @@ def publish_pds_data(message):
     dataPDS = message.split(',') # returns an array of ALL data from the PDS
 
     # create the message to be published
+    voltage = Voltage()
+    current = Currents()
+    temp = ThermistorTemps()
+    fanSpeed = FanSpeeds()
+
     try:
         voltage.data = float(dataPDS[0])
 
         current.effort = [float(data) for data in dataPDS[1:7]]
         currents = ','.join([str(x) for x in current.effort])
 
-        temp.therm1 = float(dataPDS[7])
-        temp.therm2 = float(dataPDS[8])
-        temp.therm3 = float(dataPDS[9])
+        temp.therm1 = check_temp_error_case(float(dataPDS[7]))
+        temp.therm2 = check_temp_error_case(float(dataPDS[8]))
+        temp.therm3 = check_temp_error_case(float(dataPDS[9]))
         temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]])
 
         fanSpeed.fan1 = float(dataPDS[10])
@@ -123,7 +128,7 @@ def publish_pds_data(message):
 # This function checks if the temp values from serial are equal to 999.9 (default error state) and replaces them with 'N/A' if they are.
 # It is necessary because if the temperature is at the default error state, the front end will scream at you with a horrendous windows sound warning. 
 # Changing it to 'N/A' prevents being assaulted by UI.
-def checkTempErrorCase(x):
+def check_temp_error_case(x):
     if math.isclose(999.9, x, rel_tol=0.0001, abs_tol=0.0):
         return 'N/A'
     else:
