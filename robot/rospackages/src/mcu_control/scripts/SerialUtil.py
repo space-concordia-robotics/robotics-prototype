@@ -1,7 +1,7 @@
 # setup serial communications by searching for arm teensy if USB, or simply connecting to UART
 # baud: baudrate, mcuName
 # baudrate & mcuName:
-# PdsNode = 9600, 'PDS'
+# PdsNode = 19200, 'PDS'
 # ArmNode = 115200, 'arm'
 # ScienceNode = 115200, 'science'
 # RoverNode = 115200, 'Astro'
@@ -25,7 +25,7 @@ def get_serial():
 
 def attempt_usb(mcuName):
     startListening = time.time() 
-    ser.write(str.encode('who\n'))
+    ser.write(str.encode(mcuName + ' who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             response = ser.readline().decode()
@@ -42,10 +42,11 @@ def attempt_usb(mcuName):
 
 def attempt_uart(mcuName):
     startListening = time.time()
-    ser.write(str.encode('who\n'))
+    ser.write(str.encode(mcuName + ' who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
-            dat='';data=None
+            dat=''
+            data=None
             try:
                 dat = ser.readline().decode()
                 if type == arm:
