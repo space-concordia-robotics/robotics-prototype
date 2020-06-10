@@ -10,7 +10,7 @@ $(document).ready(() => {
     const prefix = fullCommand.split(' ').shift()
     const command = fullCommand.split(prefix + ' ').pop()
     if (isCommandValid(fullCommand, command)) {
-      sendInputCommand(prefix.toLowerCase(), fullCommand)
+      sendInputCommand(prefix.toLowerCase(), command)
     }
   }
 
