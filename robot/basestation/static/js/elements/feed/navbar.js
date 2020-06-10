@@ -57,7 +57,7 @@ $(document).ready(() => {
       listener,
       STATUS_CHECK,
       function (msgs) {
-        logInfo(msgs)
+        logDebug(msgs[1])
         if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
           $('#' + toggleButtonID)[0].checked = false
         } else {

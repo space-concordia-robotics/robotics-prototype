@@ -240,6 +240,8 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     serv = rospy.Service(service_name, ScienceRequest, handle_client)
 
+    sub = rospy.Subscriber('/science_command', String, subscriber_callback)
+
     # service requests are implicitly handled but only at the rate the node publishes at
     global ser
     global reqFeedback
