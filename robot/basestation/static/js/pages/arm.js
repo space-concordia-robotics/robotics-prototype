@@ -163,7 +163,7 @@ $(document).ready(function () {
 // arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    !$('#serial-cmd-input').is(':focus') &&
+    !$('#serial-command-input').is(':focus') &&
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME
   ) {
@@ -177,14 +177,18 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    keyState[e.keyCode || e.which] = true
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = true
+    }
   },
   true
 )
 window.addEventListener(
   'keyup',
   function (e) {
-    keyState[e.keyCode || e.which] = false
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = false
+    }
   },
   true
 )
@@ -194,14 +198,12 @@ const YELLOW = 'rgb(255, 249, 148)'
 const GREEN = 'rgb(61, 127, 127)'
 
 function gameLoop () {
-  let $serialCmdInput = $('#serial-cmd-input')
-
   if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
     let budgeArray = ['~', '~', '~', '~', '~', '~']
     let i = 0
     let toBudge = false
     // 'w' --> m1 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[87]) {
+    if (keyState[87]) {
       toggleToManual()
       $('#click_btn_motor1_ccw > button').css(
         'background-color',
@@ -213,7 +215,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 's' --> m1 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[83]) {
+    else if (keyState[83]) {
       toggleToManual()
       $('#click_btn_motor1_cw > button').css(
         'background-color',
@@ -226,7 +228,7 @@ function gameLoop () {
     }
     i += 1
     // 'e' --> m2 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[69]) {
+    if (keyState[69]) {
       toggleToManual()
       $('#click_btn_motor2_ccw > button').css(
         'background-color',
@@ -238,7 +240,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'd' --> m2 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[68]) {
+    else if (keyState[68]) {
       toggleToManual()
       $('#click_btn_motor2_cw > button').css(
         'background-color',
@@ -251,7 +253,7 @@ function gameLoop () {
     }
     i += 1
     // 'r' --> m3 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[82]) {
+    if (keyState[82]) {
       toggleToManual()
       $('#click_btn_motor3_ccw > button').css(
         'background-color',
@@ -263,7 +265,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'f' --> m3 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[70]) {
+    else if (keyState[70]) {
       toggleToManual()
       $('#click_btn_motor3_cw > button').css(
         'background-color',
@@ -276,7 +278,7 @@ function gameLoop () {
     }
     i += 1
     // 't' --> m4 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[84]) {
+    if (keyState[84]) {
       toggleToManual()
       $('#click_btn_motor4_ccw > button').css(
         'background-color',
@@ -288,7 +290,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'g' --> m4 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[71]) {
+    else if (keyState[71]) {
       toggleToManual()
       $('#click_btn_motor4_cw > button').css(
         'background-color',
@@ -301,7 +303,7 @@ function gameLoop () {
     }
     i += 1
     // 'y' --> m5 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[89]) {
+    if (keyState[89]) {
       toggleToManual()
       $('#click_btn_motor5_ccw > button').css(
         'background-color',
@@ -313,7 +315,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'h' --> m5 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[72]) {
+    else if (keyState[72]) {
       toggleToManual()
       $('#click_btn_motor5_cw > button').css(
         'background-color',
@@ -326,7 +328,7 @@ function gameLoop () {
     }
     i += 1
     // 'u' --> m6 ccw
-    if (!$serialCmdInput.is(':focus') && keyState[85]) {
+    if (keyState[85]) {
       toggleToManual()
       $('#click_btn_motor6_ccw > button').css(
         'background-color',
@@ -338,7 +340,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'j' --> m6 cw
-    else if (!$serialCmdInput.is(':focus') && keyState[74]) {
+    else if (keyState[74]) {
       toggleToManual()
       $('#click_btn_motor6_cw > button').css(
         'background-color',
@@ -350,7 +352,7 @@ function gameLoop () {
       lastCmdSent = new Date().getTime()
     }
     // 'q' --> stop all motors
-    if (!$serialCmdInput.is(':focus') && keyState[81]) {
+    if (keyState[81]) {
       sendArmCommand('stop')
       lastCmdSent = new Date().getTime()
     } else if (toBudge) {
@@ -365,43 +367,43 @@ function gameLoop () {
     }
 
     // 'o' --> reset angle values
-    if (!$serialCmdInput.is(':focus') && keyState[79]) {
+    if (keyState[79]) {
       sendArmCommand('reset')
       lastCmdSent = new Date().getTime()
     }
 
     // numpad8 --> ARM UP
-    if (!$serialCmdInput.is(':focus') && keyState[104]) {
+    if (keyState[104]) {
       console.log('ARM UP')
       lightUp('#arm-up-btn > button')
     }
 
     // numpad4 --> ARM LEFT
-    if (!$serialCmdInput.is(':focus') && keyState[100]) {
+    if (keyState[100]) {
       console.log('ARM LEFT')
       lightUp('#arm-left-btn > button')
     }
 
     // numpad6 --> ARM RIGHT
-    if (!$serialCmdInput.is(':focus') && keyState[102]) {
+    if (keyState[102]) {
       console.log('ARM RIGHT')
       lightUp('#arm-right-btn > button')
     }
 
     // numpad5 --> ARM DOWN
-    if (!$serialCmdInput.is(':focus') && keyState[101]) {
+    if (keyState[101]) {
       console.log('ARM DOWN')
       lightUp('#arm-down-btn > button')
     }
 
     // numpad1 --> ARM BACK
-    if (!$serialCmdInput.is(':focus') && keyState[97]) {
+    if (keyState[97]) {
       console.log('ARM BACK')
       lightUp('#arm-back-btn > button')
     }
 
     // numpad3 --> ARM FWD
-    if (!$serialCmdInput.is(':focus') && keyState[99]) {
+    if (keyState[99]) {
       console.log('ARM FWD')
       lightUp('#arm-fwd-btn > button')
     }
@@ -416,119 +418,118 @@ gameLoop()
 // In any case
 // the following code just makes the buttons stop lighting up
 // when the user stops pressing the respective key
-let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
+  if (event.code === 'KeyW') {
     $('#click_btn_motor1_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
+  if (event.code === 'KeyS') {
     $('#click_btn_motor1_cw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyE') {
+  if (event.code === 'KeyE') {
     $('#click_btn_motor2_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
+  if (event.code === 'KeyD') {
     $('#click_btn_motor2_cw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyR') {
+  if (event.code === 'KeyR') {
     $('#click_btn_motor3_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyF') {
+  if (event.code === 'KeyF') {
     $('#click_btn_motor3_cw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyT') {
+  if (event.code === 'KeyT') {
     $('#click_btn_motor4_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyG') {
+  if (event.code === 'KeyG') {
     $('#click_btn_motor4_cw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyY') {
+  if (event.code === 'KeyY') {
     $('#click_btn_motor5_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyH') {
+  if (event.code === 'KeyH') {
     $('#click_btn_motor5_cw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
+  if (event.code === 'KeyU') {
     $('#click_btn_motor6_ccw > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
+  if (event.code === 'KeyJ') {
     $('#click_btn_motor6_cw > button').css('background-color', GREEN)
   }
 })
 
 // EXTRA CONTROLS
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
+  if (event.code === 'KeyA') {
     $('button#show-buffered-msgs').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad8') {
+  if (event.code === 'Numpad8') {
     dim('#arm-up-btn > button')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad4') {
+  if (event.code === 'Numpad4') {
     dim('#arm-left-btn > button')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad6') {
+  if (event.code === 'Numpad6') {
     dim('#arm-right-btn > button')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad5') {
+  if (event.code === 'Numpad5') {
     dim('#arm-down-btn > button')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad1') {
+  if (event.code === 'Numpad1') {
     dim('#arm-back-btn > button')
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'Numpad3') {
+  if (event.code === 'Numpad3') {
     dim('#arm-fwd-btn > button')
   }
 })
