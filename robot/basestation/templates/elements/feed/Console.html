@@ -1,8 +1,14 @@
 <h5 class="container-header">Log Console</h5>
 <div class="form-group">
+    <link href="../../static/css/CommandInput.css" rel="stylesheet">
+    <script src="../../static/js/elements/feed/CommandInput.js"></script>
     <textarea id="write-to-log" rows="8" readonly></textarea>
     <p hidden id="last-odroid-rx"></p>
     <br>
+    <div id="cmd_input">
+      <input type="text" id="serial-command-input" value="">
+      <button title="send cmd" id="send-serial-command" type="button" class="btn btn-primary btn-md">Send Command</button>
+    </div>
     <div class="btn-group" role="group" id="logs-btn">
         <button type="button" class="btn fa fa-folder-open fa-sm btn-secondary" data-toggle="tooltip" title="Open Logs"></button>
         <button type="button" class="btn fa fa-eraser fa-sm btn-secondary" data-toggle="tooltip" title="Clear Logs" onclick="clearLogConsole()"></button>
