@@ -34,6 +34,10 @@ add_message_files(
   AntennaGoal.msg
   RoverGoal.msg
   RoverGoalList.msg
+  ThermistorTemps.msg
+  FanSpeeds.msg
+  Voltage.msg
+  Currents.msg
 )
 
 ## Generate added messages and services with any dependencies listed here

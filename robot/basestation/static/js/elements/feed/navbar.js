@@ -57,17 +57,17 @@ $(document).ready(() => {
     let serialType = $('#serial-type').text()
 
     requestTask(
-        listener,
-        STATUS_CHECK,
-        function (msgs) {
-          console.log('msgs', msgs)
-          if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
-            $('#' + toggleButtonID)[0].checked = false
-          } else {
-            $('#' + toggleButtonID)[0].checked = true
-          }
-        },
-        serialType
+      listener,
+      STATUS_CHECK,
+      function (msgs) {
+        logDebug(msgs[1])
+        if (msgs[1].includes('not') || msgs[1].includes('timeout')) {
+          $('#' + toggleButtonID)[0].checked = false
+        } else {
+          $('#' + toggleButtonID)[0].checked = true
+        }
+      },
+      serialType
     )
   }
 
@@ -95,7 +95,7 @@ $(document).ready(() => {
   function setMuxChannel (muxId) {
     deviceName = getDeviceNameByMuxID(muxId)
     if (isListenerOpen() && getCookie('serialType') == 'uart') {
-      rosLog(ROSINFO, 'Don\'t change the mux channel while a listener is open!')
+      logInfo('Don\'t change the mux channel while a listener is open!')
     } else {
       requestMuxChannel('#' + muxId, function (msgs) {
         printErrToConsole(msgs)
@@ -110,65 +110,17 @@ $(document).ready(() => {
   function setSerialUart () {
     $('#serial-type').text('uart')
     setCookie('serialType', 'uart', 356)
-    rosLog(ROSINFO, 'setting cookie to uart')
+    logInfo('setting cookie to uart')
   }
 
   function setSerialUsb () {
     $('#serial-type').text('usb')
     setCookie('serialType', 'usb', 356)
-    rosLog(ROSINFO, 'setting cookie to usb')
+    logInfo('setting cookie to usb')
   }
 
-  // send serial command based on mux channel and current page
-  // beware that if choosing a different mux channel than the current page,
-  // commands will probably mess something up until this is done in a smart manner
-  $('#send-serial-btn').mouseup(function() {
-    // b
-    let cmd = $('#serial-cmd-input').val()
-    let buttonText = $('button#mux').text()
-    if (buttonText.includes('Select Device Channel')) {
-      appendToConsole(
-          'Unable to send serial command. Try opening a mux channel.'
-      )
-    } else {
-      // if the appropriate listener is open, send a command to it
-      if (
-          buttonText.includes('Rover') &&
-          $('#toggle-rover-listener-btn')[0].checked == true
-      ) {
-        // sendRoverCommand(cmd) // rover commands not yet implemented
-      } else if (
-          buttonText.includes('Arm') &&
-          $('#toggle-arm-listener-btn')[0].checked == true
-      ) {
-        sendArmCommand(cmd)
-      } else if (buttonText.includes('Science')) {
-        // science buttons unknown
-        // sendScienceCommand(cmd) // science commands not yet implemented
-      } else if (buttonText.includes('PDS')) {
-        // pds buttons unknown
-        // sendPdsCommand(cmd) // pds commands not yet implemented
-      }
-      // no listener is open, send generic request
-      else if (!buttonText.includes('Select Device Channel')) {
-        requestSerialCommand(cmd, function(msgs) {
-          console.log(msgs)
-          if (msgs[0]) {
-            console.log('nice')
-          } else { console.log('not nice') } })
-      }
-    }
-  })
-
-  $('#serial-cmd-input').on('keyup', function(e) {
-    if (e.keyCode == 13) {
-      // enter key
-      // copy code from above
-    }
-  })
-
-  $("#arm-page").click(function() {
-    window.open('arm');
+  $( '#arm-page' ).click(function() {
+    window.open('/arm')
   })
 
   $("#rover-page").click(function() {

@@ -24,7 +24,7 @@ const ROSFATAL = 16 // fatal/critical level
 
 
 // logs below this level will not be published or printed. Issue #202 will allow the user to set this value
-const MINIMUM_LOG_LEVEL = ROSINFO 
+const MINIMUM_LOG_LEVEL = ROSINFO
 
 function initRosWeb () {
   ros = new ROSLIB.Ros({
@@ -138,12 +138,28 @@ function initRosWeb () {
     name: 'rover_request',
     serviceType: 'ArmRequest' // for now... might change
   })
+
   // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_command',
     messageType: 'std_msgs/String'
   })
+
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+
+  // setup a publisher for the science_command topic
+  science_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_command',
+    messageType: 'std_msgs/String'
+  })
+
   // setup a subscriber for the rover_joint_states topic
   rover_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
@@ -559,7 +575,6 @@ function checkTaskStatuses () {
   requestMuxChannel('?', function (currentChannel) {
     console.log('currentChannel', currentChannel)
   })
-
   if (window.location.pathname == '/') {
     // check arm listener status
     requestTask(ARM_LISTENER_TASK, STATUS_CHECK, (msgs) => {
@@ -596,18 +611,6 @@ function checkTaskStatuses () {
       }
     })
   }
-}
-
-function sendIKCommand () {
-  logDebug('Sending "' + cmd + '" to IK node')
-  let command = new ROSLIB.Message({ data: cmd })
-  ik_command_publisher.publish(cmd)
-}
-
-function sendArmCommand (cmd) {
-  logDebug('Sending "' + cmd + '" to Arm Teensy')
-  let command = new ROSLIB.Message({ data: cmd })
-  arm_command_publisher.publish(command)
 }
 
 function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
@@ -656,23 +659,46 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   })
 }
 
+/*
+returns the IP portion of the currently set ROS_MASTER_URI
+*/
+function getRoverIP (callback) {
+  logInfo('roverIP: ' + env.ROS_MASTER_IP)
+  logInfo('hostIP: ' + env.HOST_IP)
+  return env.ROS_MASTER_IP
+}
+
+/*
+command sending
+*/
+function sendIKCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to IK node')
+  ik_command_publisher.publish(cmd)
+}
+
+function sendArmCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to arm Teensy')
+  arm_command_publisher.publish(command)
+}
+
 function sendRoverCommand (cmd) {
   logDebug('Sending "' + cmd + '" to Rover Teensy')
   let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
   logDebug('Sending "' + cmd + '" to PDS Teensy')
   let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to PDS')
   pds_command_publisher.publish(command)
 }
 
-/*
-returnsthe IP portion of the currntly set ROS_MASTER_URI
-*/
-function getRoverIP (callback) {
-  logDebug('roverIP: ' + env.ROS_MASTER_IP)
-  logDebug('hostIP: ' + env.HOST_IP)
-  return env.ROS_MASTER_IP
+function sendScienceCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to science Teensy')
+  science_command_publisher.publish(command)
 }
