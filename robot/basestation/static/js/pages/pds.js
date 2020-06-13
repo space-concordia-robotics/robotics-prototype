@@ -15,12 +15,6 @@ $(document).ready(() => {
     name: 'pds_request',
     serviceType: 'ArmRequest' // for now... might change
   })
-  // setup a publisher for the pds_command topic
-  let pds_command_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'pds_command',
-    messageType: 'std_msgs/String'
-  })
 
   let error_flags_listener = new ROSLIB.Topic({
     ros: ros,
@@ -211,21 +205,22 @@ $(document).ready(() => {
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    event.code === 'KeyP'
+    event.code === 'KeyP' && (!$('#serial-command-input').is(':focus')) &&
   ) {
     pingDevice('PDS')
   }
 })
+
 // print commands list
 document.addEventListener('keydown', function (event) {
-  if (event.code === 'KeyL') {
+  if ( event.code === 'KeyL' && (!$('#serial-command-input').is(':focus'))) {
     printCommandsList()
   }
 })
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if (!$('#servo-val').is(':focus')) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
       case 81: // 'q' --> cut all power
         sendPdsCommand('PDS S')

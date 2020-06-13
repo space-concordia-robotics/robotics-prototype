@@ -54,7 +54,7 @@ $(document).ready(() => {
       event.ctrlKey &&
       event.altKey &&
       event.code === 'KeyP' &&
-      !$('#servo-val').is(':focus')
+      !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
     ) {
       pingDevice('Odroid')
     }
@@ -64,7 +64,7 @@ $(document).ready(() => {
   document.addEventListener('keydown', function (event) {
     if (
       event.code === 'KeyL' &&
-      !$('#servo-val').is(':focus')
+      !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
     ) {
       $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
       printCommandsList()

@@ -161,7 +161,7 @@ $(document).ready(function () {
 document.addEventListener('keydown', function (event) {
   if (
     event.code === 'KeyP' &&
-    !$('#servo-val').is(':focus')
+    !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
   ) {
     pingDevice('Rover')
   }
@@ -173,7 +173,7 @@ const GREEN = 'rgb(61, 127, 127)'
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if (!$('#servo-val').is(':focus')) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
@@ -245,44 +245,46 @@ $(document).keydown(function (e) {
 // no throttling necessary as since keydown events are throttled
 // those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function (e) {
-  switch (e.which) {
-    case 79:
-      dim('#stop-motors-btn')
-      break
-    case 65: // left
-      dim('#rover-left > button')
-      break
-    case 87: // up
-      dim('#rover-up > button')
-      break
-    case 68: // right
-      dim('#rover-right > button')
-      break
-    case 83: // down
-      dim('#rover-down > button')
-      break
+  if (!$('#serial-command-input').is(':focus')) {
+    switch (e.which) {
+      case 79:
+        dim('#stop-motors-btn')
+        break
+      case 65: // left
+        dim('#rover-left > button')
+        break
+      case 87: // up
+        dim('#rover-up > button')
+        break
+      case 68: // right
+        dim('#rover-right > button')
+        break
+      case 83: // down
+        dim('#rover-down > button')
+        break
 
-    case 73: // increase throttle
-      dim('#max-throttle-increase > button')
-      break
-    case 85: // decrease throttle
-      dim('#max-throttle-decrease > button')
-      break
-    case 75: // increase steering
-      dim('#max-steering-increase > button')
-      break
-    case 74: // decrease steering
-      dim('#max-steering-decrease > button')
-      break
+      case 73: // increase throttle
+        dim('#max-throttle-increase > button')
+        break
+      case 85: // decrease throttle
+        dim('#max-throttle-decrease > button')
+        break
+      case 75: // increase steering
+        dim('#max-steering-increase > button')
+        break
+      case 74: // decrease steering
+        dim('#max-steering-decrease > button')
+        break
 
-    case 76: // list all rover cmds
-      dim('button#list-all-rover-cmds')
-      break
+      case 76: // list all rover cmds
+        dim('button#list-all-rover-cmds')
+        break
 
-    default:
-      return // exit this handler for other keys
+      default:
+        return // exit this handler for other keys
+    }
+    e.preventDefault() // prevent the default action (scroll / move caret)
   }
-  e.preventDefault() // prevent the default action (scroll / move caret)
 })
 
 // GAME LOOP CONTROL
@@ -291,14 +293,18 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    keyState[e.keyCode || e.which] = true
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = true
+    }
   },
   true
 )
 window.addEventListener(
   'keyup',
   function (e) {
-    keyState[e.keyCode || e.which] = false
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = false
+    }
   },
   true
 )
@@ -458,52 +464,51 @@ gameLoop()
 // In any case
 // the following code just makes the buttons stop lighting up
 // when the user stops pressing the respective key
-let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyI') {
+  if (event.code === 'KeyI') {
     $('#max-throttle-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
+  if (event.code === 'KeyJ') {
     $('#max-steering-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyK') {
+  if (event.code === 'KeyK') {
     $('#max-steering-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
+  if (event.code === 'KeyU') {
     $('#max-throttle-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
+  if (event.code === 'KeyD') {
     $('#rover-right > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
+  if (event.code === 'KeyA') {
     $('#rover-left > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
+  if (event.code === 'KeyW') {
     $('#rover-up > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
+  if (event.code === 'KeyS') {
     $('#rover-down > button').css('background-color', GREEN)
   }
 })
