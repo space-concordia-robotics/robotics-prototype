@@ -10,8 +10,7 @@ import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_ip
 import ffmpeg
 
-global proc_video
-proc_video = {}
+video_process = {}
 active_recordings = {}
 ROVER_STREAM_FOLDER = "rover_stream"
 IMAGES_FOLDER = "stream_images"
@@ -59,6 +58,7 @@ def stop_recording_feed(stream_url):
     """
 
     global active_recordings
+    global video_process
     stream_shortname = get_stream_shortname(stream_url)
     video_filename = active_recordings[stream_shortname][0]
     rotation = active_recordings[stream_shortname][1]
@@ -66,7 +66,7 @@ def stop_recording_feed(stream_url):
     message = "Successfully stopped recording of " + stream_shortname
     success = True
     try:
-        proc_video[stream_url].communicate(b'q')
+        video_process[stream_url].communicate(b'q')
         rotate_stream(video_filename, rotation)
 
     except (KeyError, ValueError) as e:
@@ -149,7 +149,8 @@ def start_ffmpeg_record(stream_url, filename):
     """
     Start ffmpeg to start recording stream
     """
-    proc_video[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
+    global video_process
+    video_process[stream_url] = subprocess.Popen(['ffmpeg -i ' + stream_url + ' -acodec copy -vcodec copy ' + filename], stdin=PIPE, shell=True)
 
 def stream_capture(stream_url, camera_rotation):
     """ Given a stream, captures an image and rotates it as shown in GUI
