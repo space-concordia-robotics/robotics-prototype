@@ -52,7 +52,7 @@ echo "[Environment setup and getting rosinstall]"
 source /opt/ros/$name_ros_version/setup.sh
 sudo apt-get install -y python-rosinstall
 
-echo "[Set the ROS evironment]"
+echo "[Set the ROS environment]"
 sh -c "echo \"\n\n#------ POST ROS INSTALLATION ------\" >> ~/.bashrc"
 sh -c "echo \"alias eb='nano ~/.bashrc'\" >> ~/.bashrc"
 sh -c "echo \"alias sb='source ~/.bashrc'\" >> ~/.bashrc"
