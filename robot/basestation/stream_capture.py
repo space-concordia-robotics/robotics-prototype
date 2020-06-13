@@ -47,7 +47,7 @@ def start_recording_feed(stream_url):
 
     if stream_is_connected:
         print("Started recording " + stream_shortname)
-        active_recordings[stream_shortname] = [video_filename]
+        active_recordings[stream_shortname] = video_filename
         threading.Thread(target = start_ffmpeg_record, args = (stream_url, video_filename)).start()
         return True, "Successfully started recording " + stream_shortname + " stream at " + os.path.abspath(video_filename)
     else:
@@ -79,18 +79,20 @@ def stop_recording_feed(stream_url):
 
 def add_rotation(stream_url,rotation):
     """
-    Add rotation value to the value of the key (stream_url) in active recordings
-    Converts the list to a tuple and handles errors
+    Creates a tuple with the video filename and rotation value and assigns it
+    to the corresponding stream shortname (key) in the active_recordings
+    dictionary
     """
     global active_recordings
 
+
     stream_shortname = get_stream_shortname(stream_url)
+    video_filename = active_recordings[stream_shortname]
     success = True
     message = "Successfully added rotation value"
 
     try:
-        active_recordings[stream_shortname].append(rotation)
-        tuple(active_recordings[stream_shortname])
+        active_recordings[stream_shortname] = (video_filename, rotation)
     except (KeyError):
         success = False
         message = "Could not add rotation value of " + get_stream_shortname(stream_url)
