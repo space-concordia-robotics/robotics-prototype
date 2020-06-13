@@ -36,6 +36,7 @@ install:
   - mv ~/Arduino/libraries/SparkFun_I2C_GPS_Arduino_Library-$SPARKFUN_I2C_VERSION ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
   - pip install -r requirements.txt
   - pip install -e .
+  - python setup.py develop
 script:
   - cd robot/rover/build
   - cmake ..
