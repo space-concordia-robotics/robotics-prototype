@@ -6,7 +6,7 @@ include(ExternalProject)
 if(DEFINED ENV{ARDUINO_PATH})
 message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
 else()
-message(FATAL_ERROR "Arduino path not configured correctly...")
+        message(FATAL_ERROR "Arduino path not configured correctly... check wiki for more info: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino")
 endif()
 
 set(ARDUINO_PATH $ENV{ARDUINO_PATH})
