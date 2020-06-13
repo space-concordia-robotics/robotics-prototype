@@ -196,7 +196,14 @@ def stop_feed_recording():
     rotation = int(request.args['camera_rotation'])
     if is_recording_stream(stream_url):
         success, message = add_rotation(stream_url, rotation)
+
+        if not success:
+            print('add_rotation method failed:', message)
+
         success, message = stop_recording_feed(stream_url)
+
+        if not success:
+            print('stop_recording_feed method failed:', message)
         return jsonify(success=success, msg=message)
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")
