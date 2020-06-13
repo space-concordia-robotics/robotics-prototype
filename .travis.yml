@@ -1,5 +1,5 @@
 os: linux
-dist: xenial
+dist: trusty
 language: python
 before_install:
     # Taken from this tutorial https://github.com/newdigate/teensy-blink
