@@ -154,14 +154,8 @@ $(document).ready(function () {
 // arm mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-<<<<<<< HEAD
-    !$('#serial-cmd-input').is(':focus') &&
-    event.code === 'KeyP'
-=======
     !$('#serial-command-input').is(':focus') &&
-    event.code === 'KeyP' &&
-    millisSince(lastCmdSent) > PING_THROTTLE_TIME
->>>>>>> master
+    event.code === 'KeyP'
   ) {
     pingDevice('Arm')
   }

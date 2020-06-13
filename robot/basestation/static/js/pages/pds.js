@@ -205,7 +205,7 @@ $(document).ready(() => {
 // pds mcu ping
 document.addEventListener('keydown', function (event) {
   if (
-    event.code === 'KeyP' && (!$('#serial-command-input').is(':focus')) &&
+    event.code === 'KeyP' && (!$('#serial-command-input').is(':focus'))
   ) {
     pingDevice('PDS')
   }
