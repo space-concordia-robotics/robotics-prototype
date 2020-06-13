@@ -23,6 +23,6 @@ def add_commit_issue_num(branch_name):
 
 if __name__ == '__main__':
     branch_name = get_branch_name()
-    #If there is already a commit message or if cherry-picking, this hook is disabled
+    # If there is already a commit message or if cherry-picking, this hook is disabled
     if not is_excluded_branch(branch_name, excluded_branches) and sys.argv[2] != 'commit' and not path.exists('.git/CHERRY_PICK_HEAD'):
         add_commit_issue_num(branch_name)
