@@ -19,12 +19,12 @@ set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 
-#given a name, will check if the library exists in the proper directory, otherwise run install_library.sh which will install it
+#given a name, will check if the library exists in the proper directory, otherwise run install_arduino_libraries.sh which will install it
 function(checkLibraries lib_name lib_version lib_url)
 
 if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})
 execute_process(
-COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_library.sh ${lib_name} ${lib_version} ${lib_url}
+COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_arduino_libraries.sh ${lib_name} ${lib_version} ${lib_url}
 )
 endif()
 
