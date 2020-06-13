@@ -205,6 +205,7 @@ function initRosWeb () {
     // sets voltage to two decimal points
     let voltage = message.data.toFixed(2)
     $('#battery-voltage').text(voltage)
+    $.notify("New voltage value received!!", "success") // To delete Hamza
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
     if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
