@@ -1,19 +1,61 @@
 os: linux
-sudo: false
-dist: trusty
+dist: trusty # Ubuntu 14, Xenial (Ubuntu 16) seems to crash python...
 language: python
+before_install:
+    # Taken from this tutorial https://github.com/newdigate/teensy-blink
+  - export ARDUINO_IDE_VERSION="1.8.12"
+  - export ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+  - export TEENSYDUINO_VERSION="152"
+  - mkdir -p robot/rover/build
+  - mkdir -p ~/Arduino/libraries
+  - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
+  - tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz -C /home/$USER/
+  - curl -fsSL https://www.pjrc.com/teensy/td_$TEENSYDUINO_VERSION/TeensyduinoInstall.linux64 -o TeensyduinoInstall.linux64
+  - chmod +x TeensyduinoInstall.linux64
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16
+  - sleep 3
+  - export DISPLAY=:1.0
+  - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
+install:
+  # Manually installing the required libraries, to be removed after #362 is merged, as cmake will automatically install this.
+  - MOTOR_SHIELD_VERSION=1.0.9
+  - ARDUINO_BLUE_VERSION=3.0.1
+  - LSM303_VERSION=3.0.1
+  - SPARKFUN_I2C_VERSION=1.0.2
+  - curl -fsSlL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library/archive/$MOTOR_SHIELD_VERSION.tar.gz > Adafruit_Motor_Shield_V2_Library.tar.gz
+  - curl -fsSlL https://github.com/purwar2016/ArduinoBlue-library/archive/$ARDUINO_BLUE_VERSION.tar.gz > ArduinoBlue-library.tar.gz
+  - curl -fsSlL https://github.com/pololu/lsm303-arduino/archive/$LSM303_VERSION.tar.gz > lsm303-arduino.tar.gz
+  - curl -fsSlL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v$SPARKFUN_I2C_VERSION.tar.gz > SparkFun_I2C_GPS_Arduino_Library.tar.gz
+  - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries
+  - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries
+  - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries
+  - tar xf SparkFun_I2C_GPS_Arduino_Library.tar.gz -C ~/Arduino/libraries
+  - mv ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library-$MOTOR_SHIELD_VERSION ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library
+  - mv ~/Arduino/libraries/ArduinoBlue-library-$ARDUINO_BLUE_VERSION ~/Arduino/libraries/ArduinoBlue
+  - mv ~/Arduino/libraries/lsm303-arduino-$LSM303_VERSION ~/Arduino/libraries/LSM303
+  - mv ~/Arduino/libraries/SparkFun_I2C_GPS_Arduino_Library-$SPARKFUN_I2C_VERSION ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
+  - pip install -r requirements.txt
+  - pip install -e .
+script:
+  - cd robot/rover/build
+  - cmake ..
+  - make
+  - cd ../../..
+  - pytest --continue-on-collection-errors
+notifications:
+  email:
+    recipients:
+      - cedricmartens98@gmail.com
+      - william.wells@spaceconcordia.ca
+      - tim.freiman@spaceconcordia.ca
+      - peter.granitski@spaceconcordia.ca
+      - joshua.glazer@spaceconcordia.ca
+    on_success: change
+    on_failure: change
+
 python:
   #- "2.7" # not supported
   - "3.6"
-
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-  - pip install -e .
-
-script:
-  # run all tests even if errors appear
-  - pytest --continue-on-collection-errors
 
 # bypass submodules because gitlab requires authentication for pull
 git:

@@ -2,7 +2,6 @@
 #include <Servo.h>
 
 //#include <SoftwareSerial.h>
-
 #define DEVEL_MODE_1       1     //Use with USB
 //#define DEVEL_MODE_2       2   //Use with UART4
 
