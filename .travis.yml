@@ -34,7 +34,7 @@ install:
   - mv ~/Arduino/libraries/ArduinoBlue-library-$ARDUINO_BLUE_VERSION ~/Arduino/libraries/ArduinoBlue
   - mv ~/Arduino/libraries/lsm303-arduino-$LSM303_VERSION ~/Arduino/libraries/LSM303
   - mv ~/Arduino/libraries/SparkFun_I2C_GPS_Arduino_Library-$SPARKFUN_I2C_VERSION ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
   - python setup.py develop
 script:
