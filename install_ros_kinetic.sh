@@ -63,6 +63,25 @@ sh -c "echo \"alias cm='cw && catkin_make'\" >> ~/.bashrc"
 sh -c "echo \"\nexport ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
 sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
 
+
+echo 'ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
+BASE="$ROBOTICS_WS/robot/basestation"
+ROVER="$ROBOTICS_WS/robot/rover"
+ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
+BASH_A="~/.bash_aliases"
+NANORC="~/.nanorc"
+
+# general shortcuts
+alias ..="cd .."
+alias b="cd -"
+alias robotics="cd $ROBOTICS_WS"
+alias base="cd $BASE"
+alias rover="cd $ROVER"
+alias arm="cd $ROVER/ArmDriverUnit"
+alias wheels="cd $ROVER/MobilePlatform"
+alias rostings="cd $ROSPACKAGES"
+alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"' >> ~/.bash_aliases
+
 source $HOME/.bashrc
 
 echo "[Complete!!!]"
