@@ -70,10 +70,6 @@ script:
   - make
   - cd ../../..
   - pytest --continue-on-collection-errors
-  # catkin stuff
-  - source /opt/ros/kinetic/setup.bash
-  - cd $CI_SOURCE_PATH/robot/rospackages
-  - catkin_make
 notifications:
   email:
     recipients:
