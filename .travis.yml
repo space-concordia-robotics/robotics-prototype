@@ -65,7 +65,7 @@ install:
 before_script:
   - rosdep install -y -r --from-paths src --ignore-src
 script:
-  - cd robot/rover/build
+  - cd $CI_SOURCE_PATH/robot/rover/build
   - cmake ..
   - make
   - cd ../../..
