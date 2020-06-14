@@ -152,6 +152,11 @@ foreach(path ${INOFILES})
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
 
+ # this particular project is important and should be supported, issue #409 opened for this
+ # for now it will be skipped
+ elseif(${name} STREQUAL "PDS")
+ continue()
+
  elseif(${name} STREQUAL "DcExampleTwoMotors") 
  continue()
 
