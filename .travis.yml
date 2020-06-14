@@ -61,7 +61,6 @@ install:
   
   # Set up and initialize catkin workspace
   - cd robot/rospackages/src
-  - catkin_init_workspace
   - cd .. && catkin_make
   - source devel/seup.bash
   - cd src && ln -s $CI_SOURCE_PATH
