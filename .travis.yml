@@ -8,7 +8,6 @@ env:
   global:
     # Adapted from https://github.com/felixduvallet/ros-travis-integration/blob/master/.travis.yml
     - CI_SOURCE_PATH=$(pwd)
-    - ROSINSTALL_FILE=$CI_SOURCE_PATH/robot/rospackages/.rosinstall
     - ROS_PARALLEL_JOBS='-j8 -l6'
     - PYTHONPATH=$PYTHONPATH:$CI_SOURCE_PATH/venv/lib/python3.6/dis-packages
 before_install:
@@ -65,10 +64,6 @@ install:
   - source devel/setup.bash
   - cd src && ln -s $CI_SOURCE_PATH
 before_script:
-  - cd $CI_SOURCE_PATH/robot/rospackages/src
-  - wstool init
-  - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
-  - wstool up
   - cd ..
   - rosdep install -y -r --from-paths src --ignore-src
 script:

@@ -1,9 +1,0 @@
-- git:
-    local-name: src/cv_camera
-    uri: https://github.com/OTL/cv_camera
-- git:
-    local-name: src/tf2_web_republisher
-    uri: https://github.com/RobotWebTools/tf2_web_republisher
-- git:
-    local-name: src/web_video_server
-    uri: https://github.com/RobotWebTools/web_video_server
