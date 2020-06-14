@@ -36,7 +36,7 @@ before_install:
   - source /opt/ros/kinetic/setup.bash
   # Prepare rosdep to install dependencies.
   - sudo rosdep init
-  - rosdep update --include-eol-distros  # Support EOL distros.
+  - rosdep update 
 install:
   # Manually installing the required libraries, to be removed after #362 is merged, as cmake will automatically install this.
   - MOTOR_SHIELD_VERSION=1.0.9
@@ -60,7 +60,7 @@ install:
   - python setup.py develop
   
   # Set up and initialize catkin workspace
-  - cd robot/rospackages/src
+  - cd $CI_SOURCE_PATH/robot/rospackages/src
   - cd .. && catkin_make
   - source devel/setup.bash
   - cd src && ln -s $CI_SOURCE_PATH
@@ -70,7 +70,7 @@ before_script:
   - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
   - wstool up
   - cd ..
-  - rosdep install -y --from-paths src --ignore-src --rosdistro kinetic
+  - rosdep install -y -r --from-paths src --ignore-src
 script:
   - cd robot/rover/build
   - cmake ..
