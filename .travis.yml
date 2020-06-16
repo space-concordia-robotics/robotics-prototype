@@ -23,12 +23,7 @@ before_install:
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
   
   # Adapted from https://github.com/felixduvallet/ros-travis-integration/blob/master/.travis.yml
-  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
-  - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-  - sudo apt-get update -qq
-  - sudo apt-get install dpkg
-  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base
-  - sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
+  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-kinetic-desktop ros-kinetic-cv-camera ros-kinetic-web-video-server -y
   - source /opt/ros/kinetic/setup.bash
   # Prepare rosdep to install dependencies.
   - sudo rosdep init
