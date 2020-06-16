@@ -5,7 +5,7 @@ cache:
   - apt
 env:
   global:
-    - CI_SOURCE_PATH=$(pwd)
+    - REPO_ROOT=$(pwd)
     - ARDUINO_IDE_VERSION="1.8.12"
     - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
     - TEENSYDUINO_VERSION="152"
@@ -38,13 +38,13 @@ install:
   - python setup.py develop
   
   # Set up and initialize catkin workspace
-  - cd $CI_SOURCE_PATH/robot/rospackages/src
-  - cd .. && catkin_make
+  - cd $REPO_ROOT/robot/rospackages
+  - catkin_make
   - source devel/setup.bash
 before_script:
   - rosdep install -y -r --from-paths src --ignore-src
 script:
-  - cd $CI_SOURCE_PATH/robot/rover/build
+  - cd $REPO_ROOT/robot/rover/build
   - cmake ..
   - make
   - cd ../../..
