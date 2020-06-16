@@ -92,6 +92,15 @@ Still in the root directory,
 Running `pytest` without doing `python setup.py develop` will give a ModuleNotFound error. To read up more on this, click [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Troubleshooting)
 
 To deactivate virtualenv, run `deactivate`.
+
+### Install and setup [Arduino](https://www.arduino.cc/) + [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
+
+Run `./install_arduino_teensyduino.sh`
+
+After the script is done, you should be able to run arduino by `cd $HOME/arduino-<version-numver>/` and running: `./arduino`.
+
+To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
+
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
 bash ./install_ros_kinetic.sh
