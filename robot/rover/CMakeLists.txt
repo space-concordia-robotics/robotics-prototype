@@ -180,26 +180,10 @@ foreach(path ${INOFILES})
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
 
- elseif(${name} STREQUAL "DcExampleTwoMotors") 
- continue()
-
- elseif(${name} STREQUAL "RosCommunication")
- continue()
-
- elseif(${name} STREQUAL "ServoExampleOpenLoop")
- continue()
-
  elseif(${name} STREQUAL "MobilePlatform")
  
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
-
- 
- elseif(${name} STREQUAL "path_send_test")
- continue()
-
- elseif(${name} STREQUAL "pure_pursuit_follower")
- continue()
 
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
@@ -224,7 +208,6 @@ endforeach()
  DEPENDS MobilePlatform_cleanup
  DEPENDS PidController_cleanup
  DEPENDS EncoderFunc_cleanup
- DEPENDS MultipleConstructors_cleanup
  DEPENDS science_cleanup
  )
 
