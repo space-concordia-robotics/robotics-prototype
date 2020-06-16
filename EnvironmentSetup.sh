@@ -104,6 +104,9 @@ cp commit_message_hook.py .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 
+# Install and setup arduino IDE + Teensyduino
+bash install_arduino_teensyduino.sh
+
 # Exit
 echo "$FINAL_MESSAGE"
 exit 0

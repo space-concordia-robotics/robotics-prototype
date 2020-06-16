@@ -41,7 +41,7 @@ public:
 
     bool isActivated = false;
     bool isOpenLoop = true; //  PID controller
-    bool bluetoothMode = true;//true;
+    bool bluetoothMode = true;
     bool isJoystickMode = true;
     bool isSteering = true;
     bool isGpsImu = true;
