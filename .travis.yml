@@ -50,7 +50,6 @@ script:
   - cd $REPO_ROOT/robot/rospackages
   - source /opt/ros/kinetic/setup.bash
   - catkin_make
-  # - source devel/setup.bash
 
   # Allow to compile arduino code in external IDEs or something
   - cd $REPO_ROOT/robot/rover/build
