@@ -9,10 +9,10 @@ ARDUINO_IDE_FOLDER="$HOME/arduino-$ARDUINO_IDE_VERSION"
 ARDUINO_DOWNLOAD_URL="https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz"
 TEENSYDUINO_DOWNLOAD_URL="https://www.pjrc.com/teensy/td_$TEENSYDUINO_VERSION/TeensyduinoInstall.linux64"
 
-count=`ls -1 ./arduino-$ARDUINO_IDE_VERSION-* 2>/dev/null | wc -l`   
+leftover_download_count=`ls -1 ./arduino-$ARDUINO_IDE_VERSION-* 2>/dev/null | wc -l`   
 
-if [ $count != 0 ]; then
-    echo "deleting left overs..."
+if [ $leftover_download_count != 0 ]; then
+    echo "Deleting leftovers..."
     rm "arduino-$ARDUINO_IDE_VERSION-"*
 fi
 
@@ -26,10 +26,10 @@ else
     echo "ARDUINO_PATH is already set to '$ARDUINO_PATH'"
 fi
 
-count=`ls -1 $ARDUINO_IDE_FOLDER/arduino* 2>/dev/null | wc -l`   
+folder_file_count=`ls -1 $ARDUINO_IDE_FOLDER/arduino* 2>/dev/null | wc -l`   
  
 # check if arduino IDE already installed in target folder
-if [ "$ARDUINO_PATH" == "$ARDUINO_IDE_FOLDER" ] && [ $count != 0 ]; then
+if [ "$ARDUINO_PATH" == "$ARDUINO_IDE_FOLDER" ] && [ $folder_file_count != 0 ]; then
     echo "Skipping arduino IDE installation step"
 else
     echo "Installing arduino IDE"
