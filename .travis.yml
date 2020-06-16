@@ -33,10 +33,12 @@ before_install:
   # Install ros dependencies
   - sudo rosdep init
   - rosdep update 
+  - cd $REPO_ROOT/robot/rospackages
   - rosdep install -y -r --from-paths src --ignore-src
 
 install:
   # Install pip dependencies and setup robot python package
+  - cd $REPO_ROOT
   - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
   - python setup.py develop
@@ -57,10 +59,10 @@ script:
 notifications:
   email:
     recipients:
-      #- cedricmartens98@gmail.com
-      #- william.wells@spaceconcordia.ca
-      #- tim.freiman@spaceconcordia.ca
-      #- peter.granitski@spaceconcordia.ca
+      - cedricmartens98@gmail.com
+      - william.wells@spaceconcordia.ca
+      - tim.freiman@spaceconcordia.ca
+      - peter.granitski@spaceconcordia.ca
     on_success: change
     on_failure: change
 
