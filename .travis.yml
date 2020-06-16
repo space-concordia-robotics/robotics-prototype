@@ -36,7 +36,7 @@ install:
     
   # Install ros package dependencies
   - cd $REPO_ROOT/robot/rospackages
-  - rosdep init
+  - sudo rosdep init
   - rosdep update 
   - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
 
