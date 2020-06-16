@@ -1,5 +1,5 @@
 os: linux
-dist: trusty
+dist: xenial
 language: python
 before_install:
     # Taken from this tutorial https://github.com/newdigate/teensy-blink
@@ -17,24 +17,7 @@ before_install:
   - export DISPLAY=:1.0
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
 install:
-  # Manually installing the required libraries, to be removed after #362 is merged, as cmake will automatically install this.
-  - MOTOR_SHIELD_VERSION=1.0.9
-  - ARDUINO_BLUE_VERSION=3.0.1
-  - LSM303_VERSION=3.0.1
-  - SPARKFUN_I2C_VERSION=1.0.2
-  - curl -fsSlL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library/archive/$MOTOR_SHIELD_VERSION.tar.gz > Adafruit_Motor_Shield_V2_Library.tar.gz
-  - curl -fsSlL https://github.com/purwar2016/ArduinoBlue-library/archive/$ARDUINO_BLUE_VERSION.tar.gz > ArduinoBlue-library.tar.gz
-  - curl -fsSlL https://github.com/pololu/lsm303-arduino/archive/$LSM303_VERSION.tar.gz > lsm303-arduino.tar.gz
-  - curl -fsSlL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v$SPARKFUN_I2C_VERSION.tar.gz > SparkFun_I2C_GPS_Arduino_Library.tar.gz
-  - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries
-  - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries
-  - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries
-  - tar xf SparkFun_I2C_GPS_Arduino_Library.tar.gz -C ~/Arduino/libraries
-  - mv ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library-$MOTOR_SHIELD_VERSION ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library
-  - mv ~/Arduino/libraries/ArduinoBlue-library-$ARDUINO_BLUE_VERSION ~/Arduino/libraries/ArduinoBlue
-  - mv ~/Arduino/libraries/lsm303-arduino-$LSM303_VERSION ~/Arduino/libraries/LSM303
-  - mv ~/Arduino/libraries/SparkFun_I2C_GPS_Arduino_Library-$SPARKFUN_I2C_VERSION ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
   - python setup.py develop
 script:
@@ -50,7 +33,6 @@ notifications:
       - william.wells@spaceconcordia.ca
       - tim.freiman@spaceconcordia.ca
       - peter.granitski@spaceconcordia.ca
-      - joshua.glazer@spaceconcordia.ca
     on_success: change
     on_failure: change
 
@@ -58,6 +40,5 @@ python:
   #- "2.7" # not supported
   - "3.6"
 
-# bypass submodules because gitlab requires authentication for pull
 git:
-  submodules: false
+  submodules: true
