@@ -9,6 +9,7 @@ env:
     - ARDUINO_IDE_VERSION="1.8.12"
     - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
     - TEENSYDUINO_VERSION="152"
+    - ROS_PYTHON_VERSION="3.6"
 
 install:
   # Taken from this tutorial https://github.com/newdigate/teensy-blink
@@ -37,7 +38,7 @@ install:
   - cd $REPO_ROOT/robot/rospackages
   - sudo rosdep init
   - rosdep update 
-  - rosdep install -y -r --from-paths src --ignore-src
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
 
 script:
   # Set up 'robot' python module and test python installation
