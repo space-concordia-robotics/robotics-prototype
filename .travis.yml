@@ -30,7 +30,7 @@ before_install:
   - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base
   - sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
   - source /opt/ros/kinetic/setup.bash
-  # Prepare rosdep to install dependencies.
+  ## Prepare rosdep to install dependencies.
   - sudo rosdep init
   - rosdep update 
 install:
