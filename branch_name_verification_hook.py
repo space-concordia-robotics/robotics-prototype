@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import robot.basestation.app as app
 from robot.util.utils import run_shell
 import re
 
