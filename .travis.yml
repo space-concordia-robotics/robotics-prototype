@@ -33,7 +33,6 @@ notifications:
       - william.wells@spaceconcordia.ca
       - tim.freiman@spaceconcordia.ca
       - peter.granitski@spaceconcordia.ca
-      - joshua.glazer@spaceconcordia.ca
     on_success: change
     on_failure: change
 
