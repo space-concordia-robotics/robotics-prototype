@@ -1,20 +1,16 @@
 os: linux
 dist: xenial
 language: python
-sudo: required
 cache:
   - apt
 env:
   global:
-    # Adapted from https://github.com/felixduvallet/ros-travis-integration/blob/master/.travis.yml
     - CI_SOURCE_PATH=$(pwd)
-    - ROS_PARALLEL_JOBS='-j8 -l6'
-    - PYTHONPATH=$PYTHONPATH:$CI_SOURCE_PATH/venv/lib/python3.6/dis-packages
+    - ARDUINO_IDE_VERSION="1.8.12"
+    - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+    - TEENSYDUINO_VERSION="152"
 before_install:
     # Taken from this tutorial https://github.com/newdigate/teensy-blink
-  - export ARDUINO_IDE_VERSION="1.8.12"
-  - export ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
-  - export TEENSYDUINO_VERSION="152"
   - mkdir -p robot/rover/build
   - mkdir -p ~/Arduino/libraries
   - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
