@@ -57,7 +57,6 @@ notifications:
       - william.wells@spaceconcordia.ca
       - tim.freiman@spaceconcordia.ca
       - peter.granitski@spaceconcordia.ca
-      - joshua.glazer@spaceconcordia.ca
     on_success: change
     on_failure: change
 
@@ -65,6 +64,5 @@ python:
   #- "2.7" # not supported
   - "3.6"
 
-# bypass submodules because gitlab requires authentication for pull
 git:
   submodules: true
