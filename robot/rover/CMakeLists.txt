@@ -180,7 +180,12 @@ foreach(path ${INOFILES})
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
 
- elseif(${name} STREQUAL "MobilePlatform")
+ # this particular project is important and should be supported, issue #409 opened for this
+ # for now it will be skipped
+ elseif(${name} STREQUAL "PDS")
+ continue()
+ 
+elseif(${name} STREQUAL "MobilePlatform")
  
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
@@ -210,8 +215,4 @@ endforeach()
  DEPENDS EncoderFunc_cleanup
  DEPENDS science_cleanup
  )
-
-
-
-
 
