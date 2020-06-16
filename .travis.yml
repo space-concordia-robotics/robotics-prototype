@@ -9,8 +9,9 @@ env:
     - ARDUINO_IDE_VERSION="1.8.12"
     - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
     - TEENSYDUINO_VERSION="152"
+
 before_install:
-    # Taken from this tutorial https://github.com/newdigate/teensy-blink
+  # Taken from this tutorial https://github.com/newdigate/teensy-blink
   - mkdir -p robot/rover/build
   - mkdir -p ~/Arduino/libraries
   - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
@@ -22,17 +23,20 @@ before_install:
   - export DISPLAY=:1.0
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
   
-  # Adapted from https://github.com/felixduvallet/ros-travis-integration/blob/master/.travis.yml
+  # Install ros-desktop and necessary packages for successful build of our ros packages
   - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
   - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
   - sudo apt-get update -qq
   - sudo apt-get install dpkg
-  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-kinetic-desktop ros-kinetic-cv-camera ros-kinetic-web-video-server -y
+  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base ros-kinetic-cv-camera ros-kinetic-web-video-server -y
   - source /opt/ros/kinetic/setup.bash
-  # Prepare rosdep to install dependencies.
+  # Install ros dependencies
   - sudo rosdep init
   - rosdep update 
+  - rosdep install -y -r --from-paths src --ignore-src
+
 install:
+  # Install pip dependencies and setup robot python package
   - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
   - python setup.py develop
@@ -41,8 +45,9 @@ install:
   - cd $REPO_ROOT/robot/rospackages
   - catkin_make
   - source devel/setup.bash
+
 before_script:
-  - rosdep install -y -r --from-paths src --ignore-src
+
 script:
   - cd $REPO_ROOT/robot/rover/build
   - cmake ..
@@ -52,10 +57,10 @@ script:
 notifications:
   email:
     recipients:
-      - cedricmartens98@gmail.com
-      - william.wells@spaceconcordia.ca
-      - tim.freiman@spaceconcordia.ca
-      - peter.granitski@spaceconcordia.ca
+      #- cedricmartens98@gmail.com
+      #- william.wells@spaceconcordia.ca
+      #- tim.freiman@spaceconcordia.ca
+      #- peter.granitski@spaceconcordia.ca
     on_success: change
     on_failure: change
 
