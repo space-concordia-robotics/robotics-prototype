@@ -1,11 +1,18 @@
 os: linux
 dist: xenial
 language: python
-before_install:
-    # Taken from this tutorial https://github.com/newdigate/teensy-blink
-  - export ARDUINO_IDE_VERSION="1.8.12"
-  - export ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
-  - export TEENSYDUINO_VERSION="152"
+cache:
+  - apt
+env:
+  global:
+    - REPO_ROOT=$(pwd)
+    - ARDUINO_IDE_VERSION="1.8.12"
+    - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+    - TEENSYDUINO_VERSION="152"
+    - ROS_PYTHON_VERSION="3.6"
+
+install:
+  # Taken from this tutorial https://github.com/newdigate/teensy-blink
   - mkdir -p robot/rover/build
   - mkdir -p ~/Arduino/libraries
   - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
@@ -16,16 +23,39 @@ before_install:
   - sleep 3
   - export DISPLAY=:1.0
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
-install:
+  
+  # Install pip dependencies and setup robot python package
   - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
-  - python setup.py develop
+    
+  # Install ros-base and necessary packages 
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  - sudo apt update -q
+  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base ros-kinetic-cv-camera ros-kinetic-web-video-server
+    
+  # Install ros package dependencies
+  - cd $REPO_ROOT/robot/rospackages
+  - sudo rosdep init
+  - rosdep update 
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
+
 script:
-  - cd robot/rover/build
+  # Set up 'robot' python module and test python installation
+  - cd $REPO_ROOT
+  - python setup.py develop
+  - pytest --continue-on-collection-errors
+
+  # Set up and initialize catkin workspace for ros packages
+  - cd $REPO_ROOT/robot/rospackages
+  - source /opt/ros/kinetic/setup.bash
+  - catkin_make
+
+  # Allow to compile arduino code in external IDEs or something
+  - cd $REPO_ROOT/robot/rover/build
   - cmake ..
   - make
-  - cd ../../..
-  - pytest --continue-on-collection-errors
+    
 notifications:
   email:
     recipients:
