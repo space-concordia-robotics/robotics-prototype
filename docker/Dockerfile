@@ -1,18 +1,19 @@
 # building from ros:kinetic image
 FROM ros:kinetic 
-
-# create a user for this image with username 'scuser'
-RUN useradd scuser \
+SHELL ["/bin/bash", "-c"]
+# create a user for this image with username '$USERNAME'
+ARG USERNAME=spaceuser
+RUN useradd $USERNAME \
 # disabling password for sudo (required to work with this image)
-&& echo 'scuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
+&& echo $USERNAME 'ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+ENV USER=$USERNAME
 # switching to new user
-USER scuser
+USER $USERNAME
 
-ENV USER=scuser
+ENV USER=$USERNAME
 
 # set workdir
-WORKDIR home/scuser/Programming/robotics-prototype/ 
+WORKDIR home/$USERNAME/Programming/robotics-prototype/ 
 
 # move root bashrc to home
 RUN sudo mv /root/.bashrc ~/ \
@@ -21,6 +22,7 @@ RUN sudo mv /root/.bashrc ~/ \
 virtualenv \
 git \
 vim \
+net-tools \
 # vim is mandatory 
 software-properties-common \
 && sudo apt-get update \
@@ -38,17 +40,25 @@ RUN sudo virtualenv --python=/usr/bin/python3.6 $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN python --version \
-&& sudo chown -R scuser /home/scuser/ \
+&& sudo chown -R $USERNAME /home/$USERNAME/ \
 && python -m pip install --upgrade pip \
 && python -m pip install -r requirements.txt -r requirements-dev.txt \
 && python setup.py develop \
 && pytest \
-&& sudo apt-get install -y ros-kinetic-rosbridge-suite \
-ros-kinetic-cv-camera \
-ros-kinetic-web-video-server \
+&& sudo apt-get install -y ros-kinetic-rosbridge-suite ros-kinetic-cv-camera ros-kinetic-web-video-server \
 && rosdep update \
-&& /bin/bash -c '. /opt/ros/kinetic/setup.bash; cd ~/Programming/robotics-prototype/robot/rospackages ; rosdep install --from-paths src/ --ignore-src -r -y ; catkin_make' \
-&& echo '\n#ros aliases\nsource /opt/ros/kinetic/setup.bash\n#competition mode\n#export ROS_MASTER_URI=http://172.16.1.30:11311\n#export ROS_HOSTNAME=$USER\n. ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash\n. ~/Programming/robotics-prototype/venv/bin/activate\nsource ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases' >> ~/.bashrc \
-&& robot/basestation/env.sh >| robot/basestation/static/js/env.js 
-# && cp commit-message-hook.sh .git/hooks/prepare-commit-msg && cp branch_name_verification_hook.py .git/hooks/post-checkout 
-docker run -p 5000:5000 -p 9090:9090 -it --rm --name my-running-app -v scvolume:/home/scuser/Programming/robotics-prototype my-ros-k-app
+&& . /opt/ros/kinetic/setup.bash \
+&& cd ~/Programming/robotics-prototype/robot/rospackages \
+&& rosdep install --from-paths src/ --ignore-src -r -y \
+&& catkin_make \
+&& echo '\n#ros aliases\n' >> ~/.bashrc \
+&& echo 'source /opt/ros/kinetic/setup.bash\n' >> ~/.bashrc \
+&& echo '#competition mode\n' >> ~/.bashrc \
+&& echo '#export ROS_MASTER_URI=http://172.16.1.30:11311\n' >> ~/.bashrc \
+&& echo '#export ROS_HOSTNAME=$USER\n' >> ~/.bashrc \
+&& echo '. ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash\n' >> ~/.bashrc \
+&& echo '. ~/Programming/robotics-prototype/venv/bin/activate\n' >> ~/.bashrc \
+&& echo '. ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases' >> ~/.bashrc
+RUN . robot/basestation/env.sh >| robot/basestation/static/js/env.js 
+RUN cd ~/Programming/robotics-prototype && \
+cp commit_message_hook.py .git/hooks/prepare-commit-msg && cp branch_name_verification_hook.py .git/hooks/post-checkout 
