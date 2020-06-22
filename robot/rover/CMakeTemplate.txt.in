@@ -40,3 +40,9 @@ $<$<BOOL:${${PROJECT_NAME}_user_sources}>:${PROJECT_NAME}_user>
 teensycore
 -lm
 ) 
+
+add_custom_command(
+TARGET ${PROJECT_NAME}
+POST_BUILD
+COMMAND ${ARM_GCC_OBJCOPY} -O ihex -R.eeprom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
+)

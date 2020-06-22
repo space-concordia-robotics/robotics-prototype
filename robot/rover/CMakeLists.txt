@@ -18,6 +18,7 @@ set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
 set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
+set(ARM_GCC_OBJCOPY ${ARM_TOOLS}/arm/bin/arm-none-eabi-objcopy)
 
 #given a name, will check if the library exists in the proper directory, otherwise run install_arduino_libraries.sh which will install it
 function(checkLibraries lib_name lib_version lib_url)
@@ -185,7 +186,7 @@ foreach(path ${INOFILES})
  elseif(${name} STREQUAL "PDS")
  continue()
  
-elseif(${name} STREQUAL "MobilePlatform")
+ elseif(${name} STREQUAL "MobilePlatform")
  
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
@@ -212,7 +213,6 @@ endforeach()
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
  DEPENDS PidController_cleanup
- DEPENDS EncoderFunc_cleanup
  DEPENDS science_cleanup
  )
 
