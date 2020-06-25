@@ -1,5 +1,6 @@
-# building from ros:kinetic image
-FROM ros:kinetic 
+ENV ROS_DISTRO=kinetic
+# building from ros:$ROS_DISTRO image
+FROM ros:$ROS_DISTRO 
 SHELL ["/bin/bash", "-c"]
 # create a user for this image with username '$USERNAME'
 ARG USERNAME=spaceuser
@@ -45,14 +46,14 @@ RUN python --version \
 && python -m pip install -r requirements.txt -r requirements-dev.txt \
 && python setup.py develop \
 && pytest \
-&& sudo apt-get install -y ros-kinetic-rosbridge-suite ros-kinetic-cv-camera ros-kinetic-web-video-server \
+&& sudo apt-get install -y ros-$ROS_DISTRO-rosbridge-suite ros-$ROS_DISTRO-cv-camera ros-$ROS_DISTRO-web-video-server \
 && rosdep update \
-&& . /opt/ros/kinetic/setup.bash \
+&& . /opt/ros/$ROS_DISTRO/setup.bash \
 && cd ~/Programming/robotics-prototype/robot/rospackages \
 && rosdep install --from-paths src/ --ignore-src -r -y \
 && catkin_make \
 && echo '\n#ros aliases\n' >> ~/.bashrc \
-&& echo 'source /opt/ros/kinetic/setup.bash\n' >> ~/.bashrc \
+&& echo 'source /opt/ros/$ROS_DISTRO/setup.bash\n' >> ~/.bashrc \
 && echo '#competition mode\n' >> ~/.bashrc \
 && echo '#export ROS_MASTER_URI=http://172.16.1.30:11311\n' >> ~/.bashrc \
 && echo '#export ROS_HOSTNAME=$USER\n' >> ~/.bashrc \
