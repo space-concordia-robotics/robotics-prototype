@@ -23,8 +23,7 @@ configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_include_directories(${PROJECT_NAME} PRIVATE @EXTERNAL_LIBARRIES_INCLUDE_DIRS@)
+target_include_directories(${PROJECT_NAME} PRIVATE @EXTERNAL_LIBRARIES_INCLUDE_DIRS@)
 
 set_target_properties(
 ${PROJECT_NAME} PROPERTIES 
