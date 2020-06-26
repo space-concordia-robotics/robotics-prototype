@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5.0)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
+set(MCU mk66fx1m0)
+
 include(ExternalProject)
 
 
@@ -122,7 +124,7 @@ set(ARM_GCC_C_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -mcpu=cort
 set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 
 #linker flags, note even c++ projects link using gcc, since we are using the -lstdc++ flag -> from Teensyduino
-set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/mk66fx1m0.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
+set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/${MCU}.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
 
 #S FILES - compiled with gcc
 add_library(teensycore_s  OBJECT ${TEENSY_CORE_S_FILES})

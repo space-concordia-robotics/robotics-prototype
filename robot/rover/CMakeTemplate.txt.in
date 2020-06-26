@@ -20,20 +20,20 @@ endif()
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.ino.cpp)
-target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(${PROJECT_NAME} PRIVATE @EXTERNAL_LIBRARIES_INCLUDE_DIRS@)
+add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp)
+target_compile_options(${PROJECT_NAME}_EXE PUBLIC ${ARM_GXX_FLAGS})
+target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME}_EXE PRIVATE @EXTERNAL_LIBRARIES_INCLUDE_DIRS@)
 
 set_target_properties(
-${PROJECT_NAME} PROPERTIES 
+${PROJECT_NAME}_EXE PROPERTIES 
 LINKER_LANGUAGE C 
 LINK_FLAGS ${ARM_GCC_LINKER_FLAGS} 
 OUTPUT_NAME ${PROJECT_NAME}.elf
 )
  
 target_link_libraries(
-${PROJECT_NAME} 
+${PROJECT_NAME}_EXE 
 @PROJECT_LIBRARIES@
 $<$<BOOL:${${PROJECT_NAME}_user_sources}>:${PROJECT_NAME}_user> 
 teensycore
@@ -41,7 +41,15 @@ teensycore
 ) 
 
 add_custom_command(
-TARGET ${PROJECT_NAME}
+TARGET ${PROJECT_NAME}_EXE
 POST_BUILD
 COMMAND ${ARM_GCC_OBJCOPY} -O ihex -R.eeprom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
 )
+add_custom_command(OUTPUT ${PROJECT_NAME}_upload_command
+COMMAND ${TEENSY_LOADER_CLI} --mcu=${MCU} -s -v ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
+DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
+)
+
+add_custom_target(${PROJECT_NAME}
+DEPENDS ${PROJECT_NAME}_upload_command
+)	
