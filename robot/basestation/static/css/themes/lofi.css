@@ -91,10 +91,10 @@ html, body {
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0);
 }
-.list-group-item{
+.list-group-item {
   color:black;
 }
-.modal-header{
+.modal-header {
   color:black;
 }
 /* Titles */

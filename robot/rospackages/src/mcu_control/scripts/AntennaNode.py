@@ -16,13 +16,13 @@ def subscriber_callback(message):
     rover['latitude'] = message.x
     rover['longitude'] = message.y
 
-    if rospy.get_param('got_antenna_pos'):
-        antenna_to_Rover_dir = Direction(
+    if rospy.get_param('got_antenna_position'):
+        antenna_to_rover_direction = Direction(
             antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
-        antenna_to_Rover_dis = Distance(
+        antenna_to_rover_distance = Distance(
             antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
 
-        rotatorAngle = antenna_to_Rover_dir - antenna['startDir'] + 180
+        rotatorAngle = antenna_to_rover_direction - antenna['startDir'] + 180
         if rotatorAngle < 0:
             rotatorAngle += 360
         elif rotatorAngle > 360:
@@ -30,7 +30,7 @@ def subscriber_callback(message):
 
         msg = Point()
         msg.x = rotatorAngle / 10
-        msg.y = antenna_to_Rover_dis
+        msg.y = antenna_to_rover_distance
         antennaPub.publish(msg)
     else:
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
@@ -62,12 +62,12 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
 
-            if not rospy.get_param('got_antenna_pos'):
+            if not rospy.get_param('got_antenna_position'):
                 try:  # rospy.has_param(param) works but requires code rethinking
                     antenna['latitude'] = rospy.get_param('antenna_latitude')
                     antenna['longitude'] = rospy.get_param('antenna_longitude')
                     antenna['startDir'] = rospy.get_param('antenna_start_dir')
-                    rospy.set_param('got_antenna_pos', True)
+                    rospy.set_param('got_antenna_position', True)
                     rospy.loginfo('Got antenna starting position! ' + str(antenna['latitude']) + ' ' + str(
                         antenna['longitude']) + ' ' + str(antenna['startDir']))
                 except KeyError:  # param not define

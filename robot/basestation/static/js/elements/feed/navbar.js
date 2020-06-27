@@ -50,8 +50,8 @@ $(document).ready(() => {
       listener = PDS_LISTENER_TASK
       toggleButtonID += 'pds-listener-btn'
     }
-    else{
-      return; // Pages that don't have this button should not run the code below (See #367)
+    else {
+      return // Pages that don't have this button should not run the code below (See #367)
     }
 
     let serialType = $('#serial-type').text()
@@ -123,23 +123,23 @@ $(document).ready(() => {
     window.open('/arm')
   })
 
-  $("#rover-page").click(function() {
-    window.open('rover');
+  $( '#rover-page' ).click(function() {
+    window.open('rover')
   })
 
-  $("#science-page").click(function() {
-    window.open('science');
+  $( '#science-page' ).click(function() {
+    window.open('science')
   })
 
-  $("#pds-page").click(function() {
-    window.open('pds');
+  $( '#pds-page' ).click(function() {
+    window.open('pds')
   })
 
-  $("#streams-page").click(function() {
-    window.open('stream');
+  $( '#streams-page' ).click(function() {
+    window.open('stream')
   })
-  $("#navigation-page").click(function() {
-    window.open('navigation');
+  $( '#navigation-page' ).click(function() {
+    window.open('navigation')
   })
 })
 

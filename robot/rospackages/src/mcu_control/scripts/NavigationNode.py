@@ -14,27 +14,27 @@ def subscriber_callback(message):
         return
     rover['latitude'] = message.x
     rover['longitude'] = message.y
-    hasHeading = False
+    has_heading = False
     if message.z > -900:
         rover['heading'] = message.z
-        hasHeading = True
+        has_heading = True
 
     if rospy.get_param('has_gps_goal'):
-        rov_to_des_distance = Distance(rover['latitude'], rover['longitude'],
+        rover_to_destination_distance = Distance(rover['latitude'], rover['longitude'],
                                        gpsGoal['latitude'], gpsGoal['longitude'])
-        rov_to_des_direction = Direction(rover['latitude'], rover['longitude'],
+        rover_to_destination_direction = Direction(rover['latitude'], rover['longitude'],
                                          gpsGoal['latitude'], gpsGoal['longitude'])
 
-        if hasHeading:
-            direction_adjust = Turning(rov_to_des_direction, rover['heading'])
+        if has_heading:
+            direction_adjust = Turning(rover_to_destination_direction, rover['heading'])
         else:
             direction_adjust = -999  # no heading, give invalid number
 
         msg = Point()
         msg.x = direction_adjust # note that direction is based on compass directions where E is 90 and W is -90
-        msg.y = rov_to_des_distance # this value is in meters
+        msg.y = rover_to_destination_distance # this value is in meters
 
-        if(msg.y < 10):
+        if msg.y < 10:
             rospy.loginfo('moving on to next coordinates')
 
         rospy.loginfo('distance : ' + str(msg.y))
