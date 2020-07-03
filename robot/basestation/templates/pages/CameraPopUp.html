@@ -1,0 +1,15 @@
+{% extends "pages/Base.html" %}
+{% block title %}Camera Panel{% endblock %}
+{% block head %}
+ {{ super() }}
+   <script src="../../static/js/elements/controls/camera-controls.js"></script>
+   <script src="../../static/js/elements/feed/camera.js"></script>
+   <script src="../../static/js/elements/feed/camera-popup.js"></script>
+{% endblock %}
+{% block navbar %}
+{% endblock %}
+{% block content %}
+  <div>{% include 'elements/feed/CameraFeed.html' %}</div>
+{% endblock %}
+{% block footer %}
+{% endblock %}

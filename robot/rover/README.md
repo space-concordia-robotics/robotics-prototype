@@ -3,11 +3,8 @@ The code running on the rover
 
 ## Scripts in this folder
 
-### test.py
+### verify_comms.py
 Simple but useful python script for quickly testing serial comms.
-
-### Logger.py
-Skeleton class for logging. Unfinished.
 
 ## Config folders
 

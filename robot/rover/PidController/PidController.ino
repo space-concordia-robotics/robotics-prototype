@@ -72,6 +72,60 @@ double motorAngle[6] = {0, 0, 0, 0, 0, 0};
 int steps;
 int i;
 
+
+// compute outputs for given motor, return speed of said motor in rad/s
+double compute(int i) {
+   /*How long since we last calculated*/
+   unsigned long now = millis();
+   double timeChange = (double)(now - lastTime);
+
+   error = motorCommandAngle[i] - motorAngle[i];
+   
+   /* proportional term */
+   proportionalTerm = error*kp[i];
+   
+   if (proportionalTerm > outMax) {
+    proportionalTerm = outMax;
+   } else if (proportionalTerm < outMin) {
+    proportionalTerm = outMin;
+   }
+   
+   /* integral term */
+   integralTerm += (ki[i] * error * timeChange);
+   
+   if (integralTerm > outMax) {
+    integralTerm = outMax;
+   } else if (integralTerm < outMin) {
+    integralTerm = outMin;
+   }
+
+   /* derivative term */
+   derivativeTerm = kd[i]* (motorAngle[i] - lastInput) / timeChange;
+  
+   if (derivativeTerm > outMax) {
+    derivativeTerm = outMax;
+   } else if (derivativeTerm < outMin) {
+    derivativeTerm = outMin;
+   }
+   
+   /*compute PID output*/
+   output = proportionalTerm + integralTerm + derivativeTerm;
+   
+   if (output > outMax) {
+    output = outMax;
+   } else if (output < outMin) {
+    output = outMin;
+   }
+  
+   /*Remember some variables for next time*/
+   lastInput = motorAngle[i];
+   lastTime = now;
+   
+   return output;
+}
+
+
+
 /////////////////////////////////////////////////////////////
 //////////////////////////VOID SETUP//////////////////////////
 /////////////////////////////////////////////////////////////
@@ -239,56 +293,6 @@ void loop() {
 //////////////////////////FUNCTIONS//////////////////////////
 /////////////////////////////////////////////////////////////
 
-// compute outputs for given motor, return speed of said motor in rad/s
-double compute(int i) {
-   /*How long since we last calculated*/
-   unsigned long now = millis();
-   double timeChange = (double)(now - lastTime);
-
-   error = motorCommandAngle[i] - motorAngle[i];
-   
-   /* proportional term */
-   proportionalTerm = error*kp[i];
-   
-   if (proportionalTerm > outMax) {
-    proportionalTerm = outMax;
-   } else if (proportionalTerm < outMin) {
-    proportionalTerm = outMin;
-   }
-   
-   /* integral term */
-   integralTerm += (ki[i] * error * timeChange);
-   
-   if (integralTerm > outMax) {
-    integralTerm = outMax;
-   } else if (integralTerm < outMin) {
-    integralTerm = outMin;
-   }
-
-   /* derivative term */
-   derivativeTerm = kd[i]* (motorAngle[i] - lastInput) / timeChange;
-  
-   if (derivativeTerm > outMax) {
-    derivativeTerm = outMax;
-   } else if (derivativeTerm < outMin) {
-    derivativeTerm = outMin;
-   }
-   
-   /*compute PID output*/
-   output = proportionalTerm + integralTerm + derivativeTerm;
-   
-   if (output > outMax) {
-    output = outMax;
-   } else if (output < outMin) {
-    output = outMin;
-   }
-  
-   /*Remember some variables for next time*/
-   lastInput = motorAngle[i];
-   lastTime = now;
-   
-   return output;
-}
 
 // helper function to callibrate motors
 void setTunings(int i, double Kp, double Ki, double Kd) {

@@ -5,120 +5,18 @@ import traceback
 import time
 import re
 
-import serial # pyserial
-import serial.tools.list_ports # pyserial
-#from robot.comms.uart import Uart
-#import from mcuSerial import McuSerial # this isn't anything yet, just a copy of uart.py
+from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
 import rospy
 from std_msgs.msg import String, Header
 # TODO: change this package name to something more generic
 from mcu_control.srv import *
 
-global ser # make global so it can be used in other parts of the code
-
-# 300 ms timeout... could potentially be even less, needs testing
-timeout = 0.3 # to wait for a response from the MCU
 mcuName = 'science'
 
 # todo: test ros+website over network with teensy
 # todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
 # todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
-
-# setup serial communications by searching for arm teensy if USB, or simply connecting to UART
-def init_serial():
-    baudrate = 115200
-    # in a perfect world, you can choose the baudrate
-    rospy.loginfo('Using %d baud by default', baudrate)
-    # in a perfect world, usb vs uart will be set by ROS params
-    usb = False; uart = True
-    myargv = rospy.myargv(argv=sys.argv)
-    if len(myargv) == 1:
-        rospy.loginfo('Using UART by default')
-    if len(myargv) > 1:
-        if myargv[1] == 'uart':
-            usb = False; uart = True
-            rospy.loginfo('Using UART and 115200 baud by default')
-        elif myargv[1] == 'usb':
-            usb = True; uart = False
-            rospy.loginfo('Using USB and 115200 baud by default')
-        else:
-            rospy.logerr('Incorrect argument: expecting "usb" or "uart"')
-            sys.exit(0)
-
-    global ser #make global so it can be used in other parts of the code
-
-    ports = list(serial.tools.list_ports.comports())
-
-    startConnecting = time.time()
-    if usb:
-        if len(ports) > 0:
-            rospy.loginfo("%d USB device(s) detected", len(ports))
-            for portObj in ports:
-                port = portObj.name
-                rospy.loginfo('Attempting to connect to /dev/' + port)
-                ser = serial.Serial('/dev/' + port, baudrate)
-
-                rospy.loginfo("clearing buffer...")
-                while ser.in_waiting:
-                    ser.readline()
-
-                rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-                for i in range(5):
-                    rospy.loginfo('attempt #%d...', i+1)
-                    startListening = time.time()
-                    ser.write(str.encode('who\n'))
-
-                    while (time.time()-startListening < timeout):
-                        if ser.in_waiting: # if there is data in the serial buffer
-                            response = ser.readline().decode()
-                            rospy.loginfo('response: ' + response)
-                            if mcuName in response:
-                                rospy.loginfo(mcuName + " MCU idenified!")
-                                rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                                rospy.loginfo('took %f ms to find the " + mcuName +  " MCU', (time.time()-startConnecting)*1000)
-                                return
-        else:
-            rospy.logerr("No USB devices recognized, exiting")
-            sys.exit(0)
-
-    elif uart:
-        port = 'ttySAC0'
-        rospy.loginfo('Attempting to connect to /dev/' + port)
-        try:
-            ser = serial.Serial('/dev/' + port, baudrate)
-        except:
-            rospy.logerr('No UART device recognized, terminating arm node')
-            sys.exit(0)
-
-        rospy.loginfo("clearing buffer...")
-        while ser.in_waiting:
-            ser.readline()
-
-        rospy.loginfo("identifying MCU by sending 'who' every %d ms", timeout*1000)
-        for i in range(1,6):
-            rospy.loginfo('attempt #%d...', i)
-            startListening = time.time()
-            ser.write(str.encode('who\n'))
-            while (time.time()-startListening < timeout):
-                if ser.in_waiting:
-                    dat = ''; data = None
-                    try:
-                        dat = ser.readline().decode()
-                        data = stripFeedback(dat)
-                    except:
-                        rospy.logwarn('trouble reading from serial port')
-                    if data is not None:
-                        if mcuName in response:
-                            rospy.loginfo(mcuName + " MCU idenified!")
-                            rospy.loginfo('timeout: %f ms', (time.time()-startListening)*1000)
-                            rospy.loginfo('took %f ms to find the ' + mcuName + ' MCU', (time.time()-startConnecting)*1000)
-                            return
-                    else:
-                        rospy.loginfo('got raw message: ' + dat)
-
-    rospy.logerr('Incorrect MCU connected, terminating listener')
-    sys.exit(0)
 
 # it may cause issues to have responses that are so similar
 requests = {
@@ -159,7 +57,7 @@ requests = {
 }
 
 def handle_client(req):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     global reqFeedback
     global reqInWaiting
     scienceResponse = ScienceRequestResponse()
@@ -189,13 +87,12 @@ def handle_client(req):
     return scienceResponse
 
 def subscriber_callback(message):
-    global ser # specify that it's global so it can be used properly
+    ser = get_serial()
     rospy.loginfo('received: ' + message.data + ' command from GUI, sending to ' + mcuName + ' Teensy')
     command = str.encode(message.data + '\n')
     ser.write(command) # send command to teensy
     return
 
-"""
 def publish_joint_states(message):
     # parse the data received from Teensy
     lhs,message = message.split('Science Data: ')
@@ -213,7 +110,6 @@ def publish_joint_states(message):
     anglePub.publish(msg)
     rospy.logdebug(msg.position)
     return
-"""
 
 def stripFeedback(data):
     startStrip=mcuName.upper() + ' '
@@ -230,7 +126,10 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-    init_serial()
+    search_success = init_serial(115200, mcuName)
+
+    if not search_success:
+        sys.exit(1)
 
     feedback_pub_topic = '/science_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')
@@ -240,8 +139,10 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     serv = rospy.Service(service_name, ScienceRequest, handle_client)
 
+    sub = rospy.Subscriber('/science_command', String, subscriber_callback)
+
     # service requests are implicitly handled but only at the rate the node publishes at
-    global ser
+    ser = get_serial()
     global reqFeedback
     reqFeedback = ''
     global reqInWaiting
