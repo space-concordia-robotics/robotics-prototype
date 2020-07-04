@@ -86,6 +86,7 @@ $(document).ready(() => {
   });
 
   initNavigationPanel()
+  createAntennaInputButtonsHandler("button[id^='antenna-']")
 
   function initNavigationPanel() {
       antenna_latitude.get(function(latitude) {
@@ -126,50 +127,57 @@ $(document).ready(() => {
   }
 
   goalList = {}
-  detachedData = null
 
-  // add antenna data
+  // set antenna data
   // onClick events for antenna data entry buttons
-  $("button[id^='antenna-']").mouseup(e => {
-    event.preventDefault()
-    let buttonId = $(e.target).attr("id").split("-")
-    let buttonClass = $(e.target).attr("class").split(" ")
-    console.log(buttonClass[2] + ': test')
-    if (buttonId[1] == 'longitude' || buttonId[1] == 'latitude') {
-      let mode = buttonId[1]
-      let format = buttonId[2] + "-" + buttonId[3]
-      if (buttonId[4] != 'btn') {
-        format = format + "-" + buttonId[4]
-      }
-      antennaHandlerTemplate(mode, format)
-    } else if (buttonClass[2] == 'antenna-change-btn') {
-        if (buttonId[1] != 'bearing') {
-          let mode = buttonClass[4]
-          let format = buttonId[1] + "-" + buttonId[2]
-          if (buttonId[3] != 'change') {
-            format = format + "-" + buttonId[3]
-          }
-          console.log(mode + " : " + format)
-          antennaChangeButtonHandlerTemplate(mode, format)
-        } else {
-          //do something
+  function createAntennaInputButtonsHandler(button, detachedData) {
+    $(button).mouseup(e => {
+      event.preventDefault()
+      let buttonId = $(e.target).attr("id").split("-")
+      let buttonClass = $(e.target).attr("class").split(" ")
+      if (buttonId[1] == 'latitude' || buttonId[1] == 'longitude') {
+        // select latitude or longitude input format
+        let mode = buttonId[1]
+        let format = buttonId[2] + "-" + buttonId[3]
+        if (buttonId[4] != 'btn') {
+          format = format + "-" + buttonId[4]
         }
-    }
-  })
+        antennaHandlerTemplate(mode, format)
+      } else if (buttonClass[2] == 'antenna-change-btn') {
+          // change latitude or longitude and its format
+          if (buttonId[1] != 'bearing') {
+            let mode = buttonClass[4]
+            let format = buttonId[1] + "-" + buttonId[2]
+            if (buttonId[3] != 'change') {
+              format = format + "-" + buttonId[3]
+            }
+            antennaChangeButtonHandlerTemplate(mode, format, detachedData)
+          } else {
+              // change bearing
+              antennaBearingChange()
+          }
+      } else if (buttonId[1] == "confirm") {
+          // confirm, set and save info
+          setAntennaData()
+      }
+    })
+  }
 
   function antennaHandlerTemplate(mode, format) {
     $('#antenna-' + mode + '-fieldset').attr('format', format)
     $('#antenna-select-' + mode + '-format-btn').dropdown('toggle')
-    detachedData = $('#antenna-select-' + mode + '-format').detach()
+    let detachedData = $('#antenna-select-' + mode + '-format').detach()
     $("#antenna-" + mode + "-fieldset").empty()
 
     let antennaInputTemplate = $("div." + format + "-template").html()
     $("#antenna-" + mode + "-fieldset").append(antennaInputTemplate).find('*').addClass(format + " " + mode)
     $("#antenna-" + mode + "-fieldset span." + format + ":first").text(mode)
     $('.antenna-input-field.' + mode).prop('disabled', false)
+
+    createAntennaInputButtonsHandler('#antenna-' + format + '-change-btn.' + mode, detachedData)
   }
 
-  function antennaChangeButtonHandlerTemplate(mode, format) {
+  function antennaChangeButtonHandlerTemplate(mode, format, detachedData) {
     $("#antenna-" + mode + "-input-group").empty()
     $("#antenna-" + mode + "-fieldset").append(detachedData)
     $("#antenna-confirm-btn").prop('disabled', false)
@@ -183,25 +191,152 @@ $(document).ready(() => {
     })
   }
 
-  // add goals data
-  $('#toggle-goal-modal-btn').on('click', function(event) {
-    $("#goal-modal-body-content").empty()
-    let goalTemplate = $('#created-goal-template').html()
-    for (let i = 0; i < goalCount; i++) {
-        $("#goal-modal-body-content").append(goalTemplate)
-        $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
-        $(".goal-" + i).find('*').addClass('goal-' + i)
+  function antennaBearingChange() {
+    $("#antenna-bearing-input").prop('disabled', false)
+    $("#antenna-bearing-change-btn").prop('disabled', false)
+    $("#antenna-confirm-btn").prop('disabled', false)
+  }
 
-        createGoalButtons(i)
+  function setAntennaData() {
+    let latitude = null
+    let longitude = null
 
-        $('#goal-name.goal-' + i).val(goalList[i].name)
-        $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
-        $('#goal-change-btn.goal-' + i).prop('disabled', false)
-        $('div.goal-' + i + ' fieldset').prop('disabled', true)
-        $('#goal-DD-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
-        $('#goal-DD-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
+    try {
+        if ($("#antenna-latitude-fieldset").attr('format') == 'decimal-degrees') {
+            let decimaldegree = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.latitude").val()))
+            $("#antenna-decimal-degrees-decimal-degree-input.latitude").attr("value", decimaldegree)
 
+            if (isNaN(decimaldegree)) {
+              throw "Bad Input latitude for decimal-degrees"
+            }
+
+            latitude = decimaldegree
+        } else if ($("#antenna-latitude-fieldset").attr('format') == 'degrees-decimal-minutes') {
+            let decimal = parseFloat($('#antenna-degrees-decimal-minutes-degree-input.latitude').val())
+            let minute = parseFloat($('#antenna-degrees-decimal-minutes-decimal-minute-input.latitude').val())
+
+            if (isNaN(decimal) || isNaN(minute)) {
+              throw "Bad input latitude for degrees-decimal-minutes"
+            }
+
+            $("#antenna-degrees-decimal-minutes-degree-input.latitude").attr("value", decimal)
+            $("#antenna-degrees-decimal-minutes-decimal-minute-input.latitude").attr("value", minute)
+
+            latitude = decimal + (minute / 60)
+        } else if ($("#antenna-latitude-fieldset").attr('format') == 'degrees-minutes-seconds') {
+            let decimal = parseFloat($('#antenna-degrees-minutes-seconds-deg-input.latitude').val())
+            let minutes = parseFloat($('#antenna-degrees-minutes-seconds-minute-input.latitude').val())
+            let seconds = parseFloat($('#antenna-degrees-minutes-seconds-second-input.latitude').val())
+
+            if (isNaN(decimal) || isNaN(minutes) || isNaN(seconds)) {
+              throw "Bad input latitude degrees-minutes-seconds"
+            }
+
+            $("#antenna-degrees-minutes-seconds-degree-input.latitude").attr("value", decimal)
+            $("#antenna-degrees-minutes-seconds-minute-input.latitude").attr("value", minutes)
+            $("#antenna-degrees-minutes-seconds-second-input.latitude").attr("value", seconds)
+
+            latitude = decimal + (minutes / 60 + seconds / 3600)
+        }
+
+        if ($("#antenna-longitude-fieldset").attr('format') == 'decimal-degrees') {
+            let decimaldegree = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.longitude").val()))
+
+            if (isNaN(decimaldegree)) {
+              throw "Bad Input longitude for decimal-degrees"
+            }
+
+            $("#antenna-decimal-degrees-decimal-degree-input.longitude").attr("value", decimaldegree)
+
+            longitude = decimaldegree
+        } else if ($("#antenna-longitude-fieldset").attr('format') == 'degrees-decimal-minutes') {
+            let decimal = parseFloat($('#antenna-degrees-decimal-minutes-degree-input.longitude').val())
+            let minute = parseFloat($('#antenna-degrees-decimal-minutes-decimal-minute-input.longitude').val())
+
+            if (isNaN(decimal) || isNaN(minute)) {
+              throw "Bad input longitude for degrees-decimal-minutes"
+            }
+
+            $("#antenna-degrees-decimal-minutes-degree-input.longitude").attr("value", decimal)
+            $("#antenna-degrees-decimal-minutes-decimal-minute-input.longitude").attr("value", minute)
+
+            longitude = decimal + (minute / 60)
+        } else if ($("#antenna-longitude-fieldset").attr('format') == 'degrees-minutes-seconds') {
+            let decimal = parseFloat($('#antenna-degrees-minutes-seconds-degree-input.longitude').val())
+            let minutes = parseFloat($('#antenna-degrees-minutes-seconds-minute-input.longitude').val())
+            let seconds = parseFloat($('#antenna-degrees-minutes-seconds-second-input.longitude').val())
+
+            if (isNaN(decimal) || isNaN(minutes) || isNaN(seconds)) {
+              throw "Bad input longitude for degrees-minutes-seconds"
+            }
+
+            $("#antenna-degrees-minutes-seconds-degree-input.longitude").attr("value", decimal)
+            $("#antenna-degrees-minutes-seconds-minute-input.longitude").attr("value", minutes)
+            $("#antenna-degrees-minutes-seconds-second-input.longitude").attr("value", seconds)
+
+            longitude = decimal + (minutes / 60 + seconds / 3600)
+        }
+        let bearing = parseFloat($("#antenna-bearing-input").val())
+        if (isNaN(bearing)) {
+          throw "Bad input bearing"
+        }
+
+        $("#antenna-bearing-input").attr("value", bearing)
+
+
+        $('.antenna-input-field').prop('disabled', true)
+        $('.antenna-change-btn').prop('disabled', false)
+        $('#antenna-confirm-btn').prop('disabled', true)
+
+        //createAntennaInputButtonsHandler('#antenna-bearing-change-btn')
+
+        //ROS params
+        antenna_latitude.set(latitude)
+        antenna_longitude.set(longitude)
+        antenna_start_dir.set(bearing)
+        $('#antenna-stats-latitude').text(latitude.toFixed(6))
+        $('#antenna-stats-longitude').text(longitude.toFixed(6))
+        $('#antenna-stats-heading').text(bearing)
+        logInfo('Antenna parameters have been set!')
+    } catch (e) {
+        logErr(e)
     }
-  })
+  }
+
+  // set goals info
+  // onClick events for goals data entry buttons
+  function createGoalsInputButtonsHandler(button, detachedData) {
+    $(button).mouseup(e => {
+      console.log('TEST')
+      event.preventDefault()
+      let buttonId = $(e.target).attr("id").split("-")
+      let buttonClass = $(e.target).attr("class").split(" ")
+      if (buttonId[1] == 'latitude' || buttonId[1] == 'longitude') {
+        // select latitude or longitude input format
+        let mode = buttonId[1]
+        let format = buttonId[2] + "-" + buttonId[3]
+        if (buttonId[4] != 'btn') {
+          format = format + "-" + buttonId[4]
+        }
+        antennaHandlerTemplate(mode, format)
+      } else if (buttonClass[2] == 'antenna-change-btn') {
+          // change latitude or longitude and its format
+          if (buttonId[1] != 'bearing') {
+            let mode = buttonClass[4]
+            let format = buttonId[1] + "-" + buttonId[2]
+            if (buttonId[3] != 'change') {
+              format = format + "-" + buttonId[3]
+            }
+            antennaChangeButtonHandlerTemplate(mode, format, detachedData)
+          } else {
+              // change bearing
+              antennaBearingChange()
+          }
+      } else if (buttonId[1] == "confirm") {
+          // confirm, set and save info
+          setAntennaData()
+      }
+    })
+  }
 
 })
