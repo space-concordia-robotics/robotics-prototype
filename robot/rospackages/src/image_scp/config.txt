@@ -1,6 +1,0 @@
-#Use this as a template for entering user details and destination of files so script doesn't need to be changed.
-#Enter credentials/ path without quotation marks 
-Username replaceWithUse
-Host relaceWithHostDomain
-Remote_path replaceWithDirectoryPath
-
