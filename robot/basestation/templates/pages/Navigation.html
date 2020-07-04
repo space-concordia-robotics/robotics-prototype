@@ -27,43 +27,43 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
 ----------------------------------------------------------------------------------------------------->
 
 <!-- ANTENNA TEMPLATES -->
-<div class="DDtemplate" hidden>
+<div class="decimal-degrees-template" hidden>
     <div class="input-group" id="antenna-input-group">
         <span class="input-group-text"></span>
-        <input id="antenna-DD-decimal-degree-input" type="text" class="form-control antenna-input-field" placeholder="Decimal degrees">
-        <button id="antenna-DD-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <input id="antenna-decimal-degrees-decimal-degree-input" type="text" class="form-control antenna-input-field" placeholder="Decimal degrees">
+        <button id="antenna-decimal-degrees-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
         <hr>
     </div>
 </div>
 
 
-<div class="DDMtemplate" hidden>
+<div class="degrees-decimal-minutes-template" hidden>
     <div class="input-group" id="antenna-input-group">
         <span class="input-group-text"></span>
 
-        <input id="antenna-DDM-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+        <input id="antenna-degrees-decimal-minutes-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
         <span class="input-group-text">°</span>
 
-        <input id="antenna-DDM-decimal-minute-input" type="text" class="form-control antenna-input-field" placeholder="Decimal Minutes">
+        <input id="antenna-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control antenna-input-field" placeholder="Decimal Minutes">
         <span class="input-group-text">'</span>
-        <button id="antenna-DDM-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <button id="antenna-degrees-decimal-minutes-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
         <hr>
     </div>
 </div>
 
-<div class="DMStemplate" hidden>
+<div class="degrees-minutes-seconds-template" hidden>
     <div class="input-group" id="antenna-input-group">
         <span class="input-group-text"></span>
-        <input id="antenna-DMS-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+        <input id="antenna-degrees-minutes-seconds-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
 
         <span class="input-group-text">°</span>
-        <input id="antenna-DMS-minute-input" type="text" class="form-control antenna-input-field" placeholder="Minutes">
+        <input id="antenna-degrees-minutes-seconds-minute-input" type="text" class="form-control antenna-input-field" placeholder="Minutes">
 
         <span class="input-group-text">'</span>
-        <input id="antenna-DMS-second-input" type="text" class="form-control antenna-input-field" placeholder="Seconds">
+        <input id="antenna-degrees-minutes-seconds-second-input" type="text" class="form-control antenna-input-field" placeholder="Seconds">
 
         <span class="input-group-text">"</span>
-        <button id="antenna-DMS-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <button id="antenna-degrees-minutes-seconds-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
         <hr>
     </div>
 </div>
@@ -81,37 +81,37 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
 
 
 
-<div id="goal-DD-input-template" hidden>
+<div id="goal-decimal-degrees-input-template" hidden>
     <span class="input-group-text"></span>
-    <input id="goal-DD-decimal-degree-input" type="text" class="form-control" placeholder="Decimal Degrees">
+    <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control" placeholder="Decimal Degrees">
 </div>
 
 
 
 
-<div id="goal-DDM-input-template" hidden>
+<div id="goal-degrees-decimal-minutes-input-template" hidden>
     <span class="input-group-text"></span>
 
-    <input id="goal-DDM-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <input id="goal-degrees-decimal-minutes-degree-input" type="text" class="form-control" placeholder="Degrees">
     <span class="input-group-text">°</span>
 
-    <input id="goal-DDM-decimal-minute-input" type="text" class="form-control" placeholder="Decimal Minutes">
+    <input id="goal-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control" placeholder="Decimal Minutes">
     <span class="input-group-text">'</span>
 </div>
 
 
 
 
-<div id="goal-DMS-input-template" hidden>
+<div id="goal-degrees-minutes-seconds-input-template" hidden>
     <span class="input-group-text"></span>
 
-    <input id="goal-DMS-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <input id="goal-degrees-minutes-seconds-degree-input" type="text" class="form-control" placeholder="Degrees">
     <span class="input-group-text">°</span>
 
-    <input id="goal-DMS-minute-input" type="text" class="form-control" placeholder="Mins">
+    <input id="goal-degrees-minutes-seconds-minute-input" type="text" class="form-control" placeholder="Mins">
     <span class="input-group-text">'</span>
 
-    <input id="goal-DMS-second-input" type="text" class="form-control" placeholder="Seconds">
+    <input id="goal-degrees-minutes-seconds-second-input" type="text" class="form-control" placeholder="Seconds">
     <span class="input-group-text">"</span>
 </div>
 
@@ -132,9 +132,9 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
                     <button type="button" id="goal-latitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Layout</button>
                     <span class="caret"></span>
                     <ul class="dropdown-menu">
-                        <li><button id="goal-latitude-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
-                        <li><button id="goal-latitude-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
-                        <li><button id="goal-latitude-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                        <li><button id="goal-latitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="goal-latitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="goal-latitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                     </ul>
                 </div>
             </div>
@@ -145,9 +145,9 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
                     <button type="button" id="goal-longitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Layout</button>
                     <span class="caret"> </span>
                     <ul class="dropdown-menu">
-                        <li><button id="goal-longitude-DD-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
-                        <li><button id="goal-longitude-DDM-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
-                        <li><button id="goal-longitude-DMS-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                        <li><button id="goal-longitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="goal-longitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="goal-longitude-degrees-minutes-Seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                     </ul>
                 </div>
             </div>
@@ -166,16 +166,16 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
                 <input id="goal-name" type="text" class="form-control" placeholder="Goal Name">
             </div>
         </fieldset>
-        <fieldset id="goal-latitude-fieldset" format='DD'>
+        <fieldset id="goal-latitude-fieldset" format='decimal-degrees'>
             <div class="input-group">
                 <span class="input-group-text">latitude</span>
-                <input id="goal-DD-decimal-degree-input" type="text" class="form-control latitude" placeholder="Decimal Degrees">
+                <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control latitude" placeholder="Decimal Degrees">
             </div>
         </fieldset>
-        <fieldset id="goal-longitude-fieldset" format='DD'>
+        <fieldset id="goal-longitude-fieldset" format='decimal-degrees'>
             <div class="input-group">
                 <span class="input-group-text">longitude</span>
-                <input id="goal-DD-decimal-degree-input" type="text" class="form-control longitude" placeholder="Decimal Degrees">
+                <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control longitude" placeholder="Decimal Degrees">
             </div>
         </fieldset>
         <div id="goal-buttons-input-group" class="input-group">
