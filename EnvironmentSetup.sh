@@ -24,7 +24,7 @@ FINAL_MESSAGE="The script will now exit, you should test the installation using 
 -> to see the GUI open a browser (preferably chrome) and go to localhost:5000"
 
 REPO="/home/$USER/Programming/robotics-prototype"
-
+ROS_VERSION="melodic"
 ## START
 
 #check if in proper directory
@@ -56,8 +56,8 @@ python setup.py develop
 
 
 # Check if ros is already installed, install it if it isn't
-ROS_VERSION=$(rosversion -d)
-if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
+ROS=$(rosversion -d)
+if [ $ROS = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
 then
     echo "You do not have ROS installed, installing..."
     
@@ -65,9 +65,9 @@ then
     
 	source ~/.bashrc
 
-    sudo apt install ros-melodic-rosbridge-suite -y
+    sudo apt install ros-$ROS_VERSION-rosbridge-suite -y
 
-elif [$ROS_VERSION != "melodic"]
+elif [$ROS != "$ROS_VERSION"]
 then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
     exit 1
@@ -75,11 +75,11 @@ fi
 
 
 # Install camera stuff, these are not ros package dependecies and not installed with rosdep
-sudo apt-get install ros-melodic-cv-camera ros-melodic-web-video-server -y
+sudo apt-get install ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server -y
 
 
 # Build catkin
-source /opt/ros/melodic/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
+source /opt/ros/$ROS_VERSION/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
 cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
