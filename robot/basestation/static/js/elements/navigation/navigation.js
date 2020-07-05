@@ -86,7 +86,6 @@ $(document).ready(() => {
   });
 
   initNavigationPanel()
-  createAntennaInputButtonsHandler("button[id^='antenna-']")
 
   function initNavigationPanel() {
       antenna_latitude.get(function(latitude) {
@@ -127,6 +126,8 @@ $(document).ready(() => {
   }
 
   goalList = {}
+  goalCount = 0
+  createAntennaInputButtonsHandler("button[id^='antenna-']")
 
   // set antenna data
   // onClick events for antenna data entry buttons
@@ -202,34 +203,40 @@ $(document).ready(() => {
     let longitude = null
 
     try {
-        if ($("#antenna-latitude-fieldset").attr('format') == 'decimal-degrees') {
-            let decimaldegree = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.latitude").val()))
-            $("#antenna-decimal-degrees-decimal-degree-input.latitude").attr("value", decimaldegree)
+        switch ($("#antenna-latitude-fieldset").attr('format')) {
+          case 'decimal-degrees': {
+            let latitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.latitude").val()))
 
-            if (isNaN(decimaldegree)) {
-              throw "Bad Input latitude for decimal-degrees"
+            if (isNaN(latitude)) {
+              throw "Bad Input latitude for decimal-degrees format"
             }
 
-            latitude = decimaldegree
-        } else if ($("#antenna-latitude-fieldset").attr('format') == 'degrees-decimal-minutes') {
+            $("#antenna-decimal-degrees-decimal-degree-input.latitude").attr("value", latitude)
+            break;
+          }
+
+          case 'degrees-decimal-minutes': {
             let decimal = parseFloat($('#antenna-degrees-decimal-minutes-degree-input.latitude').val())
             let minute = parseFloat($('#antenna-degrees-decimal-minutes-decimal-minute-input.latitude').val())
 
             if (isNaN(decimal) || isNaN(minute)) {
-              throw "Bad input latitude for degrees-decimal-minutes"
+              throw "Bad input latitude for degrees-decimal-minutes format"
             }
 
             $("#antenna-degrees-decimal-minutes-degree-input.latitude").attr("value", decimal)
             $("#antenna-degrees-decimal-minutes-decimal-minute-input.latitude").attr("value", minute)
 
             latitude = decimal + (minute / 60)
-        } else if ($("#antenna-latitude-fieldset").attr('format') == 'degrees-minutes-seconds') {
+            break;
+          }
+
+          case 'degrees-minutes-seconds': {
             let decimal = parseFloat($('#antenna-degrees-minutes-seconds-deg-input.latitude').val())
             let minutes = parseFloat($('#antenna-degrees-minutes-seconds-minute-input.latitude').val())
             let seconds = parseFloat($('#antenna-degrees-minutes-seconds-second-input.latitude').val())
 
             if (isNaN(decimal) || isNaN(minutes) || isNaN(seconds)) {
-              throw "Bad input latitude degrees-minutes-seconds"
+              throw "Bad input latitude degrees-minutes-seconds format"
             }
 
             $("#antenna-degrees-minutes-seconds-degree-input.latitude").attr("value", decimal)
@@ -237,19 +244,26 @@ $(document).ready(() => {
             $("#antenna-degrees-minutes-seconds-second-input.latitude").attr("value", seconds)
 
             latitude = decimal + (minutes / 60 + seconds / 3600)
+            break;
+          }
+
+          default:
+            throw "You didn't enter anything for latitude"
         }
 
-        if ($("#antenna-longitude-fieldset").attr('format') == 'decimal-degrees') {
-            let decimaldegree = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.longitude").val()))
+        switch ($("#antenna-longitude-fieldset").attr('format')) {
+          case 'decimal-degrees': {
+            let longitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.longitude").val()))
 
-            if (isNaN(decimaldegree)) {
+            if (isNaN(longitude)) {
               throw "Bad Input longitude for decimal-degrees"
             }
 
-            $("#antenna-decimal-degrees-decimal-degree-input.longitude").attr("value", decimaldegree)
+            $("#antenna-decimal-degrees-decimal-degree-input.longitude").attr("value", longitude)
+            break;
+          }
 
-            longitude = decimaldegree
-        } else if ($("#antenna-longitude-fieldset").attr('format') == 'degrees-decimal-minutes') {
+          case 'degrees-decimal-minutes': {
             let decimal = parseFloat($('#antenna-degrees-decimal-minutes-degree-input.longitude').val())
             let minute = parseFloat($('#antenna-degrees-decimal-minutes-decimal-minute-input.longitude').val())
 
@@ -261,7 +275,10 @@ $(document).ready(() => {
             $("#antenna-degrees-decimal-minutes-decimal-minute-input.longitude").attr("value", minute)
 
             longitude = decimal + (minute / 60)
-        } else if ($("#antenna-longitude-fieldset").attr('format') == 'degrees-minutes-seconds') {
+            break;
+          }
+
+          case 'degrees-minutes-seconds': {
             let decimal = parseFloat($('#antenna-degrees-minutes-seconds-degree-input.longitude').val())
             let minutes = parseFloat($('#antenna-degrees-minutes-seconds-minute-input.longitude').val())
             let seconds = parseFloat($('#antenna-degrees-minutes-seconds-second-input.longitude').val())
@@ -275,7 +292,13 @@ $(document).ready(() => {
             $("#antenna-degrees-minutes-seconds-second-input.longitude").attr("value", seconds)
 
             longitude = decimal + (minutes / 60 + seconds / 3600)
+            break;
+          }
+
+          default:
+            throw "You didn't enter anything for longitude"
         }
+
         let bearing = parseFloat($("#antenna-bearing-input").val())
         if (isNaN(bearing)) {
           throw "Bad input bearing"
@@ -287,8 +310,6 @@ $(document).ready(() => {
         $('.antenna-input-field').prop('disabled', true)
         $('.antenna-change-btn').prop('disabled', false)
         $('#antenna-confirm-btn').prop('disabled', true)
-
-        //createAntennaInputButtonsHandler('#antenna-bearing-change-btn')
 
         //ROS params
         antenna_latitude.set(latitude)
@@ -303,40 +324,288 @@ $(document).ready(() => {
     }
   }
 
+  createGoalsInputButtonsHandler("button[id^='goal-']")
+
   // set goals info
   // onClick events for goals data entry buttons
-  function createGoalsInputButtonsHandler(button, detachedData) {
+  function createGoalsInputButtonsHandler(button) {
     $(button).mouseup(e => {
-      console.log('TEST')
+      console.log('test')
       event.preventDefault()
       let buttonId = $(e.target).attr("id").split("-")
       let buttonClass = $(e.target).attr("class").split(" ")
-      if (buttonId[1] == 'latitude' || buttonId[1] == 'longitude') {
+      if ((buttonId[1] == 'latitude' || buttonId[1] == 'longitude') && (buttonId[3] != "format")) {
         // select latitude or longitude input format
         let mode = buttonId[1]
         let format = buttonId[2] + "-" + buttonId[3]
+        let goalNum = buttonClass[3].replace('goal-', '')
+
         if (buttonId[4] != 'btn') {
           format = format + "-" + buttonId[4]
         }
-        antennaHandlerTemplate(mode, format)
-      } else if (buttonClass[2] == 'antenna-change-btn') {
-          // change latitude or longitude and its format
-          if (buttonId[1] != 'bearing') {
-            let mode = buttonClass[4]
-            let format = buttonId[1] + "-" + buttonId[2]
-            if (buttonId[3] != 'change') {
-              format = format + "-" + buttonId[3]
+
+        goalHandlerTemplate(mode, format, goalNum)
+
+      } else {
+          switch (buttonId[1]) {
+            case 'toggle': {
+              // add new and its input templates
+              toggleGoals()
+              break;
             }
-            antennaChangeButtonHandlerTemplate(mode, format, detachedData)
-          } else {
-              // change bearing
-              antennaBearingChange()
+
+            case 'new': {
+              // add new and its input templates
+              addGoal()
+              break;
+            }
+
+            case 'confirm': {
+              // confirm and set goal info
+              let goalNum = buttonClass[2].replace('goal-', '')
+              goalConfirmButtonHandler(goalNum)
+              break;
+            }
+
+            case 'delete': {
+              // delete goal
+              let goalNum = buttonClass[2].replace('goal-', '')
+              goalDeleteButtonHandler(goalNum)
+              break;
+            }
           }
-      } else if (buttonId[1] == "confirm") {
-          // confirm, set and save info
-          setAntennaData()
-      }
+        }
     })
+  }
+
+  // functions
+  function toggleGoals() {
+    // let goalTemplate = $('#created-goal-template').html()
+    // for (let i = 0; i < goalCount; i++) {
+    //   $("#goal-modal-body-content").append(goalTemplate)
+    //   $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
+    //   $(".goal-" + i).find('*').addClass('goal-' + i)
+    //
+    //   createGoalButtons(i)
+    //
+    //   $('#goal-name.goal-' + i).val(goalList[i].name)
+    //   $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
+    //   $('#goal-change-btn.goal-' + i).prop('disabled', false)
+    //   $('div.goal-' + i + ' fieldset').prop('disabled', true)
+    //   $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
+    //   $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
+    // }
+  }
+
+  function addGoal() {
+    let newGoalTemplate = $('#add-goal-coordinates').html()
+
+    $("#goal-modal-body-content").append(newGoalTemplate)
+    $("#goal-modal-body-content .goal").addClass('goal-' + goalCount).removeClass('goal')
+    $(".goal-" + goalCount).find('*').addClass('goal-' + goalCount)
+
+    createGoalButtons(goalCount)
+    goalCount++
+  }
+
+  function goalHandlerTemplate(mode, format, current) {
+    $('#goal-' + mode + '-fieldset.goal-' + current).attr("format", format)
+    $('#goal-' + mode + '-select-format.goal-' + current).dropdown('toggle')
+    $('#goal-' + mode + '-select-format.goal-' + current).detach()
+
+    let inputTemplate = $('#goal-' + format + '-input-template').html()
+    $('#goal-' + mode + '-input-group.goal-' + current).append(inputTemplate)
+    $('#goal-' + mode + '-input-group.goal-' + current).find('input').addClass('goal-' + current + ' ' + mode)
+    $('#goal-' + mode + '-input-group.goal-' + current + ' span.input-group-text:first').text(mode)
+  }
+
+  function createGoalButtons(current) {
+    let goalButtons = $("#goal-buttons").html()
+    let currentGoalButton = '#goal-buttons-input-group.goal-' + current
+    $(currentGoalButton).append(goalButtons)
+    $(currentGoalButton).find('*').addClass('goal-' + current)
+
+    createGoalsInputButtonsHandler("button[id^='goal-'].goal-" + current)
+  }
+
+  function goalConfirmButtonHandler(current) {
+        let latitude_format = null
+        let longitude_format = null
+
+        latitude_format = $('#goal-latitude-fieldset.goal-' + current).attr('format')
+        // if (latitude_format != 'decimal-degrees' && latitude_format != 'degrees-decimal-minutes'
+        //     && latitude_format != 'degrees-decimal-minutes') {
+        //       logErr('Error with goal latitude format')
+        //     }
+
+        longitude_format = $('#goal-longitude-fieldset.goal-' + current).attr('format')
+        // if (longitude_format != 'decimal-degrees' && longitude_format != 'degrees-decimal-minutes'
+        //     && longitude_format != 'degrees-decimal-minutes') {
+        //       logErr('Error with goal longitude format')
+        //     }
+
+        $('#goal-change-btn.goal-' + current).prop('disabled', false)
+        $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
+
+        $('#goal-latitude-select-format.goal-' + current).detach()
+        $('#goal-longitude-select-format.goal-' + current).detach()
+
+        setGoalData(current, latitude_format, longitude_format)
+  }
+
+  function goalDeleteButtonHandler(current) {
+    /*------------------------\
+    implement ROS goal deleting
+    \------------------------*/
+    let goalName = $('#goal-name.goal-' + current).val()
+    let msg = new ROSLIB.Message({
+        data: goalName
+    })
+    delete_goal_publisher.publish(msg)
+
+    $('.goal-' + current).remove()
+    goalCount--
+  }
+
+  function setGoalData(current, latitude_format, longitude_format) {
+    let latitude = null
+    let longitude = null
+
+    let goalElem = $('#goal-name.goal-' + current)
+    let goalName = goalElem.val()
+
+    try {
+        for (let i = 0; i < goalList.length; i++) {
+            if (goalName == goalList[i].name) {
+                throw 'Enter different name'
+            }
+        }
+
+        switch (latitude_format) {
+          case 'decimal-degrees': {
+            latitude = parseFloat($('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + current).val())
+
+            if (isNaN(latitude)) {
+              throw "Bad input latitude for decimal degrees format"
+            }
+
+            $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + current).attr("value", latitude)
+            break;
+          }
+
+          case 'degrees-decimal-minutes': {
+            let decimal = parseFloat($('#goal-degrees-decimal-minutes-degree-input.latitude.goal-' + current).val())
+            let minute = parseFloat($('#goal-degrees-decimal-minutes-decimal-minute-input.latitude.goal-' + current).val())
+
+            if (isNaN(decimal) || isNaN(minute)) {
+              throw "Bad input latitude for degrees-decimal-minutes format"
+            }
+
+            $('#goal-degrees-decimal-minutes-degree-input.latitude.goal-' + current).attr("value", decimal)
+            $('#goal-degrees-decimal-minutes-decimal-minute-input.latitude.goal-' + current).attr("value", minute)
+
+            latitude = decimal + (minute / 60)
+            break;
+          }
+
+          case 'degrees-minutes-seconds': {
+            let decimal = parseFloat($('#goal-degrees-minutes-seconds-degree-input.latitude.goal-' + current).val())
+            let minutes = parseFloat($('#goal-degrees-minutes-seconds-minute-input.latitude.goal-' + current).val())
+            let seconds = parseFloat($('#goal-degrees-minutes-seconds-second-input.latitude.goal-' + current).val())
+
+            if (isNaN(decimal) || isNaN(minutes) || isNaN(seconds)) {
+              throw "Bad input latitude for degrees-minutes-seconds format"
+            }
+
+            $('#goal-degrees-minutes-seconds-degee-input.latitude.goal-' + current).attr("value", decimal)
+            $('#goal-degrees-minutes-seconds-minute-input.latitude.goal-' + current).attr("value", minutes)
+            $('#goal-degrees-minutes-seconds-second-input.latitude.goal-' + current).attr("value", seconds)
+
+            latitude = decimal + (minutes / 60 + seconds / 3600)
+            break;
+          }
+
+          default:
+            throw "You didn't enter anything for latitude"
+        }
+
+        switch (longitude_format) {
+          case 'decimal-degrees': {
+            longitude = parseFloat($('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + current).val())
+
+            if (isNaN(longitude)) {
+              throw "Bad input longitude for decimal-degrees format"
+            }
+
+            $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + current).attr("value", longitude)
+            break;
+          }
+
+          case 'degrees-decimal-minutes': {
+            let decimal = parseFloat($('#goal-degrees-decimal-minutes-degree-input.longitude.goal-' + current).val())
+            let minute = parseFloat($('#goal-degrees-decimal-minutes-decimal-minute-input.longitude.goal-' + current).val())
+
+            if (isNaN(decimal) || isNaN(minute)) {
+              throw "Bad input longitude for degrees-decimal-minutes format"
+            }
+
+            $('#goal-degrees-decimal-minutes-decimal-input.longitude.goal-' + current).attr("value", decimal)
+            $('#goal-degrees-decimal-minutes-decimal-minute-input.longitude.goal-' + current).attr("value", minute)
+
+            longitude = decimal + (minute / 60)
+            break;
+          }
+
+          case 'degrees-minutes-seconds': {
+            let decimal = parseFloat($('#goal-degrees-minutes-seconds-degree-input.longitude.goal-' + current).val())
+            let minutes = parseFloat($('#goal-degrees-minutes-seconds-minute-input.longitude.goal-' + current).val())
+            let seconds = parseFloat($('#goal-degrees-minutes-seconds-second-input.longitude.goal-' + current).val())
+
+            if (isNaN(decimal) || isNaN(minutes) || isNaN(seconds)) {
+              throw "Bad input long for degrees-minutes-seconds format"
+            }
+
+            $('#goal-degrees-minutes-seconds-degree-input.longitude.goal-' + current).attr("value", decimal)
+            $('#goal-degrees-minutes-seconds-minute-input.longitude.goal-' + current).attr("value", minutes)
+            $('#goal-degrees-minutes-seconds-second-input.longitude.goal-' + current).attr("value", seconds)
+
+            longitude = decimal + (minutes / 60 + seconds / 3600)
+            break;
+          }
+
+          default:
+            throw "You didn't enter anything for longitude"
+        }
+
+        if (goalName.length != 0) {
+          goalElem.attr('value', goalName)
+        }
+        else {
+          goalElem.attr('value', 'Goal-' + current)
+        }
+
+        $('#goal-name-fieldset.goal-' + current).prop('disabled', true)
+        $('#goal-latitude-fieldset.goal-' + current).prop('disabled', true)
+        $('#goal-longitude-fieldset.goal-' + current).prop('disabled', true)
+
+
+        /*----------------------------------\
+        this section implements ROS goal node
+        \----------------------------------*/
+        let goalData = new ROSLIB.Message({
+            name: goalName,
+            longitude: longitude,
+            latitude: latitude
+        })
+
+        create_goal_publisher.publish(goalData)
+
+      } catch (e) {
+        $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
+        $('#goal-change-btn.goal-' + current).prop('disabled', true)
+
+        logWarn(e)
+    }
   }
 
 })
