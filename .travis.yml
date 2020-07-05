@@ -1,5 +1,5 @@
 os: linux
-dist: xenial
+dist: bionic
 language: python
 cache:
   - apt
@@ -10,6 +10,8 @@ env:
     - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
     - TEENSYDUINO_VERSION="152"
     - ROS_PYTHON_VERSION="3.6"
+    - ROS_VERSION="melodic"
+    - OS_VERSION="bionic"
 
 install:
   # Taken from this tutorial https://github.com/newdigate/teensy-blink
@@ -29,16 +31,16 @@ install:
   - pip install -e .
     
   # Install ros-base and necessary packages 
-  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $OS_VERSION main\" > /etc/apt/sources.list.d/ros-latest.list"
   - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
   - sudo apt update -q
-  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base ros-kinetic-cv-camera ros-kinetic-web-video-server
+  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-$ROS_VERSION-ros-base ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server
     
   # Install ros package dependencies
   - cd $REPO_ROOT/robot/rospackages
   - sudo rosdep init
   - rosdep update 
-  - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro $ROS_VERSION
 
 script:
   # Set up 'robot' python module and test python installation
@@ -48,7 +50,7 @@ script:
 
   # Set up and initialize catkin workspace for ros packages
   - cd $REPO_ROOT/robot/rospackages
-  - source /opt/ros/kinetic/setup.bash
+  - source /opt/ros/$ROS_VERSION/setup.bash
   - catkin_make
 
   # Allow to compile arduino code in external IDEs or something
