@@ -608,4 +608,18 @@ $(document).ready(() => {
     }
   }
 
+
+  function updateAntennaParams() {
+      antenna_latitude.get(function(lat) {
+          antenna_longitude.get(function(long) {
+              antenna_start_dir.get(function(heading) {
+                  if (latitude && longitude && heading) {
+                      $('#antenna-stats-latitude').text(latitude.toFixed(6))
+                      $('#antenna-stats-longitude').text(longitude.toFixed(6))
+                      $('#antenna-stats-heading').text(heading + '°')
+                  }
+              })
+          })
+      })
+  }
 })
