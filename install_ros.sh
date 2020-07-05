@@ -6,8 +6,8 @@
 # Changes were made to not set up catkin_ws, update the bashrc edits, and remove the confirmation check
 
 echo "[Set the target OS, ROS version"
-name_os_version=${name_os_version:="xenial"}
-name_ros_version=${name_ros_version:="kinetic"}
+name_os_version=${name_os_version:="bionic"}
+name_ros_version=${name_ros_version:="melodic"}
 
 echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y

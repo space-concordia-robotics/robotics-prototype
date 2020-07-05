@@ -61,13 +61,13 @@ if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command 
 then
     echo "You do not have ROS installed, installing..."
     
-    bash install_ros_kinetic.sh
+    bash install_ros.sh
     
 	source ~/.bashrc
 
-    sudo apt install ros-kinetic-rosbridge-suite -y
+    sudo apt install ros-melodic-rosbridge-suite -y
 
-elif [$ROS_VERSION != "kinetic"]
+elif [$ROS_VERSION != "melodic"]
 then
     echo "A different ROS installation has been found... Please uninstall and rerun the script."
     exit 1
@@ -75,11 +75,11 @@ fi
 
 
 # Install camera stuff, these are not ros package dependecies and not installed with rosdep
-sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
+sudo apt-get install ros-melodic-cv-camera ros-melodic-web-video-server -y
 
 
 # Build catkin
-source /opt/ros/kinetic/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
+source /opt/ros/melodic/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
 cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
