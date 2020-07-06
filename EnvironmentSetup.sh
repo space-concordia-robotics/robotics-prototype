@@ -35,9 +35,9 @@ ROS_VERSION="melodic"
 SCRIPT_DIRECTORY=$REPO/EnvironmentSetup.sh
 if [ ! -f $SCRIPT_DIRECTORY ]
 then
-   # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
-   echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
-   exit 1
+    # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
+    echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
+    exit 1
 fi
 
 
@@ -64,11 +64,8 @@ ROS=$(rosversion -d)
 if [ $ROS = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
 then
     echo "You do not have ROS installed, installing..."
-    
     bash install_ros.sh
-    
-	source ~/.bashrc
-
+    source ~/.bashrc
     sudo apt install ros-$ROS_VERSION-rosbridge-suite -y
 
 elif [$ROS != "$ROS_VERSION"]
