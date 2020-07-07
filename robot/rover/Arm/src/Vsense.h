@@ -10,7 +10,7 @@ void vbatt_read() {
 
   // voltage divider backwards (vsense *(r1+r2)/r2
   // = vsense * (10k+2k)/2k = vsense * 6 )
-  float vbatt = vsense * 6.0; 
+  float vbatt = vsense * 6.0;
 
   UART_PORT.print("ARM battery voltage: ");
   UART_PORT.println(vbatt);

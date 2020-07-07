@@ -27,7 +27,7 @@
 #define STEPPER_PID_PERIOD 25 * 1000 //!< initial value for constant speed, but adjusted in variable speed modes
 #define DC_PID_PERIOD 20000 //!< 20ms, because typical pwm signals have 20ms periods
 #define SERVO_PID_PERIOD 20000 //!< 20ms, because typical pwm signals have 20ms periods
-#define SERVO_STOP 1500 //!< microsecond count which stops continuous rotation servos 
+#define SERVO_STOP 1500 //!< microsecond count which stops continuous rotation servos
 
 // DO NOT CHANGE THIS BECAUSE THE CIRCUITRY IS DESIGNED FOR PULLPUP RESISTORS ON LIMIT SWITCHES
 #define LIM_SWITCH_FALL 1 //!< triggered by falling edge
@@ -165,7 +165,7 @@
 #define M6_MAX_SOFT_ANGLE   75.0//65.0 // 150.0 //30.0
 //gripper ext :10, pin 14, gpioD -- 11: pin 36, gpioC
 /*! \brief Sets up all the Teensy pins and sends stop commands to motors that need it.
- * 
+ *
  * \todo Perhaps pinsetup.h & pinsetup.cpp should be changed to motorsetup
  * or just setup as it's also got angle limits and gear ratios
  * \todo If I think about it, physically there's the motor and the joint,

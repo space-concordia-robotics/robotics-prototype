@@ -51,15 +51,15 @@
 #include <sensor_msgs/JointState.h>
 #endif
 
-#include "PinSetup.h"
-#include "Parser.h"
+#include "PinSetup/PinSetup.h"
+#include "Parser/Parser.h"
 #include "Vsense.h"
 // #include "Notes.h" // holds todo info
 // #include "Ideas.h" // holds bits of code that haven't been implemented
-#include "PidController.h"
-#include "RobotMotor.h"
-#include "DcMotor.h"
-#include "ServoMotor.h"
+#include "PidController/PidController.h"
+#include "RobotMotor/RobotMotor.h"
+#include "DcMotor/DcMotor.h"
+#include "ServoMotor/ServoMotor.h"
 /* interrupt priorities */
 #define LIMIT_SWITCH_NVIC_PRIORITY 100 //!< limit switch interrupt priority is highest
 #define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4 //!< encoder interrupt priority is second highest
