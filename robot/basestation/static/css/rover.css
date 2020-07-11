@@ -119,11 +119,6 @@ textarea#write-to-log {
     min-height: 450px;
 }
 
-input#serial-cmd-input {
-    margin: 4px;
-    width: 100%;
-}
-
 .btn-circle {
     width: 15px;
     height: 8px;

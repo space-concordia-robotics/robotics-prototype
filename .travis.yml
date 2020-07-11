@@ -1,20 +1,74 @@
 os: linux
-sudo: false
-dist: trusty
+dist: xenial
 language: python
+cache:
+  - apt
+env:
+  global:
+    - REPO_ROOT=$(pwd)
+    - ARDUINO_IDE_VERSION="1.8.12"
+    - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+    - TEENSYDUINO_VERSION="152"
+    - ROS_PYTHON_VERSION="3.6"
+
+install:
+  # Taken from this tutorial https://github.com/newdigate/teensy-blink
+  - mkdir -p robot/rover/build
+  - mkdir -p ~/Arduino/libraries
+  - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
+  - tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz -C /home/$USER/
+  - curl -fsSL https://www.pjrc.com/teensy/td_$TEENSYDUINO_VERSION/TeensyduinoInstall.linux64 -o TeensyduinoInstall.linux64
+  - chmod +x TeensyduinoInstall.linux64
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16
+  - sleep 3
+  - export DISPLAY=:1.0
+  - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
+  
+  # Install pip dependencies and setup robot python package
+  - pip install -r requirements.txt -r requirements-dev.txt
+  - pip install -e .
+    
+  # Install ros-base and necessary packages 
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  - sudo apt update -q
+  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base ros-kinetic-cv-camera ros-kinetic-web-video-server
+    
+  # Install ros package dependencies
+  - cd $REPO_ROOT/robot/rospackages
+  - sudo rosdep init
+  - rosdep update 
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
+
+script:
+  # Set up 'robot' python module and test python installation
+  - cd $REPO_ROOT
+  - python setup.py develop
+  - pytest --continue-on-collection-errors
+
+  # Set up and initialize catkin workspace for ros packages
+  - cd $REPO_ROOT/robot/rospackages
+  - source /opt/ros/kinetic/setup.bash
+  - catkin_make
+
+  # Allow to compile arduino code in external IDEs or something
+  - cd $REPO_ROOT/robot/rover/build
+  - cmake ..
+  - make
+    
+notifications:
+  email:
+    recipients:
+      - cedricmartens98@gmail.com
+      - william.wells@spaceconcordia.ca
+      - tim.freiman@spaceconcordia.ca
+      - peter.granitski@spaceconcordia.ca
+    on_success: change
+    on_failure: change
+
 python:
   #- "2.7" # not supported
   - "3.6"
 
-# command to install dependencies
-install:
-  - pip install -r requirements.txt
-  - pip install -e .
-
-script:
-  # run all tests even if errors appear
-  - pytest --continue-on-collection-errors
-
-# bypass submodules because gitlab requires authentication for pull
 git:
-  submodules: false
+  submodules: true

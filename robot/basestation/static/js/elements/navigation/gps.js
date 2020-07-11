@@ -1,1 +1,0 @@
-// gps.js code

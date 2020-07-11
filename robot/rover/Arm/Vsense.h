@@ -15,11 +15,11 @@ void vbatt_read() {
   UART_PORT.print("ARM battery voltage: ");
   UART_PORT.println(vbatt);
 
-  if (vbatt < 12) {
-    UART_PORT.println("ARM WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY!");
+  if (vbatt < 12.0) {
+    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
   }
   else if (vbatt > 16.8) {
-    UART_PORT.println("ARM WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
+    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
   }
 };
 

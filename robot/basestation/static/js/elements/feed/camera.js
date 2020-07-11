@@ -87,9 +87,9 @@ $(document).ready(() => {
     })
   }
 
-  function stopRecording(stream_url, callback = () => {}) {
+  function stopRecording(stream_url, rotation, callback = () => {}) {
     const stop_recording_url = '/stop_feed_recording?stream_url=' + stream_url
-    $.ajax(stop_recording_url, {
+    $.ajax(stop_recording_url + '&camera_rotation=' + rotation, {
       success: data => {
         appendToConsole(data.msg)
         callback(data)
@@ -155,15 +155,18 @@ $(document).ready(() => {
     let cameraName = cameraNameElement.attr('stream')
     let cameraStreamName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let cameraPower = cameraPanel.find('.camera-power')
+    let rotation = cameraPanel.attr("rotation")
+
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
       appendToConsole("Please turn on a stream")
       return
     }
 
-    $.ajax('/capture_image?stream_url=' + getStreamURL(cameraStreamName), {
+    $.ajax('/capture_image?stream_url=' + getStreamURL(cameraStreamName) + '&camera_rotation=' + rotation, {
       success: function (data) {
         appendToConsole(data.msg)
+
         },
       error: function () {
         appendToConsole('An error occured while taking a screenshot')
@@ -315,6 +318,8 @@ $(document).ready(() => {
     let cameraPanel = cameraRecording.parents('.camera-panel')
     let cameraPower = cameraPanel.find('.camera-power')
     let cameraName = getCameraName(cameraPanel)
+    let rotation = cameraPanel.attr("rotation")
+
 
     if (getCameraName(cameraPanel) == "" || cameraPower.attr("power-on") == "false"){
       appendToConsole("Please turn on a stream")
@@ -327,7 +332,7 @@ $(document).ready(() => {
 
     if(isRecording)
     {
-      stopRecording(streamURL, (response) => {
+      stopRecording(streamURL, rotation, (response) => {
         if(response.success)
           updateRecordingButton(cameraPanel, false)
       })
