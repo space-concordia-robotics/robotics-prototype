@@ -85,6 +85,15 @@ cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 catkin_make
 
+# Install Node.js and npm
+cd ~/Programming/robotics-prototype
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install Jest
+cd ~/Programming/robotics-prototype/tests/unit/jest
+npm install --save-dev jest@26.1.0
+
 
 # Edit ~/.bash_aliases
 # Ensures that you can connect to someones else's ip to access GUI
