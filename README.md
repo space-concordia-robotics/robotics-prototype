@@ -133,6 +133,19 @@ $ cd ~/Programming/robotics-prototype/robot/rospackages
 $ rosdep install --from-paths src/ --ignore-src -r -y
 $ catkin_make
 ```
+
+### Install [Node.js](https://nodejs.org/en/docs/) and [npm](https://nodejs.org/en/knowledge/getting-started/npm/what-is-npm/)
+```
+$ cd ~/Programming/robotics-prototype
+$ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+$ sudo apt-get install -y nodejs
+```
+### Install [Jest](https://jestjs.io/)
+```
+$ cd ~/Programming/robotics-prototype/tests/unit/jest
+$ npm install --save-dev jest@26.1.0
+```
+
 ### .bashrc edits
 You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` using the GNU nano text editor, you can run `eb`. (this shortcut was added in your .bashrc file during the scripted ROS installation, among a few others)
 ```
