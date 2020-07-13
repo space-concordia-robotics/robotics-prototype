@@ -112,17 +112,17 @@ $(document).ready(() => {
               }
           })
       })
+  }
 
-      function setupAntennaStats(latitude, longitude, heading) {
-          $('#antenna-stats-latitude').text(latitude.toFixed(6))
-          $('#antenna-stats-longitude').text(longitude.toFixed(6))
-          $('#antenna-stats-heading').text(heading + '°')
-      }
+  function setupAntennaStats(latitude, longitude, heading) {
+      $('#antenna-stats-latitude').text(latitude.toFixed(6))
+      $('#antenna-stats-longitude').text(longitude.toFixed(6))
+      $('#antenna-stats-heading').text(heading + '°')
+  }
 
-      function setupGoalStats(latitude, longitude) {
-          $('#goal-stats-latitude').text(latitude.toFixed(6))
-          $('#goal-stats-longitude').text(longitude.toFixed(6))
-      }
+  function setupGoalStats(latitude, longitude) {
+      $('#goal-stats-latitude').text(latitude.toFixed(6))
+      $('#goal-stats-longitude').text(longitude.toFixed(6))
   }
 
   goalList = {}
@@ -205,7 +205,7 @@ $(document).ready(() => {
     try {
         switch ($("#antenna-latitude-fieldset").attr('format')) {
           case 'decimal-degrees': {
-            let latitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.latitude").val()))
+            latitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.latitude").val()))
 
             if (isNaN(latitude)) {
               throw "Bad Input latitude for decimal-degrees format"
@@ -231,7 +231,7 @@ $(document).ready(() => {
           }
 
           case 'degrees-minutes-seconds': {
-            let decimal = parseFloat($('#antenna-degrees-minutes-seconds-deg-input.latitude').val())
+            let decimal = parseFloat($('#antenna-degrees-minutes-seconds-degree-input.latitude').val())
             let minutes = parseFloat($('#antenna-degrees-minutes-seconds-minute-input.latitude').val())
             let seconds = parseFloat($('#antenna-degrees-minutes-seconds-second-input.latitude').val())
 
@@ -253,7 +253,7 @@ $(document).ready(() => {
 
         switch ($("#antenna-longitude-fieldset").attr('format')) {
           case 'decimal-degrees': {
-            let longitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.longitude").val()))
+            longitude = parseFloat(($("#antenna-decimal-degrees-decimal-degree-input.longitude").val()))
 
             if (isNaN(longitude)) {
               throw "Bad Input longitude for decimal-degrees"
@@ -315,9 +315,7 @@ $(document).ready(() => {
         antenna_latitude.set(latitude)
         antenna_longitude.set(longitude)
         antenna_start_dir.set(bearing)
-        $('#antenna-stats-latitude').text(latitude.toFixed(6))
-        $('#antenna-stats-longitude').text(longitude.toFixed(6))
-        $('#antenna-stats-heading').text(bearing)
+        setupAntennaStats(latitude, longitude, bearing)
         logInfo('Antenna parameters have been set!')
     } catch (e) {
         logErr(e)
@@ -433,16 +431,7 @@ $(document).ready(() => {
         let longitude_format = null
 
         latitude_format = $('#goal-latitude-fieldset.goal-' + current).attr('format')
-        // if (latitude_format != 'decimal-degrees' && latitude_format != 'degrees-decimal-minutes'
-        //     && latitude_format != 'degrees-decimal-minutes') {
-        //       logErr('Error with goal latitude format')
-        //     }
-
         longitude_format = $('#goal-longitude-fieldset.goal-' + current).attr('format')
-        // if (longitude_format != 'decimal-degrees' && longitude_format != 'degrees-decimal-minutes'
-        //     && longitude_format != 'degrees-decimal-minutes') {
-        //       logErr('Error with goal longitude format')
-        //     }
 
         $('#goal-change-btn.goal-' + current).prop('disabled', false)
         $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
@@ -600,6 +589,8 @@ $(document).ready(() => {
 
         create_goal_publisher.publish(goalData)
 
+        setupGoalStats(latitude, longitude)
+        logInfo('Goal parameters have been set!')
       } catch (e) {
         $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
         $('#goal-change-btn.goal-' + current).prop('disabled', true)
@@ -610,13 +601,11 @@ $(document).ready(() => {
 
 
   function updateAntennaParams() {
-      antenna_latitude.get(function(lat) {
-          antenna_longitude.get(function(long) {
+      antenna_latitude.get(function(latitude) {
+          antenna_longitude.get(function(longitude) {
               antenna_start_dir.get(function(heading) {
                   if (latitude && longitude && heading) {
-                      $('#antenna-stats-latitude').text(latitude.toFixed(6))
-                      $('#antenna-stats-longitude').text(longitude.toFixed(6))
-                      $('#antenna-stats-heading').text(heading + '°')
+                      setupAntennaStats(latitude, longitude, heading)
                   }
               })
           })
