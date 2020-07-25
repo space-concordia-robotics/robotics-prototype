@@ -205,7 +205,6 @@ function initRosWeb () {
     // sets voltage to two decimal points
     let voltage = message.data.toFixed(2)
     $('#battery-voltage').text(voltage)
-    $.notify("New voltage value received!!", "success") // To delete Hamza
 
     // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
     if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
@@ -228,7 +227,7 @@ function initRosWeb () {
     } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
-
+        $('#battery-temperature').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
       } else {
         textColor('#battery-voltage', 'white')
       }
@@ -282,7 +281,8 @@ function initRosWeb () {
           $obj.css({'color': 'white'})
         }
 
-        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
+        if ($obj.attr('acceptable') === '0')
+         $obj.attr('acceptable', '1')
       }
     });
 
