@@ -243,6 +243,7 @@ function initRosWeb () {
   })
   battery_temps_listener.subscribe(function (message) {
     // sets temperatures to two decimal points
+    console.log(message)
     let temps = [
       parseFloat(message.x).toFixed(2),
       parseFloat(message.y).toFixed(2),
@@ -276,7 +277,7 @@ function initRosWeb () {
       } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
-
+          $('#battery-temp-1').notify('Temperature hot!', 'warn',{position:"bottom"})
         } else {
           $obj.css({'color': 'white'})
         }
