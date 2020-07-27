@@ -70,10 +70,10 @@ fi
 #install prereqs
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
-sh -c "sudo apt install python3.6 python3.6-venv git -y"
+sudo apt install python3.6 python3.6-venv git python3-pip -y
 
 # Setup venv
-sh -c "python3.6 -m venv venv"
+python3.6 -m venv venv
 source venv/bin/activate
 
 
