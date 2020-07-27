@@ -2,8 +2,7 @@
 # Apache License 2.0
 # Copyright (c) 2017, ROBOTIS CO., LTD.
 
-# This script is adapted to be the Space Concordia Robotics Division needs
-# Changes were made to not set up catkin_ws, update the bashrc edits, and remove the confirmation check
+# This script is adapted to the Space Concordia Robotics Division needs
 
 echo "[Set the target OS, ROS version"
 name_os_version=${name_os_version:="bionic"}
@@ -41,46 +40,23 @@ echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-echo "[Install the ros-desktop-full and all rqt plugins]"
-sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-*
+echo "[Install the ros and extra ros packages]"
+sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server 
 
-echo "[Initialize rosdep]"
+echo "[Initialize rosdep and install dependencies]"
 sudo sh -c "rosdep init"
 rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+
+# Build catkin
+echo '[Build ros packages using catkin]'
+source /opt/ros/$ROS_VERSION/setup.bash 
+cd $REPO/robot/rospackages
+catkin_make
 
 echo "[Environment setup and getting rosinstall]"
 source /opt/ros/$name_ros_version/setup.sh
 sudo apt-get install -y python-rosinstall
-
-echo "[Set the ROS environment]"
-sh -c "echo \"\n\n#------ POST ROS INSTALLATION ------\" >> ~/.bashrc"
-sh -c "echo \"alias eb='nano ~/.bashrc'\" >> ~/.bashrc"
-sh -c "echo \"alias sb='source ~/.bashrc'\" >> ~/.bashrc"
-sh -c "echo \"alias gs='git status'\" >> ~/.bashrc"
-sh -c "echo \"alias gp='git pull'\" >> ~/.bashrc"
-sh -c "echo \"\nalias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'\" >> ~/.bashrc"
-sh -c "echo \"alias cm='cw && catkin_make'\" >> ~/.bashrc"
-sh -c "echo \"\nexport ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
-sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
-
-
-echo 'ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
-BASE="$ROBOTICS_WS/robot/basestation"
-ROVER="$ROBOTICS_WS/robot/rover"
-ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
-BASH_A="~/.bash_aliases"
-NANORC="~/.nanorc"
-
-# general shortcuts
-alias ..="cd .."
-alias b="cd -"
-alias robotics="cd $ROBOTICS_WS"
-alias base="cd $BASE"
-alias rover="cd $ROVER"
-alias arm="cd $ROVER/ArmDriverUnit"
-alias wheels="cd $ROVER/MobilePlatform"
-alias rostings="cd $ROSPACKAGES"
-alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"' >> ~/.bash_aliases
 
 source $HOME/.bashrc
 

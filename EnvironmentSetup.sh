@@ -3,7 +3,6 @@
 
 APPEND_TO_BASH="
 
-
 #------ ROBOTICS SETTINGS ------
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
@@ -13,7 +12,35 @@ APPEND_TO_BASH="
 . ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
+#------ POST ROS INSTALLATION ------
+alias eb='nano ~/.bashrc'
+alias sb='source ~/.bashrc'
+alias gs='git status'
+alias gp='git pull'
+alias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'
+alias cm='cw && catkin_make'
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_HOSTNAME=localhost
 "
+
+APPEND_TO_BASH_ALIASES='
+ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
+BASE="$ROBOTICS_WS/robot/basestation"
+ROVER="$ROBOTICS_WS/robot/rover"
+ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
+BASH_A="~/.bash_aliases"
+NANORC="~/.nanorc"
+
+# general shortcuts
+alias ..="cd .."
+alias b="cd -"
+alias robotics="cd $ROBOTICS_WS"
+alias base="cd $BASE"
+alias rover="cd $ROVER"
+alias arm="cd $ROVER/ArmDriverUnit"
+alias wheels="cd $ROVER/MobilePlatform"
+alias rostings="cd $ROSPACKAGES"
+alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"'
 
 FINAL_MESSAGE="
 
@@ -29,11 +56,10 @@ The script will now exit, you should test the installation using these steps:
 
 REPO="/home/$USER/Programming/robotics-prototype"
 ROS_VERSION="melodic"
-## START
 
 #check if in proper directory
-SCRIPT_DIRECTORY=$REPO/EnvironmentSetup.sh
-if [ ! -f $SCRIPT_DIRECTORY ]
+SCRIPT_LOCATION=$REPO/EnvironmentSetup.sh
+if [ ! -f $SCRIPT_LOCATION ]
 then
     # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
     echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
@@ -50,6 +76,7 @@ sh -c "sudo apt install python3.6 python3.6-venv git -y"
 sh -c "python3.6 -m venv venv"
 source venv/bin/activate
 
+
 # Install Requirements
 pip install -U pip
 pip install -r requirements.txt -r requirements-dev.txt
@@ -59,31 +86,8 @@ pip install -r requirements.txt -r requirements-dev.txt
 python setup.py develop
 
 
-# Check if ros is already installed, install it if it isn't
-ROS=$(rosversion -d)
-if [ $ROS = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
-then
-    echo "You do not have ROS installed, installing..."
-    bash install_ros.sh
-    source ~/.bashrc
-    sudo apt install ros-$ROS_VERSION-rosbridge-suite -y
-
-elif [$ROS != "$ROS_VERSION"]
-then
-    echo "A different ROS installation has been found... Please uninstall and rerun the script."
-    exit 1
-fi
-
-
-# Install camera stuff, these are not ros package dependecies and not installed with rosdep
-sudo apt-get install ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server -y
-
-
-# Build catkin
-source /opt/ros/$ROS_VERSION/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
-cd $REPO/robot/rospackages
-rosdep install --from-paths src --ignore-src -r -y
-catkin_make
+# Install ROS
+bash install_ros.sh
 
 
 # Edit ~/.bash_aliases
@@ -91,6 +95,7 @@ catkin_make
 # Add aliases to terminal
 # Makes your terminal start in (venv)
 echo "$APPEND_TO_BASH" >> ~/.bashrc
+echo "$APPEND_TO_BASH_ALIASES" >> ~/.bash_aliases
 source ~/.bashrc
 
 
@@ -107,6 +112,7 @@ cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 # Install and setup arduino IDE + Teensyduino
 bash install_arduino_teensyduino.sh
+
 
 # Exit
 echo "$FINAL_MESSAGE"
