@@ -7,6 +7,7 @@
 echo "[Set the target OS, ROS version"
 name_os_version=${name_os_version:="bionic"}
 name_ros_version=${name_ros_version:="melodic"}
+REPO=/home/$USER/Programming/robotics-prototype
 
 echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y
@@ -41,16 +42,17 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 echo "[Install the ros and extra ros packages]"
-sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server 
+sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server python-rosdep
 
 echo "[Initialize rosdep and install dependencies]"
 sudo sh -c "rosdep init"
 rosdep update
+cd $REPO/robot/rospackages
 rosdep install --from-paths src --ignore-src -r -y
 
 # Build catkin
 echo '[Build ros packages using catkin]'
-source /opt/ros/$ROS_VERSION/setup.bash 
+source /opt/ros/$name_ros_version/setup.bash 
 cd $REPO/robot/rospackages
 catkin_make
 

@@ -116,4 +116,3 @@ bash install_arduino_teensyduino.sh
 
 # Exit
 echo "$FINAL_MESSAGE"
-exit 0
