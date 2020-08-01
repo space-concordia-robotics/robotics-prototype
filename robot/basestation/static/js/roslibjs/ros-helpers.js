@@ -107,17 +107,18 @@ function initRosWeb () {
     console.log('gripper_postion:', msg)
   })
 
-  // setup a subscriber for the arm_joint_states topic
+  // setup a subscriber for the joint_states topic
   arm_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
-    name: 'arm_joint_states',
+    name: 'joint_states',
     messageType: 'sensor_msgs/JointState'
   })
   arm_joint_states_listener.subscribe(function (message) {
+    console.log(message)
     for (var angle in message.position) {
       // let motor = angle+1;
       let motor = String.fromCharCode(angle.charCodeAt(0) + 1)
-      $('#m' + motor + '-angle').text(message.position[angle])
+      $('#m' + motor + '-angle').text(((180/Math.PI) * message.position[angle]).toFixed(2))
     }
   })
   // setup a subscriber for the arm_feedback topic
