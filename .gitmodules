@@ -13,6 +13,3 @@
 [submodule "robot/rospackages/src/robot_state_publisher"]
 	path = robot/rospackages/src/robot_state_publisher
 	url = https://github.com/ros/robot_state_publisher.git
-[submodule "robotics-electronics"]
-	path = robotics-electronics
-	url = https://gitlab.com/space-concordia-robotics/rover2018-elec.git

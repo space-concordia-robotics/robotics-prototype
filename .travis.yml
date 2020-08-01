@@ -1,11 +1,18 @@
 os: linux
-dist: trusty # Ubuntu 14, Xenial (Ubuntu 16) seems to crash python...
+dist: xenial
 language: python
-before_install:
-    # Taken from this tutorial https://github.com/newdigate/teensy-blink
-  - export ARDUINO_IDE_VERSION="1.8.12"
-  - export ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
-  - export TEENSYDUINO_VERSION="152"
+cache:
+  - apt
+env:
+  global:
+    - REPO_ROOT=$(pwd)
+    - ARDUINO_IDE_VERSION="1.8.12"
+    - ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+    - TEENSYDUINO_VERSION="152"
+    - ROS_PYTHON_VERSION="3.6"
+
+install:
+  # Taken from this tutorial https://github.com/newdigate/teensy-blink
   - mkdir -p robot/rover/build
   - mkdir -p ~/Arduino/libraries
   - wget --quiet https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
@@ -16,32 +23,39 @@ before_install:
   - sleep 3
   - export DISPLAY=:1.0
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
-install:
-  # Manually installing the required libraries, to be removed after #362 is merged, as cmake will automatically install this.
-  - MOTOR_SHIELD_VERSION=1.0.9
-  - ARDUINO_BLUE_VERSION=3.0.1
-  - LSM303_VERSION=3.0.1
-  - SPARKFUN_I2C_VERSION=1.0.2
-  - curl -fsSlL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library/archive/$MOTOR_SHIELD_VERSION.tar.gz > Adafruit_Motor_Shield_V2_Library.tar.gz
-  - curl -fsSlL https://github.com/purwar2016/ArduinoBlue-library/archive/$ARDUINO_BLUE_VERSION.tar.gz > ArduinoBlue-library.tar.gz
-  - curl -fsSlL https://github.com/pololu/lsm303-arduino/archive/$LSM303_VERSION.tar.gz > lsm303-arduino.tar.gz
-  - curl -fsSlL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library/archive/v$SPARKFUN_I2C_VERSION.tar.gz > SparkFun_I2C_GPS_Arduino_Library.tar.gz
-  - tar xf Adafruit_Motor_Shield_V2_Library.tar.gz -C ~/Arduino/libraries
-  - tar xf ArduinoBlue-library.tar.gz -C ~/Arduino/libraries
-  - tar xf lsm303-arduino.tar.gz -C ~/Arduino/libraries
-  - tar xf SparkFun_I2C_GPS_Arduino_Library.tar.gz -C ~/Arduino/libraries
-  - mv ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library-$MOTOR_SHIELD_VERSION ~/Arduino/libraries/Adafruit_Motor_Shield_V2_Library
-  - mv ~/Arduino/libraries/ArduinoBlue-library-$ARDUINO_BLUE_VERSION ~/Arduino/libraries/ArduinoBlue
-  - mv ~/Arduino/libraries/lsm303-arduino-$LSM303_VERSION ~/Arduino/libraries/LSM303
-  - mv ~/Arduino/libraries/SparkFun_I2C_GPS_Arduino_Library-$SPARKFUN_I2C_VERSION ~/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control
-  - pip install -r requirements.txt
+  
+  # Install pip dependencies and setup robot python package
+  - pip install -r requirements.txt -r requirements-dev.txt
   - pip install -e .
+    
+  # Install ros-base and necessary packages 
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu xenial main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  - sudo apt update -q
+  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-kinetic-ros-base ros-kinetic-cv-camera ros-kinetic-web-video-server
+    
+  # Install ros package dependencies
+  - cd $REPO_ROOT/robot/rospackages
+  - sudo rosdep init
+  - rosdep update 
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro kinetic
+
 script:
-  - cd robot/rover/build
+  # Set up 'robot' python module and test python installation
+  - cd $REPO_ROOT
+  - python setup.py develop
+  - pytest --continue-on-collection-errors
+
+  # Set up and initialize catkin workspace for ros packages
+  - cd $REPO_ROOT/robot/rospackages
+  - source /opt/ros/kinetic/setup.bash
+  - catkin_make
+
+  # Allow to compile arduino code in external IDEs or something
+  - cd $REPO_ROOT/robot/rover/build
   - cmake ..
   - make
-  - cd ../../..
-  - pytest --continue-on-collection-errors
+    
 notifications:
   email:
     recipients:
@@ -49,7 +63,8 @@ notifications:
       - william.wells@spaceconcordia.ca
       - tim.freiman@spaceconcordia.ca
       - peter.granitski@spaceconcordia.ca
-      - joshua.glazer@spaceconcordia.ca
+      - nikolas.darlas@spaceconcordia.ca
+      - gabriel.martinica@spaceconcordia.ca
     on_success: change
     on_failure: change
 
@@ -57,6 +72,5 @@ python:
   #- "2.7" # not supported
   - "3.6"
 
-# bypass submodules because gitlab requires authentication for pull
 git:
-  submodules: false
+  submodules: true
