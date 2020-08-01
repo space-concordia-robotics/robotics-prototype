@@ -68,9 +68,9 @@ fi
 
 
 #install prereqs
-sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
-sudo apt install python3.6 python3.6-venv git python3-pip -y
+sudo apt install python3.6-venv git python3-pip -y
+
 
 # Setup venv
 python3.6 -m venv venv
