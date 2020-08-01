@@ -114,7 +114,6 @@ function initRosWeb () {
     messageType: 'sensor_msgs/JointState'
   })
   arm_joint_states_listener.subscribe(function (message) {
-    console.log(message)
     for (var angle in message.position) {
       // let motor = angle+1;
       let motor = String.fromCharCode(angle.charCodeAt(0) + 1)

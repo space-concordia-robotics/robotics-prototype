@@ -78,7 +78,6 @@ def publish_joint_states(message):
         return
     # publish it
     anglePub.publish(msg)
-    jointPub.publish(msg)
     rospy.logdebug(msg.position)
 
 def stripFeedback(data):
