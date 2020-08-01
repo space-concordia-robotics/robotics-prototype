@@ -49,7 +49,7 @@ The script will now exit, you should test the installation using these steps:
 1. Open a new terminal window to apply changes
 -> it should automatically start with virtual env activated and you should be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
 2. Test python by executing 'pytest' while in the 'robotics-prototype' directory
-3. verify ROS-Kinetic installation using 'roscore'
+3. verify ROS installation using 'roscore'
 4. Test GUI by running 'rosgui' and then 'startgui'
 -> to see the GUI open a browser (chrome) and go to localhost:5000
 #################################"
