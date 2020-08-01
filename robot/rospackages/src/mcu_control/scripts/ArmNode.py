@@ -11,6 +11,7 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
+from math import radians
 
 mcuName = 'arm'
 
@@ -71,12 +72,13 @@ def publish_joint_states(message):
     msg.header.stamp = rospy.Time.now() # Note you need to call rospy.init_node() before this will work
     try:
         for angle in angles:
-            msg.position.append(float(angle))
+            msg.position.append(radians(float(angle)))
     except:
         rospy.logwarn('trouble parsing motor angles')
         return
     # publish it
     anglePub.publish(msg)
+    jointPub.publish(msg)
     rospy.logdebug(msg.position)
 
 def stripFeedback(data):
@@ -99,7 +101,7 @@ if __name__ == '__main__':
     if not search_success:
         sys.exit(1)
 
-    angle_pub_topic = '/arm_joint_states'
+    angle_pub_topic = '/joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
     anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
 
