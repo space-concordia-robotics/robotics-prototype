@@ -48,9 +48,8 @@ def attempt_uart(mcuName):
             dat=''
             data=None
             try:
-                dat = ser.readline().decode()
-                if type == arm:
-                    data = stripFeedback(dat) #not present in pdsnode
+                data = ser.readline().decode()
+                print('data', data)
             except:
                 rospy.logwarn('trouble reading from serial port')
             if data is not None:
