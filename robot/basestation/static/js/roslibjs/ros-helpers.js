@@ -212,7 +212,7 @@ function initRosWeb () {
 
       if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
         $('#battery-voltage').attr('acceptable', '0')
-        errorSound()
+        warningSound()
         if (voltage > MAX_VOLTAGE) {
           navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
         } else if (voltage < MIN_VOLTAGE){
@@ -260,7 +260,7 @@ function initRosWeb () {
 
         if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
           $obj.attr('acceptable', '0')
-          errorSound()
+          warningSound()
           if (temperature > MAX_TEMP) {
             navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
           } else if (temperature < MIN_TEMP) {
