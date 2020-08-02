@@ -25,7 +25,7 @@ def get_serial():
 
 def attempt_usb(mcuName):
     startListening = time.time() 
-    ser.write(str.encode(mcuName + ' who\n'))
+    ser.write(str.encode('who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             response = ser.readline().decode()
@@ -42,7 +42,7 @@ def attempt_usb(mcuName):
 
 def attempt_uart(mcuName):
     startListening = time.time()
-    ser.write(str.encode(mcuName + ' who\n'))
+    ser.write(str.encode('who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             dat=''
