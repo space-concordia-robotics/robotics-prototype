@@ -32,25 +32,25 @@ $(document).ready(() => {
       messageType: 'std_msgs/String'
   })
   goal_list_subscriber.subscribe(function(message) {
-      goalList = message.goal_list
-      if (goalCount != goalList.length) {
-          goalCount = goalList.length
+    goalList = message.goal_list
+    if (goalCount != goalList.length) {
+        goalCount = goalList.length
 
-      }
-      if (goalCount > 0) {
-          goal_latitude.set(goalList[0].latitude)
-          goal_longitude.set(goalList[0].longitude)
-          $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
-          $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
-      } else {
-          goal_latitude.set(false)
-          goal_longitude.set(false)
-          $('#goal-stats-latitude').text('----')
-          $('#goal-stats-longitude').text('----')
-      }
+    }
+    if (goalCount > 0) {
+        goal_latitude.set(goalList[0].latitude)
+        goal_longitude.set(goalList[0].longitude)
+        $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
+        $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
+    } else {
+        goal_latitude.set(false)
+        goal_longitude.set(false)
+        $('#goal-stats-latitude').text('----')
+        $('#goal-stats-longitude').text('----')
+    }
 
-      // this is a meme implementation of a loop to update the params without resorting to a message type + subscriber + publisher
-      updateAntennaParams()
+    // this is a meme implementation of a loop to update the params without resorting to a message type + subscriber + publisher
+    updateAntennaParams()
   })
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
@@ -125,7 +125,7 @@ $(document).ready(() => {
       $('#goal-stats-longitude').text(longitude.toFixed(6))
   }
 
-  goalList = {}
+  goalList = []
   goalCount = 0
   createAntennaInputButtonsHandler("button[id^='antenna-']")
 
@@ -328,7 +328,6 @@ $(document).ready(() => {
   // onClick events for goals data entry buttons
   function createGoalsInputButtonsHandler(button) {
     $(button).mouseup(e => {
-      console.log('test')
       event.preventDefault()
       let buttonId = $(e.target).attr("id").split("-")
       let buttonClass = $(e.target).attr("class").split(" ")
@@ -378,21 +377,21 @@ $(document).ready(() => {
 
   // functions
   function toggleGoals() {
-    // let goalTemplate = $('#created-goal-template').html()
-    // for (let i = 0; i < goalCount; i++) {
-    //   $("#goal-modal-body-content").append(goalTemplate)
-    //   $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
-    //   $(".goal-" + i).find('*').addClass('goal-' + i)
-    //
-    //   createGoalButtons(i)
-    //
-    //   $('#goal-name.goal-' + i).val(goalList[i].name)
-    //   $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
-    //   $('#goal-change-btn.goal-' + i).prop('disabled', false)
-    //   $('div.goal-' + i + ' fieldset').prop('disabled', true)
-    //   $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
-    //   $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
-    // }
+    let goalTemplate = $('#created-goal-template').html()
+    for (let i = 0; i < goalCount; i++) {
+      $("#goal-modal-body-content").append(goalTemplate)
+      $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
+      $(".goal-" + i).find('*').addClass('goal-' + i)
+
+      createGoalButtons(i)
+
+      $('#goal-name.goal-' + i).val(goalList[i].name)
+      $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
+      $('#goal-change-btn.goal-' + i).prop('disabled', false)
+      $('div.goal-' + i + ' fieldset').prop('disabled', true)
+      $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
+      $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
+    }
   }
 
   function addGoal() {
@@ -568,8 +567,7 @@ $(document).ready(() => {
 
         if (goalName.length != 0) {
           goalElem.attr('value', goalName)
-        }
-        else {
+        } else {
           goalElem.attr('value', 'Goal-' + current)
         }
 
@@ -587,9 +585,14 @@ $(document).ready(() => {
             latitude: latitude
         })
 
-        create_goal_publisher.publish(goalData)
+        goalList.push(goalData)
 
-        setupGoalStats(latitude, longitude)
+        let goalDataList = new ROSLIB.Message({
+            goal_list: goalList
+        })
+
+        goal_list_subscriber.publish(goalDataList)
+
         logInfo('Goal parameters have been set!')
       } catch (e) {
         $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
