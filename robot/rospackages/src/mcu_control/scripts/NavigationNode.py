@@ -61,7 +61,6 @@ if __name__ == '__main__':
                   navigation_pub_topic + '" topic')
     navigationPub = rospy.Publisher(navigation_pub_topic, Point, queue_size=10)
 
-    #gotGpsPos = False
     rospy.set_param('has_gps_goal', False)
 
     gpsGoal = {'latitude': None, 'longitude': None}
