@@ -22,9 +22,6 @@ To use the automatic setup script you must first clone the repo using the comman
 ```
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
 ```
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
-
 When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
 $ cd ~/Programming/robotics-prototype
@@ -92,6 +89,15 @@ Still in the root directory,
 Running `pytest` without doing `python setup.py develop` will give a ModuleNotFound error. To read up more on this, click [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Troubleshooting)
 
 To deactivate virtualenv, run `deactivate`.
+
+### Install and setup [Arduino](https://www.arduino.cc/) + [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
+
+Run `./install_arduino_teensyduino.sh`
+
+After the script is done, you should be able to run arduino by `cd $HOME/arduino-<version-numver>/` and running: `./arduino`.
+
+To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
+
 ### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
 ```
 bash ./install_ros_kinetic.sh

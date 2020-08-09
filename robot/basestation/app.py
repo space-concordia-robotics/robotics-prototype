@@ -18,7 +18,8 @@ from robot.util.utils import run_shell
 from shlex import split
 
 import robot.basestation.stream_capture as stream_capture
-from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, is_recording_stream, stream_capture
+from robot.basestation.stream_capture import start_recording_feed, stop_recording_feed, \
+is_recording_stream, stream_capture, add_rotation
 import robot.basestation.ros_utils as ros_utils
 from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_ip
 
@@ -189,8 +190,9 @@ def rover_drive():
 
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
-    stream_url = request.args['stream_url']
-    success, message = stream_capture(stream_url)
+    stream_url= request.args['stream_url']
+    rotation = int(request.args['camera_rotation'])
+    success, message = stream_capture(stream_url, rotation)
     return jsonify(success=success, msg=message)
 
 
@@ -207,8 +209,17 @@ def initiate_feed_recording():
 @app.route("/stop_feed_recording/", methods=["POST", "GET"])
 def stop_feed_recording():
     stream_url = request.args['stream_url']
+    rotation = int(request.args['camera_rotation'])
     if is_recording_stream(stream_url):
+        success, message = add_rotation(stream_url, rotation)
+
+        if not success:
+            print('add_rotation method failed:', message)
+
         success, message = stop_recording_feed(stream_url)
+
+        if not success:
+            print('stop_recording_feed method failed:', message)
         return jsonify(success=success, msg=message)
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")

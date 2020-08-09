@@ -199,7 +199,7 @@ function initRosWeb () {
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
+    messageType: 'mcu_control/Voltage'
   })
   battery_voltage_listener.subscribe(function (message) {
     // sets voltage to two decimal points
@@ -239,7 +239,7 @@ function initRosWeb () {
   battery_temps_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_temps',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/ThermistorTemps'
   })
   battery_temps_listener.subscribe(function (message) {
     // sets temperatures to two decimal points
@@ -290,7 +290,7 @@ function initRosWeb () {
   wheel_motor_currents_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'wheel_motor_currents',
-    messageType: 'sensor_msgs/JointState'
+    messageType: 'mcu_control/Currents'
   })
   wheel_motor_currents_listener.subscribe(function (message) {
     $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
