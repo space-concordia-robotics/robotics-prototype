@@ -423,19 +423,23 @@ $(document).ready(() => {
   }
 
   function goalConfirmButtonHandler(current) {
-        let latitude_format = null
-        let longitude_format = null
+    let latitude_format = null
+    let longitude_format = null
 
-        latitude_format = $('#goal-latitude-fieldset.goal-' + current).attr('format')
-        longitude_format = $('#goal-longitude-fieldset.goal-' + current).attr('format')
+    latitude_format = $('#goal-latitude-fieldset.goal-' + current).attr('format')
+    longitude_format = $('#goal-longitude-fieldset.goal-' + current).attr('format')
 
-        $('#goal-change-btn.goal-' + current).prop('disabled', false)
-        $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
+    if (latitude_format !=  null && longitude_format !=  null) {
+      $('#goal-change-btn.goal-' + current).prop('disabled', false)
+      $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
 
-        $('#goal-latitude-select-format.goal-' + current).detach()
-        $('#goal-longitude-select-format.goal-' + current).detach()
+      $('#goal-latitude-select-format.goal-' + current).detach()
+      $('#goal-longitude-select-format.goal-' + current).detach()
 
-        setGoalData(current, latitude_format, longitude_format)
+      setGoalData(current, latitude_format, longitude_format)
+    } else {
+      logWarn('Please select a latitude and longitude format.')
+    }
   }
 
   function goalDeleteButtonHandler(current) {
