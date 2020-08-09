@@ -1,4 +1,7 @@
 $(document).ready(() => {
+  goalList = []
+  goalCount = 0
+
   // setup a subscriber for the rover_position topic
   let rover_position_listener = new ROSLIB.Topic({
       ros: ros,
@@ -49,7 +52,6 @@ $(document).ready(() => {
         $('#goal-stats-longitude').text('----')
     }
 
-    // this is a meme implementation of a loop to update the params without resorting to a message type + subscriber + publisher
     updateAntennaParams()
   })
   // setup gps parameters for antenna directing
@@ -107,6 +109,9 @@ $(document).ready(() => {
                   has_gps_goal.set(true)
                   logInfo('Found goal coordinates to set')
                   setupGoalStats(latitude, longitude)
+                  goalList = JSON.parse(localStorage.getItem("goalList"))
+                  goalCount = goalList.length
+                  toggleGoals()
               } else {
                   logInfo('Goal parameters not found')
               }
@@ -125,8 +130,7 @@ $(document).ready(() => {
       $('#goal-stats-longitude').text(longitude.toFixed(6))
   }
 
-  goalList = []
-  goalCount = 0
+
   createAntennaInputButtonsHandler("button[id^='antenna-']")
 
   // set antenna data
@@ -345,12 +349,6 @@ $(document).ready(() => {
 
       } else {
           switch (buttonId[1]) {
-            case 'toggle': {
-              // add new and its input templates
-              toggleGoals()
-              break;
-            }
-
             case 'new': {
               // add new and its input templates
               addGoal()
@@ -402,7 +400,6 @@ $(document).ready(() => {
     $(".goal-" + goalCount).find('*').addClass('goal-' + goalCount)
 
     createGoalButtons(goalCount)
-    goalCount++
   }
 
   function goalHandlerTemplate(mode, format, current) {
@@ -446,10 +443,30 @@ $(document).ready(() => {
     implement ROS goal deleting
     \------------------------*/
     let goalName = $('#goal-name.goal-' + current).val()
+
+    for (let i = 0; i < goalCount; i++) {
+      if (goalList[i].name == goalName) {
+        goalList.splice(i,i+1)
+        break
+      }
+    }
+
+    let goalDataList = new ROSLIB.Message({
+        goal_list: goalList
+    })
+
+    goal_list_subscriber.publish(goalDataList)
+    localStorage.setItem('goalList', JSON.stringify(goalList))
+
     let msg = new ROSLIB.Message({
         data: goalName
     })
     delete_goal_publisher.publish(msg)
+
+    if (goalList[0]) {
+      goal_latitude.set(goalList[0].latitude)
+      goal_longitude.set(goalList[0].longitude)
+    }
 
     $('.goal-' + current).remove()
     goalCount--
@@ -465,7 +482,7 @@ $(document).ready(() => {
     try {
         for (let i = 0; i < goalList.length; i++) {
             if (goalName == goalList[i].name) {
-                throw 'Enter different name'
+                throw 'Enter a different goal name'
             }
         }
 
@@ -592,6 +609,9 @@ $(document).ready(() => {
         })
 
         goal_list_subscriber.publish(goalDataList)
+
+        localStorage.setItem('goalList', JSON.stringify(goalList))
+        goalCount++
 
         logInfo('Goal parameters have been set!')
       } catch (e) {
