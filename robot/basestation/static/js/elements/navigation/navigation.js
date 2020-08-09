@@ -38,19 +38,29 @@ $(document).ready(() => {
       messageType: 'std_msgs/String'
   })
   goal_list_subscriber.subscribe(function(message) {
-    goalList = message.goal_list
-    if (goalList.length > 0) {
-        goal_latitude.set(goalList[0].latitude)
-        goal_longitude.set(goalList[0].longitude)
-        $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
-        $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
-    } else {
-        goal_latitude.set(false)
-        goal_longitude.set(false)
-        $('#goal-stats-latitude').text('----')
-        $('#goal-stats-longitude').text('----')
-    }
+    if (goalList.length != message.goal_list.length) {
+      if (message.goal_list.length > 0) {
+          goal_latitude.set(message.goal_list[0].latitude)
+          goal_longitude.set(message.goal_list[0].longitude)
+          $('#goal-stats-latitude').text(message.goal_list[0].latitude.toFixed(6))
+          $('#goal-stats-longitude').text(message.goal_list[0].longitude.toFixed(6))
+      } else {
+          goal_latitude.set(false)
+          goal_longitude.set(false)
+          $('#goal-stats-latitude').text('----')
+          $('#goal-stats-longitude').text('----')
+      }
 
+      if (goalList.length < message.goal_list.length) {
+        goalCount++
+      } else {
+        untoggleGoals()
+      }
+
+      goalList = message.goal_list
+
+      toggleGoals()
+    }
     updateAntennaParams()
   })
   // setup gps parameters for antenna directing
@@ -395,6 +405,10 @@ $(document).ready(() => {
       $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
       $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
     }
+  }
+
+  function untoggleGoals() {
+    $('div[class*="goal-"]').remove()
   }
 
   function addGoal() {
