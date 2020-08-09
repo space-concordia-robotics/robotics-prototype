@@ -37,32 +37,33 @@ $(document).ready(() => {
       name: 'delete_goal',
       messageType: 'std_msgs/String'
   })
+  
   goal_list_subscriber.subscribe(function(message) {
-    if (goalList.length != message.goal_list.length) {
-      if (message.goal_list.length > 0) {
-          goal_latitude.set(message.goal_list[0].latitude)
-          goal_longitude.set(message.goal_list[0].longitude)
-          $('#goal-stats-latitude').text(message.goal_list[0].latitude.toFixed(6))
-          $('#goal-stats-longitude').text(message.goal_list[0].longitude.toFixed(6))
-      } else {
-          goal_latitude.set(false)
-          goal_longitude.set(false)
-          $('#goal-stats-latitude').text('----')
-          $('#goal-stats-longitude').text('----')
-      }
+    if (message.goal_list.length > 0) {
+        goal_latitude.set(message.goal_list[0].latitude)
+        goal_longitude.set(message.goal_list[0].longitude)
+        $('#goal-stats-latitude').text(message.goal_list[0].latitude.toFixed(6))
+        $('#goal-stats-longitude').text(message.goal_list[0].longitude.toFixed(6))
+    } else {
+        goal_latitude.set(false)
+        goal_longitude.set(false)
+        $('#goal-stats-latitude').text('----')
+        $('#goal-stats-longitude').text('----')
+    }
 
+    if (goalList.length != message.goal_list.length) {
       if (goalList.length < message.goal_list.length) {
         goalCount++
-      } else {
-        untoggleGoals()
       }
 
       goalList = message.goal_list
 
+      untoggleGoals()
       toggleGoals()
     }
     updateAntennaParams()
   })
+
   // setup gps parameters for antenna directing
   let antenna_latitude = new ROSLIB.Param({
       ros: ros,
