@@ -2,6 +2,9 @@ $(document).ready(() => {
   goalList = []
   goalCount = 0
 
+  let minuteTodecmial = 60
+  let secondTodecmial = 3600
+
   // setup a subscriber for the rover_position topic
   let rover_position_listener = new ROSLIB.Topic({
       ros: ros,
@@ -36,11 +39,7 @@ $(document).ready(() => {
   })
   goal_list_subscriber.subscribe(function(message) {
     goalList = message.goal_list
-    if (goalCount != goalList.length) {
-        goalCount = goalList.length
-
-    }
-    if (goalCount > 0) {
+    if (goalList.length > 0) {
         goal_latitude.set(goalList[0].latitude)
         goal_longitude.set(goalList[0].longitude)
         $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
@@ -80,6 +79,10 @@ $(document).ready(() => {
       ros: ros,
       name: 'goal_longitude'
   })
+  let goals = new ROSLIB.Param({
+      ros: ros,
+      name: 'goal_list'
+  })
   // setup a subscriber for the rover_goal topic
   new ROSLIB.Topic({
       ros: ros,
@@ -90,33 +93,35 @@ $(document).ready(() => {
   initNavigationPanel()
 
   function initNavigationPanel() {
-      antenna_latitude.get(function(latitude) {
-          antenna_longitude.get(function(longitude) {
-              antenna_start_dir.get(function(heading) {
-                  if (latitude && longitude && heading) {
-                      logInfo('Found antenna parameters to set')
-                      setupAntennaStats(latitude, longitude, heading)
-                  } else {
-                      logInfo('Antenna parameters were not found')
-                  }
-              })
-          })
+    antenna_latitude.get(function(latitude) {
+      antenna_longitude.get(function(longitude) {
+        antenna_start_dir.get(function(heading) {
+          if (latitude && longitude && heading) {
+            logInfo('Found antenna parameters to set')
+            setupAntennaStats(latitude, longitude, heading)
+          } else {
+            logInfo('Antenna parameters were not found')
+          }
+        })
       })
+    })
 
-      goal_latitude.get(function(latitude) {
-          goal_longitude.get(function(longitude) {
-              if (latitude && longitude) {
-                  has_gps_goal.set(true)
-                  logInfo('Found goal coordinates to set')
-                  setupGoalStats(latitude, longitude)
-                  goalList = JSON.parse(localStorage.getItem("goalList"))
-                  goalCount = goalList.length
-                  toggleGoals()
-              } else {
-                  logInfo('Goal parameters not found')
-              }
-          })
+    goal_latitude.get(function(latitude) {
+      goal_longitude.get(function(longitude) {
+        goals.get(function(goal_list) {
+          if (latitude && longitude) {
+            has_gps_goal.set(true)
+            logInfo('Found goal coordinates to set')
+            setupGoalStats(latitude, longitude)
+            goalList = JSON.parse(goal_list)
+            goalCount = goalList.length
+            toggleGoals()
+          } else {
+            logInfo('Goal parameters not found')
+          }
+        })
       })
+    })
   }
 
   function setupAntennaStats(latitude, longitude, heading) {
@@ -230,7 +235,7 @@ $(document).ready(() => {
             $("#antenna-degrees-decimal-minutes-degree-input.latitude").attr("value", decimal)
             $("#antenna-degrees-decimal-minutes-decimal-minute-input.latitude").attr("value", minute)
 
-            latitude = decimal + (minute / 60)
+            latitude = decimal + (minute / minuteTodecmial)
             break;
           }
 
@@ -247,7 +252,7 @@ $(document).ready(() => {
             $("#antenna-degrees-minutes-seconds-minute-input.latitude").attr("value", minutes)
             $("#antenna-degrees-minutes-seconds-second-input.latitude").attr("value", seconds)
 
-            latitude = decimal + (minutes / 60 + seconds / 3600)
+            latitude = decimal + (minutes / minuteTodecmial + seconds / secondTodecmial)
             break;
           }
 
@@ -278,7 +283,7 @@ $(document).ready(() => {
             $("#antenna-degrees-decimal-minutes-degree-input.longitude").attr("value", decimal)
             $("#antenna-degrees-decimal-minutes-decimal-minute-input.longitude").attr("value", minute)
 
-            longitude = decimal + (minute / 60)
+            longitude = decimal + (minute / minuteTodecmial)
             break;
           }
 
@@ -295,7 +300,7 @@ $(document).ready(() => {
             $("#antenna-degrees-minutes-seconds-minute-input.longitude").attr("value", minutes)
             $("#antenna-degrees-minutes-seconds-second-input.longitude").attr("value", seconds)
 
-            longitude = decimal + (minutes / 60 + seconds / 3600)
+            longitude = decimal + (minutes / minuteTodecmial + seconds / secondTodecmial)
             break;
           }
 
@@ -376,7 +381,7 @@ $(document).ready(() => {
   // functions
   function toggleGoals() {
     let goalTemplate = $('#created-goal-template').html()
-    for (let i = 0; i < goalCount; i++) {
+    for (let i = 0; i < goalList.length; i++) {
       $("#goal-modal-body-content").append(goalTemplate)
       $("#goal-modal-body-content .goal").addClass('goal-' + i).removeClass('goal')
       $(".goal-" + i).find('*').addClass('goal-' + i)
@@ -400,6 +405,7 @@ $(document).ready(() => {
     $(".goal-" + goalCount).find('*').addClass('goal-' + goalCount)
 
     createGoalButtons(goalCount)
+    goalCount++
   }
 
   function goalHandlerTemplate(mode, format, current) {
@@ -448,32 +454,32 @@ $(document).ready(() => {
     \------------------------*/
     let goalName = $('#goal-name.goal-' + current).val()
 
-    for (let i = 0; i < goalCount; i++) {
-      if (goalList[i].name == goalName) {
-        goalList.splice(i,i+1)
-        break
+    if (goalList[0]) {
+      for (let i = 0; i < goalList.length; i++) {
+        if (goalList[i].name == goalName) {
+          goalList.splice(i,i+1)
+          break
+        }
+      }
+
+      let goalDataList = new ROSLIB.Message({
+          goal_list: goalList
+      })
+
+      goal_list_subscriber.publish(goalDataList)
+      goals.set(JSON.stringify(goalList))
+
+      let msg = new ROSLIB.Message({
+          data: goalName
+      })
+      delete_goal_publisher.publish(msg)
+
+      if (goalList[0]) {
+        goal_latitude.set(goalList[0].latitude)
+        goal_longitude.set(goalList[0].longitude)
       }
     }
-
-    let goalDataList = new ROSLIB.Message({
-        goal_list: goalList
-    })
-
-    goal_list_subscriber.publish(goalDataList)
-    localStorage.setItem('goalList', JSON.stringify(goalList))
-
-    let msg = new ROSLIB.Message({
-        data: goalName
-    })
-    delete_goal_publisher.publish(msg)
-
-    if (goalList[0]) {
-      goal_latitude.set(goalList[0].latitude)
-      goal_longitude.set(goalList[0].longitude)
-    }
-
     $('.goal-' + current).remove()
-    goalCount--
   }
 
   function setGoalData(current, latitude_format, longitude_format) {
@@ -513,7 +519,7 @@ $(document).ready(() => {
             $('#goal-degrees-decimal-minutes-degree-input.latitude.goal-' + current).attr("value", decimal)
             $('#goal-degrees-decimal-minutes-decimal-minute-input.latitude.goal-' + current).attr("value", minute)
 
-            latitude = decimal + (minute / 60)
+            latitude = decimal + (minute / minuteTodecmial)
             break;
           }
 
@@ -530,7 +536,7 @@ $(document).ready(() => {
             $('#goal-degrees-minutes-seconds-minute-input.latitude.goal-' + current).attr("value", minutes)
             $('#goal-degrees-minutes-seconds-second-input.latitude.goal-' + current).attr("value", seconds)
 
-            latitude = decimal + (minutes / 60 + seconds / 3600)
+            latitude = decimal + (minutes / minuteTodecmial + seconds / secondTodecmial)
             break;
           }
 
@@ -561,7 +567,7 @@ $(document).ready(() => {
             $('#goal-degrees-decimal-minutes-decimal-input.longitude.goal-' + current).attr("value", decimal)
             $('#goal-degrees-decimal-minutes-decimal-minute-input.longitude.goal-' + current).attr("value", minute)
 
-            longitude = decimal + (minute / 60)
+            longitude = decimal + (minute / minuteTodecmial)
             break;
           }
 
@@ -578,7 +584,7 @@ $(document).ready(() => {
             $('#goal-degrees-minutes-seconds-minute-input.longitude.goal-' + current).attr("value", minutes)
             $('#goal-degrees-minutes-seconds-second-input.longitude.goal-' + current).attr("value", seconds)
 
-            longitude = decimal + (minutes / 60 + seconds / 3600)
+            longitude = decimal + (minutes / minuteTodecmial + seconds / secondTodecmial)
             break;
           }
 
@@ -614,8 +620,7 @@ $(document).ready(() => {
 
         goal_list_subscriber.publish(goalDataList)
 
-        localStorage.setItem('goalList', JSON.stringify(goalList))
-        goalCount++
+        goals.set(JSON.stringify(goalList))
 
         logInfo('Goal parameters have been set!')
       } catch (e) {
