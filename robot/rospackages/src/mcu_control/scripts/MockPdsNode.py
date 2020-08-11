@@ -3,6 +3,7 @@
 import time
 import rospy
 import sys
+import random
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point
 from mcu_control.msg import ThermistorTemps, Voltage
@@ -15,8 +16,6 @@ class VoltageMonitor(object):
         self._pub = pub
         self._voltages = voltages
 
-    # def callback(self, msg):
-
 
 class TemperatureMonitor(object):
 
@@ -25,54 +24,37 @@ class TemperatureMonitor(object):
         self._temps = temps
 
 
-#TODO: Use only ONE get parameter method to get ALL values (scalable)
-#TODO: Take parameterState and values[] instead of voltages[] and temps[]
-def get_voltage_parameter(parameterState, voltages):
+#Get parameter state and assign value
+def get_parameter_state(parameterState, values, prevValue, noise, increment):
     try:
         param = rospy.get_param(parameterState)
     except:
-        rospy.loginfo("Failed: Voltage parameter not acquired.")
+        rospy.loginfo("Failed: Parameter state not acquired.")
         sys.exit()
 
-    currentGetVoltage = 0
+    currentGetValue = 0
     if (param == "high"):
-        target = voltages[0][1]
-        currentGetVoltage = voltages[0][1]
+        currentGetValue = values[0][1]
     elif (param == "normal"):
-        target = voltages[1][1]
-        currentGetVoltage = voltages[1][1]
+        currentGetValue = values[1][1]
     elif (param == "low"):
-        target = voltages[2][1]
-        currentGetVoltage = voltages[2][1]
+        currentGetValue = values[2][1]
     else:
         rospy.loginfo("Failed: Invalid parameter entered")
 
-    return currentGetVoltage
+    #Increment to the desired value with noise included
+    remainder = prevValue - currentGetValue
+    if ((abs(remainder) >= (noise + increment))):
+        #If negative: increment, if positive: decrement
+        if (remainder > 0):
+            currentGetValue -= (increment + (noise * (random.randint(-1, 1))))
+        else:
+            currentGetValue += (increment + (noise * (random.randint(-1, 1))))
+
+    return currentGetValue
 
 
-def get_temp_parameter(parameterState, temps):
-    try:
-        param = rospy.get_param(parameterState)
-    except:
-        rospy.loginfo("Failed: Temperature parameter not acquired.")
-        sys.exit()
-
-    currentGetTemp = 0
-    if (param == "high"):
-        currentGetTemp = temps[0][1]
-    elif (param == "normal"):
-        currentGetTemp = temps[1][1]
-    elif (param == "low"):
-        currentGetTemp = temps[2][1]
-    else:
-        rospy.loginfo("Failed: Invalid parameter entered")
-
-    return currentGetTemp
-
-
-#def publish_mock_data(voltages, temps):
 def publish_mock_data(voltages, temps):
-
     #Initialize node
     node_name = "mock_pds_node"
     rospy.init_node(node_name, anonymous=True)
@@ -83,9 +65,6 @@ def publish_mock_data(voltages, temps):
     pubVoltage = rospy.Publisher('battery_voltage', Voltage, queue_size=10)
     pubTemp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
 
-    # pubVoltageTest = rospy.Publisher('battery_voltage', Float32, queue_size=10)
-    # pubTempTest = rospy.Publisher('battery_temps', Point, queue_size=10)
-
     #Get previous state before changing parameter
     prevVoltageState = rospy.get_param("PDS_mock_voltage")
     prevTemp1State = rospy.get_param("PDS_mock_temp1")
@@ -95,45 +74,92 @@ def publish_mock_data(voltages, temps):
     #Initialize variables for previous voltage and temp
     prevVoltageValue = None
     prevTempStates = []
-    prevTempValues = []
+
+    #Create list of temps to loop through when assigning new temps
     prevTempStates.append(("PDS_mock_temp1", prevTemp1State))
     prevTempStates.append(("PDS_mock_temp2", prevTemp2State))
     prevTempStates.append(("PDS_mock_temp3", prevTemp3State))
 
-    #Set voltage value for particular parameter
-    if (prevVoltageState == "high"):
-        prevVoltageValue = ("PDS_mock_voltage", voltages[0][1])
-    elif (prevVoltageState == "normal"):
-        prevVoltageValue = ("PDS_mock_voltage", voltages[1][1])
-    elif (prevVoltageState == "low"):
-        prevVoltageValue = ("PDS_mock_voltage", voltages[2][1])
-    else:
-        rospy.loginfo("Failed: Invalid parameter entered")
+    #Create dict with all parameter states (easily append to for scalability)
+    prevParameterStates = {
+        "PDS_mock_voltage": prevVoltageState,
+        "PDS_mock_temp1": prevTemp1State,
+        "PDS_mock_temp2": prevTemp2State,
+        "PDS_mock_temp3": prevTemp3State
+    }
 
-    #Set temperature values for particular parameters
-    for x in range(len(prevTempStates)):
-        if (prevTempStates[x][1] == "high"):
-            prevTempValues.append((prevTempStates[x][0], temps[0][1]))
-        elif (prevTempStates[x][1] == "normal"):
-            prevTempValues.append((prevTempStates[x][0], temps[1][1]))
-        elif (prevTempStates[x][1] == "low"):
-            prevTempValues.append((prevTempStates[x][0], temps[2][1]))
+    #Create dict with all parameter values (easily append to for scalability)
+    prevParameterValues = {
+        "PDS_mock_voltage": None,
+        "PDS_mock_temp1": None,
+        "PDS_mock_temp2": None,
+        "PDS_mock_temp3": None
+    }
+
+    #Acquire parameter settings WHILE ROS IS RUNNING
+    while not rospy.is_shutdown():
+        #-------------------------------------------------------------------
+        #Set voltage value for particular parameter
+        if (prevVoltageState == "high"):
+            prevParameterValues["PDS_mock_voltage"] = voltages[0][1]
+        elif (prevVoltageState == "normal"):
+            prevParameterValues["PDS_mock_voltage"] = voltages[1][1]
+        elif (prevVoltageState == "low"):
+            prevParameterValues["PDS_mock_voltage"] = voltages[2][1]
         else:
             rospy.loginfo("Failed: Invalid parameter entered")
 
-    rospy.loginfo("Thermistor temp values size: " + str(len(prevTempStates)))
+        #Set temperature values for particular parameters
+        for x in range(len(prevTempStates)):
+            if (prevTempStates[x][1] == "high"):
+                prevParameterValues[prevTempStates[x][0]] = temps[0][1]
+            elif (prevTempStates[x][1] == "normal"):
+                prevParameterValues[prevTempStates[x][0]] = temps[1][1]
+            elif (prevTempStates[x][1] == "low"):
+                prevParameterValues[prevTempStates[x][0]] = temps[2][1]
+            else:
+                rospy.loginfo("Failed: Invalid parameter entered")
+        #-------------------------------------------------------------------
 
-    rospy.loginfo("PDS_mock_voltage : " + str(prevVoltageValue))
-    rospy.loginfo("PDS_mock_temp1 : " + str(prevTempValues[0]))
-    rospy.loginfo("PDS_mock_temp2 : " + str(prevTempValues[1]))
-    rospy.loginfo("PDS_mock_temp3 : " + str(prevTempValues[2]))
+        #Get new current voltage and thermistor temps
+        #1) Parameter name
+        #2) Parameter's previous value
+        #3) Noise
+        #4) Increment value
+        currentVoltage = get_parameter_state(
+            "PDS_mock_voltage",
+            voltages,
+            prevParameterValues.get("PDS_mock_voltage"),
+            0.05,
+            0.1,
+        )
+        currentTemp1 = get_parameter_state(
+            "PDS_mock_temp1",
+            temps,
+            prevParameterValues.get("PDS_mock_temp1"),
+            0.05,
+            0.1,
+        )
+        currentTemp2 = get_parameter_state(
+            "PDS_mock_temp2",
+            temps,
+            prevParameterValues.get("PDS_mock_temp1"),
+            0.05,
+            0.1,
+        )
+        currentTemp3 = get_parameter_state(
+            "PDS_mock_temp3",
+            temps,
+            prevParameterValues.get("PDS_mock_temp1"),
+            0.05,
+            0.1,
+        )
 
-    #Acquire parameter settings
-    while not rospy.is_shutdown():
-        currentVoltage = get_voltage_parameter("PDS_mock_voltage", voltages)
-        currentTemp1 = get_temp_parameter("PDS_mock_temp1", temps)
-        currentTemp2 = get_temp_parameter("PDS_mock_temp2", temps)
-        currentTemp3 = get_temp_parameter("PDS_mock_temp3", temps)
+        #Change previous states for voltage and thermistor temps
+        prevParameterStates["PDS_mock_voltage"] = rospy.get_param("PDS_mock_voltage")
+        prevParameterStates["PDS_mock_temp1"] = rospy.get_param("PDS_mock_temp1")
+        prevParameterStates["PDS_mock_temp2"] = rospy.get_param("PDS_mock_temp2")
+        prevParameterStates["PDS_mock_temp3"] = rospy.get_param("PDS_mock_temp3")
 
         #Set data to voltage and thermistortemp types
         voltage.data = float(currentVoltage)
@@ -141,10 +167,21 @@ def publish_mock_data(voltages, temps):
         thermistorTemps.therm2 = float(currentTemp2)
         thermistorTemps.therm3 = float(currentTemp3)
 
+        #Change previous values for voltage and thermistor temps
+        prevParameterValues["PDS_mock_voltage"] = currentVoltage
+        prevParameterValues["PDS_mock_temp1"] = currentTemp1
+        prevParameterValues["PDS_mock_temp2"] = currentTemp2
+        prevParameterValues["PDS_mock_temp3"] = currentTemp3
+
+        #Log new values when posted
+        rospy.loginfo("PDS_mock_voltage : " + str(prevParameterValues.get("PDS_mock_voltage")))
+        rospy.loginfo("PDS_mock_temp1 : " + str(prevParameterValues.get("PDS_mock_temp1")))
+        rospy.loginfo("PDS_mock_temp2 : " + str(prevParameterValues.get("PDS_mock_temp2")))
+        rospy.loginfo("PDS_mock_temp3 : " + str(prevParameterValues.get("PDS_mock_temp3")))
+
         #Publish voltage and thermistortemps
         pubVoltage.publish(voltage)
         pubTemp.publish(thermistorTemps)
-
         rate.sleep()
 
 
@@ -163,7 +200,7 @@ if __name__ == '__main__':
     temps.append(("low", -20))
 
     try:
-        #Initialize parameters
+        #Initialize parameters for voltage and temperatures
         rospy.set_param("PDS_mock_voltage", voltages[1][0])
         rospy.set_param("PDS_mock_temp1", temps[1][0])
         rospy.set_param("PDS_mock_temp2", temps[1][0])
