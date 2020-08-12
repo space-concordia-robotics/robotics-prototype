@@ -8,12 +8,12 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import Point
 from mcu_control.msg import ThermistorTemps, Voltage, Currents
 from decimal import *
+"""Log all data during publishing
+    Add to publish_mock_data to log published data in CLI
+    Remove from publish_mock_data if not needed
+    Used for testing purposes"""
 
 
-#Log all data during publishing
-#Add to publish_mock_data to log published data in CLI
-#Remove from publish_mock_data if not needed
-#Used for testing purposes
 def rospyPublishedValueLogger(prevParameterStates, prevParameterValues):
     #Log new values when posted
     rospy.loginfo("PDS_mock_voltage : " + str(prevParameterValues.get("PDS_mock_voltage")))
@@ -40,8 +40,10 @@ def rospyPublishedValueLogger(prevParameterStates, prevParameterValues):
     )
 
 
-#Get parameter state and assign value
-#General function, needs not to be changed
+"""Get parameter state and assign value
+General function, needs not to be changed"""
+
+
 def get_parameter_state(parameterState, values, prevValue, noise, increment):
     try:
         param = rospy.get_param(parameterState)
@@ -72,7 +74,9 @@ def get_parameter_state(parameterState, values, prevValue, noise, increment):
     return prevValue
 
 
-#Get and set parameters to be published
+"""Get and set parameters to be published"""
+
+
 def publish_mock_data(voltages, temps, currents):
     #Initialize node
     node_name = "mock_pds_node"
@@ -185,13 +189,15 @@ def publish_mock_data(voltages, temps, currents):
     currentWheelCurrent5 = prevParameterValues.get("PDS_mock_wheel_current5")
     currentWheelCurrent6 = prevParameterValues.get("PDS_mock_wheel_current6")
 
-    #Acquire and set parameters while launch file is active
+    # Acquire and set parameters while launch file is active
     while not rospy.is_shutdown():
-        #Get new current voltage and thermistor temps recursively
-        #1) Parameter name
-        #2) Parameter's previous value
-        #3) Noise value
-        #4) Increment value
+        """
+        Get new current voltage and thermistor temps recursively
+        1) Parameter name
+        2) Parameter's previous value
+        3) Noise value
+        4) Increment value
+        """
         currentVoltage = get_parameter_state(
             "PDS_mock_voltage", voltages, currentVoltage, 0.05, 0.2
         )
