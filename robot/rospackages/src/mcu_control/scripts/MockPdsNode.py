@@ -10,7 +10,10 @@ from mcu_control.msg import ThermistorTemps, Voltage, Currents
 from decimal import *
 
 
-#Log all data during publishing (Added in publish_mock_data to see values in CLI)
+#Log all data during publishing
+#Add to publish_mock_data to log published data in CLI
+#Remove from publish_mock_data if not needed
+#Used for testing purposes
 def rospyPublishedValueLogger(prevParameterStates, prevParameterValues):
     #Log new values when posted
     rospy.loginfo("PDS_mock_voltage : " + str(prevParameterValues.get("PDS_mock_voltage")))
@@ -112,7 +115,7 @@ def publish_mock_data(voltages, temps, currents):
     prevWheelCurrentStates.append(("PDS_mock_wheel_current5", prevWheelCurrent5State))
     prevWheelCurrentStates.append(("PDS_mock_wheel_current6", prevWheelCurrent6State))
 
-    #Create dict with all parameter states (easily append to for scalability)
+    #Create dict with all parameter states (append to for scalability)
     prevParameterStates = {
         "PDS_mock_voltage": prevVoltageState,
         "PDS_mock_temp1": prevTemp1State,
@@ -126,7 +129,7 @@ def publish_mock_data(voltages, temps, currents):
         "PDS_mock_wheel_current6": prevWheelCurrent6State
     }
 
-    #Create dict with all parameter values (easily append to for scalability)
+    #Create dict with all parameter values (append to for scalability)
     prevParameterValues = {
         "PDS_mock_voltage": None,
         "PDS_mock_temp1": None,
