@@ -229,7 +229,7 @@ def publish_mock_data(voltages, temps, currents):
         prevParameterStates["PDS_mock_wheel_current5"] = rospy.get_param("PDS_mock_wheel_current5")
         prevParameterStates["PDS_mock_wheel_current6"] = rospy.get_param("PDS_mock_wheel_current6")
 
-        #Change previous values for voltage and thermistor temps
+        #Change previous values for evaluated parameters
         prevParameterValues["PDS_mock_voltage"] = currentVoltage
         prevParameterValues["PDS_mock_temp1"] = currentTemp1
         prevParameterValues["PDS_mock_temp2"] = currentTemp2
