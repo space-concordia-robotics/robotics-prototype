@@ -47,12 +47,12 @@ def get_parameter_state(parameterState, values, prevValue, noise, increment):
         sys.exit()
 
     currentGetValue = 0
-    if (param == "high"):
-        currentGetValue = values.get("high")
-    elif (param == "normal"):
-        currentGetValue = values.get("normal")
-    elif (param == "low"):
-        currentGetValue = values.get("low")
+    if (param == "rise"):
+        currentGetValue = values.get("rise")
+    elif (param == "stable"):
+        currentGetValue = values.get("stable")
+    elif (param == "fall"):
+        currentGetValue = values.get("fall")
     else:
         rospy.loginfo("Failed: Invalid parameter entered")
 
@@ -141,24 +141,24 @@ def publish_mock_data(voltages, temps, currents):
     }
 
     #Set initial 1 current voltage
-    if (prevVoltageState == "high"):
-        prevParameterValues["PDS_mock_voltage"] = voltages.get("high")
-    elif (prevVoltageState == "normal"):
-        prevParameterValues["PDS_mock_voltage"] = voltages.get("normal")
-    elif (prevVoltageState == "low"):
-        prevParameterValues["PDS_mock_voltage"] = voltages.get("low")
+    if (prevVoltageState == "rise"):
+        prevParameterValues["PDS_mock_voltage"] = voltages.get("rise")
+    elif (prevVoltageState == "stable"):
+        prevParameterValues["PDS_mock_voltage"] = voltages.get("stable")
+    elif (prevVoltageState == "fall"):
+        prevParameterValues["PDS_mock_voltage"] = voltages.get("fall")
     else:
         rospy.loginfo("Failed: Invalid parameter entered")
     currentVoltage = prevParameterValues.get("PDS_mock_voltage")
 
     #Set initial 3 current temperatures
     for x in range(len(prevTempStates)):
-        if (prevTempStates[x][1] == "high"):
-            prevParameterValues[prevTempStates[x][0]] = temps.get("high")
-        elif (prevTempStates[x][1] == "normal"):
-            prevParameterValues[prevTempStates[x][0]] = temps.get("normal")
-        elif (prevTempStates[x][1] == "low"):
-            prevParameterValues[prevTempStates[x][0]] = temps.get("low")
+        if (prevTempStates[x][1] == "rise"):
+            prevParameterValues[prevTempStates[x][0]] = temps.get("rise")
+        elif (prevTempStates[x][1] == "stable"):
+            prevParameterValues[prevTempStates[x][0]] = temps.get("stable")
+        elif (prevTempStates[x][1] == "fall"):
+            prevParameterValues[prevTempStates[x][0]] = temps.get("fall")
         else:
             rospy.loginfo("Failed: Invalid parameter entered")
     currentTemp1 = prevParameterValues.get("PDS_mock_temp1")
@@ -167,12 +167,12 @@ def publish_mock_data(voltages, temps, currents):
 
     #Set initial 6 current wheel currents
     for x in range(len(prevWheelCurrentStates)):
-        if (prevWheelCurrentStates[x][1] == "high"):
-            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("high")
-        elif (prevWheelCurrentStates[x][1] == "normal"):
-            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("normal")
-        elif (prevWheelCurrentStates[x][1] == "low"):
-            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("low")
+        if (prevWheelCurrentStates[x][1] == "rise"):
+            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("rise")
+        elif (prevWheelCurrentStates[x][1] == "stable"):
+            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("stable")
+        elif (prevWheelCurrentStates[x][1] == "fall"):
+            prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("fall")
         else:
             rospy.loginfo("Failed: Invalid parameter entered")
     currentWheelCurrent1 = prevParameterValues.get("PDS_mock_wheel_current1")
@@ -199,19 +199,19 @@ def publish_mock_data(voltages, temps, currents):
             "PDS_mock_wheel_current1", currents, currentWheelCurrent1, 0.05, 0.2
         )
         currentWheelCurrent2 = get_parameter_state(
-            "PDS_mock_wheel_current1", currents, currentWheelCurrent2, 0.05, 0.2
+            "PDS_mock_wheel_current2", currents, currentWheelCurrent2, 0.05, 0.2
         )
         currentWheelCurrent3 = get_parameter_state(
-            "PDS_mock_wheel_current1", currents, currentWheelCurrent3, 0.05, 0.2
+            "PDS_mock_wheel_current3", currents, currentWheelCurrent3, 0.05, 0.2
         )
         currentWheelCurrent4 = get_parameter_state(
-            "PDS_mock_wheel_current1", currents, currentWheelCurrent4, 0.05, 0.2
+            "PDS_mock_wheel_current4", currents, currentWheelCurrent4, 0.05, 0.2
         )
         currentWheelCurrent5 = get_parameter_state(
-            "PDS_mock_wheel_current1", currents, currentWheelCurrent5, 0.05, 0.2
+            "PDS_mock_wheel_current5", currents, currentWheelCurrent5, 0.05, 0.2
         )
         currentWheelCurrent6 = get_parameter_state(
-            "PDS_mock_wheel_current1", currents, currentWheelCurrent6, 0.05, 0.2
+            "PDS_mock_wheel_current6", currents, currentWheelCurrent6, 0.05, 0.2
         )
 
         #Change previous states for evaluated parameters
@@ -265,13 +265,13 @@ def publish_mock_data(voltages, temps, currents):
 if __name__ == '__main__':
 
     #Set voltages high, normal and low to be parametrized
-    voltages = {"high": 20, "normal": 15, "low": 10}
+    voltages = {"rise": 20, "stable": 15, "fall": 10}
 
     #Set temperatures high, normal and low to be parametrized
-    temps = {"high": 100, "normal": 50, "low": -20}
+    temps = {"rise": 100, "stable": 50, "fall": -20}
 
     #Set temperatures high, normal and low to be parametrized
-    currents = {"high": 10, "normal": 5, "low": 0}
+    currents = {"rise": 10, "stable": 5, "fall": 0}
 
     #Publish all new parameter settings set by user
     try:
