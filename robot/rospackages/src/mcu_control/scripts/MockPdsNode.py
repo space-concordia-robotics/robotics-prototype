@@ -17,26 +17,26 @@ def rospyPublishedValueLogger(prevParameterStates, prevParameterValues):
     Used for testing purposes"""
 
     #Log new values when posted
-    rospy.loginfo("PDS_mock_voltage : " + str(prevParameterValues.get("PDS_mock_voltage")))
-    rospy.loginfo("PDS_mock_temp1 : " + str(prevParameterValues.get("PDS_mock_temp1")))
-    rospy.loginfo("PDS_mock_temp2 : " + str(prevParameterValues.get("PDS_mock_temp2")))
-    rospy.loginfo("PDS_mock_temp3 : " + str(prevParameterValues.get("PDS_mock_temp3")))
-    rospy.loginfo(
+    rospy.logdebug("PDS_mock_voltage : " + str(prevParameterValues.get("PDS_mock_voltage")))
+    rospy.logdebug("PDS_mock_temp1 : " + str(prevParameterValues.get("PDS_mock_temp1")))
+    rospy.logdebug("PDS_mock_temp2 : " + str(prevParameterValues.get("PDS_mock_temp2")))
+    rospy.logdebug("PDS_mock_temp3 : " + str(prevParameterValues.get("PDS_mock_temp3")))
+    rospy.logdebug(
         "PDS_mock_wheel_current1 : " + str(prevParameterValues.get("PDS_mock_wheel_current1"))
     )
-    rospy.loginfo(
+    rospy.logdebug(
         "PDS_mock_wheel_current2 : " + str(prevParameterValues.get("PDS_mock_wheel_current2"))
     )
-    rospy.loginfo(
+    rospy.logdebug(
         "PDS_mock_wheel_current3 : " + str(prevParameterValues.get("PDS_mock_wheel_current3"))
     )
-    rospy.loginfo(
+    rospy.logdebug(
         "PDS_mock_wheel_current4 : " + str(prevParameterValues.get("PDS_mock_wheel_current4"))
     )
-    rospy.loginfo(
+    rospy.logdebug(
         "PDS_mock_wheel_current5 : " + str(prevParameterValues.get("PDS_mock_wheel_current5"))
     )
-    rospy.loginfo(
+    rospy.logdebug(
         "PDS_mock_wheel_current6 : " + str(prevParameterValues.get("PDS_mock_wheel_current6"))
     )
 
