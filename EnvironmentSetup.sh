@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Setup script which install the Space Concordia Robotics Software team's development environment. 
+# Setup script which install the Space Concordia Robotics Software team's development environment.
 
 APPEND_TO_BASH="
 
+
+#------ ROBOTICS SETTINGS ------
 #competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
 #export ROS_HOSTNAME=$USER
@@ -19,7 +21,7 @@ FINAL_MESSAGE="The script will now exit, you should test the installation using 
 2. test python executing 'pytest' while in the 'robotics-prototype' directory
 3. verify ROS-Kinetic installation using 'roscore'
 4. test GUI by running 'rosgui' and then 'startgui'
--> to see the GUI open a browser (preferably chrome) and go to localhost:5000" 
+-> to see the GUI open a browser (preferably chrome) and go to localhost:5000"
 
 REPO="/home/$USER/Programming/robotics-prototype"
 
@@ -33,8 +35,8 @@ then
    echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
    exit 1
 fi
-   
-   
+
+
 #install prereqs
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
@@ -56,16 +58,13 @@ python setup.py develop
 # Check if ros is already installed, install it if it isn't
 ROS_VERSION=$(rosversion -d)
 if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
-then 
+then
     echo "You do not have ROS installed, installing..."
     
-    wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-    chmod 755 ./install_ros_kinetic.sh
-    yes "" | bash ./install_ros_kinetic.sh
-    rm ./install_ros_kinetic.sh
-	
+    bash install_ros_kinetic.sh
+    
 	source ~/.bashrc
-	
+
     sudo apt install ros-kinetic-rosbridge-suite -y
 
 elif [$ROS_VERSION != "kinetic"]
@@ -96,14 +95,17 @@ source ~/.bashrc
 
 # Run env.sh
 cd $REPO/robot/basestation
-./env.sh > static/js/env.js
+./env.sh >| static/js/env.js
 
 
 # Setup git hooks
 cd $REPO
-cp commit-message-hook.sh .git/hooks/prepare-commit-msg
+cp commit_message_hook.py .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py .git/hooks/post-checkout
 
+
+# Install and setup arduino IDE + Teensyduino
+bash install_arduino_teensyduino.sh
 
 # Exit
 echo "$FINAL_MESSAGE"
