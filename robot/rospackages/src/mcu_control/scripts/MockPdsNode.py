@@ -48,7 +48,7 @@ def get_parameter_state(parameterState, values, prevValue, noise, increment):
     try:
         param = rospy.get_param(parameterState)
     except:
-        rospy.loginfo("Failed: Parameter state not acquired.")
+        rospy.logwarn("Failed: Parameter state not acquired.")
         sys.exit()
 
     currentGetValue = 0
@@ -59,7 +59,7 @@ def get_parameter_state(parameterState, values, prevValue, noise, increment):
     elif (param == "fall"):
         currentGetValue = values.get("fall")
     else:
-        rospy.loginfo("Failed: Invalid parameter entered")
+        rospy.logwarn("Failed: Invalid parameter entered")
 
     #Increment or decrement to the desired value with noise included
     remainder = currentGetValue - prevValue
@@ -154,7 +154,7 @@ def publish_mock_data(voltages, temps, currents):
     elif (prevVoltageState == "fall"):
         prevParameterValues["PDS_mock_voltage"] = voltages.get("fall")
     else:
-        rospy.loginfo("Failed: Invalid parameter entered")
+        rospy.logwarn("Failed: Invalid parameter entered")
     currentVoltage = prevParameterValues.get("PDS_mock_voltage")
 
     #Set initial 3 current temperatures
@@ -166,7 +166,7 @@ def publish_mock_data(voltages, temps, currents):
         elif (prevTempStates[x][1] == "fall"):
             prevParameterValues[prevTempStates[x][0]] = temps.get("fall")
         else:
-            rospy.loginfo("Failed: Invalid parameter entered")
+            rospy.logwarn("Failed: Invalid parameter entered")
     currentTemp1 = prevParameterValues.get("PDS_mock_temp1")
     currentTemp2 = prevParameterValues.get("PDS_mock_temp2")
     currentTemp3 = prevParameterValues.get("PDS_mock_temp3")
@@ -180,7 +180,7 @@ def publish_mock_data(voltages, temps, currents):
         elif (prevWheelCurrentStates[x][1] == "fall"):
             prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("fall")
         else:
-            rospy.loginfo("Failed: Invalid parameter entered")
+            rospy.logwarn("Failed: Invalid parameter entered")
     currentWheelCurrent1 = prevParameterValues.get("PDS_mock_wheel_current1")
     currentWheelCurrent2 = prevParameterValues.get("PDS_mock_wheel_current2")
     currentWheelCurrent3 = prevParameterValues.get("PDS_mock_wheel_current3")
@@ -244,9 +244,6 @@ def publish_mock_data(voltages, temps, currents):
         prevParameterValues["PDS_mock_wheel_current4"] = currentWheelCurrent4
         prevParameterValues["PDS_mock_wheel_current5"] = currentWheelCurrent5
         prevParameterValues["PDS_mock_wheel_current6"] = currentWheelCurrent6
-
-        #Add to see published values in CLI, or comment out if not needed
-        rospyPublishedValueLogger(prevParameterStates, prevParameterValues)
 
         #Set valus to objects which will get published
         voltage.data = float(currentVoltage)
