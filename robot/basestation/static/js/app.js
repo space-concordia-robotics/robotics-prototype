@@ -254,8 +254,6 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   lastCmdSent = new Date().getTime()
 }
 
-<<<<<<< HEAD
-
 // pingOBC(timeout, callback)
 // call the callback with the ping and if its successful or not
 
@@ -305,4 +303,3 @@ plays an error sound once -> warning will not play if the document has not been 
 function errorSound (){
   new Audio(ERROR_SOUND_PATH).play()
 }
->>>>>>> master
