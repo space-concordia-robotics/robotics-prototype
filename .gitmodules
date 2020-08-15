@@ -2,14 +2,11 @@
 	path = robot/rospackages/src/joint_state_publisher
 	url = https://github.com/ros/joint_state_publisher.git
 [submodule "web_video_server"]
-    path = robot/rospackages/src/web_video_server
-    url = https://github.com/RobotWebTools/web_video_server
+  path = robot/rospackages/src/web_video_server
+  url = https://github.com/RobotWebTools/web_video_server
 [submodule "cv_camera"]
 	path = robot/rospackages/src/cv_camera
 	url = https://github.com/OTL/cv_camera
 [submodule "tf2_web_republisher"]
 	path = robot/rospackages/src/tf2_web_republisher
 	url = https://github.com/RobotWebTools/tf2_web_republisher
-[submodule "robot/rospackages/src/robot_state_publisher"]
-	path = robot/rospackages/src/robot_state_publisher
-	url = https://github.com/ros/robot_state_publisher.git
