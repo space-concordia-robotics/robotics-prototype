@@ -1,0 +1,17 @@
+<launch>
+ <param
+    name="robot_description"
+    textfile="$(find astro_arm)/urdf/astro_arm.urdf" />
+
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+   <rosparam param="source_list">[joint_states]</rosparam>
+   <rosparam param="use_gui">TRUE</rosparam>
+  </node>
+
+  <node name="tf2_web_republisher" pkg="tf2_web_republisher" type="tf2_web_republisher"/>
+</launch>
