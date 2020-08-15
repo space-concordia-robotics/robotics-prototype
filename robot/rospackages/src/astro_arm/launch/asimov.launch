@@ -1,4 +1,6 @@
 <launch>
+  <rosparam file="$(find astro_arm)/config/joint_names.yaml"/>
+
  <param
     name="robot_description"
     textfile="$(find astro_arm)/urdf/astro_arm.urdf" />
