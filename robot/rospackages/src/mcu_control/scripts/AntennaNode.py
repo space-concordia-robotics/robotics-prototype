@@ -11,12 +11,13 @@ from geometry_msgs.msg import Point
 
 def subscriber_callback(message):
     rospy.loginfo(message)
+
     if message.x < -900 or message.y < -900:
         return
     rover['latitude'] = message.x
     rover['longitude'] = message.y
 
-    if rospy.get_param('got_antenna_position'):
+    if got_antenna_position:
         antenna_to_rover_direction = Direction(
             antenna['latitude'], antenna['longitude'], rover['latitude'], rover['longitude'])
         antenna_to_rover_distance = Distance(
@@ -36,7 +37,6 @@ def subscriber_callback(message):
         rospy.loginfo('Waiting for antenna position ROS parameters to be set')
     return
 
-
 if __name__ == '__main__':
     node_name = 'antenna_node'
     # only allow one node of this type
@@ -44,9 +44,9 @@ if __name__ == '__main__':
     rospy.loginfo('Initialized "' + node_name +
                   '" node for pub/sub functionality')
 
-    subscribe_topic = '/rover_position'
+    rover_topic = '/rover_position'
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
-    sub = rospy.Subscriber(subscribe_topic, Point, subscriber_callback)
+    sub = rospy.Subscriber(rover_topic, Point, subscriber_callback)
 
     antenna_pub_topic = '/antenna_goal'
     rospy.loginfo('Beginning to publish to "' + antenna_pub_topic + '" topic')
@@ -59,23 +59,24 @@ if __name__ == '__main__':
 
     rospy.loginfo('This node needs the antenna starting position (antenna_latitude, ' +
                   'antenna_longitude, antenna_start_dir) and will wait until it receives that')
+
+    got_antenna_position = False
+
     try:
         while not rospy.is_shutdown():
-
-            if not rospy.get_param('got_antenna_position'):
-                try:  # rospy.has_param(param) works but requires code rethinking
-                    antenna['latitude'] = rospy.get_param('antenna_latitude')
-                    antenna['longitude'] = rospy.get_param('antenna_longitude')
-                    antenna['startDir'] = rospy.get_param('antenna_start_dir')
-                    rospy.set_param('got_antenna_position', True)
-                    rospy.loginfo('Got antenna starting position! ' + str(antenna['latitude']) + ' ' + str(
-                        antenna['longitude']) + ' ' + str(antenna['startDir']))
-                except KeyError:  # param not define
-                    pass
+            if not got_antenna_position:
+                antenna['latitude'] = rospy.get_param('antenna_latitude')
+                antenna['longitude'] = rospy.get_param('antenna_longitude')
+                antenna['startDir'] = rospy.get_param('antenna_start_dir')
+                got_antenna_position = True
+                rospy.loginfo('Got antenna starting position! ' + str(antenna['latitude']) + ' ' + str(
+                    antenna['longitude']) + ' ' + str(antenna['startDir']))
             else:
                 pass
             rospy.Rate(100).sleep()
     except rospy.ROSInterruptException:
+        pass
+    except KeyError:  # param not define
         pass
 
     def shutdown_hook():

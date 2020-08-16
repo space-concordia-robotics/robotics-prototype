@@ -8,9 +8,9 @@ from std_msgs.msg import String
 
 
 def create_goal_callback(message):
-    goal = RoverGoal(message.name, message.long, message.lat)
+    goal = RoverGoal(message.name, message.longitude, message.latitude)
     goal_list.append(goal)
-
+    print(goal_list)
 
 def delete_goal_callback(message):
     name = message.data
