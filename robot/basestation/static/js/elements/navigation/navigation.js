@@ -67,6 +67,10 @@ $(document).ready(() => {
     ros: ros,
     name: 'antenna_start_dir'
   })
+  const has_gps_goal = new ROSLIB.Param({
+    ros: ros,
+    name: 'has_gps_goal'
+  })
   // setup a subscriber for the rover_goal topic
   new ROSLIB.Topic({
     ros: ros,
@@ -98,23 +102,14 @@ $(document).ready(() => {
       const buttonClass = $(e.target)
         .attr('class')
         .split(' ')
-      if (buttonId[1] == 'latitude' || buttonId[1] == 'longitude') {
-        // select latitude or longitude input format
-        const mode = buttonId[1]
-        let format = buttonId[2] + '-' + buttonId[3]
-        if (buttonId[4] != 'btn') {
-          format = format + '-' + buttonId[4]
-        }
-        antennaHandlerTemplate(mode, format)
-      } else if (buttonClass[2] == 'antenna-change-btn') {
+      if (buttonClass[2] == 'antenna-change-btn') {
         // change latitude or longitude and its format
         if (buttonId[1] != 'bearing') {
           const mode = buttonClass[4]
-          let format = buttonId[1] + '-' + buttonId[2]
           if (buttonId[3] != 'change') {
             format = format + '-' + buttonId[3]
           }
-          antennaChangeButtonHandlerTemplate(mode, format, detachedData)
+          antennaChangeButtonHandlerTemplate(mode, detachedData)
         } else {
           // change bearing
           antennaBearingChange()
@@ -122,6 +117,14 @@ $(document).ready(() => {
       } else if (buttonId[1] == 'confirm') {
         // confirm, set and save info
         setAntennaData()
+      } else {
+        // select latitude or longitude input format buttons
+        const mode = buttonId[1]
+        let format = buttonId[2] + '-' + buttonId[3]
+        if (buttonId[4] != 'btn') {
+          format = format + '-' + buttonId[4]
+        }
+        antennaHandlerTemplate(mode, format)
       }
     })
   }
@@ -147,7 +150,7 @@ $(document).ready(() => {
     )
   }
 
-  function antennaChangeButtonHandlerTemplate (mode, format, detachedData) {
+  function antennaChangeButtonHandlerTemplate (mode, detachedData) {
     $('#antenna-' + mode + '-input-group').empty()
     $('#antenna-' + mode + '-fieldset').append(detachedData)
     $('#antenna-confirm-btn').prop('disabled', false)
