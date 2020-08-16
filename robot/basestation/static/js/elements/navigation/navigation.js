@@ -22,10 +22,6 @@ $(document).ready(() => {
     messageType: 'geometry_msgs/Point',
     ros: ros
   })
-  antenna_goal_listener.subscribe(function (message) {
-    $('#antenna-stats-rec-angle').text(parseFloat(message.x).toFixed(3))
-    $('#antenna-stats-dist-to-rover').text(parseFloat(message.y).toFixed(2))
-  })
   // setup topics to communicate with GoalsNode
   const create_goal_publisher = new ROSLIB.Topic({
     ros: ros,
