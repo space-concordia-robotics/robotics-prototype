@@ -244,9 +244,9 @@ function initRosWeb () {
   battery_temps_listener.subscribe(function (message) {
     // sets temperatures to two decimal points
     let temps = [
-      parseFloat(message.x).toFixed(2),
-      parseFloat(message.y).toFixed(2),
-      parseFloat(message.z).toFixed(2)
+      parseFloat(message.therm1).toFixed(2),
+      parseFloat(message.therm2).toFixed(2),
+      parseFloat(message.therm3).toFixed(2)
     ]
 
     $('.battery-temp').each(function(i, obj) {
