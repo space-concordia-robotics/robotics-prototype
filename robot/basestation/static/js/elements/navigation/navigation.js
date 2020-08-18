@@ -89,44 +89,43 @@ $(document).ready(() => {
     $('#goal-stats-longitude').text(longitude.toFixed(6))
   }
 
-  createAntennaInputButtonsHandler("button[id^='antenna-']")
-
   // set antenna data
   // onClick events for antenna data entry buttons
-  function createAntennaInputButtonsHandler (button, detachedData) {
-    $(button).mouseup(e => {
-      event.preventDefault()
-      const buttonId = $(e.target)
-        .attr('id')
-        .split('-')
-      const buttonClass = $(e.target)
-        .attr('class')
-        .split(' ')
-      if (buttonClass[2] == 'antenna-change-btn') {
-        // change latitude or longitude and its format
-        if (buttonId[1] != 'bearing') {
-          const mode = buttonClass[4]
-          if (buttonId[3] != 'change') {
-            format = format + '-' + buttonId[3]
+  createAntennaFormatButtonsHandler()
+  createBearingChangeButtonHandler()
+  createSetAntennaDataButtonsHandler()
+
+  function createAntennaFormatButtonsHandler () {
+      // select latitude or longitude input format buttons
+      $("button[id^='antenna-latitude'], button[id^='antenna-longitude'").mouseup(e => {
+          const buttonId = $(e.target).attr('id').split('-')
+          const mode = buttonId[1]
+          let format = buttonId[2] + '-' + buttonId[3]
+          if (buttonId[4] != 'btn') {
+            format = format + '-' + buttonId[4]
           }
+          antennaHandlerTemplate(mode, format)
+      })
+  }
+
+  function createAntennaChangeButtonsHandler (button, mode, detachedData) {
+      // unhide antenna format selection box when change button is clicked
+      $(button).mouseup(e => {
           antennaChangeButtonHandlerTemplate(mode, detachedData)
-        } else {
-          // change bearing
+      })
+  }
+
+  function createBearingChangeButtonHandler () {
+      // allow changing of antenna bearing
+      $('#antenna-bearing-change-btn').mouseup(e => {
           antennaBearingChange()
-        }
-      } else if (buttonId[1] == 'confirm') {
-        // confirm, set and save info
-        setAntennaData()
-      } else {
-        // select latitude or longitude input format buttons
-        const mode = buttonId[1]
-        let format = buttonId[2] + '-' + buttonId[3]
-        if (buttonId[4] != 'btn') {
-          format = format + '-' + buttonId[4]
-        }
-        antennaHandlerTemplate(mode, format)
-      }
-    })
+      })
+  }
+
+  function createSetAntennaDataButtonsHandler () {
+      $("button[id='antenna-confirm-btn']").mouseup(e => {
+          setAntennaData()
+      })
   }
 
   // AntennaData functions
@@ -144,10 +143,7 @@ $(document).ready(() => {
     $('#antenna-' + mode + '-fieldset span.' + format + ':first').text(mode)
     $('.antenna-input-field.' + mode).prop('disabled', false)
 
-    createAntennaInputButtonsHandler(
-      '#antenna-' + format + '-change-btn.' + mode,
-      detachedData
-    )
+    createAntennaChangeButtonsHandler("button[id='antenna-" + format + "-change-btn']", mode, detachedData)
   }
 
   function antennaChangeButtonHandlerTemplate (mode, detachedData) {
