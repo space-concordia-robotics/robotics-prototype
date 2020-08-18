@@ -1,6 +1,6 @@
 PING_THROTTLE_TIME = 1000
-ERROR_SOUND_PATH = '../../static/sound/error.mp3'
-WARNING_SOUND_PATH = '../../static/sound/warning.wav'
+ERROR_SOUND_PATH = '../../static/sound/error.wav'
+
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
   // @TODO: fix this hacky workaround (refer to issue #142)
@@ -260,11 +260,4 @@ plays an error sound once -> warning will not play if the document has not been 
 */
 function errorSound (){
   new Audio(ERROR_SOUND_PATH).play()
-}
-
-/*
-plays an error sound once -> warning will not play if the document has not been interacted with yet
-*/
-function warningSound (){
-  new Audio(WARNING_SOUND_PATH).play()
 }

@@ -212,7 +212,7 @@ function initRosWeb () {
 
       if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
         $('#battery-voltage').attr('acceptable', '0')
-        warningSound()
+        errorSound()
         if (voltage > MAX_VOLTAGE) {
           navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
         } else if (voltage < MIN_VOLTAGE){
@@ -243,7 +243,6 @@ function initRosWeb () {
   })
   battery_temps_listener.subscribe(function (message) {
     // sets temperatures to two decimal points
-    console.log(message)
     let temps = [
       parseFloat(message.x).toFixed(2),
       parseFloat(message.y).toFixed(2),
@@ -260,7 +259,7 @@ function initRosWeb () {
 
         if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
           $obj.attr('acceptable', '0')
-          warningSound()
+          errorSound()
           if (temperature > MAX_TEMP) {
             navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
           } else if (temperature < MIN_TEMP) {
@@ -277,7 +276,7 @@ function initRosWeb () {
       } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
-          $('#battery-temp-1').notify('Temperature hot!', 'warn',{position:"bottom"})
+          $('#battery-temp-1').notify('Battery Temperature hot!!!', 'warn',{position:"bottom"})
         } else {
           $obj.css({'color': 'white'})
         }
