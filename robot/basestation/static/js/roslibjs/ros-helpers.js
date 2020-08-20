@@ -227,7 +227,7 @@ function initRosWeb () {
     } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
-        $('#battery-temperature').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
+        $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
       } else {
         textColor('#battery-voltage', 'white')
       }
@@ -282,7 +282,7 @@ function initRosWeb () {
         }
 
         if ($obj.attr('acceptable') === '0')
-         $obj.attr('acceptable', '1')
+          $obj.attr('acceptable', '1')
       }
     });
 
