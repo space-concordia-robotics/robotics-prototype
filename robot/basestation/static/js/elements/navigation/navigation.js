@@ -35,20 +35,16 @@ $(document).ready(() => {
   })
 
   goal_list_subscriber.subscribe(function (message) {
-    if (message.goal_list.length > 0) {
-      if (goalCount == 0) {
-        goalCount = message.goal_list.length
-      }
-      if (goalList.length != message.goal_list.length) {
-        goalList = message.goal_list
-        toggleGoals()
-      }
+    if (goalList.length != message.goal_list.length) {
       goalList = message.goal_list
-      $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
-      $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
+      toggleGoals()
+      if (message.goal_list.length != 0) {
+        $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
+        $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
     } else {
-      $('#goal-stats-latitude').text('----')
-      $('#goal-stats-longitude').text('----')
+        $('#goal-stats-latitude').text('----')
+        $('#goal-stats-longitude').text('----')
+      }
     }
 
     updateAntennaParams()
@@ -398,8 +394,9 @@ $(document).ready(() => {
   // functions
   function toggleGoals() {
     $('div[class*="goal-"]').remove()
+    goalCount = goalList.length
     const goalTemplate = $('#created-goal-template').html()
-    for (let i = 0; i < goalList.length; i++) {
+    for (let i = 0; i < goalCount; i++) {
       $('#goal-modal-body-content').append(goalTemplate)
       $('#goal-modal-body-content .goal')
         .addClass('goal-' + i)
@@ -746,7 +743,7 @@ $(document).ready(() => {
     antenna_latitude.get(function (latitude) {
       antenna_longitude.get(function (longitude) {
         antenna_start_dir.get(function (heading) {
-          if (latitude && longitude && heading) {
+          if (latitude != null && longitude != null && heading != null) {
             setupAntennaStats(latitude, longitude, heading)
           }
         })
