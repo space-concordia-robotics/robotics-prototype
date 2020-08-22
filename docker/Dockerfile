@@ -1,6 +1,6 @@
-ENV ROS_DISTRO=kinetic
+ENV ROS_DISTRO=melodic
 # building from ros:$ROS_DISTRO image
-FROM ros:$ROS_DISTRO 
+FROM ros:$ROS_DISTRO
 SHELL ["/bin/bash", "-c"]
 # create a user for this image with username '$USERNAME'
 ARG USERNAME=spaceuser
@@ -20,17 +20,10 @@ WORKDIR home/$USERNAME/Programming/robotics-prototype/
 RUN sudo mv /root/.bashrc ~/ \
 && sudo apt-get update \
 && sudo apt-get install -y python-pip \
-virtualenv \
 git \
 vim \
 net-tools \
-# vim is mandatory 
 software-properties-common \
-&& sudo apt-get update \
-&& sudo add-apt-repository ppa:deadsnakes/ppa \
-&& sudo apt-get update \
-&& sudo apt-get install -y python3.6 
-
 
 # clone the repo
 RUN sudo git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype . ; exit 0
