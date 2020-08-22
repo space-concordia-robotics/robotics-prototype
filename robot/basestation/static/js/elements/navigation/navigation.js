@@ -353,57 +353,46 @@ $(document).ready(() => {
     }
   }
 
-  createGoalsInputButtonsHandler("button[id^='goal-']")
-
   // set goals info
-  // onClick events for goals data entry buttons
-  function createGoalsInputButtonsHandler (button) {
-    $(button).mouseup(e => {
-      event.preventDefault()
-      const buttonId = $(e.target)
-        .attr('id')
-        .split('-')
-      const buttonClass = $(e.target)
-        .attr('class')
-        .split(' ')
-      if (
-        (buttonId[1] == 'latitude' || buttonId[1] == 'longitude') &&
-        buttonId[3] != 'format'
-      ) {
-        // select latitude or longitude input format
-        const mode = buttonId[1]
-        let format = buttonId[2] + '-' + buttonId[3]
-        const goalNum = buttonClass[3].replace('goal-', '')
+  // mouseup events for goals data entry buttons
+  createGoalsAddButtonHandler()
 
-        if (buttonId[4] != 'btn') {
-          format = format + '-' + buttonId[4]
-        }
+  function createGoalsFormatButtonsHandler (button) {
+      // select latitude or longitude input format buttons
+      $(button).mouseup(e => {
+          const buttonId = $(e.target).attr('id').split('-')
+          const buttonClass = $(e.target).attr('class').split(' ')
+          const mode = buttonId[1]
+          let format = buttonId[2] + '-' + buttonId[3]
+          const goalNum = buttonClass[3].replace('goal-', '')
 
-        goalHandlerTemplate(mode, format, goalNum)
-      } else {
-        switch (buttonId[1]) {
-          case 'new': {
-            // add new and its input templates
-            addGoal()
-            break
+          if (buttonId[4] != 'btn') {
+            format = format + '-' + buttonId[4]
           }
 
-          case 'confirm': {
-            // confirm and set goal info
-            const goalNum = buttonClass[2].replace('goal-', '')
-            goalConfirmButtonHandler(goalNum)
-            break
-          }
+          goalHandlerTemplate(mode, format, goalNum)
+      })
+  }
 
-          case 'delete': {
-            // delete goal
-            const goalNum = buttonClass[2].replace('goal-', '')
-            goalDeleteButtonHandler(goalNum)
-            break
-          }
-        }
-      }
-    })
+  function createGoalsAddButtonHandler () {
+      // add new goal templates
+      $("button[id='goal-new-coordinates-btn']").mouseup(e => {
+          addGoal()
+      })
+  }
+
+  function createGoalsConfirmButtonHandler (goalNum) {
+      // add new goal templates
+      $('#goal-confirm-btn.goal-' + goalNum).mouseup(e => {
+          goalConfirmButtonHandler(goalNum)
+      })
+  }
+
+  function createGoalsDeleteButtonHandler (goalNum) {
+      // add new goal templates
+      $('#goal-delete-btn.goal-' + goalNum).mouseup(e => {
+          goalDeleteButtonHandler(goalNum)
+      })
   }
 
   // functions
@@ -472,7 +461,9 @@ $(document).ready(() => {
       .find('*')
       .addClass('goal-' + current)
 
-    createGoalsInputButtonsHandler("button[id^='goal-'].goal-" + current)
+     createGoalsFormatButtonsHandler("button[id^='goal-latitude'].goal-" + current + ", button[id^='goal-longitude'].goal-" + current)
+     createGoalsConfirmButtonHandler(current)
+     createGoalsDeleteButtonHandler(current)
   }
 
   function goalConfirmButtonHandler (current) {
