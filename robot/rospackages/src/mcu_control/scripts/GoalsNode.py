@@ -10,7 +10,7 @@ from std_msgs.msg import String
 def create_goal_callback(message):
     goal = RoverGoal(message.name, message.longitude, message.latitude)
     goal_list.append(goal)
-    
+
 
 def delete_goal_callback(message):
     name = message.data
@@ -18,6 +18,10 @@ def delete_goal_callback(message):
         if goal.name == name:
             goal_list.remove(goal)
 
+def restore_goals_callback(message):
+    goal_list.clear()
+    for goal in message.goal_list:
+        goal_list.append(goal)
 
 if __name__ == '__main__':
     node_name = 'goals_node'
@@ -31,6 +35,9 @@ if __name__ == '__main__':
 
     delete_goal_sub_topic = 'delete_goal'
     delete_goal_sub = rospy.Subscriber(delete_goal_sub_topic, String, delete_goal_callback)
+
+    restore_goals_sub_topic = 'restore_goals'
+    restore_goals_sub = rospy.Subscriber(restore_goals_sub_topic, RoverGoalList, restore_goals_callback)
 
     goal_list_pub_topic = 'goal_list'
     rospy.loginfo('Beginning to publish to "' + goal_list_pub_topic + '" topic')

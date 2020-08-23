@@ -110,7 +110,7 @@ const sketch = function (p) {
       p.mouseX < p.width &&
       p.mouseY > 0 &&
       p.mouseY < p.height &&
-      !$('#antenna-modal, #goal-modal').hasClass('show')
+      !$("[id$='modal']").hasClass('show')
     ) {
       const newZoomValue = zoomValue - e.delta / 500
       if (newZoomValue >= MIN_ZOOM && newZoomValue <= MAX_ZOOM) {
@@ -127,7 +127,7 @@ const sketch = function (p) {
       p.mouseX < p.width - 10 &&
       p.mouseY > 0 &&
       p.mouseY < p.height - 10 &&
-      !$('#antenna-modal, #goal-modal').hasClass('show')
+      !$("[id$='modal']").hasClass('show')
     ) {
       dragDiffX += p.movedX
       dragDiffY += p.movedY
@@ -136,7 +136,7 @@ const sketch = function (p) {
 
   // resize canvas
   p.mouseClicked = function () {
-    if (!$('#antenna-modal, #goal-modal').hasClass('show')) {
+    if (!$("[id$='modal']").hasClass('show')) {
       const r = 10 // button radius
       const d = p.dist(p.mouseX, p.mouseY, p.width, p.height) // distance between mouse and lower right corner
 

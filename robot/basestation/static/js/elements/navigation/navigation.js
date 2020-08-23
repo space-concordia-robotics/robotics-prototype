@@ -2,6 +2,9 @@ $(document).ready(() => {
   goalList = []
   goalCount = 0
 
+  goalListBackupsCount = 0
+  const maxGoalListBackups = 3
+
   const minuteTodecmial = 60
   const secondTodecmial = 3600
 
@@ -28,20 +31,31 @@ $(document).ready(() => {
     name: 'create_goal',
     messageType: 'mcu_control/RoverGoal'
   })
+
   const delete_goal_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'delete_goal',
     messageType: 'std_msgs/String'
   })
 
+  const restore_goals_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'restore_goals',
+    messageType: 'mcu_control/RoverGoalList'
+  })
+
   goal_list_subscriber.subscribe(function (message) {
     if (goalList.length != message.goal_list.length) {
+      backupGoalList(message.goal_list)
+
       goalList = message.goal_list
+
       toggleGoals()
+
       if (message.goal_list.length != 0) {
         $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
         $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
-    } else {
+      } else {
         $('#goal-stats-latitude').text('----')
         $('#goal-stats-longitude').text('----')
       }
@@ -49,6 +63,57 @@ $(document).ready(() => {
 
     updateAntennaParams()
   })
+
+  function backupGoalList (goal_list) {
+      goalListBackupsCount = 0
+      for (let i = 0; i<maxGoalListBackups; i++) {
+          if (localStorage.getItem('goalList-' + i) != null) {
+              goalListBackupsCount++
+          }
+      }
+
+      if (goalListBackupsCount < maxGoalListBackups) {
+          localStorage.setItem('goalList-' + goalListBackupsCount, JSON.stringify(goal_list))
+          goalListBackupsCount++
+      } else {
+          for (let i = 0; i<maxGoalListBackups-1; i++) {
+              localStorage.setItem('goalList-' + i, localStorage.getItem('goalList-' + (i+1)))
+          }
+          localStorage.setItem('goalList-' + maxGoalListBackups-1, JSON.stringify(goal_list))
+      }
+  }
+
+  toggleGoalsBackups()
+
+  function toggleGoalsBackups () {
+      $('.backup-').remove()
+      const restoreGoalsTemplate = $('#goals-restore-template').html()
+
+      for (let i = 0; i<maxGoalListBackups; i++) {
+          if (localStorage.getItem('goalList-' + i) != null) {
+              $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
+              $('#goals-restore-btn.backup').addClass('backup-' + i).removeClass('backup')
+              $('.backup-' + i).parent().addClass('backup-' + i)
+              createGoalsRestoreButtonHandler(i)
+          }
+       }
+  }
+
+  function createGoalsRestoreButtonHandler (backupNum) {
+      // restore goals list
+      $('#goals-restore-btn.backup-' + backupNum).mouseup(e => {
+          console.log('backup number ' + backupNum)
+          goalRestoreButtonHandler(backupNum)
+      })
+  }
+
+  function goalRestoreButtonHandler (backupNum) {
+      const goalListData = new ROSLIB.Message({
+        goal_list: JSON.parse(localStorage.getItem('goalList-' + backupNum))
+      })
+
+      restore_goals_publisher.publish(goalListData)
+  }
 
   // setup gps parameters for antenna directing
   const antenna_latitude = new ROSLIB.Param({
