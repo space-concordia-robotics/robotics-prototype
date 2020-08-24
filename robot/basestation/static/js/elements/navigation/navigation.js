@@ -69,73 +69,6 @@ $(document).ready(() => {
     updateAntennaParams()
   })
 
-  function backupGoalList (goal_list) {
-      goalListBackupsCount = 0
-      for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalListBackup-' + i) != null) {
-              goalListBackupsCount++
-          }
-          if (localStorage.getItem('goalListBackup-' + i) == JSON.stringify(goal_list)) {
-              return
-          }
-      }
-
-
-      if (goalListBackupsCount < maxGoalListBackups) {
-          writeGoalListToStorage(goalListBackupsCount, JSON.stringify(goal_list))
-          goalListBackupsCount++
-      } else {
-          for (let i = 0; i<maxGoalListBackups-1; i++) {
-              localStorage.setItem('goalListBackup-' + i, localStorage.getItem('goalListBackup-' + (i+1)))
-              localStorage.setItem('timeOfGoalsBackup-' + i, localStorage.getItem('timeOfGoalsBackup-' + (i+1)))
-          }
-          writeGoalListToStorage(maxGoalListBackups-1, JSON.stringify(goal_list))
-      }
-  }
-
-  function writeGoalListToStorage (backupNum, goal_list) {
-      const dateTime = new Date();
-      localStorage.setItem('goalListBackup-' + (backupNum), goal_list)
-      localStorage.setItem('timeOfGoalsBackup-' + (backupNum), dateTime.getDate() + ' '
-        + dateTime.getHours() + ':' + dateTime.getMinutes() + ':' + dateTime.getSeconds())
-  }
-
-  toggleGoalsBackups()
-
-  function toggleGoalsBackups () {
-      $("[class^='restore-goals-']").remove()
-
-      for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalListBackup-' + i) != null) {
-              $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
-              $('#goals-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $('#goals-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $("[class='restore-goals']").addClass('restore-goals-' + i).removeClass('restore-goals')
-
-              createGoalsRestoreButtonHandler(i)
-
-              $('#goals-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfGoalsBackup-' + i))
-          }
-       }
-  }
-
-  function createGoalsRestoreButtonHandler (backupNum) {
-      // restore goals list
-      $('#goals-restore-btn.backup-' + backupNum).mouseup(e => {
-          goalRestoreButtonHandler(backupNum)
-      })
-  }
-
-  function goalRestoreButtonHandler (backupNum) {
-      const goalListData = new ROSLIB.Message({
-        goal_list: JSON.parse(localStorage.getItem('goalListBackup-' + backupNum))
-      })
-
-      restore_goals_publisher.publish(goalListData)
-
-      logInfo('Goal list from ' + localStorage.getItem('timeOfGoalsBackup-' + backupNum) + ' restored.')
-  }
-
   // setup gps parameters for antenna directing
   const antenna_latitude = new ROSLIB.Param({
     ros: ros,
@@ -830,5 +763,73 @@ $(document).ready(() => {
         })
       })
     })
+  }
+
+  // Goal backup and restore functions
+  function backupGoalList (goal_list) {
+      goalListBackupsCount = 0
+      for (let i = 0; i<maxGoalListBackups; i++) {
+          if (localStorage.getItem('goalListBackup-' + i) != null) {
+              goalListBackupsCount++
+          }
+          if (localStorage.getItem('goalListBackup-' + i) == JSON.stringify(goal_list)) {
+              return
+          }
+      }
+
+
+      if (goalListBackupsCount < maxGoalListBackups) {
+          writeGoalListToStorage(goalListBackupsCount, JSON.stringify(goal_list))
+          goalListBackupsCount++
+      } else {
+          for (let i = 0; i<maxGoalListBackups-1; i++) {
+              localStorage.setItem('goalListBackup-' + i, localStorage.getItem('goalListBackup-' + (i+1)))
+              localStorage.setItem('timeOfGoalsBackup-' + i, localStorage.getItem('timeOfGoalsBackup-' + (i+1)))
+          }
+          writeGoalListToStorage(maxGoalListBackups-1, JSON.stringify(goal_list))
+      }
+  }
+
+  function writeGoalListToStorage (backupNum, goal_list) {
+      const dateTime = new Date();
+      localStorage.setItem('goalListBackup-' + (backupNum), goal_list)
+      localStorage.setItem('timeOfGoalsBackup-' + (backupNum), dateTime.getDate() + ' '
+        + dateTime.getHours() + ':' + dateTime.getMinutes() + ':' + dateTime.getSeconds())
+  }
+
+  toggleGoalsBackups()
+
+  function toggleGoalsBackups () {
+      $("[class^='restore-goals-']").remove()
+
+      for (let i = 0; i<maxGoalListBackups; i++) {
+          if (localStorage.getItem('goalListBackup-' + i) != null) {
+              $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
+              $('#goals-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $('#goals-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $("[class='restore-goals']").addClass('restore-goals-' + i).removeClass('restore-goals')
+
+              createGoalsRestoreButtonHandler(i)
+
+              $('#goals-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfGoalsBackup-' + i))
+          }
+       }
+  }
+
+  function createGoalsRestoreButtonHandler (backupNum) {
+      // restore goals list
+      $('#goals-restore-btn.backup-' + backupNum).mouseup(e => {
+          goalRestoreButtonHandler(backupNum)
+      })
+  }
+
+  function goalRestoreButtonHandler (backupNum) {
+      const goalListData = new ROSLIB.Message({
+        goal_list: JSON.parse(localStorage.getItem('goalListBackup-' + backupNum))
+      })
+
+      restore_goals_publisher.publish(goalListData)
+
+      logInfo('Goal list from ' + localStorage.getItem('timeOfGoalsBackup-' + backupNum) + ' restored.')
   }
 })
