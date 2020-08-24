@@ -56,9 +56,11 @@ $(document).ready(() => {
       toggleGoalsBackups()
 
       if (message.goal_list.length != 0) {
+        $('#goal-stats-name').text(goalList[0].name)
         $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
         $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
       } else {
+        $('#goal-stats-name').text('----')
         $('#goal-stats-latitude').text('----')
         $('#goal-stats-longitude').text('----')
       }
@@ -105,7 +107,6 @@ $(document).ready(() => {
 
       for (let i = 0; i<maxGoalListBackups; i++) {
           if (localStorage.getItem('goalListBackup-' + i) != null) {
-              console.log('loop-' + i)
               $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
               $('#goals-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
               $('#goals-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
@@ -131,6 +132,8 @@ $(document).ready(() => {
       })
 
       restore_goals_publisher.publish(goalListData)
+
+      logInfo('Goal list from ' + localStorage.getItem('timeOfGoalsBackup-' + backupNum) + ' restored.')
   }
 
   // setup gps parameters for antenna directing
@@ -161,11 +164,6 @@ $(document).ready(() => {
     $('#antenna-stats-latitude').text(latitude.toFixed(6))
     $('#antenna-stats-longitude').text(longitude.toFixed(6))
     $('#antenna-stats-heading').text(heading + '°')
-  }
-
-  function setupGoalStats (latitude, longitude) {
-    $('#goal-stats-latitude').text(latitude.toFixed(6))
-    $('#goal-stats-longitude').text(longitude.toFixed(6))
   }
 
   // set antenna data
