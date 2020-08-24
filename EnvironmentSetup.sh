@@ -57,7 +57,7 @@ The script will now exit, you should test the installation using these steps:
 REPO="/home/$USER/Programming/robotics-prototype"
 ROS_VERSION="melodic"
 
-#check if in proper directory
+# check if in proper directory
 SCRIPT_LOCATION=$REPO/EnvironmentSetup.sh
 if [ ! -f $SCRIPT_LOCATION ]
 then
@@ -67,10 +67,12 @@ then
 fi
 
 
-#install prereqs
+# install prereqs
 sudo apt update -y
 sudo apt install python3.6-venv git python3-pip -y
 
+# necessary for `ifconfig` in env.sh
+sudo apt install net-tools
 
 # Setup venv
 python3.6 -m venv venv
