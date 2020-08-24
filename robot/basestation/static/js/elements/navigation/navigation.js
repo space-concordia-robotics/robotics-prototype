@@ -8,6 +8,8 @@ $(document).ready(() => {
   const minuteTodecmial = 60
   const secondTodecmial = 3600
 
+  const restoreGoalsTemplate = $('#goals-restore-template').html()
+
   // setup a subscriber for the rover_position topic
   const rover_position_listener = new ROSLIB.Topic({
     ros: ros,
@@ -51,6 +53,7 @@ $(document).ready(() => {
       goalList = message.goal_list
 
       toggleGoals()
+      toggleGoalsBackups()
 
       if (message.goal_list.length != 0) {
         $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
@@ -67,34 +70,50 @@ $(document).ready(() => {
   function backupGoalList (goal_list) {
       goalListBackupsCount = 0
       for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalList-' + i) != null) {
+          if (localStorage.getItem('goalListBackup-' + i) != null) {
               goalListBackupsCount++
+          }
+          if (localStorage.getItem('goalListBackup-' + i) == JSON.stringify(goal_list)) {
+              return
           }
       }
 
+
       if (goalListBackupsCount < maxGoalListBackups) {
-          localStorage.setItem('goalList-' + goalListBackupsCount, JSON.stringify(goal_list))
+          writeGoalListToStorage(goalListBackupsCount, JSON.stringify(goal_list))
           goalListBackupsCount++
       } else {
           for (let i = 0; i<maxGoalListBackups-1; i++) {
-              localStorage.setItem('goalList-' + i, localStorage.getItem('goalList-' + (i+1)))
+              localStorage.setItem('goalListBackup-' + i, localStorage.getItem('goalListBackup-' + (i+1)))
+              localStorage.setItem('timeOfGoalsBackup-' + i, localStorage.getItem('timeOfGoalsBackup-' + (i+1)))
           }
-          localStorage.setItem('goalList-' + maxGoalListBackups-1, JSON.stringify(goal_list))
+          writeGoalListToStorage(maxGoalListBackups-1, JSON.stringify(goal_list))
       }
+  }
+
+  function writeGoalListToStorage (backupNum, goal_list) {
+      const dateTime = new Date();
+      localStorage.setItem('goalListBackup-' + (backupNum), goal_list)
+      localStorage.setItem('timeOfGoalsBackup-' + (backupNum), dateTime.getDate() + ' '
+        + dateTime.getHours() + ':' + dateTime.getMinutes() + ':' + dateTime.getSeconds())
   }
 
   toggleGoalsBackups()
 
   function toggleGoalsBackups () {
-      $('.backup-').remove()
-      const restoreGoalsTemplate = $('#goals-restore-template').html()
+      $("[class^='restore-goals-']").remove()
 
       for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalList-' + i) != null) {
+          if (localStorage.getItem('goalListBackup-' + i) != null) {
+              console.log('loop-' + i)
               $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
-              $('#goals-restore-btn.backup').addClass('backup-' + i).removeClass('backup')
-              $('.backup-' + i).parent().addClass('backup-' + i)
+              $('#goals-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $('#goals-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $("[class='restore-goals']").addClass('restore-goals-' + i).removeClass('restore-goals')
+
               createGoalsRestoreButtonHandler(i)
+
+              $('#goals-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfGoalsBackup-' + i))
           }
        }
   }
@@ -102,14 +121,13 @@ $(document).ready(() => {
   function createGoalsRestoreButtonHandler (backupNum) {
       // restore goals list
       $('#goals-restore-btn.backup-' + backupNum).mouseup(e => {
-          console.log('backup number ' + backupNum)
           goalRestoreButtonHandler(backupNum)
       })
   }
 
   function goalRestoreButtonHandler (backupNum) {
       const goalListData = new ROSLIB.Message({
-        goal_list: JSON.parse(localStorage.getItem('goalList-' + backupNum))
+        goal_list: JSON.parse(localStorage.getItem('goalListBackup-' + backupNum))
       })
 
       restore_goals_publisher.publish(goalListData)
