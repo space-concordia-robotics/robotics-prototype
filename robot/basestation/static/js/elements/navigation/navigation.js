@@ -47,7 +47,7 @@ $(document).ready(() => {
   })
 
   goal_list_subscriber.subscribe(function (message) {
-    if (goalList.length != message.goal_list.length) {
+    if (JSON.stringify(goalList) != JSON.stringify(message.goal_list)) {
       backupGoalList(message.goal_list)
 
       goalList = message.goal_list
