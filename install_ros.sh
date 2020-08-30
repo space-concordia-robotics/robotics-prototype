@@ -2,12 +2,12 @@
 # Apache License 2.0
 # Copyright (c) 2017, ROBOTIS CO., LTD.
 
-# This script is adapted to be the Space Concordia Robotics Division needs
-# Changes were made to not set up catkin_ws, update the bashrc edits, and remove the confirmation check
+# This script is adapted to the Space Concordia Robotics Division needs
 
 echo "[Set the target OS, ROS version"
-name_os_version=${name_os_version:="xenial"}
-name_ros_version=${name_ros_version:="kinetic"}
+name_os_version=${name_os_version:="bionic"}
+name_ros_version=${name_ros_version:="melodic"}
+REPO=/home/$USER/Programming/robotics-prototype
 
 echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y
@@ -41,26 +41,24 @@ echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-echo "[Install the ros-desktop-full and all rqt plugins]"
-sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-*
+echo "[Install the ros and extra ros packages]"
+sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server python-rosdep
 
-echo "[Initialize rosdep]"
+echo "[Initialize rosdep and install dependencies]"
 sudo sh -c "rosdep init"
 rosdep update
+cd $REPO/robot/rospackages
+rosdep install --from-paths src --ignore-src -r -y
+
+# Build catkin
+echo '[Build ros packages using catkin]'
+source /opt/ros/$name_ros_version/setup.bash 
+cd $REPO/robot/rospackages
+catkin_make
 
 echo "[Environment setup and getting rosinstall]"
 source /opt/ros/$name_ros_version/setup.sh
 sudo apt-get install -y python-rosinstall
-
-echo "[Set the ROS evironment]"
-sh -c "echo '#\n\n ------ POST ROS INSTALLATION ------'" >> ~/.bashrc"
-sh -c "echo \"alias eb='nano ~/.bashrc'\" >> ~/.bashrc"
-sh -c "echo \"alias sb='source ~/.bashrc'\" >> ~/.bashrc"
-sh -c "echo \"alias gs='git status'\" >> ~/.bashrc"
-sh -c "echo \"alias gp='git pull'\" >> ~/.bashrc"
-
-sh -c "echo \"export ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
-sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
 
 source $HOME/.bashrc
 

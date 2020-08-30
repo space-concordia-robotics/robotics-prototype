@@ -9,6 +9,12 @@ Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to 
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
 
+### Style and format
+
+So far we only have standardized solutions for our python style and conventions. The configurations for formatting are stored in `.style.yapf` and for linting in `.pylintrc`. These will be eventually automated using git hooks, as documented per [issue #417](https://github.com/space-concordia-robotics/robotics-prototype/issues/417). While it's not mandatory, it is encouraged to try to setup whatever IDE/editor you are using to reference these configuration files.
+
+
+If you wish to quickly test these in the command line, refer to the testing steps in [PR #415](https://github.com/space-concordia-robotics/robotics-prototype/pull/415).
 
 ## Automatic Setup
 **Notes:**
@@ -22,9 +28,6 @@ To use the automatic setup script you must first clone the repo using the comman
 ```
 $ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
 ```
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
-
 When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
 $ cd ~/Programming/robotics-prototype
@@ -38,39 +41,32 @@ If for some reason the automatic script doesn't work, you can follow these steps
 
 
 ### Prerequisites
-Make sure you are using Ubuntu 16.04 (The ROS distribution we use doesn't support anything newer than 16.04).
+Make sure you are using Ubuntu 18.04 (The ROS distribution we use doesn't support anything newer than 18.04).
 
-Make sure the following are installed
-```
-$ sudo apt install python-pip
-$ sudo apt install virtualenv
-$ sudo apt install git
-```
-You will also need python3.6, which is by default not in Ubuntu 16.04's APT's available packages.
-#### Installing python3.6
+Add deadsnakes python repository.
 ```
 $ sudo add-apt-repository ppa:deadsnakes/ppa
 $ sudo apt update
-$ sudo apt install python3.6
 ```
-### Setup the local repository
 
+Install required packages
+```
+$ sudo apt install python3.6 python3.6-venv git python-pip
+```
+
+Clone the repo recursively.
 ```
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
-
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press <kbd>Ctrl + C</kbd>**
-
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 ```
 $ cd robotics-prototype
-$ virtualenv -p `which python3.6` venv
+$ python3.6 -m venv venv
 $ source venv/bin/activate
 ```
 You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
@@ -92,23 +88,32 @@ Still in the root directory,
 Running `pytest` without doing `python setup.py develop` will give a ModuleNotFound error. To read up more on this, click [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Troubleshooting)
 
 To deactivate virtualenv, run `deactivate`.
-### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
-```
-bash ./install_ros_kinetic.sh
-```
-To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
-To verify ROS-Kinetic has been successfully installed, you should do
+### Install and setup [Arduino](https://www.arduino.cc/) + [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
+
+Run `./install_arduino_teensyduino.sh`
+
+After the script is done, you should be able to run arduino by `cd $HOME/arduino-<version-numver>/` and running: `./arduino`.
+
+To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
+
+### Install [ROS-Melodic](http://wiki.ros.org/melodic)
+```
+bash ./install_ros.sh
+```
+To see exactly what happened during the installation of ROS-Melodic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
+
+To verify ROS-Melodic has been successfully installed, you should do
 ```
 $ roscore
 ```
-In the output you should see included: `* /rosdistro: kinetic`
+In the output you should see included: `* /rosdistro: melodic`
 
 To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
 
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 ```
-$ sudo apt install ros-kinetic-rosbridge-suite
+$ sudo apt install ros-melodic-rosbridge-suite
 ```
 To verify that its working, deactivate `venv` with `deactivate`
 ```
@@ -120,8 +125,8 @@ You will need `venv` activated for everything except the above command until [th
 To successfully build the ROS packages, you will need these dependencies.
 
 ```
-sudo apt-get install ros-kinetic-cv-camera
-sudo apt-get install ros-kinetic-web-video-server
+sudo apt-get install ros-melodic-cv-camera
+sudo apt-get install ros-melodic-web-video-server
 ```
 
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
@@ -205,10 +210,6 @@ We are using git submodules in `robotics-prototype`. This means that we are usin
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
 Pull : `git pull; git submodule update --init --recursive`
-
-If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
-
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and this [issue](https://stackoverflow.com/a/51133684/4048657) you may encounter
 
 ### Atom
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
