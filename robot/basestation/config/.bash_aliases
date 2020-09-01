@@ -8,4 +8,4 @@ alias updateEnv="bash $BASE/env.sh >| $BASE/static/js/env.js"
 alias roverenv=". $ROBOTICS_WS/venv/bin/activate"
 alias startgui="updateEnv && roverenv && cd $BASE && python app.py"
 # we have to deactivate venv for this launch file to not break, bug to be resolved eventually
-alias rosgui="roverenv && roslaunch mcu_control basestation.launch"
+alias rosgui="roverenv && deactivate && roslaunch rosbridge_server rosbridge_websocket.launch & . ~/Programming/robotics-prototype/venv/bin/activate && rosrun mcu_control GoalsNode.py"

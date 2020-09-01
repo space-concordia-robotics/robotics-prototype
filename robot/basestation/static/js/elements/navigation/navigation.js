@@ -56,7 +56,7 @@ $(document).ready(() => {
       toggleGoalsBackups()
 
       if (message.goal_list.length != 0) {
-        $('#goal-stats-name').text(goalList[0].name)
+        $('#goal-stats-name').text(goalList[0].name).css("background-color", goalList[0].color);
         $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
         $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
       } else {
@@ -738,6 +738,7 @@ $(document).ready(() => {
         \---------------------------------- */
       const goalData = new ROSLIB.Message({
         name: goalName,
+        color: getRandomColor(),
         longitude: longitude,
         latitude: latitude
       })

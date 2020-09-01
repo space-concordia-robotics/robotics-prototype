@@ -1,7 +1,0 @@
-<launch>
-
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-
-  <node pkg="mcu_control" type="GoalsNode.py" name="goals_node"/>
-
-</launch>
