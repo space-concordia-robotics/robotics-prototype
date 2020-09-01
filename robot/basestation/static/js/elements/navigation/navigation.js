@@ -40,6 +40,12 @@ $(document).ready(() => {
     messageType: 'std_msgs/String'
   })
 
+  const set_as_current_goal_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'set_as_current_goal',
+    messageType: 'std_msgs/String'
+  })
+
   const restore_goals_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'restore_goals',
@@ -405,6 +411,13 @@ $(document).ready(() => {
       })
   }
 
+  function createGoalsSetAsCurrentButtonHandler (goalNum) {
+      // add new goal templates
+      $('#goal-set-as-current-btn.goal-' + goalNum).mouseup(e => {
+          goalSetAsCurrentButtonHandler(goalNum)
+      })
+  }
+
   // functions
   function toggleGoals() {
     $('div[class*="goal-"]').remove()
@@ -475,6 +488,7 @@ $(document).ready(() => {
      createGoalsFormatButtonsHandler("button[id^='goal-latitude'].goal-" + current + ", button[id^='goal-longitude'].goal-" + current)
      createGoalsConfirmButtonHandler(current)
      createGoalsDeleteButtonHandler(current)
+     createGoalsSetAsCurrentButtonHandler(current)
   }
 
   function goalConfirmButtonHandler (current) {
@@ -514,6 +528,19 @@ $(document).ready(() => {
     delete_goal_publisher.publish(msg)
 
     $('.goal-' + current).remove()
+  }
+
+  function goalSetAsCurrentButtonHandler (current) {
+      /* ------------------------\
+      implement ROS goal setting as current
+      \------------------------ */
+      const goalName = $('#goal-name.goal-' + current).val()
+
+      const msg = new ROSLIB.Message({
+        data: goalName
+      })
+
+      set_as_current_goal_publisher.publish(msg)
   }
 
   function setGoalData (current, latitude_format, longitude_format) {

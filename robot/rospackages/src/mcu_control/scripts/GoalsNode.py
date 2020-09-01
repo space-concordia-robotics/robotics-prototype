@@ -18,6 +18,15 @@ def delete_goal_callback(message):
         if goal.name == name:
             goal_list.remove(goal)
 
+def set_as_current_goal_callback(message):
+    name = message.data
+    index = 0
+
+    for goal in goal_list:
+        if goal.name == name:
+            goal_list.insert(0, goal_list.pop(index))
+        index += 1
+
 def restore_goals_callback(message):
     goal_list.clear()
     for goal in message.goal_list:
@@ -35,6 +44,9 @@ if __name__ == '__main__':
 
     delete_goal_sub_topic = 'delete_goal'
     delete_goal_sub = rospy.Subscriber(delete_goal_sub_topic, String, delete_goal_callback)
+
+    set_as_current_goal_sub_topic = 'set_as_current_goal'
+    set_as_current_goal_sub = rospy.Subscriber(set_as_current_goal_sub_topic, String, set_as_current_goal_callback)
 
     restore_goals_sub_topic = 'restore_goals'
     restore_goals_sub = rospy.Subscriber(restore_goals_sub_topic, RoverGoalList, restore_goals_callback)
