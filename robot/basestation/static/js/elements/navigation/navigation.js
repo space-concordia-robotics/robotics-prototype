@@ -4,6 +4,7 @@ $(document).ready(() => {
 
   goalListBackupsCount = 0
   const maxGoalListBackups = 3
+  settingGoalAsCurrent = false
 
   const minuteTodecmial = 60
   const secondTodecmial = 3600
@@ -54,7 +55,11 @@ $(document).ready(() => {
 
   goal_list_subscriber.subscribe(function (message) {
     if (JSON.stringify(goalList) != JSON.stringify(message.goal_list)) {
-      backupGoalList(message.goal_list)
+      if (!settingGoalAsCurrent) {
+        backupGoalList(message.goal_list)
+      } else {
+        settingGoalAsCurrent = false
+      }
 
       goalList = message.goal_list
 
@@ -540,6 +545,7 @@ $(document).ready(() => {
         data: goalName
       })
 
+      settingGoalAsCurrent = true
       set_as_current_goal_publisher.publish(msg)
   }
 
@@ -804,7 +810,6 @@ $(document).ready(() => {
               return
           }
       }
-
 
       if (goalListBackupsCount < maxGoalListBackups) {
           writeGoalListToStorage(goalListBackupsCount, JSON.stringify(goal_list))
