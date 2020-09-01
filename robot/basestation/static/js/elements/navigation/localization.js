@@ -14,12 +14,28 @@ const sketch = function (p) {
   roverY = 0
   baseLat = null
   baseLong = null
+
+  goalX = null // cartesian coordinates of current goal in pixels
+  goalY = null
+  goalColor = 'black'
+
   rover_position_listener.subscribe(function (message) {
     roverLong = message.x
     roverLat = message.y
     roverHeading = message.z
     initializeBase(message.x, message.y)
     adjustValuesToCartesian(roverLat, roverLong)
+  })
+
+  goal_list_subscriber.subscribe(function (message) {
+    if (message.goal_list.length != 0) {
+        goalX = message.goal_list[0].longitude
+        goalY = message.goal_list[0].latitude
+        goalColor = message.goal_list[0].color
+      } else {
+        goalX = 1500
+        goalY = 1500
+      }
   })
 
   dragDiffX = 0
@@ -52,6 +68,7 @@ const sketch = function (p) {
     drawGrid()
     drawBase()
     drawRover()
+    drawGoal()
   }
 
   /* ----------------------------------------
@@ -71,6 +88,15 @@ const sketch = function (p) {
     p.rotate(roverHeading)
     p.scale(1 / zoomValue)
     p.triangle(0, -15, 10, 10, -10, 10) // 3 points (x, y, x, y, x ,y)
+    p.pop()
+  }
+
+  function drawGoal () {
+    p.push()
+    p.translate(goalX, goalX)
+    p.fill(goalColor)
+    p.scale(1 / zoomValue)
+    p.circle(0, 0, 20);
     p.pop()
   }
 
