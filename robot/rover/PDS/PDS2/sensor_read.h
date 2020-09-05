@@ -3,6 +3,7 @@
  * Read temperature values
  */
 
+
 #define MUX_S0  8
 #define MUX_S1  9
 #define MUX_S2  10
