@@ -35,7 +35,7 @@ $(document).ready(() => {
             'Odroid ping timeout after ' +
             timeoutVal / 1000 +
             ' seconds. ' +
-            "Check if the websockets server is running. If not, there's either a network issue " +
+            'Check if the websockets server is running. If not, there\'s either a network issue ' +
             'or the Odroid and possibly the whole rover has shut down unexpectedly.'
           appendToConsole(msg)
         } else {
@@ -53,7 +53,7 @@ $(document).ready(() => {
       event.altKey &&
       event.code === 'KeyP' &&
       millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-      !$('#servo-val').is(':focus')
+      !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
     ) {
       pingDevice('Odroid')
       lastCmdSent = new Date().getTime()
@@ -65,7 +65,7 @@ $(document).ready(() => {
     if (
       event.code === 'KeyL' &&
       millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-      !$('#servo-val').is(':focus')
+      !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
     ) {
       $('button#list-all-cmds').css('background-color', 'rgb(255, 0, 0)')
       printCommandsList()

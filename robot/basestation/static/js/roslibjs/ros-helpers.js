@@ -2,6 +2,30 @@ REQUEST_TIMEOUT = 3000
 ROTATE_TIMEOUT = 1000
 lastRotate = 0
 
+// minimum and maximum acceptable battery voltages (volts)
+MIN_VOLTAGE = 12.5
+MAX_VOLTAGE = 16.8
+VOLTAGE_LEEWAY = 0.5
+VOLTAGE_WARNING = 1
+// minimum and maximum acceptable battery tempratures (degrees celcius)
+MIN_TEMP = 0
+MAX_TEMP = 85
+TEMP_LEEWAY = 1
+TEMP_WARNING = 10
+// variable to toggle unacceptable voltage and temperature indicators
+ALERT_ENABLE = true
+
+// ROS logging severity level constants
+const ROSDEBUG = 1 // debug level
+const ROSINFO = 2  // general level
+const ROSWARN = 4  // warning level
+const ROSERROR = 8 // error level
+const ROSFATAL = 16 // fatal/critical level
+
+
+// logs below this level will not be published or printed. Issue #202 will allow the user to set this value
+const MINIMUM_LOG_LEVEL = ROSINFO
+
 function initRosWeb () {
   ros = new ROSLIB.Ros({
     url: 'ws://' + env.HOST_IP + ':9090'
@@ -9,15 +33,21 @@ function initRosWeb () {
   ros.on('connection', function () {
     appendToConsole('Connected to websocket server.')
     checkTaskStatuses()
-    if (window.location.pathname == '/rover') {
-      initNavigationPanel()
-    }
   })
   ros.on('error', function (error) {
     appendToConsole('Error connecting to websocket server: ', error)
   })
   ros.on('close', function () {
     appendToConsole('Connection to websocket server closed.')
+  })
+
+  /* Logging */
+
+  // publishes log messages to /rosout
+  ros_logger = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rosout',
+    messageType: 'rosgraph_msgs/Log'
   })
 
   /* general controls */
@@ -36,9 +66,7 @@ function initRosWeb () {
     serviceType: 'SelectMux'
   })
   // setup a client for the serial_cmd service
-  serial_cmd_client = new ROSLIB.Service({
-    ros: ros,
-    name: 'serial_cmd',
+  serial_cmd_client = new ROSLIB.Service({ ros: ros, name: 'serial_cmd',
     serviceType: 'SerialCmd'
   })
   // setup a client for the task_handler service
@@ -110,12 +138,28 @@ function initRosWeb () {
     name: 'rover_request',
     serviceType: 'ArmRequest' // for now... might change
   })
+
   // setup a publisher for the rover_command topic
   rover_command_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'rover_command',
     messageType: 'std_msgs/String'
   })
+
+  // setup a publisher for the pds_command topic
+  pds_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'pds_command',
+    messageType: 'std_msgs/String'
+  })
+
+  // setup a publisher for the science_command topic
+  science_command_publisher = new ROSLIB.Topic({
+    ros: ros,
+    name: 'science_command',
+    messageType: 'std_msgs/String'
+  })
+
   // setup a subscriber for the rover_joint_states topic
   rover_joint_states_listener = new ROSLIB.Topic({
     ros: ros,
@@ -155,27 +199,98 @@ function initRosWeb () {
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
+    messageType: 'mcu_control/Voltage'
   })
   battery_voltage_listener.subscribe(function (message) {
-    $('#battery-voltage').text(message.data.toFixed(2))
+    // sets voltage to two decimal points
+    let voltage = message.data.toFixed(2)
+    $('#battery-voltage').text(voltage)
+
+    // if statement to control voltage indicator switching between acceptable(white) and unacceptable(red)
+    if ((voltage > MAX_VOLTAGE || voltage < MIN_VOLTAGE)) {
+      textColor('#battery-voltage', 'red')
+
+      if ($('#battery-voltage').attr('acceptable') === '1' && ALERT_ENABLE) {
+        $('#battery-voltage').attr('acceptable', '0')
+        errorSound()
+        if (voltage > MAX_VOLTAGE) {
+          navModalMessage('Warning: Voltage too high', 'Disconnect Battery first and then the BMS, and then discharge the Battery to 16.8V')
+        } else if (voltage < MIN_VOLTAGE){
+          navModalMessage('Warning: Voltage too low', 'Turn rover off, disconnect Battery and BMS, and then charge battery to 16.8V')
+        }
+      }
+    } else if (voltage > MAX_VOLTAGE - VOLTAGE_LEEWAY || voltage < MIN_VOLTAGE + VOLTAGE_LEEWAY){
+      if ($('#battery-voltage').attr('acceptable') === '0') {
+        textColor('#battery-voltage', 'red')
+      }
+
+    } else {
+      if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
+        textColor('#battery-voltage', 'orange')
+
+      } else {
+        textColor('#battery-voltage', 'white')
+      }
+
+      if ($('#battery-voltage').attr('acceptable') === '0') $('#battery-voltage').attr('acceptable', '1')
+    }
   })
   // setup a subscriber for the battery_temps topic
   battery_temps_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_temps',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/ThermistorTemps'
   })
   battery_temps_listener.subscribe(function (message) {
-    $('#battery-temp-1').text(parseFloat(message.x).toFixed(2))
-    $('#battery-temp-2').text(parseFloat(message.y).toFixed(2))
-    $('#battery-temp-3').text(parseFloat(message.z).toFixed(2))
+    // sets temperatures to two decimal points
+    let temps = [
+      parseFloat(message.therm1).toFixed(2),
+      parseFloat(message.therm2).toFixed(2),
+      parseFloat(message.therm3).toFixed(2)
+    ]
+
+    $('.battery-temp').each(function(i, obj) {
+      let $obj = $(obj)
+      let temperature = temps[i]
+      $obj.text(temperature)
+
+      if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
+        $obj.css({'color': 'red'})
+
+        if ($obj.attr('acceptable') === '1' && ALERT_ENABLE) {
+          $obj.attr('acceptable', '0')
+          errorSound()
+          if (temperature > MAX_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too high.', 'Decrease temperature')
+          } else if (temperature < MIN_TEMP) {
+            navModalMessage('Warning: Battery temperature (' + $obj.attr('sensorName') + ') too low.', 'Increase temperature')
+          }
+        }
+      } else if (temperature > MAX_TEMP - TEMP_LEEWAY || temperature < MIN_TEMP + TEMP_LEEWAY){
+        if ($obj.attr('acceptable') === '0') {
+          $obj.css({'color': 'red'})
+        } else {
+          $obj.css({'color': 'orange'})
+        }
+
+      } else {
+        if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
+          $obj.css({'color': 'orange'})
+
+        } else {
+          $obj.css({'color': 'white'})
+        }
+
+        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
+      }
+    });
+
   })
   // setup a subscriber for the wheel_motor_currents topic
   wheel_motor_currents_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'wheel_motor_currents',
-    messageType: 'sensor_msgs/JointState'
+    messageType: 'mcu_control/Currents'
   })
   wheel_motor_currents_listener.subscribe(function (message) {
     $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
@@ -185,15 +300,141 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
+
+  // setup a subcriber function for rover_position topic
+  rover_position_listener = new ROSLIB.Topic({
+    ros: ros,
+    name: 'rover_position',
+    messageType: 'geometry_msgs/Point'
+  })
 }
 
 /* functions used in main code */
+
+/**
+ * Gets the current time and formats it for ROS and the GUI.
+ * @return array of two variables: ROS time object, string containing hh:mm:ss
+*/
+function rosTimestamp () {
+  // next few lines taken and adjusted from roslibjs action server example
+  let currentTime = new Date()
+  let secs = currentTime.getTime()/1000 // seconds before truncating the decimal
+  let secsFloored = Math.floor(secs) // seconds after truncating
+  let nanoSecs = Math.round(1000000000*(secs-secsFloored)) // nanoseconds since the previous second
+
+  // return a dictionary for the ROS log and a string for the gui console
+  let stampTime = currentTime.toString().split(' ')[4] // hh:mm:ss from date object
+  return [{secs : secsFloored, nsecs : nanoSecs}, stampTime]
+}
+
+/**
+ * Creates and publishes a ROS log message to /rosout based on the parameters
+ * @param logLevel one of the ROS loglevel constants defined above
+ * @param timestamp ros time object containing seconds and nanoseconds
+ * @param message the log message
+*/
+function publishRosLog (logLevel, timestamp, message) {
+  ros_logger.publish(
+    new ROSLIB.Message({
+      // I'm only publishing the essentials. We could include more info if so desired
+      header : {
+        // seq // uint32: sequence ID, seems to increment automatically
+        stamp : timestamp // dictionary: contains truncated seconds and nanoseconds
+        // frame_id // string: probably only useful for tf
+      },
+      level : logLevel, // int: see log level constants above
+      // name : '/web_gui', // name of the node (proposed)
+      msg : message, // string: this is the log message
+      // file // string: we could specify the js file that generated the log
+      // function // string: we could specify the parent function that generated the log
+      // line // uint32: we could specify the specific line of code that generated the log
+      // topics // string[]: topic names that the node publishes
+    })
+  )
+}
+
+/**
+ * Prints the log message to the GUI and chrome console.
+ * Also calls publishRosLog with the message and parameters.
+ * @param logLevel one of the ROS loglevel constants defined above
+ * @param message the log message
+*/
+function rosLog (logLevel, message, devConsole = true, guiConsole = true) {
+  logData = {}
+  logData[ROSDEBUG] = {prefix : '[DEBUG]', type : 'log'}
+  logData[ROSINFO] = {prefix : '[INFO]', type : 'log'}
+  logData[ROSWARN] = {prefix : '[WARN]', type : 'warn'}
+  logData[ROSERROR] = {prefix : '[ERROR]', type : 'error'}
+  logData[ROSFATAL] = {prefix : '[FATAL]', type : 'error'}
+
+  stamps = rosTimestamp()
+  consoleMsg = logData[logLevel].prefix + ' [' + stamps[1] + ']: ' + message
+
+  if (devConsole) {
+    if (logData[logLevel].type === 'log') {
+      console.log(consoleMsg)
+    } else if (logData[logLevel].type === 'warn') {
+      console.warn(consoleMsg)
+    } else if (logData[logLevel].type === 'error') {
+      console.error(consoleMsg)
+    }
+  }
+  if (guiConsole) {
+    // false means don't append (again) to the dev console
+    appendToConsole(consoleMsg, false)
+  }
+  // log messages go to log file: currently rosout.log
+  publishRosLog(logLevel, stamps[0], message)
+}
+
+// these functions copy the rospy logging functions
+/**
+ * Sends a debug message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logDebug (message, devConsole = true, guiConsole = true) {
+  // unlike rospy, (currently) the debug messages we generate will get published
+  rosLog(ROSDEBUG, message, devConsole, guiConsole)
+}
+/**
+ * Sends an info message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logInfo (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSINFO, message, devConsole, guiConsole)
+}
+/**
+ * Sends a warning message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logWarn (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSWARN, message, devConsole, guiConsole)
+}
+/**
+ * Sends an error message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logErr (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSERROR, message, devConsole, guiConsole)
+}
+/**
+ * Sends a fatal error message with timestamp to the GUI and chrome consoles.
+ * Also publishes it to /rosout.
+ * @param message the log message
+*/
+function logFatal (message, devConsole = true, guiConsole = true) {
+  rosLog(ROSFATAL, message, devConsole, guiConsole)
+}
+
 function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   let dev = elemID[elemID.length - 1]
   let request = new ROSLIB.ServiceRequest({ device: dev })
   let sentTime = new Date().getTime()
 
-  console.log(request)
   if (dev != '?') {
     appendToConsole(
       'Sending request to switch to channel ' + $('a' + elemID).text()
@@ -207,7 +448,6 @@ function requestMuxChannel (elemID, callback, timeout = REQUEST_TIMEOUT) {
   mux_select_client.callService(request, function (result) {
     clearTimeout(timer)
     let latency = millisSince(sentTime)
-    console.log(result)
     let msg = result.response // .slice(0, result.response.length - 1) // remove newline character
     if (msg.includes('failed') || msg.includes('ERROR')) {
       // how to account for a lack of response?
@@ -229,8 +469,7 @@ function requestSerialCommand (command, callback) {
   let request = new ROSLIB.ServiceRequest({ msg: command + '\n' })
   let sentTime = new Date().getTime()
 
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  logInfo('Sending request to execute command "' + command + '"')
 
   mux_select_client.callService(request, function (result) {
     let latency = millisSince(sentTime)
@@ -248,33 +487,47 @@ function requestSerialCommand (command, callback) {
     }
   })
 }
+
+STATUS_STOP=0
+STATUS_START=1
+STATUS_CHECK=2
+ARM_LISTENER_TASK = 'arm_listener'
+ROVER_LISTENER_TASK = 'rover_listener'
+SCIENCE_LISTENER_TASK = 'science_listener'
+PDS_LISTENER_TASK = 'pds_listener'
+CAMERA_TASK = 'camera_stream'
+CAMERA_PORTS = 'camera_ports'
+
+/**
+ * Sends a request to the task handler.
+ *
+ * STATUS_STOP stops the task
+ * STATUS_START starts the task
+ * STATUS_CHECK obtains insight on the task
+ *
+ * @reqTask The task related to the request
+ * @reqStatus The status of the request
+ * @callback Callback on success
+ * @reqArgs Arguments of the request
+ * @timeout Timeout of the request
+ */
 function requestTask (
   reqTask,
   reqStatus,
-  buttonID,
-  callback,
+  callback = arg => {},
   reqArgs = '',
   timeout = REQUEST_TIMEOUT
 ) {
-  var request
-  if (reqArgs == '') {
-    request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus })
-  } else {
-    request = new ROSLIB.ServiceRequest({
-      task: reqTask,
-      status: reqStatus,
-      args: reqArgs
-    })
-  }
+
+  let request = new ROSLIB.ServiceRequest({ task: reqTask, status: reqStatus, args: reqArgs })
   let sentTime = new Date().getTime()
 
-  console.log('request:', request)
-  if (reqStatus == 0) {
-    appendToConsole('Sending request to stop ' + reqTask + ' task')
-  } else if (reqStatus == 1) {
-    appendToConsole('Sending request to start ' + reqTask + ' task')
-  } else if (reqStatus == 2) {
-    appendToConsole('Sending request to check ' + reqTask + ' task status')
+  if (reqStatus == STATUS_STOP) {
+    logInfo('Sending request to stop ' + reqTask + ' task')
+  } else if (reqStatus == STATUS_START) {
+    logInfo('Sending request to start ' + reqTask + ' task')
+  } else if (reqStatus == STATUS_CHECK) {
+    logInfo('Sending request to check ' + reqTask + ' task status')
   }
 
   let timer = setTimeout(function () {
@@ -284,7 +537,6 @@ function requestTask (
   task_handler_client.callService(request, function (result) {
     clearTimeout(timer)
     let latency = millisSince(sentTime)
-    console.log('result:', result)
     let msg = result.response
     if (
       msg.includes('Failed') ||
@@ -293,7 +545,6 @@ function requestTask (
       msg.includes('is already running') ||
       msg.includes('not available')
     ) {
-      // how to account for a lack of response?
       appendToConsole('Request failed. Received "' + msg + '"')
       callback([false, msg])
     } else {
@@ -301,17 +552,6 @@ function requestTask (
         'Received "' + msg + '" with ' + latency.toString() + ' ms latency'
       )
 
-      if (reqStatus == 0) {
-        $(buttonID)[0].checked = false
-      } else if (reqStatus == 1) {
-        $(buttonID)[0].checked = true
-      } else if (reqStatus == 2) {
-        if (msg.includes('not')) {
-          $(buttonID)[0].checked = false
-        } else {
-          $(buttonID)[0].checked = true
-        }
-      }
       callback([true, msg])
     }
   })
@@ -331,10 +571,9 @@ function checkTaskStatuses () {
   requestMuxChannel('?', function (currentChannel) {
     console.log('currentChannel', currentChannel)
   })
-
   if (window.location.pathname == '/') {
     // check arm listener status
-    requestTask('arm_listener', 2, '#toggle-arm-listener-btn', function (msgs) {
+    requestTask(ARM_LISTENER_TASK, STATUS_CHECK, (msgs) => {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -344,90 +583,8 @@ function checkTaskStatuses () {
         }
       }
     })
-    // check all camera stream status
-    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyArmScienceCam')
-        ) {
-          $('#camera-feed').removeClass('rotateimg180')
-          $('#arm-science-camera-stream-btn')[0].checked = true
-          $('#rear-camera-stream-btn')[0].checked = false
-          $('#front-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyFrontCam')
-        ) {
-          $('#camera-feed').addClass('rotateimg180')
-          $('#front-camera-stream-btn')[0].checked = true
-          $('#arm-science-camera-stream-btn')[0].checked = false
-          $('#rear-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyRearCam')
-        ) {
-          $('#camera-feed').addClass('rotateimg180')
-          $('#rear-camera-stream-btn')[0].checked = true
-          $('#front-camera-stream-btn')[0].checked = false
-          $('#arm-science-camera-stream-btn')[0].checked = false
-        }
-      }
-    })
-  } else if (window.location.pathname == '/rover') {
-    // check rover listener status
-    requestTask('rover_listener', 2, '#toggle-rover-listener-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (msgs[1].includes('not running')) {
-          $('#toggle-rover-listener-btn')[0].checked = false
-        } else if (msgs[1].includes('running')) {
-          $('#toggle-rover-listener-btn')[0].checked = true
-        }
-      }
-    })
-
-    // check all camera stream status
-    requestTask('camera_stream', 2, '#arm-science-camera-stream-btn', function (
-      msgs
-    ) {
-      printErrToConsole(msgs)
-      if (msgs[0] && msgs.length == 2) {
-        if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyArmScienceCam')
-        ) {
-          $('#front-camera-stream-btn').removeClass('rotateimg180')
-          $('#arm-science-camera-stream-btn')[0].checked = true
-          $('#rear-camera-stream-btn')[0].checked = false
-          $('#front-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyFrontCam')
-        ) {
-          $('#front-camera-stream-btn').addClass('rotateimg180')
-          $('#front-camera-stream-btn')[0].checked = true
-          $('#arm-science-camera-stream-btn')[0].checked = false
-          $('#rear-camera-stream-btn')[0].checked = false
-        } else if (
-          msgs[1].includes('running') &&
-          msgs[1].includes('/dev/ttyRearCam')
-        ) {
-          $('#front-camera-stream-btn').removeClass('rotateimg180')
-          $('#rear-camera-stream-btn')[0].checked = true
-          $('#front-camera-stream-btn')[0].checked = false
-          $('#arm-science-camera-stream-btn')[0].checked = false
-        }
-      }
-    })
   } else if (window.location.pathname == '/science') {
-    console.log('science page')
-    requestTask('science_listener', 2, '#science-listener-btn', function (msgs) {
+    requestTask(SCIENCE_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -439,7 +596,7 @@ function checkTaskStatuses () {
     })
   } else if (window.location.pathname == '/pds') {
     // check rover listener status
-    requestTask('pds_listener', 2, '#toggle-pds-listener-btn', function (msgs) {
+    requestTask(PDS_LISTENER_TASK, STATUS_CHECK, function (msgs) {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
@@ -452,26 +609,11 @@ function checkTaskStatuses () {
   }
 }
 
-function sendIKCommand () {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to IK node')
-  ik_command_publisher.publish(cmd)
-}
-
-function sendArmCommand (cmd) {
-  let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to arm Teensy')
-  arm_command_publisher.publish(command)
-}
-
 function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   let request = new ROSLIB.ServiceRequest({ msg: command })
   let sentTime = new Date().getTime()
 
-  console.log(request)
-  appendToConsole('Sending request to execute command "' + command + '"')
+  logInfo('Sending request to execute command "' + command + '"')
 
   let timer = setTimeout(function () {
     callback([false, command + ' timeout after ' + timeout / 1000 + ' seconds'])
@@ -513,25 +655,46 @@ function sendRequest (device, command, callback, timeout = REQUEST_TIMEOUT) {
   })
 }
 
-function sendRoverCommand (cmd) {
+/*
+returns the IP portion of the currently set ROS_MASTER_URI
+*/
+function getRoverIP (callback) {
+  logInfo('roverIP: ' + env.ROS_MASTER_IP)
+  logInfo('hostIP: ' + env.HOST_IP)
+  return env.ROS_MASTER_IP
+}
+
+/*
+command sending
+*/
+function sendIKCommand (cmd) {
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to rover Teensy')
+  logInfo('Sending "' + cmd + '" to IK node')
+  ik_command_publisher.publish(cmd)
+}
+
+function sendArmCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to arm Teensy')
+  arm_command_publisher.publish(command)
+}
+
+function sendRoverCommand (cmd) {
+  logDebug('Sending "' + cmd + '" to Rover Teensy')
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to rover Teensy')
   rover_command_publisher.publish(command)
 }
 
 function sendPdsCommand (cmd) {
+  logDebug('Sending "' + cmd + '" to PDS Teensy')
   let command = new ROSLIB.Message({ data: cmd })
-  console.log(command)
-  appendToConsole('Sending "' + cmd + '" to PDS Teensy')
+  logInfo('Sending "' + cmd + '" to PDS')
   pds_command_publisher.publish(command)
 }
 
-/*
-returnsthe IP portion of the currntly set ROS_MASTER_URI
-*/
-function getRoverIP (callback) {
-  console.log('roverIP: ' + env.ROS_MASTER_IP)
-  console.log('hostIP: ' + env.HOST_IP)
-  return env.ROS_MASTER_IP
+function sendScienceCommand (cmd) {
+  let command = new ROSLIB.Message({ data: cmd })
+  logInfo('Sending "' + cmd + '" to science Teensy')
+  science_command_publisher.publish(command)
 }

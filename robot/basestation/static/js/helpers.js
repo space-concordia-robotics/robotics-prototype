@@ -1,12 +1,19 @@
 // Console Log
 const logConsole = '#write-to-log'
-const serialCmd = '#serial-cmd-input'
 
 // Console Log
 function appendToConsole (msg, devConsole = true, guiConsole = true) {
   if (guiConsole) {
-    $(logConsole).append(msg + '\n')
-    $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+    if($(logConsole)[0] != undefined)
+    {
+      $(logConsole).append(msg + '\n')
+      $(logConsole).scrollTop($(logConsole)[0].scrollHeight)
+    }
+    else
+    {
+      console.log('Can\'t append message to log console. Logged messaged to chrome console')
+      console.log(msg)
+    }
   }
   if (devConsole) {
     console.log(msg + '\n')
@@ -31,10 +38,6 @@ function appendToScienceLog (msg) {
 
 function clearLogConsole () {
   $(logConsole).html('')
-}
-
-function clearSerialCmd () {
-  $(serialCmd).val('')
 }
 
 function scrollToBottom () {
@@ -123,6 +126,11 @@ function greyOut (selector) {
   color(selector, '#6c757d')
 }
 
+// convenience function for setting text color of elements
+function textColor (selector, color) {
+  $(selector).css('color', color)
+}
+
 // convenience functions for setting/getting cookies
 function setCookie (cname, cvalue, exdays) {
   var d = new Date()
@@ -147,12 +155,6 @@ function getCookie (cname) {
   return ''
 }
 
-// return properly formatted camera stream URL
-function getStreamURL (topicName) {
-  return (
-    'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
-  )
-}
 
 // isNumeric
 function isNumeric (num) {

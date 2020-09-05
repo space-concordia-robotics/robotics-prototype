@@ -1,18 +1,57 @@
-// Keep the state of changable text of a button when called on upon page load
-function keepText (button) {
-  if (window.localStorage.getItem(button) == 'text-swap') {
-    toggleText(button)
+// Applies modulo and if the value is negative, cycle it.
+function negativeModulo (number, modulo) {
+  while (number < 0) {
+    number += modulo
   }
+
+  number %= modulo
+  return number;
 }
 
-// Toggle text of a button
-function toggleText (button) {
-  if (button.text() == button.data('text-swap')) {
-    button.text(button.data('text-original'))
-    window.localStorage.setItem(button, 'text-original')
-  } else {
-    button.data('text-original', button.text())
-    button.text(button.data('text-swap'))
-    window.localStorage.setItem(button, 'text-swap')
+// Rotate element to given angle
+function rotateElement (element, angle) {
+  element.css({
+    transform: 'rotate(' + angle + 'deg)',
+    '-ms-transform': 'rotate(' + angle + 'deg)',
+    '-moz-transform': 'rotate(' + angle + 'deg)',
+    '-webkit-transform': 'rotate(' + angle + 'deg)',
+    '-o-transform': 'rotate(' + angle + 'deg)'
+  })
+}
+
+/**
+ * Clamps a value in a given range.
+ *
+ * @param {number} number The number to clamp.
+ * @param {number} [lower] The lower bound.
+ * @param {number} upper The upper bound.
+ * @returns {number} Returns the clamped number.
+ */
+function clamp(number, lower, upper) {
+  if (number === number) {
+    if (upper !== undefined) {
+      number = number <= upper ? number : upper;
+    }
+    if (lower !== undefined) {
+      number = number >= lower ? number : lower;
+    }
+  }
+  return number;
+}
+
+function getDeviceNameByMuxID (id) {
+  switch(id) {
+    case 'mux-0':
+      return 'Rover'
+      break;
+    case 'mux-1':
+      return 'Arm'
+      break;
+    case 'mux-2':
+      return 'Science'
+      break
+    case 'mux-3':
+      return 'PDS'
+      break;
   }
 }

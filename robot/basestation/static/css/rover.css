@@ -56,10 +56,6 @@ html, body {
     background-color: #101148;
 }
 
-.row, .row>* {
-    border: 0px solid #05072f;
-}
-
 .round-btn {
     width: 80px;
     height: 80px;
@@ -121,11 +117,6 @@ html, body {
 textarea#write-to-log {
     min-width: 100%;
     min-height: 450px;
-}
-
-input#serial-cmd-input {
-    margin: 4px;
-    width: 100%;
 }
 
 .btn-circle {

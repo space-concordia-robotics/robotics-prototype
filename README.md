@@ -8,40 +8,65 @@ This repo contains the Robotics software team code.
 Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
 
 Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
-### Prerequisites
-Make sure you are using Ubuntu 16.04 (The ROS distribution we use doesn't support anything newer than 16.04).
 
-Make sure the following are installed
+### Style and format
+
+So far we only have standardized solutions for our python style and conventions. The configurations for formatting are stored in `.style.yapf` and for linting in `.pylintrc`. These will be eventually automated using git hooks, as documented per [issue #417](https://github.com/space-concordia-robotics/robotics-prototype/issues/417). While it's not mandatory, it is encouraged to try to setup whatever IDE/editor you are using to reference these configuration files.
+
+
+If you wish to quickly test these in the command line, refer to the testing steps in [PR #415](https://github.com/space-concordia-robotics/robotics-prototype/pull/415).
+
+## Automatic Setup
+**Notes:**
+- Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
+- Don't forget the `--recursive` when cloning, or you might run into issues.
+- The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
+- You should be prompted once (maybe more) for sudo password.
+Apart from that, you can can sit back and relax :slightly_smiling_face:
+
+To use the automatic setup script you must first clone the repo using the command below. **Make sure that you do not have a directory named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.**
 ```
-$ sudo apt install python-pip
-$ sudo apt install virtualenv
-$ sudo apt install git
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
 ```
-You will also need python3.6, which is by default not in Ubuntu 16.04's APT's available packages.
-#### Installing python3.6
+When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
+```
+$ cd ~/Programming/robotics-prototype
+$ ./EnvironmentSetup.sh
+```
+
+If you want to code in C++ using a Teensy, you will need to read [this wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino).
+
+## Manual setup
+If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
+
+
+### Prerequisites
+Make sure you are using Ubuntu 18.04 (The ROS distribution we use doesn't support anything newer than 18.04).
+
+Add deadsnakes python repository.
 ```
 $ sudo add-apt-repository ppa:deadsnakes/ppa
 $ sudo apt update
-$ sudo apt install python3.6
 ```
-### Setup the local repository
 
+Install required packages
+```
+$ sudo apt install python3.6 python3.6-venv git python-pip
+```
+
+Clone the repo recursively.
 ```
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype robotics-prototype
+$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
-
-**If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code. If you don't have gitlab access then simply press `Ctrl + C`**
-
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and [this](https://stackoverflow.com/questions/47860772/gitlab-remote-http-basic-access-denied-and-fatal-authentication/51133684#51133684) issue you may encounter
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 ```
 $ cd robotics-prototype
-$ virtualenv -p `which python3.6` venv
+$ python3.6 -m venv venv
 $ source venv/bin/activate
 ```
 You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
@@ -63,25 +88,32 @@ Still in the root directory,
 Running `pytest` without doing `python setup.py develop` will give a ModuleNotFound error. To read up more on this, click [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Troubleshooting)
 
 To deactivate virtualenv, run `deactivate`.
-### Install [ROS-Kinetic](http://wiki.ros.org/kinetic)
-```
-wget https://raw.githubusercontent.com/ROBOTIS-GIT/robotis_tools/master/install_ros_kinetic.sh
-chmod 755 ./install_ros_kinetic.sh
-bash ./install_ros_kinetic.sh
-```
-To see exactly what happened during the installation of ROS-Kinetic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
-To verify ROS-Kinetic has been successfully installed, you should do
+### Install and setup [Arduino](https://www.arduino.cc/) + [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html)
+
+Run `./install_arduino_teensyduino.sh`
+
+After the script is done, you should be able to run arduino by `cd $HOME/arduino-<version-numver>/` and running: `./arduino`.
+
+To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
+
+### Install [ROS-Melodic](http://wiki.ros.org/melodic)
+```
+bash ./install_ros.sh
+```
+To see exactly what happened during the installation of ROS-Melodic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
+
+To verify ROS-Melodic has been successfully installed, you should do
 ```
 $ roscore
 ```
-In the output you should see included: `* /rosdistro: kinetic`
+In the output you should see included: `* /rosdistro: melodic`
 
-To stop a running process in the command line, press `Ctrl-C`
+To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
 
 ### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
 ```
-$ sudo apt install ros-kinetic-rosbridge-suite
+$ sudo apt install ros-melodic-rosbridge-suite
 ```
 To verify that its working, deactivate `venv` with `deactivate`
 ```
@@ -93,8 +125,8 @@ You will need `venv` activated for everything except the above command until [th
 To successfully build the ROS packages, you will need these dependencies.
 
 ```
-sudo apt-get install ros-kinetic-cv-camera
-sudo apt-get install ros-kinetic-web-video-server
+sudo apt-get install ros-melodic-cv-camera
+sudo apt-get install ros-melodic-web-video-server
 ```
 
 ### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
@@ -103,6 +135,7 @@ The first catkin workspace was automatically generated during the scripted insta
 You need to setup another catkin workspace in robot/rospackages
 ```
 $ cd ~/Programming/robotics-prototype/robot/rospackages
+$ rosdep install --from-paths src/ --ignore-src -r -y
 $ catkin_make
 ```
 ### .bashrc edits
@@ -122,7 +155,7 @@ source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 You will need to provide the IP that the GUI will work with. By running this script, everything is handled.
 
 ```
-./robot/basestation/env.sh > robot/basestation/static/js/env.js
+./robot/basestation/env.sh >| robot/basestation/static/js/env.js
 ```
 
 ### Run the GUI
@@ -136,16 +169,11 @@ $ python app.py
 ```
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 
-### ffmpeg
 
-For the features of capturing a snapshot and recording the camera streams we require `ffmpeg`:
-```
-sudo apt install ffmpeg
-```
+### Final Steps
+You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
-You can read about the formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
-
-Make sure to setup the [git hooks](#setting-up-git-hooks)
+Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by running ./EnvironmentSetup.sh)
 
 ## Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
@@ -158,7 +186,7 @@ This explains how to setup git hooks which prepend an issue number to a commit m
 
 Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
 
-- `cp commit-message-hook.sh .git/hooks/prepare-commit-msg`
+- `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
 - `cp branch_name_verification_hook.py .git/hooks/post-checkout`
 
 If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
@@ -182,10 +210,6 @@ We are using git submodules in `robotics-prototype`. This means that we are usin
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
 Pull : `git pull; git submodule update --init --recursive`
-
-If you do not have access to the GitLab repository, you will not be able to successfully authenticate to clone `rover2018-elec`. This is fine as long as you do not need the PDS code.
-
-If you have access to the GitLab repository, you will need additional setups for GitLab pulling and pushing. Please see [how to create and add your SSH key](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html) and this [issue](https://stackoverflow.com/a/51133684/4048657) you may encounter
 
 ### Atom
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.

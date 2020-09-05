@@ -1,17 +1,13 @@
 // for command thoughput limiting
 const GAME_LOOP_PERIOD = 50
-const CONTINUOUS_SERVO_PERIOD = 100
-const POSITION_SERVO_PERIOD = 60
-const SERVO_STOP = 93 // tested with front servos
-const MIN_CONTINUOUS_SERVO_OFFSET = 4 // tested with front servos
-const MAX_CONTINUOUS_SERVO_OFFSET = 20
-
 const DRIVE_THROTTLE_TIME = 100
 const PING_THROTTLE_TIME = 1000
 const MCU_FEEDBACK_THROTTLE = 1000
 // constants for speed setting limits (absolute max: 45)
 const MAX_THROTTLE_SPEED = 45
 const MAX_STEERING_SPEED = 45
+
+
 let lastCmdSent = 0
 let lastFrontPosServoCmd = 0
 let lastFrontContServoCmd = 0
@@ -20,32 +16,19 @@ let lastRearContServoCmd = 0
 
 let maxSoftThrottle = 25
 let maxSoftSteering = 39
-let maxFrontTiltPwm = 180
-let minFrontTiltPwm = 0
-let maxRearTiltPwm = 115
-let minRearTiltPwm = 0
 
 let throttle = 0 // how fast are the wheels turning in general
 let steering = 0 // values further from 0 mean sharper turning radius
 let spinning = 0 // for rotating around its centre
-let frontTiltPwm = 60
-let rearTiltPwm = 35
-let frontPanPwm = SERVO_STOP
-let rearPanPwm = SERVO_STOP
 
 let throttleIncrement = 1
 let steeringIncrement = 1
-let positionServoIncrement = 1
-let continuousServoIncrement = 2
-let continuousServoOffset = 20
 
 let maxThrottleIncrement = 1
 let maxSteeringIncrement = 1
 let movementCommanded = false
 
 sentZero = true // used to prevent the gui from sending wheel commands
-sentFrontServoStop = true // used to prevent the gui from sending servo commands
-sentRearServoStop = true // used to prevent the gui from sending servo commands
 
 function printCommandsList () {
   appendToConsole("'ctrl-alt-p': ping odroid")
@@ -55,65 +38,6 @@ function printCommandsList () {
 }
 
 $(document).ready(function () {
-  // camera servos
-
-  // init camera servos
-  /*
-  // servo name: "Front camera positional tilt base"
-  $('#camera-front-lpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand(
-        // TODO: add more validation for input box
-        '!' + $('#servo-val').val()
-      )
-    }
-  })
-
-  $('#camera-front-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('!' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Front camera Side continuous servo"
-  $('#camera-front-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-front-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('@' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Rear camera positional tilt base"
-  $('#camera-back-lpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-back-rpan-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('#' + $('#servo-val').val())
-    }
-  })
-
-  // servo name: "Rear camera Side continuous servo"
-  $('#camera-back-tilt-up-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
-
-  $('#camera-back-tilt-down-btn').click(function () {
-    if ($('#servo-val').val() != '') {
-      sendRoverCommand('$' + $('#servo-val').val())
-    }
-  })
-  */
 
   $('#reboot-button').on('click', function (event) {
     event.preventDefault()
@@ -195,9 +119,8 @@ $(document).ready(function () {
         serialType == 'usb'
       ) {
         requestTask(
-          'rover_listener',
-          1,
-          '#toggle-rover-listener-btn',
+          ROVER_LISTENER_TASK,
+          STATUS_START,
           function (msgs) {
             printErrToConsole(msgs)
             if (msgs[0]) {
@@ -216,9 +139,8 @@ $(document).ready(function () {
     } else {
       // closing rover listener
       requestTask(
-        'rover_listener',
-        0,
-        '#toggle-rover-listener-btn',
+        ROVER_LISTENER_TASK,
+        STATUS_STOP,
         function (msgs) {
           printErrToConsole(msgs)
           if (msgs.length == 2) {
@@ -247,7 +169,7 @@ document.addEventListener('keydown', function (event) {
   if (
     event.code === 'KeyP' &&
     millisSince(lastCmdSent) > PING_THROTTLE_TIME &&
-    !$('#servo-val').is(':focus')
+    !$('#servo-val').is(':focus') && (!$('#serial-command-input').is(':focus'))
   ) {
     pingDevice('Rover')
     lastCmdSent = new Date().getTime()
@@ -260,7 +182,7 @@ const GREEN = 'rgb(61, 127, 127)'
 
 // commands to change speed settings, get buffered serial messages
 $(document).keydown(function (e) {
-  if (!$('#servo-val').is(':focus')) {
+  if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
       case 73: // 'i' --> increase max throttle
         lightUp('#max-throttle-increase > button')
@@ -333,44 +255,46 @@ $(document).keydown(function (e) {
 // no throttling necessary as since keydown events are throttled
 // those keys will not change color and the following code will only set it to it's default color
 $(document).keyup(function (e) {
-  switch (e.which) {
-    case 79:
-      dim('#stop-motors-btn')
-      break
-    case 65: // left
-      dim('#rover-left > button')
-      break
-    case 87: // up
-      dim('#rover-up > button')
-      break
-    case 68: // right
-      dim('#rover-right > button')
-      break
-    case 83: // down
-      dim('#rover-down > button')
-      break
+  if (!$('#serial-command-input').is(':focus')) {
+    switch (e.which) {
+      case 79:
+        dim('#stop-motors-btn')
+        break
+      case 65: // left
+        dim('#rover-left > button')
+        break
+      case 87: // up
+        dim('#rover-up > button')
+        break
+      case 68: // right
+        dim('#rover-right > button')
+        break
+      case 83: // down
+        dim('#rover-down > button')
+        break
 
-    case 73: // increase throttle
-      dim('#max-throttle-increase > button')
-      break
-    case 85: // decrease throttle
-      dim('#max-throttle-decrease > button')
-      break
-    case 75: // increase steering
-      dim('#max-steering-increase > button')
-      break
-    case 74: // decrease steering
-      dim('#max-steering-decrease > button')
-      break
+      case 73: // increase throttle
+        dim('#max-throttle-increase > button')
+        break
+      case 85: // decrease throttle
+        dim('#max-throttle-decrease > button')
+        break
+      case 75: // increase steering
+        dim('#max-steering-increase > button')
+        break
+      case 74: // decrease steering
+        dim('#max-steering-decrease > button')
+        break
 
-    case 76: // list all rover cmds
-      dim('button#list-all-rover-cmds')
-      break
+      case 76: // list all rover cmds
+        dim('button#list-all-rover-cmds')
+        break
 
-    default:
-      return // exit this handler for other keys
+      default:
+        return // exit this handler for other keys
+    }
+    e.preventDefault() // prevent the default action (scroll / move caret)
   }
-  e.preventDefault() // prevent the default action (scroll / move caret)
 })
 
 // GAME LOOP CONTROL
@@ -379,67 +303,21 @@ var keyState = {}
 window.addEventListener(
   'keydown',
   function (e) {
-    keyState[e.keyCode || e.which] = true
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = true
+    }
   },
   true
 )
 window.addEventListener(
   'keyup',
   function (e) {
-    keyState[e.keyCode || e.which] = false
+    if (!$('#serial-command-input').is(':focus')) {
+      keyState[e.keyCode || e.which] = false
+    }
   },
   true
 )
-
-function handlePositionServo (
-  pwmVal,
-  minPwm,
-  maxPwm,
-  upKey,
-  downKey,
-  upBtn,
-  downBtn
-) {
-  let newCommand = false
-  if (keyState[upKey]) {
-    lightUp(upBtn)
-    if (pwmVal > minPwm) {
-      pwmVal -= positionServoIncrement
-    }
-    newCommand = true
-  } else if (keyState[downKey]) {
-    lightUp(downBtn)
-    if (pwmVal < maxPwm) {
-      pwmVal += positionServoIncrement
-    }
-    newCommand = true
-  }
-  return [newCommand, pwmVal]
-}
-
-function handleContinuousServo (pwmVal, leftKey, rightKey, leftBtn, rightBtn) {
-  if (keyState[leftKey] && !$('#servo-val').is(':focus')) {
-    lightUp(leftBtn)
-    if (pwmVal < SERVO_STOP + continuousServoOffset) {
-      pwmVal += continuousServoIncrement
-    }
-  } else if (keyState[rightKey] && !$('#servo-val').is(':focus')) {
-    lightUp(rightBtn)
-    if (pwmVal > SERVO_STOP - continuousServoOffset) {
-      pwmVal -= continuousServoIncrement
-    }
-  } else {
-    // decelerate
-    if (pwmVal < SERVO_STOP) {
-      pwmVal += continuousServoIncrement
-    } else if (pwmVal > SERVO_STOP) {
-      pwmVal -= continuousServoIncrement
-    } else {
-      // do nothing, you've stopped
-    }
-  }
-  return pwmVal
-}
 
 function gameLoop () {
   /*
@@ -450,136 +328,6 @@ function gameLoop () {
   decoupled from the rate at which the steering or throttle changes
   */
   if (millisSince(lastCmdSent) > GAME_LOOP_PERIOD) {
-    /* CAMERA SERVO CONTROL */
-    // TODO: check if the position servo code is the same for rear servo or if
-    // the directions must be reversed, because that may be annoying
-    // TODO: same thing but for the continuous servo code
-    // WARNING: the position servo limits are probably off
-    // WARNING: currently I assume that 90 deg is the home position but this may not be the case
-    // WARNING: the current implementation allows commands to two different servos to occur back-to-back
-    // with no delay. this may be bad, consider something that only allows one command per x ms
-
-    // front camera position servo (up/down, servo 1)
-    if (
-      millisSince(lastFrontPosServoCmd) > POSITION_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      let returnVals = handlePositionServo(
-        frontTiltPwm,
-        minFrontTiltPwm,
-        maxFrontTiltPwm,
-        111,
-        104, // numpad '/' and '8'
-        '#camera-front-tilt-up-btn',
-        '#camera-front-tilt-down-btn'
-      )
-      if (returnVals[0]) {
-        frontTiltPwm = returnVals[1]
-        $('#front-tilt-pwm').text(frontTiltPwm)
-        lastFrontPosServoCmd = new Date().getTime()
-        sendRoverCommand('!' + frontTiltPwm.toString())
-      }
-    }
-    // Front camera continuous servo (left/right, servo 2)
-    if (
-      millisSince(lastFrontContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      // > CONTINUOUS_SERVO_PERIOD){
-      frontPanPwm = handleContinuousServo(
-        frontPanPwm,
-        105, // numpad '7' and '9'
-        103,
-        '#camera-front-lpan-btn',
-        '#camera-front-rpan-btn'
-      )
-      // check whether or not to send a new command for the continuous servo
-      if (frontPanPwm == SERVO_STOP && sentFrontServoStop) {
-      } else {
-        let frontPan = SERVO_STOP
-        if (
-          frontPanPwm > SERVO_STOP &&
-          frontPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          frontPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        } else if (
-          frontPanPwm < SERVO_STOP &&
-          frontPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          frontPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        } else {
-          frontPan = frontPanPwm
-        }
-        $('#front-pan-pwm').text(frontPan)
-        lastFrontContServoCmd = new Date().getTime()
-        sendRoverCommand('@' + frontPan.toString())
-        if (frontPanPwm != SERVO_STOP) {
-          sentFrontServoStop = false
-        } else {
-          sentFrontServoStop = true
-        }
-      }
-    }
-
-    // rear camera position servo (up/down, servo 1)
-    if (
-      millisSince(lastRearPosServoCmd) > POSITION_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      let returnVals = handlePositionServo(
-        rearTiltPwm,
-        minRearTiltPwm,
-        maxRearTiltPwm,
-        101,
-        98, // numpad '5' and '2'
-        '#camera-back-tilt-up-btn',
-        '#camera-back-tilt-down-btn'
-      )
-      if (returnVals[0]) {
-        rearTiltPwm = returnVals[1]
-        $('#back-tilt-pwm').text(rearTiltPwm)
-        lastRearPosServoCmd = new Date().getTime()
-        sendRoverCommand('#' + rearTiltPwm.toString())
-      }
-    }
-    // rear camera continuous servo (left/right, servo 2)
-    if (
-      millisSince(lastRearContServoCmd) > CONTINUOUS_SERVO_PERIOD &&
-      !$('#servo-val').is(':focus')
-    ) {
-      // > CONTINUOUS_SERVO_PERIOD){
-      rearPanPwm = handleContinuousServo(
-        rearPanPwm,
-        97,
-        99, // numpad '1' and '3'
-        '#camera-back-lpan-btn',
-        '#camera-back-rpan-btn'
-      )
-      // check whether or not to send a new command for the continuous servo
-      if (rearPanPwm == SERVO_STOP && sentRearServoStop) {
-        // don't move the servo
-      } else {
-        let rearPan = SERVO_STOP
-        if (
-          rearPanPwm > SERVO_STOP &&
-          rearPanPwm < SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          rearPan = SERVO_STOP + MIN_CONTINUOUS_SERVO_OFFSET
-        } else if (
-          rearPanPwm < SERVO_STOP &&
-          rearPanPwm > SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        ) {
-          rearPan = SERVO_STOP - MIN_CONTINUOUS_SERVO_OFFSET
-        } else {
-          rearPan = rearPanPwm
-        }
-        $('#back-pan-pwm').text(rearPan)
-        lastRearContServoCmd = new Date().getTime()
-        sendRoverCommand('$' + rearPan.toString())
-        sentRearServoStop = rearPan == SERVO_STOP
-      }
-    }
-
     /* ROVER WHEEL CONTROL */
     // 'd' --> rover right
     if (keyState[68] && !$('#servo-val').is(':focus')) {
@@ -728,52 +476,51 @@ gameLoop()
 // In any case
 // the following code just makes the buttons stop lighting up
 // when the user stops pressing the respective key
-let $serialCmdInput = $('#serial-cmd-input')
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyI') {
+  if (event.code === 'KeyI') {
     $('#max-throttle-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyJ') {
+  if (event.code === 'KeyJ') {
     $('#max-steering-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyK') {
+  if (event.code === 'KeyK') {
     $('#max-steering-increase > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyU') {
+  if (event.code === 'KeyU') {
     $('#max-throttle-decrease > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyD') {
+  if (event.code === 'KeyD') {
     $('#rover-right > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyA') {
+  if (event.code === 'KeyA') {
     $('#rover-left > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyW') {
+  if (event.code === 'KeyW') {
     $('#rover-up > button').css('background-color', GREEN)
   }
 })
 
 document.addEventListener('keyup', function (event) {
-  if (!$('#serial-cmd-input').is(':focus') && event.code === 'KeyS') {
+  if (event.code === 'KeyS') {
     $('#rover-down > button').css('background-color', GREEN)
   }
 })

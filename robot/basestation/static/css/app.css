@@ -23,12 +23,58 @@
 }
 
 .stretch-down {
-  margin-bottom: 100px;
+  margin-bottom: 10%;
 }
 
-img#camera-feed {
-    /* these values should ideally reflect the resolution
-    at which the camera is streaming images at */
-    height: 480px;
-    width: 640px;
+.camera-panel {
+    margin:0.5%;
+}
+
+.camera-head {
+    height: 5%;
+    width: 100%;
+    margin:0px;
+    border-style:solid;
+    border-width:thick;
+}
+
+.camera-stream {
+    border-style: solid;
+    border-width: thick;
+    border-color: black;
+    margin: 0px;
+    position: relative;
+
+}
+
+.camera-btn {
+    padding: 2%;
+}
+
+.camera-label {
+    padding: 2%;
+}
+
+.camera-rotr {
+    transform: scaleX(-1);
+}
+
+.camera-name {
+  text-align: center;
+}
+
+.camera-feed {
+  height: 480px;
+  padding: 2%;
+  display:block;
+  margin:auto;
+}
+
+.camera-controls {
+    opacity: 0.55;
+    position: absolute;
+    display: block;
+    bottom: 3%;
+    right: 3%;
+    display: none;
 }
