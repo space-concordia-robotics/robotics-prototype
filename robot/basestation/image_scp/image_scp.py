@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This script connects to the rover using ssh and then transfers the contents of
 a directory back to the base station. A new directory is created on the base station.
@@ -15,6 +17,7 @@ from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from paramiko.auth_handler import AuthenticationException, SSHException
 from scp import SCPClient, SCPException
 import transferconfig as cfg
+import traceback
 
 class RemoteConnection:
 
@@ -64,16 +67,20 @@ class RemoteConnection:
 
     def get_images(self, basestation_directory):
         rover_file_path = self.rover_file_path
+
         try:
             self.scp.get(rover_file_path, basestation_directory, recursive=True)
-            print("Images transfered from rover to base station")
-        except SCPException as error:
-            print(error + "Directory was not found")
+            print('Images transfered from rover to base station')
+            print('From ' + rover_file_path + ' to ' + basestation_directory)
+        except SCPException:
+            traceback.print_exc()
+        except Exception:
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
 
-    image_retriver = RemoteConnection(cfg.user['rover_ip'], cfg.user['username'],
+    image_retriver = RemoteConnection(cfg.user['rover_ip'], cfg.user['rover_user'],
                                       cfg.user['rover_image_dir'], cfg.user['key_path'],
                                       cfg.user['rsa_password'])
     beans = image_retriver.check_ssh_keys()
