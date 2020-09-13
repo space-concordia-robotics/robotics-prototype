@@ -24,7 +24,7 @@ $(document).ready(function () {
     delete keys[e.which];
   });
 
-  setInterval(update_movement, 0.2);
+  setInterval(update_movement, 200);
 
   /*
  * Sends a Twist command to move the rover.
@@ -49,6 +49,10 @@ $(document).ready(function () {
     twist_topic.publish(twistMessage);
   }
 
+  /*
+   * Looks periodically at the key presses, button presses and throttle values to determine
+   * with what values a Twist command should be sent.
+   */
   function update_movement()
   {
     //todo: remove todos before PR.
