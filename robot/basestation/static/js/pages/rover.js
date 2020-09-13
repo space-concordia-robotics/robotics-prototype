@@ -10,8 +10,8 @@ $(document).ready(function () {
 
   twist_topic = new ROSLIB.Topic({
     ros: ros,
-    name: 'cmd_vel',
-    messageType: 'std_msgs/Twist'
+    name: '/cmd_vel',
+    messageType: 'geometry_msgs/Twist'
   })
 
   let keys = {};
@@ -33,7 +33,20 @@ $(document).ready(function () {
  */
   function move_rover(linear, angular)
   {
+    let twistMessage = new ROSLIB.Message({
+      linear : {
+        x : linear,
+        y : 0,
+        z : 0
+      },
+      angular : {
+        x : 0,
+        y : 0,
+        z : angular
+      }
+    });
 
+    twist_topic.publish(twistMessage);
   }
 
   function update_movement()
