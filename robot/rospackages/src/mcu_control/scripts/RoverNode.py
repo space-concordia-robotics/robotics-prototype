@@ -66,7 +66,7 @@ def handle_client(req):
     reqInWaiting=False
     return roverResponse
 
-def subscriber_callback(message):
+def rover_command_callback(message):
     ser = get_serial()
     rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
@@ -74,6 +74,18 @@ def subscriber_callback(message):
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     return
+
+def twist_callback(twist_msg):
+    max_motor
+    
+    ser = get_serial()
+    command = str.encode(twistToRoverCommand(twist_msg))
+    ser.write(command) # send move command to wheel teensy
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+
+def twistToRoverCommand(twist_msg):
+    pass
 
 def publish_joint_states(message):
     # parse the data received from Teensy
@@ -152,7 +164,7 @@ if __name__ == '__main__':
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
     search_success = init_serial(115200, mcuName)
-    
+
     if not search_success:
         sys.exit(1)
 
@@ -173,11 +185,14 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    subscribe_topic = '/rover_command'
-    #first of all, it should subscribe to Twist and decide how to send it to the rover...
-    #for now i might just have it subscribe to Strings tho
-    rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+    rover_command_topic = '/rover_command'
+    twist_topic = '/cmd_vel'
+
+    rover_command_sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
+    twist_sub = rospy.Subscriber(twist_topic, Twist, twist_callback)
+
+    rospy.loginfo('Beginning to subscribe to "' + rover_command_topic + '" topic')
+    rospy.loginfo('Beginning to subscribe to "' + twist_topic + '" topic')
     # the long way is for the gui to publish a twist and the node to convert it to throttle:steering
     # the short way is for the gui to send the command string directly. no Twist.
 
