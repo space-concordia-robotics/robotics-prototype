@@ -4,6 +4,7 @@ import sys
 import traceback
 import time
 import re
+import numpy
 
 from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
@@ -32,6 +33,43 @@ requests = {
     'acc-off' : ['Limiter: CLose'],
     'reboot' : ['rebooting']
 }
+
+def twist_callback(twist_msg):
+    """ Handles the twist message and sends it to the wheel MCU """
+
+    ser = get_serial()
+    command = str.encode(twistToRoverCommand(twist_msg))
+    ser.write(command) # send move command to wheel teensy
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+
+def twistToRoverCommand(twist_msg):
+    """ 
+    Converts Twist command to serial 
+    max_speed : Maximum rover speed in (m/s) NEEDS TO BE TWEAKED
+    max_angular_speed : Maximum angular speed in (rad/s) NEEDS TO BE TWEAKED
+    """
+
+    max_speed = 0.5
+    max_angular_speed = 1 
+
+    max_throttle = 49
+    max_steering = 49
+
+    linear_speed_bounds = [-max_speed, max_speed]
+    angular_speed_bounds = [-max_angular_speed, max_angular_speed]
+
+    throttle_bounds = [-max_throttle, max_throttle]
+    steering_bounds = [-max_steering, max_steering]
+
+    throttle = twist_msg.linear.x / max_speed # throttle should now be in [-1, 1]
+    steering = twist_msg.angular.z / max_angular_speed # steering should now [-1,1]
+
+    linear_motor_val = throttle * max_throttle
+    angular_motor_val = steering * max_steering
+
+    return linear_motor_val + ':' + angular_motor_val
+
 def handle_client(req):
     # feedback to tell if script itself is responsive
     if req.msg == 'ping':
@@ -73,19 +111,6 @@ def rover_command_callback(message):
     ser.write(command) # send command to teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    return
-
-def twist_callback(twist_msg):
-    max_motor
-    
-    ser = get_serial()
-    command = str.encode(twistToRoverCommand(twist_msg))
-    ser.write(command) # send move command to wheel teensy
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
-
-def twistToRoverCommand(twist_msg):
-    pass
 
 def publish_joint_states(message):
     # parse the data received from Teensy
