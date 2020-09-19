@@ -1959,7 +1959,7 @@ THREE.ColladaLoader.prototype = {
 
 			if ( primitives.length === 0 ) return {};
 
-			// our marker is to create one buffer geoemtry for a single type of primitives
+			// our goal is to create one buffer geoemtry for a single type of primitives
 			// first, we group all primitives by their type
 
 			var groupedPrimitives = groupPrimitives( primitives );
