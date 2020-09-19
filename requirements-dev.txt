@@ -1,6 +1,4 @@
 # Development specific requirements
 pytest==3.6.3
-pylint==2.0.1
-yapf==0.22.0
-jsbeautifier==1.11.0
-cpplint==1.5.1
+pylint==2.5.3
+yapf==0.30.0
