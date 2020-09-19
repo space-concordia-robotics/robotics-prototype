@@ -24,12 +24,8 @@ def load_markers(filename):
 def create_marker_callback(message):
     marker = RoverMarker(message.name, message.color, message.longitude, message.latitude)
     marker_list.append(marker)
-<<<<<<< HEAD
-    save_markers(marker_list, json_file)
-=======
     rospy.loginfo('Created marker ' + message.name)
     save_makers(marker_list, json_file)
->>>>>>> 53b7c7e6fa023759b95c821f5424948adbd1300d
 
 
 def delete_marker_callback(message):
