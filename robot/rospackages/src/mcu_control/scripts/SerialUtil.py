@@ -25,7 +25,7 @@ def get_serial():
 
 def attempt_usb(mcuName):
     startListening = time.time() 
-    ser.write(str.encode(mcuName + ' who\n'))
+    ser.write(str.encode('who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             response = ser.readline().decode()
@@ -42,15 +42,14 @@ def attempt_usb(mcuName):
 
 def attempt_uart(mcuName):
     startListening = time.time()
-    ser.write(str.encode(mcuName + ' who\n'))
+    ser.write(str.encode('who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
             dat=''
             data=None
             try:
-                dat = ser.readline().decode()
-                if type == arm:
-                    data = stripFeedback(dat) #not present in pdsnode
+                data = ser.readline().decode()
+                print('data', data)
             except:
                 rospy.logwarn('trouble reading from serial port')
             if data is not None:

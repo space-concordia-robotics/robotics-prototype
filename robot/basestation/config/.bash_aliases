@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+BASE="$ROBOTICS_WS/robot/basestation"
+ROVER="$ROBOTICS_WS/robot/rover"
+
 # to start the gui
 alias updateEnv="bash $BASE/env.sh >| $BASE/static/js/env.js"
 alias roverenv=". $ROBOTICS_WS/venv/bin/activate"
