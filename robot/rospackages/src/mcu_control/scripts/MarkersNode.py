@@ -12,14 +12,28 @@ from std_msgs.msg import String
 json_file = 'markers.json'
 
 def save_markers(markers, filename):
-    json.dump(markers, filename)
+    with open(filename, "w") as f:
+        marker_dict = {}
+        for marker in markers:
+            marker_dict[marker.name] = {'longitude' : marker.longitude, 'latitude' : marker.latitude, 'color' : marker.color}
+        json.dump(marker_dict, f)
 
 def load_markers(filename):
     if not os.path.exists(filename):
         return []
     else:
         with open(filename) as f:
-            return json.load(f)
+            rospy.loginfo('Found marker.json file')
+            marker_dict = json.load(f)
+            markers = []
+            for marker_name in marker_dict.keys():
+                color = marker_dict[marker_name]['color']
+                lat = marker_dict[marker_name]['latitude']
+                long = marker_dict[marker_name]['longitude']
+                marker = RoverMarker(marker_name, color, long, lat)
+                markers.append(marker)
+            return markers
+
 
 def create_marker_callback(message):
     marker = RoverMarker(message.name, message.color, message.longitude, message.latitude)
