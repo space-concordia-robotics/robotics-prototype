@@ -300,10 +300,10 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
-  goal_list_subscriber = new ROSLIB.Topic({
+  marker_list_subscriber = new ROSLIB.Topic({
       ros: ros,
-      name: 'goal_list',
-      messageType: 'mcu_control/RoverGoalList'
+      name: 'marker_list',
+      messageType: 'mcu_control/RoverMarkerList'
   })
   // setup a subcriber function for rover_position topic
   rover_position_listener = new ROSLIB.Topic({

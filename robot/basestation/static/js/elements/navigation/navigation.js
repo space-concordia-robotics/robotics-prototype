@@ -9,8 +9,6 @@ $(document).ready(() => {
   const minuteTodecmial = 60
   const secondTodecmial = 3600
 
-  const restoremarkersTemplate = $('#markers-restore-template').html()
-
   // setup a subscriber for the rover_position topic
   const rover_position_listener = new ROSLIB.Topic({
     ros: ros,
@@ -47,12 +45,6 @@ $(document).ready(() => {
     messageType: 'std_msgs/String'
   })
 
-  const restore_markers_publisher = new ROSLIB.Topic({
-    ros: ros,
-    name: 'restore_markers',
-    messageType: 'mcu_control/RovermarkerList'
-  })
-
   marker_list_subscriber.subscribe(function (message) {
     if (JSON.stringify(markerList) != JSON.stringify(message.marker_list)) {
       if (!settingmarkerAsCurrent) {
@@ -64,7 +56,6 @@ $(document).ready(() => {
       markerList = message.marker_list
 
       togglemarkers()
-      togglemarkersBackups()
 
       if (message.marker_list.length != 0) {
         $('#marker-stats-name').text(markerList[0].name).css('color', markerList[0].color)
@@ -797,72 +788,5 @@ $(document).ready(() => {
         })
       })
     })
-  }
-
-  // marker backup and restore functions
-  function backupmarkerList (marker_list) {
-      markerListBackupsCount = 0
-      for (let i = 0; i<maxmarkerListBackups; i++) {
-          if (localStorage.getItem('markerListBackup-' + i) != null) {
-              markerListBackupsCount++
-          }
-          if (localStorage.getItem('markerListBackup-' + i) == JSON.stringify(marker_list)) {
-              return
-          }
-      }
-
-      if (markerListBackupsCount < maxmarkerListBackups) {
-          writemarkerListToStorage(markerListBackupsCount, JSON.stringify(marker_list))
-          markerListBackupsCount++
-      } else {
-          for (let i = 0; i<maxmarkerListBackups-1; i++) {
-              localStorage.setItem('markerListBackup-' + i, localStorage.getItem('markerListBackup-' + (i+1)))
-              localStorage.setItem('timeOfmarkersBackup-' + i, localStorage.getItem('timeOfmarkersBackup-' + (i+1)))
-          }
-          writemarkerListToStorage(maxmarkerListBackups-1, JSON.stringify(marker_list))
-      }
-  }
-
-  function writemarkerListToStorage (backupNum, marker_list) {
-      const dateTime = new Date();
-      localStorage.setItem('markerListBackup-' + (backupNum), marker_list)
-      localStorage.setItem('timeOfmarkersBackup-' + (backupNum), dateTime.getDate() + ' '
-        + dateTime.getHours() + ':' + dateTime.getMinutes() + ':' + dateTime.getSeconds())
-  }
-
-  togglemarkersBackups()
-
-  function togglemarkersBackups () {
-      $("[class^='restore-markers-']").remove()
-
-      for (let i = 0; i<maxmarkerListBackups; i++) {
-          if (localStorage.getItem('markerListBackup-' + i) != null) {
-              $('#markers-restore-modal-body-content').append(restoremarkersTemplate)
-              $('#markers-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $('#markers-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $("[class='restore-markers']").addClass('restore-markers-' + i).removeClass('restore-markers')
-
-              createmarkersRestoreButtonHandler(i)
-
-              $('#markers-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfmarkersBackup-' + i))
-          }
-       }
-  }
-
-  function createmarkersRestoreButtonHandler (backupNum) {
-      // restore markers list
-      $('#markers-restore-btn.backup-' + backupNum).mouseup(e => {
-          markerRestoreButtonHandler(backupNum)
-      })
-  }
-
-  function markerRestoreButtonHandler (backupNum) {
-      const markerListData = new ROSLIB.Message({
-        marker_list: JSON.parse(localStorage.getItem('markerListBackup-' + backupNum))
-      })
-
-      restore_markers_publisher.publish(markerListData)
-
-      logInfo('marker list from ' + localStorage.getItem('timeOfmarkersBackup-' + backupNum) + ' restored.')
   }
 })
