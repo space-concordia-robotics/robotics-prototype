@@ -41,7 +41,6 @@ def create_marker_callback(message):
     rospy.loginfo('Created marker ' + message.name)
     save_markers(marker_list, json_file)
 
-
 def delete_marker_callback(message):
     name = message.data
     for marker in marker_list:
