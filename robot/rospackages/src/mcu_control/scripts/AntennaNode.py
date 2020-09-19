@@ -6,7 +6,7 @@ import time
 from Nav_funs import Distance, Direction
 import rospy
 from geometry_msgs.msg import Point
-#from mcu_control.msg import RoverPosition, AntennaGoal
+#from mcu_control.msg import RoverPosition, AntennaMarker
 
 
 def subscriber_callback(message):
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
     sub = rospy.Subscriber(rover_topic, Point, subscriber_callback)
 
-    antenna_pub_topic = '/antenna_goal'
+    antenna_pub_topic = '/antenna_marker'
     rospy.loginfo('Beginning to publish to "' + antenna_pub_topic + '" topic')
     antennaPub = rospy.Publisher(antenna_pub_topic, Point, queue_size=10)
 

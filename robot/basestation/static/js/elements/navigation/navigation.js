@@ -1,15 +1,15 @@
 $(document).ready(() => {
-  goalList = []
-  goalCount = 0
+  markerList = []
+  markerCount = 0
 
-  goalListBackupsCount = 0
-  const maxGoalListBackups = 3
-  settingGoalAsCurrent = false
+  markerListBackupsCount = 0
+  const maxmarkerListBackups = 3
+  settingmarkerAsCurrent = false
 
   const minuteTodecmial = 60
   const secondTodecmial = 3600
 
-  const restoreGoalsTemplate = $('#goals-restore-template').html()
+  const restoremarkersTemplate = $('#markers-restore-template').html()
 
   // setup a subscriber for the rover_position topic
   const rover_position_listener = new ROSLIB.Topic({
@@ -22,58 +22,58 @@ $(document).ready(() => {
     $('#rover-longitude').text(message.y)
     $('#rover-heading').text(message.z)
   })
-  // setup a subscriber for the antenna_goal topic
-  const antenna_goal_listener = new ROSLIB.Topic({
-    name: 'antenna_goal',
+  // setup a subscriber for the antenna_marker topic
+  const antenna_marker_listener = new ROSLIB.Topic({
+    name: 'antenna_marker',
     messageType: 'geometry_msgs/Point',
     ros: ros
   })
-  // setup topics to communicate with GoalsNode
-  const create_goal_publisher = new ROSLIB.Topic({
+  // setup topics to communicate with markersNode
+  const create_marker_publisher = new ROSLIB.Topic({
     ros: ros,
-    name: 'create_goal',
-    messageType: 'mcu_control/RoverGoal'
+    name: 'create_marker',
+    messageType: 'mcu_control/Rovermarker'
   })
 
-  const delete_goal_publisher = new ROSLIB.Topic({
+  const delete_marker_publisher = new ROSLIB.Topic({
     ros: ros,
-    name: 'delete_goal',
+    name: 'delete_marker',
     messageType: 'std_msgs/String'
   })
 
-  const set_as_current_goal_publisher = new ROSLIB.Topic({
+  const set_as_current_marker_publisher = new ROSLIB.Topic({
     ros: ros,
-    name: 'set_as_current_goal',
+    name: 'set_as_current_marker',
     messageType: 'std_msgs/String'
   })
 
-  const restore_goals_publisher = new ROSLIB.Topic({
+  const restore_markers_publisher = new ROSLIB.Topic({
     ros: ros,
-    name: 'restore_goals',
-    messageType: 'mcu_control/RoverGoalList'
+    name: 'restore_markers',
+    messageType: 'mcu_control/RovermarkerList'
   })
 
-  goal_list_subscriber.subscribe(function (message) {
-    if (JSON.stringify(goalList) != JSON.stringify(message.goal_list)) {
-      if (!settingGoalAsCurrent) {
-        backupGoalList(message.goal_list)
+  marker_list_subscriber.subscribe(function (message) {
+    if (JSON.stringify(markerList) != JSON.stringify(message.marker_list)) {
+      if (!settingmarkerAsCurrent) {
+        backupmarkerList(message.marker_list)
       } else {
-        settingGoalAsCurrent = false
+        settingmarkerAsCurrent = false
       }
 
-      goalList = message.goal_list
+      markerList = message.marker_list
 
-      toggleGoals()
-      toggleGoalsBackups()
+      togglemarkers()
+      togglemarkersBackups()
 
-      if (message.goal_list.length != 0) {
-        $('#goal-stats-name').text(goalList[0].name).css('color', goalList[0].color)
-        $('#goal-stats-latitude').text(goalList[0].latitude.toFixed(6))
-        $('#goal-stats-longitude').text(goalList[0].longitude.toFixed(6))
+      if (message.marker_list.length != 0) {
+        $('#marker-stats-name').text(markerList[0].name).css('color', markerList[0].color)
+        $('#marker-stats-latitude').text(markerList[0].latitude.toFixed(6))
+        $('#marker-stats-longitude').text(markerList[0].longitude.toFixed(6))
       } else {
-        $('#goal-stats-name').text('----').css('color', 'black')
-        $('#goal-stats-latitude').text('----')
-        $('#goal-stats-longitude').text('----')
+        $('#marker-stats-name').text('----').css('color', 'black')
+        $('#marker-stats-latitude').text('----')
+        $('#marker-stats-longitude').text('----')
       }
     }
 
@@ -93,14 +93,14 @@ $(document).ready(() => {
     ros: ros,
     name: 'antenna_start_dir'
   })
-  const has_gps_goal = new ROSLIB.Param({
+  const has_gps_marker = new ROSLIB.Param({
     ros: ros,
-    name: 'has_gps_goal'
+    name: 'has_gps_marker'
   })
-  // setup a subscriber for the rover_goal topic
+  // setup a subscriber for the rover_marker topic
   new ROSLIB.Topic({
     ros: ros,
-    name: 'rover_goal',
+    name: 'rover_marker',
     messageType: 'geometry_msgs/Point'
   })
 
@@ -374,192 +374,192 @@ $(document).ready(() => {
     }
   }
 
-  // set goals info
-  // mouseup events for goals data entry buttons
-  createGoalsAddButtonHandler()
+  // set markers info
+  // mouseup events for markers data entry buttons
+  createmarkersAddButtonHandler()
 
-  function createGoalsFormatButtonsHandler (button) {
+  function createmarkersFormatButtonsHandler (button) {
       // select latitude or longitude input format buttons
       $(button).mouseup(e => {
           const buttonId = $(e.target).attr('id').split('-')
           const buttonClass = $(e.target).attr('class').split(' ')
           const mode = buttonId[1]
           let format = buttonId[2] + '-' + buttonId[3]
-          const goalNum = buttonClass[3].replace('goal-', '')
+          const markerNum = buttonClass[3].replace('marker-', '')
 
           if (buttonId[4] != 'btn') {
             format = format + '-' + buttonId[4]
           }
 
-          goalHandlerTemplate(mode, format, goalNum)
+          markerHandlerTemplate(mode, format, markerNum)
       })
   }
 
-  function createGoalsAddButtonHandler () {
-      // add new goal templates
-      $("button[id='goal-new-coordinates-btn']").mouseup(e => {
-          addGoal()
+  function createmarkersAddButtonHandler () {
+      // add new marker templates
+      $("button[id='marker-new-coordinates-btn']").mouseup(e => {
+          addmarker()
       })
   }
 
-  function createGoalsConfirmButtonHandler (goalNum) {
-      // add new goal templates
-      $('#goal-confirm-btn.goal-' + goalNum).mouseup(e => {
-          goalConfirmButtonHandler(goalNum)
+  function createmarkersConfirmButtonHandler (markerNum) {
+      // add new marker templates
+      $('#marker-confirm-btn.marker-' + markerNum).mouseup(e => {
+          markerConfirmButtonHandler(markerNum)
       })
   }
 
-  function createGoalsDeleteButtonHandler (goalNum) {
-      // add new goal templates
-      $('#goal-delete-btn.goal-' + goalNum).mouseup(e => {
-          goalDeleteButtonHandler(goalNum)
+  function createmarkersDeleteButtonHandler (markerNum) {
+      // add new marker templates
+      $('#marker-delete-btn.marker-' + markerNum).mouseup(e => {
+          markerDeleteButtonHandler(markerNum)
       })
   }
 
-  function createGoalsSetAsCurrentButtonHandler (goalNum) {
-      // add new goal templates
-      $('#goal-set-as-current-btn.goal-' + goalNum).mouseup(e => {
-          goalSetAsCurrentButtonHandler(goalNum)
+  function createmarkersSetAsCurrentButtonHandler (markerNum) {
+      // add new marker templates
+      $('#marker-set-as-current-btn.marker-' + markerNum).mouseup(e => {
+          markerSetAsCurrentButtonHandler(markerNum)
       })
   }
 
   // functions
-  function toggleGoals() {
-    $('div[class*="goal-"]').remove()
-    goalCount = goalList.length
-    const goalTemplate = $('#created-goal-template').html()
-    for (let i = 0; i < goalCount; i++) {
-      $('#goal-modal-body-content').append(goalTemplate)
-      $('#goal-modal-body-content .goal')
-        .addClass('goal-' + i)
-        .removeClass('goal')
-      $('.goal-' + i)
+  function togglemarkers() {
+    $('div[class*="marker-"]').remove()
+    markerCount = markerList.length
+    const markerTemplate = $('#created-marker-template').html()
+    for (let i = 0; i < markerCount; i++) {
+      $('#marker-modal-body-content').append(markerTemplate)
+      $('#marker-modal-body-content .marker')
+        .addClass('marker-' + i)
+        .removeClass('marker')
+      $('.marker-' + i)
         .find('*')
-        .addClass('goal-' + i)
+        .addClass('marker-' + i)
 
-      createGoalButtons(i)
+      createmarkerButtons(i)
 
-      $('#goal-name.goal-' + i).val(goalList[i].name)
-      $('#goal-confirm-btn.goal-' + i).prop('disabled', true)
-      $('#goal-change-btn.goal-' + i).prop('disabled', false)
-      $('div.goal-' + i + ' fieldset').prop('disabled', true)
-      $('#goal-decimal-degrees-decimal-degree-input.latitude.goal-' + i).val(goalList[i].latitude)
-      $('#goal-decimal-degrees-decimal-degree-input.longitude.goal-' + i).val(goalList[i].longitude)
+      $('#marker-name.marker-' + i).val(markerList[i].name)
+      $('#marker-confirm-btn.marker-' + i).prop('disabled', true)
+      $('#marker-change-btn.marker-' + i).prop('disabled', false)
+      $('div.marker-' + i + ' fieldset').prop('disabled', true)
+      $('#marker-decimal-degrees-decimal-degree-input.latitude.marker-' + i).val(markerList[i].latitude)
+      $('#marker-decimal-degrees-decimal-degree-input.longitude.marker-' + i).val(markerList[i].longitude)
     }
   }
 
-  function addGoal () {
-    const newGoalTemplate = $('#add-goal-coordinates').html()
+  function addmarker () {
+    const newmarkerTemplate = $('#add-marker-coordinates').html()
 
-    $('#goal-modal-body-content').append(newGoalTemplate)
-    $('#goal-modal-body-content .goal')
-      .addClass('goal-' + goalCount)
-      .removeClass('goal')
-    $('.goal-' + goalCount)
+    $('#marker-modal-body-content').append(newmarkerTemplate)
+    $('#marker-modal-body-content .marker')
+      .addClass('marker-' + markerCount)
+      .removeClass('marker')
+    $('.marker-' + markerCount)
       .find('*')
-      .addClass('goal-' + goalCount)
+      .addClass('marker-' + markerCount)
 
-    createGoalButtons(goalCount)
-    goalCount++
+    createmarkerButtons(markerCount)
+    markerCount++
   }
 
-  function goalHandlerTemplate (mode, format, current) {
-    $('#goal-' + mode + '-fieldset.goal-' + current).attr('format', format)
-    $('#goal-' + mode + '-select-format.goal-' + current).dropdown('toggle')
-    $('#goal-' + mode + '-select-format.goal-' + current).detach()
+  function markerHandlerTemplate (mode, format, current) {
+    $('#marker-' + mode + '-fieldset.marker-' + current).attr('format', format)
+    $('#marker-' + mode + '-select-format.marker-' + current).dropdown('toggle')
+    $('#marker-' + mode + '-select-format.marker-' + current).detach()
 
-    const inputTemplate = $('#goal-' + format + '-input-template').html()
-    $('#goal-' + mode + '-input-group.goal-' + current).append(inputTemplate)
-    $('#goal-' + mode + '-input-group.goal-' + current)
+    const inputTemplate = $('#marker-' + format + '-input-template').html()
+    $('#marker-' + mode + '-input-group.marker-' + current).append(inputTemplate)
+    $('#marker-' + mode + '-input-group.marker-' + current)
       .find('input')
-      .addClass('goal-' + current + ' ' + mode)
+      .addClass('marker-' + current + ' ' + mode)
     $(
-      '#goal-' +
+      '#marker-' +
         mode +
-        '-input-group.goal-' +
+        '-input-group.marker-' +
         current +
         ' span.input-group-text:first'
     ).text(mode)
   }
 
-  function createGoalButtons (current) {
-    const goalButtons = $('#goal-buttons').html()
-    const currentGoalButton = '#goal-buttons-input-group.goal-' + current
-    $(currentGoalButton).append(goalButtons)
-    $(currentGoalButton)
+  function createmarkerButtons (current) {
+    const markerButtons = $('#marker-buttons').html()
+    const currentmarkerButton = '#marker-buttons-input-group.marker-' + current
+    $(currentmarkerButton).append(markerButtons)
+    $(currentmarkerButton)
       .find('*')
-      .addClass('goal-' + current)
+      .addClass('marker-' + current)
 
-     createGoalsFormatButtonsHandler("button[id^='goal-latitude'].goal-" + current + ", button[id^='goal-longitude'].goal-" + current)
-     createGoalsConfirmButtonHandler(current)
-     createGoalsDeleteButtonHandler(current)
-     createGoalsSetAsCurrentButtonHandler(current)
+     createmarkersFormatButtonsHandler("button[id^='marker-latitude'].marker-" + current + ", button[id^='marker-longitude'].marker-" + current)
+     createmarkersConfirmButtonHandler(current)
+     createmarkersDeleteButtonHandler(current)
+     createmarkersSetAsCurrentButtonHandler(current)
   }
 
-  function goalConfirmButtonHandler (current) {
+  function markerConfirmButtonHandler (current) {
     let latitude_format = null
     let longitude_format = null
 
-    latitude_format = $('#goal-latitude-fieldset.goal-' + current).attr(
+    latitude_format = $('#marker-latitude-fieldset.marker-' + current).attr(
       'format'
     )
-    longitude_format = $('#goal-longitude-fieldset.goal-' + current).attr(
+    longitude_format = $('#marker-longitude-fieldset.marker-' + current).attr(
       'format'
     )
 
     if (latitude_format != null && longitude_format != null) {
-      $('#goal-change-btn.goal-' + current).prop('disabled', false)
-      $('#goal-confirm-btn.goal-' + current).prop('disabled', true)
+      $('#marker-change-btn.marker-' + current).prop('disabled', false)
+      $('#marker-confirm-btn.marker-' + current).prop('disabled', true)
 
-      $('#goal-latitude-select-format.goal-' + current).detach()
-      $('#goal-longitude-select-format.goal-' + current).detach()
+      $('#marker-latitude-select-format.marker-' + current).detach()
+      $('#marker-longitude-select-format.marker-' + current).detach()
 
-      setGoalData(current, latitude_format, longitude_format)
+      setmarkerData(current, latitude_format, longitude_format)
     } else {
       logWarn('Please select a latitude and longitude format.')
     }
   }
 
-  function goalDeleteButtonHandler (current) {
+  function markerDeleteButtonHandler (current) {
     /* ------------------------\
-    implement ROS goal deleting
+    implement ROS marker deleting
     \------------------------ */
-    const goalName = $('#goal-name.goal-' + current).val()
+    const markerName = $('#marker-name.marker-' + current).val()
 
     const msg = new ROSLIB.Message({
-      data: goalName
+      data: markerName
     })
 
-    delete_goal_publisher.publish(msg)
+    delete_marker_publisher.publish(msg)
 
-    $('.goal-' + current).remove()
+    $('.marker-' + current).remove()
   }
 
-  function goalSetAsCurrentButtonHandler (current) {
+  function markerSetAsCurrentButtonHandler (current) {
       /* ------------------------\
-      implement ROS goal setting as current
+      implement ROS marker setting as current
       \------------------------ */
-      const goalName = $('#goal-name.goal-' + current).val()
+      const markerName = $('#marker-name.marker-' + current).val()
 
       const msg = new ROSLIB.Message({
-        data: goalName
+        data: markerName
       })
 
-      settingGoalAsCurrent = true
-      set_as_current_goal_publisher.publish(msg)
+      settingmarkerAsCurrent = true
+      set_as_current_marker_publisher.publish(msg)
   }
 
-  function setGoalData (current, latitude_format, longitude_format) {
+  function setmarkerData (current, latitude_format, longitude_format) {
     let latitude = null
     let longitude = null
 
-    const goalElem = $('#goal-name.goal-' + current)
-    const goalName = goalElem.val()
+    const markerElem = $('#marker-name.marker-' + current)
+    const markerName = markerElem.val()
 
     try {
-      for (let i = 0; i < goalList.length; i++) {
-        if (goalName == goalList[i].name) {
-          throw 'Enter a different goal name'
+      for (let i = 0; i < markerList.length; i++) {
+        if (markerName == markerList[i].name) {
+          throw 'Enter a different marker name'
         }
       }
 
@@ -567,7 +567,7 @@ $(document).ready(() => {
         case 'decimal-degrees': {
           latitude = parseFloat(
             $(
-              '#goal-decimal-degrees-decimal-degree-input.latitude.goal-' +
+              '#marker-decimal-degrees-decimal-degree-input.latitude.marker-' +
                 current
             ).val()
           )
@@ -577,7 +577,7 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-decimal-degrees-decimal-degree-input.latitude.goal-' +
+            '#marker-decimal-degrees-decimal-degree-input.latitude.marker-' +
               current
           ).attr('value', latitude)
           break
@@ -586,13 +586,13 @@ $(document).ready(() => {
         case 'degrees-decimal-minutes': {
           const decimal = parseFloat(
             $(
-              '#goal-degrees-decimal-minutes-degree-input.latitude.goal-' +
+              '#marker-degrees-decimal-minutes-degree-input.latitude.marker-' +
                 current
             ).val()
           )
           const minute = parseFloat(
             $(
-              '#goal-degrees-decimal-minutes-decimal-minute-input.latitude.goal-' +
+              '#marker-degrees-decimal-minutes-decimal-minute-input.latitude.marker-' +
                 current
             ).val()
           )
@@ -602,11 +602,11 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-degrees-decimal-minutes-degree-input.latitude.goal-' +
+            '#marker-degrees-decimal-minutes-degree-input.latitude.marker-' +
               current
           ).attr('value', decimal)
           $(
-            '#goal-degrees-decimal-minutes-decimal-minute-input.latitude.goal-' +
+            '#marker-degrees-decimal-minutes-decimal-minute-input.latitude.marker-' +
               current
           ).attr('value', minute)
 
@@ -617,19 +617,19 @@ $(document).ready(() => {
         case 'degrees-minutes-seconds': {
           const decimal = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-degree-input.latitude.goal-' +
+              '#marker-degrees-minutes-seconds-degree-input.latitude.marker-' +
                 current
             ).val()
           )
           const minutes = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-minute-input.latitude.goal-' +
+              '#marker-degrees-minutes-seconds-minute-input.latitude.marker-' +
                 current
             ).val()
           )
           const seconds = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-second-input.latitude.goal-' +
+              '#marker-degrees-minutes-seconds-second-input.latitude.marker-' +
                 current
             ).val()
           )
@@ -639,14 +639,14 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-degrees-minutes-seconds-degee-input.latitude.goal-' + current
+            '#marker-degrees-minutes-seconds-degee-input.latitude.marker-' + current
           ).attr('value', decimal)
           $(
-            '#goal-degrees-minutes-seconds-minute-input.latitude.goal-' +
+            '#marker-degrees-minutes-seconds-minute-input.latitude.marker-' +
               current
           ).attr('value', minutes)
           $(
-            '#goal-degrees-minutes-seconds-second-input.latitude.goal-' +
+            '#marker-degrees-minutes-seconds-second-input.latitude.marker-' +
               current
           ).attr('value', seconds)
 
@@ -663,7 +663,7 @@ $(document).ready(() => {
         case 'decimal-degrees': {
           longitude = parseFloat(
             $(
-              '#goal-decimal-degrees-decimal-degree-input.longitude.goal-' +
+              '#marker-decimal-degrees-decimal-degree-input.longitude.marker-' +
                 current
             ).val()
           )
@@ -673,7 +673,7 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-decimal-degrees-decimal-degree-input.longitude.goal-' +
+            '#marker-decimal-degrees-decimal-degree-input.longitude.marker-' +
               current
           ).attr('value', longitude)
           break
@@ -682,13 +682,13 @@ $(document).ready(() => {
         case 'degrees-decimal-minutes': {
           const decimal = parseFloat(
             $(
-              '#goal-degrees-decimal-minutes-degree-input.longitude.goal-' +
+              '#marker-degrees-decimal-minutes-degree-input.longitude.marker-' +
                 current
             ).val()
           )
           const minute = parseFloat(
             $(
-              '#goal-degrees-decimal-minutes-decimal-minute-input.longitude.goal-' +
+              '#marker-degrees-decimal-minutes-decimal-minute-input.longitude.marker-' +
                 current
             ).val()
           )
@@ -698,11 +698,11 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-degrees-decimal-minutes-decimal-input.longitude.goal-' +
+            '#marker-degrees-decimal-minutes-decimal-input.longitude.marker-' +
               current
           ).attr('value', decimal)
           $(
-            '#goal-degrees-decimal-minutes-decimal-minute-input.longitude.goal-' +
+            '#marker-degrees-decimal-minutes-decimal-minute-input.longitude.marker-' +
               current
           ).attr('value', minute)
 
@@ -713,19 +713,19 @@ $(document).ready(() => {
         case 'degrees-minutes-seconds': {
           const decimal = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-degree-input.longitude.goal-' +
+              '#marker-degrees-minutes-seconds-degree-input.longitude.marker-' +
                 current
             ).val()
           )
           const minutes = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-minute-input.longitude.goal-' +
+              '#marker-degrees-minutes-seconds-minute-input.longitude.marker-' +
                 current
             ).val()
           )
           const seconds = parseFloat(
             $(
-              '#goal-degrees-minutes-seconds-second-input.longitude.goal-' +
+              '#marker-degrees-minutes-seconds-second-input.longitude.marker-' +
                 current
             ).val()
           )
@@ -735,15 +735,15 @@ $(document).ready(() => {
           }
 
           $(
-            '#goal-degrees-minutes-seconds-degree-input.longitude.goal-' +
+            '#marker-degrees-minutes-seconds-degree-input.longitude.marker-' +
               current
           ).attr('value', decimal)
           $(
-            '#goal-degrees-minutes-seconds-minute-input.longitude.goal-' +
+            '#marker-degrees-minutes-seconds-minute-input.longitude.marker-' +
               current
           ).attr('value', minutes)
           $(
-            '#goal-degrees-minutes-seconds-second-input.longitude.goal-' +
+            '#marker-degrees-minutes-seconds-second-input.longitude.marker-' +
               current
           ).attr('value', seconds)
 
@@ -756,32 +756,32 @@ $(document).ready(() => {
           throw "You didn't enter anything for longitude"
       }
 
-      if (goalName.length != 0) {
-        goalElem.attr('value', goalName)
+      if (markerName.length != 0) {
+        markerElem.attr('value', markerName)
       } else {
-        goalElem.attr('value', 'Goal-' + current)
+        markerElem.attr('value', 'marker-' + current)
       }
 
-      $('#goal-name-fieldset.goal-' + current).prop('disabled', true)
-      $('#goal-latitude-fieldset.goal-' + current).prop('disabled', true)
-      $('#goal-longitude-fieldset.goal-' + current).prop('disabled', true)
+      $('#marker-name-fieldset.marker-' + current).prop('disabled', true)
+      $('#marker-latitude-fieldset.marker-' + current).prop('disabled', true)
+      $('#marker-longitude-fieldset.marker-' + current).prop('disabled', true)
 
       /* ----------------------------------\
-        this section implements ROS goal node
+        this section implements ROS marker node
         \---------------------------------- */
-      const goalData = new ROSLIB.Message({
-        name: goalName,
+      const markerData = new ROSLIB.Message({
+        name: markerName,
         color: getRandomColor(),
         longitude: longitude,
         latitude: latitude
       })
 
-      create_goal_publisher.publish(goalData)
+      create_marker_publisher.publish(markerData)
 
-      logInfo('Goal parameters have been set!')
+      logInfo('marker parameters have been set!')
     } catch (e) {
-      $('#goal-confirm-btn.goal-' + current).prop('disabled', false)
-      $('#goal-change-btn.goal-' + current).prop('disabled', true)
+      $('#marker-confirm-btn.marker-' + current).prop('disabled', false)
+      $('#marker-change-btn.marker-' + current).prop('disabled', true)
 
       logWarn(e)
     }
@@ -799,70 +799,70 @@ $(document).ready(() => {
     })
   }
 
-  // Goal backup and restore functions
-  function backupGoalList (goal_list) {
-      goalListBackupsCount = 0
-      for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalListBackup-' + i) != null) {
-              goalListBackupsCount++
+  // marker backup and restore functions
+  function backupmarkerList (marker_list) {
+      markerListBackupsCount = 0
+      for (let i = 0; i<maxmarkerListBackups; i++) {
+          if (localStorage.getItem('markerListBackup-' + i) != null) {
+              markerListBackupsCount++
           }
-          if (localStorage.getItem('goalListBackup-' + i) == JSON.stringify(goal_list)) {
+          if (localStorage.getItem('markerListBackup-' + i) == JSON.stringify(marker_list)) {
               return
           }
       }
 
-      if (goalListBackupsCount < maxGoalListBackups) {
-          writeGoalListToStorage(goalListBackupsCount, JSON.stringify(goal_list))
-          goalListBackupsCount++
+      if (markerListBackupsCount < maxmarkerListBackups) {
+          writemarkerListToStorage(markerListBackupsCount, JSON.stringify(marker_list))
+          markerListBackupsCount++
       } else {
-          for (let i = 0; i<maxGoalListBackups-1; i++) {
-              localStorage.setItem('goalListBackup-' + i, localStorage.getItem('goalListBackup-' + (i+1)))
-              localStorage.setItem('timeOfGoalsBackup-' + i, localStorage.getItem('timeOfGoalsBackup-' + (i+1)))
+          for (let i = 0; i<maxmarkerListBackups-1; i++) {
+              localStorage.setItem('markerListBackup-' + i, localStorage.getItem('markerListBackup-' + (i+1)))
+              localStorage.setItem('timeOfmarkersBackup-' + i, localStorage.getItem('timeOfmarkersBackup-' + (i+1)))
           }
-          writeGoalListToStorage(maxGoalListBackups-1, JSON.stringify(goal_list))
+          writemarkerListToStorage(maxmarkerListBackups-1, JSON.stringify(marker_list))
       }
   }
 
-  function writeGoalListToStorage (backupNum, goal_list) {
+  function writemarkerListToStorage (backupNum, marker_list) {
       const dateTime = new Date();
-      localStorage.setItem('goalListBackup-' + (backupNum), goal_list)
-      localStorage.setItem('timeOfGoalsBackup-' + (backupNum), dateTime.getDate() + ' '
+      localStorage.setItem('markerListBackup-' + (backupNum), marker_list)
+      localStorage.setItem('timeOfmarkersBackup-' + (backupNum), dateTime.getDate() + ' '
         + dateTime.getHours() + ':' + dateTime.getMinutes() + ':' + dateTime.getSeconds())
   }
 
-  toggleGoalsBackups()
+  togglemarkersBackups()
 
-  function toggleGoalsBackups () {
-      $("[class^='restore-goals-']").remove()
+  function togglemarkersBackups () {
+      $("[class^='restore-markers-']").remove()
 
-      for (let i = 0; i<maxGoalListBackups; i++) {
-          if (localStorage.getItem('goalListBackup-' + i) != null) {
-              $('#goals-restore-modal-body-content').append(restoreGoalsTemplate)
-              $('#goals-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $('#goals-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
-              $("[class='restore-goals']").addClass('restore-goals-' + i).removeClass('restore-goals')
+      for (let i = 0; i<maxmarkerListBackups; i++) {
+          if (localStorage.getItem('markerListBackup-' + i) != null) {
+              $('#markers-restore-modal-body-content').append(restoremarkersTemplate)
+              $('#markers-restore-btn.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $('#markers-backup-time.backup-num').addClass('backup-' + i).removeClass('backup-num')
+              $("[class='restore-markers']").addClass('restore-markers-' + i).removeClass('restore-markers')
 
-              createGoalsRestoreButtonHandler(i)
+              createmarkersRestoreButtonHandler(i)
 
-              $('#goals-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfGoalsBackup-' + i))
+              $('#markers-backup-time.backup-' + i).text('Date/Time: ' + localStorage.getItem('timeOfmarkersBackup-' + i))
           }
        }
   }
 
-  function createGoalsRestoreButtonHandler (backupNum) {
-      // restore goals list
-      $('#goals-restore-btn.backup-' + backupNum).mouseup(e => {
-          goalRestoreButtonHandler(backupNum)
+  function createmarkersRestoreButtonHandler (backupNum) {
+      // restore markers list
+      $('#markers-restore-btn.backup-' + backupNum).mouseup(e => {
+          markerRestoreButtonHandler(backupNum)
       })
   }
 
-  function goalRestoreButtonHandler (backupNum) {
-      const goalListData = new ROSLIB.Message({
-        goal_list: JSON.parse(localStorage.getItem('goalListBackup-' + backupNum))
+  function markerRestoreButtonHandler (backupNum) {
+      const markerListData = new ROSLIB.Message({
+        marker_list: JSON.parse(localStorage.getItem('markerListBackup-' + backupNum))
       })
 
-      restore_goals_publisher.publish(goalListData)
+      restore_markers_publisher.publish(markerListData)
 
-      logInfo('Goal list from ' + localStorage.getItem('timeOfGoalsBackup-' + backupNum) + ' restored.')
+      logInfo('marker list from ' + localStorage.getItem('timeOfmarkersBackup-' + backupNum) + ' restored.')
   }
 })

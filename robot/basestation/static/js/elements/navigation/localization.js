@@ -15,9 +15,9 @@ const sketch = function (p) {
   baseLat = null
   baseLong = null
 
-  goalX = null // cartesian coordinates of current goal in pixels
-  goalY = null
-  goalColor = 'black'
+  markerX = null // cartesian coordinates of current marker in pixels
+  markerY = null
+  markerColor = 'black'
 
   rover_position_listener.subscribe(function (message) {
     roverLong = message.x
@@ -27,14 +27,14 @@ const sketch = function (p) {
     adjustValuesToCartesian(roverLat, roverLong)
   })
 
-  goal_list_subscriber.subscribe(function (message) {
-    if (message.goal_list.length != 0) {
-        goalX = message.goal_list[0].longitude
-        goalY = message.goal_list[0].latitude
-        goalColor = message.goal_list[0].color
+  marker_list_subscriber.subscribe(function (message) {
+    if (message.marker_list.length != 0) {
+        markerX = message.marker_list[0].longitude
+        markerY = message.marker_list[0].latitude
+        markerColor = message.marker_list[0].color
       } else {
-        goalX = 1500
-        goalY = 1500
+        markerX = 1500
+        markerY = 1500
       }
   })
 
@@ -68,7 +68,7 @@ const sketch = function (p) {
     drawGrid()
     drawBase()
     drawRover()
-    drawGoal()
+    drawmarker()
   }
 
   /* ----------------------------------------
@@ -91,10 +91,10 @@ const sketch = function (p) {
     p.pop()
   }
 
-  function drawGoal () {
+  function drawmarker () {
     p.push()
-    p.translate(goalX, goalX)
-    p.fill(goalColor)
+    p.translate(markerX, markerX)
+    p.fill(markerColor)
     p.scale(1 / zoomValue)
     p.circle(0, 0, 20);
     p.pop()
