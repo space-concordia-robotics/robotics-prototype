@@ -216,3 +216,8 @@ If you're using Atom (it can be installed via Ubuntu software), setting up shoul
 
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
 - Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
+
+### VS Code
+If you're using atom, you will need to install some plugins.
+
+- clangd, python, C/C++
