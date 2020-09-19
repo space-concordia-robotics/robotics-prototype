@@ -227,3 +227,9 @@ If you're using Atom (it can be installed via Ubuntu software), setting up shoul
 
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
 - Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
+
+### VS Code
+If you're using VS Code, you will need to download a couple of plugins
+
+- Install the plugins: Beautify, Python, and C/C++
+- Open a .py file and click "Set as interpreter" above `#! /usr/bin/env python3` and install anything needed.
