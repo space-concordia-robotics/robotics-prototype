@@ -3,13 +3,28 @@
 import sys
 import time
 import rospy
+import os
+import json
+
 from mcu_control.msg import RoverMarker, RoverMarkerList
 from std_msgs.msg import String
 
+json_file = 'markers.json'
+
+def save_markers(markers, filename):
+    json.dump(markers, filename)
+
+def load_markers(filename):
+    if not os.path.exists(filename):
+        return []
+    else:
+        with open(filename) as f:
+            return json.load(f)
 
 def create_marker_callback(message):
-    marker = Rovermarker(message.name, message.color, message.longitude, message.latitude)
+    marker = RoverMarker(message.name, message.color, message.longitude, message.latitude)
     marker_list.append(marker)
+    save_makers(marker_list, json_file)
 
 
 def delete_marker_callback(message):
@@ -17,6 +32,7 @@ def delete_marker_callback(message):
     for marker in marker_list:
         if marker.name == name:
             marker_list.remove(marker)
+            save_makers(marker_list, json_file)
 
 def set_as_current_marker_callback(message):
     name = message.data
@@ -27,11 +43,6 @@ def set_as_current_marker_callback(message):
             marker_list.insert(0, marker_list.pop(index))
         index += 1
 
-def restore_markers_callback(message):
-    marker_list.clear()
-    for marker in message.marker_list:
-        marker_list.append(marker)
-
 if __name__ == '__main__':
     node_name = 'markers_node'
     # only allow one node of this type
@@ -40,7 +51,7 @@ if __name__ == '__main__':
                   '" node for pub/sub/service functionality')
 
     create_marker_sub_topic = 'create_marker'
-    create_marker_sub = rospy.Subscriber(create_marker_sub_topic, Rovermarker, create_marker_callback)
+    create_marker_sub = rospy.Subscriber(create_marker_sub_topic, RoverMarker, create_marker_callback)
 
     delete_marker_sub_topic = 'delete_marker'
     delete_marker_sub = rospy.Subscriber(delete_marker_sub_topic, String, delete_marker_callback)
@@ -48,15 +59,12 @@ if __name__ == '__main__':
     set_as_current_marker_sub_topic = 'set_as_current_marker'
     set_as_current_marker_sub = rospy.Subscriber(set_as_current_marker_sub_topic, String, set_as_current_marker_callback)
 
-    restore_markers_sub_topic = 'restore_markers'
-    restore_markers_sub = rospy.Subscriber(restore_markers_sub_topic, RovermarkerList, restore_markers_callback)
-
     marker_list_pub_topic = 'marker_list'
     rospy.loginfo('Beginning to publish to "' + marker_list_pub_topic + '" topic')
-    marker_pub = rospy.Publisher(marker_list_pub_topic, RovermarkerList, queue_size=1)
+    marker_pub = rospy.Publisher(marker_list_pub_topic, RoverMarkerList, queue_size=1)
     rate = rospy.Rate(2)  # 2Hz
 
-    marker_list = []
+    marker_list = load_markers(json_file)
 
     try:
         while not rospy.is_shutdown():
