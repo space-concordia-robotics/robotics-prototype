@@ -30,7 +30,7 @@ $(document).ready(() => {
   const create_marker_publisher = new ROSLIB.Topic({
     ros: ros,
     name: 'create_marker',
-    messageType: 'mcu_control/Rovermarker'
+    messageType: 'mcu_control/RoverMarker'
   })
 
   const delete_marker_publisher = new ROSLIB.Topic({
@@ -47,15 +47,9 @@ $(document).ready(() => {
 
   marker_list_subscriber.subscribe(function (message) {
     if (JSON.stringify(markerList) != JSON.stringify(message.marker_list)) {
-      if (!settingmarkerAsCurrent) {
-        backupmarkerList(message.marker_list)
-      } else {
-        settingmarkerAsCurrent = false
-      }
-
       markerList = message.marker_list
 
-      togglemarkers()
+      toggleMarkers()
 
       if (message.marker_list.length != 0) {
         $('#marker-stats-name').text(markerList[0].name).css('color', markerList[0].color)
@@ -415,7 +409,7 @@ $(document).ready(() => {
   }
 
   // functions
-  function togglemarkers() {
+  function toggleMarkers() {
     $('div[class*="marker-"]').remove()
     markerCount = markerList.length
     const markerTemplate = $('#created-marker-template').html()

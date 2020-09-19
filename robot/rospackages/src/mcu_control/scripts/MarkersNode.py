@@ -24,7 +24,7 @@ def load_markers(filename):
 def create_marker_callback(message):
     marker = RoverMarker(message.name, message.color, message.longitude, message.latitude)
     marker_list.append(marker)
-    save_makers(marker_list, json_file)
+    save_markers(marker_list, json_file)
 
 
 def delete_marker_callback(message):
@@ -32,7 +32,7 @@ def delete_marker_callback(message):
     for marker in marker_list:
         if marker.name == name:
             marker_list.remove(marker)
-            save_makers(marker_list, json_file)
+            save_markers(marker_list, json_file)
 
 def set_as_current_marker_callback(message):
     name = message.data
