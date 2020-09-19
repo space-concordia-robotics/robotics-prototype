@@ -218,6 +218,6 @@ If you're using Atom (it can be installed via Ubuntu software), setting up shoul
 - Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
 
 ### VS Code
-If you're using atom, you will need to install some plugins.
+If you're using VS Code, you will need to install some plugins.
 
 - clangd, python, standardjs
