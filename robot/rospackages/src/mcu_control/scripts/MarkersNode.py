@@ -23,7 +23,7 @@ def load_markers(filename):
         return []
     else:
         with open(filename) as f:
-            rospy.loginfo('Found marker.json file')
+            rospy.loginfo('Found markers.json file')
             marker_dict = json.load(f)
             markers = []
             for marker_name in marker_dict.keys():
