@@ -424,7 +424,7 @@ $(document).ready(() => {
 
       createmarkerButtons(i)
 
-      $('#marker-name.marker-' + i).val(markerList[i].name)
+      $('#marker-name.marker-' + i).val(markerList[i].name).css('color', markerList[0].color)
       $('#marker-confirm-btn.marker-' + i).prop('disabled', true)
       $('#marker-change-btn.marker-' + i).prop('disabled', false)
       $('div.marker-' + i + ' fieldset').prop('disabled', true)
@@ -516,8 +516,6 @@ $(document).ready(() => {
     })
 
     delete_marker_publisher.publish(msg)
-
-    $('.marker-' + current).remove()
   }
 
   function markerSetAsCurrentButtonHandler (current) {
@@ -530,7 +528,6 @@ $(document).ready(() => {
         data: markerName
       })
 
-      settingmarkerAsCurrent = true
       set_as_current_marker_publisher.publish(msg)
   }
 
