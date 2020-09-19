@@ -68,124 +68,105 @@ The following elements are hidden HTML elements. This HTML is appended to dynami
     </div>
 </div>
 
-
-
-
-<!-- GOAL TEMPLATEs -->
-<div id="goal-buttons" hidden>
-    <button id="goal-confirm-btn" type="button" class="btn btn-success">Confirm</button>
-    <button id="goal-delete-btn" type="button" class="btn btn-danger">Delete</button>
-    <button id="goal-set-as-current-btn" type="button" class="btn btn-warning">Set as current</button>
+<!-- marker TEMPLATEs -->
+<div id="marker-buttons" hidden>
+    <button id="marker-confirm-btn" type="button" class="btn btn-success">Confirm</button>
+    <button id="marker-delete-btn" type="button" class="btn btn-danger">Delete</button>
+    <button id="marker-set-as-current-btn" type="button" class="btn btn-warning">Set as current</button>
 </div>
 
 
-<div id="goal-decimal-degrees-input-template" hidden>
+<div id="marker-decimal-degrees-input-template" hidden>
     <span class="input-group-text"></span>
-    <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control" placeholder="Decimal Degrees">
+    <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control" placeholder="Decimal Degrees">
 </div>
 
 
-
-
-<div id="goal-degrees-decimal-minutes-input-template" hidden>
+<div id="marker-degrees-decimal-minutes-input-template" hidden>
     <span class="input-group-text"></span>
 
-    <input id="goal-degrees-decimal-minutes-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <input id="marker-degrees-decimal-minutes-degree-input" type="text" class="form-control" placeholder="Degrees">
     <span class="input-group-text">°</span>
 
-    <input id="goal-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control" placeholder="Decimal Minutes">
+    <input id="marker-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control" placeholder="Decimal Minutes">
     <span class="input-group-text">'</span>
 </div>
 
-
-
-
-<div id="goal-degrees-minutes-seconds-input-template" hidden>
+<div id="marker-degrees-minutes-seconds-input-template" hidden>
     <span class="input-group-text"></span>
 
-    <input id="goal-degrees-minutes-seconds-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <input id="marker-degrees-minutes-seconds-degree-input" type="text" class="form-control" placeholder="Degrees">
     <span class="input-group-text">°</span>
 
-    <input id="goal-degrees-minutes-seconds-minute-input" type="text" class="form-control" placeholder="Mins">
+    <input id="marker-degrees-minutes-seconds-minute-input" type="text" class="form-control" placeholder="Mins">
     <span class="input-group-text">'</span>
 
-    <input id="goal-degrees-minutes-seconds-second-input" type="text" class="form-control" placeholder="Seconds">
+    <input id="marker-degrees-minutes-seconds-second-input" type="text" class="form-control" placeholder="Seconds">
     <span class="input-group-text">"</span>
 </div>
 
-
-
-
-<div id="add-goal-coordinates" hidden>
-    <div class='goal'>
-        <fieldset id="goal-name-fieldset">
+<div id="add-marker-coordinates" hidden>
+    <div class='marker'>
+        <fieldset id="marker-name-fieldset">
             <div class="input-group">
                 <span class="input-group-text">name</span>
-                <input id="goal-name" type="text" class="form-control" placeholder="Goal">
+                <input id="marker-name" type="text" class="form-control" placeholder="marker">
             </div>
         </fieldset>
-        <fieldset id="goal-latitude-fieldset">
-            <div id="goal-latitude-input-group" class="input-group">
-                <div id="goal-latitude-select-format" class="dropdown">
-                    <button type="button" id="goal-latitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Layout</button>
+        <fieldset id="marker-latitude-fieldset">
+            <div id="marker-latitude-input-group" class="input-group">
+                <div id="marker-latitude-select-format" class="dropdown">
+                    <button type="button" id="marker-latitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Layout</button>
                     <span class="caret"></span>
                     <ul class="dropdown-menu">
-                        <li><button id="goal-latitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
-                        <li><button id="goal-latitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
-                        <li><button id="goal-latitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                        <li><button id="marker-latitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="marker-latitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="marker-latitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                     </ul>
                 </div>
             </div>
         </fieldset>
-        <fieldset id="goal-longitude-fieldset">
-            <div id="goal-longitude-input-group" class="input-group">
-                <div id="goal-longitude-select-format" class="dropdown">
-                    <button type="button" id="goal-longitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Layout</button>
+        <fieldset id="marker-longitude-fieldset">
+            <div id="marker-longitude-input-group" class="input-group">
+                <div id="marker-longitude-select-format" class="dropdown">
+                    <button type="button" id="marker-longitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Layout</button>
                     <span class="caret"> </span>
                     <ul class="dropdown-menu">
-                        <li><button id="goal-longitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
-                        <li><button id="goal-longitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
-                        <li><button id="goal-longitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                        <li><button id="marker-longitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="marker-longitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="marker-longitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
                     </ul>
                 </div>
             </div>
         </fieldset>
-        <div id="goal-buttons-input-group" class="input-group">
+        <div id="marker-buttons-input-group" class="input-group">
         </div>
         <hr>
     </div>
 </div>
 
-<div id="created-goal-template" hidden>
-    <div class="goal">
-        <fieldset id="goal-name-fieldset">
+<div id="created-marker-template" hidden>
+    <div class="marker">
+        <fieldset id="marker-name-fieldset">
             <div class="input-group">
                 <span class="input-group-text">name</span>
-                <input id="goal-name" type="text" class="form-control" placeholder="Goal Name">
+                <input id="marker-name" type="text" class="form-control" placeholder="marker Name">
             </div>
         </fieldset>
-        <fieldset id="goal-latitude-fieldset" format='decimal-degrees'>
+        <fieldset id="marker-latitude-fieldset" format='decimal-degrees'>
             <div class="input-group">
                 <span class="input-group-text">latitude</span>
-                <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control latitude" placeholder="Decimal Degrees">
+                <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control latitude" placeholder="Decimal Degrees">
             </div>
         </fieldset>
-        <fieldset id="goal-longitude-fieldset" format='decimal-degrees'>
+        <fieldset id="marker-longitude-fieldset" format='decimal-degrees'>
             <div class="input-group">
                 <span class="input-group-text">longitude</span>
-                <input id="goal-decimal-degrees-decimal-degree-input" type="text" class="form-control longitude" placeholder="Decimal Degrees">
+                <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control longitude" placeholder="Decimal Degrees">
             </div>
         </fieldset>
-        <div id="goal-buttons-input-group" class="input-group">
+        <div id="marker-buttons-input-group" class="input-group">
         </div>
-        <hr>
-    </div>
-</div>
-
-<div id="goals-restore-template" hidden>
-    <div class="restore-goals">
-        <button id="goals-restore-btn" type="button" class="btn btn-success backup-num">Restore</button>
-        <span id="goals-backup-time" class="backup-num" style="color:black"></span>
         <hr>
     </div>
 </div>
