@@ -2,10 +2,6 @@ $(document).ready(() => {
   markerList = []
   markerCount = 0
 
-  markerListBackupsCount = 0
-  const maxmarkerListBackups = 3
-  settingmarkerAsCurrent = false
-
   const minuteTodecmial = 60
   const secondTodecmial = 3600
 
