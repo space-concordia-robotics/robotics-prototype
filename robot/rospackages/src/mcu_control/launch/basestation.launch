@@ -1,0 +1,3 @@
+<launch>
+  <node name="goals_node" pkg="mcu_control" type="GoalsNode.py" />
+</launch>
