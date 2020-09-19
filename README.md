@@ -220,4 +220,4 @@ If you're using Atom (it can be installed via Ubuntu software), setting up shoul
 ### VS Code
 If you're using atom, you will need to install some plugins.
 
-- clangd, python, C/C++, beautify
+- clangd, python, C/C++, standardjs
