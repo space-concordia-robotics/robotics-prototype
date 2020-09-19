@@ -12,7 +12,8 @@ from std_msgs.msg import String
 json_file = 'markers.json'
 
 def save_markers(markers, filename):
-    json.dump(markers, filename)
+    with open(filename, "w") as outfile:
+        json.dump(markers, outfile)
 
 def load_markers(filename):
     if not os.path.exists(filename):
@@ -26,7 +27,6 @@ def create_marker_callback(message):
     marker_list.append(marker)
     rospy.loginfo('Created marker ' + message.name)
     save_markers(marker_list, json_file)
-
 
 def delete_marker_callback(message):
     name = message.data
