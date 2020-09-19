@@ -1,7 +1,6 @@
 {
     "editor.formatOnSave": true,
     "python.pythonPath": "venv/bin/python",
-    "python.unitTest.pyTestEnabled": true,
     "python.formatting.provider": "yapf",
     "python.linting.lintOnSave": true,
     "python.linting.enabled": true,
@@ -10,6 +9,4 @@
     "python.linting.pylintCategorySeverity.refactor": "Warning",
     "python.linting.pylintArgs": ["--rcfile", ".pylintrc"],
     "markdown.styles": [".vscode/markdown.css"],
-    "C_Cpp.clang_format_fallbackStyle": "Google",
-    "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }
