@@ -52,11 +52,11 @@ $(document).ready(() => {
       toggleMarkers()
 
       if (message.marker_list.length != 0) {
-        $('#marker-stats-name').text(markerList[0].name).css('color', markerList[0].color)
+        $('#marker-stats-name').text(markerList[0].name)
         $('#marker-stats-latitude').text(markerList[0].latitude.toFixed(6))
         $('#marker-stats-longitude').text(markerList[0].longitude.toFixed(6))
       } else {
-        $('#marker-stats-name').text('----').css('color', 'black')
+        $('#marker-stats-name').text('----')
         $('#marker-stats-latitude').text('----')
         $('#marker-stats-longitude').text('----')
       }
@@ -424,7 +424,7 @@ $(document).ready(() => {
 
       createmarkerButtons(i)
 
-      $('#marker-name.marker-' + i).val(markerList[i].name).css('color', markerList[0].color)
+      $('#marker-name.marker-' + i).val(markerList[i].name)
       $('#marker-confirm-btn.marker-' + i).prop('disabled', true)
       $('#marker-change-btn.marker-' + i).prop('disabled', false)
       $('div.marker-' + i + ' fieldset').prop('disabled', true)
