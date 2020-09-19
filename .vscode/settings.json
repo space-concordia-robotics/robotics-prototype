@@ -10,6 +10,6 @@
     "C_Cpp.clang_format_fallbackStyle": "Google",
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "python.linting.pylintCategorySeverity.convention": "Warning",
-    "python.linting.pylintCategorySeverity.refactor": "Warning"
-    "python.linting.pylintArgs": ["--rcfile", ".pylintrc"],
+    "python.linting.pylintCategorySeverity.refactor": "Warning",
+    "python.linting.pylintArgs": ["--rcfile", ".pylintrc"]
 }
