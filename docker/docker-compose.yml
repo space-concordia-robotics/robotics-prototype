@@ -1,0 +1,7 @@
+version: '3.6' # compatible with ubuntu bionic
+
+services:
+    ros-master:
+        image: ros:melodic-ros-core
+        command: stdbuf -o L roscore
+        restart: always
