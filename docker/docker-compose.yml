@@ -12,3 +12,12 @@ services:
             - ros-master
         environment:
             - "ROS_MASTER_URI=http://ros-master:11311"
+    prototype:
+        build: ..
+        depends_on:
+            - ros-master
+        environment:
+            - "ROS_MASTER_URI=http://ros-master:11311"
+
+        ports:
+            - "5000:5000"
