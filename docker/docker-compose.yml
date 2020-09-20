@@ -12,6 +12,8 @@ services:
             - ros-master
         environment:
             - "ROS_MASTER_URI=http://ros-master:11311"
+        ports:
+            - "9090:9090"
     prototype:
         build: ..
         depends_on:
