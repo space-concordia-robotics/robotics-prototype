@@ -5,3 +5,10 @@ services:
         image: ros:melodic-ros-core
         command: stdbuf -o L roscore
         restart: always
+
+    rosbridge:
+        build: ./rosbridge 
+        depends_on:
+            - ros-master
+        environment:
+            - "ROS_MASTER_URI=http://ros-master:11311"
