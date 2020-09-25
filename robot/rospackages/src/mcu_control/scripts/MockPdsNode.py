@@ -9,7 +9,7 @@ from geometry_msgs.msg import Point
 from mcu_control.msg import ThermistorTemps, Voltage, Currents
 from decimal import *
 
-def get_parameter_state(parameter, values, prevValue, noise, increment):
+def get_parameter_state(parameter, values, valueBeforeIncrement, noise, increment):
     """Get parameter state and assign value
     General function, needs not to be changed"""
 
@@ -31,53 +31,39 @@ def get_parameter_state(parameter, values, prevValue, noise, increment):
         return None
 
     #Increment or decrement to the desired value with noise included
-    remainder = currentGetValue - prevValue
+    remainder = currentGetValue - valueBeforeIncrement
+
+    #If negative: increment, if positive: decrement
     if ((abs(remainder) >= (noise + increment))):
-        #If negative: increment, if positive: decrement
+        
         if (remainder > 0):
-            prevValue = round(prevValue + (noise * (random.uniform(-1, 1))) + increment, 2)
+            valueBeforeNoise = valueBeforeIncrement + increment #Increment the value presented on the gui
+            valueAfterNoise = round(valueBeforeNoise + (noise * (random.uniform(-1, 1))), 2) #Add noise to the incremented value
+
         else:
-            prevValue = round(prevValue + (noise * (random.uniform(-1, 1))) - increment, 2)
+            valueBeforeNoise = valueBeforeIncrement - increment #Decrement the value presented on the gui
+            valueAfterNoise = round(valueBeforeNoise + (noise * (random.uniform(-1, 1))), 2) #Add noise to the incremented value
+    
     else:
-        prevValue = round(currentGetValue + (noise * (random.uniform(-1, 1))), 2)
-    return prevValue
+        valueAfterNoise = round(currentGetValue + (noise * (random.uniform(-1, 1))), 2) #Add noise to the value if it is not incrementing or decrementing
 
-#TODO: Function to increment
-#TODO: Function to add noise
+    return valueAfterNoise
 
-
-#TODO: Refactor the parameter names to something general
-def init_parameter_values(prevParameterValues, prevVoltageStates, voltages):
+def init_parameter_values(parameterValuesMap, parameterState, stateValue):
+    """Initialize parameters with the values according to the states (rise, stable and fall)"""
 
     outputArray = []
-
-    for x in range(len(prevVoltageStates)):
-        if (prevVoltageStates[x][1] == "rise"):
-            prevParameterValues[prevVoltageStates[x][0]] = voltages.get("rise")
-        elif (prevVoltageStates[x][1] == "stable"):
-            prevParameterValues[prevVoltageStates[x][0]] = voltages.get("stable")
-        elif (prevVoltageStates[x][1] == "fall"):
-            prevParameterValues[prevVoltageStates[x][0]] = voltages.get("fall")
+    for x in range(len(parameterState)):
+        if (parameterState[x][1] == "rise"):
+            parameterValuesMap[parameterState[x][0]] = stateValue.get("rise")
+        elif (parameterState[x][1] == "stable"):
+            parameterValuesMap[parameterState[x][0]] = stateValue.get("stable")
+        elif (parameterState[x][1] == "fall"):
+            parameterValuesMap[parameterState[x][0]] = stateValue.get("fall")
         else:
-            rospy.logwarn("Failed: Invalid parameter entered for PDS_mock_voltage")
-        outputArray.append(prevParameterValues.get(prevVoltageStates[x][0]))
-    
-    # else:
-    #     for x in range(len(parameterStates)):
-    #         if (parameterStates == "rise"):
-    #             parameterValues[parameterStates[x][0]] = values.get("rise")
-    #         elif (parameterStates == "stable"):
-    #             parameterValues[parameterStates[x][0]] = values.get("stable")
-    #         elif (parameterStates == "fall"):
-    #             parameterValues[parameterStates[x][0]] = values.get("fall")
-    #         else:
-    #             rospy.logwarn("Failed: Invalid parameter entered for {}".format(parameterStates[x][0]))
-    #         outputArray.append(parameterValues.get(parameterStates[x][0]))
-    
+            rospy.logwarn("Failed: Invalid parameter entered for {}".format(parameterState[x][0]))
+        outputArray.append(parameterValuesMap.get(parameterState[x][0]))
     return outputArray
-
-
-
 
 def get_param_exist(parameter):
     """Get parameter state if parameter exists and sets to None if it does not"""
@@ -89,7 +75,6 @@ def get_param_exist(parameter):
         parameterState = None
 
     return parameterState
-
 
 def publish_mock_data(voltages, temps, currents, noiseValues):
     """Get and set parameters to be published"""
@@ -121,6 +106,10 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
     prevWheelCurrent4State = get_param_exist("PDS_mock_wheel4_current")
     prevWheelCurrent5State = get_param_exist("PDS_mock_wheel5_current")
     prevWheelCurrent6State = get_param_exist("PDS_mock_wheel6_current")
+
+    #Create list of noises to loop through when assigning new voltages
+    prevNoiseStates = []
+    prevNoiseStates.append(("PDS_mock_global_noise", prevNoiseState))
 
     #Create list of voltages to loop through when assigning new voltages
     prevVoltageStates = []
@@ -156,67 +145,26 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
         "PDS_mock_wheel6_current": None
     }
 
-    #Set initial 1 current noise
-    if (prevNoiseState == "rise"):
-        prevParameterValues["PDS_mock_global_noise"] = noiseValues.get("rise")
-    elif (prevNoiseState == "stable"):
-        prevParameterValues["PDS_mock_global_noise"] = noiseValues.get("stable")
-    elif (prevNoiseState == "fall"):
-        prevParameterValues["PDS_mock_global_noise"] = noiseValues.get("fall")
-    else:
-        rospy.logwarn("Failed: Invalid parameter entered for PDS_mock_global_noise")
-        prevParameterValues["PDS_mock_global_noise"] = 0
-    currentNoise = prevParameterValues.get("PDS_mock_global_noise")
+    #Initialize 1 starting noise (can be changed to accomodate more voltages)
+    currentNoises = []
+    currentNoises = init_parameter_values(prevParameterValues, prevNoiseStates, noiseValues)
+    currentNoise = currentNoises[0]
+    rospy.logwarn("currentNoise: {}".format(currentNoise))
 
-    #Set initial 1 current voltage (can be changed to accomodate more voltages)
+    #Initialize 1 starting voltage (can be changed to accomodate more voltages)
     currentVoltage = []
-    # for x in range(len(prevVoltageStates)):
-    #     if (prevVoltageState == "rise"):
-    #         prevParameterValues[prevVoltageStates[x][0]] = voltages.get("rise")
-    #     elif (prevVoltageState == "stable"):
-    #         prevParameterValues[prevVoltageStates[x][0]] = voltages.get("stable")
-    #     elif (prevVoltageState == "fall"):
-    #         prevParameterValues[prevVoltageStates[x][0]] = voltages.get("fall")
-    #     else:
-    #         rospy.logwarn("Failed: Invalid parameter entered for PDS_mock_voltage")
-    #     currentVoltage.append(prevParameterValues.get("PDS_mock_voltage"))
-
-    #TODO: FIX THIS PART WHY ISN'T IT WORKING IDK
     currentVoltage = init_parameter_values(prevParameterValues, prevVoltageStates, voltages)
-    rospy.logwarn("currentVoltage: {}".format(currentVoltage)) 
+    rospy.logwarn("currentVoltage: {}".format(currentVoltage))
 
-    #Set initial 3 current temperatures
+    #Initialize 3 starting temperatures (can be changed to accomodate more temps)
     currentTemps = []
-    # for x in range(len(prevTempStates)):
-    #     if (prevTempStates[x][1] == "rise"):
-    #         prevParameterValues[prevTempStates[x][0]] = temps.get("rise")
-    #     elif (prevTempStates[x][1] == "stable"):
-    #         prevParameterValues[prevTempStates[x][0]] = temps.get("stable")
-    #     elif (prevTempStates[x][1] == "fall"):
-    #         prevParameterValues[prevTempStates[x][0]] = temps.get("fall")
-    #     else:
-    #         rospy.logwarn("Failed: Invalid parameter entered for prevTempStates[x][0]")
-    #     currentTemps.append(prevParameterValues.get("PDS_mock_temp{}".format(x+1)))
-    
     currentTemps = init_parameter_values(prevParameterValues, prevTempStates, temps)
-    rospy.logwarn("currentTemps: {}".format(currentTemps)) 
+    rospy.logwarn("currentTemps: {}".format(currentTemps))
 
-
-    #Set initial 6 current wheel currents
+    #Initialize 6 starting wheel currents (can be changed to accomodate more currents)
     currentWheelCurrents = []
-    # for x in range(len(prevWheelCurrentStates)):
-    #     if (prevWheelCurrentStates[x][1] == "rise"):
-    #         prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("rise")
-    #     elif (prevWheelCurrentStates[x][1] == "stable"):
-    #         prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("stable")
-    #     elif (prevWheelCurrentStates[x][1] == "fall"):
-    #         prevParameterValues[prevWheelCurrentStates[x][0]] = currents.get("fall")
-    #     else:
-    #         rospy.logwarn("Failed: Invalid parameter entered for prevWheelCurrentStates[x][0]")
-    #     currentWheelCurrents.append(prevParameterValues.get("PDS_mock_wheel{}_current".format(x+1)))
-
     currentWheelCurrents = init_parameter_values(prevParameterValues, prevWheelCurrentStates, currents)
-    rospy.logwarn("currentWheelCurrents: {}".format(currentWheelCurrents)) 
+    rospy.logwarn("currentWheelCurrents: {}".format(currentWheelCurrents))
 
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
