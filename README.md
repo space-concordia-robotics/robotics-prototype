@@ -11,7 +11,7 @@ This project uses python virtual environments, so it is necessary the ensure tha
 
 So far we only have standardized solutions for our python style and conventions. The configurations for formatting are stored in `.style.yapf` and for linting in `.pylintrc`. These will be eventually automated using git hooks, as documented per [issue #417](https://github.com/space-concordia-robotics/robotics-prototype/issues/417). While it's not mandatory, it is encouraged to try to setup whatever IDE/editor you are using to reference these configuration files.
 
-### Atom
+#### Atom
 If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
 
 - Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
