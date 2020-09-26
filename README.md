@@ -36,8 +36,19 @@ When you have cloned the repo you can then execute `EnvironmentSetup.sh` which w
 $ cd ~/Programming/robotics-prototype
 $ ./EnvironmentSetup.sh
 ```
+After you have restarted your terminal you can run the GUI
 
-If you want to code in C++ using a Teensy, you will need to read [this wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino).
+### Running the GUI
+1. Make sure your virtual environment is activated.
+#### Option 1
+2. Use the `base` alias to enter the necessary directory.
+3. Execute `app.py` using `python app.py`
+#### Option 2
+2. In one terminal window run `rosgui`
+3. In another run `startgui`
+
+After either option, head over to [localhost:5000](http://localhost:5000) on your browser.
+
 
 ## Manual setup
 If for some reason the automatic script doesn't work, you can follow these steps to set up the development environment.
@@ -170,7 +181,9 @@ Finish the commit and `git push` as usual.
 Lastly, the branch-verification-hook will verify if the names of newly created branches follow our naming conventions explained [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions). Note that this hook will only run after entering git checkout <branch-name>, and not when the branch is created.
 
 ## Extra Info
-You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
+- If you want to code in C++ using a Teensy, you will need to read [this wiki page](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino).
+
+- You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
 
 ### Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
