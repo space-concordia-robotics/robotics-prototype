@@ -113,7 +113,7 @@ def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
     currentTemps = get_states_values(parameterTemps, temps)
     rospy.logwarn("currentTemps: {}".format(currentTemps))
 
-    #Initialize 6 starting wheel currents (can be changed to accomodate more currents)
+    #Initialize 6 starting wheel currents
     currentWheelCurrents = []
     parameterCurrents = ["PDS_mock_wheel1_current", "PDS_mock_wheel2_current", "PDS_mock_wheel3_current", "PDS_mock_wheel4_current", "PDS_mock_wheel5_current", "PDS_mock_wheel6_current"]
     currentWheelCurrents = get_states_values(parameterCurrents, currents)
@@ -197,9 +197,3 @@ if __name__ == '__main__':
         publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates)
     except rospy.ROSInterruptException:
         pass
-
-#-----------------Scenarios-----------------
-#Normal Battery Depletion 16.5V, and fall
-#Overcharged battery, 19V, fall slowly
-#Rover on fire, HOT HOT HIGH TEMP
-#Broken motor, rising current on X motor
