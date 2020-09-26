@@ -3,16 +3,19 @@
 # robotics-prototype
 This repo contains the Robotics software team code.
 
-## Contributing and Development Environment Instructions
+## Contributing and Development Environment
 
-Firstly, this project is built in Python 3.6+ and JavaScript (ES6). You need to have a version of Python installed that is 3.6+. Make sure that whenever you use `python`, `python3` or `python3.6` or whatever later on meets this requirement.
-
-Secondly, it is imperative you use a virtual env (instead of your system Python) to use/contribute to the project, else things could get messy.
+This project uses python virtual environments, so it is necessary the ensure that the virtual environment is properly setup and indeed uses python3.6+.
 
 ### Style and format
 
 So far we only have standardized solutions for our python style and conventions. The configurations for formatting are stored in `.style.yapf` and for linting in `.pylintrc`. These will be eventually automated using git hooks, as documented per [issue #417](https://github.com/space-concordia-robotics/robotics-prototype/issues/417). While it's not mandatory, it is encouraged to try to setup whatever IDE/editor you are using to reference these configuration files.
 
+### Atom
+If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
+
+- Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
+- Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
 
 If you wish to quickly test these in the command line, refer to the testing steps in [PR #415](https://github.com/space-concordia-robotics/robotics-prototype/pull/415).
 
@@ -211,8 +214,3 @@ Clone : `git clone --recursive https://github.com/space-concordia-robotics/robot
 
 Pull : `git pull; git submodule update --init --recursive`
 
-### Atom
-If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
-
-- Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
-- Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
