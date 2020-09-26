@@ -46,15 +46,10 @@ If for some reason the automatic script doesn't work, you can follow these steps
 ### Prerequisites
 Make sure you are using Ubuntu 18.04 (The ROS distribution we use doesn't support anything newer than 18.04).
 
-Add deadsnakes python repository.
-```
-$ sudo add-apt-repository ppa:deadsnakes/ppa
-$ sudo apt update
-```
 
 Install required packages
 ```
-$ sudo apt install python3.6 python3.6-venv git python-pip
+$ sudo apt install python3.6-venv git python-pip net-tools
 ```
 
 Clone the repo recursively.
@@ -114,33 +109,12 @@ In the output you should see included: `* /rosdistro: melodic`
 
 To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
 
-### Install [rosbridge-suite](http://wiki.ros.org/rosbridge_suite)
-```
-$ sudo apt install ros-melodic-rosbridge-suite
-```
-To verify that its working, deactivate `venv` with `deactivate`
+To verify that rosbridge is working, deactivate `venv` with `deactivate`
 ```
 $ roslaunch rosbridge_server rosbridge_websocket.launch
 ```
-You will need `venv` activated for everything except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
+You will need `venv` activated for everything you do except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
 
-### Install ROS nodes for camera
-To successfully build the ROS packages, you will need these dependencies.
-
-```
-sudo apt-get install ros-melodic-cv-camera
-sudo apt-get install ros-melodic-web-video-server
-```
-
-### Setup [catkin workspaces](http://wiki.ros.org/catkin/conceptual_overview)
-The first catkin workspace was automatically generated during the scripted installation of ROS, you can see `catkin_ws` in your `~` directory.
-
-You need to setup another catkin workspace in robot/rospackages
-```
-$ cd ~/Programming/robotics-prototype/robot/rospackages
-$ rosdep install --from-paths src/ --ignore-src -r -y
-$ catkin_make
-```
 ### .bashrc edits
 You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` using the GNU nano text editor, you can run `eb`. (this shortcut was added in your .bashrc file during the scripted ROS installation, among a few others)
 ```
@@ -161,6 +135,15 @@ You will need to provide the IP that the GUI will work with. By running this scr
 ./robot/basestation/env.sh >| robot/basestation/static/js/env.js
 ```
 
+### Setup git hooks
+
+Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
+
+- `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
+- `cp branch_name_verification_hook.py .git/hooks/post-checkout`
+
+If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
+
 ### Run the GUI
 Firstly, in a new terminal you should run `rosgui` (this is one of the new aliases in .bash_aliases that you added) to launch a ROS server
 
@@ -172,27 +155,6 @@ $ python app.py
 ```
 Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
 
-
-### Final Steps
-You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
-
-Make sure to setup the [git hooks](#setting-up-git-hooks) (This was done by running ./EnvironmentSetup.sh)
-
-## Using Git
-For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
-
-### Git hooks
-
-This explains how to setup git hooks which prepend an issue number to a commit message, and verify branch naming conventions. Git hooks are located in the local `.git/hooks` file of each repo, so initializing this hook in the this repo will not change any other repos you might have.
-
-### Setting up git hooks
-
-Git hooks are important for performing repository validity checks. To setup git hooks using Git Bash, run the following commands from the root of the repository (ex: from ~/Programming/robotics-prototype/):
-
-- `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
-- `cp branch_name_verification_hook.py .git/hooks/post-checkout`
-
-If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
 ### The commit hook prepender and branch verification hook
 
@@ -207,10 +169,15 @@ Finish the commit and `git push` as usual.
 
 Lastly, the branch-verification-hook will verify if the names of newly created branches follow our naming conventions explained [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions). Note that this hook will only run after entering git checkout <branch-name>, and not when the branch is created.
 
+## Extra Info
+You can read about the code formatting guide [here](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Code-Formatting-and-Conventions)
+
+### Using Git
+For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
+
 ### Cloning and Pulling
 We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
 
 Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
 
 Pull : `git pull; git submodule update --init --recursive`
-
