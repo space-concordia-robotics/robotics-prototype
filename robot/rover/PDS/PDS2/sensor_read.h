@@ -1,12 +1,9 @@
 
 /*
- * Read temperature values
+ * Read Temperature Values
  */
 
 
-#define MUX_S0  8
-#define MUX_S1  9
-#define MUX_S2  10
 
 // Constants
 const float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
@@ -19,7 +16,7 @@ void mux_settings()
     pinMode(MUX_S1, OUTPUT);
     pinMode(MUX_S2, OUTPUT);
     
-    pinMode(A0, INPUT);  
+    pinMode(MUX_output, INPUT);  
 }
 
 float temp_read(int adrs0, int adrs1, int adrs2)
@@ -34,7 +31,7 @@ float temp_read(int adrs0, int adrs1, int adrs2)
     digitalWrite(MUX_S1, adrs1);
     digitalWrite(MUX_S2, adrs2);   
 
-    MUX_OUT = analogRead(A0);
+    MUX_OUT = analogRead(MUX_output);
 
     Rntc = R1 * (1023.0 / (float)MUX_OUT - 1.0);
     log_Rntc = log(Rntc);

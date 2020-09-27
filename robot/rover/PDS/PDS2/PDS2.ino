@@ -1,15 +1,11 @@
 
 #include <Arduino.h>
+#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
+#include "variables.h"
 #include "sensor_read.h"
+#include "load_setup.h"
+#include "parse_command.h"
 
-
-#define CHAR_BUFF_SIZE 150
-#define SERIAL_BAUD_RATE 9600
-
-
-char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
-
-float Temp1 = 0;
 
 
 void setup() 
@@ -18,6 +14,7 @@ void setup()
   
     mux_settings();
 
+    load_settings();
 }
 
 void loop() 
@@ -29,6 +26,7 @@ void loop()
         if (num > 0) 
         {
             Serial.println(BUFFER); // Prints the received message
+            parseCommand(); // Check the command
             memset(BUFFER, 0, CHAR_BUFF_SIZE); // Copies 0 to the variable BUFFER
         } 
         else 
@@ -37,11 +35,18 @@ void loop()
         }
     }
 
+    // Read Load Voltage
+    enable_multisense();
+    float load_value = load_voltage();
+    Serial.print("Load Value after conversion: ");
+    Serial.print(load_value); 
+    Serial.println(" V");     
+    
+    // Read Temperature Value
     Temp1 = temp_read(0, 0, 0);
   
     Serial.print("Temperature: "); 
     Serial.print(Temp1);
     Serial.println(" C"); 
     delay(1000);
-  
 }
