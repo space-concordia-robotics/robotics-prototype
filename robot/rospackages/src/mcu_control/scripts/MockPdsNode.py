@@ -181,7 +181,7 @@ if __name__ == '__main__':
     voltages = {"rise": 20, "stable": 15, "fall": 10}
 
     #Set temperatures rise, stable and fall to be parametrized
-    temps = {"rise": 100, "stable": 50, "fall": -20}
+    temps = {"rise": 100, "stable": 25, "fall": -20}
 
     #Set temperatures rise, stable and fall to be parametrized
     currents = {"rise": 1, "stable": 0.3, "fall": 0}
