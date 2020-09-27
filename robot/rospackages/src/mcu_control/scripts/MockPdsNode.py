@@ -82,7 +82,7 @@ def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
 
     #Initialize node
     node_name = "mock_pds_node"
-    rospy.init_node(node_name, anonymous=True)
+    rospy.init_node(node_name)
     rospy.loginfo("Initialized: {} node for mock PDS values".format(node_name))
     rospyRate = 10
     rate = rospy.Rate(rospyRate)
