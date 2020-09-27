@@ -97,27 +97,27 @@ def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
 
     #Initialize 1 starting rise fall rate
     currentRate = get_states_values("PDS_mock_rise_fall_rate", riseFallRates)
-    rospy.logwarn("currentRate: {}".format(currentRate))
+    rospy.loginfo("currentRate: {}".format(currentRate))
 
     #Initialize 1 starting noise
     currentNoise = get_states_values("PDS_mock_global_noise", noiseValues)
-    rospy.logwarn("currentNoise: {}".format(currentNoise))
+    rospy.loginfo("currentNoise: {}".format(currentNoise))
 
     #Initialize 1 starting voltage
     currentVoltage = get_states_values("PDS_mock_global_noise", voltages)
-    rospy.logwarn("currentVoltage: {}".format(currentVoltage))
+    rospy.loginfo("currentVoltage: {}".format(currentVoltage))
 
     #Initialize 3 starting temperatures
     currentTemps = []
     parameterTemps = ["PDS_mock_temp1", "PDS_mock_temp2", "PDS_mock_temp3"]
     currentTemps = get_states_values(parameterTemps, temps)
-    rospy.logwarn("currentTemps: {}".format(currentTemps))
+    rospy.loginfo("currentTemps: {}".format(currentTemps))
 
     #Initialize 6 starting wheel currents
     currentWheelCurrents = []
     parameterCurrents = ["PDS_mock_wheel1_current", "PDS_mock_wheel2_current", "PDS_mock_wheel3_current", "PDS_mock_wheel4_current", "PDS_mock_wheel5_current", "PDS_mock_wheel6_current"]
     currentWheelCurrents = get_states_values(parameterCurrents, currents)
-    rospy.logwarn("currentWheelCurrents: {}".format(currentWheelCurrents))
+    rospy.loginfo("currentWheelCurrents: {}".format(currentWheelCurrents))
 
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
