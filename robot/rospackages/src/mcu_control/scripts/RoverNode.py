@@ -218,8 +218,6 @@ if __name__ == '__main__':
 
     rospy.loginfo('Beginning to subscribe to "' + rover_command_topic + '" topic')
     rospy.loginfo('Beginning to subscribe to "' + twist_topic + '" topic')
-    # the long way is for the gui to publish a twist and the node to convert it to throttle:steering
-    # the short way is for the gui to send the command string directly. no Twist.
 
     service_name = '/rover_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
