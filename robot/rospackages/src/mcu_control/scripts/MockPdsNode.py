@@ -67,6 +67,22 @@ def get_states_values(parameters, values):
                 rospy.logwarn("Failed: Invalid parameter entered for {}".format(parameters[x]))
         return outputArray
 
+#TODO: Include an if condition IF a user enters a NON float value
+#TODO: Test launch file using direct numbers instead of strings for the rates
+#TODO: Test if writing a value in CLI gives a string or a float
+#TODO: Look into setting a value in the launch file as a float type
+def get_param_float(parameter, safetyValue):
+    paramValue = get_param_exist(parameter)
+    if(paramValue is None):
+        paramValue = safetyValue
+    try:
+        floatValue = float(paramValue)
+    except:
+        rospy.logwarn("Invalid parameter set, value unchanged: {}".format(safetyValue))
+        floatValue = float(safetyValue)
+    return floatValue
+    
+
 def get_param_exist(parameter):
     """Get parameter state if parameter exists and sets to None if it does not exist"""
 
@@ -77,12 +93,12 @@ def get_param_exist(parameter):
         parameterState = None
     return parameterState
 
-def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
+def publish_mock_data(voltages, temps, currents, noiseValues):
     """Get and set parameters to be published"""
 
     #Initialize node
     node_name = "mock_pds_node"
-    rospy.init_node(node_name, anonymous=True)
+    rospy.init_node(node_name)
     rospy.loginfo("Initialized: {} node for mock PDS values".format(node_name))
     rospyRate = 10
     rate = rospy.Rate(rospyRate)
@@ -95,29 +111,37 @@ def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
     pubTemp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
     pubWheelCurrent = rospy.Publisher('wheel_motor_currents', Currents, queue_size=10)
 
-    #Initialize 1 starting rise fall rate
-    currentRate = get_states_values("PDS_mock_rise_fall_rate", riseFallRates)
-    rospy.logwarn("currentRate: {}".format(currentRate))
+    #Initialize 1 starting voltage increment rate
+    voltageRate = get_param_float("PDS_mock_voltage_rate", 0.04)
+    rospy.loginfo("voltageRate: {}".format(voltageRate))
+
+    #Initialize 1 starting temp increment rate
+    tempRate = get_param_float("PDS_mock_temp_rate", 1)
+    rospy.loginfo("tempRate: {}".format(tempRate))
+
+    #Initialize 1 starting current increment rate
+    currentRate = get_param_float("PDS_mock_current_rate", 0.025)
+    rospy.loginfo("currentRate: {}".format(currentRate))
 
     #Initialize 1 starting noise
     currentNoise = get_states_values("PDS_mock_global_noise", noiseValues)
-    rospy.logwarn("currentNoise: {}".format(currentNoise))
+    rospy.loginfo("currentNoise: {}".format(currentNoise))
 
     #Initialize 1 starting voltage
     currentVoltage = get_states_values("PDS_mock_global_noise", voltages)
-    rospy.logwarn("currentVoltage: {}".format(currentVoltage))
+    rospy.loginfo("currentVoltage: {}".format(currentVoltage))
 
     #Initialize 3 starting temperatures
     currentTemps = []
     parameterTemps = ["PDS_mock_temp1", "PDS_mock_temp2", "PDS_mock_temp3"]
     currentTemps = get_states_values(parameterTemps, temps)
-    rospy.logwarn("currentTemps: {}".format(currentTemps))
+    rospy.loginfo("currentTemps: {}".format(currentTemps))
 
     #Initialize 6 starting wheel currents
     currentWheelCurrents = []
     parameterCurrents = ["PDS_mock_wheel1_current", "PDS_mock_wheel2_current", "PDS_mock_wheel3_current", "PDS_mock_wheel4_current", "PDS_mock_wheel5_current", "PDS_mock_wheel6_current"]
     currentWheelCurrents = get_states_values(parameterCurrents, currents)
-    rospy.logwarn("currentWheelCurrents: {}".format(currentWheelCurrents))
+    rospy.loginfo("currentWheelCurrents: {}".format(currentWheelCurrents))
 
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
@@ -127,20 +151,26 @@ def publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates):
         3) Noise value
         4) Increment value"""
 
-        #Get 1 rate immediately while ros is running
-        currentRate = get_states_values("PDS_mock_rise_fall_rate", riseFallRates)
+        #Get float voltageRate immediately while ros is running
+        voltageRate = get_param_float("PDS_mock_voltage_rate", voltageRate)
+
+        #Get float tempRate immediately while ros is running
+        tempRate = get_param_float("PDS_mock_temp_rate", tempRate)
+
+        #Get float currentRate immediately while ros is running
+        currentRate = get_param_float("PDS_mock_current_rate", currentRate)
 
         #Get 1 noise immediately while ros is running
         currentNoise = get_states_values("PDS_mock_global_noise", noiseValues)
 
         #Get 1 voltage incrementally while ros is running
         if (currentVoltage is not None):
-            currentVoltage = get_parameter_value("PDS_mock_voltage", voltages, currentVoltage, currentNoise, currentRate/rospyRate)
+            currentVoltage = get_parameter_value("PDS_mock_voltage", voltages, currentVoltage, currentNoise, voltageRate/rospyRate)
 
         #Get 3 temperatures incrementally while ros is running
         for x in range(len(currentTemps)):
             if (currentTemps[x] is not None):
-                currentTemps[x] = get_parameter_value(parameterTemps[x], temps, currentTemps[x], currentNoise, currentRate/rospyRate)
+                currentTemps[x] = get_parameter_value(parameterTemps[x], temps, currentTemps[x], currentNoise, tempRate/rospyRate)
 
         #Get 6 wheel currents incrementally while ros is running
         for x in range(len(currentWheelCurrents)):
@@ -181,7 +211,7 @@ if __name__ == '__main__':
     voltages = {"rise": 20, "stable": 15, "fall": 10}
 
     #Set temperatures rise, stable and fall to be parametrized
-    temps = {"rise": 100, "stable": 50, "fall": -20}
+    temps = {"rise": 100, "stable": 25, "fall": -20}
 
     #Set temperatures rise, stable and fall to be parametrized
     currents = {"rise": 1, "stable": 0.3, "fall": 0}
@@ -189,11 +219,8 @@ if __name__ == '__main__':
     #Set temperatures rise, stable and fall to be parametrized
     noiseValues = {"rise": 0.1, "stable": 0.05, "fall": 0.01}
 
-    #Set rise fall rates rise, stable and fall to be parametrized
-    riseFallRates = {"rise": 0.1, "stable": 0.04, "fall": 0.01}
-
     #Publish all new parameter settings set by user
     try:
-        publish_mock_data(voltages, temps, currents, noiseValues, riseFallRates)
+        publish_mock_data(voltages, temps, currents, noiseValues)
     except rospy.ROSInterruptException:
         pass
