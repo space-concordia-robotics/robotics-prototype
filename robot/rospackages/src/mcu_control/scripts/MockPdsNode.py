@@ -15,6 +15,7 @@ def get_parameter_value(parameter, values, valueBeforeIncrement, noise, incremen
 
     # Acquire the value associated to the state if it exists
     currentGetValue = get_states_values(parameter, values)
+
     #Increment or decrement to the desired value with noise included
     remainder = currentGetValue - valueBeforeIncrement
 
@@ -72,6 +73,9 @@ def get_states_values(parameters, values):
 #TODO: Test if writing a value in CLI gives a string or a float
 #TODO: Look into setting a value in the launch file as a float type
 def get_param_float(parameter, safetyValue):
+    """Get float value for a parameter, and if the value does not exist, 
+        or an invalid parameter is entered, return the previous value it once was"""
+
     paramValue = get_param_exist(parameter)
     if(paramValue is None):
         paramValue = safetyValue
@@ -93,6 +97,41 @@ def get_param_exist(parameter):
         parameterState = None
     return parameterState
 
+def init_default_mandatory_param(parameter, defaultValue):
+    """Initialize parameters which are mandatory in the proper functionality of the simulator"""
+    
+    paramState = get_param_exist(parameter)
+    if (paramState is None):
+        rospy.logwarn("Parameter state None assigned to {}".format(parameter))
+    rospy.loginfo("{}: {}".format(parameter, defaultValue))
+    return defaultValue
+
+def init_default_voluntary_param(parameters, defaultValue):
+    """Initialize parameters which can be missing, but not cause problems in the functionality of the simulator"""
+
+    #Check if parameters is a string (single parameter) or an array (multiple parameters) and initialize appropriately
+    if isinstance(parameters, str):
+        paramValue = get_param_exist("PDS_mock_voltage")
+        if (paramValue is None):
+            rospy.logwarn("Parameter state None assigned to {}".format(parameters))
+        else:
+            paramValue = defaultValue
+        rospy.loginfo("{}: {}".format(parameters, paramValue))
+        return paramValue
+
+    #If parameters is an array, check if the parameters exist, and initialize them appropriately
+    else:
+        outputArray = []
+        for x in range(len(parameters)):
+            existFlag = get_param_exist(parameters[x])
+            if(existFlag is not None):
+                outputArray.append(defaultValue)
+            else:
+                outputArray.append(None)
+                rospy.logwarn("Parameter state None assigned to {}".format(parameters[x]))
+        return outputArray
+
+
 def publish_mock_data(voltages, temps, currents, noiseValues):
     """Get and set parameters to be published"""
 
@@ -112,35 +151,35 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
     pubWheelCurrent = rospy.Publisher('wheel_motor_currents', Currents, queue_size=10)
 
     #Initialize 1 starting voltage increment rate
-    voltageRate = get_param_float("PDS_mock_voltage_rate", 0.04)
-    rospy.loginfo("voltageRate: {}".format(voltageRate))
+    #Using default value if not initialized in launch file
+    voltageRate = init_default_mandatory_param("PDS_mock_voltage_rate", 0.04)
 
     #Initialize 1 starting temp increment rate
-    tempRate = get_param_float("PDS_mock_temp_rate", 1)
-    rospy.loginfo("tempRate: {}".format(tempRate))
+    #Using default value if not initialized in launch file
+    tempRate = init_default_mandatory_param("PDS_mock_temp_rate", 1)
 
     #Initialize 1 starting current increment rate
-    currentRate = get_param_float("PDS_mock_current_rate", 0.025)
-    rospy.loginfo("currentRate: {}".format(currentRate))
+    #Using default value if not initialized in launch file
+    currentRate = init_default_mandatory_param("PDS_mock_current_rate", 0.025)
 
     #Initialize 1 starting noise
-    currentNoise = get_states_values("PDS_mock_global_noise", noiseValues)
-    rospy.loginfo("currentNoise: {}".format(currentNoise))
+    #Using default value if not initialized in launch file
+    currentNoise = init_default_mandatory_param("PDS_mock_global_noise", noiseValues.get("stable"))
 
     #Initialize 1 starting voltage
-    currentVoltage = get_states_values("PDS_mock_global_noise", voltages)
-    rospy.loginfo("currentVoltage: {}".format(currentVoltage))
+    #Initialize variable to default value if it exists, or keep as None if it does not exist
+    currentVoltage = init_default_voluntary_param("PDS_mock_voltage", voltages.get("stable"))
 
     #Initialize 3 starting temperatures
-    currentTemps = []
+    #Initialize variables to default values if they exist, or keep as None if they do not exist
     parameterTemps = ["PDS_mock_temp1", "PDS_mock_temp2", "PDS_mock_temp3"]
-    currentTemps = get_states_values(parameterTemps, temps)
+    currentTemps = init_default_voluntary_param(parameterTemps, temps.get("stable"))
     rospy.loginfo("currentTemps: {}".format(currentTemps))
 
     #Initialize 6 starting wheel currents
-    currentWheelCurrents = []
+    #Initialize variables to default values if they exist, or keep as None if they do not exist
     parameterCurrents = ["PDS_mock_wheel1_current", "PDS_mock_wheel2_current", "PDS_mock_wheel3_current", "PDS_mock_wheel4_current", "PDS_mock_wheel5_current", "PDS_mock_wheel6_current"]
-    currentWheelCurrents = get_states_values(parameterCurrents, currents)
+    currentWheelCurrents = init_default_voluntary_param(parameterCurrents, currents.get("stable"))
     rospy.loginfo("currentWheelCurrents: {}".format(currentWheelCurrents))
 
     # Acquire parameter and set parameter states while launch file is active
