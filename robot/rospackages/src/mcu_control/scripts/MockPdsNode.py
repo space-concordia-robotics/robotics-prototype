@@ -14,7 +14,7 @@ def get_parameter_value(parameter, values, valueBeforeIncrement, noise, incremen
     General function, needs not to be changed"""
 
     # Acquire the value associated to the state if it exists
-    currentGetValue = get_states_values(parameter, values)
+    currentGetValue = get_states_values(parameter, values, valueBeforeIncrement)
 
     #Increment or decrement to the desired value with noise included
     remainder = currentGetValue - valueBeforeIncrement
@@ -32,7 +32,7 @@ def get_parameter_value(parameter, values, valueBeforeIncrement, noise, incremen
 
     return valueAfterNoise
 
-def get_states_values(parameters, values):
+def get_states_values(parameters, values, safetyValue):
     """Initialize parameters with the values according to the states (rise, stable and fall)"""
 
     #Check if parameters is a string (single parameter) or an array (multiple parameters)
@@ -47,10 +47,11 @@ def get_states_values(parameters, values):
             newValue = values.get("fall")
         else:
             rospy.logwarn("Failed: Invalid parameter entered")
-            #If noise or riseFallRate were never initialized in the launch file, set them to stable
-            if ((parameters == "PDS_mock_rise_fall_rate" or parameters == "PDS_mock_global_noise") and paramState == None):
-                    newValue = values.get("stable")
-                    rospy.logwarn("Noise or rate set to STABLE")
+            #If noise or voltage rate, temp rate or current rate were published a wrong input
+            #(i.e. float instead of rise, fall or stable), then keep the value as is was before
+            if (newValue == None):
+                    newValue = safetyValue
+                    rospy.logwarn("Invalid parameter value entered, value left unchanged")
         return newValue
 
     #If parameters is an array, return the value associated for each parameter state
@@ -68,19 +69,22 @@ def get_states_values(parameters, values):
                 rospy.logwarn("Failed: Invalid parameter entered for {}".format(parameters[x]))
         return outputArray
 
-#TODO: Include an if condition IF a user enters a NON float value
-#TODO: Test launch file using direct numbers instead of strings for the rates
-#TODO: Test if writing a value in CLI gives a string or a float
-#TODO: Look into setting a value in the launch file as a float type
 def get_param_float(parameter, safetyValue):
-    """Get float value for a parameter, and if the value does not exist, 
-        or an invalid parameter is entered, return the previous value it once was"""
+    """Get float value for a parameter, and if the value does not exist
+    or an invalid parameter is entered, return the previous value it once was"""
 
+    #Check if a value was entered for the parameter
     paramValue = get_param_exist(parameter)
+
+    #Check if a value was initialized in the launch file
+    #If it was not, set its value to the value it was before
     if(paramValue is None):
         paramValue = safetyValue
+
+    #If a value was entered by the user, check if it is a float number
     try:
         floatValue = float(paramValue)
+    #If the value entered is not a float, keep the value it was set to before
     except:
         rospy.logwarn("Invalid parameter set, value unchanged: {}".format(safetyValue))
         floatValue = float(safetyValue)
@@ -98,7 +102,8 @@ def get_param_exist(parameter):
     return parameterState
 
 def init_default_mandatory_param(parameter, defaultValue):
-    """Initialize parameters which are mandatory in the proper functionality of the simulator"""
+    """Initialize parameters to a default value regardless if they
+    exist or not to assure proper simulator functionality"""
     
     paramState = get_param_exist(parameter)
     if (paramState is None):
@@ -107,7 +112,8 @@ def init_default_mandatory_param(parameter, defaultValue):
     return defaultValue
 
 def init_default_voluntary_param(parameters, defaultValue):
-    """Initialize parameters which can be missing, but not cause problems in the functionality of the simulator"""
+    """Initialize parameters to a default value if they exist,
+    but if they do not, then set them to None"""
 
     #Check if parameters is a string (single parameter) or an array (multiple parameters) and initialize appropriately
     if isinstance(parameters, str):
@@ -133,7 +139,7 @@ def init_default_voluntary_param(parameters, defaultValue):
 
 
 def publish_mock_data(voltages, temps, currents, noiseValues):
-    """Get and set parameters to be published"""
+    """Get and set all parameters to be published"""
 
     #Initialize node
     node_name = "mock_pds_node"
@@ -167,17 +173,17 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
     currentNoise = init_default_mandatory_param("PDS_mock_global_noise", noiseValues.get("stable"))
 
     #Initialize 1 starting voltage
-    #Initialize variable to default value if it exists, or keep as None if it does not exist
+    #Initialize variable to default value if it exists, OR keep as None if it does not exist
     currentVoltage = init_default_voluntary_param("PDS_mock_voltage", voltages.get("stable"))
 
     #Initialize 3 starting temperatures
-    #Initialize variables to default values if they exist, or keep as None if they do not exist
+    #Initialize variables to default values if they exist, OR keep as None if they do not exist
     parameterTemps = ["PDS_mock_temp1", "PDS_mock_temp2", "PDS_mock_temp3"]
     currentTemps = init_default_voluntary_param(parameterTemps, temps.get("stable"))
     rospy.loginfo("currentTemps: {}".format(currentTemps))
 
     #Initialize 6 starting wheel currents
-    #Initialize variables to default values if they exist, or keep as None if they do not exist
+    #Initialize variables to default values if they exist, OR keep as None if they do not exist
     parameterCurrents = ["PDS_mock_wheel1_current", "PDS_mock_wheel2_current", "PDS_mock_wheel3_current", "PDS_mock_wheel4_current", "PDS_mock_wheel5_current", "PDS_mock_wheel6_current"]
     currentWheelCurrents = init_default_voluntary_param(parameterCurrents, currents.get("stable"))
     rospy.loginfo("currentWheelCurrents: {}".format(currentWheelCurrents))
@@ -185,10 +191,9 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
         """Get new current, voltage, and thermistor temps recursively
-        1) Parameter name
-        2) Parameter's previous value
-        3) Noise value
-        4) Increment value"""
+        1) get_param_float takes a (float) value directly from the user
+        2) get_states_values takes a (state) directly from the user and immediately sets that value to the variable
+        3) get_parameter_value takes a (state) directly from the user and incrementally increases/decreases to the desired state condition"""
 
         #Get float voltageRate immediately while ros is running
         voltageRate = get_param_float("PDS_mock_voltage_rate", voltageRate)
@@ -200,7 +205,7 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
         currentRate = get_param_float("PDS_mock_current_rate", currentRate)
 
         #Get 1 noise immediately while ros is running
-        currentNoise = get_states_values("PDS_mock_global_noise", noiseValues)
+        currentNoise = get_states_values("PDS_mock_global_noise", noiseValues, currentNoise)
 
         #Get 1 voltage incrementally while ros is running
         if (currentVoltage is not None):
@@ -243,8 +248,9 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
 
 if __name__ == '__main__':
     """Calls publisher function and passes parameter settings
-    Change the values for the parameter states (rise, stable and fall) here (i.e. voltages, temps and currents)
-    No other places require to be modified to change the state values"""
+    Change the values for the parameter states (rise, stable and fall)
+    However, change the initial starting values for the parameters directly in publish_mock_data
+    No other places require to be modified to change the state (rise, stable, and fall) values"""
 
     #Set voltages rise, stable and fall to be parametrized
     voltages = {"rise": 20, "stable": 15, "fall": 10}
