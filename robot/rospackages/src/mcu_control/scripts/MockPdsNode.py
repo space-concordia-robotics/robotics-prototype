@@ -105,7 +105,11 @@ def init_default_mandatory_param(parameter, defaultValue):
     """Initialize parameters to a default value regardless if they
     exist or not to assure proper simulator functionality"""
     
+    # Check if parameter exists
     paramState = get_param_exist(parameter)
+
+    #If the parameter does not exist, give a warning,
+    #but return the same default initial value if the parameter exists or not
     if (paramState is None):
         rospy.logwarn("Parameter state None assigned to {}".format(parameter))
     rospy.loginfo("{}: {}".format(parameter, defaultValue))
@@ -244,7 +248,6 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
 
         #Add delay before each iteration of loop which runs rospy
         rate.sleep()
-
 
 if __name__ == '__main__':
     """Calls publisher function and passes parameter settings
