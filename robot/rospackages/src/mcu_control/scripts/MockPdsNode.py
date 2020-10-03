@@ -172,9 +172,17 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
     #Using default value if not initialized in launch file
     currentRate = init_default_mandatory_param("PDS_mock_current_rate", 0.025)
 
-    #Initialize 1 starting noise
+    #Initialize 1 starting voltage noise
     #Using default value if not initialized in launch file
-    currentNoise = init_default_mandatory_param("PDS_mock_global_noise", noiseValues.get("stable"))
+    voltageNoise = init_default_mandatory_param("PDS_mock_voltage_noise", 0.05)
+
+    #Initialize 1 starting temperature noise
+    #Using default value if not initialized in launch file
+    tempNoise = init_default_mandatory_param("PDS_mock_temperature_noise", 0.05)
+
+    #Initialize 1 starting current noise
+    #Using default value if not initialized in launch file
+    currentNoise = init_default_mandatory_param("PDS_mock_current_noise", 0.05)
 
     #Initialize 1 starting voltage
     #Initialize variable to default value if it exists, OR keep as None if it does not exist
@@ -208,8 +216,14 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
         #Get float currentRate immediately while ros is running
         currentRate = get_param_float("PDS_mock_current_rate", currentRate)
 
-        #Get 1 noise immediately while ros is running
-        currentNoise = get_states_values("PDS_mock_global_noise", noiseValues, currentNoise)
+        #Get float voltage noise immediately while ros is running
+        voltageNoise = get_param_float("PDS_mock_voltage_noise", voltageNoise)
+
+        #Get float temp noise immediately while ros is running
+        tempNoise = get_param_float("PDS_mock_temperature_noise", tempNoise)
+
+        #Get float current noise immediately while ros is running
+        currentNoise = get_param_float("PDS_mock_current_noise", currentNoise)
 
         #Get 1 voltage incrementally while ros is running
         if (currentVoltage is not None):
