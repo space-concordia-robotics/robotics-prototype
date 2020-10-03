@@ -142,7 +142,7 @@ def init_default_voluntary_param(parameters, defaultValue):
         return outputArray
 
 
-def publish_mock_data(voltages, temps, currents, noiseValues):
+def publish_mock_data(voltages, temps, currents):
     """Get and set all parameters to be published"""
 
     #Initialize node
@@ -280,11 +280,8 @@ if __name__ == '__main__':
     #Set temperatures rise, stable and fall to be parametrized
     currents = {"rise": 1, "stable": 0.3, "fall": 0}
 
-    #Set temperatures rise, stable and fall to be parametrized
-    noiseValues = {"rise": 0.1, "stable": 0.05, "fall": 0.01}
-
     #Publish all new parameter settings set by user
     try:
-        publish_mock_data(voltages, temps, currents, noiseValues)
+        publish_mock_data(voltages, temps, currents)
     except rospy.ROSInterruptException:
         pass
