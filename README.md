@@ -40,14 +40,10 @@ After you have restarted your terminal you can run the GUI
 
 ### Running the GUI
 1. Make sure your virtual environment is activated.
-#### Option 1
-2. Use the `base` alias to enter the necessary directory.
-3. Execute `app.py` using `python app.py`
-#### Option 2
 2. In one terminal window run `rosgui`
 3. In another run `startgui`
 
-After either option, head over to [localhost:5000](http://localhost:5000) on your browser.
+After either option, head over to [localhost:5000](/localhost:5000) on your browser.
 
 
 ## Manual setup
@@ -152,8 +148,6 @@ Git hooks are important for performing repository validity checks. To setup git 
 
 - `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
 - `cp branch_name_verification_hook.py .git/hooks/post-checkout`
-
-If you're on windows, install [Git Bash](https://git-scm.com/downloads) to be able to run the same commands.
 
 ### Run the GUI
 Firstly, in a new terminal you should run `rosgui` (this is one of the new aliases in .bash_aliases that you added) to launch a ROS server
