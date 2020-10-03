@@ -236,6 +236,8 @@ def publish_mock_data(voltages, temps, currents, noiseValues):
             thermistorTemps.therm2 = float(currentTemps[1])
         if (currentTemps[2] is not None):
             thermistorTemps.therm3 = float(currentTemps[2])
+
+        wheelCurrents.effort.clear()
         #Set wheel currents 1-6
         for x in range(len(currentWheelCurrents)):
             if(currentWheelCurrents[x] is not None):
