@@ -227,12 +227,12 @@ def publish_mock_data(voltages, temps, currents):
 
         #Get 1 voltage incrementally while ros is running
         if (currentVoltage is not None):
-            currentVoltage = get_parameter_value("PDS_mock_voltage", voltages, currentVoltage, currentNoise, voltageRate/rospyRate)
+            currentVoltage = get_parameter_value("PDS_mock_voltage", voltages, currentVoltage, voltageNoise, voltageRate/rospyRate)
 
         #Get 3 temperatures incrementally while ros is running
         for x in range(len(currentTemps)):
             if (currentTemps[x] is not None):
-                currentTemps[x] = get_parameter_value(parameterTemps[x], temps, currentTemps[x], currentNoise, tempRate/rospyRate)
+                currentTemps[x] = get_parameter_value(parameterTemps[x], temps, currentTemps[x], tempNoise, tempRate/rospyRate)
 
         #Get 6 wheel currents incrementally while ros is running
         for x in range(len(currentWheelCurrents)):
