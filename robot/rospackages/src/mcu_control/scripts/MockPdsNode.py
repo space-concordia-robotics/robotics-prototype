@@ -182,7 +182,7 @@ def publish_mock_data(voltages, temps, currents):
 
     #Initialize 1 starting current noise
     #Using default value if not initialized in launch file
-    currentNoise = init_default_mandatory_param("PDS_mock_current_noise", 0.05)
+    currentNoise = init_default_mandatory_param("PDS_mock_current_noise", 0.01)
 
     #Initialize 1 starting voltage
     #Initialize variable to default value if it exists, OR keep as None if it does not exist

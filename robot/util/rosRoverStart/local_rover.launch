@@ -8,7 +8,7 @@
     <param name="PDS_mock_current_rate" value="0.025"/>
     <param name="PDS_mock_voltage_noise" value="0.05"/>
     <param name="PDS_mock_temperature_noise" value="0.05"/>
-    <param name="PDS_mock_current_noise" value="0.05"/>
+    <param name="PDS_mock_current_noise" value="0.01"/>
     <param name="PDS_mock_voltage" value="stable"/>
     <param name="PDS_mock_temp1" value="stable"/>
     <param name="PDS_mock_temp2" value="stable"/>
