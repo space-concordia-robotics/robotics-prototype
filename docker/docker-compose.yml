@@ -13,7 +13,6 @@ services:
             - rp-network
 
     rosbridge:
-        #build: ./rosbridge 
         build:
             context: ../
             dockerfile: ./docker/rosbridge/Dockerfile

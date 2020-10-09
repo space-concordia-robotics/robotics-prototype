@@ -1,4 +1,4 @@
-FROM ros:melodic
+FROM ros:melodic-ros-core
 
 SHELL ["/bin/bash", "-c"]
 
@@ -7,7 +7,6 @@ RUN useradd --create-home --shell /bin/bash spaceuser \
 
 WORKDIR /home/spaceuser/Programming/robotics-prototype
 COPY requirements.txt requirements-dev.txt setup.py ./
-
 
 RUN apt-get update && apt-get install -y python3-pip \
     && pip3 install -r requirements.txt -r requirements-dev.txt \
@@ -18,13 +17,9 @@ RUN apt-get install -y ros-$ROS_DISTRO-cv-camera \
 
 COPY . .
 
-WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rospackages
-RUN rosdep install --from-paths src/ --ignore-src -r -y \
-    && source /opt/ros/$ROS_DISTRO/setup.sh \
-    && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
-    && chown -R spaceuser:spaceuser /home/spaceuser/Programming/robotics-prototype
+RUN chown -R spaceuser:spaceuser /home/spaceuser/Programming/robotics-prototype \
+    && echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc
 
-WORKDIR /home/spaceuser/Programming/robotics-prototype
 USER spaceuser
 RUN chmod u+x ./docker/prototype/entrypoint.sh
 ENTRYPOINT ["./docker/prototype/entrypoint.sh"]
