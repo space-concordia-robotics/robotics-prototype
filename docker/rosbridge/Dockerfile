@@ -29,4 +29,7 @@ RUN rosdep init \
 USER spaceuser
 WORKDIR /home/spaceuser/Programming/robotics-prototype
 
+RUN echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc \
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc
+
 ENTRYPOINT ["./entrypoint.sh"]
