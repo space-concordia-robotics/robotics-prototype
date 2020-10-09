@@ -1,13 +1,22 @@
 version: '3.6' # compatible with ubuntu bionic
 
+networks:
+    rp-network:
+        driver: bridge
+
 services:
     ros-master:
         image: ros:melodic-ros-core
         command: stdbuf -o L roscore
         restart: always
+        networks:
+            - rp-network
 
     rosbridge:
-        build: ./rosbridge 
+        #build: ./rosbridge 
+        build:
+            context: ../
+            dockerfile: ./docker/rosbridge/Dockerfile
         depends_on:
             - ros-master
         environment:
@@ -15,6 +24,8 @@ services:
         ports:
             - "9090:9090"
         restart: always
+        networks:
+            - rp-network
     prototype:
         build: ..
         depends_on:
@@ -26,3 +37,5 @@ services:
         ports:
             - "5000:5000"
         restart: always
+        networks:
+            - rp-network
