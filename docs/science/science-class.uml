@@ -69,20 +69,23 @@ CommandCenter -- TemperatureController
 CommandCenter -- Pump
 CommandCenter -- Carousel
 CommandCenter -- Funnel
-CommandCenter -- ScienceNode
+CommandCenter -- ScienceNode : "RS-485"
+
 Fan -- Laser
 Fan -- TemperatureController
 
-Stoppable -- Laser
-Stoppable -- Pump
-Stoppable -- Carousel
-Stoppable -- Fan
-Stoppable -- Funnel
+PIDController -- TemperatureController : "Temperature Control"
 
-Updateable -- Pump
-Updateable -- Carousel
-Updateable -- Funnel
-Updateable -- TemperatureController
+Stoppable <|-- Laser
+Stoppable <|-- Pump
+Stoppable <|-- Carousel
+Stoppable <|-- Fan
+Stoppable <|-- Funnel
 
-Sensor "3" -- "1" TemperatureController
+Updateable <|-- Pump
+Updateable <|-- Carousel
+Updateable <|-- Funnel
+Updateable <|-- TemperatureController
+
+Sensor "3" -- "1" TemperatureController : "Provides temperature"
 @enduml
