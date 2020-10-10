@@ -1,0 +1,56 @@
+@startuml
+skinparam classAttributeIconSize 0
+class Sensor
+interface Stoppable
+{
+  +eStop()
+}
+interface Updateable
+{
+  +update(dt)
+}
+class Fan
+{
+    +fanPWM
+    +turnOn()
+    +turnOff()
+}
+class Funnel
+{
+    +motorPWM
+    +funnel()
+}
+class Laser
+{
+  #timeTurnedOn
+  +turnOn()
+  +turnOff()
+  +isReady()
+  +timeLeftForWarmUp()
+  +checkForFaults()
+  +readCurrents()
+}
+class TemperatureController
+class Pump
+{
+  #pumpTimeElapsed
+  #motorPWM
+  +pump()
+  +backpump()
+}
+class CommandCenter
+class Funnel
+{
+  #motorPWM
+  +startFunnel()
+}
+class Carousel
+{
+  #currentCuvette
+  +home()
+  +goToCuvette(cuvetteId)
+  +nextCuvette()
+  +previousCuvette()
+  +getCurrentCuvette()
+}
+@enduml
