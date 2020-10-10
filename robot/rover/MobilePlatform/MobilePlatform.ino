@@ -1,31 +1,13 @@
 
 #include <Arduino.h>
-
-#include "pins.h"
-#include "motors.h"
-#include <Servo.h>
-#include "ArduinoBlue.h"
+#include "commands.h"
+#include "navigation.h"
 
 #include <SoftwareSerial.h>
-
-/* comms */
-#define SERIAL_BAUD 115200
-#define SERIAL_TIMEOUT 20
-#define FEEDBACK_PRINT_INTERVAL 50
-#define LED_BLINK_INTERVAL 1000
-#define SENSOR_READ_INTERVAL 200
-#define SENSOR_TIMEOUT 20
-#define THROTTLE_TIMEOUT 200
-#define MOTOR_CONTROL_INTERVAL 10
-
-#define SERVO_STOP 93
-#define FRONT_BASE_DEFAULT_PWM 65
-#define REAR_BASE_DEFAULT_PWM 35
-
 /*
-  choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
-  the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
-  should work.
+choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
+the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
+should work.
 */
 //#define DEVEL_MODE_1 1
 ////#define DEVEL_MODE_2 2
@@ -38,13 +20,7 @@
 //#define UART_PORT Serial1
 //#endif
 
-/* more variables */
-#define MAX_INPUT_VALUE 49  // maximum speed signal from controller
-#define MIN_INPUT_VALUE -MAX_INPUT_VALUE // minimum speed signal from controller
-#define MAX_PWM_VALUE 255
-#define MIN_PWM_VALUE -MAX_PWM_VALUE
-#define MAX_RPM_VALUE MAX_RPM
-#define MIN_RPM_VALUE -MAX_RPM
+
 
 SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
@@ -53,14 +29,8 @@ elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery 
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
-String cmd;
 
-float maxOutputSignal, minOutputSignal;
-int motorNumber;
-int leftMotorDirection; // CCW =1 or CW =-1
-int rightMotorDirection; // CCW =1 or CW =-1
-float desiredVelocityRight = 0;
-float desiredVelocityLeft = 0;
+
 float wheelBase = 0.33; //distance between left and right wheels
 float radius = 0.14; // in m
 float piRad = 0.10472; // Pi in radians
@@ -73,9 +43,8 @@ float kd = 40.625;
 //float kd = 0.05;
 float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
-float throttle = 0, steering = 0, heading = 0; // Input values for set velocity functions
-int loop_state, button, i; // Input values for set velocity functions
-bool devMode = true; //if devMode is true then connection is through usb serial
+
+
 // constructors
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
 DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor");
@@ -88,7 +57,7 @@ DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
 
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
-
+Commands Cmds;
 /* function declarations */
 // initializers
 void attachServos(void); // attach pins to servo objects
@@ -96,19 +65,8 @@ void initEncoders(void); // Encoder initiation (attach interrups and pinModes fo
 void serialHandler(void); // Read String that automatically listens to all available ports and bluetooth. If uart is availble and reads who, its will switch devMode to false
 void initPids(void); // Initiate PID for DMotor
 // during operation
-void velocityHandler(float throttle, float steering);
 void roverVelocityCalculator(void);
 
-void print(String msg);
-void println(String msg);
-void printres(float msg, int a);
-
-// these includes must be placed exactly where and how they are in the code
-#include "helpers.h"
-#include "Vsense.h"
-#include "commands.h"
-Commands Cmds;
-#include "navigation.h"
 
 // encoder interrupts
 void rf_encoder_interrupt(void);
@@ -128,6 +86,11 @@ void setup() {
   bluetooth.setTimeout(50);
   delay(300); // NECSSARY. Give time for serial port to set up
 
+  devMode = true; //if devMode is true then connection is through usb serial
+ 
+  Cmds.setBluetooth(&bluetooth);
+  Cmds.setMotorList(motorList);
+  Cmds.setServoList(servoList);
   initPins();
   initEncoders();
   initPids();
@@ -145,7 +108,7 @@ void setup() {
 }
 
 void loop() {
-  // incoming format example: "5:7"
+  // incoming format example: "5: 7"
   // this represents the speed for throttle:steering
   // as well as direction by the positive/negative sign
 
@@ -184,77 +147,42 @@ void loop() {
 
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
     if (Cmds.isEnc) {
-      print("ASTRO Motor Speeds: ");
-      print(RF.getCurrentVelocity());
-      print(", ");
-      print(RM.getCurrentVelocity());
-      print(", ");
-      print(RB.getCurrentVelocity());
-      print(", ");
-      print(LF.getCurrentVelocity());
-      print(", ");
-      print(LM.getCurrentVelocity());
-      print(", ");
-      println(LB.getCurrentVelocity());
+      Helpers::get().print("ASTRO Motor Speeds: ");
+      Helpers::get().print(RF.getCurrentVelocity());
+      Helpers::get().print(", ");
+      Helpers::get().print(RM.getCurrentVelocity());
+      Helpers::get().print(", ");
+      Helpers::get().print(RB.getCurrentVelocity());
+      Helpers::get().print(", ");
+      Helpers::get().print(LF.getCurrentVelocity());
+      Helpers::get().print(", ");
+      Helpers::get().print(LM.getCurrentVelocity());
+      Helpers::get().print(", ");
+      Helpers::get().println(LB.getCurrentVelocity());
 
       roverVelocityCalculator();
 
-      print("ASTRO Desired Velocities: ");
-      print(String(RF.desiredVelocity) + ", ");
-      print(String(RM.desiredVelocity) + ", ");
-      print(String(RB.desiredVelocity) + ", ");
-      print(String(LF.desiredVelocity) + ", ");
-      print(String(LM.desiredVelocity) + ", ");
-      println(String(LB.desiredVelocity));
+      Helpers::get().print("ASTRO Desired Velocities: ");
+      Helpers::get().print(String(RF.desiredVelocity) + ", ");
+      Helpers::get().print(String(RM.desiredVelocity) + ", ");
+      Helpers::get().print(String(RB.desiredVelocity) + ", ");
+      Helpers::get().print(String(LF.desiredVelocity) + ", ");
+      Helpers::get().print(String(LM.desiredVelocity) + ", ");
+      Helpers::get().println(String(LB.desiredVelocity));
     }
     else {
-      print("ASTRO Motor Speeds: ");
-      print(String(RF.desiredVelocity) + ", ");
-      print(String(RM.desiredVelocity) + ", ");
-      print(String(RB.desiredVelocity) + ", ");
-      print(String(LF.desiredVelocity) + ", ");
-      print(String(LM.desiredVelocity) + ", ");
-      println(String(LB.desiredVelocity));
+      Helpers::get().print("ASTRO Motor Speeds: ");
+      Helpers::get().print(String(RF.desiredVelocity) + ", ");
+      Helpers::get().print(String(RM.desiredVelocity) + ", ");
+      Helpers::get().print(String(RB.desiredVelocity) + ", ");
+      Helpers::get().print(String(LF.desiredVelocity) + ", ");
+      Helpers::get().print(String(LM.desiredVelocity) + ", ");
+      Helpers::get().println(String(LB.desiredVelocity));
     }
     sinceFeedbackPrint = 0;
   }
 }
 
-void velocityHandler(float throttle, float steering) {
-  // steering of 0 means both motors at throttle.
-  // as steering moves away from 0, one motor keeps throttle.
-  // the other slows down or even reverses based on the steering value.
-  // multiplier is mapped between -1 and 1 so 0 means no speed and the extremes mean full throttle in either direction.
-
-  float multiplier = mapFloat(fabs(steering), 0, MAX_INPUT_VALUE, 1, -1);
-  float leadingSideAbs = mapFloat(fabs(throttle), 0, MAX_INPUT_VALUE, 0, maxOutputSignal);
-  float trailingSideAbs = leadingSideAbs * multiplier;
-
-  int dir = 1;
-  if (throttle >= 0) dir = 1;
-  else if (throttle < 0) dir = -1;
-
-  if (steering < 0) { // turning left
-    desiredVelocityRight = leadingSideAbs * dir;
-    desiredVelocityLeft = trailingSideAbs * dir;
-  }
-  else { // turning right
-    desiredVelocityRight = trailingSideAbs * dir;
-    desiredVelocityLeft = leadingSideAbs * dir;
-  }
-
-  if (desiredVelocityLeft > 0) leftMotorDirection = CCW;
-  else leftMotorDirection = CW;
-  if (desiredVelocityRight < 0) rightMotorDirection = CCW;
-  else rightMotorDirection = CW;
-
-  RF.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RF.getCurrentVelocity());
-  RM.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RM.getCurrentVelocity());
-  RB.setVelocity(rightMotorDirection, fabs(desiredVelocityRight), RB.getCurrentVelocity());
-  LF.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LF.getCurrentVelocity());
-  LM.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LM.getCurrentVelocity());
-  LB.setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), LB.getCurrentVelocity());
-}
 
 void roverVelocityCalculator(void) {
   rightLinearVelocity = (RF.desiredDirection * RF.getCurrentVelocity() + RM.desiredDirection * RM.getCurrentVelocity() + RB.desiredDirection * RB.getCurrentVelocity()) * radius * piRad;
@@ -263,63 +191,14 @@ void roverVelocityCalculator(void) {
   linearVelocity = (rightLinearVelocity - leftLinearVelocity)  / 6;
   rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
 
-  print("ASTRO ");
-  print("Linear Velocity: ");
-  print(linearVelocity);
-  print(" m/s ");
+  Helpers::get().print("ASTRO ");
+  Helpers::get().print("Linear Velocity: ");
+  Helpers::get().print(linearVelocity);
+  Helpers::get().print(" m / s ");
 
-  print("Rotational Velocity: ");
-  print(rotationalVelocity);
-  println(" m^2/6 ");
-}
-
-void print(String msg) {
-  if (devMode) {
-    Serial.print(msg);
-    if (Cmds.bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
-  }
-  else {
-    Serial1.print(msg);
-    if (Cmds.bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
-  }
-}
-void println(String msg) {
-  if (devMode) {
-    Serial.println(msg);
-    if (Cmds.bluetoothMode) {
-      bluetooth.println(msg);
-      //            delay(50);
-    }
-  }
-  else {
-    Serial1.println(msg);
-    if (Cmds.bluetoothMode) {
-      bluetooth.println(msg);
-      //            delay(50);
-    }
-  }
-}
-void printres(float msg, int a) {
-  if (devMode) {
-    Serial.print(msg, a);
-    if (Cmds.bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
-  }
-  else {
-    Serial1.print(msg, a);
-    if (Cmds.bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
-  }
+  Helpers::get().print("Rotational Velocity: ");
+  Helpers::get().print(rotationalVelocity);
+  Helpers::get().println(" m ^ 2 / 6 ");
 }
 
 //! Figures out which serial being used
@@ -330,7 +209,7 @@ void serialHandler(void) {
       cmd.trim();
       ser_flush();
       if (cmd == "who") {
-        devMode = false;
+        devMode = false ;
       }
       Cmds.handler(cmd, "UART");
     }
@@ -338,7 +217,7 @@ void serialHandler(void) {
       cmd = Serial.readStringUntil('\n');
       cmd.trim();
       if (cmd == "who") {
-        devMode = true;
+         devMode = true;
       }
       Cmds.handler(cmd, "USB");
     }
@@ -427,21 +306,21 @@ void initEncoders(void) {
 //! Initiate PID objects for Dc Motors
 void initPids(void) {
   /*
-    RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
-    RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-    RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
+  RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
+  RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
+  RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
 
-    LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
-    LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
-    LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
+  LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
+  LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
+  LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
 
-    RF.pidController.setOutputLimits(-50, 50, 5.0);
-    RM.pidController.setOutputLimits(-50, 50, 5.0);
-    RB.pidController.setOutputLimits(-50, 50, 5.0);
+  RF.pidController.setOutputLimits(-50, 50, 5.0);
+  RM.pidController.setOutputLimits(-50, 50, 5.0);
+  RB.pidController.setOutputLimits(-50, 50, 5.0);
 
-    LF.pidController.setOutputLimits(-50, 50, 5.0);
-    LM.pidController.setOutputLimits(-50, 50, 5.0);
-    LB.pidController.setOutputLimits(-50, 50, 5.0);
+  LF.pidController.setOutputLimits(-50, 50, 5.0);
+  LM.pidController.setOutputLimits(-50, 50, 5.0);
+  LB.pidController.setOutputLimits(-50, 50, 5.0);
   */
 }
 
@@ -484,3 +363,45 @@ void lb_encoder_interrupt(void) {
   LB.prevTime = micros();
   LB.encoderCount++;
 }
+
+
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void ser_flush(void) {
+  if (devMode) {
+    while (Serial.available()) {
+      Serial.read();
+    }
+  }
+  else {
+    while (Serial1.available()) {
+      Serial1.read();
+    }
+  }
+
+}
+void toggleLed() {
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+}
+
+
+//assumes Serial.begin() already in main code
+//Will print a battery voltage to the screen
+void vbatt_read() {
+  float vsense = analogRead(V_SENSE_PIN);
+  vsense *= 0.003225806; //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
+  //voltage divider backwards (vsense *(r1+r2)/r2 = vsense * (10k+2k)/2k = vsense*6)
+  float vbatt = vsense * 6.0;
+
+  Helpers::get().print("ASTRO Battery voltage: ");
+  Helpers::get().println(vbatt);
+
+  if (vbatt < 12.0) {
+    Helpers::get().println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
+  }
+  else if (vbatt > 16.8) {
+    Helpers::get().println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
+  }
+};

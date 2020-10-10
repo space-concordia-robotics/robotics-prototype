@@ -1,0 +1,2 @@
+/usr/bin/ar qc libEncoder.a  CMakeFiles/Encoder.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/Encoder/Encoder.cpp.o
+/usr/bin/ranlib libEncoder.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libLSM303.a  CMakeFiles/LSM303.dir/home/nikolas/Arduino/libraries/LSM303/LSM303.cpp.o
+/usr/bin/ranlib libLSM303.a

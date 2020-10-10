@@ -1,12 +1,11 @@
 #ifndef NAVIGATION_H
 #define NAVIGATION_H
 
-#include "commands.h"
-
 #include <SparkFun_I2C_GPS_Arduino_Library.h>
 #include "TinyGPS++.h"
 #include <Wire.h>
 #include <LSM303.h>  // contains a sketch for calibrating
+#include "Helpers.h" 
 
 #define MAX_IMU_TIMEOUTS 10
 
@@ -17,10 +16,10 @@ LSM303 compass;
 void initNav(Commands & cmdObj) {
   if (gpsSpark.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     cmdObj.gpsError = true;
-    println(cmdObj.gpsErrorMsg);
+    Helpers::get().println(cmdObj.gpsErrorMsg);
   }
   else {
-    println("ASTRO GPS successfully initialized");
+   Helpers::get().println("ASTRO GPS successfully initialized");
   }
 
   compass.init();
@@ -35,10 +34,10 @@ void initNav(Commands & cmdObj) {
   compass.read();
   if (compass.timeoutOccurred()) {
     cmdObj.imuError = true;
-    println(cmdObj.imuErrorMsg);
+    Helpers::get().println(cmdObj.imuErrorMsg);
   }
   else {
-    println("ASTRO IMU seems to be working, got an initial reading");
+    Helpers::get().println("ASTRO IMU seems to be working, got an initial reading");
   }
 }
 //min: { -1794,  +1681,  -2947 }    max: { +3359,  +6531,  +2016 }
@@ -79,38 +78,38 @@ void navHandler(Commands & cmdObj) {
       imuTimeoutCnt++;
       cmdObj.imuError = true;
       cmdObj.imuErrorMsg = "ASTRO IMU timed out too many times, giving up";
-      println(cmdObj.imuErrorMsg);
-      print("ASTRO HEADING-N/A");
+      Helpers::get().println(cmdObj.imuErrorMsg);
+      Helpers::get().print("ASTRO HEADING-N/A");
     }
     else if (imuTimeoutCnt <= MAX_IMU_TIMEOUTS) {
       compass.read();
       if (compass.timeoutOccurred()) {
         imuTimeoutCnt++;
         cmdObj.imuError = true;
-        print("ASTRO HEADING-N/A");
+        Helpers::get().print("ASTRO HEADING-N/A");
       }
       else {
         imuTimeoutCnt = 0;
         cmdObj.imuError = false;
         heading = compass.heading(LSM303::vector<int> { -1, 0, 0 });
-        print("ASTRO HEADING-OK ");
-        print(heading);
+        Helpers::get().print("ASTRO HEADING-OK ");
+        Helpers::get().print(heading);
       }
     }
     else {
-      print("ASTRO HEADING-N/A");
+      Helpers::get().print("ASTRO HEADING-N/A");
     }
-    print(" -- ");
+    Helpers::get().print(" -- ");
 
     if (!gotGps) {
-      println("GPS-N/A");
+     Helpers::get().println("GPS-N/A");
     }
     else {
-      print("GPS-OK ");
-      printres(gpsPlus.location.lat(), 5); // print the latitude with 6 digits after the decimal
-      print(" "); // space
-      printres(gpsPlus.location.lng(), 5); // print the longitude with 6 digits after the decimal
-      println("");
+      Helpers::get().print("GPS-OK ");
+      Helpers::get().printres(gpsPlus.location.lat(), 5); // print the latitude with 6 digits after the decimal
+      Helpers::get().print(" "); // space
+      Helpers::get().printres(gpsPlus.location.lng(), 5); // print the longitude with 6 digits after the decimal
+      Helpers::get().println("");
     }
   }
 }

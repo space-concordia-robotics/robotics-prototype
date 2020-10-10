@@ -1,0 +1,2 @@
+/usr/bin/ar qc libAdafruit.a  CMakeFiles/Adafruit.dir/home/nikolas/Arduino/libraries/Adafruit_Motor_Shield_V2_Library/Adafruit_MotorShield.cpp.o CMakeFiles/Adafruit.dir/home/nikolas/Arduino/libraries/Adafruit_Motor_Shield_V2_Library/utility/Adafruit_MS_PWMServoDriver.cpp.o
+/usr/bin/ranlib libAdafruit.a

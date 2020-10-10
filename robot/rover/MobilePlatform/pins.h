@@ -61,7 +61,7 @@
 #define RS_SERVO 16
 #define RB_SERVO 17
 
-void initPins(void) {
+inline void initPins(void) {
   pinMode(RF_DIR, OUTPUT);
   pinMode(RF_PWM, OUTPUT);
   pinMode(RM_DIR, OUTPUT);

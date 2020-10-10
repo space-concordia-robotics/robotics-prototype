@@ -1,0 +1,2 @@
+/usr/bin/ar qc libServo.a  CMakeFiles/Servo.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/Servo/Servo.cpp.o
+/usr/bin/ranlib libServo.a
