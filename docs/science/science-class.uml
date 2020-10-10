@@ -20,7 +20,7 @@ package "Embedded Science Subsystem"
   }
   class Funnel
   {
-      +motorPWM
+      #motorPWM
       +funnel()
   }
   class Laser
@@ -42,11 +42,7 @@ package "Embedded Science Subsystem"
     +backpump()
   }
   class CommandCenter
-  class Funnel
-  {
-    #motorPWM
-    +startFunnel()
-  }
+
   class Carousel
   {
     #currentCuvette
