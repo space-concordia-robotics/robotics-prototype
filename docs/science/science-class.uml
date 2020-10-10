@@ -1,56 +1,88 @@
 @startuml
 skinparam classAttributeIconSize 0
-class Sensor
-interface Stoppable
+
+package "Embedded Science Subsystem"
 {
-  +eStop()
-}
-interface Updateable
-{
-  +update(dt)
-}
-class Fan
-{
-    +fanPWM
+  class Sensor
+  interface Stoppable
+  {
+    +eStop()
+  }
+  interface Updateable
+  {
+    +update(dt)
+  }
+  class Fan
+  {
+      #fanPWM
+      +turnOn()
+      +turnOff()
+  }
+  class Funnel
+  {
+      +motorPWM
+      +funnel()
+  }
+  class Laser
+  {
+    #timeTurnedOn
     +turnOn()
     +turnOff()
+    +isReady()
+    +timeLeftForWarmUp()
+    +checkForFaults()
+    +readCurrents()
+  }
+  class TemperatureController
+  class Pump
+  {
+    #pumpTimeElapsed
+    #motorPWM
+    +pump()
+    +backpump()
+  }
+  class CommandCenter
+  class Funnel
+  {
+    #motorPWM
+    +startFunnel()
+  }
+  class Carousel
+  {
+    #currentCuvette
+    +home()
+    +goToCuvette(cuvetteId)
+    +nextCuvette()
+    +previousCuvette()
+    +getCurrentCuvette()
+  }
 }
-class Funnel
+package "Base Station"
 {
-    +motorPWM
-    +funnel()
+  class ScienceNode
 }
-class Laser
-{
-  #timeTurnedOn
-  +turnOn()
-  +turnOff()
-  +isReady()
-  +timeLeftForWarmUp()
-  +checkForFaults()
-  +readCurrents()
-}
-class TemperatureController
-class Pump
-{
-  #pumpTimeElapsed
-  #motorPWM
-  +pump()
-  +backpump()
-}
-class CommandCenter
-class Funnel
-{
-  #motorPWM
-  +startFunnel()
-}
-class Carousel
-{
-  #currentCuvette
-  +home()
-  +goToCuvette(cuvetteId)
-  +nextCuvette()
-  +previousCuvette()
-  +getCurrentCuvette()
-}
+class PIDController
+
+CommandCenter -- Laser
+CommandCenter -- Fan
+CommandCenter -- TemperatureController
+CommandCenter -- Pump
+CommandCenter -- Carousel
+CommandCenter -- Funnel
+CommandCenter -- ScienceNode
+Fan -- Laser
+Fan -- TemperatureController
+
+Stoppable -- Laser
+Stoppable -- Pump
+Stoppable -- Carousel
+Stoppable -- Fan
+Stoppable -- Funnel
+
+Updateable -- Pump
+Updateable -- Carousel
+Updateable -- Funnel
+Updateable -- TemperatureController
+
+Sensor "3" -- "1" TemperatureController
 @enduml
