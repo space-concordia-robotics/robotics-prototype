@@ -1,5 +1,8 @@
 #! /usr/bin/env python3
 
+"""Simulator used to acquire and set states initialized
+either manually by user in CLI or through .launch file"""
+
 import time
 import sys
 import random
