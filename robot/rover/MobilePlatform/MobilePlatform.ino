@@ -1,5 +1,5 @@
 
-#include "commands.h"
+#include "Commands.h"
 #include "navigation.h"
 
 #include <SoftwareSerial.h>

@@ -27,8 +27,6 @@
 #define MIN_RPM_VALUE -MAX_RPM
 
 
-
-
 extern int loop_state; 
 extern int button;
 extern int i; // Input values for set velocity functions

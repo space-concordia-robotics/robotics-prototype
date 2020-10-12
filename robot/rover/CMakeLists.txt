@@ -60,13 +60,18 @@ set(ADAFRUIT_VERSION 1.0.9)
 
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_URL https://github.com/pololu/lsm303-arduino)
-set(LSM303_VERSION 3.0.1) 
+set(LSM303_VERSION 3.0.1)
+
+set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
+set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
+set(TINYGPS_VERSION v1.0.2)
 
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
+checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -140,7 +145,6 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 function(createCppLibrary sources libraryName includes)
 add_library(${libraryName} ${sources})
 
-
 if(NOT ${includes} STREQUAL "")
 target_include_directories(${libraryName} PRIVATE ${includes})
 endif()
@@ -154,13 +158,12 @@ createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial 
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
-#create the additionnal libraries installed thru the Teensyduino library manager
+#The last argument indicates if there are any additional include paths that are needed during the creation of a library
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
-
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
-
+createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
@@ -187,8 +190,8 @@ foreach(path ${INOFILES})
  
 elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
- set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
+ set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
+ set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH})
 
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
@@ -208,7 +211,7 @@ endforeach()
  #you'd think you could give the function a list of dependecies rather than this manual listing of dependecies which we see here, but I havent found a way of doing this...
  add_custom_target(cleanup
  COMMENT "cleaning up..."
- COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/*
+ COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/* ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
  DEPENDS PidController_cleanup

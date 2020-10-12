@@ -14,7 +14,7 @@ TinyGPSPlus gpsPlus;   // GPS object
 LSM303 compass;
 
 void initNav(Commands & cmdObj) {
-  if (gpsSpark.begin(Wire, 400000) == false) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
+  if (!gpsSpark.begin(Wire, 400000)) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     cmdObj.gpsError = true;
     Helpers::get().println(cmdObj.gpsErrorMsg);
   }

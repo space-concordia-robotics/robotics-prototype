@@ -21,8 +21,6 @@ target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DI
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 endif()
 
-message(STATUS ${${PROJECT_NAME}_user_sources})
-message(STATUS ${USER_SOURCES})
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
