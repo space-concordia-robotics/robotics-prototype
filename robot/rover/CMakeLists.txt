@@ -212,7 +212,6 @@ endforeach()
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
  DEPENDS PidController_cleanup
- DEPENDS EncoderFunc_cleanup
  DEPENDS science_cleanup
  )
 

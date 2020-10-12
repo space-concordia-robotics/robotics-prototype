@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../MobilePlatform/build/lib/libMobilePlatform_user.a  CMakeFiles/MobilePlatform_user.dir/TinyGPS++.cpp.o
-/usr/bin/ranlib ../../MobilePlatform/build/lib/libMobilePlatform_user.a

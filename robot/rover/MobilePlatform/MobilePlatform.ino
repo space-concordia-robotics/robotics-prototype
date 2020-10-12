@@ -1,5 +1,4 @@
 
-#include <Arduino.h>
 #include "commands.h"
 #include "navigation.h"
 
@@ -115,13 +114,13 @@ void loop() {
   serialHandler();
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
-    vbatt_read();
+    Helpers::get().vbatt_read(V_SENSE_PIN);
     navHandler(Cmds);
     sinceSensorRead = 0;
   }
 
   if (sinceLedToggle > LED_BLINK_INTERVAL) {
-    toggleLed();
+    Helpers::get().toggleLed();
     sinceLedToggle = 0;
   }
 
@@ -207,7 +206,7 @@ void serialHandler(void) {
     if (Serial1.available()) {
       cmd = Serial1.readStringUntil('\n');
       cmd.trim();
-      ser_flush();
+      Helpers::get().ser_flush();
       if (cmd == "who") {
         devMode = false ;
       }
@@ -229,7 +228,7 @@ void serialHandler(void) {
     if (Serial1.available()) {
       cmd = Serial1.readStringUntil('\n');
       cmd.trim();
-      ser_flush();
+      Helpers::get().ser_flush();
       Cmds.handler(cmd, "UART");
     }
     else if (Cmds.bluetoothMode) {
@@ -363,45 +362,3 @@ void lb_encoder_interrupt(void) {
   LB.prevTime = micros();
   LB.encoderCount++;
 }
-
-
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-void ser_flush(void) {
-  if (devMode) {
-    while (Serial.available()) {
-      Serial.read();
-    }
-  }
-  else {
-    while (Serial1.available()) {
-      Serial1.read();
-    }
-  }
-
-}
-void toggleLed() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-}
-
-
-//assumes Serial.begin() already in main code
-//Will print a battery voltage to the screen
-void vbatt_read() {
-  float vsense = analogRead(V_SENSE_PIN);
-  vsense *= 0.003225806; //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
-  //voltage divider backwards (vsense *(r1+r2)/r2 = vsense * (10k+2k)/2k = vsense*6)
-  float vbatt = vsense * 6.0;
-
-  Helpers::get().print("ASTRO Battery voltage: ");
-  Helpers::get().println(vbatt);
-
-  if (vbatt < 12.0) {
-    Helpers::get().println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
-  }
-  else if (vbatt > 16.8) {
-    Helpers::get().println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
-  }
-};
