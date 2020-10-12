@@ -123,7 +123,8 @@ def get_param_float(parameter, safety_value):
     try:
         float_value = float(param_value)
     # If the value entered is not a float, keep the value it was set to before
-    except TypeError:
+    except Exception:
+        print(traceback.format_exc())
         rospy.logwarn(
             "Invalid parameter set, value unchanged: {}".format(safety_value))
         float_value = float(safety_value)
@@ -136,7 +137,8 @@ def get_param_exist(parameter):
 
     try:
         parameter_state = rospy.get_param(parameter)
-    except ImportError:
+    except Exception:
+        print(traceback.format_exc())
         rospy.logwarn("Parameter state None assigned to {}.".format(parameter))
         parameter_state = None
     return parameter_state
