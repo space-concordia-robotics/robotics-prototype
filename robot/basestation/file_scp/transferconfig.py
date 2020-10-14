@@ -20,10 +20,13 @@ Changes made here will not be ignored by git so do not push any senstive informa
 
 import getpass
 
-user = {'rover_ip':'172.16.1.30',
-        'rover_user': 'odroid',
-        'rover_image_dir': '~/Pictures/', # using tilda '~' works here
-        'basestation_dir':'/home/' + getpass.getuser() + '/Picturez/', # but not here
-        'key_path': '/home/'+ getpass.getuser() + '/.ssh/id_rsa', # nor here
-        'rsa_password':'None'
-        }
+user = {
+    'rover_ip': 'ROVER IP HERE',
+    'rover_user': 'ROVER USER NAME HERE',
+    'rover_image_dir': '~/Pictures',  # using tilda '~' works here
+    'basestation_dir': '/home/' + getpass.getuser() + '/Payload/',  # but not here
+    'payload_file_subdir':
+    'rover_pictures',  #names the dir of files the will be placed in payload
+    'key_path': '/home/' + getpass.getuser() + '/.ssh/id_rsa',  # nor here
+    'rsa_password': 'None'
+}
