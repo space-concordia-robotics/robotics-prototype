@@ -21,7 +21,7 @@ class Pump : public Stoppable, public Updatable{
 
         virtual void update(unsigned long deltaMicroSeconds) override;
 
-        virtual ~Pump() {}
+        virtual ~Pump();
 };
 
 

@@ -27,3 +27,7 @@ bool Laser::isReady() {
 unsigned long Laser::timeLeftForWarmUp() {
     return 0;
 }
+
+Laser::~Laser() {
+
+}

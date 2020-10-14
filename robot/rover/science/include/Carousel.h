@@ -21,7 +21,7 @@ class Carousel : public Stoppable, public Updatable {
 
         virtual void eStop() override;
         virtual void update(unsigned long deltaMicroSeconds) override;
-        virtual ~Carousel() {}
+        virtual ~Carousel();
 };
 
 

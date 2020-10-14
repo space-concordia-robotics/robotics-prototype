@@ -27,3 +27,7 @@ void Carousel::nextCuvette() {
 void Carousel::previousCuvette() {
 
 }
+
+Carousel::~Carousel() {
+
+}

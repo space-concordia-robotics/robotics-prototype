@@ -7,7 +7,7 @@
 
 class Stoppable{
     public:
-        virtual ~Stoppable();
         virtual void eStop() = 0;
+        virtual ~Stoppable() {};
 };
 #endif //ROVER_STOPPABLE_H

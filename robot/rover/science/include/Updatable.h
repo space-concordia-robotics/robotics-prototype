@@ -7,8 +7,8 @@
 
 class Updatable{
 public:
-    virtual ~Updatable();
     virtual void update(unsigned long deltaMicroSeconds) = 0;
+    virtual ~Updatable() {}
 };
 
 #endif //ROVER_UPDATABLE_H

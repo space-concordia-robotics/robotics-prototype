@@ -19,3 +19,7 @@ void Pump::eStop() {
 void Pump::update(unsigned long deltaMicroSeconds) {
 
 }
+
+Pump::~Pump() {
+
+}

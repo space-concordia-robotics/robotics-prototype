@@ -19,3 +19,7 @@ void Fan::update(unsigned long) {
 void Fan::eStop() {
 
 }
+
+Fan::~Fan() {
+
+}
