@@ -7,3 +7,7 @@
 void Carousel::eStop() {
 
 }
+
+void Carousel::update(unsigned long deltaMicroSeconds) {
+
+}

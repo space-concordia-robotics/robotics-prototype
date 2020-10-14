@@ -20,6 +20,8 @@ class Carousel : public Stoppable, public Updatable {
         int getCurrentCuvette() const { return currentCuvette; }
 
         virtual void eStop() override;
+        virtual void update(unsigned long deltaMicroSeconds) override;
+        virtual ~Carousel() {}
 };
 
 
