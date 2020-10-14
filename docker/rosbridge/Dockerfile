@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y python3-pip \
     && pip3 install -r requirements.txt -r requirements-dev.txt \
     && pip3 install rosdep \
     && python3 setup.py develop \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update -y && apt-get upgrade -y
 
 COPY robot/rospackages/ ./robot/rospackages
 WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rospackages
