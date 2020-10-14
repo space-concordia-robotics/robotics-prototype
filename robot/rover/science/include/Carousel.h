@@ -6,8 +6,9 @@
 #define ROVER_CAROUSEL_H
 
 #include "Stoppable.h"
+#include "Updatable.h"
 
-class Carousel : public Stoppable {
+class Carousel : public Stoppable, public Updatable {
     protected:
         int currentCuvette;
 
