@@ -7,7 +7,7 @@ const int NUMBER_OF_UPDATABLES = 5;
 
 Carousel* carousel;
 Laser* laser;
-Stoppable* stoppable[NUMBER_OF_STOPPABLES] = {carousel, laser};
+Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser};
 Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel};
 unsigned long time = micros();
 
@@ -36,4 +36,15 @@ void updateSystems()
     }
 
     time = micros();
+}
+
+/**
+ * Stops all systems immediately.
+ */
+void emergencyStop()
+{
+    for(auto & stoppable : stoppables)
+    {
+        stoppable->eStop();
+    }
 }

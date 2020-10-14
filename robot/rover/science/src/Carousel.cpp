@@ -11,3 +11,19 @@ void Carousel::eStop() {
 void Carousel::update(unsigned long deltaMicroSeconds) {
 
 }
+
+void Carousel::home() {
+
+}
+
+void Carousel::goToCuvette(int cuvetteId) {
+
+}
+
+void Carousel::nextCuvette() {
+
+}
+
+void Carousel::previousCuvette() {
+
+}

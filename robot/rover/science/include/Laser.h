@@ -18,6 +18,7 @@ class Laser : public Stoppable, public Updatable {
         unsigned long timeLeftForWarmUp();
 
         virtual void eStop() override;
+        virtual void update(unsigned long deltaMicroSeconds);
         virtual ~Laser();
 };
 
