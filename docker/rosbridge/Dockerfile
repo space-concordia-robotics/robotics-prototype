@@ -15,9 +15,10 @@ RUN apt-get update && apt-get install -y python3-pip \
     && python3 setup.py develop \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update -y && apt-get upgrade -y \
+    && apt-get install -y nano vim
 
-COPY robot/rospackages/ ./robot/rospackages
+COPY . .
 WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rospackages
 RUN rosdep init \
     && rosdep update --rosdistro $ROS_DISTRO \
@@ -28,9 +29,14 @@ RUN rosdep init \
     && chmod u+x /home/spaceuser/Programming/robotics-prototype/entrypoint.sh
 
 USER spaceuser
+
+# $USER env variable used in some of the scripts
+ENV USER spaceuser 
 WORKDIR /home/spaceuser/Programming/robotics-prototype
 
 RUN echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc \
-    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc \
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/basestation/config/.bash_aliases" >> /home/spaceuser/.bashrc \
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc
 
 ENTRYPOINT ["./entrypoint.sh"]
