@@ -1,14 +1,24 @@
 #include <Arduino.h>
 #include <include/Laser.h>
+#include <include/Fan.h>
+#include <include/Funnel.h>
+#include <include/Pump.h>
+#include <include/CommandCenter.h>
 #include "include/Carousel.h"
 
 const int NUMBER_OF_STOPPABLES = 5;
 const int NUMBER_OF_UPDATABLES = 5;
 
-Carousel* carousel;
-Laser* laser;
-Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser};
-Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel};
+Carousel* carousel = new Carousel();
+Laser* laser = new Laser();
+Fan* fan = new Fan();
+Funnel* funnel = new Funnel();
+Pump* pump = new Pump();
+
+CommandCenter* commandCenter = new CommandCenter();
+
+Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
+Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
 unsigned long time = micros();
 
 void updateSystems();
