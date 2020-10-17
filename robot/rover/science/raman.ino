@@ -3,7 +3,7 @@
 #include <include/Fan.h>
 #include <include/Funnel.h>
 #include <include/Pump.h>
-#include <include/CommandCenter.h>
+#include <include/commands/CommandCenter.h>
 #include "include/Carousel.h"
 
 const int NUMBER_OF_STOPPABLES = 5;
