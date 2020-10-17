@@ -112,8 +112,8 @@ def check_payload_subdir(basestation_directory, payload_sub):
         print(
             f'{basestation_directory}{payload_sub} already exists, please enter a new subdirectory name that is not in this list'
         )
-        thing = os.listdir(basestation_directory)
-        print(thing)
+        taken_names = os.listdir(basestation_directory)
+        print(taken_names)
         new_name = input()
         return new_name
     else:
