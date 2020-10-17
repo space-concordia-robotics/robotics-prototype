@@ -3,6 +3,9 @@
 # NOTE: Running this script in sudo will cause the checks for environment vars to fail
 # To complete the installation run `sudo install.sh` in the arduino IDE folder
 
+# make sure dependencies are installed
+sudo apt install curl
+
 ARDUINO_IDE_VERSION="1.8.12"
 TEENSYDUINO_VERSION="152"
 ARDUINO_IDE_FOLDER="$HOME/arduino-$ARDUINO_IDE_VERSION"
