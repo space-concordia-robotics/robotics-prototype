@@ -3,6 +3,7 @@
 #include "navigation.h"
 
 #include <SoftwareSerial.h>
+#include <Servo.h>
 /*
 choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
 the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -30,13 +31,13 @@ elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
 
 
-float wheelBase = 0.33; //distance between left and right wheels
-float radius = 0.14; // in m
-float piRad = 0.10472; // Pi in radians
+const float wheelBase = 0.33; //distance between left and right wheels
+const float radius = 0.14; // in m
+const float piRad = 0.10472; // Pi in radians
 //float kp = 23.5;
-float kp = 14.1;
-float ki = 0.282;
-float kd = 40.625;
+const float kp = 14.1;
+const float ki = 0.282;
+const float kd = 40.625;
 //float kp = 10.0;
 //float ki = 0.02;
 //float kd = 0.05;

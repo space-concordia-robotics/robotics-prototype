@@ -2,7 +2,7 @@
 #define COMMANDS_H
 #include "ArduinoBlue.h"
 #include "DcMotor.h"
-//
+#include <Servo.h>
 // Created by Fauzi Ameen on 2019-05-21
 // Bluetooth removed to simplify code and reduce sources of error by Josh Glazer on 2019-05-30.
 //

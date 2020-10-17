@@ -1,8 +1,6 @@
 #ifndef CORE_H
 #define CORE_H
 #include "Arduino.h"
-#include <Servo.h>
-#include <SoftwareSerial.h>
 
 /* comms */
 #define SERIAL_BAUD 115200

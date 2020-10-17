@@ -16,14 +16,14 @@ void ser_flush(void);
 void toggleLed() ;
 
 String getValue(String data, char separator, int index) ;
+
 void vbatt_read(int v_sense_pin);
 
-  static Helpers& get();
+static Helpers& get();
 
-    
-  void print(String msg);
-  void println(String msg);
-  void printres(float msg, int a);
+void print(String msg);
+void println(String msg);
+void printres(float msg, int a);
   
 };
 

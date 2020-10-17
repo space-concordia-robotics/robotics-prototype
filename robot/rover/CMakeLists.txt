@@ -172,7 +172,7 @@ foreach(path ${INOFILES})
  #creates a command which runs a few batch commands to delete the current subproject. 
  #These are useless on their own and need to be attached to a target to work 
  add_custom_command(
- OUTPUT ${name}_cleanup
+ OUTPUT ${project_dir}_cleanup
  COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/build
  	 rm ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt
  )

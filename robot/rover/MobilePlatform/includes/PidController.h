@@ -2,7 +2,7 @@
 #define PIDCONTROLLER_H
 #include "Helpers.h"
 #include "pins.h"
-#include "Core.h"
+#include "Globals.h"
 class PidController {
 public:
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
@@ -25,7 +25,4 @@ private:
     float errorSum;
     float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
-
-
-
 #endif

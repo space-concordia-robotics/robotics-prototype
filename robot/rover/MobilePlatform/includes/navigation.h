@@ -5,7 +5,7 @@
 #include "TinyGPS++.h"
 #include <Wire.h>
 #include <LSM303.h>  // contains a sketch for calibrating
-#include "Helpers.h" 
+#include "Commands.h"
 
 #define MAX_IMU_TIMEOUTS 10
 

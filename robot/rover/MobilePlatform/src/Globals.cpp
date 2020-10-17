@@ -1,4 +1,4 @@
-#include "Core.h"
+#include "Globals.h"
  int loop_state; 
  int button;
  int i; // Input values for set velocity functions
