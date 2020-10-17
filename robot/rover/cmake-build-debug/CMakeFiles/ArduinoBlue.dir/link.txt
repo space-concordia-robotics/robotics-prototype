@@ -1,0 +1,2 @@
+/usr/bin/ar qc libArduinoBlue.a  CMakeFiles/ArduinoBlue.dir/home/nikolas/Arduino/libraries/ArduinoBlue/src/ArduinoBlue.cpp.o
+/usr/bin/ranlib libArduinoBlue.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../MobilePlatform/build/lib/libMobilePlatform_user.a  CMakeFiles/MobilePlatform_user.dir/src/Commands.cpp.o CMakeFiles/MobilePlatform_user.dir/src/DcMotor.cpp.o CMakeFiles/MobilePlatform_user.dir/src/Globals.cpp.o CMakeFiles/MobilePlatform_user.dir/src/Helpers.cpp.o CMakeFiles/MobilePlatform_user.dir/src/PidController.cpp.o CMakeFiles/MobilePlatform_user.dir/src/RobotMotor.cpp.o
+/usr/bin/ranlib ../../MobilePlatform/build/lib/libMobilePlatform_user.a

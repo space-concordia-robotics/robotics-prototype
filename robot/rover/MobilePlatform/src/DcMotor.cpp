@@ -98,9 +98,7 @@ void DcMotor::velocityHandler(DcMotor* motors, float throttle, float steering) {
   float multiplier = Helpers::get().mapFloat(fabs(steering), 0, MAX_INPUT_VALUE, 1, -1);
   float leadingSideAbs = Helpers::get().mapFloat(fabs(throttle), 0, MAX_INPUT_VALUE, 0, maxOutputSignal);
   float trailingSideAbs = leadingSideAbs * multiplier;
-  float desiredVelocityLeft = 0.0;
-  float desiredVelocityRight = 0.0;
-  
+
   int dir = 1;
   if (throttle >= 0) dir = 1;
   else if (throttle < 0) dir = -1;

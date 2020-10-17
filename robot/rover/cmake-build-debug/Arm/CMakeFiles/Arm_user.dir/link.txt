@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../Arm/build/lib/libArm_user.a  CMakeFiles/Arm_user.dir/PinSetup.cpp.o
+/usr/bin/ranlib ../../Arm/build/lib/libArm_user.a

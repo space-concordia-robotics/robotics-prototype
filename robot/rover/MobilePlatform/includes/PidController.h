@@ -1,7 +1,7 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
 #include "Helpers.h"
-#include "pins.h"
+#include "Pins.h"
 #include "Globals.h"
 class PidController {
 public:

@@ -13,7 +13,7 @@ I2CGPS gpsSpark;  // I2C object
 TinyGPSPlus gpsPlus;   // GPS object
 LSM303 compass;
 
-void initNav(Commands & cmdObj) {
+inline void initNav(Commands & cmdObj) {
   if (!gpsSpark.begin(Wire, 400000)) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
     cmdObj.gpsError = true;
     Helpers::get().println(cmdObj.gpsErrorMsg);
@@ -42,7 +42,7 @@ void initNav(Commands & cmdObj) {
 }
 //min: { -1794,  +1681,  -2947 }    max: { +3359,  +6531,  +2016 }
 
-bool readGps(Commands & cmdObj) {
+inline bool readGps(Commands & cmdObj) {
   bool gotGps = false;
   if (!cmdObj.gpsError) {
     elapsedMillis sinceStart;
@@ -66,7 +66,7 @@ bool readGps(Commands & cmdObj) {
   // from gps: -111.0145 (last digits have error)
 }
 
-void navHandler(Commands & cmdObj) {
+inline void navHandler(Commands & cmdObj) {
   // if gps didn't start properly it just doesn't work
   // if imu times out it will still continuously attempt to read values.. was causing delays before, to fix
   static int imuTimeoutCnt = 0;

@@ -7,23 +7,29 @@ extern SoftwareSerial bluetooth;
 extern bool devMode;
 extern bool bluetoothMode;
 class Helpers{
-
+    Helpers() {}
 public:
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) ;
+    Helpers(Helpers const&) = delete;
 
-void ser_flush(void);
+    void operator=(Helpers const& ) = delete;
 
-void toggleLed() ;
+    float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) ;
 
-String getValue(String data, char separator, int index) ;
+    void ser_flush(void);
 
-void vbatt_read(int v_sense_pin);
+    void toggleLed() ;
 
-static Helpers& get();
+    String getValue(String data, char separator, int index) ;
 
-void print(String msg);
-void println(String msg);
-void printres(float msg, int a);
+    void vbatt_read(int v_sense_pin);
+
+    static Helpers& get();
+
+    void print(String msg);
+
+    void println(String msg);
+
+    void printres(float msg, int a);
   
 };
 
