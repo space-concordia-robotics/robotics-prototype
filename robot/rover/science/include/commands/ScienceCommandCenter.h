@@ -9,6 +9,8 @@
 
 class ScienceCommandCenter : public CommandCenter{
 
+    public:
+        void executeCommand(const char *commandName, const char **args) override;
 };
 
 

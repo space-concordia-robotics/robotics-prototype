@@ -4,6 +4,7 @@
 #include <include/Funnel.h>
 #include <include/Pump.h>
 #include <include/commands/CommandCenter.h>
+#include <include/commands/ScienceCommandCenter.h>
 #include "include/Carousel.h"
 
 const int NUMBER_OF_STOPPABLES = 5;
@@ -15,7 +16,7 @@ Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
 Pump* pump = new Pump();
 
-CommandCenter* commandCenter = new CommandCenter();
+CommandCenter* commandCenter = new ScienceCommandCenter();
 
 Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
 Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
