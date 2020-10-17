@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSparkFunGPS.a  CMakeFiles/SparkFunGPS.dir/home/nikolas/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control/src/SparkFun_I2C_GPS_Arduino_Library.cpp.o
-/usr/bin/ranlib libSparkFunGPS.a

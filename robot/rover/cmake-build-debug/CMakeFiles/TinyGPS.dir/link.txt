@@ -1,2 +1,0 @@
-/usr/bin/ar qc libTinyGPS.a  CMakeFiles/TinyGPS.dir/home/nikolas/Arduino/libraries/TinyGPS/src/TinyGPS++.cpp.o
-/usr/bin/ranlib libTinyGPS.a

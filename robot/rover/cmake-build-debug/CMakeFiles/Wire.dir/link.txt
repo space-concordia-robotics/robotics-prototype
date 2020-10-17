@@ -1,2 +1,0 @@
-/usr/bin/ar qc libWire.a  CMakeFiles/Wire.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/Wire/Wire.cpp.o CMakeFiles/Wire.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/Wire/WireIMXRT.cpp.o CMakeFiles/Wire.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/Wire/WireKinetis.cpp.o
-/usr/bin/ranlib libWire.a

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libSoftwareSerial.a  CMakeFiles/SoftwareSerial.dir/home/nikolas/arduino-1.8.12/hardware/teensy/avr/libraries/SoftwareSerial/SoftwareSerial.cpp.o
-/usr/bin/ranlib libSoftwareSerial.a
