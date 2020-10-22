@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update -y && apt-get upgrade -y \
-    && apt-get install -y nano vim
+    && apt-get install -y nano vim wget curl libfontconfig libx11-6 libxft2
 
 COPY . .
 WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rospackages
@@ -29,17 +29,25 @@ RUN rosdep init \
     && chown -R spaceuser:spaceuser /home/spaceuser/Programming \
     && chmod u+x /home/spaceuser/Programming/robotics-prototype/entrypoint.sh
 
-WORKDIR /home/spaceuser/Programming/robotics-prototype
-
 USER spaceuser
 
 # $USER env variable used in some of the scripts
 ENV USER spaceuser 
-WORKDIR /home/spaceuser/Programming/robotics-prototype
 
+WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rover
+
+RUN echo 'spaceuser' | sudo -S /home/spaceuser/Programming/robotics-prototype/install_arduino_teensyduino.sh \
+    && echo 'spaceuser' | sudo -S chown -R spaceuser:spaceuser /home/spaceuser \
+    && tail -n1 /home/spaceuser/.bashrc > /home/spaceuser/.tmprc \
+    && source /home/spaceuser/.tmprc \
+    && cmake . \
+    && make -j$(nproc) \
+    && rm /home/spaceuser/.tmprc
+
+WORKDIR /home/spaceuser/Programming/robotics-prototype
 RUN echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/basestation/config/.bash_aliases" >> /home/spaceuser/.bashrc \
-    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc 
 
 ENTRYPOINT ["./entrypoint.sh"]
