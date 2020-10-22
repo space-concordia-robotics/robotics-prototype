@@ -2,7 +2,8 @@ FROM ros:melodic-ros-core
 
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y ros-melodic-rosbridge-suite \
-    && useradd --create-home --shell /bin/bash spaceuser \
+    && useradd --create-home --groups sudo --shell /bin/bash spaceuser \
+    && echo -e 'spaceuser\nspaceuser' | passwd spaceuser \
     && mkdir -p /home/spaceuser/Programming/robotics-prototype
 
 
@@ -27,6 +28,8 @@ RUN rosdep init \
     && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
     && chown -R spaceuser:spaceuser /home/spaceuser/Programming \
     && chmod u+x /home/spaceuser/Programming/robotics-prototype/entrypoint.sh
+
+WORKDIR /home/spaceuser/Programming/robotics-prototype
 
 USER spaceuser
 
