@@ -8,11 +8,10 @@ function printCommandsList () {
 
 $(document).ready(function () {
 
-  twist_topic = new ROSLIB.Topic({
-    ros: ros,
-    name: '/cmd_vel',
-    messageType: 'geometry_msgs/Twist'
-  })
+  const KEY_A = 65;
+  const KEY_D = 68;
+  const KEY_W = 87;
+  const KEY_S = 83;
 
   let keys = {};
 
@@ -25,6 +24,12 @@ $(document).ready(function () {
   });
 
   setInterval(update_movement, 200);
+
+  twist_topic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/cmd_vel',
+    messageType: 'geometry_msgs/Twist'
+  })
 
   /*
  * Sends a Twist command to move the rover.
@@ -65,17 +70,16 @@ $(document).ready(function () {
     let currentLinearSpeed = 0;
     let currentAngularSpeed = 0;
 
-    //todo: remove magic values before PR.
-    if(keys[65]) // left
+    if(keys[KEY_A])
       currentAngularSpeed += desiredAngularSpeed;
 
-    if(keys[68]) // right
+    if(keys[KEY_D])
       currentAngularSpeed -= desiredAngularSpeed;
 
-    if(keys[87]) // forward
+    if(keys[KEY_W])
       currentLinearSpeed += desiredLinearSpeed;
 
-    if(keys[83]) // backwards
+    if(keys[KEY_S])
       currentLinearSpeed -= desiredLinearSpeed;
 
     move_rover(currentLinearSpeed, currentAngularSpeed);
