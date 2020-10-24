@@ -17,11 +17,41 @@ $(document).ready(function () {
 
   $(document).keydown(function (e) {
     keys[e.which] = true;
+
+    toggle_drive_buttons(e.which, true);
   });
 
   $(document).keyup(function (e) {
     delete keys[e.which];
+
+    toggle_drive_buttons(e.which, false);
   });
+
+  function driveButtonUp(button)
+  {
+    $(button).css('background-color', GREEN)
+  }
+
+  function toggle_drive_buttons(key, turnOn)
+  {
+    let uiFunc = turnOn ? dim : driveButtonUp;
+
+    switch (key)
+    {
+      case KEY_W:
+        uiFunc("#rover-up > button")
+        break;
+      case KEY_A:
+        uiFunc("#rover-left > button")
+        break;
+      case KEY_S:
+        uiFunc("#rover-down > button")
+        break;
+      case KEY_D:
+        uiFunc("#rover-right > button")
+        break;
+    }
+  }
 
   setInterval(update_movement, 200);
 
@@ -364,29 +394,5 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keyup', function (event) {
   if (event.code === 'KeyU') {
     $('#max-throttle-decrease > button').css('background-color', GREEN)
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (event.code === 'KeyD') {
-    $('#rover-right > button').css('background-color', GREEN)
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (event.code === 'KeyA') {
-    $('#rover-left > button').css('background-color', GREEN)
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (event.code === 'KeyW') {
-    $('#rover-up > button').css('background-color', GREEN)
-  }
-})
-
-document.addEventListener('keyup', function (event) {
-  if (event.code === 'KeyS') {
-    $('#rover-down > button').css('background-color', GREEN)
   }
 })
