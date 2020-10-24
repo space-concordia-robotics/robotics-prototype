@@ -18,12 +18,14 @@ $(document).ready(function () {
   $(document).keydown(function (e) {
     keys[e.which] = true;
 
+    update_movement();
     toggle_drive_buttons(e.which, true);
   });
 
   $(document).keyup(function (e) {
     delete keys[e.which];
 
+    update_movement();
     toggle_drive_buttons(e.which, false);
   });
 
