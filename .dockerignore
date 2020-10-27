@@ -31,6 +31,7 @@
 **/*.dockerignore
 **/*Dockerfile
 **/*docker-compose.yml
+**/*.a
 robot/rover/Arm/CMakeLists.txt
 robot/rover/Arm/Arm.ino.cpp
 robot/rover/Arm/CMakeFiles
