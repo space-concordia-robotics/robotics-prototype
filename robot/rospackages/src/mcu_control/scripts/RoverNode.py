@@ -18,7 +18,8 @@ mcuName = 'Astro'
 
 last_angular_speed = None
 last_linear_speed = None
-last_speed_change = None
+last_speed_change_ns = None
+acceleration_rate = 0.1 # m/s^2
 
 requests = {
     'ping' : ['pong'],
@@ -38,14 +39,30 @@ def twist_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     ser = get_serial()
     linear, angular = twist_command_received(twist_msg)
-    command = str.encode(twistToRoverCommand(linear, angular)
+    command = str.encode(twistToRoverCommand(linear, angular))
     ser.write(command) # send move command to wheel teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
 
 def twist_command_received(twist):
+    twist_linear = twist.linear.x
+    twist_angular = twist.angular.z
 
-    return x, z
+    isExpired = (time.time_ns() - last_speed_change_ns) > 300_000 # 300 ms
+
+    if last_speed_change_ns == None or isExpired:
+        last_linear_speed = 0
+        last_angular_speed = 0
+        last_speed_change_ns = time.time_ns()
+
+    return twist_linear, twist_angular
+
+ def accelerate_linear(linear, rate_linear):
+    last_linear_speed
+
+def accelerate_angular(angular, rate_angular):
+    pass
+
 
 def twist_to_rover_command(linear, angular):
     """ 
