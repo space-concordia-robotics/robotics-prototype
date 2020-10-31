@@ -16,9 +16,9 @@ from mcu_control.srv import *
 
 mcuName = 'Astro'
 
-# todo: test ros+website over network with teensy
-# todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
-# todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
+last_angular_speed = None
+last_linear_speed = None
+last_speed_change = None
 
 requests = {
     'ping' : ['pong'],
@@ -36,14 +36,18 @@ requests = {
 
 def twist_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
-
     ser = get_serial()
-    command = str.encode(twistToRoverCommand(twist_msg))
+    linear, angular = twist_command_received(twist_msg)
+    command = str.encode(twistToRoverCommand(linear, angular)
     ser.write(command) # send move command to wheel teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
 
-def twistToRoverCommand(twist_msg):
+def twist_command_received(twist):
+
+    return x, z
+
+def twist_to_rover_command(linear, angular):
     """ 
     Converts Twist command to serial 
     max_speed : Maximum rover speed in (m/s) NEEDS TO BE TWEAKED
@@ -62,8 +66,8 @@ def twistToRoverCommand(twist_msg):
     throttle_bounds = [-max_throttle, max_throttle]
     steering_bounds = [-max_steering, max_steering]
 
-    throttle = twist_msg.linear.x / max_speed # throttle should now be in [-1, 1]
-    steering = twist_msg.angular.z / max_angular_speed # steering should now [-1,1]
+    throttle = linear / max_speed # throttle should now be in [-1, 1]
+    steering = angular / max_angular_speed # steering should now [-1,1]
 
     linear_motor_val = throttle * max_throttle
     angular_motor_val = steering * max_steering
