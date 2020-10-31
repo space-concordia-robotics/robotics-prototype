@@ -20,6 +20,11 @@ last_angular_speed = None
 last_linear_speed = None
 last_speed_change_ms = None
 acceleration_rate = 0.1 # m/s^2
+max_speed = 0.5 # Maximum rover speed in (m/s) NEEDS TO BE TWEAKED
+max_angular_speed = 1 # Maximum angular speed in (rad/s) NEEDS TO BE TWEAKED
+
+max_throttle = 49
+max_steering = 49
 
 requests = {
     'ping' : ['pong'],
@@ -64,7 +69,7 @@ def twist_command_received(twist):
 
     return linear, angular
 
- def accelerate_linear(linear, rate_linear):
+def accelerate_linear(linear, rate_linear):
     global last_linear_speed
 
     dt_ms = (time.time_ns()/1000)-last_speed_change_ms
@@ -97,15 +102,7 @@ def accelerate_angular(angular, rate_angular):
 def twist_to_rover_command(linear, angular):
     """ 
     Converts Twist command to serial 
-    max_speed : Maximum rover speed in (m/s) NEEDS TO BE TWEAKED
-    max_angular_speed : Maximum angular speed in (rad/s) NEEDS TO BE TWEAKED
     """
-
-    max_speed = 0.5
-    max_angular_speed = 1 
-
-    max_throttle = 49
-    max_steering = 49
 
     linear_speed_bounds = [-max_speed, max_speed]
     angular_speed_bounds = [-max_angular_speed, max_angular_speed]
