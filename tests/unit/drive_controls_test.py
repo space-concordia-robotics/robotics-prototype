@@ -1,5 +1,6 @@
 from robot.rospackages.src.mcu_control.scripts.RoverNode import twist_to_rover_command, accelerate_value
 import robot.rospackages.src.mcu_control.scripts.RoverNode as rn
+from geometry_msgs.msg import Twist
 
 def test_twist_to_rover():
     zero = twist_to_rover_command(0, 0)
@@ -26,4 +27,5 @@ def test_acceleration():
     assert(accelerate_value(0.3, 0.5, 10, 1000) == 0.5)
     assert(accelerate_value(0, -0.2, 0.1, 250) == -0.025)
     assert(accelerate_value(-0.5, -0.5, 0.1, 250) == -0.5)
+    assert(accelerate_value(0.3, 0, 0.1, 250) == 0)
 

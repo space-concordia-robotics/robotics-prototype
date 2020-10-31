@@ -26,6 +26,9 @@ max_angular_speed = 1 # Maximum angular speed in (rad/s) NEEDS TO BE TWEAKED
 max_throttle = 49
 max_steering = 49
 
+expire_rate = 300 # A command lasts for 300 ms unless overwritten
+initial_ramp_factor = 3 
+
 requests = {
     'ping' : ['pong'],
     'who' : ['Happy Astro','Paralyzed Astro'],
@@ -43,13 +46,13 @@ requests = {
 def twist_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     ser = get_serial()
-    linear, angular = twist_command_received(twist_msg)
+    linear, angular = accelerate_twist(twist_msg)
     command = str.encode(twistToRoverCommand(linear, angular))
     ser.write(command) # send move command to wheel teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
 
-def twist_command_received(twist):
+def accelerate_twist(twist):
     global last_speed_change_ms
     global last_linear_speed
     global last_angular_speed
@@ -57,21 +60,33 @@ def twist_command_received(twist):
     twist_linear = twist.linear.x
     twist_angular = twist.angular.z
 
-    isExpired = (time.time_ms() - last_speed_change_ms) > 300 # 300 ms
+    is_expired = (time.time_ns()/1000 - last_speed_change_ms) > expire_rate
 
-    if last_speed_change_ns == None or isExpired:
+    if last_speed_change_ns == None or is_expired:
         last_linear_speed = 0
         last_angular_speed = 0
-        last_speed_change_ms = time.time_ns()/1000
+        last_speed_change_ms = time.time_ns()/1000 - expire_rate / initial_ramp_factor
 
-    linear = accelerate_linear(twist_linear, rate_linear)
-    angular = accelerate_angular(twist_angular, rate_angular)
+    delta = (time.time_ns()/1000) - last_speed_change_ms
+    
+    linear = accelerate_value(last_linear_speed, twist_linear, rate_linear, delta)
+    angular = accelerate_value(last_angular_speed, twist_angular, rate_angular, delta)
 
     return linear, angular
 
 def accelerate_value(current, desired, rate, dt):
+    """
+    Accelerates the current speed to a desired speed at a certain rate while
+    considering a certain time difference. Ex : Current Speed 0.3 m/s, desired speed 0.5 m/s,
+    if the rate is 0.1 m/s^2 and dt is 100 milliseconds then the new speed should be 0.31 m/s.
+
+    There is an exception that if the rover wants to stop (desired = 0), then the rover should stop immediately.
+    """
     if(desired == current):
         return desired
+
+    if(desired == 0):
+        return 0
 
     if(desired < current):
         rate = -rate
@@ -80,36 +95,6 @@ def accelerate_value(current, desired, rate, dt):
     if(abs(new_value) > abs(desired)):
         new_value = desired
     return new_value
-
-def accelerate_linear(linear, rate_linear):
-    global last_linear_speed
-
-    dt_ms = (time.time_ns()/1000)-last_speed_change_ms
-
-    if(linear < last_linear_speed):
-        rate_linear = -rate_linear
-
-    last_linear_speed = last_linear_speed + rate_linear * dt_ms / 1000
-
-    if(abs(last_linear_speed) > abs(linear)):
-        last_linear_speed = linear
-
-    return last_linear_speed
-
-def accelerate_angular(angular, rate_angular):
-    global last_angular_speed
-
-    dt_ms = (time.time_ns()/1000)-last_speed_change_ms
-
-    if(linear < last_angular_speed):
-        rate_angular = -rate_angular
-
-    last_angular_speed = last_angular_speed + rate_angular * dt_ms / 1000
-
-    if(abs(last_angular_speed) > abs(angular)):
-        last_angular_speed = linear
-
-    return last_angular_speed
 
 def twist_to_rover_command(linear, angular):
     """ 
