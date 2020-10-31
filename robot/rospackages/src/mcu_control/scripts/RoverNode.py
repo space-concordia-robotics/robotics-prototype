@@ -116,7 +116,7 @@ def twist_to_rover_command(linear, angular):
     linear_motor_val = throttle * max_throttle
     angular_motor_val = steering * max_steering
 
-    return linear_motor_val + ':' + angular_motor_val
+    return str(round(linear_motor_val)) + ':' + str(round(angular_motor_val))
 
 def handle_client(req):
     # feedback to tell if script itself is responsive
