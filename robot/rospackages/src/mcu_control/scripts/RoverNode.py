@@ -69,6 +69,18 @@ def twist_command_received(twist):
 
     return linear, angular
 
+def accelerate_value(current, desired, rate, dt):
+    if(desired == current):
+        return desired
+
+    if(desired < current):
+        rate = -rate
+
+    new_value = current + rate * dt /1000
+    if(abs(new_value) > abs(desired)):
+        new_value = desired
+    return new_value
+
 def accelerate_linear(linear, rate_linear):
     global last_linear_speed
 
