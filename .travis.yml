@@ -34,7 +34,7 @@ install:
   - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $OS_VERSION main\" > /etc/apt/sources.list.d/ros-latest.list"
   - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
   - sudo apt update -q
-  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-$ROS_VERSION-ros-base ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server
+  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-$ROS_VERSION-ros-base ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server python-rospy
     
   # Install ros package dependencies
   - cd $REPO_ROOT/robot/rospackages
