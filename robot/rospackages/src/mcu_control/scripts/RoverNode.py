@@ -18,7 +18,7 @@ mcuName = 'Astro'
 
 last_angular_speed = None
 last_linear_speed = None
-last_speed_change_ns = None
+last_speed_change_ms = None
 acceleration_rate = 0.1 # m/s^2
 
 requests = {
@@ -45,20 +45,39 @@ def twist_callback(twist_msg):
     ser.reset_output_buffer()
 
 def twist_command_received(twist):
+    global last_speed_change_ms
+    global last_linear_speed
+    global last_angular_speed
+
     twist_linear = twist.linear.x
     twist_angular = twist.angular.z
 
-    isExpired = (time.time_ns() - last_speed_change_ns) > 300_000 # 300 ms
+    isExpired = (time.time_ms() - last_speed_change_ms) > 300 # 300 ms
 
     if last_speed_change_ns == None or isExpired:
         last_linear_speed = 0
         last_angular_speed = 0
-        last_speed_change_ns = time.time_ns()
+        last_speed_change_ms = time.time_ns()/1000
 
-    return twist_linear, twist_angular
+    linear = accelerate_linear(twist_linear, rate_linear)
+    angular = accelerate_angular(twist_angular, rate_angular)
+
+    return linear, angular
 
  def accelerate_linear(linear, rate_linear):
-    last_linear_speed
+    global last_linear_speed
+
+    dt_ms = (time.time_ns()/1000)-last_speed_change_ms
+
+    if(linear < last_linear_speed):
+        rate_linear = -rate_linear
+
+    last_linear_speed = last_linear_speed + rate_linear * dt_ms / 1000
+
+    if(abs(last_linear_speed) > abs(linear)):
+        last_linear_speed = linear
+
+    return last_linear_speed
 
 def accelerate_angular(angular, rate_angular):
     pass
