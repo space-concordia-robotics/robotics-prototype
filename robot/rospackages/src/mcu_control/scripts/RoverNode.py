@@ -80,8 +80,19 @@ def twist_command_received(twist):
     return last_linear_speed
 
 def accelerate_angular(angular, rate_angular):
-    pass
+    global last_angular_speed
 
+    dt_ms = (time.time_ns()/1000)-last_speed_change_ms
+
+    if(linear < last_angular_speed):
+        rate_angular = -rate_angular
+
+    last_angular_speed = last_angular_speed + rate_angular * dt_ms / 1000
+
+    if(abs(last_angular_speed) > abs(angular)):
+        last_angular_speed = linear
+
+    return last_angular_speed
 
 def twist_to_rover_command(linear, angular):
     """ 
