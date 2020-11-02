@@ -6,6 +6,7 @@
 #include <include/commands/CommandCenter.h>
 #include <include/commands/ScienceCommandCenter.h>
 #include "include/Carousel.h"
+#include <cstdint>
 
 const uint8_t NUMBER_OF_STOPPABLES = 5;
 const uint8_t NUMBER_OF_UPDATABLES = 5;

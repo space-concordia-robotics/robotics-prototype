@@ -8,6 +8,7 @@
 
 #include "Updatable.h"
 #include "Stoppable.h"
+#include <cstdint>
 
 class Pump : public Stoppable, public Updatable{
     protected:

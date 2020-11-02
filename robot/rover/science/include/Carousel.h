@@ -7,6 +7,7 @@
 
 #include "Stoppable.h"
 #include "Updatable.h"
+#include <cstdint>
 
 class Carousel : public Stoppable, public Updatable {
     protected:
@@ -17,7 +18,7 @@ class Carousel : public Stoppable, public Updatable {
         void goToCuvette(uint8_t cuvetteId);
         void nextCuvette();
         void previousCuvette();
-        int getCurrentCuvette() const { return currentCuvette; }
+        uint8_t getCurrentCuvette() const { return currentCuvette; }
 
         virtual void eStop() override;
         virtual void update(unsigned long deltaMicroSeconds) override;

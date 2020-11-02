@@ -8,6 +8,7 @@
 
 #include "Stoppable.h"
 #include "Updatable.h"
+#include <cstdint>
 
 class Funnel : public Stoppable, public Updatable {
     protected:

@@ -7,6 +7,7 @@
 
 #include "Updatable.h"
 #include "Stoppable.h"
+#include <cstdint>
 
 class Fan :  public Stoppable, public Updatable {
 
