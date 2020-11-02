@@ -12,7 +12,7 @@
 class Pump : public Stoppable, public Updatable{
     protected:
         unsigned long pumpTimeElapsed;
-        int pumpPWM;
+        uint8_t pumpPWM;
     public:
         virtual void pump();
         virtual void backpump();

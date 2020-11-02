@@ -7,8 +7,8 @@
 #include <include/commands/ScienceCommandCenter.h>
 #include "include/Carousel.h"
 
-const int NUMBER_OF_STOPPABLES = 5;
-const int NUMBER_OF_UPDATABLES = 5;
+const uint8_t NUMBER_OF_STOPPABLES = 5;
+const uint8_t NUMBER_OF_UPDATABLES = 5;
 
 Carousel* carousel = new Carousel();
 Laser* laser = new Laser();
