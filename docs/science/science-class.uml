@@ -79,6 +79,7 @@ Stoppable <|-- Fan
 Stoppable <|-- Funnel
 
 Updateable <|-- Pump
+Updateable <|-- Laser
 Updateable <|-- Carousel
 Updateable <|-- Funnel
 Updateable <|-- TemperatureController
