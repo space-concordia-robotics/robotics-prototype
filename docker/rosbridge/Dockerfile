@@ -28,10 +28,16 @@ RUN apt-get update -y && apt-get upgrade -y \
     && apt-get install -y nano vim wget curl libfontconfig libx11-6 libxft2
 
 COPY install_arduino_teensyduino.sh .
-
 USER spaceuser
 RUN echo 'spaceuser' | sudo -S /home/spaceuser/Programming/robotics-prototype/install_arduino_teensyduino.sh 
 
+USER root
+COPY robot/rospackages ./robot/rospackages
+RUN rosdep init \
+    && rosdep update --rosdistro $ROS_DISTRO \
+    && rosdep install --from-paths robot/rospackages/src/ --ignore-src -r -y 
+
+USER spaceuser
 COPY robot/rover ./robot/rover
 WORKDIR /home/spaceuser/Programming/robotics-prototype/robot/rover
 RUN echo 'spaceuser' | sudo -S chown -R spaceuser:spaceuser /home/spaceuser \
@@ -43,10 +49,6 @@ RUN echo 'spaceuser' | sudo -S chown -R spaceuser:spaceuser /home/spaceuser \
 
 USER root
 WORKDIR /home/spaceuser/Programming/robotics-prototype
-COPY robot/rospackages ./robot/rospackages
-RUN rosdep init \
-    && rosdep update --rosdistro $ROS_DISTRO \
-    && rosdep install --from-paths robot/rospackages/src/ --ignore-src -r -y 
 
 COPY . .
 
