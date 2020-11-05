@@ -56,3 +56,7 @@ robot/rover/science/MakeFile
 robot/rover/science/cmake_install.cmake
 robot/rover/science/science.ino.cpp
 robot/rover/cmake_install.cmake
+.git
+**/*.gitignore
+**/*.gitmodules
+**/*.md
