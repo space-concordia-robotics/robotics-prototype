@@ -154,15 +154,16 @@ endif()
 target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
-#create the pre-installed teensy libraries
+#create default teensy libraries
+#the last argument in these functions is incase a library needs additional include paths
 createCppLibrary(${TEENSY_LIB}/Servo/Servo.cpp Servo "")
 createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial "")
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
-#create the additionnal libraries installed thru the Teensyduino library manager
-createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
+#create the external teensy libraries
 
+createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
@@ -175,7 +176,7 @@ foreach(path ${INOFILES})
  #creates a command which runs a few bash commands to delete the current subproject. 
  #These are useless on their own and need to be attached to a target to work 
  add_custom_command(
- OUTPUT ${name}_cleanup
+ OUTPUT ${project_dir}_cleanup
  COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/build
  	 rm ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt
  )
@@ -213,7 +214,7 @@ foreach(path ${INOFILES})
  #you'd think you could give the function a list of dependecies rather than this manual listing of dependecies which we see here, but I havent found a way of doing this...
  add_custom_target(cleanup
  COMMENT "cleaning up..."
- COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/*
+ COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/* ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
  DEPENDS PidController_cleanup
