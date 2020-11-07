@@ -199,7 +199,7 @@ function initRosWeb () {
   battery_voltage_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_voltage',
-    messageType: 'std_msgs/Float32'
+    messageType: 'mcu_control/Voltage'
   })
   battery_voltage_listener.subscribe(function (message) {
     // sets voltage to two decimal points
@@ -227,7 +227,8 @@ function initRosWeb () {
     } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
-        $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
+            $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
+
       } else {
         textColor('#battery-voltage', 'white')
       }
@@ -239,14 +240,14 @@ function initRosWeb () {
   battery_temps_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'battery_temps',
-    messageType: 'geometry_msgs/Point'
+    messageType: 'mcu_control/ThermistorTemps'
   })
   battery_temps_listener.subscribe(function (message) {
     // sets temperatures to two decimal points
     let temps = [
-      parseFloat(message.x).toFixed(2),
-      parseFloat(message.y).toFixed(2),
-      parseFloat(message.z).toFixed(2)
+      parseFloat(message.therm1).toFixed(2),
+      parseFloat(message.therm2).toFixed(2),
+      parseFloat(message.therm3).toFixed(2)
     ]
 
     $('.battery-temp').each(function(i, obj) {
@@ -281,8 +282,7 @@ function initRosWeb () {
           $obj.css({'color': 'white'})
         }
 
-        if ($obj.attr('acceptable') === '0')
-          $obj.attr('acceptable', '1')
+        if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
       }
     });
 
@@ -291,7 +291,7 @@ function initRosWeb () {
   wheel_motor_currents_listener = new ROSLIB.Topic({
     ros: ros,
     name: 'wheel_motor_currents',
-    messageType: 'sensor_msgs/JointState'
+    messageType: 'mcu_control/Currents'
   })
   wheel_motor_currents_listener.subscribe(function (message) {
     $('#right-front-current').text(parseFloat(message.effort[0]).toFixed(3))
@@ -301,7 +301,11 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
-
+  marker_list_subscriber = new ROSLIB.Topic({
+      ros: ros,
+      name: 'marker_list',
+      messageType: 'mcu_control/RoverMarkerList'
+  })
   // setup a subcriber function for rover_position topic
   rover_position_listener = new ROSLIB.Topic({
     ros: ros,
