@@ -71,7 +71,6 @@ notifications:
     on_failure: change
 
 python:
-  #- "2.7" # not supported
   - "3.6"
 
 git:
