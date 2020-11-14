@@ -44,16 +44,18 @@ install:
   - rosdep install -y -r --from-paths src --ignore-src --rosdistro $ROS_VERSION
 
 script:
-  # Set up 'robot' python module and test python installation
+  # Set up 'robot' python module
   - cd $REPO_ROOT
   - python setup.py develop
-  - pytest --continue-on-collection-errors
 
   # Set up and initialize catkin workspace for ros packages
   - cd $REPO_ROOT/robot/rospackages
   - source /opt/ros/$ROS_VERSION/setup.bash
   - catkin_make
 
+  # Run python unit tests
+  - pytest --continue-on-collection-errors
+    
   # Allow to compile arduino code in external IDEs or something
   - cd $REPO_ROOT/robot/rover/build
   - cmake ..
