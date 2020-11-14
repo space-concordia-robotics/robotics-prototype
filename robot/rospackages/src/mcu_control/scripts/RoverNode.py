@@ -12,7 +12,7 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
-from mcu_control.srv import *
+from robot.rospackages.src.mcu_control.srv import *
 
 mcuName = 'Astro'
 
@@ -79,8 +79,6 @@ def accelerate_value(current, desired, rate, dt):
     Accelerates the current speed to a desired speed at a certain rate while
     considering a certain time difference. Ex : Current Speed 0.3 m/s, desired speed 0.5 m/s,
     if the rate is 0.1 m/s^2 and dt is 100 milliseconds then the new speed should be 0.31 m/s.
-
-    There is an exception that if the rover wants to stop (desired = 0), then the rover should stop immediately.
     """
     if(desired == current):
         return desired
