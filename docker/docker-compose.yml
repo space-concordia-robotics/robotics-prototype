@@ -25,6 +25,8 @@ services:
         restart: always
         networks:
             - rp-network
+        devices:
+            - "/dev/video0:/dev/video0"
     prototype:
         build: ..
         depends_on:
