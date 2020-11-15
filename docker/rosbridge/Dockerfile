@@ -1,12 +1,14 @@
 FROM ros:melodic-ros-core
 
+ARG videoid
+
 SHELL ["/bin/bash", "-c"]
 
 # $USER env variable used in some of the scripts
 ENV USER spaceuser 
 
 RUN apt-get update && apt-get install -y ros-melodic-rosbridge-suite \
-    && useradd --create-home --groups sudo,44 --shell /bin/bash spaceuser \
+    && useradd --create-home --groups sudo,$videoid --shell /bin/bash spaceuser \
     && echo -e 'spaceuser\nspaceuser' | passwd spaceuser \
     && mkdir -p /home/spaceuser/Programming/robotics-prototype \
     && echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc \
@@ -62,5 +64,4 @@ RUN source /opt/ros/$ROS_DISTRO/setup.sh \
 
 USER spaceuser
 WORKDIR /home/spaceuser/Programming/robotics-prototype
-
 ENTRYPOINT ["./entrypoint.sh"]

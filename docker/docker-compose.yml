@@ -16,6 +16,8 @@ services:
         build:
             context: ../
             dockerfile: ./docker/rosbridge/Dockerfile
+            args:
+                - videoid=${VIDEOID:-44}
         depends_on:
             - ros-master
         environment:
