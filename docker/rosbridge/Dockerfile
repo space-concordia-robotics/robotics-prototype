@@ -6,15 +6,16 @@ SHELL ["/bin/bash", "-c"]
 
 # $USER env variable used in some of the scripts
 ENV USER spaceuser 
-
-RUN apt-get update && apt-get install -y ros-melodic-rosbridge-suite \
-    && useradd --create-home --groups sudo,$videoid --shell /bin/bash spaceuser \
+COPY docker/rosbridge/videogroupworkaround.sh .
+RUN ./videogroupworkaround.sh $videoid \
+    && useradd --create-home --groups sudo,video --shell /bin/bash spaceuser \
     && echo -e 'spaceuser\nspaceuser' | passwd spaceuser \
     && mkdir -p /home/spaceuser/Programming/robotics-prototype \
     && echo "source /opt/ros/melodic/setup.bash" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/basestation/config/.bash_aliases" >> /home/spaceuser/.bashrc \
-    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc 
+    && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc \
+    && apt-get update && apt-get install -y ros-melodic-rosbridge-suite 
 
 WORKDIR /home/spaceuser/Programming/robotics-prototype
 COPY requirements.txt requirements-dev.txt setup.py docker/rosbridge/entrypoint.sh ./
