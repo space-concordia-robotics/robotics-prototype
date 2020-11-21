@@ -21,12 +21,11 @@ Changes made here will not be ignored by git so do not push any senstive informa
 import getpass
 
 user = {
-    'rover_ip': 'ROVER IP HERE',
+    'rover_ip': '',
     'rover_user': 'ROVER USER NAME HERE',
     'rover_image_dir': '~/Pictures',  # using tilda '~' works here
     'basestation_dir': '/home/' + getpass.getuser() + '/Payload/',  # but not here
-    'payload_file_subdir':
-    'rover_pictures',  #names the dir of files the will be placed in payload
+    'payload_file_subdir':'',  #names the dir of files the will be placed in payload
     'key_path': '/home/' + getpass.getuser() + '/.ssh/id_rsa',  # nor here
     'rsa_password': 'None'
 }
