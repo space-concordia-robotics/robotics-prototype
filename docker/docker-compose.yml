@@ -35,9 +35,6 @@ services:
         depends_on:
             - ros-master
             - rosbridge
-            #environment:
-            #    - "ROS_MASTER_URI=http://ros-master:11311" irrelevant for the python app (frontend)
-
         ports:
             - "5000:5000"
         restart: always
