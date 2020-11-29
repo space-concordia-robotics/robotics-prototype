@@ -20,4 +20,6 @@
     <param name="PDS_mock_wheel5_current" value="stable"/>
     <param name="PDS_mock_wheel6_current" value="stable"/>
     <include file="$(find mcu_control)/launch/basestation.launch" />
+    <include file="$(find webcam_ar_track)/launch/webcam_indiv.launch"/>
+    <node pkg="camera_vision" type="ar_tracker.py" name="ar_tracker" output="screen"/>
 </launch>
