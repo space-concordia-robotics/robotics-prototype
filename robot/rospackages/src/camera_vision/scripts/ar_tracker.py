@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 import sys
 
 import rospy
@@ -79,7 +79,7 @@ class arTrackerDemo():
         image = cv2.rectangle(frame, starting_point, ending_point, color, thickness)
 
         # Publish the new overlay including image to topic '/camera/image_ar'
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(image))
+        self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
 
     def cleanup(self):
         print('shutting down ar_tracker node')
