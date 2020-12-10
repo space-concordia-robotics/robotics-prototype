@@ -122,7 +122,6 @@ if __name__ == "__main__":
     try:
         current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
         dispatcher = Listener(current_dir + "start_stream.sh", "bash")
-        #dispatcher = Listener(current_dir + "start_stream.sh", "bash", "/dev/video0")
         dispatcher.start()
 
         print("Is running: " + str(dispatcher.is_running()))

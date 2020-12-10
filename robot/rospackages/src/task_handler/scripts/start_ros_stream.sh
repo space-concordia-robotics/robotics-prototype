@@ -45,4 +45,5 @@ topicName="${port:5}Cam"
 # |1080p --> 1920x1080, full HD     | 0                        |
 # +---------------------------------+--------------------------+
 
-rosrun cv_camera cv_camera_node _device_path:=$port _image_width:=480 _image_height:=360 __name:=$topicName
+rosrun cv_camera cv_camera_node _device_path:=$port _image_width:=480 _image_height:=360 __name:=$topicName &
+roslaunch camera_vision autonomy.launch cv_camera_node_name:=$topicName
