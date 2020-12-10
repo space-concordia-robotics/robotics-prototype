@@ -77,8 +77,10 @@ class Listener:
                         real_pid = get_pid("cv_camera_node")
 
                     if real_pid != -1:
-                        output, error = run_shell("kill -9", str(real_pid))
-                        print("kill -9", str(real_pid))
+                        # better to use SIGINT rather than SIGKILL because it kills all
+                        # child processes as well
+                        output, error = run_shell("kill -2", str(real_pid))
+                        print("kill -2", str(real_pid))
                     else:
                         return False
             else:
