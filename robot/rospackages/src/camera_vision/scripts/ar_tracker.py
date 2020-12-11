@@ -13,6 +13,7 @@ class arTrackerDemo():
         # necessary for handling images from topics
         self.node_name = 'ar_tracker'
         rospy.init_node(self.node_name)
+        cv_camera_node_name = rospy.get_param('~cv_camera_node_name')
 
         self.is_marker_seen = False
 
@@ -24,13 +25,13 @@ class arTrackerDemo():
 
         # subscribe to the camera image and depth topics and set
         # the appropriate callbacks
-        self.image_sub = rospy.Subscriber('/video0Cam/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/'+ cv_camera_node_name +'/image_raw', Image, self.image_callback)
 
         # subscribe to ar_track_alvar marker messages
-        self.ar_track_marker_sub = rospy.Subscriber('/ar_pose_marker', AlvarMarkers, self.ar_track_alvar_callback)
+        self.ar_track_marker_sub = rospy.Subscriber('/ar_pose_marker_'+cv_camera_node_name, AlvarMarkers, self.ar_track_alvar_callback)
 
         # create publisher for new feed with overlay
-        self.image_pub = rospy.Publisher('/video0Cam/image_ar', Image, queue_size=10)
+        self.image_pub = rospy.Publisher('/'+ cv_camera_node_name +'/image_ar', Image, queue_size=10)
 
         rate = rospy.Rate(1) # 1hz, take it easy 8-)
 
