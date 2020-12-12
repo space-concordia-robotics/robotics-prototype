@@ -29,8 +29,11 @@ $(document).ready(() => {
   const RECORDING_ON = '../../../static/img/camera/record_on.png'
   const RECORDING_OFF = '../../../static/img/camera/record_off.png'
 
-  function getStreamURL(topicName) {
-    return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  function getStreamURL(topicName, arTagDetection = false) {
+    if(arTagDetection)
+        return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_ar'
+    else
+        return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
   }
 
   function getCameraFilename(cameraPanel) {
@@ -135,7 +138,6 @@ $(document).ready(() => {
     cameraPower.attr('src', POWER_ON)
 
     cameraControls.attr('camera-name', cameraName)
-    console.log("memes")
   }
 
   function showStreamOff(cameraPanel) {
@@ -348,5 +350,16 @@ $(document).ready(() => {
 
   $('.camera-popup' ).click(function() {
     window.open('/camerapopup', "", 'height=' + screen.height + ', width=' + screen.width);
+  })
+  $('.ar-tag-detection').click((e) =>{
+    let cameraPanel = $(e.target).parents('.camera-panel')
+    let cameraPower = cameraPanel.find('.camera-power')
+    let cameraFeed = cameraPanel.find('.camera-feed')
+    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
+    if(cameraPower.attr("power-on") == "true"){
+      cameraFeed.attr('src', getStreamURL(cameraName, arTagDetection = true))
+      }else{
+      return;
+      }
   })
 })
