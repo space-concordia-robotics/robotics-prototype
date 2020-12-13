@@ -356,10 +356,15 @@ $(document).ready(() => {
     let cameraPower = cameraPanel.find('.camera-power')
     let cameraFeed = cameraPanel.find('.camera-feed')
     let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
+    let arTagDetectionUrl = getStreamURL(cameraName, arTagDetection = true)
     if(cameraPower.attr("power-on") == "true"){
-      cameraFeed.attr('src', getStreamURL(cameraName, arTagDetection = true))
+      if (cameraFeed.attr('src') == arTagDetectionUrl) cameraFeed.attr('src', getStreamURL(cameraName))
+        else cameraFeed.attr('src', arTagDetectionUrl)
       }else{
       return;
       }
+  })
+  $('.ar-tag-detection').mouseup(() =>{
+    $('.ar-tag-detection').blur()
   })
 })

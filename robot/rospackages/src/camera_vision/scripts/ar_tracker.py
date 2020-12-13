@@ -80,7 +80,11 @@ class arTrackerDemo():
         image = cv2.rectangle(frame, starting_point, ending_point, color, thickness)
 
         # Publish the new overlay including image to topic '/camera/image_ar'
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
+        except rospy.ROSException as e:
+            rospy.logerr("Failed to publish AR image: %s", e)
+
 
     def cleanup(self):
         print('shutting down ar_tracker node')
