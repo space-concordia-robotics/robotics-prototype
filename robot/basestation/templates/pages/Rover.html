@@ -9,23 +9,18 @@
     <script src="../../static/js/elements/controls/rover_controls.js"></script>
     <script src="../../static/js/elements/feed/camera.js"></script>
     <script src="../../static/js/elements/controls/extra-controls.js"></script>
-    <script src="../../static/js/p5.min.js"></script>
-    <script src='../../../static/js/elements/navigation/localization.js'></script>
-    <script src='../../../static/js/elements/navigation/navigationUtilities.js'></script>
 {% endblock %}
 {% block content %}
 <div class="row">
     <div class="col-md-3">{% with device="Rover" %}{% include "elements/feed/Console.html" %}{% endwith %}</div>
     <div class="col-md-3">
-        {% include 'elements/navigation/GPS.html' %}
         {% include 'elements/feed/RoverMotorTable.html' %}
     </div>
     <div class="col-md-6">{% include 'elements/feed/CameraFeed.html' %}</div>
 </div>
 <div class="row">
-    <div class="col-md-3">{% include 'elements/navigation/Navigation.html' %}</div>
-    <div class="col-md-4">{% include 'elements/controls/RoverMotorControls.html' %}</div>
-    <div class="col-md-3">{% include 'elements/controls/CameraControls.html' %}</div>
-    <div class="col-md-2">{% with device="Rover" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}</div>
+    <div class="col-md-5">{% include 'elements/controls/RoverMotorControls.html' %}</div>
+    <div class="col-md-4">{% include 'elements/controls/CameraControls.html' %}</div>
+    <div class="col-md-3">{% with device="Rover" %}{% include 'elements/controls/ExtraControls.html' %}{% endwith %}</div>
 </div>
 {% endblock %}
