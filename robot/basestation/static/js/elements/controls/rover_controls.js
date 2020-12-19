@@ -84,9 +84,6 @@ $(document).ready(function () {
    */
   function update_movement()
   {
-    //todo: remove todos before PR.
-
-    //todo: put all this into a new javascript file called rover_controls.js
 
     let desiredLinearSpeed = 0.5; // todo speed should based on throttle
     let desiredAngularSpeed = 1; // todo angular speed should be based on throttle
