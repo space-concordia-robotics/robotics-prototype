@@ -13,7 +13,7 @@ from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
-from robot.rospackages.src.mcu_control.scripts.DriveControls.py import accelerate_twist, accelerate_value, twist_to_rover_command
+from robot.rospackages.src.mcu_control.scripts.DriveControls import accelerate_twist, accelerate_value, twist_to_rover_command
 
 mcuName = 'Astro'
 
