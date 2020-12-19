@@ -12,7 +12,7 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
-from robot.rospackages.src.mcu_control.srv import *
+from mcu_control.srv import *
 
 mcuName = 'Astro'
 
