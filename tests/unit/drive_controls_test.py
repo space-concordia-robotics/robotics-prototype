@@ -1,24 +1,24 @@
-from robot.rospackages.src.mcu_control.scripts.RoverNode import twist_to_rover_command, accelerate_value
-import robot.rospackages.src.mcu_control.scripts.RoverNode as rn
+from robot.rospackages.src.mcu_control.scripts.DriveControls import twist_to_rover_command, accelerate_value
+import robot.rospackages.src.mcu_control.scripts.DriveControls as dc
 from geometry_msgs.msg import Twist
 
 def test_twist_to_rover():
     zero = twist_to_rover_command(0, 0)
     assert(zero == "0:0")
 
-    max_positive_speed = twist_to_rover_command(rn.max_speed, rn.max_angular_speed)
-    assert(max_positive_speed == str(rn.max_throttle) + ":" + str(rn.max_steering))
+    max_positive_speed = twist_to_rover_command(dc.max_speed, dc.max_angular_speed)
+    assert(max_positive_speed == str(dc.max_throttle) + ":" + str(dc.max_steering))
 
-    max_negative_speed = twist_to_rover_command(-rn.max_speed, -rn.max_angular_speed)
-    assert(max_negative_speed == str(-rn.max_throttle) + ":" + str(-rn.max_steering))
+    max_negative_speed = twist_to_rover_command(-dc.max_speed, -dc.max_angular_speed)
+    assert(max_negative_speed == str(-dc.max_throttle) + ":" + str(-dc.max_steering))
 
-    half_max_positive =  twist_to_rover_command(rn.max_speed * 0.5, rn.max_angular_speed * 0.5)
+    half_max_positive =  twist_to_rover_command(dc.max_speed * 0.5, dc.max_angular_speed * 0.5)
 
-    assert(half_max_positive == str(round(rn.max_throttle * 0.5)) + ":" + str(round(rn.max_steering * 0.5)))
+    assert(half_max_positive == str(round(dc.max_throttle * 0.5)) + ":" + str(round(dc.max_steering * 0.5)))
 
-    half_max_negative =  twist_to_rover_command(-rn.max_speed * 0.5, -rn.max_angular_speed * 0.5)
+    half_max_negative =  twist_to_rover_command(-dc.max_speed * 0.5, -dc.max_angular_speed * 0.5)
 
-    assert(half_max_negative == str(round(rn.max_throttle * -0.5)) + ":" + str(round(rn.max_steering * -0.5)))
+    assert(half_max_negative == str(round(dc.max_throttle * -0.5)) + ":" + str(round(dc.max_steering * -0.5)))
 
 def test_acceleration():
     assert(accelerate_value(0.3, 0.5, 0.1, 0) == 0.3)
