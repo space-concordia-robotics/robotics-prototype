@@ -16,6 +16,7 @@ emailer.log
 rosRoverStart.log
 status_done
 build
+cmake-build-debug
 devel
 odroid_rx.txt
 tmp

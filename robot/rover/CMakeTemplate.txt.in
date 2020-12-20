@@ -11,6 +11,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
+set(USER_SOURCES FALSE)
+
 #if there are other sources files in this directory, compile them into a library
 if(NOT "${${PROJECT_NAME}_user_sources}" STREQUAL "")
 
@@ -19,6 +21,7 @@ add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
 
 target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes @EXTERNAL_LIBARRIES_INCLUDE_DIRS@)
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
+
 endif()
 
 

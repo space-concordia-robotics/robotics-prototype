@@ -158,13 +158,15 @@ endif()
 target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
-#create the pre-installed teensy libraries
+#create default teensy libraries
+#the last argument in these functions is incase a library needs additional include paths
 createCppLibrary(${TEENSY_LIB}/Servo/Servo.cpp Servo "")
 createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial "")
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
 #The last argument indicates if there are any additional include paths that are needed during the creation of a library
+#create the external teensy libraries
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
