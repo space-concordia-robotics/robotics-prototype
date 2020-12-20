@@ -13,7 +13,7 @@ from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
-from robot.rospackages.src.mcu_control.scripts.DriveControls import accelerate_twist, accelerate_value, twist_to_rover_command
+from robot.rospackages.src.mcu_control.scripts.DriveControls import accelerate_twist, twist_to_rover_command
 
 mcuName = 'Astro'
 
@@ -36,7 +36,8 @@ def twist_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     ser = get_serial()
     linear, angular = accelerate_twist(twist_msg)
-    command = str.encode(twist_to_rover_command(linear, angular))
+    string_command = twist_to_rover_command(linear, angular)
+    command = str.encode(string_command)
     ser.write(command) # send move command to wheel teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()

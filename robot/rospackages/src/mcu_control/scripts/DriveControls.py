@@ -34,6 +34,10 @@ def accelerate_twist(twist):
     
     linear = accelerate_value(last_linear_speed, twist_linear, acceleration_rate, delta)
     angular = accelerate_value(last_angular_speed, twist_angular, acceleration_rate, delta)
+    
+    last_linear_speed = linear
+    last_angular_speed = angular
+    last_speed_change_ms = time.time() * 1000
 
     return linear, angular
 
