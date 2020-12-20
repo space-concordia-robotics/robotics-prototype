@@ -36,7 +36,7 @@ def twist_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     ser = get_serial()
     linear, angular = accelerate_twist(twist_msg)
-    command = str.encode(twistToRoverCommand(linear, angular))
+    command = str.encode(twist_to_rover_command(linear, angular))
     ser.write(command) # send move command to wheel teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
