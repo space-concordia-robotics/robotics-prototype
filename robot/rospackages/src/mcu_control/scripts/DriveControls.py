@@ -1,3 +1,4 @@
+import time
 last_angular_speed = None
 last_linear_speed = None
 last_speed_change_ms = None
@@ -15,21 +16,24 @@ def accelerate_twist(twist):
     global last_speed_change_ms
     global last_linear_speed
     global last_angular_speed
-
+    
+    is_expired = False
+    
     twist_linear = twist.linear.x
     twist_angular = twist.angular.z
 
-    is_expired = (time.time_ns()/1000 - last_speed_change_ms) > expire_rate
+    if last_speed_change_ms != None:
+        is_expired = (time.time()*1000 - last_speed_change_ms) > expire_rate
 
-    if last_speed_change_ns == None or is_expired:
+    if last_speed_change_ms == None or is_expired:
         last_linear_speed = 0
         last_angular_speed = 0
-        last_speed_change_ms = time.time_ns()/1000 - expire_rate / initial_ramp_factor
+        last_speed_change_ms = time.time()*1000 - expire_rate / initial_ramp_factor
 
-    delta = (time.time_ns()/1000) - last_speed_change_ms
+    delta = (time.time()*1000) - last_speed_change_ms
     
-    linear = accelerate_value(last_linear_speed, twist_linear, rate_linear, delta)
-    angular = accelerate_value(last_angular_speed, twist_angular, rate_angular, delta)
+    linear = accelerate_value(last_linear_speed, twist_linear, acceleration_rate, delta)
+    angular = accelerate_value(last_angular_speed, twist_angular, acceleration_rate, delta)
 
     return linear, angular
 
