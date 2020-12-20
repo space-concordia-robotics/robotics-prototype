@@ -62,17 +62,22 @@ def twist_to_rover_command(linear, angular):
     Converts Twist command to serial 
     """
 
-    linear_speed_bounds = [-max_speed, max_speed]
-    angular_speed_bounds = [-max_angular_speed, max_angular_speed]
+    if linear > max_speed:
+        linear = max_speed
+    elif linear < -max_speed:
+        linear = -max_speed
 
-    throttle_bounds = [-max_throttle, max_throttle]
-    steering_bounds = [-max_steering, max_steering]
+    if angular > max_angular_speed:
+        angular = max_angular_speed
+    elif angular < -max_angular_speed:
+        angular = -max_angular_speed
 
     throttle = linear / max_speed # throttle should now be in [-1, 1]
     steering = angular / max_angular_speed # steering should now [-1,1]
 
     linear_motor_val = throttle * max_throttle
     angular_motor_val = steering * max_steering
+
 
     return str(round(linear_motor_val)) + ':' + str(round(angular_motor_val))
 

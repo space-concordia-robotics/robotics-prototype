@@ -20,6 +20,9 @@ def test_twist_to_rover():
 
     assert(half_max_negative == str(round(dc.max_throttle * -0.5)) + ":" + str(round(dc.max_steering * -0.5)))
 
+    assert(twist_to_rover_command(2*dc.max_speed, 2 * dc.max_angular_speed) ==twist_to_rover_command(dc.max_speed, dc.max_angular_speed)) 
+    assert(twist_to_rover_command(2*-dc.max_speed, 2 * -dc.max_angular_speed) ==twist_to_rover_command(-dc.max_speed, -dc.max_angular_speed)) 
+
 def test_acceleration():
     assert(accelerate_value(0.3, 0.5, 0.1, 0) == 0.3)
     assert(accelerate_value(0.3, 0.5, 0.1, 1000) == 0.4)
