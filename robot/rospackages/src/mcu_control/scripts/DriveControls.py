@@ -2,9 +2,12 @@ import time
 last_angular_speed = None
 last_linear_speed = None
 last_speed_change_ms = None
-acceleration_rate = 0.1 # m/s^2
-max_speed = 0.5 # Maximum rover speed in (m/s) NEEDS TO BE TWEAKED
-max_angular_speed = 1 # Maximum angular speed in (rad/s) NEEDS TO BE TWEAKED
+
+linear_acceleration_rate = 0.2
+angular_acceleration_rate = 0.35
+
+max_speed = 0.5 # Maximum rover speed in (m/s)
+max_angular_speed = 1 # Maximum angular speed in (rad/s)
 
 max_throttle = 49
 max_steering = 49
@@ -22,18 +25,18 @@ def accelerate_twist(twist):
     twist_linear = twist.linear.x
     twist_angular = twist.angular.z
 
-    if last_speed_change_ms != None:
+    if last_speed_change_ms is not None:
         is_expired = (time.time()*1000 - last_speed_change_ms) > expire_rate
 
-    if last_speed_change_ms == None or is_expired:
+    if last_speed_change_ms is None or is_expired:
         last_linear_speed = 0
         last_angular_speed = 0
         last_speed_change_ms = time.time()*1000 - expire_rate / initial_ramp_factor
 
     delta = (time.time()*1000) - last_speed_change_ms
     
-    linear = accelerate_value(last_linear_speed, twist_linear, acceleration_rate, delta)
-    angular = accelerate_value(last_angular_speed, twist_angular, acceleration_rate, delta)
+    linear = accelerate_value(last_linear_speed, twist_linear, linear_acceleration_rate, delta)
+    angular = accelerate_value(last_angular_speed, twist_angular, angular_acceleration_rate, delta)
     
     last_linear_speed = linear
     last_angular_speed = angular
@@ -76,12 +79,13 @@ def twist_to_rover_command(linear, angular):
     elif angular < -max_angular_speed:
         angular = -max_angular_speed
 
-    throttle = linear / max_speed # throttle should now be in [-1, 1]
-    steering = angular / max_angular_speed # steering should now [-1,1]
+    linear_speed = linear / max_speed # linear_speed should now be in [-1, 1]
+    angular_speed = angular / max_angular_speed # angular_speed should now [-1,1]
 
-    linear_motor_val = throttle * max_throttle
-    angular_motor_val = steering * max_steering
+    linear_motor_val = linear_speed * max_throttle
+    angular_motor_val = angular_speed * max_steering
 
-
-    return str(round(linear_motor_val)) + ':' + str(round(angular_motor_val))
+    throttle = max(linear_speed, angular_speed)
+    steering = angular_speed
+    return str(round(throttle)) + ':' + str(round(steering))
 
