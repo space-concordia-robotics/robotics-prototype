@@ -288,7 +288,8 @@ $(document).ready(() => {
 
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
     let isPoweredOn = cameraPower.attr("power-on") == "true"
-    if(isPoweredOn)
+    if(isPoweredOn){
+      $('.ar-tag-detection').css("color","black");
       isRecording(streamURL, is_recording => {
         if(is_recording)
         {
@@ -309,7 +310,7 @@ $(document).ready(() => {
           })
         }
       })
-    else
+    }else
       startCameraStream(cameraName, () => {
         showStreamOn(cameraPanel)
       })
@@ -358,11 +359,16 @@ $(document).ready(() => {
     let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
     let arTagDetectionUrl = getStreamURL(cameraName, arTagDetection = true)
     if(cameraPower.attr("power-on") == "true"){
-      if (cameraFeed.attr('src') == arTagDetectionUrl) cameraFeed.attr('src', getStreamURL(cameraName))
-        else cameraFeed.attr('src', arTagDetectionUrl)
-      }else{
-      return;
+      if (cameraFeed.attr('src') == arTagDetectionUrl){
+          cameraFeed.attr('src', getStreamURL(cameraName))
+          $('.ar-tag-detection').css("color","black");
+      } else {
+          cameraFeed.attr('src', arTagDetectionUrl)
+          $('.ar-tag-detection').css("color","red");
       }
+    }else{
+      return;
+    }
   })
   $('.ar-tag-detection').mouseup(() =>{
     $('.ar-tag-detection').blur()
