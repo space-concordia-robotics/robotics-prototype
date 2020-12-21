@@ -85,7 +85,6 @@ def twist_to_rover_command(linear, angular):
     linear_motor_val = linear_speed * max_throttle
     angular_motor_val = angular_speed * max_steering
 
-    throttle = max(linear_speed, angular_speed)
-    steering = angular_speed
+    throttle = linear_motor_val if abs(linear_motor_val) > abs(angular_motor_val) else angular_motor_val
+    steering = angular_motor_val
     return str(round(throttle)) + ':' + str(round(steering))
-
