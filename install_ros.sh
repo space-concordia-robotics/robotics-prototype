@@ -42,7 +42,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 echo "[Install the ros and extra ros packages]"
-sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server python-rosdep
+sudo apt-get install -y ros-$name_ros_version-desktop-full ros-$name_ros_version-rqt-* ros-$name_ros_version-rosbridge-suite ros-$name_ros_version-cv-camera ros-$name_ros_version-web-video-server ros-$name_ros_version-ar-track-alvar python-rosdep
 
 echo "[Initialize rosdep and install dependencies]"
 sudo sh -c "rosdep init"

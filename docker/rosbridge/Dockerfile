@@ -25,7 +25,8 @@ RUN apt-get update && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update -y && apt-get upgrade -y \
-    && apt-get install -y nano vim wget curl libfontconfig libx11-6 libxft2
+    && apt-get install -y nano vim wget curl libfontconfig libx11-6 libxft2 \
+    && ros-ROS_DISTRO-ar-track-alvar
 
 COPY install_arduino_teensyduino.sh .
 USER spaceuser
