@@ -89,7 +89,7 @@ def twist_to_rover_command(linear, angular):
     steering = 0
 
     if linear_val == 0:
-        throttle = angular_val
+        throttle = abs(angular_val)
         if angular_val < 0:
             steering = 49
         elif angular_val > 0:
