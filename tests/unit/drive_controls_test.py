@@ -6,28 +6,9 @@ def test_twist_to_rover_zero():
     zero = twist_to_rover_command(0, 0)
     assert(zero == "0:0")
 
-def test_twist_to_rover_limits():
-    max_positive_speed = twist_to_rover_command(dc.max_speed, dc.max_angular_speed)
-    assert(max_positive_speed == str(dc.max_throttle) + ":" + str(dc.max_steering))
-
-    max_negative_speed = twist_to_rover_command(-dc.max_speed, -dc.max_angular_speed)
-    assert(max_negative_speed == str(-dc.max_throttle) + ":" + str(-dc.max_steering))
-
-    half_max_positive = twist_to_rover_command(dc.max_speed * 0.5, dc.max_angular_speed * 0.5)
-    assert(half_max_positive == str(round(dc.max_throttle * 0.5)) + ":" + str(round(dc.max_steering * 0.5)))
-
-    half_max_negative = twist_to_rover_command(-dc.max_speed * 0.5, -dc.max_angular_speed * 0.5)
-    assert(half_max_negative == str(round(dc.max_throttle * -0.5)) + ":" + str(round(dc.max_steering * -0.5)))
-
 def test_twist_to_rover_overshoot():
     assert(twist_to_rover_command(2*dc.max_speed, 2 * dc.max_angular_speed) == twist_to_rover_command(dc.max_speed, dc.max_angular_speed)) 
     assert(twist_to_rover_command(2*-dc.max_speed, 2 * -dc.max_angular_speed) == twist_to_rover_command(-dc.max_speed, -dc.max_angular_speed)) 
-
-def test_twist_to_rover_angular_throttle():
-    assert(twist_to_rover_command(0, dc.max_angular_speed) == str(dc.max_throttle) + ":" + str(dc.max_steering)) 
-    assert(twist_to_rover_command(0, -dc.max_angular_speed) == str(-dc.max_throttle) + ":" + str(-dc.max_steering)) 
-    assert(twist_to_rover_command(dc.max_speed * 0.5, dc.max_angular_speed) == str(dc.max_throttle) + ":" + str(dc.max_steering)) 
-    assert(twist_to_rover_command(dc.max_speed, dc.max_angular_speed * 0.5) == str(dc.max_throttle) + ":" + str(round(0.5 * dc.max_steering))) 
 
 def test_acceleration():
     assert(accelerate_value(0.3, 0.5, 0.1, 0) == 0.3)
