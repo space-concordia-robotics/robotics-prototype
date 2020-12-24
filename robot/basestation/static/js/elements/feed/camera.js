@@ -356,16 +356,31 @@ $(document).ready(() => {
     let cameraPanel = $(e.target).parents('.camera-panel')
     let cameraPower = cameraPanel.find('.camera-power')
     let cameraFeed = cameraPanel.find('.camera-feed')
-    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX
+    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX // video0Cam
     let arTagDetectionUrl = getStreamURL(cameraName, arTagDetection = true)
+
     if(cameraPower.attr("power-on") == "true"){
-      if (cameraFeed.attr('src') == arTagDetectionUrl){
-          cameraFeed.attr('src', getStreamURL(cameraName))
-          $('.ar-tag-detection').css("color","black");
-      } else {
-          cameraFeed.attr('src', arTagDetectionUrl)
-          $('.ar-tag-detection').css("color","red");
-      }
+      ros.getNodes( nodes =>{
+        const isARNodeRunning = nodes.includes("/ar_tracker_"+cameraName);
+        if (cameraFeed.attr('src') == arTagDetectionUrl){
+            //Check if already running, if yes -> Turn off AR feed. If no -> don't do anything
+            if (isARNodeRunning){
+            cameraFeed.attr('src', getStreamURL(cameraName))
+            $('.ar-tag-detection').css("color","black");
+                // Kill the AR node
+            }else{
+                return;
+            }
+        } else {
+            // Check if AR feed is already running. If yes switch to it, if no, turn it on + switch to it.
+            if (!isARNodeRunning){
+                //turn it on
+            }
+            // switching to it
+            cameraFeed.attr('src', arTagDetectionUrl)
+            $('.ar-tag-detection').css("color","red");
+        }
+      })
     }else{
       return;
     }
