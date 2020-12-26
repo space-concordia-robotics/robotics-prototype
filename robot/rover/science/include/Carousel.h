@@ -7,18 +7,17 @@
 
 #include "Stoppable.h"
 #include "Updatable.h"
-#include <cstdint>
 
 class Carousel : public Stoppable, public Updatable {
     protected:
-        uint8_t currentCuvette;
+        int currentCuvette;
 
     public:
         void home();
-        void goToCuvette(uint8_t cuvetteId);
+        void goToCuvette(int cuvetteId);
         void nextCuvette();
         void previousCuvette();
-        uint8_t getCurrentCuvette() const { return currentCuvette; }
+        int getCurrentCuvette() const { return currentCuvette; }
 
         virtual void eStop() override;
         virtual void update(unsigned long deltaMicroSeconds) override;

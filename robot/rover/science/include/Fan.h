@@ -7,12 +7,11 @@
 
 #include "Updatable.h"
 #include "Stoppable.h"
-#include <cstdint>
 
 class Fan :  public Stoppable, public Updatable {
 
     protected:
-        uint8_t fanPWM;
+        int fanPWM;
     public:
         void turnOn();
         void turnOff();

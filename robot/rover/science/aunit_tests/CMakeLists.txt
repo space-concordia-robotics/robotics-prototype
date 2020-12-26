@@ -1,16 +1,15 @@
-cmake_minimum_required(VERSION 3.10.2)
-
 file(MAKE_DIRECTORY build)
 set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
-project(@Project_Name@)
+cmake_minimum_required(VERSION 3.5.0)
+project(CommandTests)
 
 #create the library and elf directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-message(STATUS ${${PROJECT_NAME}_user_sources} )
+file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) 
+
 set(USER_SOURCES FALSE)
 
 #if there are other sources files in this directory, compile them into a library
@@ -18,17 +17,17 @@ if(NOT "${${PROJECT_NAME}_user_sources}" STREQUAL "")
 set(USER_SOURCES TRUE)
 add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
 
-target_include_directories(${PROJECT_NAME}_user PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_compile_options(${PROJECT_NAME}_user PRIVATE ${ARM_GXX_FLAGS})
+target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 
 endif()
 
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 
 add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp)
-target_compile_options(${PROJECT_NAME}_EXE PRIVATE ${ARM_GXX_FLAGS})
-target_include_directories(${PROJECT_NAME}_EXE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(${PROJECT_NAME}_EXE PRIVATE @EXTERNAL_LIBRARIES_INCLUDE_DIRS@)
+target_compile_options(${PROJECT_NAME}_EXE PUBLIC ${ARM_GXX_FLAGS})
+target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME}_EXE PRIVATE /home/nikolas/Arduino/libraries/Adafruit_Motor_Shield_V2_Library)
 
 set_target_properties(
 ${PROJECT_NAME}_EXE PROPERTIES 
@@ -39,7 +38,7 @@ OUTPUT_NAME ${PROJECT_NAME}.elf
  
 target_link_libraries(
 ${PROJECT_NAME}_EXE 
-@PROJECT_LIBRARIES@
+Adafruit;Encoder;Wire;Servo
 $<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
 teensycore
 -lm
@@ -58,7 +57,3 @@ DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
 add_custom_target(${PROJECT_NAME}
 DEPENDS ${PROJECT_NAME}_upload_command
 )	
-
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aunit_tests)
- add_subdirectory(aunit_tests)
-endif()

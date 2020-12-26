@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
@@ -68,6 +68,8 @@ set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_URL https://github.com/pololu/lsm303-arduino)
 set(LSM303_VERSION 3.0.1) 
 
+set(AUNIT_PATH ${ARDUINO_EXTERNAL_LIB}/AUnit)
+
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
@@ -79,7 +81,7 @@ file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
 file(GLOB TEENSY_CORE_C_FILES ${TEENSY_CORE}/teensy3/*.c )
 file(GLOB TEENSY_CORE_CXX_FILES ${TEENSY_CORE}/teensy3/*.cpp)
 
-#function to find all subdirectories for a given directory, useful for finding paths to the teensy libraries
+#function to find all subdirectories for a given directory (non-recursive), useful for finding paths to the teensy libraries
 macro(getSubdirectories result curDir)
 
 file(GLOB subDirs LIST_DIRECTORIES true ${curDir}/*)
@@ -99,7 +101,8 @@ endmacro()
 
 #find paths for all pre-installed teensy libraries, so that all projects have access to these paths
 getSubdirectories(TEENSY_LIBRARIES ${TEENSY_LIB})
-
+getSubdirectories(AUNIT_DIRS ${AUNIT_PATH}/src)
+#message(${AUNIT_DIRS})
 #every project should have access to all of these paths
 include_directories(
  	${TEENSY_CORE}
@@ -107,6 +110,7 @@ include_directories(
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
 )
+message(${TEENSY_LIBRARIES})
 #every compiler should use these common defines, copy pasted from the Teensyduino verbose output
 add_definitions(
 -D__MK66FX1M0__
@@ -121,16 +125,15 @@ add_definitions(
 #compiler flags for all compilers, copy pasted from the Teensyduino verbose output
 set(ARM_GCC_S_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -nostdlib -MMD -x assembler-with-cpp -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 set(ARM_GCC_C_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
-set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
-
+set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
+#TODO : -nostdlib
 #linker flags, note even c++ projects link using gcc, since we are using the -lstdc++ flag -> from Teensyduino
-set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/${MCU}.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
+ set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/${MCU}.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
 
 #S FILES - compiled with gcc
 add_library(teensycore_s  OBJECT ${TEENSY_CORE_S_FILES})
 target_compile_options(teensycore_s PUBLIC ${ARM_GCC_S_FLAGS})
 set_target_properties(teensycore_s PROPERTIES LINKER_LANGUAGE C)
-
 #C FILES - compiled with gcc
 add_library(teensycore_c OBJECT ${TEENSY_CORE_C_FILES})
 target_compile_options(teensycore_c PUBLIC ${ARM_GCC_C_FLAGS})
@@ -146,12 +149,11 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 function(createCppLibrary sources libraryName includes)
 add_library(${libraryName} ${sources})
 
-
 if(NOT ${includes} STREQUAL "")
 target_include_directories(${libraryName} PRIVATE ${includes})
 endif()
 
-target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
+target_compile_options(${libraryName} PRIVATE ${ARM_GXX_FLAGS})
 endfunction() 
 
 #create default teensy libraries
@@ -168,11 +170,20 @@ createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/uti
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 
+#create the testing library
+
+
+file(GLOB_RECURSE AUNIT_SOURCES ${AUNIT_PATH}/*.cpp)
+add_library(AUNIT ${AUNIT_SOURCES})
+target_compile_options(AUNIT PRIVATE ${ARM_GXX_FLAGS})
+target_include_directories(AUNIT PRIVATE ${TEENSY_CORE} ${TEENSY_CORE}/teensy3 ${AUNIT_PATH}/src)
+
+#message(STATUS "SOURCES : ${AUNIT_SOURCES}")
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
  get_filename_component(name ${path} NAME_WE)
- 
+ message(${name})
  #creates a command which runs a few bash commands to delete the current subproject. 
  #These are useless on their own and need to be attached to a target to work 
  add_custom_command(
@@ -185,27 +196,33 @@ foreach(path ${INOFILES})
  
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
-
+ continue()
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
  continue()
  
  elseif(${name} STREQUAL "MobilePlatform")
- 
+  continue()
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
  set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
 
  elseif(${name} STREQUAL "PidController")
+  continue()
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
  set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
 
  endif()
  
  #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
- configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
- add_subdirectory(${project_dir}) 
- 
+ if(NOT ${name} STREQUAL "CommandTests")
+
+  message(STATUS "CMAKE FILE IS FOUND IN : ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}")
+  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY)
+  add_subdirectory(${project_dir})
+
+ endif()
+
  endforeach()
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 

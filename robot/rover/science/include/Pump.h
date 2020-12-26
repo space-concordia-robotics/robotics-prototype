@@ -8,12 +8,11 @@
 
 #include "Updatable.h"
 #include "Stoppable.h"
-#include <cstdint>
 
 class Pump : public Stoppable, public Updatable{
     protected:
         unsigned long pumpTimeElapsed;
-        uint8_t pumpPWM;
+        int pumpPWM;
     public:
         virtual void pump();
         virtual void backpump();
