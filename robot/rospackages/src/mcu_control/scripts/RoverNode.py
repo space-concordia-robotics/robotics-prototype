@@ -4,6 +4,7 @@ import sys
 import traceback
 import time
 import re
+import numpy
 
 from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
@@ -12,12 +13,10 @@ from std_msgs.msg import String, Header, Float32
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
+from robot.rospackages.src.mcu_control.scripts.DriveControls import accelerate_twist, twist_to_rover_command
 
 mcuName = 'Astro'
 
-# todo: test ros+website over network with teensy
-# todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
-# todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
 
 requests = {
     'ping' : ['pong'],
@@ -32,6 +31,17 @@ requests = {
     'acc-off' : ['Limiter: CLose'],
     'reboot' : ['rebooting']
 }
+
+def twist_callback(twist_msg):
+    """ Handles the twist message and sends it to the wheel MCU """
+    ser = get_serial()
+    linear, angular = accelerate_twist(twist_msg)
+    string_command = twist_to_rover_command(linear, angular)
+    command = str.encode(string_command)
+    ser.write(command) # send move command to wheel teensy
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+
 def handle_client(req):
     # feedback to tell if script itself is responsive
     if req.msg == 'ping':
@@ -66,14 +76,13 @@ def handle_client(req):
     reqInWaiting=False
     return roverResponse
 
-def subscriber_callback(message):
+def rover_command_callback(message):
     ser = get_serial()
     rospy.loginfo('received: '+message.data+' command from GUI, sending to rover Teensy')
     command = str.encode(message.data+'\n')
     ser.write(command) # send command to teensy
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    return
 
 def publish_joint_states(message):
     # parse the data received from Teensy
@@ -152,7 +161,7 @@ if __name__ == '__main__':
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
 
     search_success = init_serial(115200, mcuName)
-    
+
     if not search_success:
         sys.exit(1)
 
@@ -173,13 +182,14 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    subscribe_topic = '/rover_command'
-    #first of all, it should subscribe to Twist and decide how to send it to the rover...
-    #for now i might just have it subscribe to Strings tho
-    rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
-    # the long way is for the gui to publish a twist and the node to convert it to throttle:steering
-    # the short way is for the gui to send the command string directly. no Twist.
+    rover_command_topic = '/rover_command'
+    twist_topic = '/cmd_vel'
+
+    rover_command_sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
+    twist_sub = rospy.Subscriber(twist_topic, Twist, twist_callback)
+
+    rospy.loginfo('Beginning to subscribe to "' + rover_command_topic + '" topic')
+    rospy.loginfo('Beginning to subscribe to "' + twist_topic + '" topic')
 
     service_name = '/rover_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
