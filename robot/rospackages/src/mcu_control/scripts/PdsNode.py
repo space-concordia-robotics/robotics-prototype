@@ -4,6 +4,7 @@ import sys
 import traceback
 import time
 import re
+import math
 
 from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
 
@@ -95,9 +96,9 @@ def publish_pds_data(message):
         current.effort = [float(data) for data in dataPDS[1:7]]
         currents = ','.join([str(x) for x in current.effort])
 
-        temp.therm1 = float(dataPDS[7])
-        temp.therm2 = float(dataPDS[8])
-        temp.therm3 = float(dataPDS[9])
+        temp.therm1 = check_temp_error_case(float(dataPDS[7]))
+        temp.therm2 = check_temp_error_case(float(dataPDS[8]))
+        temp.therm3 = check_temp_error_case(float(dataPDS[9]))
         temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]])
 
         fanSpeed.fan1 = float(dataPDS[10])
@@ -111,7 +112,7 @@ def publish_pds_data(message):
         rospy.loginfo('temps: ' + str(temps))
         rospy.loginfo('currents: ' + str(currents))
         rospy.loginfo('fan speeds: ' + str(fanSpeeds))
-        
+
         voltagePub.publish(voltage)
         currentPub.publish(current)
         tempPub.publish(temp)
@@ -123,6 +124,15 @@ def publish_pds_data(message):
         rospy.logwarn('trouble parsing PDS sensor data')
         return
     return
+
+# This function checks if the temp values from serial are equal to 999.9 (default error state) and replaces them with 'N/A' if they are.
+# It is necessary because if the temperature is at the default error state, the front end will scream at you with a horrendous windows sound warning. 
+# Changing it to 'N/A' prevents being assaulted by UI.
+def check_temp_error_case(x):
+    if math.isclose(999.9, x, rel_tol=0.0001, abs_tol=0.0):
+        return 'N/A'
+    else:
+        return x
 
 def stripFeedback(data):
     startStrips = ['PDS ', 'Command', 'Motor']
