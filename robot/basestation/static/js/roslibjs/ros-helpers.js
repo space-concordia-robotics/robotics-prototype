@@ -251,7 +251,8 @@ function initRosWeb () {
 
     $('.battery-temp').each(function(i, obj) {
       let $obj = $(obj)
-      let temperature = temps[i]
+      let temperature = temps[i] == 999.9 ? 'N/A ' : temps[i]
+
       $obj.text(temperature)
 
       if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
