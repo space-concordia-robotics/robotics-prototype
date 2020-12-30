@@ -16,6 +16,8 @@ $(document).ready(() => {
   // task handler's recognized name for camera stream task
   const CAMERA_TASK = 'camera_stream'
   const CAMERA_PORTS = 'camera_ports'
+  // ar stream tasks
+  const AR_TASK = 'ar_stream'
   // response messages from task handler
   // these values must not be altered unless they are updated in the task handler server
   const CAMERA_START_SUCCESS_RESPONSE = 'Started camera stream'
@@ -63,6 +65,13 @@ $(document).ready(() => {
     }, cameraStream)
   }
 
+  function startARStream(cameraStream, cameraFeed){
+      requestTask(AR_TASK, STATUS_START, () => {
+          const arTagDetectionUrl = getStreamURL(cameraStream, arTagDetection = true)
+          $('.ar-tag-detection').css("color","red");
+          cameraFeed.attr('src', arTagDetectionUrl);
+      } , reqArgs = cameraStream);
+  }
   function stopCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_TASK, STATUS_STOP, msgs => {
         if(msgs[0])
@@ -374,11 +383,16 @@ $(document).ready(() => {
         } else {
             // Check if AR feed is already running. If yes switch to it, if no, turn it on + switch to it.
             if (!isARNodeRunning){
-                //turn it on
+                //turn it on and switch to it in callback
+                startARStream(cameraName, cameraFeed);
+                //return;
+            }else{
+                cameraFeed.attr('src', arTagDetectionUrl)
+                $('.ar-tag-detection').css("color","red");
             }
             // switching to it
-            cameraFeed.attr('src', arTagDetectionUrl)
-            $('.ar-tag-detection').css("color","red");
+            //cameraFeed.attr('src', arTagDetectionUrl)
+            //$('.ar-tag-detection').css("color","red");
         }
       })
     }else{

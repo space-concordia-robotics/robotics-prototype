@@ -5,8 +5,10 @@ import os
 import time
 import sys
 import glob
+import roslaunch
 from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *
+from sensor_msgs.msg import Image
 
 # return the response string after calling the task handling function
 def handle_task_request(req):
@@ -214,6 +216,12 @@ def handle_task(task, status, args):
             if task == 'camera_stream':
                 response_tmp = start_camera_stream(args, active_ports, active_stream_ctr)
                 response = response_tmp if response_tmp != '' else 'Started camera stream on port ' + args
+            elif task == 'ar_stream':
+
+                ar_stream = Listener(scripts[5], 'bash', args)
+                ar_stream.start()
+                rospy.wait_for_message('/{}/image_ar'.format(args), Image)
+
             else:
                 if running_tasks[i].start():
                     response = 'Started ' + chosen_task
@@ -267,13 +275,13 @@ if __name__ == "__main__":
     mcu_control_dir = current_dir + '../../mcu_control/scripts/'
 
     # tasks that can be run
-    scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh"]
+    scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh", current_dir + "start_ar_stream.sh"]
 
     # set up listener objects
     running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
 
     # expected client arguments for choosing task
-    known_tasks = ['rover_listener', 'arm_listener', 'science_listener', 'pds_listener', 'camera_stream', 'camera_ports']
+    known_tasks = ['rover_listener', 'arm_listener', 'science_listener', 'pds_listener', 'camera_stream', 'camera_ports', 'ar_stream']
     known_listeners = known_tasks[:-2]
 
     # keep track of currently running streams

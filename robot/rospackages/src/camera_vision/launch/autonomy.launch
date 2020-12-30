@@ -1,6 +1,7 @@
 <launch>
+    <arg name="camera_node_name" default="video0Cam" />
     <include file="$(find webcam_ar_track)/launch/webcam_indiv.launch" pass_all_args="true"/> 
-    <node pkg="camera_vision" type="ar_tracker.py" name="ar_tracker_$(arg __name)" output="screen"> 
-        <param name="cv_camera_node_name" type="string" value="$(arg __name)"/>
+    <node pkg="camera_vision" type="ar_tracker.py" name="ar_tracker_$(arg camera_node_name)" output="screen"> 
+        <param name="camera_node_name" type="string" value="$(arg camera_node_name)"/>
     </node>
 </launch>

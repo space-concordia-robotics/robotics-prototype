@@ -13,7 +13,7 @@ class arTracker():
         # necessary for handling images from topics
         self.node_name = 'ar_tracker'
         rospy.init_node(self.node_name)
-        cv_camera_node_name = rospy.get_param('~cv_camera_node_name')
+        cv_camera_node_name = rospy.get_param('~camera_node_name')
 
         self.is_marker_seen = False
 
