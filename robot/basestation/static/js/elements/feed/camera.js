@@ -85,7 +85,11 @@ $(document).ready(() => {
 
     }, cameraStream)
   }
-
+  function stopARStream(cameraStream, cameraFeed){
+      requestTask(AR_TASK, STATUS_STOP, () =>{
+          console.log("Stop the ar stream dawg");
+      }, reqArgs = cameraStream)
+  }
   function startRecording(stream_url, callback = () => {}) {
     const start_recording_url = '/initiate_feed_recording?stream_url=' + stream_url
     $.ajax(start_recording_url, {
@@ -374,8 +378,9 @@ $(document).ready(() => {
         if (cameraFeed.attr('src') == arTagDetectionUrl){
             //Check if already running, if yes -> Turn off AR feed. If no -> don't do anything
             if (isARNodeRunning){
-            cameraFeed.attr('src', getStreamURL(cameraName))
-            $('.ar-tag-detection').css("color","black");
+                stopARStream(cameraName, cameraFeed);
+                cameraFeed.attr('src', getStreamURL(cameraName))
+                $('.ar-tag-detection').css("color","black");
                 // Kill the AR node
             }else{
                 return;

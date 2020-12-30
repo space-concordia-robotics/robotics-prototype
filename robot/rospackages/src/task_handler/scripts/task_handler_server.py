@@ -6,6 +6,7 @@ import time
 import sys
 import glob
 import roslaunch
+import subprocess
 from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *
 from sensor_msgs.msg import Image
@@ -239,6 +240,12 @@ def handle_task(task, status, args):
             if task == 'camera_stream':
                 response_tmp = stop_camera_task(args, active_ports, active_stream_ctr)
                 response = response_tmp if response_tmp != '' else 'Stopped camera stream on port ' + args
+            elif task == 'ar_stream':
+                # find pid of roslaunch process and send SIGINT to it
+                pattern = 'autonomy\.launch.*{}'.format(args)
+                # command looks like: `pgrep -f 'autonomy\.launch.*video0Cam'`
+                ar_pid = int(subprocess.run(['pgrep', '-f', pattern], stdout=subprocess.PIPE).stdout)
+                subprocess.run(['kill', '-2', str(ar_pid)])
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = 'Stopped ' + chosen_task
