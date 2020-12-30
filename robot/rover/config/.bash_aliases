@@ -16,9 +16,12 @@ alias arm="cd $ROVER/ArmDriverUnit"
 alias wheels="cd $ROVER/MobilePlatform"
 alias rostings="cd $ROSPACKAGES"
 alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"
+alias upload="cmake --build $ROVER/build --target "
+alias cmake_clean="cmake --build $ROVER/build --target cleanup && rm -rf $ROVER/build"
 
 # edit thyself
 alias editalius="nano $BASH_A"
 alias alius=". $BASH_A"
 alias editnani="nano $NANORC"
 alias nani=". $NANORC"
+

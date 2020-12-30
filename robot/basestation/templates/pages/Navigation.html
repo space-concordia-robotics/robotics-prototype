@@ -1,0 +1,173 @@
+{% extends "pages/Base.html" %}
+{% block title %}Navigation{% endblock %}
+{% block head %}
+{{ super() }}
+<script src="../../static/js/elements/navigation/navigation.js"></script>
+<script src="../../static/js/elements/feed/console.js"></script>
+<script src="../../static/js/p5.min.js"></script>
+<script src='../../../static/js/elements/navigation/localization.js'></script>
+<script src='../../../static/js/elements/navigation/navigationUtilities.js'></script>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-2">
+        {% include "elements/feed/Console.html" %}
+    </div>
+    <div class="col-md-7">
+        {% include "elements/navigation/GPS.html" %}
+    </div>
+    <div class="col-md-3" id="data-start">
+       {% include "elements/navigation/NavigationData.html" %}
+    </div>
+</div>
+
+
+<!----------------------------------------------------------------------------------------------------
+The following elements are hidden HTML elements. This HTML is appended to dynamically create elements on the web page.
+----------------------------------------------------------------------------------------------------->
+
+<!-- ANTENNA TEMPLATES -->
+<div class="decimal-degrees-template" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+        <input id="antenna-decimal-degrees-decimal-degree-input" type="text" class="form-control antenna-input-field" placeholder="Decimal degrees">
+        <button id="antenna-decimal-degrees-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+
+<div class="degrees-decimal-minutes-template" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+
+        <input id="antenna-degrees-decimal-minutes-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+        <span class="input-group-text">°</span>
+
+        <input id="antenna-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control antenna-input-field" placeholder="Decimal Minutes">
+        <span class="input-group-text">'</span>
+        <button id="antenna-degrees-decimal-minutes-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+<div class="degrees-minutes-seconds-template" hidden>
+    <div class="input-group" id="antenna-input-group">
+        <span class="input-group-text"></span>
+        <input id="antenna-degrees-minutes-seconds-degree-input" type="text" class="form-control antenna-input-field" placeholder="Degrees">
+
+        <span class="input-group-text">°</span>
+        <input id="antenna-degrees-minutes-seconds-minute-input" type="text" class="form-control antenna-input-field" placeholder="Minutes">
+
+        <span class="input-group-text">'</span>
+        <input id="antenna-degrees-minutes-seconds-second-input" type="text" class="form-control antenna-input-field" placeholder="Seconds">
+
+        <span class="input-group-text">"</span>
+        <button id="antenna-degrees-minutes-seconds-change-btn" class="btn btn-warning antenna-change-btn">Change</button>
+        <hr>
+    </div>
+</div>
+
+<!-- MARKER TEMPLATEs -->
+<div id="marker-buttons" hidden>
+    <button id="marker-confirm-btn" type="button" class="btn btn-success">Confirm</button>
+    <button id="marker-delete-btn" type="button" class="btn btn-danger">Delete</button>
+    <button id="marker-set-as-current-btn" type="button" class="btn btn-warning">Set as current</button>
+</div>
+
+
+<div id="marker-decimal-degrees-input-template" hidden>
+    <span class="input-group-text"></span>
+    <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control" placeholder="Decimal Degrees">
+</div>
+
+
+<div id="marker-degrees-decimal-minutes-input-template" hidden>
+    <span class="input-group-text"></span>
+
+    <input id="marker-degrees-decimal-minutes-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <span class="input-group-text">°</span>
+
+    <input id="marker-degrees-decimal-minutes-decimal-minute-input" type="text" class="form-control" placeholder="Decimal Minutes">
+    <span class="input-group-text">'</span>
+</div>
+
+<div id="marker-degrees-minutes-seconds-input-template" hidden>
+    <span class="input-group-text"></span>
+
+    <input id="marker-degrees-minutes-seconds-degree-input" type="text" class="form-control" placeholder="Degrees">
+    <span class="input-group-text">°</span>
+
+    <input id="marker-degrees-minutes-seconds-minute-input" type="text" class="form-control" placeholder="Mins">
+    <span class="input-group-text">'</span>
+
+    <input id="marker-degrees-minutes-seconds-second-input" type="text" class="form-control" placeholder="Seconds">
+    <span class="input-group-text">"</span>
+</div>
+
+<div id="add-marker-coordinates" hidden>
+    <div class='marker'>
+        <fieldset id="marker-name-fieldset">
+            <div class="input-group">
+                <span class="input-group-text">name</span>
+                <input id="marker-name" type="text" class="form-control" placeholder="marker">
+            </div>
+        </fieldset>
+        <fieldset id="marker-latitude-fieldset">
+            <div id="marker-latitude-input-group" class="input-group">
+                <div id="marker-latitude-select-format" class="dropdown">
+                    <button type="button" id="marker-latitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Latitude Layout</button>
+                    <span class="caret"></span>
+                    <ul class="dropdown-menu">
+                        <li><button id="marker-latitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="marker-latitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="marker-latitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset id="marker-longitude-fieldset">
+            <div id="marker-longitude-input-group" class="input-group">
+                <div id="marker-longitude-select-format" class="dropdown">
+                    <button type="button" id="marker-longitude-select-format-btn" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">Select Longitude Layout</button>
+                    <span class="caret"> </span>
+                    <ul class="dropdown-menu">
+                        <li><button id="marker-longitude-decimal-degrees-btn" class="btn btn-primary btn-sm">Decimal Degrees</button></li>
+                        <li><button id="marker-longitude-degrees-decimal-minutes-btn" class="btn btn-primary btn-sm">Degrees Decimal Minutes</button></li>
+                        <li><button id="marker-longitude-degrees-minutes-seconds-btn" class="btn btn-primary btn-sm">Degrees Minutes Seconds</button></li>
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <div id="marker-buttons-input-group" class="input-group">
+        </div>
+        <hr>
+    </div>
+</div>
+
+<div id="created-marker-template" hidden>
+    <div class="marker">
+        <fieldset id="marker-name-fieldset">
+            <div class="input-group">
+                <span class="input-group-text">name</span>
+                <input id="marker-name" type="text" class="form-control" placeholder="marker Name">
+            </div>
+        </fieldset>
+        <fieldset id="marker-latitude-fieldset" format='decimal-degrees'>
+            <div class="input-group">
+                <span class="input-group-text">latitude</span>
+                <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control latitude" placeholder="Decimal Degrees">
+            </div>
+        </fieldset>
+        <fieldset id="marker-longitude-fieldset" format='decimal-degrees'>
+            <div class="input-group">
+                <span class="input-group-text">longitude</span>
+                <input id="marker-decimal-degrees-decimal-degree-input" type="text" class="form-control longitude" placeholder="Decimal Degrees">
+            </div>
+        </fieldset>
+        <div id="marker-buttons-input-group" class="input-group">
+        </div>
+        <hr>
+    </div>
+</div>
+{% endblock %}
