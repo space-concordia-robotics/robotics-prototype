@@ -8,24 +8,20 @@ all of the rospackages are present. Reboot to run systemd services."
 
 #install prereqs
 sudo apt update -y
-sudo apt install nodejs npm openssh-server -y
+sudo apt install openssh-server -y
 sudo ufw allow ssh
 
 # Setup systemd services
 cd $REPO/robot/rover
 sudo cp systemd/config-ethernet.service /etc/systemd/system/config-ethernet.service
-sudo cp systemd/ip-emailer.service /etc/systemd/system/ip-emailer.service
 sudo cp systemd/ros-rover-start.service /etc/systemd/system/ros-rover-start.service
 sudo systemctl enable config-ethernet.service
-sudo systemctl enable ip-emailer.service
 sudo systemctl enable ros-rover-start.service
 
 # Setup ethernet and emailer service scripts
 cd $REPO/robot/util
 sudo cp configEthernet/runConfigEthernet.sh /usr/bin/runConfigEthernet.sh
-sudo cp emailer/runEmailer.sh /usr/bin/runEmailer.sh
 cd $REPO/robot/util/configEthernet && bash synchConfigEthernet.sh
-cd $REPO/robot/util/emailer/ && bash syncEmailer.sh
 
 # Exit
 echo "$FINAL_MESSAGE"
