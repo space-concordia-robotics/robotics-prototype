@@ -27,7 +27,7 @@ install:
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
   
   # Install pip dependencies and setup robot python package
-  - pip install -r requirements.txt -r requirements-dev.txt
+  - pip install -r requirements.txt
   - pip install -e .
     
   # Install ros-base and necessary packages 
