@@ -18,7 +18,7 @@ RUN ./videogroupworkaround.sh $videoid \
     && apt-get update && apt-get install -y apt-utils ros-melodic-rosbridge-suite 
 
 WORKDIR /home/spaceuser/Programming/robotics-prototype
-COPY requirements.txt requirements-dev.txt setup.py docker/rosbridge/entrypoint.sh ./
+COPY requirements.txt setup.py docker/rosbridge/entrypoint.sh ./
 
 RUN apt-get update && apt-get install -y python3-pip \
     && pip3 install -r requirements.txt \
