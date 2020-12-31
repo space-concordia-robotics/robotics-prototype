@@ -21,4 +21,4 @@ source "$REPO_HOME/venv/bin/activate"
 python3 "$REPO_HOME/setup.py" develop
 
 # source primary catkin_ws setup bash script and execute one launch script to rule them all
-source OPT_MELODIC_SETUP && source $ROS_PACKAGES_SETUP && roslaunch $ROSLAUNCH_FILE
+source $OPT_MELODIC_SETUP && source $ROS_PACKAGES_SETUP && roslaunch $ROSLAUNCH_FILE
