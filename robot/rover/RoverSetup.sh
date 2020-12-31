@@ -7,7 +7,6 @@ FINAL_MESSAGE="The script will now exit, ensure that ros is install correctly an
 all of the rospackages are present. Reboot to run systemd services."
 
 #install prereqs
-sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update -y
 sudo apt install nodejs npm openssh-server -y
 sudo ufw allow ssh
