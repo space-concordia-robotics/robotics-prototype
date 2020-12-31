@@ -12,9 +12,6 @@ sudo apt update -y
 sudo apt install nodejs npm openssh-server -y
 sudo ufw allow ssh
 
-# Setup venv
-cd $REPO
-
 # Setup systemd services
 cd $REPO/robot/rover
 sudo cp systemd/config-ethernet.service /etc/systemd/system/config-ethernet.service
