@@ -78,4 +78,4 @@ python:
   - "3.6"
 
 git:
-  submodules: true
+  submodules: false
