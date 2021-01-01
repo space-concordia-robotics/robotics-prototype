@@ -78,7 +78,9 @@ $(document).ready(() => {
         {
             successCallback();
             const topicName = getCameraFilename($('.camera-panel')) + TOPIC_SUFFIX;
-            stopARStream(topicName, $('.camera-feed'));
+            ros.getNodes( nodes =>{
+                if (nodes.includes("/ar_tracker_"+topicName)) stopARStream(topicName, $('.camera-feed'));
+            })
         }
         else
         {
