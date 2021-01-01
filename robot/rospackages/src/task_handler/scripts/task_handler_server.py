@@ -221,6 +221,7 @@ def handle_task(task, status, args):
 
                 ar_stream = Listener(scripts[5], 'bash', args)
                 ar_stream.start()
+                # Wait until it's up before returning
                 rospy.wait_for_message('/{}/image_ar'.format(args), Image)
 
             else:
@@ -244,8 +245,9 @@ def handle_task(task, status, args):
                 # find pid of roslaunch process and send SIGINT to it
                 pattern = 'autonomy\.launch.*{}'.format(args)
                 # command looks like: `pgrep -f 'autonomy\.launch.*video0Cam'`
-                ar_pid = int(subprocess.run(['pgrep', '-f', pattern], stdout=subprocess.PIPE).stdout)
-                subprocess.run(['kill', '-2', str(ar_pid)])
+                ar_pid = subprocess.run(['pgrep', '-f', pattern], stdout=subprocess.PIPE).stdout # returns bytes
+                if len(ar_pid) > 0:
+                    subprocess.run(['kill', '-2', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = 'Stopped ' + chosen_task
