@@ -76,7 +76,9 @@ $(document).ready(() => {
     requestTask(CAMERA_TASK, STATUS_STOP, msgs => {
         if(msgs[0])
         {
-            successCallback()
+            successCallback();
+            const topicName = getCameraFilename($('.camera-panel')) + TOPIC_SUFFIX;
+            stopARStream(topicName, $('.camera-feed'));
         }
         else
         {
