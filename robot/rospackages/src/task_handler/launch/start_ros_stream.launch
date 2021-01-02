@@ -1,8 +1,8 @@
 <launch>
-    <arg name="_device_path" default="/dev/video0"/>
-    <arg name="_image_width" default="480" />
-    <arg name="_image_height" default="360" />
-    <arg name="__name" default="video0Cam" />
+    <arg name="_device_path" value="$(arg _device_path)" default="/dev/video0"/>
+    <arg name="_image_width" value="$(arg _image_width)" default="480" />
+    <arg name="_image_height" value="$(arg _image_height)" default="360" />
+    <arg name="__name" value="$(arg __name)" default="video0Cam" />
     <include file="$(find task_handler)/launch/stream.launch" pass_all_args="true"/>
     <include file="$(find camera_vision)/launch/autonomy.launch" pass_all_args="true"/>
 </launch>
