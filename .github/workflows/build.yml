@@ -8,6 +8,14 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     container: ros:melodic-ros-base
+    env:
+      REPO_ROOT="/home/test/Programming/robotics-prototype"
+      ARDUINO_IDE_VERSION="1.8.12"
+      ARDUINO_PATH="$HOME/arduino-$ARDUINO_IDE_VERSION" # Required for CMake script
+      TEENSYDUINO_VERSION="152"
+      ROS_PYTHON_VERSION="3.6"
+      ROS_VERSION="melodic"
+      OS_VERSION="bionic"
     steps:
       # Use github workspace so that job can access repo
       #
@@ -21,8 +29,11 @@ jobs:
           sudo apt upgrade -y
 
       - name: Clone Repo (Without autonomy module for now)
-        run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming
-
+        run : |
+          mkdir -p /home/test/ && export HOME=/home/test
+          git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming
+          cd $REPO_ROOT
+          pwd
       #- name: Enter repo and run script
         #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
 
