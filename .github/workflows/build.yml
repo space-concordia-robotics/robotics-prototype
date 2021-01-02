@@ -15,12 +15,12 @@ jobs:
       #
       #
 
-      -name: Run some commands to find out what is up with the container
-       run: |
-         ros --version
-         python --version
-         echo $HOME
-         pwd
+      - name: Run some commands to find out what is up with the container
+        run: |
+          ros --version
+          python --version
+          echo $HOME
+          pwd
 
 
 
