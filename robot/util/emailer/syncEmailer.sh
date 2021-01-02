@@ -7,5 +7,6 @@ fi
 cp ./* $EMAILER_DIR
 cd $EMAILER_DIR
 
+cp runEmailer.sh /usr/bin/runEmailer.sh
 # install dependencies defined in package.json
 npm install
