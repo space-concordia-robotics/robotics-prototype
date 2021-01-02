@@ -22,6 +22,18 @@ const ROSWARN = 4  // warning level
 const ROSERROR = 8 // error level
 const ROSFATAL = 16 // fatal/critical level
 
+//Alert handling variables
+var crntalert; //current alert
+var prevalert = Date.now(); //previous alert
+
+function checkAlert() {
+        if (crntalert >= prevalert + 3000){
+            prevalert = crntalert;
+            return true; //display alert message
+        } else{
+            return false;
+        }
+}
 
 // logs below this level will not be published or printed. Issue #202 will allow the user to set this value
 const MINIMUM_LOG_LEVEL = ROSINFO
@@ -227,8 +239,13 @@ function initRosWeb () {
     } else {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
+        crntalert = Date.now();
+        console.log("current alert is: " + crntalert);
+        console.log("previous alert is: " + prevalert);
+        console.log(checkAlert() == true);
+        if (checkAlert()){
             $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
-
+        }
       } else {
         textColor('#battery-voltage', 'white')
       }
