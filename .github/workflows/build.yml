@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-18.04
     container: ros:melodic-ros-base
     env:
-      REPO_ROOT="/home/test/Programming/robotics-prototype"
-      ARDUINO_PATH="/home/test/arduino-1.8.12" # Required for CMake script
-      TEENSYDUINO_VERSION="152"
-      ROS_PYTHON_VERSION="3.6"
-      ROS_VERSION="melodic"
-      OS_VERSION="bionic"
+      REPO_ROOT:"/home/test/Programming/robotics-prototype"
+      ARDUINO_PATH:"/home/test/arduino-1.8.12" # Required for CMake script
+      TEENSYDUINO_VERSION:"152"
+      ROS_PYTHON_VERSION:"3.6"
+      ROS_VERSION:"melodic"
+      OS_VERSION:"bionic"
     steps:
       # Use github workspace so that job can access repo
       #
