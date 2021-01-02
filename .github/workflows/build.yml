@@ -7,14 +7,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-18.04
-
+    container: ros:melodic-ros-base
     steps:
       # Use github workspace so that job can access repo
       - name: Clone Repo
-        run : git clone --recursive -b gh-actions-test https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
+        run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
 
-      - name: Enter repo and run script
-        run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
+      #- name: Enter repo and run script
+        #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
 
-      - name: Run pytest
-        run: pytest
+      #- name: Run pytest
+        #run: pytest
