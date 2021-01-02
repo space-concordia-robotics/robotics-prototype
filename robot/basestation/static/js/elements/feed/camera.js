@@ -215,6 +215,7 @@ $(document).ready(() => {
   })
 
   $(document).on('click', '.camera-selection-element', e => {
+    $('.ar-tag-detection').css("color","black");
     let selectedStream = $(e.target)[0]
     let cameraPanel = $(e.target).parents(".camera-panel")
     let cameraNameElement = cameraPanel.find(".camera-name")
@@ -402,14 +403,10 @@ $(document).ready(() => {
             if (!isARNodeRunning){
                 //turn it on and switch to it in callback
                 startARStream(cameraName, cameraFeed);
-                //return;
             }else{
                 cameraFeed.attr('src', arTagDetectionUrl)
                 $('.ar-tag-detection').css("color","red");
             }
-            // switching to it
-            //cameraFeed.attr('src', arTagDetectionUrl)
-            //$('.ar-tag-detection').css("color","red");
         }
       })
     }else{
