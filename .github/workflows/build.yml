@@ -1,0 +1,20 @@
+name: ROS CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      # Use github workspace so that job can access repo
+      - name: Clone Repo
+        run : git clone --recursive -b gh-actions-test https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
+
+      - name: Enter repo and run script
+        run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
+
+      - name: Run pytest
+        run: pytest
