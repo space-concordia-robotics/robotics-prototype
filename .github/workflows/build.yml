@@ -10,8 +10,23 @@ jobs:
     container: ros:melodic-ros-base
     steps:
       # Use github workspace so that job can access repo
-      - name: Clone Repo
-        run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
+      #
+      #
+      #
+      #
+
+      -name: Run some commands to find out what is up with the container
+       run: |
+         ros --version
+         python --version
+         echo $HOME
+         pwd
+
+
+
+
+      #- name: Clone Repo
+        #run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
 
       #- name: Enter repo and run script
         #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
