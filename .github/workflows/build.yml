@@ -18,7 +18,7 @@ jobs:
       - name: Run some commands to find out what is up with the container
         run: |
           rosversion -d
-          python --version
+          python3 --version
           echo $HOME
           pwd
 
