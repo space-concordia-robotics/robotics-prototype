@@ -10,7 +10,7 @@ jobs:
     container: ros:melodic-ros-base
     env:
       REPO_ROOT:/home/test/Programming/robotics-prototype
-      ARDUINO_PATH:/home/test/arduino-1.8.12 # Required for CMake script
+      ARDUINO_PATH:/home/test/arduino-1.8.12
       TEENSYDUINO_VERSION:152
       ROS_PYTHON_VERSION:3.6
       ROS_VERSION:melodic
