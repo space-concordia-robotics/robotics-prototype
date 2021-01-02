@@ -15,18 +15,13 @@ jobs:
       #
       #
 
-      - name: Run some commands to find out what is up with the container
+      - name: Update the container
         run: |
-          rosversion -d
-          python3 --version
-          echo $HOME
-          pwd
+          sudo apt update
+          sudo apt upgrade -y
 
-
-
-
-      #- name: Clone Repo
-        #run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype/ ~/Programming/robotics-prototype
+      - name: Clone Repo (Without autonomy module for now)
+        run : git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming
 
       #- name: Enter repo and run script
         #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
