@@ -1,7 +1,7 @@
 <launch>
-    <node pkg="cv_camera" type="cv_camera_node" name="$(arg __name)" output="screen">
-    <param name="_device_path" type="string" value="$(arg _device_path)"/>
-    <param name="_image_width" type="int" value="$(arg _image_width)"/>
-    <param name="_image_height" type="int" value="$(arg _image_height)"/>
+    <node pkg="cv_camera" type="cv_camera_node" name="$(arg name)" output="screen">
+    <param name="device_path" type="string" value="$(arg device_path)"/>
+    <param name="image_width" type="int" value="$(arg image_width)"/>
+    <param name="image_height" type="int" value="$(arg image_height)"/>
     </node>
 </launch>
