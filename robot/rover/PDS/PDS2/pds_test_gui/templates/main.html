@@ -24,6 +24,16 @@
     }});
     })
     })
+
+
+    setInterval(function() {
+      $.ajax({url:"/temperatures", success: function(result){
+        $('.temp-1').text(result[0])
+        $('.temp-2').text(result[1])
+        $('.temp-3').text(result[2])
+        $('.temp-4').text(result[3])
+      }});
+    }, 500)
 });
 </script>
 <body>

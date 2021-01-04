@@ -1,11 +1,16 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import serial
 import sys
 import time
+import threading
+import random
+# https://github.com/MartensCedric/sc-robotics-initiation/blob/master/binaryclock.py
+
 app = Flask(__name__)
 
 temperatures = [15, 15, 15, 15]
 currents = [1, 1, 1, 1]
+reading = True
 
 @app.route('/')
 def main_page():
@@ -38,11 +43,19 @@ def motoron():
 
 @app.route('/temperatures')
 def get_temperatures():
-    return (temperatures, 200)
+    return (jsonify(temperatures), 200)
 
 # have a loop that collects telemetry
+def read_serial():
+    global temperatures
+    while reading:
+        try:
+            #getting telemetry
+            # if ever you have an issue of that the port is already used, it might
+            # be because there's a thread in the background you can talk to me
+            time.sleep(0.2)
+            temperatures = [random.randint(0, 25), random.randint(0, 25), random.randint(0, 25), random.randint(0, 25)]
+        except Exception as e: print(e)
 
-while True:
-    time.sleep(0.5)
-    # update telemetry
-    temperatures = [10, 10, 10, 10] # from device
+thread = threading.Thread(target = read_serial)
+thread.start()
