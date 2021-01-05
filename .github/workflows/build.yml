@@ -26,4 +26,5 @@ jobs:
       - name: Run pytest
         run: |
           cd ~/robotics-prototype 
+          source venv/bin/activate
           pytest
