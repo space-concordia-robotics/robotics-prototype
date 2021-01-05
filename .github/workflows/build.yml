@@ -5,9 +5,9 @@ on:
   pull_request:
 
 env:
-  REPO_ROOT: "/home/test/Programming/robotics-prototype"
-  HOME: "/home/test"
-  ARDUINO_PATH: "/home/test/arduino-1.8.12"
+  #REPO_ROOT: "/home/test/Programming/robotics-prototype"
+  #HOME: "/home/test"
+  #ARDUINO_PATH: "/home/test/arduino-1.8.12"
   TEENSYDUINO_VERSION: "152"
   ROS_PYTHON_VERSION: "3.6"
   ROS_VERSION: "melodic"
@@ -24,20 +24,27 @@ jobs:
       #
       #
 
-      - name: Update the container
+      - name: Find user, home dir, and current dir
         run: |
-          sudo apt update
-          sudo apt upgrade -y
-
-      - name: Clone Repo (Without autonomy module for now)
-        run : |
-          #mkdir -p /home/test/ && export HOME=/home/test
-          git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype/
-          cd $REPO_ROOT
+          whoami
+          echo $HOME
+          echo ~
           pwd
-          #
-      - name: Enter repo and run script
-        run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
 
-      - name: Run pytest
-        run: pytest
+      #- name: Update the container
+      #run: |
+      #sudo apt update
+      #sudo apt upgrade -y
+      #
+      #- name: Clone Repo (Without autonomy module for now)
+      #run : |
+      ##mkdir -p /home/test/ && export HOME=/home/test
+      #git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype/
+      #cd $REPO_ROOT
+      #pwd
+      ##
+      #- name: Enter repo and run script
+      #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
+      #
+      #- name: Run pytest
+      #run: pytest
