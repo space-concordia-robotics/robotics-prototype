@@ -10,12 +10,17 @@ jobs:
     container: ros:melodic-ros-base
     steps:
 
-      - name: Setup Environment
-        run: robotics-prototype/.github/workflows/environment.sh
-
-      - name: Install arduino compiler
-        run: robotics-prototype/.github/workflows/teensyduino.sh
-
-      - name: Run pytest
+      - name:
         run: |
-          cd robotics-prototype && pytest
+          pwd
+          ls
+
+      #- name: Setup Environment
+        #run: robotics-prototype/.github/workflows/environment.sh
+
+      #- name: Install arduino compiler
+        #run: robotics-prototype/.github/workflows/teensyduino.sh
+
+      #- name: Run pytest
+        #run: |
+          #cd robotics-prototype && pytest
