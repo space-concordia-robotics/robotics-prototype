@@ -1,3 +1,5 @@
+#! /bin/bash
+
 sudo apt install curl
 
 ARDUINO_IDE_VERSION="1.8.12"

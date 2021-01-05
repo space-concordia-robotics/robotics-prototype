@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 # Apache License 2.0
 # Copyright (c) 2017, ROBOTIS CO., LTD.
 
