@@ -15,9 +15,8 @@ jobs:
 
       - name:
         run: |
-          pwd
+          cd $HOME
           ls
-
       #- name: Setup Environment
         #run: robotics-prototype/.github/workflows/environment.sh
 
