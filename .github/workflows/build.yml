@@ -11,18 +11,14 @@ jobs:
     steps:
 
       - name: Clone branch without autonomy module
-        run: git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/
+        run: git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
 
-      - name:
+      - name: Setup Environment
+        run: ~/robotics-prototype/.github/workflows/environment.sh
+
+      - name: Install arduino compiler
+        run: ~/robotics-prototype/.github/workflows/teensyduino.sh
+
+      - name: Run pytest
         run: |
-          cd $HOME
-          ls
-      #- name: Setup Environment
-        #run: robotics-prototype/.github/workflows/environment.sh
-
-      #- name: Install arduino compiler
-        #run: robotics-prototype/.github/workflows/teensyduino.sh
-
-      #- name: Run pytest
-        #run: |
-          #cd robotics-prototype && pytest
+          cd ~/robotics-prototype && pytest
