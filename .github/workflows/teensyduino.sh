@@ -33,7 +33,7 @@ if [ "$ARDUINO_PATH" == "$ARDUINO_IDE_FOLDER" ] && [ $folder_file_count != 0 ]; 
 else
     echo "Installing arduino IDE"
     mkdir -p ~/Arduino/libraries &&
-    wget $ARDUINO_DOWNLOAD_URL &&
+    wget --quiet $ARDUINO_DOWNLOAD_URL &&
     tar xf arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz -C $HOME &&
         
     # the following line requires sudo rights to complete the symlink
@@ -51,3 +51,8 @@ chmod +x TeensyduinoInstall.linux64 &&
 
 # clean up
 rm TeensyduinoInstall.linux64
+
+cd ~/robotics-prototype/robot/rover/build
+cmake ..
+make
+ 
