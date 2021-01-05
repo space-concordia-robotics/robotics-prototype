@@ -14,10 +14,14 @@ jobs:
         run: git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
 
       - name: Setup Environment
-        run: .~/robotics-prototype/.github/workflows/environment.sh
+        run: |
+          cd ~/robotics-prototype
+          ./.github/workflows/environment.sh
 
       - name: Install arduino compiler
-        run: .~/robotics-prototype/.github/workflows/teensyduino.sh
+        run: |
+          cd ~/robotics-prototype
+          ./.github/workflows/teensyduino.sh
 
       - name: Run pytest
         run: |
