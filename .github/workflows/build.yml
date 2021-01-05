@@ -10,6 +10,9 @@ jobs:
     container: ros:melodic-ros-base
     steps:
 
+      - name: Clone branch without autonomy module
+        run: git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/
+
       - name:
         run: |
           pwd
