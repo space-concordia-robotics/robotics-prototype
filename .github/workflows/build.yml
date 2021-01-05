@@ -6,6 +6,7 @@ on:
 
 env:
   REPO_ROOT: "/home/test/Programming/robotics-prototype"
+  HOME: "/home/test"
   ARDUINO_PATH: "/home/test/arduino-1.8.12"
   TEENSYDUINO_VERSION: "152"
   ROS_PYTHON_VERSION: "3.6"
@@ -30,7 +31,7 @@ jobs:
 
       - name: Clone Repo (Without autonomy module for now)
         run : |
-          mkdir -p /home/test/ && export HOME=/home/test
+          #mkdir -p /home/test/ && export HOME=/home/test
           git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype/
           cd $REPO_ROOT
           pwd
