@@ -60,7 +60,5 @@ echo "[Environment setup and getting rosinstall]"
 source /opt/ros/$name_ros_version/setup.sh
 sudo apt-get install -y python-rosinstall
 
-source $HOME/.bashrc
-
 echo "[Complete!!!]"
 exit 0
