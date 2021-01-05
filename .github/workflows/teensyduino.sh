@@ -1,6 +1,6 @@
 #! /bin/bash
 
-sudo apt install curl
+sudo apt install curl wget -y
 
 ARDUINO_IDE_VERSION="1.8.12"
 TEENSYDUINO_VERSION="152"
