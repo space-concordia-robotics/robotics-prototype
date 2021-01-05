@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container: ros:melodic-ros-base
+    container: ros:melodic-ros-core
     steps:
       # Use github workspace so that job can access repo
       #
@@ -31,7 +31,7 @@ jobs:
       - name: Clone Repo (Without autonomy module for now)
         run : |
           mkdir -p /home/test/ && export HOME=/home/test
-          git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming
+          git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype/
           cd $REPO_ROOT
           pwd
       #- name: Enter repo and run script
