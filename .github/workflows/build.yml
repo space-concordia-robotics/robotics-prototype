@@ -11,10 +11,10 @@ jobs:
     steps:
 
       - name: Setup Environment
-        run: environment.sh
+        run: robotics-prototyp/.github/workflows/environment.sh
 
       - name: Install arduino compiler
-        run: teensyduino.sh
+        run: robotics-prototyp/.github/workflows/teensyduino.sh
 
       - name: Run pytest
         run: |
