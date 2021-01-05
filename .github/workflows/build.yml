@@ -13,7 +13,10 @@ jobs:
       - name: Clone branch
         env: 
           SECRET: ${{ secrets.TEST_SECRET }}
-        run: git clone --recursive -b gh-actions-493 https://$SECRET@github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
+        run: |
+          git config credential.helper store
+          echo "https://https://$SECRET@github.com/space-concordia-robotics/autonomy-packages > ~/.git-credentials"
+          git clone --recursive -b gh-actions-493 https://$SECRET@github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
 
       - name: Setup Environment
         run: |
