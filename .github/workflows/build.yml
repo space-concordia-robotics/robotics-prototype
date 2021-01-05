@@ -34,8 +34,9 @@ jobs:
           git clone --recursive -b gh-actions-493 https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype/
           cd $REPO_ROOT
           pwd
-      #- name: Enter repo and run script
-        #run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
+          #
+      - name: Enter repo and run script
+        run: cd ~/Programming/robotics-prototype && ./EnvironmentSetup.sh
 
-      #- name: Run pytest
-        #run: pytest
+      - name: Run pytest
+        run: pytest
