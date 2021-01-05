@@ -39,4 +39,4 @@ jobs:
       - name: Run pytest
         run: |
           cd ~/robotics-prototype 
-          bash -c "source venv/bin/activate && pytest"
+          bash -c "source venv/bin/activate && source /robot/rospackages/devel/setup.bash && pytest"
