@@ -18,13 +18,19 @@ jobs:
           cd ~/robotics-prototype
           ./.github/workflows/environment.sh
 
+      - name: Configure ROS environment
+        run: |
+          cd ~/robotics-prototype
+          ./.github/workflows/ros.sh
+
       - name: Install arduino compiler
         run: |
           cd ~/robotics-prototype
           ./.github/workflows/teensyduino.sh
 
+
       - name: Run pytest
         run: |
           cd ~/robotics-prototype 
-          source venv/bin/activate
+          ./venv/bin/activate
           pytest
