@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
+![ROS CI](https://github.com/space-concordia-robotics/robotics-prototype/workflows/ROS%20CI/badge.svg)
 
 # robotics-prototype
 This repo contains the Robotics software team code.
