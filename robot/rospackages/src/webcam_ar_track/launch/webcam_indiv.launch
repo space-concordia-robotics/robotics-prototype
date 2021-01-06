@@ -1,4 +1,9 @@
 <launch>
+    <!-- The following commented lines are needed in kinetic for some reason -->
+    <!-- <arg name="device_path" /> -->
+    <!-- <arg name="image_width" /> -->
+    <!-- <arg name="image_height" /> -->
+    <!-- <arg name="name" /> -->
 	<arg name="marker_size" default="14.6" />
 	<arg name="max_new_marker_error" default="0.08" />
 	<arg name="max_track_error" default="0.2" />

@@ -1,4 +1,9 @@
 <launch>
+    <!-- The following commented lines are needed in kinetic for some reason -->
+    <!-- <arg name="device_path" /> -->
+    <!-- <arg name="image_width" /> -->
+    <!-- <arg name="image_height" /> -->
+    <!-- <arg name="name" /> -->
     <node pkg="cv_camera" type="cv_camera_node" name="$(arg name)" output="screen">
     <param name="device_path" type="string" value="$(arg device_path)"/>
     <param name="image_width" type="int" value="$(arg image_width)"/>
