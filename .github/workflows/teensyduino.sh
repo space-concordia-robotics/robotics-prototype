@@ -52,6 +52,8 @@ chmod +x TeensyduinoInstall.linux64 &&
 # clean up
 rm TeensyduinoInstall.linux64
 
+export ARDUINO_PATH=$ARDUINO_PATH
+
 mkdir -p ~/robotics-prototype/robot/rover/build
 cd ~/robotics-prototype/robot/rover/build
 cmake ..
