@@ -1,4 +1,6 @@
 <launch>
+    <!-- From what we've seen the following line is needed in kinetic (despite the 'pass_all_args' from camera_vision/launch/autonomy.launch). Make sure to comment it out if you're on kinetic -->
+    <!-- <arg name="camera_node_name" /> -->
 	<arg name="marker_size" default="14.6" />
 	<arg name="max_new_marker_error" default="0.08" />
 	<arg name="max_track_error" default="0.2" />
