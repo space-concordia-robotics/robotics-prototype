@@ -10,11 +10,11 @@ jobs:
     container: ros:melodic-ros-base
     steps:
 
-      - name: Clone branch
+      - name: Clone repo
         env: 
           SECRET: ${{ secrets.TEST_SECRET }}
         run: |
-          git clone -b gh-actions-493 https://$SECRET@github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
+          git clone https://github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
           cd ~/robotics-prototype
           git config credential.helper store
           echo "https://https://$SECRET@github.com/space-concordia-robotics/autonomy-packages > ~/.git-credentials"
@@ -30,7 +30,7 @@ jobs:
           cd ~/robotics-prototype
           ./.github/workflows/ros.sh
 
-      - name: Install arduino compiler
+      - name: Install teensyduino and run cmake on codebase
         run: |
           cd ~/robotics-prototype
           ./.github/workflows/teensyduino.sh
