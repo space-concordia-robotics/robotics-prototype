@@ -137,9 +137,9 @@ def stop_camera_task(port, active_ports, active_stream_ctr):
                         active_ports.remove(port)
                         active_streams.remove(stream)
                     else:
-                        response = 'Failed to stop ' + chosen_task + ' on port: ' + ports
+                        response = 'Failed to stop camera stream on port: ' + port
                 else:
-                    response = 'Failed to stop ' + chosen_task + ' on port: ' + port
+                    response = 'Failed to stop camera stream on port: ' + port
     else:
         response = "No active stream found on port: " + port + ', nothing to terminate'
 
