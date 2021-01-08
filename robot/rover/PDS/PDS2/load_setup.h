@@ -32,7 +32,7 @@ void disable_multisense()
 }
 
 
-void enabla_motor()
+void enable_motor()
 {
     digitalWrite(MOTOR_in, HIGH);
     Serial.println("Motor is Enabled!");
@@ -55,4 +55,18 @@ float load_voltage()
     Serial.println(load);
     
     return Vout;
+}
+
+
+void enable_fans()
+{
+    digitalWrite(Fans, HIGH);
+    Serial.println("Fans are Enabled!");  
+}
+
+
+void disable_fans()
+{
+    digitalWrite(Fans, LOW);
+    Serial.println("Fans are Disabled!");  
 }

@@ -10,10 +10,8 @@
 
 void setup() 
 {
-    Serial.begin(SERIAL_BAUD_RATE);
-  
+    Serial.begin(SERIAL_BAUD_RATE);  
     mux_settings();
-
     load_settings();
 }
 

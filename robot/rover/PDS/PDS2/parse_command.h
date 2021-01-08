@@ -22,7 +22,7 @@ void parseCommand()
         else if (*token == 'A') 
         { //enable all motors
             // enable_multisense();
-            enabla_motor();
+            enable_motor();
             Serial.println("Command: PDS enabling the motor!");
             break;
         }
