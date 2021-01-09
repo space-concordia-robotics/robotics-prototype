@@ -11,6 +11,7 @@ namespace internal_comms
     typedef struct {
         uint8_t commandID; // ID of command
         uint8_t* rawArgs; // Byte array with the bytes of the arguments
+        uint8_t rawArgsLength; // Number of bytes in the rawArgs array
         bool isValid; // Whether the command is valid
     } Command;
 
@@ -25,13 +26,12 @@ namespace internal_comms
             virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs) = 0;
 
             /**
-             * Takes as an input a rawCommand.
-             * Parses the command and returns by reference a command struct
+             * Reads serial the next command
+             * and returns a command struct
              *
-             * @param rawCommand
              * @return returns a command struct
              */
-            virtual Command* processCommand(const uint8_t* rawCommand) const;
+            virtual Command* processCommand() const;
     };
 
 }
