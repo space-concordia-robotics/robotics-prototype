@@ -9,12 +9,12 @@ namespace internal_comms
     Command* CommandCenter::processCommand(const uint8_t* rawCommand) const
     {
         Command* com = (Command*) malloc(sizeof(Command));
-        com.isValid = false;
+        com->isValid = false;
         if(rawCommand == nullptr)
             return com;
 
-        com.commandID = rawCommand[0];
-        com.isValid = true;
+        com->commandID = rawCommand[0];
+        com->isValid = true;
         return com;
     }
 }
