@@ -9,9 +9,9 @@
 namespace internal_comms
 {
     typedef struct {
-        byte commandID,
-             byte* rawArgs,
-             bool isValid
+        byte commandID, // ID of command
+        byte* rawArgs, // Byte array with the bytes of the arguments
+        bool isValid // Whether the command is valid
     } Command;
 
     class CommandCenter {
@@ -25,13 +25,13 @@ namespace internal_comms
             virtual void executeCommand(const byte commandID, const byte* rawArgs) = 0;
 
             /**
-             * Takes as an input a rawCommand in the form commandName=arg1,arg2,arg3,...
-             * Parses the command and returns by reference commandName and a const char* array of arguments
+             * Takes as an input a rawCommand.
+             * Parses the command and returns by reference a command struct
              *
              * @param rawCommand
-             * @return returns true if the command is valid, false otherwise
+             * @return returns a command struct
              */
-            virtual Command* processCommand(const byte* rawCommand, byte& commandID, byte* rawArgs) const;
+            virtual Command* processCommand(const byte* rawCommand) const;
     };
 
 }
