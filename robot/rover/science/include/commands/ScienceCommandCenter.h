@@ -5,12 +5,10 @@
 #ifndef ROVER_SCIENCECOMMANDCENTER_H
 #define ROVER_SCIENCECOMMANDCENTER_H
 
-#include "CommandCenter.h"
+#include "../../../comms/include/CommandCenter.h"
 
-class ScienceCommandCenter : public CommandCenter{
+class ScienceCommandCenter{
 
-    public:
-        void executeCommand(const char *commandName, const char **args) override;
 };
 
 

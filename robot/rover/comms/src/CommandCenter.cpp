@@ -6,7 +6,7 @@
 
 namespace internal_comms
 {
-    Command* CommandCenter::processCommand(const byte* rawCommand) const
+    Command* CommandCenter::processCommand(const uint8_t* rawCommand) const
     {
         Command* com = (Command*) malloc(sizeof(Command));
         com.isValid = false;

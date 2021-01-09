@@ -208,6 +208,8 @@ foreach(path ${INOFILES})
  
  endforeach()
 
+ add_subdirectory("comms")
+
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
  #the command is cmake --build . --target clean
 
