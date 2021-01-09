@@ -15,7 +15,7 @@ namespace internal_comms {
         Command* command = commandCenter->processCommand();
         if(command->isValid)
         {
-            commandCenter->executeCommand(command->commandID, command->bytesRead);
+            commandCenter->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
         }
         else
         {
@@ -32,6 +32,6 @@ namespace internal_comms {
 
     void endSerial()
     {
-        serial.end();
+        Serial.end();
     }
 }

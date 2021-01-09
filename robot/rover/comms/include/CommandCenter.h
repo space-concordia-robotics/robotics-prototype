@@ -23,7 +23,7 @@ namespace internal_comms
              * @param commandID The ID of the command to execute
              * @param rawArgs The raw bytes consisting of the arguments
              */
-            virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs) = 0;
+            virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) = 0;
 
             /**
              * Reads serial the next command
