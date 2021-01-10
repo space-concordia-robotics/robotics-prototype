@@ -5,7 +5,6 @@ import os
 import time
 import sys
 import glob
-import roslaunch
 import subprocess
 from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *

@@ -15,7 +15,7 @@ RUN ./videogroupworkaround.sh $videoid \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rospackages/devel/setup.bash" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/basestation/config/.bash_aliases" >> /home/spaceuser/.bashrc \
     && echo "source /home/spaceuser/Programming/robotics-prototype/robot/rover/config/.bash_aliases" >> /home/spaceuser/.bashrc \
-    && apt-get update && apt-get install -y apt-utils ros-melodic-rosbridge-suite 
+    && apt-get update && apt-get install -y apt-utils ros-$ROS_DISTRO-rosbridge-suite 
 
 WORKDIR /home/spaceuser/Programming/robotics-prototype
 COPY requirements.txt requirements-dev.txt setup.py docker/rosbridge/entrypoint.sh ./
@@ -30,7 +30,7 @@ RUN apt-get update -y && apt-get upgrade -y \
     && apt-get install -y nano vim wget curl libfontconfig libx11-6 libxft2 v4l-utils \
     ros-$ROS_DISTRO-cv-camera \
     ros-$ROS_DISTRO-web-video-server \
-    ros-ROS_DISTRO-ar-track-alvar
+    ros-$ROS_DISTRO-ar-track-alvar
 
 COPY install_arduino_teensyduino.sh .
 USER spaceuser
