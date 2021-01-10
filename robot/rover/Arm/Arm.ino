@@ -26,7 +26,6 @@
 */
 
 #include "Includes.h"
-#include <iostream>
 /* comms */
 char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
 
