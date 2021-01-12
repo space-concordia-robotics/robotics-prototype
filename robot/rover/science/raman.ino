@@ -3,7 +3,7 @@
 #include <include/Fan.h>
 #include <include/Funnel.h>
 #include <include/Pump.h>
-#include <include/commands/CommandCenter.h>
+#include "../comms/include/CommandCenter.h"
 #include <include/commands/ScienceCommandCenter.h>
 #include "include/Carousel.h"
 #include <cstdint>
@@ -16,8 +16,6 @@ Laser* laser = new Laser();
 Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
 Pump* pump = new Pump();
-
-CommandCenter* commandCenter = new ScienceCommandCenter();
 
 Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
 Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
