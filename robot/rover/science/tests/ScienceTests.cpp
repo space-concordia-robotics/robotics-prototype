@@ -1,6 +1,9 @@
 #line 2 "basic.ino"
+#include "Carousel.h"
+Carousel carousel;
 #include "AUnit.h"
 test(correct) {
+        carousel.eStop();
         int x = 1;
         assertEqual(x, 1);
 }
