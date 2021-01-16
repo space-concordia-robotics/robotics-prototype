@@ -85,8 +85,10 @@ $(document).ready(function () {
   function update_movement()
   {
 
-    let desiredLinearSpeed = 0.5; // todo speed should based on throttle
-    let desiredAngularSpeed = 1; // todo angular speed should be based on throttle
+    let throttle = parseFloat($('.throttle-speed').text());
+
+    let desiredLinearSpeed = 0.5 * throttle;
+    let desiredAngularSpeed = 1 * throttle;
 
     let currentLinearSpeed = 0;
     let currentAngularSpeed = 0;
@@ -121,4 +123,12 @@ $(document).ready(function () {
 
     $('.throttle-speed').text(newThrottle);
   }
+
+  $('.throttle-increase').click(() => {
+    modify_throttle(0.05)
+  });
+
+  $('.throttle-decrease').click(() => {
+    modify_throttle(-0.05)
+  });
 })
