@@ -17,7 +17,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 LINKER_LANGUAGE C 
 LINK_FLAGS ${ARM_GCC_LINKER_FLAGS}
 )
-message(STATUS ${project_sources})
+
 #Note the second line, CMakeTemplate.txt.in will pass in the name of the library it generated so our testing file can link to
 target_link_libraries( ${PROJECT_NAME}
 ${project_sources}
