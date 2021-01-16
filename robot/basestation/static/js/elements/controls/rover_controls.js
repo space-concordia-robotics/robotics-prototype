@@ -106,5 +106,19 @@ $(document).ready(function () {
     move_rover(currentLinearSpeed, currentAngularSpeed);
   }
 
+  /*
+   * Modifies the current throttle displayed on the GUI by an amount
+   */
+  function modify_throttle(amount)
+  {
+    let currentThrottle = parseFloat($('.throttle-speed').text())
+    let newThrottle = currentThrottle + amount;
 
+    if(newThrottle > 1)
+      newThrottle = 1
+    else if(newThrottle < 0)
+      newThrottle = 0
+
+    $('.throttle-speed').text(newThrottle);
+  }
 })
