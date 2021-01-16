@@ -354,7 +354,7 @@ if __name__ == '__main__':
     to change the state (rise, stable, and fall) values"""
 
     # Set voltages rise, stable and fall to be parametrized
-    voltages = {"rise": 20, "stable": 15, "fall": 10}
+    voltages = {"rise": 20, "stable": 13.5, "fall": 10}
 
     # Set temperatures rise, stable and fall to be parametrized
     temps = {"rise": 100, "stable": 25, "fall": -20}

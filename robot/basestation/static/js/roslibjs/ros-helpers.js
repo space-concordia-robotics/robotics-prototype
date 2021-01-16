@@ -27,7 +27,7 @@ var crntalert; //current alert
 var prevalert = Date.now(); //previous alert
 
 function checkAlert() {
-        if (crntalert >= prevalert + 3000){
+        if (crntalert >= prevalert + 5000){
             prevalert = crntalert;
             return true; //display alert message
         } else{
@@ -242,7 +242,6 @@ function initRosWeb () {
         crntalert = Date.now();
         console.log("current alert is: " + crntalert);
         console.log("previous alert is: " + prevalert);
-        console.log(checkAlert() == true);
         if (checkAlert()){
             $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
         }
