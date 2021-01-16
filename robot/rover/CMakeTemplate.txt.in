@@ -58,6 +58,6 @@ add_custom_target(${PROJECT_NAME}
         DEPENDS ${PROJECT_NAME}_upload_command)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-add_subdirectory(tests)
-set(project_sources ${PROJECT_NAME}_user)
+    set(project_sources ${PROJECT_NAME}_user)
+    add_subdirectory(tests)
 endif()

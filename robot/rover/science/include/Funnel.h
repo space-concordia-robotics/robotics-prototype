@@ -8,10 +8,11 @@
 
 #include "Stoppable.h"
 #include "Updatable.h"
+#include <cstdint>
 
 class Funnel : public Stoppable, public Updatable {
     protected:
-        int funnelPWM;
+        uint8_t funnelPWM;
     public:
         virtual void funnel();
         virtual void update(unsigned long) override;

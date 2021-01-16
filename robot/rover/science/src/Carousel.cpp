@@ -16,7 +16,7 @@ void Carousel::home() {
 
 }
 
-void Carousel::goToCuvette(int cuvetteId) {
+void Carousel::goToCuvette(uint8_t cuvetteId) {
 
 }
 

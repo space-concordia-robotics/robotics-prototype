@@ -74,7 +74,7 @@ set(AUNIT_VERSION v1.4.1)
 
 set(UNIXHOSTDUINO_PATH  ${ARDUINO_EXTERNAL_LIB}/UnixHostDuino)
 set(UNIXHOSTDUINO_URL https://github.com/steamypotato/UnixHostDuino)
-set(UNIXHOSTDUINO_VERSION v0.3.3)
+set(UNIXHOSTDUINO_VERSION v0.3.4)
 
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
@@ -135,10 +135,10 @@ add_definitions(
 #compiler flags for all compilers, copy pasted from the Teensyduino verbose output
 set(ARM_GCC_S_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -nostdlib -MMD -x assembler-with-cpp -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 set(ARM_GCC_C_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
-set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
+set(ARM_GXX_FLAGS -O2 -g -ffunction-sections -nostdlib -MMD -mthumb -fno-exceptions -fpermissive -felide-constructors -std=gnu++14 -Wno-error=narrowing -fno-rtti -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant)
 
 #linker flags, note even c++ projects link using gcc, since we are using the -lstdc++ flag -> from Teensyduino
- set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/${MCU}.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
+set(ARM_GCC_LINKER_FLAGS "-O2 -Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1584728951 -T${TEENSY_CORE}/teensy3/${MCU}.ld -lstdc++ -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant")
 
 #S FILES - compiled with gcc
 add_library(teensycore_s  OBJECT ${TEENSY_CORE_S_FILES})
@@ -218,7 +218,6 @@ foreach(path ${INOFILES})
  endif()
  
   #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
-  message(STATUS "CMake file was found in : ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}")
   configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY)
   add_subdirectory(${project_dir})
 
