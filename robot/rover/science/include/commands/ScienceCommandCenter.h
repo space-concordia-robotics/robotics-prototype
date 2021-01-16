@@ -7,8 +7,10 @@
 
 #include "../../../comms/include/CommandCenter.h"
 
-class ScienceCommandCenter{
+using namespace internal_comms;
 
+class ScienceCommandCenter : CommandCenter {
+    void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength);
 };
 
 

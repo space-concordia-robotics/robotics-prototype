@@ -32,6 +32,9 @@ namespace internal_comms
              * @return returns a command struct
              */
             virtual Command* processCommand() const;
+
+        private:
+            uint16_t readMessageSize() const;
     };
 
 }

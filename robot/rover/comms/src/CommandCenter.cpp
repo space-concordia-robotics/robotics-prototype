@@ -9,21 +9,30 @@ namespace internal_comms
     Command* CommandCenter::processCommand() const
     {
         uint8_t commandID = Serial.read();
-        size_t bytesToRead = Serial.read();
-        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * bytesToRead);
-        uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, bytesRead);
+        uint16_t messageLength = readMessageSize();
+        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * messageLength);
+        uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, messageLength);
 
-        if(bytesRead != bytesToRead)
+        if(bytesRead != messageLength)
         {
             // Possibly an issue
         }
 
 
-        Command* com = (Command*) malloc(sizeof(Command));
-        com->commandID = commandID;
-        com->isValid = true;
-        com->rawArgs = buffer;
-        com->rawArgsLength = bytesRead;
-        return com;
+        Command* cmd = (Command*) malloc(sizeof(Command));
+        cmd->commandID = commandID;
+        cmd->isValid = true;
+        cmd->rawArgs = buffer;
+        cmd->rawArgsLength = bytesRead;
+        return cmd;
+    }
+
+    uint16_t CommandCenter::readMessageSize() const 
+    {
+        // Serial.read() returns size_t
+        uint16_t byte1 = Serial.read();
+        uint8_t byte2 = Serial.read();
+        uint16_t messageLength = (byte1 << 8) | byte2;
+        return messageLength;
     }
 }
