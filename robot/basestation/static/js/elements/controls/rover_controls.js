@@ -121,14 +121,16 @@ $(document).ready(function () {
     else if(newThrottle < 0)
       newThrottle = 0
 
-    $('.throttle-speed').text(newThrottle);
+    $('.throttle-speed').text(Math.round(newThrottle * 100)/100);
   }
 
-  $('.throttle-increase').click(() => {
-    modify_throttle(0.05)
-  });
+  let KEY_U = 117
+  let KEY_I = 105
+  $(document).keypress(e => {
+    if(e.which == KEY_U)
+      modify_throttle(0.05);
 
-  $('.throttle-decrease').click(() => {
-    modify_throttle(-0.05)
+    if(e.which == KEY_I)
+      modify_throttle(-0.05);
   });
 })
