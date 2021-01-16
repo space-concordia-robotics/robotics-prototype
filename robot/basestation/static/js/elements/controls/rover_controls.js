@@ -85,8 +85,10 @@ $(document).ready(function () {
   function update_movement()
   {
 
-    let desiredLinearSpeed = 0.5; // todo speed should based on throttle
-    let desiredAngularSpeed = 1; // todo angular speed should be based on throttle
+    let throttle = parseFloat($('.throttle-speed').text());
+
+    let desiredLinearSpeed = 0.5 * throttle;
+    let desiredAngularSpeed = 1 * throttle;
 
     let currentLinearSpeed = 0;
     let currentAngularSpeed = 0;
@@ -106,5 +108,29 @@ $(document).ready(function () {
     move_rover(currentLinearSpeed, currentAngularSpeed);
   }
 
+  /*
+   * Modifies the current throttle displayed on the GUI by an amount
+   */
+  function modify_throttle(amount)
+  {
+    let currentThrottle = parseFloat($('.throttle-speed').text())
+    let newThrottle = currentThrottle + amount;
 
+    if(newThrottle > 1)
+      newThrottle = 1
+    else if(newThrottle < 0)
+      newThrottle = 0
+
+    $('.throttle-speed').text(Math.round(newThrottle * 100)/100);
+  }
+
+  let KEY_U = 117
+  let KEY_I = 105
+  $(document).keypress(e => {
+    if(e.which == KEY_U)
+      modify_throttle(0.05);
+
+    if(e.which == KEY_I)
+      modify_throttle(-0.05);
+  });
 })

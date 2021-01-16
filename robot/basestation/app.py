@@ -25,12 +25,9 @@ from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_i
 
 app = flask.Flask(__name__)
 
-# Once we launch this, this will route us to the "/" page or index page and
-# automatically render the Robot GUI
-@app.route("/")
 @app.route("/arm")
 def index():
-    """Current landing page, the arm panel."""
+    """The arm panel."""
     return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/camerapopup")
@@ -38,6 +35,7 @@ def camerapopup():
     """Camera Pop-up."""
     return flask.render_template("pages/CameraPopUp.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/")
 @app.route("/rover")
 def rover():
     """Rover control panel."""
