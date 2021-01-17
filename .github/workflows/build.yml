@@ -15,14 +15,9 @@ jobs:
     steps:
 
       - name: Clone repo
-        env: 
-          SECRET: ${{ secrets.TEST_SECRET }}
         run: |
           git clone https://github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
           cd ~/robotics-prototype
-          git config credential.helper store
-          echo "https://https://$SECRET@github.com/space-concordia-robotics/autonomy-packages > ~/.git-credentials"
-          git submodule init
 
       - name: Setup Environment
         run: |
