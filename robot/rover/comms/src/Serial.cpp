@@ -1,6 +1,6 @@
-#include "Serial.h"
+#include "include/Serial.h"
 
-namespace internal_comms {
+namespace internal_comms{
 
     void startSerial(uint8_t rxPin, uint8_t txPin, long baudRate)
     {

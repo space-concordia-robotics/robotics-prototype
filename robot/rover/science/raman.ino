@@ -4,8 +4,8 @@
 #include <include/Funnel.h>
 #include <include/Pump.h>
 #include "../comms/include/CommandCenter.h"
-#include "../comms/include/commands/ScienceCommandCenter.h"
 #include "../comms/include/Serial.h"
+#include "include/commands/ScienceCommandCenter.h"
 #include "include/Carousel.h"
 #include <cstdint>
 
@@ -20,23 +20,25 @@ Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
 Pump* pump = new Pump();
 
-CommandCenter* commandCenter = new ScienceCommandCenter();
+internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
 Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
 Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
 unsigned long time = micros();
 
-
 void loop()
 {
     if(Serial.available() > 0)
-        readCommand(commandCenter);
+        internal_comms::readCommand(commandCenter);
 
     updateSystems();
 }
 
 void setup()
-{}
+{
+    internal_comms::startSerial(1, 2, 9600);
+
+}
 
 /**
  * Calculates delta for each system and calls their update method.

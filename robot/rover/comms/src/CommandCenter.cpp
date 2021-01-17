@@ -11,9 +11,10 @@ namespace internal_comms
         uint8_t commandID = Serial.read();
         uint8_t deviceSending = Serial.read();
         uint8_t deviceReceiving = Serial.read();
-        uint16_t messageLength = readMessageSize();
-        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * messageLength);
-        uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, messageLength);
+        uint16_t argumentSize = readMessageSize();
+
+        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
+        uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         uint8_t stopByte = Serial.read();
 
         Command* cmd = (Command*) malloc(sizeof(Command));
@@ -22,7 +23,7 @@ namespace internal_comms
         cmd->rawArgs = buffer;
         cmd->rawArgsLength = bytesRead;
 
-        if(bytesRead != messageLength)
+        if(bytesRead != argumentSize)
         {
             // Possibly an issue
         }

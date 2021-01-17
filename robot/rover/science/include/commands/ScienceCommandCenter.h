@@ -7,8 +7,8 @@
 
 #include "../../../comms/include/CommandCenter.h"
 
-class ScienceCommandCenter : internal_comms::CommandCenter {
-    void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength);
+class ScienceCommandCenter : public internal_comms::CommandCenter {
+    void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) override;
 };
 
 

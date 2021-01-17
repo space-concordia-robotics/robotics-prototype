@@ -1,9 +1,9 @@
+#ifndef INTERNAL_COMMS_COMMANDCENTER_H
+#define INTERNAL_COMMS_COMMANDCENTER_H
 //
 // Created by cedric on 2020-10-14.
 //
 
-#ifndef INTERNAL_COMMS_COMMANDCENTER_H
-#define INTERNAL_COMMS_COMMANDCENTER_H
 #include "Arduino.h"
 
 namespace internal_comms
@@ -31,7 +31,7 @@ namespace internal_comms
              *
              * @return returns a command struct
              */
-            virtual Command* processCommand() const;
+            Command* processCommand() const;
 
         private:
             uint16_t readMessageSize() const;
