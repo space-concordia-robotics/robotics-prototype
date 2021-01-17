@@ -34,7 +34,7 @@ namespace internal_comms
             Command* processCommand() const;
 
         private:
-            uint16_t readMessageSize() const;
+            uint16_t readArgSize() const;
     };
 
 }

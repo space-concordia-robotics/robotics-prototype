@@ -11,7 +11,7 @@ namespace internal_comms
         uint8_t commandID = Serial.read();
         uint8_t deviceSending = Serial.read();
         uint8_t deviceReceiving = Serial.read();
-        uint16_t argumentSize = readMessageSize();
+        uint16_t argumentSize = readArgSize();
 
         uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
         uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
@@ -36,12 +36,12 @@ namespace internal_comms
         return cmd;
     }
 
-    uint16_t CommandCenter::readMessageSize() const 
+    uint16_t CommandCenter::readArgSize() const 
     {
         // Serial.read() returns size_t
         uint16_t byte1 = Serial.read();
         uint8_t byte2 = Serial.read();
-        uint16_t messageLength = (byte1 << 8) | byte2;
-        return messageLength;
+        uint16_t ArgumentsLength = (byte1 << 8) | byte2;
+        return ArgumentsLength;
     }
 }
