@@ -6,12 +6,12 @@
 
 namespace internal_comms
 {
-    void startSerial(uint8_t rxPin, uint8_t txPin, long baudRate)
+    void startSerial(uint8_t rxPin, uint8_t txPin)
     {
         pinMode(rxPin, INPUT);
         pinMode(txPin, OUTPUT); 
 
-        Serial.begin(baudRate);
+        Serial.begin(COMMS_BAUDRATE);
     }
 
     void readCommand(CommandCenter* commandCenter)
