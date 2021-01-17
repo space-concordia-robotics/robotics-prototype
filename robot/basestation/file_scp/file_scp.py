@@ -12,7 +12,7 @@ import os.path
 import subprocess
 import sys
 import traceback
-from paramiko import SSHClient, AutoAddPolicy, RSAKey
+from paramiko import SSHClient, AutoAddPolicy, Ed25519Key
 from paramiko.auth_handler import SSHException
 from scp import SCPClient, SCPException
 import transferconfig as cfg
@@ -20,26 +20,26 @@ import transferconfig as cfg
 
 class RemoteConnection:
 
-    def __init__(self, rover_ip, user, rover_file_path, key_path, rsa_password):
+    def __init__(self, rover_ip, user, rover_file_path, key_path, ed25519_password):
         self.rover_ip = rover_ip
         self.user = user
         self.rover_file_path = rover_file_path
-        self.rsa_password = rsa_password
+        self.ed25519_password = ed25519_password 
         self.key_path = key_path
         self.ssh_key = None
         self.scp = None
 
     def check_ssh_keys(self):
-        """checks if system has an RSA key for the server. if key is not found
+        """checks if system has an Ed255219 key for the server. if key is not found
         will generate a new key at the location specified in the config file"""
         path = os.path.expanduser(self.key_path)
         try:
-            RSAKey.from_private_key_file(path, password=self.rsa_password)
+            Ed25519Key.from_private_key_file(path, password=self.ed25519_password)
             print("key found")
         except FileNotFoundError:
             print('key is not found')
-            subprocess.run(f'ssh-keygen -f {self.key_path} -t rsa', shell=True)
-            print(f'RSA key generated at {self.key_path}')
+            subprocess.run(f'ssh-keygen -f {self.key_path} -t ed25519', shell=True)
+            print(f'Ed25519 key generated at {self.key_path}')
         except SSHException:
             print(
                 'There is a problem with the key, double check that your encription' +
@@ -48,14 +48,14 @@ class RemoteConnection:
             sys.exit()
 
     def connect(self):
-        """initiate the connection to the host machine. If the rsa key has not been
+        """initiate the connection to the host machine. If the Ed25519 key has not been
         pushed to rover, function will handle it"""
         try:
             self.client = SSHClient()
             self.client.load_system_host_keys()
             self.client.set_missing_host_key_policy(AutoAddPolicy())
             self.client.connect(
-                hostname=self.rover_ip, username=self.user, password=self.rsa_password
+                hostname=self.rover_ip, username=self.user, password=self.ed25519_password
             )
             self.scp = SCPClient(self.client.get_transport())
             print(f'sucessfully connected to {self.rover_file_path}')
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     )
     image_retriver = RemoteConnection(
         cfg.user['rover_ip'], cfg.user['rover_user'], cfg.user['rover_image_dir'],
-        cfg.user['key_path'], cfg.user['rsa_password']
+        cfg.user['key_path'], cfg.user['ed25519_password']
     )
     image_retriver.check_ssh_keys()
     image_retriver.connect()
