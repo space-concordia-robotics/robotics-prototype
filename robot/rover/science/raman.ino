@@ -40,7 +40,7 @@ void loop()
 
 void setup()
 {
-    internal_comms::startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, BAUDRATE); // wrong pins
+    internal_comms::startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, BAUDRATE);
 }
 
 /**
