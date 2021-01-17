@@ -18,7 +18,7 @@ set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
 set(TEENSY_CORE ${ARDUINO_PATH}/hardware/teensy/avr/cores)
 set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
-set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
+set(ARDUINO_EXTERNAL_LIB $ENV{HOME}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 set(ARM_GCC_OBJCOPY ${ARM_TOOLS}/arm/bin/arm-none-eabi-objcopy)
@@ -212,6 +212,8 @@ foreach(path ${INOFILES})
  add_subdirectory(${project_dir}) 
  
  endforeach()
+
+ add_subdirectory("comms")
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
  #the command is cmake --build . --target clean
