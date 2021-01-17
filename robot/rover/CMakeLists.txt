@@ -168,7 +168,7 @@ CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp Spark
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 
 #libraries should be created before the executables
-add_subdirectory(comms)
+add_subdirectory(internal_comms)
 
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
@@ -188,7 +188,7 @@ foreach(path ${INOFILES})
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
  elseif(${name} STREQUAL "raman")
-  set(PROJECT_LIBRARIES comms)
+  set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")

@@ -3,8 +3,8 @@
 #include <include/Fan.h>
 #include <include/Funnel.h>
 #include <include/Pump.h>
-#include "../comms/include/CommandCenter.h"
-#include "../comms/include/Serial.h"
+#include "../internal_comms/include/CommandCenter.h"
+#include "../internal_comms/include/Serial.h"
 #include "include/commands/ScienceCommandCenter.h"
 #include "include/Carousel.h"
 #include <cstdint>

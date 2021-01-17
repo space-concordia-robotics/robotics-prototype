@@ -5,7 +5,7 @@
 #ifndef ROVER_SCIENCECOMMANDCENTER_H
 #define ROVER_SCIENCECOMMANDCENTER_H
 
-#include "../../../comms/include/CommandCenter.h"
+#include "../../../internal_comms/include/CommandCenter.h"
 
 class ScienceCommandCenter : public internal_comms::CommandCenter {
     void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) override;
