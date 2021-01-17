@@ -12,6 +12,10 @@
 const uint8_t NUMBER_OF_STOPPABLES = 5;
 const uint8_t NUMBER_OF_UPDATABLES = 5;
 
+const uint8_t TX_TEENSY_4_0_PIN = 1;
+const uint8_t RX_TEENSY_4_0_PIN = 0;
+const long BAUDRATE = 9600;
+
 void updateSystems();
 
 Carousel* carousel = new Carousel();
@@ -36,8 +40,7 @@ void loop()
 
 void setup()
 {
-    internal_comms::startSerial(1, 2, 9600);
-
+    internal_comms::startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, BAUDRATE); // wrong pins
 }
 
 /**

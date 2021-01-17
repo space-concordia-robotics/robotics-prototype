@@ -1,7 +1,11 @@
+//
+// Created by cedric on 2021-01-16
+//
+
 #include "include/Serial.h"
 
-namespace internal_comms{
-
+namespace internal_comms
+{
     void startSerial(uint8_t rxPin, uint8_t txPin, long baudRate)
     {
         pinMode(rxPin, INPUT);
