@@ -8,7 +8,7 @@ UNIXHOSTDUINO_PATH := ~/Arduino/libraries/UnixHostDuino
 SRC_INCLUDE_DIRS:= ../include
 
 #Addtional .cpp files that are needed by the tests
-SRC_FILES :=
+SRC_FILES := ../src/Carousel.cpp
 
 
 include $(UNIXHOSTDUINO_PATH)/UnixHostDuino.mk

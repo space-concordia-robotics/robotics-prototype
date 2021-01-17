@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
 
-#include(ExternalProject)
-
-
 if(DEFINED ENV{ARDUINO_PATH})
 message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
 else()
@@ -202,7 +199,7 @@ foreach(path ${INOFILES})
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
 
-     # this particular project is important and should be supported, issue #409 opened for this
+# this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
  continue()

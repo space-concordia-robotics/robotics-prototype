@@ -52,7 +52,7 @@ add_custom_command(
 add_custom_command(OUTPUT ${PROJECT_NAME}_upload_command
         COMMAND ${TEENSY_LOADER_CLI} --mcu=${MCU} -s -v ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
         DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
-        )
+)
 
 add_custom_target(${PROJECT_NAME}
         DEPENDS ${PROJECT_NAME}_upload_command)
