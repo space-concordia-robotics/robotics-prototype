@@ -107,7 +107,7 @@ endmacro()
 
 #find paths for all pre-installed teensy libraries, so that all projects have access to these paths
 getSubdirectories(TEENSY_LIBRARIES ${TEENSY_LIB})
-getSubdirectories(AUNIT_DIRS ${AUNIT_PATH}/src)
+
 #every project should have access to all of these paths
 include_directories(
  	${TEENSY_CORE}
@@ -181,7 +181,6 @@ CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 file(GLOB_RECURSE AUNIT_SOURCES ${AUNIT_PATH}/*.cpp)
 createCppLibrary("${AUNIT_SOURCES}" AUNIT ${AUNIT_PATH}/src)
 
-#message(STATUS "SOURCES : ${AUNIT_SOURCES}")
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
