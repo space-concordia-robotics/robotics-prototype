@@ -162,17 +162,19 @@ createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
 #create the external teensy libraries
-
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 
+#libraries should be created before the executables
+add_subdirectory(internal_comms)
+
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
  get_filename_component(name ${path} NAME_WE)
- 
+
  #creates a command which runs a few bash commands to delete the current subproject. 
  #These are useless on their own and need to be attached to a target to work 
  add_custom_command(
@@ -182,10 +184,11 @@ foreach(path ${INOFILES})
  )
 
  set(Project_Name ${name})
- 
+
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
-
+ elseif(${name} STREQUAL "raman")
+  set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
@@ -207,8 +210,6 @@ foreach(path ${INOFILES})
  add_subdirectory(${project_dir}) 
  
  endforeach()
-
- add_subdirectory("comms")
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
  #the command is cmake --build . --target clean

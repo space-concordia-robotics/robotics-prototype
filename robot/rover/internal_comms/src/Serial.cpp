@@ -1,13 +1,17 @@
-#include "Serial.h"
+//
+// Created by cedric on 2021-01-16
+//
 
-namespace internal_comms {
+#include "include/Serial.h"
 
-    void startSerial(uint8_t rxPin, uint8_t txPin, long baudRate)
+namespace internal_comms
+{
+    void startSerial(uint8_t rxPin, uint8_t txPin)
     {
         pinMode(rxPin, INPUT);
         pinMode(txPin, OUTPUT); 
 
-        Serial.begin(baudRate);
+        Serial.begin(COMMS_BAUDRATE);
     }
 
     void readCommand(CommandCenter* commandCenter)
