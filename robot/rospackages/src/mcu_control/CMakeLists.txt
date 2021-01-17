@@ -31,8 +31,9 @@ add_message_files(
   IkCommand.msg
   ## rover
   ##RoverPosition.msg
-  AntennaGoal.msg
-  ##RoverGoal.msg
+  AntennaMarker.msg
+  RoverMarker.msg
+  RoverMarkerList.msg
   ThermistorTemps.msg
   FanSpeeds.msg
   Voltage.msg
