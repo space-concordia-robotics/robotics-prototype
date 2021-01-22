@@ -1,4 +1,0 @@
-# Development specific requirements
-pytest==3.6.3
-pylint==2.5.3
-yapf==0.30.0

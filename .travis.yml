@@ -27,14 +27,15 @@ install:
   - ./TeensyduinoInstall.linux64 --dir=$ARDUINO_PATH
   
   # Install pip dependencies and setup robot python package
-  - pip install -r requirements.txt -r requirements-dev.txt
+  - pip install -r requirements.txt
   - pip install -e .
     
   # Install ros-base and necessary packages 
   - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $OS_VERSION main\" > /etc/apt/sources.list.d/ros-latest.list"
   - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
   - sudo apt update -q
-  - sudo apt install -y -q dpkg python-catkin-pkg python-rosdep python-wstool ros-$ROS_VERSION-ros-base ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server
+  - sudo apt install -y ros-$ROS_VERSION-ros-base ros-$ROS_VERSION-cv-camera ros-$ROS_VERSION-web-video-server 
+  - sudo apt install -y python-rosdep python-wstool 
     
   # Install ros package dependencies
   - cd $REPO_ROOT/robot/rospackages
@@ -43,16 +44,19 @@ install:
   - rosdep install -y -r --from-paths src --ignore-src --rosdistro $ROS_VERSION
 
 script:
-  # Set up 'robot' python module and test python installation
+  # Set up 'robot' python module
   - cd $REPO_ROOT
   - python setup.py develop
-  - pytest --continue-on-collection-errors
 
   # Set up and initialize catkin workspace for ros packages
   - cd $REPO_ROOT/robot/rospackages
   - source /opt/ros/$ROS_VERSION/setup.bash
   - catkin_make
 
+  # Run python unit tests
+  - cd $REPO_ROOT
+  - pytest --continue-on-collection-errors
+    
   # Allow to compile arduino code in external IDEs or something
   - cd $REPO_ROOT/robot/rover/build
   - cmake ..
@@ -72,8 +76,7 @@ notifications:
     on_failure: change
 
 python:
-  #- "2.7" # not supported
   - "3.6"
 
 git:
-  submodules: true
+  submodules: false
