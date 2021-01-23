@@ -2,7 +2,13 @@
 // Created by Michael on 2021-01-23.
 //
 
+
 //TODO: Fix CMake
+//TODO: Get methods from MobilePlatform.ino 
+//TODO: Fix PinSetup.h (not sure what i need to do ngl)
+//TODO: Fix path from /includes to /include (And includes which use this path) and FIX CMAKE SO IT BUILDS!
+//TODO: Fix CMakeLists.txt and CMakeTemplate.txt.in from /robot/rover
+
 
 #include "../../includes/commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
 
