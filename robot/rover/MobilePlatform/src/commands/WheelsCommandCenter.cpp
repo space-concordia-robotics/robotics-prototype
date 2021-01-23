@@ -77,8 +77,8 @@ Switch command recieved to perform specific function
       moveWheel();
       break;
     default:
+        break; //Added so the cmake compiles
         //Function which uses the arm to perform CBT of users choice
-    
   }
 
 }
