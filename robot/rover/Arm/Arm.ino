@@ -297,24 +297,6 @@ void loop() {
         nh.loginfo("arm");
 #endif
       }
-      else if (motorCommand.stopAllMotors) { // emergency stop takes precedence
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          motorArray[i]->stopRotation();
-          motorArray[i]->stopHoming();
-        }
-        // the following variables are global rather than belonging to a class so must be dealt with separately
-        // i suppose i could package a bunch of this into a function called stopHoming
-        isHoming = false;
-        homingMotor = NUM_MOTORS - 1;
-        for (int i = 0; i < NUM_MOTORS; i++) {
-          motorsToHome[i] = false;
-        }
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("ARM all motors stopped because of emergency stop");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("all motors stopped because of emergency stop");
-#endif
-      }
       else if (motorCommand.rebootCommand) {
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
         UART_PORT.println("ARM rebooting arm teensy... hang on a sec");
@@ -1248,4 +1230,19 @@ void m6ExtendISR(void) {
   else {
     motor6.triggerState = 0;
   }
+}
+
+void stopAllMotors()
+{
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      motorArray[i]->stopRotation();
+      motorArray[i]->stopHoming();
+    }
+    // the following variables are global rather than belonging to a class so must be dealt with separately
+    // i suppose i could package a bunch of this into a function called stopHoming
+    isHoming = false;
+    homingMotor = NUM_MOTORS - 1;
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      motorsToHome[i] = false;
+    }
 }
