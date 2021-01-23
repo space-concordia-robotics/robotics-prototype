@@ -70,15 +70,15 @@
 // includes must come after the above UART_PORT definition as it's used in other files.
 // perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include <Servo.h>
-#include "PinSetup.h"
-#include "Parser.h"
-#include "Vsense.h"
+#include "include/PinSetup.h"
+#include "include/Parser.h"
+#include "include/Vsense.h"
 // #include "Notes.h" // holds todo info
 // #include "Ideas.h" // holds bits of code that haven't been implemented
-#include "PidController.h"
-#include "RobotMotor.h"
-#include "DcMotor.h"
-#include "ServoMotor.h"
+#include "include/PidController.h"
+#include "include/RobotMotor.h"
+#include "include/DcMotor.h"
+#include "include/ServoMotor.h"
 /* interrupt priorities */
 #define LIMIT_SWITCH_NVIC_PRIORITY 100 //!< limit switch interrupt priority is highest
 #define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4 //!< encoder interrupt priority is second highest
@@ -94,6 +94,7 @@
 #define SERIAL_PRINT_INTERVAL 50 //!< how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 20 //!< how often should the serial port be read
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
+
 #include "../internal_comms/include/CommandCenter.h"
 #include "../internal_comms/include/Serial.h"
 #include "include/commands/ArmCommandCenter.h"
