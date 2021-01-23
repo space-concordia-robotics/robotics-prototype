@@ -10,6 +10,9 @@ else()
     message(FATAL_ERROR "Arduino path not configured correctly... check wiki for more info: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino")
 endif()
 
+add_subdirectory(../../internal_comms ../../internal_comms/build EXCLUDE_FROM_ALL)
+include_directories(../../internal_comms/include)
+
 set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 set(ARDUINO_LIBS ${ARDUINO_PATH}/libraries)
 
@@ -26,6 +29,7 @@ set(CMAKE_CXX_COMPILER ${AVR_TOOLS}/avr/bin/avr-g++)
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
+set(PROJECT_LIBRARIES internal_comms)
 #Find the arduino core files and store them
 file(GLOB ARDUINO_CORE_S_FILES ${ARDUINO_CORE}/*.S)
 file(GLOB ARDUINO_CORE_C_FILES ${ARDUINO_CORE}/*.c )
