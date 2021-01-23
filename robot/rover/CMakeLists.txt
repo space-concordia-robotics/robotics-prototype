@@ -193,6 +193,8 @@ foreach(path ${INOFILES})
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
  continue()
+ elseif(${name} STREQUAL "PDS2")
+ continue()
  
  elseif(${name} STREQUAL "MobilePlatform")
  
