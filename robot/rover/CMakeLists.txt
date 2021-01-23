@@ -192,7 +192,7 @@ foreach(path ${INOFILES})
  set(Project_Name ${name})
 
  if(${name} STREQUAL "Arm")
- set(PROJECT_LIBRARIES  Servo)
+ set(PROJECT_LIBRARIES Servo internal_comms)
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this

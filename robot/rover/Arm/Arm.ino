@@ -1,7 +1,7 @@
 /*
   This is the main sketch which defines the control logic of the robotic arm of
   the Space Concordia Division, which runs on a Teensy 3.6 that communicates
-  with an Odroid XU4.
+  with an Nvidia Jetson TX2
 
   The code can be compiled for serial communication over usb (if connected to a
   standard computer), or for serial communication over TX/RX pins (if connected
@@ -26,6 +26,9 @@
 */
 
 #include "Includes.h"
+#include "../internal_comms/include/CommandCenter.h"
+#include "../internal_comms/include/Serial.h"
+#include "include/commands/ArmCommandCenter.h"
 
 /* comms */
 char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
@@ -120,6 +123,7 @@ void m6ExtendISR(void);
 void dcInterrupt(void); //!< manages motors 1-4
 void servoInterrupt(void); //!< manages motors 5&6
 
+internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
 
    \todo do housekeeping stuff
@@ -146,8 +150,8 @@ void servoInterrupt(void); //!< manages motors 5&6
    Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
 */
 void setup() {
-  pinSetup();
-  initComms();
+
+  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
   initEncoders();
   initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
@@ -175,6 +179,9 @@ void loop() {
   if (isHoming) { // not done homing the motors
     homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
   }
+
+  if(Serial.available() > 0)
+      internal_comms::readCommand(commandCenter);
 
   /* message parsing functionality */
   motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
