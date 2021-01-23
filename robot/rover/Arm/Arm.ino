@@ -29,6 +29,10 @@
 #include "../internal_comms/include/CommandCenter.h"
 #include "../internal_comms/include/Serial.h"
 #include "include/commands/ArmCommandCenter.h"
+#include <cstdint>
+
+const uint8_t TX_TEENSY_3_6_PIN = 1;
+const uint8_t RX_TEENSY_3_6_PIN = 0;
 
 /* comms */
 char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
