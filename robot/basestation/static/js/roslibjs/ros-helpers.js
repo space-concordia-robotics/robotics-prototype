@@ -240,8 +240,6 @@ function initRosWeb () {
       if (voltage < MIN_VOLTAGE + VOLTAGE_WARNING) {
         textColor('#battery-voltage', 'orange')
         crntalert = Date.now();
-        console.log("current alert is: " + crntalert);
-        console.log("previous alert is: " + prevalert);
         if (checkAlert()){
             $('#battery-voltage-warning').notify('Warning! Voltage is approaching danger value!', 'warn',{position:"bottom"})
         }
@@ -293,7 +291,7 @@ function initRosWeb () {
       } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
-          $('#battery-temp-1').notify('Battery temperature hot!', 'warn',{position:"bottom"})
+          $('#battery-temp-1').notify('Battery temperature cold!', 'warn',{position:"bottom"})
         } else {
           $obj.css({'color': 'white'})
         }
