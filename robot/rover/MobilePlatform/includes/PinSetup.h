@@ -1,8 +1,6 @@
 #ifndef PINS_H
 #define PINS_H
 
-#include <Arduino.h>
-
 #define V_SENSE_PIN 39 // for reading battery voltage
 
 /***** MOTORS *****/
