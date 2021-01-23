@@ -14,7 +14,8 @@
 
 // FANs pins
 #define Fans 5 // PB1
-//#define Fan_B_Pin 6 // PB2/
+#define Fan_B_Pin 6 // PB2/
+#define Fan_A_Pin 6 // PB2/
 
 // MOTOR pins are Arduino's digital 8, 9, 10, 11 (This will change for our application)
 #define MOTOR_in 7

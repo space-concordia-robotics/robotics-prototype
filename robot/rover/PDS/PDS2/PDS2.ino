@@ -5,6 +5,7 @@
 #include "sensor_read.h"
 #include "load_setup.h"
 #include "parse_command.h"
+#include "PDSCommandCenter.h"
 
 
 
