@@ -297,14 +297,6 @@ void loop() {
         nh.loginfo("arm");
 #endif
       }
-      else if (motorCommand.rebootCommand) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("ARM rebooting arm teensy... hang on a sec");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("rebooting arm teensy... hang on a sec");
-#endif
-        rebootTeensy();
-      }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
           if (motorCommand.homeAllMotors) {
