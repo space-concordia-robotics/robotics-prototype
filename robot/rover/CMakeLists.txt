@@ -72,7 +72,7 @@ set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
 set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
 set(TINYGPS_VERSION v1.0.2)
 
-set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/ETLCPP/src)
+set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/EmbeddedTemplateLibrary)
 set(ETL_URL https://github.com/ETLCPP/etl)
 set(ETL_VERSION 19.4.3)
 
@@ -179,7 +179,7 @@ createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
 
 # For a library that doesn't have a cpp file, but only header files
-include_directories(${ETL_PATH}) 
+include_directories(${ETL_PATH}/include)
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
