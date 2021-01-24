@@ -179,7 +179,7 @@ createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
 
 # For a library that doesn't have a cpp file, but only header files
-include_directories(${Project_Name} PUBLIC ${ETL_PATH}) 
+include_directories(${ETL_PATH}) 
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
