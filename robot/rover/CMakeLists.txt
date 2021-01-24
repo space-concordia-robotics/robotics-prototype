@@ -177,7 +177,6 @@ createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/uti
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
-createCppLibrary(${ETL_PATH}/etl.cpp EmbeddedTemplateLibrary "")
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
