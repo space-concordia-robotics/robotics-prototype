@@ -3,6 +3,7 @@
 //
 
 #include "include/CommandCenter.h"
+#include <etl/queue.h>
 
 namespace internal_comms
 {
