@@ -72,12 +72,17 @@ set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
 set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
 set(TINYGPS_VERSION v1.0.2)
 
+set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/ETLCPP/src)
+set(ETL_URL https://github.com/ETLCPP/etl)
+set(ETL_VERSION 19.4.3)
+
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
 checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
+checkLibraries(EmbeddedTemplateLibrary ${ETL_VERSION} ${ETL_URL})
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -172,6 +177,7 @@ createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/uti
 CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
+createCppLibrary(${ETL_PATH}/etl.cpp EmbeddedTemplateLibrary "")
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
@@ -203,7 +209,7 @@ foreach(path ${INOFILES})
  elseif(${name} STREQUAL "MobilePlatform")
  
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
- set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH})
+ set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
 
  elseif(${name} STREQUAL "PidController")
