@@ -154,13 +154,13 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 
 #This function will create a library and store it with the given name
 function(createCppLibrary sources libraryName includes)
-add_library(${libraryName} ${sources})
+        add_library(${libraryName} ${sources})
 
-if(NOT ${includes} STREQUAL "")
-target_include_directories(${libraryName} PRIVATE ${includes})
-endif()
+        if(NOT ${includes} STREQUAL "")
+        target_include_directories(${libraryName} PRIVATE ${includes})
+        endif()
 
-target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
+        target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
 #create default teensy libraries
@@ -174,9 +174,12 @@ createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/
 #create the external teensy libraries
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
-CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
-CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
+createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
+createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
+
+# For a library that doesn't have a cpp file, but only header files
+include_directories(${Project_Name} PUBLIC ${ETL_PATH}) 
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
@@ -195,6 +198,7 @@ foreach(path ${INOFILES})
  )
 
  set(Project_Name ${name})
+
 
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
