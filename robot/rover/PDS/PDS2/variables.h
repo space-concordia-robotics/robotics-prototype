@@ -14,8 +14,8 @@
 
 // FANs pins
 #define Fans 5 // PB1
-#define Fan_B_Pin 6 // PB2/
-#define Fan_A_Pin 6 // PB2/
+#define Fan_A_Pin 9 // PB1/
+#define Fan_B_Pin 10 // PB2/
 
 // MOTOR pins are Arduino's digital 8, 9, 10, 11 (This will change for our application)
 #define MOTOR_in 7
@@ -42,3 +42,4 @@ float Temp1 = 0;
 
 // Number of steps per rotation for Stepper Motor (This will be removed for our application)
 const int stepsPerRevolution = 2048;
+

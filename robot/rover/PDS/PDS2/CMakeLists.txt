@@ -10,8 +10,6 @@ else()
     message(FATAL_ERROR "Arduino path not configured correctly... check wiki for more info: https://github.com/space-concordia-robotics/robotics-prototype/wiki/Setting-up-Teensyduino")
 endif()
 
-add_subdirectory(../../internal_comms ../../internal_comms/build EXCLUDE_FROM_ALL)
-include_directories(../../internal_comms/include)
 
 set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 set(ARDUINO_LIBS ${ARDUINO_PATH}/libraries)
@@ -49,8 +47,11 @@ add_definitions(
 #The .ino file will have access to these base directories
 include_directories(
         ${ARDUINO_PATH}/hardware/arduino/avr/variants/standard
+        ${AVR_TOOLS}/arm/arm-none-eabi/include/   
         ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino
+        ../../internal_comms/include
 )
+#add_subdirectory(../../internal_comms ../../internal_comms/build EXCLUDE_FROM_ALL)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

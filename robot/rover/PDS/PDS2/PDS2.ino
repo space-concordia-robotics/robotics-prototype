@@ -6,12 +6,17 @@
 #include "load_setup.h"
 #include "parse_command.h"
 #include "PDSCommandCenter.h"
+#include "Serial.h"
+#include <cstdint>
 
+const uint8_t TX_PIN = 1;
+const uint8_t RX_PIN = 0;
 
+internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
 
 void setup() 
 {
-    Serial.begin(SERIAL_BAUD_RATE);  
+    internal_comms::startSerial(RX_PIN, TX_PIN);
     mux_settings();
     load_settings();
 }

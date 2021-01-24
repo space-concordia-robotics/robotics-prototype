@@ -2,6 +2,7 @@
 #define PDSCOMMANDCENTER_H
 
 #include "CommandCenter.h" 
+#define COMMAND_PING 13  
 
 class PDSCommandCenter : public internal_comms::CommandCenter {
     public:
