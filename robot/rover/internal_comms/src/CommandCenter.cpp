@@ -44,4 +44,16 @@ namespace internal_comms
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
         return ArgumentsLength;
     }
+
+    
+    void CommandCenter::queueMessage(const Command& message)
+    {
+        // something
+    }
+
+
+    void CommandCenter::sendMessage()
+    {
+        // something
+    }
 }

@@ -26,15 +26,33 @@ namespace internal_comms
             virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) = 0;
 
             /**
-             * Reads serial the next command
+             * Reads serial to next command
              * and returns a command struct
              *
              * @return returns a command struct
              */
             Command* processCommand() const;
 
+            /**
+             * Queues messages so that they are ready to be sent
+             * allows teensy 
+             */
+            void queueMessage(const Command& message);
+
         private:
+            /**
+             * Reads the two bytes that make up the argument length and combines
+             * them into an uint16_t
+             */
             uint16_t readArgSize() const;
+
+            /**
+             * Every loop, this command gets executed,
+             * does not do anything if there are no messages in queue
+             */
+            void sendMessage();
+            
+            
     };
 
 }
