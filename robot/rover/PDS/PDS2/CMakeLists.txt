@@ -20,6 +20,8 @@ set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
 #Set the path to the arduino libraries you're gonna use
 set(STEPPER_PATH ${ARDUINO_LIBS}/Stepper)
 
+set(INTERNAL_COMMS_PATH ../../internal_comms)
+
 #Set the compilers for c and c++
 set(CMAKE_C_COMPILER ${AVR_TOOLS}/avr/bin/avr-gcc)
 set(CMAKE_CXX_COMPILER ${AVR_TOOLS}/avr/bin/avr-g++)
@@ -27,7 +29,6 @@ set(CMAKE_CXX_COMPILER ${AVR_TOOLS}/avr/bin/avr-g++)
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
-set(PROJECT_LIBRARIES internal_comms)
 #Find the arduino core files and store them
 file(GLOB ARDUINO_CORE_S_FILES ${ARDUINO_CORE}/*.S)
 file(GLOB ARDUINO_CORE_C_FILES ${ARDUINO_CORE}/*.c )
@@ -47,11 +48,9 @@ add_definitions(
 #The .ino file will have access to these base directories
 include_directories(
         ${ARDUINO_PATH}/hardware/arduino/avr/variants/standard
-        ${AVR_TOOLS}/arm/arm-none-eabi/include/   
+        ${AVR_TOOLS}/avr/avr/include/   
         ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino
-        ../../internal_comms/include
 )
-#add_subdirectory(../../internal_comms ../../internal_comms/build EXCLUDE_FROM_ALL)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -63,6 +62,7 @@ function(createCppLibrary sources libraryName includes)
     add_library(${libraryName} ${sources})
 
     if(NOT ${includes} STREQUAL "")
+        message(VERBOSE "Creating library ${libraryName}")
         target_include_directories(${libraryName} PRIVATE ${includes})
     endif()
 
@@ -87,6 +87,11 @@ target_compile_options(arduinocore PUBLIC ${AVR_GXX_FLAGS})
 
 #Create the arduino libraries here
 createCppLibrary(${STEPPER_PATH}/src/Stepper.cpp Stepper "")
+#Create the internal_comms library 
+#createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
+#set(PROJECT_LIBRARIES InternalComms)
+add_subdirectory(${INTERNAL_COMMS_PATH} ${CMAKE_BINARY_DIR}/xxx)
+#set(PROJECT_LIBRARIES )
 
 #Rename the .ino file and add it as an executable with an _exe name extension
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
@@ -97,6 +102,7 @@ target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR
 
 #In case you need arduino libraries, give the .ino file the include directory of the header file for that library
 target_include_directories(${PROJECT_NAME}_EXE PRIVATE ${STEPPER_PATH}/src)
+#target_include_directories(${PROJECT_NAME}_EXE PRIVATE ${INTERNAL_COMMS_PATH}/include)
 
 target_compile_options(${PROJECT_NAME}_EXE PUBLIC ${AVR_GXX_FLAGS})
 
@@ -111,5 +117,6 @@ target_link_libraries(
         ${PROJECT_NAME}_EXE
         Stepper
         arduinocore
+        #InternalComms
         -lm
 )

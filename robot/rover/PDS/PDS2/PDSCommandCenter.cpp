@@ -5,7 +5,7 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
     switch(commandID)
     {
         case COMMAND_PING:
-            pong();
+            //pong();
             break;
     }
 }

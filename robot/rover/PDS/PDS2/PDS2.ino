@@ -7,7 +7,6 @@
 #include "parse_command.h"
 #include "PDSCommandCenter.h"
 #include "Serial.h"
-#include <cstdint>
 
 const uint8_t TX_PIN = 1;
 const uint8_t RX_PIN = 0;
