@@ -5,6 +5,7 @@
 //
 
 #include "Arduino.h"
+#include <etl/queue.h>
 
 namespace internal_comms
 {
@@ -14,6 +15,12 @@ namespace internal_comms
         uint8_t rawArgsLength; // Number of bytes in the rawArgs array
         bool isValid; // Whether the command is valid
     } Command;
+
+    typedef struct {
+        uint8_t messageID;
+        uint16_t rawArgsLength;
+        uint8_t* rawArgs;
+    } Message;
 
     class CommandCenter {
         public:
@@ -37,9 +44,22 @@ namespace internal_comms
              * Queues messages so that they are ready to be sent
              * allows teensy 
              */
-            void queueMessage(const Command& message);
+            void queueMessage(const Message message);
+
+            /**
+             * Processes message struct into a byte array
+             * that is ready to be sent over serial. 
+             * It includes the stop byte.
+             */
+            uint8_t* encodeMessage(const Message& message) const;
 
         private:
+
+            /**
+             * Holds the messages that are ready to be sent out 
+             */
+            etl::queue<Message&, 5> messageQueue;
+
             /**
              * Reads the two bytes that make up the argument length and combines
              * them into an uint16_t
