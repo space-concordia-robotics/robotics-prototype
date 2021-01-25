@@ -62,8 +62,7 @@ function(createCppLibrary sources libraryName includes)
     add_library(${libraryName} ${sources})
 
     if(NOT ${includes} STREQUAL "")
-        message(VERBOSE "Creating library ${libraryName}")
-        target_include_directories(${libraryName} PRIVATE ${includes})
+        target_include_directories(${libraryName} PUBLIC ${includes}) # PUBLIC so that the project also has access to these includes
     endif()
 
     target_compile_options(${libraryName} PUBLIC ${AVR_GXX_FLAGS})
@@ -84,14 +83,12 @@ add_library(arduinocore $<TARGET_OBJECTS:arduinocore_s> $<TARGET_OBJECTS:arduino
 target_compile_options(arduinocore PUBLIC ${AVR_GXX_FLAGS})
 
 
-
 #Create the arduino libraries here
 createCppLibrary(${STEPPER_PATH}/src/Stepper.cpp Stepper "")
 #Create the internal_comms library 
-#createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
-#set(PROJECT_LIBRARIES InternalComms)
-add_subdirectory(${INTERNAL_COMMS_PATH} ${CMAKE_BINARY_DIR}/xxx)
-#set(PROJECT_LIBRARIES )
+file(GLOB_RECURSE InternalComms_sources ${INTERNAL_COMMS_PATH}/*.cpp) 
+createCppLibrary("${InternalComms_sources}" InternalComms ${INTERNAL_COMMS_PATH}/include)
+set(PROJECT_LIBRARIES InternalComms)
 
 #Rename the .ino file and add it as an executable with an _exe name extension
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
@@ -117,6 +114,6 @@ target_link_libraries(
         ${PROJECT_NAME}_EXE
         Stepper
         arduinocore
-        #InternalComms
+        InternalComms
         -lm
 )
