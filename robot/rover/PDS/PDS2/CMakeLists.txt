@@ -86,13 +86,14 @@ target_compile_options(arduinocore PUBLIC ${AVR_GXX_FLAGS})
 #Create the arduino libraries here
 createCppLibrary(${STEPPER_PATH}/src/Stepper.cpp Stepper "")
 #Create the internal_comms library 
-file(GLOB_RECURSE InternalComms_sources ${INTERNAL_COMMS_PATH}/*.cpp) 
-createCppLibrary("${InternalComms_sources}" InternalComms ${INTERNAL_COMMS_PATH}/include)
+#file(GLOB_RECURSE InternalComms_sources ${INTERNAL_COMMS_PATH}/src/*.cpp) 
+createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
 set(PROJECT_LIBRARIES InternalComms)
 
+file(GLOB_RECURSE PDS_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp) 
 #Rename the .ino file and add it as an executable with an _exe name extension
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
-add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp)
+add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp ${PDS_sources})
 
 #Just in case you make a folder in the current directory, the .ino file will be able to include from it
 target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
