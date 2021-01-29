@@ -291,11 +291,15 @@ function initRosWeb () {
       } else {
         if (temperature > MAX_TEMP - TEMP_WARNING || temperature < MIN_TEMP + TEMP_WARNING) {
           $obj.css({'color': 'orange'})
-          $('#battery-temp-1').notify('Battery temperature cold!', 'warn',{position:"bottom"})
+          if (temperature < MIN_TEMP + TEMP_WARNING){
+              $('#battery-temp-1').notify('Battery temperature cold!', 'warn',{position:"bottom"})
+          }
+          else if (temperature >= MAX_TEMP - TEMP_WARNING){
+              $('#battery-temp-1').notify('Battery temperature hot!', 'warn',{position:"bottom"})
+          }
         } else {
           $obj.css({'color': 'white'})
         }
-
         if ($obj.attr('acceptable') === '0') $obj.attr('acceptable', '1')
       }
     });
