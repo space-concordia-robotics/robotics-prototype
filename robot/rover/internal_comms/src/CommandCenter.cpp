@@ -47,9 +47,8 @@ namespace internal_comms
     }
 
     
-    void CommandCenter::queueMessage(const Message message)
+    void CommandCenter::queueMessage(const Message* message) const
     {
-        Message* msg = message;
         messageQueue.push(message);
     }
 
@@ -59,7 +58,7 @@ namespace internal_comms
         // something
     }
 
-    uint8_t* encodeMessage(const Message& message) 
+    uint8_t* encodeMessage(const Message* message) 
     {
         // basically take all the message data and encode into one large byte array
     }
