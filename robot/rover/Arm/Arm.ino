@@ -918,11 +918,11 @@ void m6ExtendISR(void) {
   Resets the motors to their original position.
   Starts from the last motor and work inwards
  **/
-void homeAllMotors()
+void homeAllMotors(uint8_t homingStyle)
 {
     for (int i = NUM_MOTORS - 1; i >= 0; i--) { 
         if (motorArray[i]->hasLimitSwitches) {
-            if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
+            if (homingStyle == DOUBLE_ENDED_HOMING) {
                 motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
             }
             motorsToHome[i] = true;
@@ -970,12 +970,12 @@ void resetAngles()
   }
 }
 
-void stopSingleMotor(int motorId)
+void stopSingleMotor(uint8_t motorId)
 {
     motorArray[motorId - 1]->stopRotation();
 }
 
-void setGearRatioValue(int motorId, float gearRatio)
+void setGearRatioValue(uint8_t motorId, float gearRatio)
 {
     motorArray[motorId]->setGearRatio(gearRatio);
 }
@@ -992,22 +992,22 @@ void setArmSpeed(float armSpeedFactor)
     }
 }
 
-void setOpenLoopGain(int motorId, float gain)
+void setOpenLoopGain(uint8_t motorId, float gain)
 {
     motorArray[motorId - 1]->setOpenLoopGain(gain);
 }
 
-void setPidConstants(int motorId, float kp, float ki, float kd)
+void setPidConstants(uint8_t motorId, float kp, float ki, float kd)
 {
     motorArray[motorId - 1]->pidController.setGainConstants(kp, ki, kd);
 }
 
-void setMotorSpeed(int motorId, float motorSpeed)
+void setMotorSpeed(uint8_t motorId, float motorSpeed)
 {
     motorArray[motorId - 1]->setMotorSpeed(motorSpeed);
 }
 
-void setOpenLoopState(int motorId, bool isOpenLoop)
+void setOpenLoopState(uint8_t motorId, bool isOpenLoop)
 {
     if (isOpenLoop) {
       motorArray[motorId - 1]->isOpenLoop = true;
@@ -1031,17 +1031,17 @@ void budgeMotors()
 /**
  * Changes the direction in case of backwards wiring
  **/
-void switchMotorDirection(int motorId)
+void switchMotorDirection(uint8_t motorId)
 {
     motorArray[motorId] -> switchDirectionLogic();
 }
 
-void resetSingleMotor(int motorId)
+void resetSingleMotor(uint8_t motorId)
 {
     motorArray[motorId - 1]->setSoftwareAngle(0.0);
 }
 
-void moveMultipleMotors(int* motorsToMove, float* anglesToReach)
+void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach)
 {
     while(*motorsToMove != 0)
     {

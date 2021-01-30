@@ -28,16 +28,16 @@ void resetAngles();
 void homeAllMotors();
 void homeCommand();
 void setArmSpeed(float armSpeedFactor);
-void stopSingleMotor(int motorId);
-void setGearRatioValue(int motorId, float gearRatio);
-void setOpenLoopGain(int motorId, float gain);
-void setPidConstants(int motorId, float kp, float ki, float kd);
-void setMotorSpeed(int motorId, float speed);
-void setOpenLoopState(int motorId, bool isOpenLoop);
-void resetSingleMotor(int motorId);
-void switchMotorDirection(int motorId);
+void stopSingleMotor(uint8_t motorId);
+void setGearRatioValue(uint8_t motorId, float gearRatio);
+void setOpenLoopGain(uint8_t motorId, float gain);
+void setPidConstants(uint8_t motorId, float kp, float ki, float kd);
+void setMotorSpeed(uint8_t motorId, float speed);
+void setOpenLoopState(uint8_t motorId, bool isOpenLoop);
+void resetSingleMotor(uint8_t motorId);
+void switchMotorDirection(uint8_t motorId);
 void budgeMotors();
-void moveMultipleMotors(int* motorsToMove, float* anglesToReach);
+void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -56,7 +56,7 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       resetAngles();
       break;
     case COMMAND_HOME_MOTORS:
-      homeMotors();
+      homeAllMotors(*rawArgs);
       break;
     case COMMAND_HOME:
       homeCommand();
@@ -68,22 +68,22 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       stopSingleMotor(*rawArgs);
       break;
     case COMMAND_GEAR_RATIO:
-      setGearRatioValue(*rawArgs, *static_cast<float*>(++rawArgs));
+      setGearRatioValue(*rawArgs, 1.0);
       break;
     case COMMAND_OPEN_LOOP_GAIN:
-      setOpenLoopGain(*rawArgs, *static_cast<float*>(++rawArgs));
+      setOpenLoopGain(*rawArgs, 1.0);
       break;
     case COMMAND_PID_CONSTANTS:
-      int motorId = *rawArgs;
+      uint8_t motorId = *rawArgs;
       rawArgs++;
-      float* pid = static_cast<float*>(rawArgs);
-      setPidConstants(*rawArgs, *pid, *(++pid) *(++pid));
+      float pid[3] = {1.0f, 1.0f, 1.0f};
+      setPidConstants(motorId, pid[0], pid[1], pid[2]);
       break;
     case COMMAND_OPEN_LOOP_STATE:
       setOpenLoopState(1, true);
       break;
     case COMMAND_RESET_SINGLE_MOTOR:
-      resetSingleMotor(*rawArgs)
+      resetSingleMotor(*rawArgs);
       break;
     case COMMAND_BUDGE_MOTORS:
       budgeMotors();
