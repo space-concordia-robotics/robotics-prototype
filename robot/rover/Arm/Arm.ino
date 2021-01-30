@@ -297,23 +297,6 @@ void loop() {
         nh.loginfo("arm");
 #endif
       }
-        else if (motorCommand.armSpeedCommand) {
-        }
-        else { // following cases are for commands to specific motors
-          if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
-            motorArray[motorCommand.whichMotor - 1]->stopRotation();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM stopped motor "); UART_PORT.println(motorCommand.whichMotor);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-            // this is SUPER DUPER GROSS
-            String infoMessage = "stopped motor " + motorCommand.whichMotor;
-            char actualMessage[50];
-            for (unsigned int i = 0; i < infoMessage.length(); i++) {
-              actualMessage[i] = infoMessage[i];
-            }
-            nh.loginfo(actualMessage);
-#endif
-          }
           else if (motorCommand.gearCommand) { // set gear ratio for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -1210,6 +1193,11 @@ void resetAngles()
   }
 }
 
+void stopSingleMotor(int motorId)
+{
+    motorArray[motorId - 1]->stopRotation();
+}
+
 void setArmSpeed(float armSpeedFactor)
 {
     if (armSpeedFactor > 0) {
@@ -1229,6 +1217,9 @@ void setArmSpeed(float armSpeedFactor)
 #endif
             motorArray[i]->setMotorSpeed(newSpeed);
         }
+        else { // following cases are for commands to specific motors
+          if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
+          }
     }
     else {
 #ifdef DEBUG_MAIN

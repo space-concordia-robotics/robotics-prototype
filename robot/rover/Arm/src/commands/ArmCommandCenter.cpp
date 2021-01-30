@@ -11,6 +11,7 @@
 #define COMMAND_HOME_MOTORS 4
 #define COMMAND_HOME 5
 #define COMMAND_ARM_SPEED 6
+#define COMMAND_STOP_SINGLE_MOTOR 7
 
 void emergencyStop();
 void rebootTeensy();
@@ -19,6 +20,7 @@ void resetAngles();
 void homeAllMotors();
 void homeCommand();
 void setArmSpeed(float armSpeedFactor);
+void stopSingleMotor(int motor);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -44,6 +46,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_ARM_SPEED:
       setArmSpeed(1.0f);
+      break;
+    case COMMAND_STOP_SINGLE_MOTOR:
+      stopSingleMotor(1);
       break;
   }
 
