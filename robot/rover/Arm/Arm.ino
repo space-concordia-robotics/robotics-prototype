@@ -103,29 +103,10 @@
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 
-/* comms */
-char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
-
-// kinda weird that this comes out of nowhere... maybe should be Parser.commandInfo or something. or define it here instead of parser
-/*
-  info from parsing functionality is packaged and given to motor control functionality.
-  many of these are set to 0 so that the message can reset, thus making sure that
-  the code later on doesn't inadvertently make a motor move when it wasn't supposed to
-*/
-commandInfo motorCommand; //!< struct which holds command data to be sent to main loop
-commandInfo emptyMotorCommand; //!< used to reset the struct when the loop restarts
-Parser Parser; //!< object which parses and verifies commands
-bool msgReceived = false; //!< If true, the MCU will attempt to interpret a command.
-bool msgIsValid = false; //!< If true, the MCU will execute a command. Otherwise, it will send an error message.
-
-/* blink variables */
-bool msgCheck = false; //!< If a message was received, while this remains true, the MCU will blink
 enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
 int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
 bool startBlinking = false; //!< if true, teensy blinks as response to a message
 int blinkCount = 0; //!< when it reaches max it goes back to heartbeat
-
-// i took the ROS stuff from here and stuck it into ideas.h
 
 /* motors */
 //! quadrature encoder matrix. Corresponds to the correct direction for a specific set of prev and current encoder states
@@ -256,47 +237,6 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-  /* message parsing functionality */
-  motorCommand = emptyMotorCommand; // reset motorCommand so the microcontroller doesn't try to move a motor next loop
-  msgReceived = false;
-  msgIsValid = false;
-#if defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.spinOnce();
-  if (msgReceived) {
-    nh.logdebug(serialBuffer);
-  }
-#elif defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  if (UART_PORT.available()) {
-    // if a message was sent to the Teensy
-    msgReceived = true;
-    UART_PORT.readBytesUntil(10, serialBuffer, BUFFER_SIZE); // read through it until NL
-    // @TODO find a way to check for \r carriage return and remove it... the issue is that it's a char array not String
-#ifdef DEBUG_MAIN
-    UART_PORT.print("ARM GOT: "); UART_PORT.println(serialBuffer); // send back what was received
-#endif
-    Parser.parseCommand(motorCommand, serialBuffer); // read serialBuffer and stuff the data into motorCommand
-    memset(serialBuffer, 0, BUFFER_SIZE); // empty the buffer
-    msgIsValid = Parser.verifCommand(motorCommand); // verify the data to make sure it's valid
-  }
-#endif
-  if (msgReceived) {
-    startBlinking = true;
-    if (msgIsValid) {
-      blinkType = GOOD_BLINK; // alert the blink check that it was a good message
-      if (motorCommand.pingCommand) { // respond to ping
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("ARM pong");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("pong");
-#endif
-      }
-      else if (motorCommand.whoCommand) { // respond to ping
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("ARM arm");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("arm");
-#endif
-      }
           else if (motorCommand.gearCommand) { // set gear ratio for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
