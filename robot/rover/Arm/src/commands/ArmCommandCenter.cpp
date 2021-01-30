@@ -17,6 +17,7 @@
 #define COMMAND_PID_CONSTANTS 10
 #define COMMAND_MOTOR_SPEED 11
 #define COMMAND_OPEN_LOOP_STATE 12
+#define COMMAND_RESET_SINGLE_MOTOR 13
 
 void emergencyStop();
 void rebootTeensy();
@@ -31,6 +32,9 @@ void setOpenLoopGain(int motorId, float gain);
 void setPidConstants(int motorId, float kp, float ki, float kd);
 void setMotorSpeed(int motorId, float speed);
 void setOpenLoopState(int motorId, bool isOpenLoop);
+void resetSingleMotor(int motorId);
+void switchMotorDirection(int motorId);
+void budgeMotors();
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -74,6 +78,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_OPEN_LOOP_STATE:
       setOpenLoopState(1, true);
+      break;
+    case COMMAND_RESET_SINGLE_MOTOR:
+      resetSingleMotor(*rawArgs)
       break;
   }
 

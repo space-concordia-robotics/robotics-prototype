@@ -237,42 +237,9 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-          else if (motorCommand.loopCommand) { // set loop states for appropriate motor
-            }
-          }
-          else if (motorCommand.resetSingleMotor) { // reset the motor angle's variable
-            motorArray[motorCommand.whichMotor - 1]->setSoftwareAngle(0.0);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM reset angle value of motor "); UART_PORT.println(motorCommand.whichMotor);
-#endif
-          }
-          else if (motorCommand.switchDir) { // change the direction modifier to swap rotation direction in the case of backwards wiring
-            motorArray[motorCommand.whichMotor - 1] -> switchDirectionLogic();
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            int dir = motorArray[motorCommand.whichMotor - 1]->getDirectionLogic();
-            UART_PORT.print("ARM direction modifier is now "); UART_PORT.println(dir);
-#endif
+          else if (motorCommand.switchDir) {
           }
           else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
-            for (int i = 0; i < NUM_MOTORS; i++) {
-              if (motorCommand.motorsToMove[i]) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                UART_PORT.print("ARM motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired direction is: "); UART_PORT.println(motorCommand.directionsToMove[i]);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-                // this is SUPER DUPER GROSS
-                int tempVal = i + 1;
-                String infoMessage = "ARM motor " + tempVal;
-                infoMessage += " desired direction is: ";
-                infoMessage += motorCommand.directionsToMove[i];
-                char actualMessage[60];
-                for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                  actualMessage[i] = infoMessage[i];
-                }
-                nh.loginfo(actualMessage);
-#endif
-                motorArray[i]->budge(motorCommand.directionsToMove[i]);
-              }
-            }
           }
           else if (motorCommand.multiMove) { // make motors move simultaneously
             for (int i = 0; i < NUM_MOTORS; i++) {
@@ -1100,27 +1067,9 @@ void setArmSpeed(float armSpeedFactor)
         for (int i = 0; i < NUM_MOTORS; i++) {
             float newSpeed = ( motorArray[i]->getMotorSpeed() ) * armSpeedFactor;
             if (newSpeed >= 100) {
-#ifdef DEBUG_MAIN
-                UART_PORT.print("ARM $A,Alert: multiplier is too big, motor ");
-                UART_PORT.print(i + 1);
-                UART_PORT.println(" speed is saturating at 100%");
-#endif
-                newSpeed = 100;
-            }
-#ifdef DEBUG_MAIN
-            UART_PORT.print("ARM $S,Success: Motor "); UART_PORT.print(i + 1);
-            UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
-#endif
             motorArray[i]->setMotorSpeed(newSpeed);
         }
         else { // following cases are for commands to specific motors
-          if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
-          }
-    }
-    else {
-#ifdef DEBUG_MAIN
-        UART_PORT.println("ARM $E,Error: invalid multiplier value");
-#endif
     }
 }
 
@@ -1131,7 +1080,7 @@ void setOpenLoopGain(int motorId, float gain)
 
 void setPidConstants(int motorId, float kp, float ki, float kd)
 {
-    motorArray[motorId - 1]->pidController.setGainConstants(motorCommand.kp, motorCommand.ki, motorCommand.kd);
+    motorArray[motorId - 1]->pidController.setGainConstants(kp, ki, kd);
 }
 
 void setMotorSpeed(int motorId, float motorSpeed)
@@ -1139,7 +1088,7 @@ void setMotorSpeed(int motorId, float motorSpeed)
     motorArray[motorId - 1]->setMotorSpeed(motorSpeed);
 }
 
-void setOpenLoop(int motorId, bool isOpenLoop)
+void setOpenLoopState(int motorId, bool isOpenLoop)
 {
     if (isOpenLoop) {
       motorArray[motorId - 1]->isOpenLoop = true;
@@ -1149,4 +1098,26 @@ void setOpenLoop(int motorId, bool isOpenLoop)
       if (motorArray[motorId - 1]->hasEncoder) {
         motorArray[motorId - 1]->isOpenLoop = false;
     }
+}
+
+void budgeMotors()
+{
+    for (int i = 0; i < NUM_MOTORS; i++) {
+      if (motorCommand.motorsToMove[i]) {
+        motorArray[i]->budge(motorCommand.directionsToMove[i]);
+      }
+    }
+}
+
+/**
+ * Changes the direction in case of backwards wiring
+ **/
+void switchMotorDirection(int motorId)
+{
+    motorArray[motorId] -> switchDirectionLogic();
+}
+
+void resetSingleMotor(int motorId)
+{
+    motorArray[motorId - 1]->setSoftwareAngle(0.0);
 }
