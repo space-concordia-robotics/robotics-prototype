@@ -237,55 +237,8 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-          else if (motorCommand.switchDir) {
-          }
-          else if (motorCommand.budgeCommand) { // make motors move until the command isn't sent anymore
-          }
           else if (motorCommand.multiMove) { // make motors move simultaneously
             for (int i = 0; i < NUM_MOTORS; i++) {
-              if (motorCommand.motorsToMove[i]) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-                UART_PORT.print("ARM motor "); UART_PORT.print(i + 1); UART_PORT.print(" desired angle (degrees) is: "); UART_PORT.println(motorCommand.anglesToReach[i]);
-#endif
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-                // this is SUPER DUPER GROSS
-                int tempVal = i + 1;
-                String infoMessage = "motor " + tempVal;
-                infoMessage += " desired angle (degrees) is: ";
-                infoMessage += motorCommand.anglesToReach[i];
-                char actualMessage[50];
-                for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                  actualMessage[i] = infoMessage[i];
-                }
-                nh.loginfo(actualMessage);
-#endif
-                if (!(motorArray[i] -> withinJointAngleLimits(motorCommand.anglesToReach[i]))) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                  UART_PORT.print("ARM $E,Error: requested motor ");
-                  UART_PORT.print(i + 1);
-                  UART_PORT.print(" angle is not within angle limits: ");
-                  UART_PORT.print(motorArray[i]->minJointAngle);
-                  UART_PORT.print(" and ");
-                  UART_PORT.println(motorArray[i]->maxJointAngle);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-                  // this is SUPER DUPER GROSS
-                  int tempVal = i + 1;
-                  String infoMessage = "motor " + tempVal;
-                  infoMessage += " angle is not within angle limits";
-                  char actualMessage[50];
-                  for (unsigned int i = 0; i < infoMessage.length(); i++) {
-                    actualMessage[i] = infoMessage[i];
-                  }
-                  nh.logerror(actualMessage);
-#endif
-                }
-                else {
-                  if (motorArray[i]->setDesiredAngle(motorCommand.anglesToReach[i])) { // this method returns true if the command is within joint angle limits
-                    motorArray[i]->goToCommandedAngle();
-                  }
-                }
-              }
             }
           }
         } // end of commands to a specific motor
@@ -1068,8 +1021,8 @@ void setArmSpeed(float armSpeedFactor)
             float newSpeed = ( motorArray[i]->getMotorSpeed() ) * armSpeedFactor;
             if (newSpeed >= 100) {
             motorArray[i]->setMotorSpeed(newSpeed);
+            }
         }
-        else { // following cases are for commands to specific motors
     }
 }
 
@@ -1120,4 +1073,17 @@ void switchMotorDirection(int motorId)
 void resetSingleMotor(int motorId)
 {
     motorArray[motorId - 1]->setSoftwareAngle(0.0);
+}
+
+void moveMultipleMotors(int* motorsToMove, float* anglesToReach)
+{
+
+    while(*motorsToMove != 0)
+    {
+        if(motorArray[*motorsToMove - 1]->setDesiredAngle(*anglesToReach)){
+            motorArray[*motorsToMove - 1]->goToCommandedAngle();
+        }
+        motorsToMove++;
+        anglesToReach++;
+    }
 }

@@ -35,6 +35,7 @@ void setOpenLoopState(int motorId, bool isOpenLoop);
 void resetSingleMotor(int motorId);
 void switchMotorDirection(int motorId);
 void budgeMotors();
+void moveMultipleMotors(int* motorsToMove, float* anglesToReach);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
