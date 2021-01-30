@@ -18,6 +18,8 @@
 #define COMMAND_MOTOR_SPEED 11
 #define COMMAND_OPEN_LOOP_STATE 12
 #define COMMAND_RESET_SINGLE_MOTOR 13
+#define COMMAND_BUDGE_MOTORS 14
+#define COMMAND_MOVE_MULTIPLE_MOTORS 15
 
 void emergencyStop();
 void rebootTeensy();
@@ -82,6 +84,12 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_RESET_SINGLE_MOTOR:
       resetSingleMotor(*rawArgs)
+      break;
+    case COMMAND_BUDGE_MOTORS:
+      budgeMotors();
+      break;
+    case COMMAND_MOVE_MULTIPLE_MOTORS:
+      moveMultipleMotors(0, 0);
       break;
   }
 

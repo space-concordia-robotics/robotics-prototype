@@ -237,40 +237,6 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-          else if (motorCommand.multiMove) { // make motors move simultaneously
-            for (int i = 0; i < NUM_MOTORS; i++) {
-            }
-          }
-        } // end of commands to a specific motor
-      } // end of commands ignored during homing
-      else { // alert the user that the arm is homing so ignoring certain commands
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-        UART_PORT.println("ARM arm is homing! ignoring all commands besides ping or stop");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-        nh.loginfo("arm is homing! ignoring all commands besides ping or stop");
-#endif
-      }
-    } // end of executing valid commands
-    else { // alert the user that it's a bad command
-      blinkType = BAD_BLINK; // alert the blink check that it was a bad message
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-      UART_PORT.println("ARM $E,Error: bad motor command");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-      nh.logerror("error: bad motor command");
-#endif
-    }
-  } // end of message parsing
-  if (sinceAnglePrint >= SERIAL_PRINT_INTERVAL) { // every SERIAL_PRINT_INTERVAL milliseconds the Teensy should print all the motor angles
-    printMotorAngles();
-    vbatt_read();
-    sinceAnglePrint = 0; // reset the timer
-  }
-
-  if (startBlinking) { // freshen things up before changing blink type
-    startBlinking = false;
-    clearBlinkState();
-  }
-  blinkLED(); // decides how to blink based on global variables
 } // end of loop
 
 /* initialization functions */
@@ -1077,7 +1043,6 @@ void resetSingleMotor(int motorId)
 
 void moveMultipleMotors(int* motorsToMove, float* anglesToReach)
 {
-
     while(*motorsToMove != 0)
     {
         if(motorArray[*motorsToMove - 1]->setDesiredAngle(*anglesToReach)){
@@ -1086,4 +1051,9 @@ void moveMultipleMotors(int* motorsToMove, float* anglesToReach)
         motorsToMove++;
         anglesToReach++;
     }
+}
+
+void emergencyStop()
+{
+    stopAllMotors();
 }
