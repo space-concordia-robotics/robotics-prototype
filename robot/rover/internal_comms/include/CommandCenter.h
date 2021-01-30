@@ -12,7 +12,7 @@ namespace internal_comms
     typedef struct {
         uint8_t commandID; // ID of command
         uint8_t* rawArgs; // Byte array with the bytes of the arguments
-        uint8_t rawArgsLength; // Number of bytes in the rawArgs array
+        uint16_t rawArgsLength; // Number of bytes in the rawArgs array
         bool isValid; // Whether the command is valid
     } Command;
 

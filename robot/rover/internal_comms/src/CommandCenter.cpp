@@ -15,7 +15,7 @@ namespace internal_comms
         uint16_t argumentSize = readArgSize();
 
         uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
-        uint8_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
+        uint16_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         uint8_t stopByte = Serial.read();
 
         Command* cmd = (Command*) malloc(sizeof(Command));
