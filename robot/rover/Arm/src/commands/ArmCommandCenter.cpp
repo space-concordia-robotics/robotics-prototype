@@ -9,10 +9,12 @@
 #define COMMAND_STOP_MOTORS 2
 #define COMMAND_RESET_ANGLES 3
 #define COMMAND_HOME_MOTORS 4
+#define COMMAND_HOME 5
 
 void stopAllMotors();
 void rebootTeensy();
-void homeMotors();
+void homeAllMotors();
+void homeCommand();
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -26,6 +28,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_HOME_MOTORS:
       homeMotors();
+      break;
+    case COMMAND_HOME:
+      homeCommand();
       break;
   }
 

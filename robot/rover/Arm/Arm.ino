@@ -298,25 +298,8 @@ void loop() {
 #endif
       }
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
-        if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
-          if (motorCommand.homeAllMotors) {
-#ifdef DEBUG_MAIN
-                UART_PORT.print("ARM Motor "); UART_PORT.print(i + 1); UART_PORT.println(" to be homed.");
-#endif
-              }
-            }
-            homingMotor = NUM_MOTORS - 1;
           }
           else if (motorCommand.homeCommand) {
-            if (motorArray[motorCommand.whichMotor - 1]->hasLimitSwitches) {
-              if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
-                motorArray[motorCommand.whichMotor - 1]->homingType = DOUBLE_ENDED_HOMING;
-              }
-              motorsToHome[motorCommand.whichMotor - 1] = true;
-#ifdef DEBUG_MAIN
-              UART_PORT.print("ARM Motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" to be homed.");
-#endif
-            }
             homingMotor = motorCommand.whichMotor - 1;
           }
           isHoming = true;
@@ -1219,9 +1202,9 @@ void m6ExtendISR(void) {
 }
 
 /**
-    Resets the motors to their original position.
-    Starts from the last motor and work inwards
-**/
+  Resets the motors to their original position.
+  Starts from the last motor and work inwards
+ **/
 void homeAllMotors()
 {
     for (int i = NUM_MOTORS - 1; i >= 0; i--) { 
@@ -1233,14 +1216,33 @@ void homeAllMotors()
         }
     }
 
+    homingMotor = NUM_MOTORS - 1;
+    isHoming = true;
+}
+
+void homeCommand()
+{
+    if (motorArray[motorCommand.whichMotor - 1]->hasLimitSwitches) {
+        if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
+            motorArray[motorCommand.whichMotor - 1]->homingType = DOUBLE_ENDED_HOMING;
+        }
+        motorsToHome[motorCommand.whichMotor - 1] = true;
+    }
+
+    homingMotor = motorCommand.whichMotor - 1;
+    isHoming = true;
+}
+
 void stopAllMotors()
 {
     for (int i = 0; i < NUM_MOTORS; i++) {
       motorArray[i]->stopRotation();
       motorArray[i]->stopHoming();
     }
-    // the following variables are global rather than belonging to a class so must be dealt with separately
-    // i suppose i could package a bunch of this into a function called stopHoming
+}
+
+void stopHoming()
+{
     isHoming = false;
     homingMotor = NUM_MOTORS - 1;
     for (int i = 0; i < NUM_MOTORS; i++) {
