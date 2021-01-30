@@ -36,7 +36,7 @@ void setMotorSpeed(uint8_t motorId, float speed);
 void setOpenLoopState(uint8_t motorId, bool isOpenLoop);
 void resetSingleMotor(uint8_t motorId);
 void switchMotorDirection(uint8_t motorId);
-void budgeMotors();
+void budgeMotors(uint8_t* motorsToMove, bool* moveCW);
 void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
@@ -86,7 +86,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       resetSingleMotor(*rawArgs);
       break;
     case COMMAND_BUDGE_MOTORS:
-      budgeMotors();
+      uint8_t motorsToMove[3] = {2, 4, 5};
+      bool moveCW[3] = {true, false, true};
+      budgeMotors(motorsToMove, moveCW);
       break;
     case COMMAND_MOVE_MULTIPLE_MOTORS:
       moveMultipleMotors(0, 0);

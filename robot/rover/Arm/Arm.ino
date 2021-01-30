@@ -1016,6 +1016,7 @@ void setOpenLoopState(uint8_t motorId, bool isOpenLoop)
     {
       if (motorArray[motorId - 1]->hasEncoder) {
         motorArray[motorId - 1]->isOpenLoop = false;
+      }
     }
 }
 
@@ -1023,9 +1024,9 @@ void budgeMotors(uint8_t* motorsToMove, bool* moveCW)
 {
     while(motorsToMove != 0)
     {
-        motorArray[*motorsToMove - 1]->budge((*moveCW) ? CLOCKWISE : COUNTER_CLOCKWISE);
+        motorArray[(int)*motorsToMove - 1]->budge((*moveCW) ? CLOCKWISE : COUNTER_CLOCKWISE);
         motorsToMove++;
-        directionsToMove++;
+        moveCW++;
     }
 }
 
@@ -1046,8 +1047,8 @@ void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach)
 {
     while(*motorsToMove != 0)
     {
-        if(motorArray[*motorsToMove - 1]->setDesiredAngle(*anglesToReach)){
-            motorArray[*motorsToMove - 1]->goToCommandedAngle();
+        if(motorArray[(int)*motorsToMove - 1]->setDesiredAngle(*anglesToReach)){
+            motorArray[(int)*motorsToMove - 1]->goToCommandedAngle();
         }
         motorsToMove++;
         anglesToReach++;
