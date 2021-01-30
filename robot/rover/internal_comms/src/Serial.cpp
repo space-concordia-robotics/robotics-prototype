@@ -33,11 +33,11 @@ namespace internal_comms
         command = nullptr;
     }
 
-    void sendCommand(Command* command)
+    void sendMessage(Message* message)
     {
-        Serial.write(command->commandID);
-        Serial.write(command->rawArgsLength);
-        Serial.write(command->rawArgs, command->rawArgsLength);
+        Serial.write(message->messageID);
+        Serial.write(message->rawArgsLength);
+        Serial.write(message->rawArgs, message->rawArgsLength);
     }
 
     void endSerial()
