@@ -300,12 +300,6 @@ void loop() {
       else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
         if (motorCommand.homeAllMotors || motorCommand.homeCommand) { // initialize homing procedure
           if (motorCommand.homeAllMotors) {
-            for (int i = NUM_MOTORS - 1; i >= 0; i--) { // start with last motor and work inwards
-              if (motorArray[i]->hasLimitSwitches) {
-                if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
-                  motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
-                }
-                motorsToHome[i] = true;
 #ifdef DEBUG_MAIN
                 UART_PORT.print("ARM Motor "); UART_PORT.print(i + 1); UART_PORT.println(" to be homed.");
 #endif
@@ -1223,6 +1217,21 @@ void m6ExtendISR(void) {
     motor6.triggerState = 0;
   }
 }
+
+/**
+    Resets the motors to their original position.
+    Starts from the last motor and work inwards
+**/
+void homeAllMotors()
+{
+    for (int i = NUM_MOTORS - 1; i >= 0; i--) { 
+        if (motorArray[i]->hasLimitSwitches) {
+            if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
+                motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
+            }
+            motorsToHome[i] = true;
+        }
+    }
 
 void stopAllMotors()
 {
