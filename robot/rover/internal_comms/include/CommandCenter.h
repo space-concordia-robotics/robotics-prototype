@@ -45,21 +45,21 @@ namespace internal_comms
              * allows teensy.
              * Returns something if full.
              */
-            void queueMessage(const Message* message) const;
+            void queueMessage(Message& message);
 
             /**
              * Processes message struct into a byte array
              * that is ready to be sent over serial. 
              * It includes the stop byte.
              */
-            uint8_t* encodeMessage(const Message* message) const;
+            uint8_t* encodeMessage(Message* message);
 
         private:
 
             /**
              * Holds the messages that are ready to be sent out 
              */
-            etl::queue<const Message*, 5> messageQueue;
+            etl::queue<const Message, 5> messageQueue;
 
             /**
              * Reads the two bytes that make up the argument length and combines

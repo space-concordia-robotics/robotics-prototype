@@ -47,7 +47,7 @@ namespace internal_comms
     }
 
     
-    void CommandCenter::queueMessage(const Message* message) const
+    void CommandCenter::queueMessage(Message& message)
     {
         messageQueue.push(message);
     }
