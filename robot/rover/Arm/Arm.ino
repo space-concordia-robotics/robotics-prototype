@@ -297,54 +297,7 @@ void loop() {
         nh.loginfo("arm");
 #endif
       }
-      else if (!isHoming) { // ignore anything besides pings or emergency stop if homing
-          }
-          else if (motorCommand.homeCommand) {
-            homingMotor = motorCommand.whichMotor - 1;
-          }
-          isHoming = true;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.print("ARM initializing homing command, starting with motor ");
-          UART_PORT.println(homingMotor + 1);
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-          nh.loginfo("initializing homing command");
-#endif
-        }
-        else if (motorCommand.resetAllMotors) { // reset software angles of all motors
-          for (int i = 0; i < NUM_MOTORS; i++) {
-            motorArray[i]->setSoftwareAngle(0.0);
-          }
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-          UART_PORT.println("ARM all motor angle values reset");
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-          nh.loginfo("all motor angle values reset");
-#endif
-        }
         else if (motorCommand.armSpeedCommand) {
-          float factor = motorCommand.armSpeedMultiplier;
-          if (factor > 0) {
-            for (int i = 0; i < NUM_MOTORS; i++) {
-              float newSpeed = ( motorArray[i]->getMotorSpeed() ) * factor;
-              if (newSpeed >= 100) {
-#ifdef DEBUG_MAIN
-                UART_PORT.print("ARM $A,Alert: multiplier is too big, motor ");
-                UART_PORT.print(i + 1);
-                UART_PORT.println(" speed is saturating at 100%");
-#endif
-                newSpeed = 100;
-              }
-#ifdef DEBUG_MAIN
-              UART_PORT.print("ARM $S,Success: Motor "); UART_PORT.print(i + 1);
-              UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
-#endif
-              motorArray[i]->setMotorSpeed(newSpeed);
-            }
-          }
-          else {
-#ifdef DEBUG_MAIN
-            UART_PORT.println("ARM $E,Error: invalid multiplier value");
-#endif
-          }
         }
         else { // following cases are for commands to specific motors
           if (motorCommand.stopSingleMotor) { // stopping a single motor takes precedence
@@ -1247,5 +1200,39 @@ void stopHoming()
     homingMotor = NUM_MOTORS - 1;
     for (int i = 0; i < NUM_MOTORS; i++) {
       motorsToHome[i] = false;
+    }
+}
+
+void resetAngles()
+{
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motorArray[i]->setSoftwareAngle(0.0);
+  }
+}
+
+void setArmSpeed(float armSpeedFactor)
+{
+    if (armSpeedFactor > 0) {
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            float newSpeed = ( motorArray[i]->getMotorSpeed() ) * armSpeedFactor;
+            if (newSpeed >= 100) {
+#ifdef DEBUG_MAIN
+                UART_PORT.print("ARM $A,Alert: multiplier is too big, motor ");
+                UART_PORT.print(i + 1);
+                UART_PORT.println(" speed is saturating at 100%");
+#endif
+                newSpeed = 100;
+            }
+#ifdef DEBUG_MAIN
+            UART_PORT.print("ARM $S,Success: Motor "); UART_PORT.print(i + 1);
+            UART_PORT.print(" speed is now "); UART_PORT.println(newSpeed);
+#endif
+            motorArray[i]->setMotorSpeed(newSpeed);
+        }
+    }
+    else {
+#ifdef DEBUG_MAIN
+        UART_PORT.println("ARM $E,Error: invalid multiplier value");
+#endif
     }
 }
