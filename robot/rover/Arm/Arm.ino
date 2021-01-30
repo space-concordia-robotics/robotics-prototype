@@ -237,32 +237,7 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-          else if (motorCommand.motorSpeedCommand) { // set speed for appropriate motor
-            motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new speed of "); UART_PORT.println(motorCommand.motorSpeed);
-#endif
-          }
           else if (motorCommand.loopCommand) { // set loop states for appropriate motor
-            if (motorCommand.loopState == OPEN_LOOP) {
-              motorArray[motorCommand.whichMotor - 1]->isOpenLoop = true;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-              UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in open loop");
-#endif
-            }
-            else if (motorCommand.loopState == CLOSED_LOOP) {
-              if (motorArray[motorCommand.whichMotor - 1]->hasEncoder) {
-                motorArray[motorCommand.whichMotor - 1]->isOpenLoop = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor); UART_PORT.println(" is now in closed loop");
-#endif
-              }
-              else {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-                UART_PORT.println("ARM $E,Alert: cannot use closed loop if motor has no encoder.");
-#endif
-              }
             }
           }
           else if (motorCommand.resetSingleMotor) { // reset the motor angle's variable
@@ -1157,4 +1132,21 @@ void setOpenLoopGain(int motorId, float gain)
 void setPidConstants(int motorId, float kp, float ki, float kd)
 {
     motorArray[motorId - 1]->pidController.setGainConstants(motorCommand.kp, motorCommand.ki, motorCommand.kd);
+}
+
+void setMotorSpeed(int motorId, float motorSpeed)
+{
+    motorArray[motorId - 1]->setMotorSpeed(motorSpeed);
+}
+
+void setOpenLoop(int motorId, bool isOpenLoop)
+{
+    if (isOpenLoop) {
+      motorArray[motorId - 1]->isOpenLoop = true;
+    }
+    else
+    {
+      if (motorArray[motorId - 1]->hasEncoder) {
+        motorArray[motorId - 1]->isOpenLoop = false;
+    }
 }

@@ -15,6 +15,8 @@
 #define COMMAND_GEAR_RATIO 8
 #define COMMAND_OPEN_LOOP_GAIN 9
 #define COMMAND_PID_CONSTANTS 10
+#define COMMAND_MOTOR_SPEED 11
+#define COMMAND_OPEN_LOOP_STATE 12
 
 void emergencyStop();
 void rebootTeensy();
@@ -27,6 +29,8 @@ void stopSingleMotor(int motorId);
 void setGearRatioValue(int motorId, float gearRatio);
 void setOpenLoopGain(int motorId, float gain);
 void setPidConstants(int motorId, float kp, float ki, float kd);
+void setMotorSpeed(int motorId, float speed);
+void setOpenLoopState(int motorId, bool isOpenLoop);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -54,16 +58,22 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       setArmSpeed(1.0f);
       break;
     case COMMAND_STOP_SINGLE_MOTOR:
-      stopSingleMotor(1);
+      stopSingleMotor(*rawArgs);
       break;
     case COMMAND_GEAR_RATIO:
-      setGearRatioValue(1, 1.0);
+      setGearRatioValue(*rawArgs, *static_cast<float*>(++rawArgs));
       break;
     case COMMAND_OPEN_LOOP_GAIN:
-      setOpenLoopGain(1, 1.0);
+      setOpenLoopGain(*rawArgs, *static_cast<float*>(++rawArgs));
       break;
     case COMMAND_PID_CONSTANTS:
-      setPidConstants(1, 1.0, 1.0, 1.0);
+      int motorId = *rawArgs;
+      rawArgs++;
+      float* pid = static_cast<float*>(rawArgs);
+      setPidConstants(*rawArgs, *pid, *(++pid) *(++pid));
+      break;
+    case COMMAND_OPEN_LOOP_STATE:
+      setOpenLoopState(1, true);
       break;
   }
 
