@@ -25,6 +25,12 @@ namespace internal_comms
         {
             // Handle invalid command
         }
+
+        free(command->rawArgs);
+        command->rawArgs = nullptr;
+
+        delete command;
+        command = nullptr;
     }
 
     void sendCommand(Command* command)
