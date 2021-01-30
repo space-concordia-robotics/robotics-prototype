@@ -237,30 +237,6 @@ void loop() {
   if(Serial.available() > 0)
       internal_comms::readCommand(commandCenter);
 
-          else if (motorCommand.gearCommand) { // set gear ratio for appropriate motor
-            motorArray[motorCommand.whichMotor - 1]->setGearRatio(motorCommand.gearRatioVal);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new gear ratio of "); UART_PORT.println(motorCommand.gearRatioVal);
-#endif
-          }
-          else if (motorCommand.openLoopGainCommand) { // set open loop gain for appropriate motor
-            motorArray[motorCommand.whichMotor - 1]->setOpenLoopGain(motorCommand.openLoopGain);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has a new open loop gain of "); UART_PORT.println(motorCommand.openLoopGain);
-#endif
-          }
-          else if (motorCommand.pidCommand) { // set open loop gain for appropriate motor
-            motorArray[motorCommand.whichMotor - 1]->pidController.setGainConstants(motorCommand.kp, motorCommand.ki, motorCommand.kd);
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.print("ARM motor "); UART_PORT.print(motorCommand.whichMotor);
-            UART_PORT.print(" has new pid gains. kp: ");
-            UART_PORT.print(motorCommand.kp); UART_PORT.print(" ki: ");
-            UART_PORT.print(motorCommand.ki); UART_PORT.print(" kd: ");
-            UART_PORT.println(motorCommand.kd);
-#endif
-          }
           else if (motorCommand.motorSpeedCommand) { // set speed for appropriate motor
             motorArray[motorCommand.whichMotor - 1]->setMotorSpeed(motorCommand.motorSpeed);
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -1138,6 +1114,11 @@ void stopSingleMotor(int motorId)
     motorArray[motorId - 1]->stopRotation();
 }
 
+void setGearRatioValue(int motorId, float gearRatio)
+{
+    motorArray[motorId]->setGearRatio(gearRatio);
+}
+
 void setArmSpeed(float armSpeedFactor)
 {
     if (armSpeedFactor > 0) {
@@ -1166,4 +1147,14 @@ void setArmSpeed(float armSpeedFactor)
         UART_PORT.println("ARM $E,Error: invalid multiplier value");
 #endif
     }
+}
+
+void setOpenLoopGain(int motorId, float gain)
+{
+    motorArray[motorId - 1]->setOpenLoopGain(gain);
+}
+
+void setPidConstants(int motorId, float kp, float ki, float kd)
+{
+    motorArray[motorId - 1]->pidController.setGainConstants(motorCommand.kp, motorCommand.ki, motorCommand.kd);
 }
