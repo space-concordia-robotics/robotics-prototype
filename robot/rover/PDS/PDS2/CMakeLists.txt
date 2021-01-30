@@ -107,6 +107,9 @@ set_target_properties(
         LINK_FLAGS ${AVR_GCC_LINKER_FLAGS}
         OUTPUT_NAME ${PROJECT_NAME}.elf
 )
+
+# Need to link arduino core libs to internal comms as well because it needs them
+target_link_libraries( InternalComms arduinocore)
 #Note that if you need extra arduino libraries, it is a semi colon seperated list using the library name you provided in createCppLibrary
 target_link_libraries(
         ${PROJECT_NAME}_EXE
