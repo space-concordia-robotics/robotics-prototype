@@ -25,8 +25,8 @@ void emergencyStop();
 void rebootTeensy();
 void stopAllMotors();
 void resetAngles();
-void homeAllMotors();
-void homeCommand();
+void homeAllMotors(uint8_t homingStyle);
+void homeMotor(uint8_t motorId, uint8_t homingStyle);
 void setArmSpeed(float armSpeedFactor);
 void stopSingleMotor(uint8_t motorId);
 void setGearRatioValue(uint8_t motorId, float gearRatio);
@@ -59,7 +59,7 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       homeAllMotors(*rawArgs);
       break;
     case COMMAND_HOME:
-      homeCommand();
+      homeMotor(*rawArgs, *(++rawArgs));
       break;
     case COMMAND_ARM_SPEED:
       setArmSpeed(1.0f);

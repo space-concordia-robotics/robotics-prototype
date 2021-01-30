@@ -933,16 +933,16 @@ void homeAllMotors(uint8_t homingStyle)
     isHoming = true;
 }
 
-void homeCommand()
+void homeMotor(uint8_t motorId, uint8_t homingStyle)
 {
-    if (motorArray[motorCommand.whichMotor - 1]->hasLimitSwitches) {
-        if (motorCommand.homingStyle == DOUBLE_ENDED_HOMING) {
-            motorArray[motorCommand.whichMotor - 1]->homingType = DOUBLE_ENDED_HOMING;
+    if (motorArray[motorId - 1]->hasLimitSwitches) {
+        if (homingStyle == DOUBLE_ENDED_HOMING) {
+            motorArray[motorId - 1]->homingType = DOUBLE_ENDED_HOMING;
         }
-        motorsToHome[motorCommand.whichMotor - 1] = true;
+        motorsToHome[motorId - 1] = true;
     }
 
-    homingMotor = motorCommand.whichMotor - 1;
+    homingMotor = motorId - 1;
     isHoming = true;
 }
 
@@ -1019,12 +1019,13 @@ void setOpenLoopState(uint8_t motorId, bool isOpenLoop)
     }
 }
 
-void budgeMotors()
+void budgeMotors(uint8_t* motorsToMove, bool* moveCW)
 {
-    for (int i = 0; i < NUM_MOTORS; i++) {
-      if (motorCommand.motorsToMove[i]) {
-        motorArray[i]->budge(motorCommand.directionsToMove[i]);
-      }
+    while(motorsToMove != 0)
+    {
+        motorArray[*motorsToMove - 1]->budge((*moveCW) ? CLOCKWISE : COUNTER_CLOCKWISE);
+        motorsToMove++;
+        directionsToMove++;
     }
 }
 
@@ -1033,7 +1034,7 @@ void budgeMotors()
  **/
 void switchMotorDirection(uint8_t motorId)
 {
-    motorArray[motorId] -> switchDirectionLogic();
+    motorArray[motorId - 1] -> switchDirectionLogic();
 }
 
 void resetSingleMotor(uint8_t motorId)
