@@ -104,6 +104,7 @@ createCppLibrary(${STEPPER_PATH}/src/Stepper.cpp Stepper "")
 add_library(InternalComms "${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp")
 target_include_directories(InternalComms PUBLIC ${INTERNAL_COMMS_PATH}/include)
 target_include_directories(InternalComms PUBLIC ${ETL_PATH}/include)
+target_compile_definitions(InternalComms PRIVATE ETL_NO_STL)
 target_compile_options(InternalComms PUBLIC ${AVR_GXX_FLAGS})
 #createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
 createCppLibrary(${CMAKE_CURRENT_SOURCE_DIR}/PDSCommandCenter.cpp PDS_sources ${INTERNAL_COMMS_PATH}/include)
@@ -130,7 +131,6 @@ set_target_properties(
         OUTPUT_NAME ${PROJECT_NAME}.elf
 )
 
-#target_include_directories(InternalComms PUBLIC ${ETL_PATH}/include)
 # Need to link arduino core libs to internal comms as well because it needs them
 target_link_libraries( InternalComms arduinocore)
 #Note that if you need extra arduino libraries, it is a semi colon seperated list using the library name you provided in createCppLibrary
