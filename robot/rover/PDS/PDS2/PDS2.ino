@@ -15,16 +15,30 @@ internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
 
 void setup() 
 {
-    internal_comms::startSerial(RX_PIN, TX_PIN);
+
+/*
     mux_settings();
     load_settings();
+    Serial.begin(9600);
+    pinMode(LED_BUILTIN, OUTPUT);
+    */
+    //Serial.begin(57600L);
+    internal_comms::startSerial(RX_PIN, TX_PIN);
 }
 
 void loop() 
 {
     // listen to the serial port and parse an incoming message
-    if (Serial.available()) 
+    
+    if (Serial.available() > 0) 
     {
+        internal_comms::readCommand(commandCenter);
+        
+        //Serial.readBytesUntil('\n', BUFFER, 0); // Reads the message until it reaches the character '\n'
+        /*
+        int incoming_byte = Serial.read();
+        Serial.print("I received: ");
+        Serial.println(incoming_byte, DEC);
         byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // Reads the message until it reaches the character '\n'
         if (num > 0) 
         {
@@ -36,8 +50,11 @@ void loop()
         {
             Serial.println("Command error: PDS received empty message");
         }
+        */
     }
 
+
+/*
     // Read Load Voltage
     enable_multisense();
     float load_value = load_voltage();
@@ -52,4 +69,13 @@ void loop()
     Serial.print(Temp1);
     Serial.println(" C"); 
     delay(1000);
+    */
+}
+void pong()
+{
+    Serial.println("PDS pong");
+}
+void error()
+{
+    Serial.println("No command found"); 
 }
