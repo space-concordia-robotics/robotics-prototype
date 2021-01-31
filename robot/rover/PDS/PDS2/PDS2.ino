@@ -79,3 +79,7 @@ void error()
 {
     Serial.println("No command found"); 
 }
+void who()
+{
+    Serial.println("PDS pds"); 
+}
