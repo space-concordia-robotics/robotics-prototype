@@ -12,7 +12,12 @@ endif()
 
 
 set(ARDUINO_PATH $ENV{ARDUINO_PATH})
+set(ARDUINO_EXTERNAL_LIB $ENV{HOME}/Arduino/libraries)
 set(ARDUINO_LIBS ${ARDUINO_PATH}/libraries)
+
+set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/EmbeddedTemplateLibrary)
+set(ETL_URL https://github.com/ETLCPP/etl)
+set(ETL_VERSION 19.4.3)
 
 set(AVR_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
@@ -68,6 +73,16 @@ function(createCppLibrary sources libraryName includes)
     target_compile_options(${libraryName} PUBLIC ${AVR_GXX_FLAGS})
 endfunction()
 
+#given a name, will check if the library exists in the proper directory, otherwise run install_arduino_libraries.sh which will install it
+function(checkLibraries lib_name lib_version lib_url)
+
+if(NOT EXISTS ${ARDUINO_EXTERNAL_LIB}/${lib_name})
+execute_process(
+COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../install_arduino_libraries.sh ${lib_name} ${lib_version} ${lib_url}
+)
+endif()
+
+endfunction()
 
 #S FILES - compiled with gcc
 add_library(arduinocore_s  OBJECT ${ARDUINO_CORE_S_FILES})
@@ -82,12 +97,19 @@ target_compile_options(arduinocore_c PUBLIC ${AVR_GCC_C_FLAGS})
 add_library(arduinocore $<TARGET_OBJECTS:arduinocore_s> $<TARGET_OBJECTS:arduinocore_c> ${ARDUINO_CORE_CXX_FILES})
 target_compile_options(arduinocore PUBLIC ${AVR_GXX_FLAGS})
 
+checkLibraries(EmbeddedTemplateLibrary ${ETL_VERSION} ${ETL_URL})
 #Create the arduino libraries here
 createCppLibrary(${STEPPER_PATH}/src/Stepper.cpp Stepper "")
 #Create the internal_comms library 
-createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
+add_library(InternalComms "${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp")
+target_include_directories(InternalComms PUBLIC ${INTERNAL_COMMS_PATH}/include)
+target_include_directories(InternalComms PUBLIC ${ETL_PATH}/include)
+target_compile_options(InternalComms PUBLIC ${AVR_GXX_FLAGS})
+#createCppLibrary("${INTERNAL_COMMS_PATH}/src/CommandCenter.cpp;${INTERNAL_COMMS_PATH}/src/Serial.cpp" InternalComms ${INTERNAL_COMMS_PATH}/include)
 createCppLibrary(${CMAKE_CURRENT_SOURCE_DIR}/PDSCommandCenter.cpp PDS_sources ${INTERNAL_COMMS_PATH}/include)
+
 set(PROJECT_LIBRARIES InternalComms)
+
 
 #Rename the .ino file and add it as an executable with an _exe name extension
 configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
@@ -108,6 +130,7 @@ set_target_properties(
         OUTPUT_NAME ${PROJECT_NAME}.elf
 )
 
+#target_include_directories(InternalComms PUBLIC ${ETL_PATH}/include)
 # Need to link arduino core libs to internal comms as well because it needs them
 target_link_libraries( InternalComms arduinocore)
 #Note that if you need extra arduino libraries, it is a semi colon seperated list using the library name you provided in createCppLibrary
