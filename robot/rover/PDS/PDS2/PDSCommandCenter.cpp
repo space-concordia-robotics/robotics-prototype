@@ -3,7 +3,8 @@
 #include <Arduino.h>
 void pong();
 void error();
-void who();
+void disableAllMotors();
+void enableAllMotors();
 void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength)
 {
     Serial.println("inside executeCommand");
@@ -13,9 +14,13 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
             Serial.println("PING");
             pong();
             break;
-        case COMMAND_WHO:
-            Serial.println("WHO");
-            who();
+        case COMMAND_DISABLE_ALL_MOTORS:
+            Serial.println("Disabling all motors");
+            disableAllMotors();
+            break;
+        case COMMAND_ENABLE_ALL_MOTORS:
+            Serial.println("Disabling all motors");
+            enableAllMotors();
             break;
         default:
             error();
