@@ -6,6 +6,7 @@
 #define COMMAND_DISABLE_ALL_MOTORS 51
 #define COMMAND_ENABLE_ALL_MOTORS 52
 #define COMMAND_MOTOR 53
+#define COMMAND_FAN 54
 
 class PDSCommandCenter : public internal_comms::CommandCenter {
     public:
