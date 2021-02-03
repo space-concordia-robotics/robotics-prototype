@@ -19,7 +19,7 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
             disableAllMotors();
             break;
         case COMMAND_ENABLE_ALL_MOTORS:
-            Serial.println("Disabling all motors");
+            Serial.println("Enabling all motors");
             enableAllMotors();
             break;
         default:
