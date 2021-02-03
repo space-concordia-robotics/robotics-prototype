@@ -93,3 +93,12 @@ void enableAllMotors()
         PORTC |= 0B00111000; //motor four, five and six
         Serial.println("Command: PDS enabling power to all motors");
 }
+void motor(uint8_t motorPin, uint8_t state)
+{
+    // Need check to see if pin given is a valid motor pin
+    Serial.print("Motor pin: ");
+    Serial.println(motorPin, DEC);
+    Serial.print("On or off: ");
+    Serial.println(state, DEC);
+    digitalWrite(motorPin, state);
+}
