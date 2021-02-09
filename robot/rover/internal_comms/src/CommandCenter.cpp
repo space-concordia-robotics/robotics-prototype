@@ -2,7 +2,7 @@
 // Created by cedric on 2020-10-14.
 //
 
-#include "include/CommandCenter.h"
+#include "CommandCenter.h"
 #include <etl/queue.h>
 
 namespace internal_comms
