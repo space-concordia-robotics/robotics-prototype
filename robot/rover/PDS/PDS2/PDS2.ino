@@ -102,10 +102,9 @@ void motor(uint8_t motorPin, uint8_t state)
     Serial.println(state, DEC);
     digitalWrite(motorPin, state);
 }
-void fan(uint8_t fanPin, uint8_t fanSpeed)
+void fan(uint8_t state)
 {
-    Serial.print("Fan pin: ");
-    Serial.println(fanPin, DEC);
-    Serial.print("Speed: ");
-    Serial.println(fanSpeed, DEC);
+    Serial.print("Fan state: ");
+    Serial.println(state, DEC);
+    digitalWrite(Fans, state);
 }
