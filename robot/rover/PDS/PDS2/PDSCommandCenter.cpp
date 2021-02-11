@@ -16,40 +16,40 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
     Serial.println((char*)rawArgs);
     Serial.print("Raw args length: ");
     Serial.println(rawArgsLength, DEC);
-    if (commandID == COMMAND_PING)
+    uint8_t state;
+    uint8_t motorPin;
+    switch(commandID)
     {
+        case COMMAND_PING:
             Serial.println("PING");
             pong();
-    }else if(commandID == COMMAND_DISABLE_ALL_MOTORS)
-    {
+            break;
+        case COMMAND_DISABLE_ALL_MOTORS:
             Serial.println("Disabling all motors");
             disableAllMotors();
-    } else if (commandID == COMMAND_DISABLE_ALL_MOTORS)
-    {
-            Serial.println("Disabling all motors");
-            disableAllMotors();
-    }else if (commandID == COMMAND_ENABLE_ALL_MOTORS)
-    {
+            break;
+        case COMMAND_ENABLE_ALL_MOTORS:
             Serial.println("Enabling all motors");
             enableAllMotors();
-    }else if (commandID == COMMAND_MOTOR)
-    {
+            break;
+        case COMMAND_MOTOR:
             if (rawArgsLength != 2) {
                 Serial.println("Wrong number of arguments. It should be 2, motor pin + on/off ");
                 return;
             }
-            uint8_t motorPin = *rawArgs;
-            uint8_t state = *(++rawArgs);
+            motorPin = *rawArgs;
+            state = *(++rawArgs);
             motor(motorPin, state);
-    }else if (commandID == COMMAND_FAN)
-    {
+            break;
+        case COMMAND_FAN:
             if (rawArgsLength != 1) {
                 Serial.println("Wrong number of arguments. It should only one, on/off");
                 return;
             }
-            uint8_t state = *rawArgs;
+            state = *rawArgs;
             fan(state);
-    }else{
-        error();
-    } 
+            break;
+        default:
+            error();
+    }
 }

@@ -15,14 +15,8 @@ internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
 
 void setup() 
 {
-
-/*
     mux_settings();
     load_settings();
-    Serial.begin(9600);
-    pinMode(LED_BUILTIN, OUTPUT);
-    */
-    //Serial.begin(57600L);
     internal_comms::startSerial(RX_PIN, TX_PIN);
 }
 
@@ -54,8 +48,8 @@ void loop()
     }
 
 
-/*
     // Read Load Voltage
+/*
     enable_multisense();
     float load_value = load_voltage();
     Serial.print("Load Value after conversion: ");
