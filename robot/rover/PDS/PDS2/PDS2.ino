@@ -27,29 +27,10 @@ void loop()
     if (Serial.available() > 0) 
     {
         internal_comms::readCommand(commandCenter);
-        
-        //Serial.readBytesUntil('\n', BUFFER, 0); // Reads the message until it reaches the character '\n'
-        /*
-        int incoming_byte = Serial.read();
-        Serial.print("I received: ");
-        Serial.println(incoming_byte, DEC);
-        byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // Reads the message until it reaches the character '\n'
-        if (num > 0) 
-        {
-            Serial.println(BUFFER); // Prints the received message
-            parseCommand(); // Check the command
-            memset(BUFFER, 0, CHAR_BUFF_SIZE); // Copies 0 to the variable BUFFER
-        } 
-        else 
-        {
-            Serial.println("Command error: PDS received empty message");
-        }
-        */
     }
 
 
     // Read Load Voltage
-/*
     enable_multisense();
     float load_value = load_voltage();
     Serial.print("Load Value after conversion: ");
@@ -63,7 +44,6 @@ void loop()
     Serial.print(Temp1);
     Serial.println(" C"); 
     delay(1000);
-    */
 }
 void pong()
 {
