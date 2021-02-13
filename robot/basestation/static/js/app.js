@@ -1,5 +1,6 @@
 PING_THROTTLE_TIME = 1000
 ERROR_SOUND_PATH = '../../static/sound/error.wav'
+var error_sound = new Audio(ERROR_SOUND_PATH)
 
 /* eslint-disable no-unused-lets */
 $(document).ready(() => {
@@ -255,9 +256,12 @@ function pingOdroid (timeoutVal = REQUEST_TIMEOUT) {
   lastCmdSent = new Date().getTime()
 }
 
-/*
-plays an error sound once -> warning will not play if the document has not been interacted with yet
-*/
 function errorSound (){
-  new Audio(ERROR_SOUND_PATH).play()
+  console.log(error_sound);
+  var sound = $("#errsound")[0];
+  console.log(sound);
+  sound.muted = true;
+  sound.play();
+  sound.muted = false;
+  sound.play();
 }
