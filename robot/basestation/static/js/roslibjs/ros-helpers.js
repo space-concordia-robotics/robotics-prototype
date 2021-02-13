@@ -251,7 +251,8 @@ function initRosWeb () {
 
     $('.battery-temp').each(function(i, obj) {
       let $obj = $(obj)
-      let temperature = temps[i]
+      let temperature = temps[i] == 999.9 ? 'N/A ' : temps[i]
+
       $obj.text(temperature)
 
       if ((temperature > MAX_TEMP || temperature < MIN_TEMP)) {
@@ -300,7 +301,11 @@ function initRosWeb () {
     $('#left-mid-current').text(parseFloat(message.effort[4]).toFixed(3))
     $('#left-rear-current').text(parseFloat(message.effort[5]).toFixed(3))
   })
-
+  marker_list_subscriber = new ROSLIB.Topic({
+      ros: ros,
+      name: 'marker_list',
+      messageType: 'mcu_control/RoverMarkerList'
+  })
   // setup a subcriber function for rover_position topic
   rover_position_listener = new ROSLIB.Topic({
     ros: ros,

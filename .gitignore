@@ -16,6 +16,7 @@ emailer.log
 rosRoverStart.log
 status_done
 build
+cmake-build-debug
 devel
 odroid_rx.txt
 tmp
@@ -29,6 +30,7 @@ rover_stream
 stream_images
 *.swp
 emails.txt
+markers.json
 robot/rover/Arm/CMakeLists.txt
 robot/rover/MobilePlatform/CMakeLists.txt
 robot/rover/PidController/CMakeLists.txt

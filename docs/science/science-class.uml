@@ -1,0 +1,88 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Embedded Science Subsystem"
+{
+  class Sensor
+  interface Stoppable
+  {
+    +eStop()
+  }
+  interface Updateable
+  {
+    +update(dt)
+  }
+  class Fan
+  {
+      #fanPWM
+      +turnOn()
+      +turnOff()
+  }
+  class Funnel
+  {
+      #motorPWM
+      +funnel()
+  }
+  class Laser
+  {
+    #timeTurnedOn
+    +turnOn()
+    +turnOff()
+    +isReady()
+    +timeLeftForWarmUp()
+    +checkForFaults()
+    +readCurrents()
+  }
+  class TemperatureController
+  class Pump
+  {
+    #pumpTimeElapsed
+    #motorPWM
+    +pump()
+    +backpump()
+  }
+  class CommandCenter
+
+  class Carousel
+  {
+    #currentCuvette
+    +home()
+    +goToCuvette(cuvetteId)
+    +nextCuvette()
+    +previousCuvette()
+    +getCurrentCuvette()
+  }
+}
+package "Base Station"
+{
+  class ScienceNode
+}
+class PIDController
+
+CommandCenter -- Laser
+CommandCenter -- Fan
+CommandCenter -- TemperatureController
+CommandCenter -- Pump
+CommandCenter -- Carousel
+CommandCenter -- Funnel
+CommandCenter -- ScienceNode : "RS-485"
+
+Fan -- Laser
+Fan -- TemperatureController
+
+PIDController -- TemperatureController : "Temperature Control"
+
+Stoppable <|-- Laser
+Stoppable <|-- Pump
+Stoppable <|-- Carousel
+Stoppable <|-- Fan
+Stoppable <|-- Funnel
+
+Updateable <|-- Pump
+Updateable <|-- Laser
+Updateable <|-- Carousel
+Updateable <|-- Funnel
+Updateable <|-- TemperatureController
+
+Sensor "3" -- "1" TemperatureController : "Provides temperature"
+@enduml

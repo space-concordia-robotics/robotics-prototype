@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate services in the 'srv' folder
 add_service_files(
+  DIRECTORY
+  srv
   FILES
   ## arm
   ArmRequest.srv
@@ -31,8 +33,9 @@ add_message_files(
   IkCommand.msg
   ## rover
   ##RoverPosition.msg
-  AntennaGoal.msg
-  ##RoverGoal.msg
+  AntennaMarker.msg
+  RoverMarker.msg
+  RoverMarkerList.msg
   ThermistorTemps.msg
   FanSpeeds.msg
   Voltage.msg

@@ -3,13 +3,10 @@ atomicwrites==1.1.5
 cycler==0.10.0
 empy==3.3.2
 kiwisolver==1.0.1
-matplotlib==2.2.2
 more-itertools==4.2.0
 numpy==1.14.5
 pluggy==0.6.0
 py==1.5.4
-#pycairo==1.17.1
-#PyGObject==3.28.3 # unfortunately the version that Trusty supports for python3-gi is too outdated for pyobject 
 pyparsing==2.2.0
 pyserial==3.4
 python-dateutil==2.7.3
@@ -29,3 +26,6 @@ attrs==19.2.0
 ffmpeg-python==0.2.0
 Twisted==20.3.0
 pygame==1.9.6
+pytest==3.6.3
+pylint==2.5.3
+yapf==0.30.0
