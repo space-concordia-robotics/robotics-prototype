@@ -1,24 +1,24 @@
 
 #include <Arduino.h>
-#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
-#include "variables.h"
-#include "sensor_read.h"
+//#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
+/*#include "variables.h"
+#include "sensor_read.h"*/
 #include "load_setup.h"
-#include "parse_command.h"
+//#include "parse_command.h"
 
-
+Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
 
 void setup() 
 {
     Serial.begin(SERIAL_BAUD_RATE);  
-    mux_settings();
-    load_settings();
+    /*mux_settings();
+    load_settings();*/
 }
 
 void loop() 
 {
     // listen to the serial port and parse an incoming message
-    if (Serial.available()) 
+    /*if (Serial.available()) 
     {
         byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // Reads the message until it reaches the character '\n'
         if (num > 0) 
@@ -38,7 +38,10 @@ void loop()
     float load_value = load_voltage();
     Serial.print("Load Value after conversion: ");
     Serial.print(load_value); 
-    Serial.println(" V");     
+    Serial.println(" V");  
+
+    //1. Interpret the load voltage
+    //2. Decide what to do after figuring out the motors' conditions
     
     // Read Temperature Value
     Temp1 = temp_read(0, 0, 0);
@@ -46,5 +49,7 @@ void loop()
     Serial.print("Temperature: "); 
     Serial.print(Temp1);
     Serial.println(" C"); 
-    delay(1000);
+//    delay(1000);/
+*/
+    
 }

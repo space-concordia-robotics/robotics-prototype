@@ -1,4 +1,7 @@
+//#ifndef
+//#define
 
+#include <Arduino.h>
 /*
  * Pins and Variable Definitions
  */
@@ -32,12 +35,14 @@
 
 
 
-char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
+//char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
 
 
 // Temperature value
-float Temp1 = 0;
+//float Temp1 = 0;
 
 
 // Number of steps per rotation for Stepper Motor (This will be removed for our application)
 const int stepsPerRevolution = 2048;
+
+//#endif/

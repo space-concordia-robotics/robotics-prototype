@@ -1,8 +1,15 @@
+//#ifndef
+//#define
 
 /*
  * INCOMPLETE!!!!!!!!!!!!!
  */
-
+#include <Arduino.h>
+#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
+#include "variables.h"
+#include "sensor_read.h"
+#include "load_setup.h"
+#include "parse_command.h"
 
 
 void parseCommand() 
@@ -60,3 +67,5 @@ void parseCommand()
         
     } // end of while loop
 } // end of parseCommand
+
+//#endif/

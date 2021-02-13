@@ -1,72 +1,35 @@
+#ifndef SETUP_H
+#define SETUP_H
+
+#include "variables.h"
+#include <Stepper.h> 
 
 /*
  * Load Settings
  */
 
-
-
-// Create stepper object called 'myStepper', note the pin order:
-Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
-
-
-void load_settings() 
+class Setup
 {
-   pinMode(MultiSense, INPUT); // Feedback from output current
-   pinMode(SEn, OUTPUT); // Enables MultiSense pin
-
-   // Motor setting
-   pinMode(MOTOR_in, OUTPUT);  
-   myStepper.setSpeed(5); // Set the speed to 5 rpm
-}
-
-
-void enable_multisense()
-{
-    digitalWrite(SEn, HIGH);
-}
-
-
-void disable_multisense()
-{
-    digitalWrite(SEn, LOW);
-}
-
-
-void enable_motor()
-{
-    digitalWrite(MOTOR_in, HIGH);
-    Serial.println("Motor is Enabled!");
-    myStepper.step(stepsPerRevolution); // clockwise rotation  
-}
-
-
-void disable_motor()
-{
-    digitalWrite(MOTOR_in, LOW); 
-    Serial.println("Motor is Disabled!");
-}
-
-
-float load_voltage()
-{
-    int load = analogRead(MultiSense);
-    float Vout = ((float)load / 1023.0) * 5;
-    Serial.print("Load Value before conversion: ");
-    Serial.println(load);
+    int pin;
     
-    return Vout;
-}
+    public:
+    
+        Setup();
+        void enable_device(String message, int pin1);
+        void disable_device(String message, int pin1);
+        int get_status(int pin1);
+        float load_voltage();
+        //void load_settings();
+        /*void enable_multisense();
+        void disable_multisense();
+        void enable_fans();
+        void disable_fans();*/        
+};
 
-
-void enable_fans()
+class Motor : public Setup
 {
-    digitalWrite(Fans, HIGH);
-    Serial.println("Fans are Enabled!");  
-}
+    public:
+        Motor();    
+};
 
-
-void disable_fans()
-{
-    digitalWrite(Fans, LOW);
-    Serial.println("Fans are Disabled!");  
-}
+#endif

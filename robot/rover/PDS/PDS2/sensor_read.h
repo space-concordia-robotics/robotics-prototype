@@ -1,8 +1,16 @@
+//#ifndef
+//#define
 
 /*
  * Read Temperature Values
  */
 
+#include <Arduino.h>
+#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
+#include "variables.h"
+#include "sensor_read.h"
+#include "load_setup.h"
+#include "parse_command.h"
 
 
 // Constants
@@ -40,3 +48,5 @@ float temp_read(int adrs0, int adrs1, int adrs2)
 
     return T;
 }
+
+//#endif/
