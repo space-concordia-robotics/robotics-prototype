@@ -75,6 +75,8 @@ $(document).ready(function () {
       }
     });
 
+    console.log('twistMsg', twistMessage.linear.x)
+    console.log('twistMsg', twistMessage.angular.z)
     twist_topic.publish(twistMessage);
   }
 
