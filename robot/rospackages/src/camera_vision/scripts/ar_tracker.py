@@ -13,7 +13,9 @@ class arTracker():
         # necessary for handling images from topics
         self.node_name = 'ar_tracker'
         rospy.init_node(self.node_name)
-        cv_camera_node_name = rospy.get_param('~camera_node_name')
+        # make sure to use `rosparam set ~camera_node_name video0Cam` 
+        #cv_camera_node_name = rospy.get_param('~camera_node_name')
+        cv_camera_node_name = 'video0Cam'
 
         self.is_marker_seen = False
 
@@ -54,18 +56,25 @@ class arTracker():
         # require numpy arrays
         frame = np.array(frame, dtype=np.uint8)
 
+        #@TODO: use these values and dynamically set max height/width values used in map_from_ar_pos.. function?
         shape = frame.shape
         height = shape[0]
         width = shape[1]
 
         # Starting coordinate
         # Represents the top left corner of rectangle
-        starting_point = (width/2 - width/5, height/2 - height/5)
-
+        #starting_point = (width/2 - width/5, height/2 - height/5)
+        print('width:', width)
+        print('height:', height)
+        starting_point = (width/2 - 1, height/2 - 1)
+        print('starting_point:', starting_point)
         # Ending coordinate
         # Represents the bottom right corner of rectangle
-        ending_point = (width/2 + width/5, height/2 + width/5)
+        #ending_point = (width/2 + width/5, height/2 + width/5)
+        ending_point = (width/2 + 1, height/2 + 1)
+        print('ending_point:', ending_point)
 
+        #@TODO: when done with the rest, make sure to remove the default red square!
         if self.is_marker_seen:
             # Green color in BGR
             color = (0, 255, 0)
@@ -85,6 +94,30 @@ class arTracker():
         except rospy.ROSException as e:
             rospy.logerr("Failed to publish AR image: %s", e)
 
+
+    def map_from_ar_pos_to_screen_pos(self, ar_pos):
+        '''
+        returns starting and ending points (top left and bottom right corners) needed to draw rectangle
+        based on the ar's x, y and z positions given by ar_track_alvar
+        '''
+
+        # these values are fine to hardcode as long as the default streaming resultion (360p) is used
+        # once this becomes variable, it will be time to dynamify these settings
+        MAX_HEIGHT = 480 
+        MAX_WIDTH  = 848
+        INPUT_SCALE_FACTOR = 10
+
+        mid_h = MAX_HEIGHT / 2
+        mid_w = MAX_WIDTH / 2
+    
+        ar_x = ar_pos.x * INPUT_SCALE_FACTOR
+        ar_y = ar_pos.y * INPUT_SCALE_FACTOR
+        ar_z = ar_pos.z * INPUT_SCALE_FACTOR
+
+        # quick mafs where we translate these ar tag coordinates from 3D space to 2D rectangles
+        # possibly change the size too based on the z values
+
+        return [(0, 0), (0, 0)] 
 
     def cleanup(self):
         print('shutting down ar_tracker node')
