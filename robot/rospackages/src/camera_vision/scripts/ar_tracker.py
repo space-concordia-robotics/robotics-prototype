@@ -10,6 +10,8 @@ import numpy as np
 
 class arTracker():
     def __init__(self):
+        self.markers = []
+
         # necessary for handling images from topics
         self.node_name = 'ar_tracker'
         rospy.init_node(self.node_name)
@@ -40,6 +42,7 @@ class arTracker():
         rospy.loginfo('Waiting for image topics...')
 
     def ar_track_alvar_callback(self, ar_pose_marker):
+        self.markers = ar_pose_marker.markers
         if ar_pose_marker.markers:
             self.is_marker_seen = True
         else:
@@ -64,15 +67,15 @@ class arTracker():
         # Starting coordinate
         # Represents the top left corner of rectangle
         #starting_point = (width/2 - width/5, height/2 - height/5)
-        print('width:', width)
-        print('height:', height)
+        #print('width:', width)
+        #print('height:', height)
         starting_point = (width/2 - 1, height/2 - 1)
-        print('starting_point:', starting_point)
+        #print('starting_point:', starting_point)
         # Ending coordinate
         # Represents the bottom right corner of rectangle
         #ending_point = (width/2 + width/5, height/2 + width/5)
         ending_point = (width/2 + 1, height/2 + 1)
-        print('ending_point:', ending_point)
+        #print('ending_point:', ending_point)
 
         #@TODO: when done with the rest, make sure to remove the default red square!
         if self.is_marker_seen:
@@ -85,29 +88,38 @@ class arTracker():
         # Line thickness of 2 px
         thickness = 2
 
-        # Draw a rectangle with blue line borders of thickness of 2 px
-        image = cv2.rectangle(frame, starting_point, ending_point, color, thickness)
+        for i in range(len(self.markers)):
 
-        # Publish the new overlay including image to topic '/camera/image_ar'
-        try:
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
-        except rospy.ROSException as e:
-            rospy.logerr("Failed to publish AR image: %s", e)
+            starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
+
+            # Draw a rectangle with blue line borders of thickness of 2 px
+            image = cv2.rectangle(frame, starting_point, ending_point, color, thickness)
+
+            # Publish the new overlay including image to topic '/camera/image_ar'
+            try:
+                self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
+            except rospy.ROSException as e:
+                rospy.logerr("Failed to publish AR image: %s", e)
 
 
-    def map_from_ar_pos_to_screen_pos(self, ar_pos):
+    def map_from_ar_pos_to_screen_pos(self, markers):
         '''
         returns list of size 2 containing the starting and ending points of top left and bottom right corners as tuples. These are necessary inputs for drawing the rectangles.
         '''
+
+        ar_pos = markers.pose.pose.position
+
+        print(ar_pos)
+
 
         # these values are fine to hardcode as long as the default streaming resultion (360p) is used
         # once this becomes variable, it will be time to dynamify these settings
         MAX_HEIGHT = 480 
         MAX_WIDTH  = 848
-        INPUT_SCALE_FACTOR = 100
+        INPUT_SCALE_FACTOR = 180
 
-        mid_h = MAX_HEIGHT / 2
-        mid_w = MAX_WIDTH / 2
+        mid_h = MAX_HEIGHT / 2 - 60
+        mid_w = MAX_WIDTH / 2 - 100
     
         ar_x = ar_pos.x * INPUT_SCALE_FACTOR
         ar_y = ar_pos.y * INPUT_SCALE_FACTOR
@@ -116,10 +128,10 @@ class arTracker():
         # quick mafs where we translate these ar tag coordinates from 3D space to 2D rectangles
         # possibly change the size too based on the z values
 
-        SIZE_FACTOR = 4
+        SIZE_FACTOR = 10
 
-        start_point = (mid_w + ar_x - SIZE_FACTOR, mid_h + ar_y - SIZE_FACTOR)
-        end_point = (mid_w + ar_x + SIZE_FACTOR, mid_h + ar_y + SIZE_FACTOR)
+        start_point = (int(mid_w + ar_x - SIZE_FACTOR), int(mid_h + ar_y - SIZE_FACTOR))
+        end_point = (int(mid_w + ar_x + SIZE_FACTOR), int(mid_h + ar_y + SIZE_FACTOR))
 
         return [start_point, end_point] 
 
