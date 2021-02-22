@@ -64,43 +64,38 @@ class arTracker():
         height = shape[0]
         width = shape[1]
 
-        # Starting coordinate
-        # Represents the top left corner of rectangle
-        #starting_point = (width/2 - width/5, height/2 - height/5)
-        #print('width:', width)
-        #print('height:', height)
-        starting_point = (width/2 - 1, height/2 - 1)
-        #print('starting_point:', starting_point)
-        # Ending coordinate
-        # Represents the bottom right corner of rectangle
-        #ending_point = (width/2 + width/5, height/2 + width/5)
-        ending_point = (width/2 + 1, height/2 + 1)
-        #print('ending_point:', ending_point)
+        # Line thiccness of 2 px
+        thiccness = 2
+
+        image = frame
 
         #@TODO: when done with the rest, make sure to remove the default red square!
         if self.is_marker_seen:
             # Green color in BGR
             color = (0, 255, 0)
+
+            for i in range(len(self.markers)):
+                #if self.markers[i]:
+                starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
+
+                # Draw a rectangle with blue line borders of thiccness of 2 px
+                image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
+
         else:
             # Red color in BGR
             color = (0, 0, 255)
 
-        # Line thickness of 2 px
-        thickness = 2
+            # Represents the top left corner of rectangle
+            starting_point = (0 + width/4, 0 + height/4)
+            # Represents the bottom right corner of rectangle
+            ending_point = (width - width/4, height - height/4)
+            image = cv2.rectangle(frame, starting_point, ending_point, color, thiccness)
 
-        for i in range(len(self.markers)):
-
-            starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
-
-            # Draw a rectangle with blue line borders of thickness of 2 px
-            image = cv2.rectangle(frame, starting_point, ending_point, color, thickness)
-
-            # Publish the new overlay including image to topic '/camera/image_ar'
-            try:
-                self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
-            except rospy.ROSException as e:
-                rospy.logerr("Failed to publish AR image: %s", e)
-
+        # Publish the new overlay including image to topic '/camera/image_ar'
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
+        except rospy.ROSException as e:
+            rospy.logerr("Failed to publish AR image: %s", e)
 
     def map_from_ar_pos_to_screen_pos(self, markers):
         '''
