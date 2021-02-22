@@ -219,6 +219,7 @@ def handle_task(task, status, args):
             elif task == 'ar_stream':
 
                 ar_stream = Listener(scripts[5], 'bash', args)
+                    #subprocess.run(['kill', '-2', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
                 ar_stream.start()
                 # Wait until it's up before returning
                 rospy.wait_for_message('/{}/image_ar'.format(args), Image)
@@ -241,12 +242,13 @@ def handle_task(task, status, args):
                 response_tmp = stop_camera_task(args, active_ports, active_stream_ctr)
                 response = response_tmp if response_tmp != '' else 'Stopped camera stream on port ' + args
             elif task == 'ar_stream':
-                # find pid of roslaunch process and send SIGINT to it
+                # find pid of roslaunch process and send SIGKILL to it
+				# using SIGINT (i.e. kill -2) causes issues with proper re-initialization of this task
                 pattern = 'autonomy\.launch.*{}'.format(args)
                 # command looks like: `pgrep -f 'autonomy\.launch.*video0Cam'`
                 ar_pid = subprocess.run(['pgrep', '-f', pattern], stdout=subprocess.PIPE).stdout # returns bytes
                 if len(ar_pid) > 0:
-                    subprocess.run(['kill', '-2', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
+                    subprocess.run(['kill', '-9', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = 'Stopped ' + chosen_task
