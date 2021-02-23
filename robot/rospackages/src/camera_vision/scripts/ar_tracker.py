@@ -9,6 +9,10 @@ from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 
 class arTracker():
+
+    #the size of the marker (14cmx14cm)
+    markerSizeCM = 2.2
+
     def __init__(self):
         self.markers = []
 
@@ -74,21 +78,30 @@ class arTracker():
             # Green color in BGR
             color = (0, 255, 0)
 
-            for i in range(len(self.markers)):
+            arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
+            arucoParams = cv2.aruco.DetectorParameters_create()
+            (corners, ids, rejected) = cv2.aruco.detectMarkers(image, arucoDict, parameters=arucoParams)
+            #print(corners)
+            #print(ids)
+            print(rejected)
+
+
+
+            #for i in range(len(self.markers)):
                 #if self.markers[i]:
-                starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
+            #    starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
 
                 # Draw a rectangle with blue line borders of thiccness of 2 px
-                image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
+            #    image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
 
         else:
             # Red color in BGR
             color = (0, 0, 255)
 
             # Represents the top left corner of rectangle
-            starting_point = (0 + width/4, 0 + height/4)
+            starting_point = (1, 1)
             # Represents the bottom right corner of rectangle
-            ending_point = (width - width/4, height - height/4)
+            ending_point = (width - 2, height - 2)
             image = cv2.rectangle(frame, starting_point, ending_point, color, thiccness)
 
         # Publish the new overlay including image to topic '/camera/image_ar'
@@ -109,24 +122,28 @@ class arTracker():
 
         # these values are fine to hardcode as long as the default streaming resultion (360p) is used
         # once this becomes variable, it will be time to dynamify these settings
-        MAX_HEIGHT = 480 
-        MAX_WIDTH  = 848
-        INPUT_SCALE_FACTOR = 180
+        MAX_HEIGHT = 640
+        MAX_WIDTH  = 360
 
-        mid_h = MAX_HEIGHT / 2 - 60
-        mid_w = MAX_WIDTH / 2 - 100
+        MIDDLE_HEIGHT = MAX_HEIGHT / 2 
+        MIDDLE_WIDTH = MAX_WIDTH / 2 
+
+
+        INPUT_SCALE_FACTOR = 60
+        ar_z = ar_pos.z / 10
     
-        ar_x = ar_pos.x * INPUT_SCALE_FACTOR
-        ar_y = ar_pos.y * INPUT_SCALE_FACTOR
-        ar_z = ar_pos.z * INPUT_SCALE_FACTOR
+        ar_x = ar_pos.x * INPUT_SCALE_FACTOR / ar_z
+        ar_y = ar_pos.y * INPUT_SCALE_FACTOR / ar_z
+
+        print("x: {}, y: {}, z: {}".format(ar_x, ar_y, ar_z))
 
         # quick mafs where we translate these ar tag coordinates from 3D space to 2D rectangles
         # possibly change the size too based on the z values
 
-        SIZE_FACTOR = 10
+        #SIZE_FACTOR = 10*self.markerSizeCM/ar_z
 
-        start_point = (int(mid_w + ar_x - SIZE_FACTOR), int(mid_h + ar_y - SIZE_FACTOR))
-        end_point = (int(mid_w + ar_x + SIZE_FACTOR), int(mid_h + ar_y + SIZE_FACTOR))
+        start_point = (int(ar_x+ MIDDLE_HEIGHT ), int(ar_y+MIDDLE_WIDTH ))
+        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 ), int(ar_y +MIDDLE_WIDTH+ 20 ))
 
         return [start_point, end_point] 
 
