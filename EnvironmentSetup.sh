@@ -3,86 +3,94 @@
 
 APPEND_TO_BASH="
 
-
 #------ ROBOTICS SETTINGS ------
-#competition mode
+# competition mode
 #export ROS_MASTER_URI=http://172.16.1.30:11311
 #export ROS_HOSTNAME=$USER
+# local mode
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_HOSTNAME=localhost
 
-. ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
-. ~/Programming/robotics-prototype/venv/bin/activate
+source ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+source ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
+#------ POST ROS INSTALLATION ------
+alias eb='nano ~/.bashrc'
+alias sb='source ~/.bashrc'
+alias gs='git status'
+alias gp='git pull'
+alias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'
+alias cm='cw && catkin_make'
 "
 
-FINAL_MESSAGE="The script will now exit, you should test the installation using these steps:
-1. restart the terminal for certain changes to apply
--> it will automatically start with virtual env activated and you will be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
-2. test python executing 'pytest' while in the 'robotics-prototype' directory
-3. verify ROS-Kinetic installation using 'roscore'
-4. test GUI by running 'rosgui' and then 'startgui'
--> to see the GUI open a browser (preferably chrome) and go to localhost:5000"
+APPEND_TO_BASH_ALIASES='
+ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
+BASE="$ROBOTICS_WS/robot/basestation"
+ROVER="$ROBOTICS_WS/robot/rover"
+ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
+BASH_A="~/.bash_aliases"
+NANORC="~/.nanorc"
+
+# general shortcuts
+alias ..="cd .."
+alias b="cd -"
+alias robotics="cd $ROBOTICS_WS"
+alias base="cd $BASE"
+alias rover="cd $ROVER"
+alias arm="cd $ROVER/ArmDriverUnit"
+alias wheels="cd $ROVER/MobilePlatform"
+alias rostings="cd $ROSPACKAGES"
+alias mcu="cd $ROSPACKAGES/src/mcu_control/scripts"
+alias util="cd $ROBOTICS_WS/robot/util"'
+
+FINAL_MESSAGE="
+
+#################################
+The script will now exit, you should test the installation using these steps:
+1. Open a new terminal window to apply changes
+-> it should automatically start with virtual env activated and you should be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
+2. Test python by executing 'pytest' while in the 'robotics-prototype' directory
+3. verify ROS installation using 'roscore'
+4. Test GUI by running 'rosgui' and then 'startgui'
+-> to see the GUI open a browser (chrome) and go to localhost:5000
+#################################"
 
 REPO="/home/$USER/Programming/robotics-prototype"
+ROS_VERSION="melodic"
 
-## START
-
-#check if in proper directory
-SCRIPT_DIRECTORY=$REPO/EnvironmentSetup.sh
-if [ ! -f $SCRIPT_DIRECTORY ]
+# check if in proper directory
+SCRIPT_LOCATION=$REPO/EnvironmentSetup.sh
+if [ ! -f $SCRIPT_LOCATION ]
 then
-   # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
-   echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
-   exit 1
+    # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
+    echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
+    exit 1
 fi
 
 
-#install prereqs
-sudo add-apt-repository ppa:deadsnakes/ppa -y
+# install prereqs
 sudo apt update -y
-sudo apt install python3.6 python3.6-venv git -y
+sudo apt install python3.6-venv git python3-pip -y
+
+# necessary for `ifconfig` in env.sh
+sudo apt install net-tools
 
 # Setup venv
 python3.6 -m venv venv
 source venv/bin/activate
 
+
 # Install Requirements
 pip install -U pip
-pip install -r requirements.txt -r requirements-dev.txt
-
+pip install -r requirements.txt
 
 # Setup python and allow for module imports from within repo
 python setup.py develop
 
 
-# Check if ros is already installed, install it if it isn't
-ROS_VERSION=$(rosversion -d)
-if [ $ROS_VERSION = "<unknown>" ] || [ $? != 0 ] # $? = 0 when previous command succeeds
-then
-    echo "You do not have ROS installed, installing..."
-    
-    bash install_ros_kinetic.sh
-    
-	source ~/.bashrc
-
-    sudo apt install ros-kinetic-rosbridge-suite -y
-
-elif [$ROS_VERSION != "kinetic"]
-then
-    echo "A different ROS installation has been found... Please uninstall and rerun the script."
-    exit 1
-fi
-
-
-# Install camera stuff, these are not ros package dependecies and not installed with rosdep
-sudo apt-get install ros-kinetic-cv-camera ros-kinetic-web-video-server -y
-
-
-# Build catkin
-source /opt/ros/kinetic/setup.bash # Have to source this from catkin installation b/c catkin_make uses some aliases that need to be sourced before or it'll fail
-cd $REPO/robot/rospackages
-rosdep install --from-paths src --ignore-src -r -y
-catkin_make
+# Install ROS
+bash install_ros.sh
 
 
 # Edit ~/.bash_aliases
@@ -90,6 +98,7 @@ catkin_make
 # Add aliases to terminal
 # Makes your terminal start in (venv)
 echo "$APPEND_TO_BASH" >> ~/.bashrc
+echo "$APPEND_TO_BASH_ALIASES" >> ~/.bash_aliases
 source ~/.bashrc
 
 
@@ -107,6 +116,6 @@ cp branch_name_verification_hook.py .git/hooks/post-checkout
 # Install and setup arduino IDE + Teensyduino
 bash install_arduino_teensyduino.sh
 
+
 # Exit
 echo "$FINAL_MESSAGE"
-exit 0

@@ -25,12 +25,9 @@ from robot.basestation.ros_utils import fetch_ros_master_uri, fetch_ros_master_i
 
 app = flask.Flask(__name__)
 
-# Once we launch this, this will route us to the "/" page or index page and
-# automatically render the Robot GUI
-@app.route("/")
 @app.route("/arm")
 def index():
-    """Current landing page, the arm panel."""
+    """The arm panel."""
     return flask.render_template("pages/Arm.html", roverIP=fetch_ros_master_ip())
 
 @app.route("/camerapopup")
@@ -38,10 +35,12 @@ def camerapopup():
     """Camera Pop-up."""
     return flask.render_template("pages/CameraPopUp.html", roverIP=fetch_ros_master_ip())
 
+@app.route("/")
 @app.route("/rover")
 def rover():
     """Rover control panel."""
     return flask.render_template("pages/Rover.html", roverIP=fetch_ros_master_ip())
+
 
 @app.route("/science")
 def science():
@@ -63,14 +62,23 @@ def stream():
     """Streams page."""
     return flask.render_template("pages/Streams.html", roverIP=fetch_ros_master_ip())
 
+
+@app.route("/navigation")
+def navigation():
+    """Navigation page."""
+    return flask.render_template("pages/Navigation.html", roverIP=fetch_ros_master_ip())
+
+
 # routes for science page
 @app.route('/science/numSections')
 def numSections():
     return '4'
 
+
 @app.route('/science/initialSection')
 def initialSection():
     return '0'
+
 
 @app.route("/ping_rover")
 def ping_rover():
@@ -100,7 +108,8 @@ def ping_rover():
     if error:
         print("Error: " + error.decode())
 
-    ros_output, error = run_shell("rosrun ping_acknowledgment ping_response_client.py hello")
+    ros_output, error = run_shell(
+        "rosrun ping_acknowledgment ping_response_client.py")
     ros_output = ros_output.decode()
 
     print("Pinging rover")
@@ -179,12 +188,14 @@ def rover_drive():
 
     return jsonify(success=True, cmd=cmd, feedback=feedback, error=error)
 
+
 @app.route("/capture_image/", methods=["POST", "GET"])
 def capture_image():
     stream_url= request.args['stream_url']
     rotation = int(request.args['camera_rotation'])
     success, message = stream_capture(stream_url, rotation)
     return jsonify(success=success, msg=message)
+
 
 @app.route("/initiate_feed_recording/", methods=["POST", "GET"])
 def initiate_feed_recording():
@@ -194,6 +205,7 @@ def initiate_feed_recording():
     else:
         success, message = start_recording_feed(stream_url)
         return jsonify(success=success, msg=message)
+
 
 @app.route("/stop_feed_recording/", methods=["POST", "GET"])
 def stop_feed_recording():
@@ -213,10 +225,12 @@ def stop_feed_recording():
     else:
         return jsonify(success=False, msg="Attempted to stop stream that was not recording")
 
+
 @app.route("/is_recording/", methods=["POST", "GET"])
 def is_recording():
     stream_url = request.args['stream_url']
     return jsonify(is_recording=is_recording_stream(stream_url))
+
 
 if __name__ == "__main__":
 

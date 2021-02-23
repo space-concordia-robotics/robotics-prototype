@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-import robot.basestation.app as app
 from robot.util.utils import run_shell, append_to_file
 from branch_name_verification_hook import is_excluded_branch, get_issue_num, get_branch_name, excluded_branches
-import re
 import sys
-import os
 from os import path
 
 def add_commit_issue_num(branch_name):
