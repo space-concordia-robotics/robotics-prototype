@@ -136,10 +136,15 @@ class arTracker():
         #HACK_Y = 0
         HACK_X = -30 + int(ar_x * 0.01)
         HACK_Y = -20 + int(ar_y * 0.05)
+        # LT = left-top, RB = right-bottom
+        # further you are, the bigger the Z
+        print('ar_z', ar_z)
+        SIZE_OFFSET_LT = int(ar_z * 100)
+        SIZE_OFFSET_RB = int(ar_z * 100)
         #start_point = (int(ar_x+ MIDDLE_HEIGHT + HACK_X) , int(ar_y+MIDDLE_WIDTH + HACK_Y))
         #end_point = int((ar_x + MIDDLE_HEIGHT+ 20 + HACK_X)/ar_z), int((ar_y +MIDDLE_WIDTH+ 20 + HACK_Y)/ar_z)
-        start_point = (int(ar_x+ MIDDLE_HEIGHT + HACK_X) , int(ar_y+MIDDLE_WIDTH + HACK_Y))
-        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 + HACK_X), int(ar_y +MIDDLE_WIDTH+ 20 + HACK_Y))
+        start_point = (int(ar_x + MIDDLE_HEIGHT + HACK_X + SIZE_OFFSET_LT) , int(ar_y + MIDDLE_WIDTH + HACK_Y + SIZE_OFFSET_LT))
+        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 + HACK_X - SIZE_OFFSET_RB), int(ar_y + MIDDLE_WIDTH+ 20 + HACK_Y - SIZE_OFFSET_RB))
 
         return [start_point, end_point] 
 
