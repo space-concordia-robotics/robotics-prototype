@@ -28,4 +28,5 @@ Twisted==20.3.0
 pygame==1.9.6
 pytest==3.6.3
 pylint==2.5.3
+pyside2==2.5.15.2
 yapf==0.30.0
