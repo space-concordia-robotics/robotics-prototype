@@ -78,21 +78,12 @@ class arTracker():
             # Green color in BGR
             color = (0, 255, 0)
 
-            arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
-            arucoParams = cv2.aruco.DetectorParameters_create()
-            (corners, ids, rejected) = cv2.aruco.detectMarkers(image, arucoDict, parameters=arucoParams)
-            #print(corners)
-            #print(ids)
-            print(rejected)
-
-
-
-            #for i in range(len(self.markers)):
+            for i in range(len(self.markers)):
                 #if self.markers[i]:
-            #    starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
+                starting_point, ending_point = self.map_from_ar_pos_to_screen_pos(self.markers[i])
 
                 # Draw a rectangle with blue line borders of thiccness of 2 px
-            #    image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
+                image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
 
         else:
             # Red color in BGR
@@ -117,13 +108,12 @@ class arTracker():
 
         ar_pos = markers.pose.pose.position
 
-        print(ar_pos)
-
-
         # these values are fine to hardcode as long as the default streaming resultion (360p) is used
         # once this becomes variable, it will be time to dynamify these settings
-        MAX_HEIGHT = 640
-        MAX_WIDTH  = 360
+        #MAX_HEIGHT = 640
+        #MAX_WIDTH  = 360
+        MAX_HEIGHT = 848
+        MAX_WIDTH  = 480
 
         MIDDLE_HEIGHT = MAX_HEIGHT / 2 
         MIDDLE_WIDTH = MAX_WIDTH / 2 
@@ -142,8 +132,14 @@ class arTracker():
 
         #SIZE_FACTOR = 10*self.markerSizeCM/ar_z
 
-        start_point = (int(ar_x+ MIDDLE_HEIGHT ), int(ar_y+MIDDLE_WIDTH ))
-        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 ), int(ar_y +MIDDLE_WIDTH+ 20 ))
+        #HACK_X = 0
+        #HACK_Y = 0
+        HACK_X = -30 + int(ar_x * 0.01)
+        HACK_Y = -20 + int(ar_y * 0.05)
+        #start_point = (int(ar_x+ MIDDLE_HEIGHT + HACK_X) , int(ar_y+MIDDLE_WIDTH + HACK_Y))
+        #end_point = int((ar_x + MIDDLE_HEIGHT+ 20 + HACK_X)/ar_z), int((ar_y +MIDDLE_WIDTH+ 20 + HACK_Y)/ar_z)
+        start_point = (int(ar_x+ MIDDLE_HEIGHT + HACK_X) , int(ar_y+MIDDLE_WIDTH + HACK_Y))
+        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 + HACK_X), int(ar_y +MIDDLE_WIDTH+ 20 + HACK_Y))
 
         return [start_point, end_point] 
 
