@@ -84,6 +84,29 @@ class arTracker():
 
                 # Draw a rectangle with blue line borders of thiccness of 2 px
                 image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
+      
+            # experiment
+
+            tl_x = 10
+            tl_y = 10 
+            br_x = 20
+            br_y = 20
+            
+            # shrink
+            #tl_x += 2
+            #tl_y += 2
+            #br_x -= 2
+            #br_y -= 2
+
+            # grow
+            tl_x -= 2
+            tl_y -= 2
+            br_x += 2
+            br_y += 2
+
+            tl = (tl_x, tl_y)
+            br = (br_x, br_y) 
+            image = cv2.rectangle(image, tl, br, color, thiccness)
 
         else:
             # Red color in BGR
@@ -95,6 +118,28 @@ class arTracker():
             ending_point = (width - 2, height - 2)
             image = cv2.rectangle(frame, starting_point, ending_point, color, thiccness)
 
+            # experiment
+
+            tl_x = 10
+            tl_y = 10 
+            br_x = 20
+            br_y = 20
+            
+            # shrink
+            #tl_x += 2
+            #tl_y += 2
+            #br_x -= 2
+            #br_y -= 2
+
+            # grow
+            tl_x -= 4
+            tl_y -= 4
+            br_x += 4
+            br_y += 4
+
+            tl = (tl_x, tl_y)
+            br = (br_x, br_y) 
+            image = cv2.rectangle(image, tl, br, color, thiccness)
         # Publish the new overlay including image to topic '/camera/image_ar'
         try:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
@@ -115,8 +160,8 @@ class arTracker():
         MAX_HEIGHT = 848
         MAX_WIDTH  = 480
 
-        MIDDLE_HEIGHT = MAX_HEIGHT / 2 
-        MIDDLE_WIDTH = MAX_WIDTH / 2 
+        HALF_HEIGHT = MAX_HEIGHT / 2 
+        HALF_WIDTH = MAX_WIDTH / 2 
 
 
         INPUT_SCALE_FACTOR = 60
@@ -125,7 +170,7 @@ class arTracker():
         ar_x = ar_pos.x * INPUT_SCALE_FACTOR / ar_z
         ar_y = ar_pos.y * INPUT_SCALE_FACTOR / ar_z
 
-        print("x: {}, y: {}, z: {}".format(ar_x, ar_y, ar_z))
+        #print("x: {}, y: {}, z: {}".format(ar_x, ar_y, ar_z))
 
         # quick mafs where we translate these ar tag coordinates from 3D space to 2D rectangles
         # possibly change the size too based on the z values
@@ -134,17 +179,25 @@ class arTracker():
 
         #HACK_X = 0
         #HACK_Y = 0
-        HACK_X = -30 + int(ar_x * 0.01)
-        HACK_Y = -20 + int(ar_y * 0.05)
+        HACK_X = -30 + int(ar_x * 0.01) - 35
+        HACK_Y = -20 + int(ar_y * 0.05) - 35
         # LT = left-top, RB = right-bottom
         # further you are, the bigger the Z
         print('ar_z', ar_z)
-        SIZE_OFFSET_LT = int(ar_z * 100)
-        SIZE_OFFSET_RB = int(ar_z * 100)
-        #start_point = (int(ar_x+ MIDDLE_HEIGHT + HACK_X) , int(ar_y+MIDDLE_WIDTH + HACK_Y))
-        #end_point = int((ar_x + MIDDLE_HEIGHT+ 20 + HACK_X)/ar_z), int((ar_y +MIDDLE_WIDTH+ 20 + HACK_Y)/ar_z)
-        start_point = (int(ar_x + MIDDLE_HEIGHT + HACK_X + SIZE_OFFSET_LT) , int(ar_y + MIDDLE_WIDTH + HACK_Y + SIZE_OFFSET_LT))
-        end_point = (int(ar_x + MIDDLE_HEIGHT+ 20 + HACK_X - SIZE_OFFSET_RB), int(ar_y + MIDDLE_WIDTH+ 20 + HACK_Y - SIZE_OFFSET_RB))
+        # change size of box based on Z value
+        SIZE_OFFSET_LT = int(abs(ar_z) * 100)
+        SIZE_OFFSET_RB = int(abs(ar_z) * 100)
+        SIZE = 80
+        LT_x = int(ar_x + HALF_HEIGHT + HACK_X + SIZE_OFFSET_LT) 
+        LT_y = int(ar_y + HALF_WIDTH + HACK_Y + SIZE_OFFSET_LT) 
+        RB_x = int(ar_x + HALF_HEIGHT + HACK_X - SIZE_OFFSET_LT + SIZE) 
+        RB_y = int(ar_y + HALF_WIDTH + HACK_Y - SIZE_OFFSET_LT + SIZE) 
+        start_point = (LT_x, LT_y)
+        end_point = (RB_x, RB_y)
+        print('SIZE_OFFSET_LT:', SIZE_OFFSET_LT)
+        print('SIZE_OFFSET_RB:', SIZE_OFFSET_RB)
+        print('start_point:', start_point) 
+        print('end_point:', end_point) 
 
         return [start_point, end_point] 
 
