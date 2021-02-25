@@ -84,29 +84,6 @@ class arTracker():
 
                 # Draw a rectangle with blue line borders of thiccness of 2 px
                 image = cv2.rectangle(image, starting_point, ending_point, color, thiccness)
-      
-            # experiment
-
-            tl_x = 10
-            tl_y = 10 
-            br_x = 20
-            br_y = 20
-            
-            # shrink
-            #tl_x += 2
-            #tl_y += 2
-            #br_x -= 2
-            #br_y -= 2
-
-            # grow
-            tl_x -= 2
-            tl_y -= 2
-            br_x += 2
-            br_y += 2
-
-            tl = (tl_x, tl_y)
-            br = (br_x, br_y) 
-            image = cv2.rectangle(image, tl, br, color, thiccness)
 
         else:
             # Red color in BGR
@@ -118,28 +95,6 @@ class arTracker():
             ending_point = (width - 2, height - 2)
             image = cv2.rectangle(frame, starting_point, ending_point, color, thiccness)
 
-            # experiment
-
-            tl_x = 10
-            tl_y = 10 
-            br_x = 20
-            br_y = 20
-            
-            # shrink
-            #tl_x += 2
-            #tl_y += 2
-            #br_x -= 2
-            #br_y -= 2
-
-            # grow
-            tl_x -= 4
-            tl_y -= 4
-            br_x += 4
-            br_y += 4
-
-            tl = (tl_x, tl_y)
-            br = (br_x, br_y) 
-            image = cv2.rectangle(image, tl, br, color, thiccness)
         # Publish the new overlay including image to topic '/camera/image_ar'
         try:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, 'bgr8'))
@@ -155,8 +110,12 @@ class arTracker():
 
         # these values are fine to hardcode as long as the default streaming resultion (360p) is used
         # once this becomes variable, it will be time to dynamify these settings
+        # those dimensions are for @domludera's laptop cam
         #MAX_HEIGHT = 640
         #MAX_WIDTH  = 360
+        # these dimensions are for @PeterGhimself's laptop cam (dell inspiron 15 7000 gaming)
+        # ideally this should be actually tested with the rovers cams (logitech c920s) and ajusted accordingly
+        # so that the default behavior is catered to the rover
         MAX_HEIGHT = 848
         MAX_WIDTH  = 480
 
@@ -175,10 +134,6 @@ class arTracker():
         # quick mafs where we translate these ar tag coordinates from 3D space to 2D rectangles
         # possibly change the size too based on the z values
 
-        #SIZE_FACTOR = 10*self.markerSizeCM/ar_z
-
-        #HACK_X = 0
-        #HACK_Y = 0
         HACK_X = -30 + int(ar_x * 0.01) - 35
         HACK_Y = -20 + int(ar_y * 0.05) - 35
         # LT = left-top, RB = right-bottom
