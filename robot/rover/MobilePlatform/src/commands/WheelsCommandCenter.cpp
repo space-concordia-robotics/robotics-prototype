@@ -30,14 +30,14 @@ Command messages
 /*
 Command functions
 */
-void setMotors(unit8_t onOff);
+void setMotors(bool turnMotorOn);
 void stopMotors();
 void closeMotorsLoop();
 void openMotorsLoop();
-void setJoystick(unit8_t onOff);
-void setGps(unit8_t onOff);
-void setEncoder(unit8_t onOff);
-void setAcceleration(unit8_t onOff);
+void setJoystick(bool turnJoystickOn);
+void setGps(bool turnGpsOn);
+void setEncoder(bool turnEncOn);
+void setAcceleration(bool turnAccelOn);
 void getRoverStatus();
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255 
