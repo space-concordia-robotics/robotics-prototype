@@ -44,15 +44,16 @@ float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocit
 String rotation; // Rotation direction of the whole rover
 
 
-// constructors
-DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");
-DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor");
-DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO, "Rear Right Motor");
-DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor");
-DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor");
-DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor");
+// Motor constructor initializations
+DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
+DcMotor RM(RM_DIR, RM_PWM, GEAR_RATIO, "Middle Right Motor"); // Motor 1
+DcMotor RB(RB_DIR, RB_PWM, GEAR_RATIO, "Rear Right Motor"); // Motor 2
+DcMotor LF(LF_DIR, LF_PWM, GEAR_RATIO, "Front Left Motor"); // Motor 3
+DcMotor LM(LM_DIR, LM_PWM, GEAR_RATIO, "Middle Left Motor"); // Motor 4
+DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor"); // Motor 5
 
-DcMotor motorList[] = {RF, RM, RB, LF, LM, LB};
+// List of motors
+DcMotor motorList[] = {RF, RM, RB, LF, LM, LB}; // 0,1,2,3,4,5 motors
 
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
@@ -66,8 +67,15 @@ void initPids(void); // Initiate PID for DMotor
 // during operation
 void roverVelocityCalculator(void);
 
+// Initialize motor encoders
+void initMotorEncoder0(void);
+void initMotorEncoder1(void);
+void initMotorEncoder2(void);
+void initMotorEncoder3(void);
+void initMotorEncoder4(void);
+void initMotorEncoder5(void);
 
-// encoder interrupts
+// Set encoder interrupts
 void rf_encoder_interrupt(void);
 void rm_encoder_interrupt(void);
 void rb_encoder_interrupt(void);
@@ -75,7 +83,10 @@ void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
 
-void setup() {
+// Initialization Serial, Serial1 and Bluetooth communications
+void initSerialCommunications(void)
+
+void initSerialCommunications(void) {
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
   Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
@@ -83,22 +94,39 @@ void setup() {
   Serial1.setTimeout(SERIAL_TIMEOUT);
   bluetooth.begin(9600);
   bluetooth.setTimeout(50);
-  delay(300); // NECSSARY. Give time for serial port to set up
+  delay(300); // NECESSARY. Give time for serial port to set up
 
   devMode = true; //if devMode is true then connection is through usb serial
- 
+
   Cmds.setBluetooth(&bluetooth);
   Cmds.setMotorList(motorList);
   Cmds.setServoList(servoList);
+}
+
+void setup() {
+
+  // TODO: Change to proper pins
+  // internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
+
+  initSerialCommunications();
+
+  // Initialize setup for pins from PinSetup.h
   initPins();
   initEncoders();
   initPids();
+
+  // Initialize servo motors
   attachServos();
+
+  // Initialize ASTRO GPS from Navigation.h
   initNav(Cmds);
+
+  // Use PID
   if (Cmds.isOpenLoop) {
     maxOutputSignal = MAX_PWM_VALUE;
     minOutputSignal = MIN_PWM_VALUE;
   }
+  // Do not use PID
   else {
     maxOutputSignal = MAX_RPM_VALUE;
     minOutputSignal = MIN_RPM_VALUE;
@@ -142,7 +170,7 @@ void loop() {
     LB.setVelocity(LB.desiredDirection, fabs(LB.desiredVelocity), LB.getCurrentVelocity());
 
     sinceMC = 0;
-  }
+  } // End of loop
 
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
     if (Cmds.isEnc) {
@@ -235,10 +263,9 @@ void serialHandler(void) {
       Cmds.bleHandler();
     }
   }
-
 }
 
-//! attach the servos to pins
+//! Attach the servos to pins
 void attachServos() {
   frontSide.attach(FS_SERVO);
   frontSide.write(SERVO_STOP);
@@ -251,8 +278,7 @@ void attachServos() {
   rearBase.write(REAR_BASE_DEFAULT_PWM);
 }
 
-//! Initiate encoder for dcMotor objects and pinModes
-void initEncoders(void) {
+void initMotorEncoder0(void) {
   RF.attachEncoder(RF_EA, RF_EB, PULSES_PER_REV);
   pinMode(RF.encoderPinB, INPUT_PULLUP);
   pinMode(RF.encoderPinA, INPUT_PULLUP);
@@ -260,7 +286,9 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
   RF.pidController.setGainConstants(kp, ki, kd);
   //    RF.pidController.setGainConstants(3.15, 0.0002, 0.0);
+}
 
+void initMotorEncoder1(void) {
   RM.attachEncoder(RM_EA, RM_EB, PULSES_PER_REV);
   pinMode(RM.encoderPinB, INPUT_PULLUP);
   pinMode(RM.encoderPinA, INPUT_PULLUP);
@@ -268,7 +296,9 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
   //    RM.pidController.setGainConstants(3.15, 0.0002, 0.0);
   RM.pidController.setGainConstants(kp, ki, kd);
+}
 
+void initMotorEncoder2(void) {
   RB.attachEncoder(RB_EA, RB_EB, PULSES_PER_REV);
   pinMode(RB.encoderPinB, INPUT_PULLUP);
   pinMode(RB.encoderPinA, INPUT_PULLUP);
@@ -276,7 +306,9 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
   RB.pidController.setGainConstants(kp, ki, kd);
   //    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+}
 
+void initMotorEncoder3(void) {
   LF.attachEncoder(LF_EA, LF_EB, PULSES_PER_REV);
   pinMode(LF.encoderPinB, INPUT_PULLUP);
   pinMode(LF.encoderPinA, INPUT_PULLUP);
@@ -284,7 +316,9 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
   LF.pidController.setGainConstants(kp, ki, kd);
   //    LF.pidController.setGainConstants(kp, 0.0002, 0.0);
+}
 
+void initMotorEncoder4(void) {
   LM.attachEncoder(LM_EA, LM_EB, PULSES_PER_REV);
   pinMode(LM.encoderPinB, INPUT_PULLUP);
   pinMode(LM.encoderPinA, INPUT_PULLUP);
@@ -292,7 +326,9 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
   LM.pidController.setGainConstants(kp, ki, kd);
   //    LM.pidController.setGainConstants(3.15, 0.0002, 0.0);
+}
 
+void initMotorEncoder5(void) {
   LB.attachEncoder(LB_EA, LB_EB, PULSES_PER_REV);
   pinMode(LB.encoderPinB, INPUT_PULLUP);
   pinMode(LB.encoderPinA, INPUT_PULLUP);
@@ -300,6 +336,17 @@ void initEncoders(void) {
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
   LB.pidController.setGainConstants(kp, ki, kd);
   //    LB.pidController.setGainConstants(3.15, 0.0002, 0.0);
+}
+
+
+//! Initiate encoder for dcMotor objects and pinModes
+void initEncoders(void) {
+  initMotorEncoder0();
+  initMotorEncoder1();
+  initMotorEncoder2();
+  initMotorEncoder3();
+  initMotorEncoder4();
+  initMotorEncoder5();
 }
 
 //! Initiate PID objects for Dc Motors
@@ -328,7 +375,6 @@ void rf_encoder_interrupt(void) {
   RF.prevTime = micros();
   RF.encoderCount++;
   //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
-
 }
 
 void rm_encoder_interrupt(void) {
