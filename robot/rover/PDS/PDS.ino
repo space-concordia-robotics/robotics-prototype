@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "PDSCommandCenter.h"
+#include "Serial.h"
 /*
    Concordia University - Space Concordia URC 2019
    Contributors:
@@ -114,8 +115,14 @@ void printMotorState();
 void updateMotorState();
 float readMultiplexer(uint8_t channel);
 
+const uint8_t TX_PIN = 1;
+const uint8_t RX_PIN = 0;
+
+internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
+
 void setup() {
-  Serial.begin(SERIAL_BAUD_RATE);
+  //Serial.begin(SERIAL_BAUD_RATE);
+  internal_comms::startSerial(RX_PIN, TX_PIN);
   Serial.setTimeout(SERIAL_TIMEOUT_DELAY);
 
   pinMode(Fan_A_Speed_Pin, OUTPUT);
@@ -154,6 +161,8 @@ void loop() {
   /***************************************************************************************************************/
   // listen to the serial port and parse an incoming message
   if (Serial.available()) {
+    internal_comms::readCommand(commandCenter);
+    /*
     byte num = Serial.readBytesUntil('\n', BUFFER, CHAR_BUFF_SIZE); // The terminator character is discarded from the serial buffer
     if (num > 0) {
       Serial.println(BUFFER); // echo the received command
@@ -164,6 +173,7 @@ void loop() {
       Serial.println("Command error: PDS received empty message");
       badMessages++;
     }
+    */
   }
   /***************************************************************************************************************/
   // read raw current values
@@ -523,4 +533,12 @@ void printMotorState() {
     Serial.print(" State: ");
     Serial.println(motorState[i-1]);
   }
+}
+void pong()
+{
+    Serial.println("PDS pong");
+}
+void error()
+{
+    Serial.println("No command found"); 
 }
