@@ -560,3 +560,47 @@ void enableAllMotors()
         updateMotorState();
         printMotorState();
 }
+void motor(uint8_t motorNum, uint8_t state)
+{
+        if (motorNum < 1 || motorNum > 6) {
+          badMessages++;
+          Serial.println("Command error: PDS invalid motor number");
+        } else {
+          if (state == 0 || state == 1) {
+            digitalWrite(motorPins[motorNum - 1], state);
+            Serial.print("Command: PDS toggling power state to motor: ");
+            Serial.println(motorNum);
+          } else {
+            Serial.println("Command error: PDS invalid motor state");
+            badMessages++;
+          }
+        }
+        updateMotorState();
+        printMotorState();
+}
+void fan(uint8_t fanNum, uint8_t fanSpeed)
+{
+        if (fanNum == 1 || fanNum == 2) {
+          if (fanSpeed <  0 || fanSpeed > 100) {
+            Serial.println("Command error: PDS fan speed out of range");
+            badMessages++;
+            return;
+          }
+          MAX_FAN_SPEED = (int)(12.0 * 255.0 / batteryVoltage); // calculate the max allowable fan speed
+          fanSpeed = map(fanSpeed, 0, 100, 0, MAX_FAN_SPEED); // To check that the value returned is indeed correct
+          switch (fanNum) {
+            case 1:
+              fanASpeed = fanSpeed;
+              analogWrite(Fan_A_Speed_Pin,fanASpeed);
+              break;
+            case 2:
+              fanBSpeed = fanSpeed;
+              analogWrite(Fan_B_Speed_Pin,fanBSpeed);
+              break;
+          }
+          Serial.println("Command: PDS updating fan speed");
+        } else {
+          Serial.println("Command error: PDS invalid fan number"); 
+          badMessages++;
+        }
+}
