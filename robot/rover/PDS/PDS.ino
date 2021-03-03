@@ -542,3 +542,21 @@ void error()
 {
     Serial.println("No command found"); 
 }
+void disableAllMotors()
+{
+        PORTB &= 0B11111110; //motor one
+        PORTD &= 0B00111111; //motor two and three
+        PORTC &= 0B11000111; //motor four, five and six
+        Serial.println("Command: PDS disabling power to all motors");
+        updateMotorState();
+        printMotorState();
+}
+void enableAllMotors()
+{
+        PORTB |= 0B00000001; //motor one
+        PORTD |= 0B11000000; //motor two and three
+        PORTC |= 0B00111000; //motor four, five and six
+        Serial.println("Command: PDS enabling power to all motors");
+        updateMotorState();
+        printMotorState();
+}

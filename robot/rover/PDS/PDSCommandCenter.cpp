@@ -3,9 +3,9 @@
 #include <Arduino.h>
 void pong();
 void error();
-/*
 void disableAllMotors();
 void enableAllMotors();
+/*
 void motor(uint8_t, uint8_t);
 void fan(uint8_t);
 */
@@ -26,7 +26,6 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
             Serial.println("PING");
             pong();
             break;
-            /*
         case COMMAND_DISABLE_ALL_MOTORS:
             Serial.println("Disabling all motors");
             disableAllMotors();
@@ -35,6 +34,7 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
             Serial.println("Enabling all motors");
             enableAllMotors();
             break;
+            /*
         case COMMAND_MOTOR:
             if (rawArgsLength != 2) {
                 Serial.println("Wrong number of arguments. It should be 2, motor pin + on/off ");
