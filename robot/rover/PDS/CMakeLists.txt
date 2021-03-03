@@ -105,7 +105,7 @@ target_include_directories(InternalComms PUBLIC ${INTERNAL_COMMS_PATH}/include)
 target_include_directories(InternalComms PUBLIC ${ETL_PATH}/include)
 target_compile_definitions(InternalComms PRIVATE ETL_NO_STL)
 target_compile_options(InternalComms PUBLIC ${AVR_GXX_FLAGS})
-#createCppLibrary(${CMAKE_CURRENT_SOURCE_DIR}/PDSCommandCenter.cpp PDS_sources ${INTERNAL_COMMS_PATH}/include)
+createCppLibrary(${CMAKE_CURRENT_SOURCE_DIR}/PDSCommandCenter.cpp PDS_sources ${INTERNAL_COMMS_PATH}/include)
 
 set(PROJECT_LIBRARIES InternalComms)
 
@@ -137,7 +137,7 @@ target_link_libraries(
         Stepper
         arduinocore
         InternalComms
-        #PDS_sources
+        PDS_sources
         -lm
 )
 

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "PDSCommandCenter.h"
 /*
    Concordia University - Space Concordia URC 2019
    Contributors:
