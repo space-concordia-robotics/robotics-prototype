@@ -1,3 +1,4 @@
+#include <Arduino.h>
 /*
    Concordia University - Space Concordia URC 2019
    Contributors:
