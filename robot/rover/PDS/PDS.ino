@@ -230,7 +230,6 @@ void loop() {
       tempReadings[i] = (1.0 / (A + B * ln + C * pow(ln, 3))) - 273.15;
     }
   }
-
   /***************************************************************************************************************/
   if (errorFlagGeneral.UV && autoProtection) {
     errorFlagGeneral.criticalError = 1;
