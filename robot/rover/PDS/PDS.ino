@@ -622,3 +622,14 @@ void resetCurrentReadingErrorFlags()
           errorFlagCurrentReadings.motor5OC = 0;
           errorFlagCurrentReadings.motor6OC = 0;
 }
+void toggleAutoProtection(uint8_t state)
+{
+    Serial.println("Command: AUTO has been sent");
+    if(state){
+    Serial.println("Command: PDS set autoMode ON");
+    autoProtection = true;
+    } else {
+    Serial.println("Command: PDS set autoMode OFF");
+    autoProtection = false;
+    }
+}

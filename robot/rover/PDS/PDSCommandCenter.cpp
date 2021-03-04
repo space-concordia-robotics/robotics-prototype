@@ -9,6 +9,7 @@ void motor(uint8_t, uint8_t);
 void fan(uint8_t, uint8_t);
 void resetGeneralErrorFlags();
 void resetCurrentReadingErrorFlags();
+void toggleAutoProtection(uint8_t);
 void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength)
 {
     if (commandID == COMMAND_PING)
@@ -47,7 +48,12 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
     }else if(commandID == COMMAND_RESET_CURRENT_READING_ERROR_FLAGS)
     {
         resetCurrentReadingErrorFlags();
-    } else
+    }else if(commandID == COMMAND_TOGGLE_AUTO_MODE) 
+    {
+        uint8_t state = *rawArgs;
+        toggleAutoProtection(state);
+    }
+    else
     {
             error();
     }

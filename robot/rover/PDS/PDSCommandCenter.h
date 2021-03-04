@@ -9,6 +9,7 @@
 #define COMMAND_FAN 54
 #define COMMAND_RESET_GENERAL_ERROR_FLAGS 55
 #define COMMAND_RESET_CURRENT_READING_ERROR_FLAGS 56
+#define COMMAND_TOGGLE_AUTO_MODE 57
 
 class PDSCommandCenter : public internal_comms::CommandCenter {
     public:
