@@ -603,3 +603,22 @@ void fan(uint8_t fanNum, uint8_t fanSpeed)
           badMessages++;
         }
 }
+void resetGeneralErrorFlags()
+{
+          Serial.println("Command: PDS Resetting General Error flags");
+          errorFlagGeneral.OV = 0;
+          errorFlagGeneral.UV = 0;
+          errorFlagGeneral.criticalError = 0;
+          errorFlagGeneral.thermOutOfRange = 0;
+          errorFlagGeneral.noLoop = 0;
+}
+void resetCurrentReadingErrorFlags()
+{
+          Serial.println("Command: PDS Resetting Current Reading Error flags");
+          errorFlagCurrentReadings.motor1OC = 0;
+          errorFlagCurrentReadings.motor2OC = 0;
+          errorFlagCurrentReadings.motor3OC = 0;
+          errorFlagCurrentReadings.motor4OC = 0;
+          errorFlagCurrentReadings.motor5OC = 0;
+          errorFlagCurrentReadings.motor6OC = 0;
+}

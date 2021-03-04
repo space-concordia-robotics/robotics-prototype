@@ -7,6 +7,8 @@
 #define COMMAND_ENABLE_ALL_MOTORS 52
 #define COMMAND_MOTOR 53
 #define COMMAND_FAN 54
+#define COMMAND_RESET_GENERAL_ERROR_FLAGS 55
+#define COMMAND_RESET_CURRENT_READING_ERROR_FLAGS 56
 
 class PDSCommandCenter : public internal_comms::CommandCenter {
     public:

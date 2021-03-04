@@ -7,6 +7,8 @@ void disableAllMotors();
 void enableAllMotors();
 void motor(uint8_t, uint8_t);
 void fan(uint8_t, uint8_t);
+void resetGeneralErrorFlags();
+void resetCurrentReadingErrorFlags();
 void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength)
 {
     if (commandID == COMMAND_PING)
@@ -39,7 +41,13 @@ void PDSCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
             uint8_t fanNum = *rawArgs;
             uint8_t fanSpeed = *(++rawArgs);
             fan(fanNum, fanSpeed);
-    }else
+    }else if(commandID == COMMAND_RESET_GENERAL_ERROR_FLAGS)
+    {
+        resetGeneralErrorFlags();
+    }else if(commandID == COMMAND_RESET_CURRENT_READING_ERROR_FLAGS)
+    {
+        resetCurrentReadingErrorFlags();
+    } else
     {
             error();
     }
