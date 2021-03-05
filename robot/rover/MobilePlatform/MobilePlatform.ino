@@ -130,7 +130,8 @@ void setup() {
   // Initialize servo motors
   attachServos();
 
-  // Initialize ASTRO GPS from Navigation.h
+  // Handle navigation commands each time a new command is received 
+  // Looped and called as new commands are received 
   initNav(Cmds);
 
   // Use PID
@@ -222,7 +223,6 @@ void loop() {
   }
 }
 
-
 void roverVelocityCalculator(void) {
   rightLinearVelocity = (RF.desiredDirection * RF.getCurrentVelocity() + RM.desiredDirection * RM.getCurrentVelocity() + RB.desiredDirection * RB.getCurrentVelocity()) * radius * piRad;
   leftLinearVelocity = (LF.desiredDirection * LF.getCurrentVelocity() + LM.desiredDirection * LM.getCurrentVelocity() + LB.desiredDirection * LB.getCurrentVelocity()) * radius * piRad;
@@ -286,16 +286,31 @@ void serialHandler(void) {
   }
 }
 
+//----------------------------------------TODO-------------------------------------
 // TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
 // Toggle 0-5 motors
 void toggleMotors(bool turnMotorOn) {
+  if (turnMotorOn) {
+    Cmds.isGpsImu = true;
+    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Disabled");
+  }
+  else {
+    Cmds.isGpsImu = true;
+    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Enabled");
+  }
 
 }
 
-// Emergency stop motors
+// Emergency stop all motors
 void stopMotors(void) {
   DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle AND steering to 0
+  // Not required to send as command to Navigation
 }
 
 // Close motors loop
@@ -336,12 +351,28 @@ void getRoverStatus(void){
 // Throttle -49 to 49 and Steering -49 to 49
 void moveRover(int8_t roverThrottle, int8_t roverSteering){
 
+  // TODO: Fix this to work correctly with the wheels
+  throttle = Helpers::get().getValue(cmd, ':', 0).toFloat();
+  steering = Helpers::get().getValue(cmd, ':', 1).toFloat();
+  DcMotor::velocityHandler(motorList,throttle, steering);
+  
+  // Display the movement changes in console
+  String msg = "ASTRO left: " + String(desiredVelocityLeft);
+  msg += " -- right: " + String(desiredVelocityRight);
+  msg += " maxOutput: " + String(maxOutputSignal);
+  Helpers::get().println(msg);
+  
+  // Reset timer for reading battery, gps and imu data
+  Cmds.sinceThrottle = 0;
 } 
 
 // Wheel number 0 to 5 and -255 to 255 
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM){
 
-} 
+}
+//----------------------------------------TODO-------------------------------------
+
+
 
 //! Attach the servos to pins
 void attachServos() {
