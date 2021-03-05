@@ -33,8 +33,15 @@ should work.
 //#define UART_PORT Serial1
 //#endif
 
+//-----------------------------------TODO-----------------------------------
+// Update these variables with the new ones!
 SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
+
+// ArduinoBlue* phone = nullptr;
+// SoftwareSerial* bluetooth(9, 10);
+// DcMotor* motorList = nullptr;
+// Servo* servoList = nullptr;
 
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -57,7 +64,6 @@ String rotation; // Rotation direction of the whole rover
 // TODO: Change to the correct values later
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
-
 
 // Motor constructor initializations
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
@@ -287,24 +293,38 @@ void serialHandler(void) {
 }
 
 //----------------------------------------TODO-------------------------------------
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+// Implement the remaining changes to .ino using the Commands.cpp args
+// void setPhone(ArduinoBlue* phone){
+//   Cmds->phone = phone;
+// }
+// void setBluetooth(SoftwareSerial* bluetooth){
+//   Cmds->bluetooth = bluetooth;
+// }
+// void setMotorList(DcMotor* motorList){
+//   Cmds->motorList = motorList;
+// }
+// void setServoList(Servo* servoList){
+//   Cmds->servoList = servoList;
+// }
+
+void setPhone(ArduinoBlue phone){
+  Cmds.phone = phone;
+}
+void setBluetooth(SoftwareSerial bluetooth){
+  Cmds.bluetooth = bluetooth;
+}
+void setMotorList(DcMotor motorList){
+  Cmds.motorList = motorList;
+}
+void setServoList(Servo servoList){
+  Cmds.servoList = servoList;
+}
+
+//----------------------------------------TODO-------------------------------------
 // TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
 // Toggle 0-5 motors
 void toggleMotors(bool turnMotorOn) {
-  if (turnMotorOn) {
-    Cmds.isGpsImu = true;
-    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Disabled");
-  }
-  else {
-    Cmds.isGpsImu = true;
-    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Enabled");
-  }
-
+  
 }
 
 // Emergency stop all motors
@@ -315,12 +335,62 @@ void stopMotors(void) {
 
 // Close motors loop
 void closeMotorsLoop(void) {
+  // Stop rover first
+  if (Cmds.isActivated) {
+    stopMotors();
+  }
 
+  Helpers::get().println("ASTRO Turning encoders on first...");
+  toggleEncoder(true);
+  maxOutputSignal = MAX_RPM_VALUE; 
+  minOutputSignal = MIN_RPM_VALUE;
+  
+  // Why is this redone in the for loop??
+  Helpers::get().println("ASTRO Bo!");
+  motorList[0].isOpenLoop = false;
+  motorList[1].isOpenLoop = false;
+  motorList[2].isOpenLoop = false;
+  motorList[3].isOpenLoop = false;
+  motorList[4].isOpenLoop = false;
+  motorList[5].isOpenLoop = false;
+
+  // Set motors 0-5 open loop off
+  for (i = 0; i < RobotMotor::numMotors; i++) {
+    motorList[i].isOpenLoop = false;
+    String msg = "ASTRO Motor " + String(i + 1);
+    msg += String(" loop status is: ");
+    msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
+    Helpers::get().println(msg);
+  }
 }
 
 // Open motors loop
 void openMotorsLoop(void) {
+  // Stop rover first
+  if (Cmds.isActivated) {
+    stopMotors();
+  }
 
+  Helpers::get().println("ASTRO Turning encoders off first...");
+  maxOutputSignal = MAX_PWM_VALUE; 
+  minOutputSignal = MIN_PWM_VALUE;
+
+  // Why is this redone in the for loop??
+  motorList[0].isOpenLoop = true;
+  motorList[1].isOpenLoop = true;
+  motorList[2].isOpenLoop = true;
+  motorList[3].isOpenLoop = true;
+  motorList[4].isOpenLoop = true;
+  motorList[5].isOpenLoop = true;
+
+  // Set motors 0-5 open loop on
+  for (i = 0; i < RobotMotor::numMotors; i++) {
+    motorList[i].isOpenLoop = true; 
+    String msg = "ASTRO Motor " + String(i + 1);
+    msg += String(" loop status is: ");
+    msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
+    Helpers::get().println(msg);
+  }
 }
 
 // Toggle joystick
@@ -330,17 +400,60 @@ void toggleJoystick(bool turnJoystickOn){
 
 // Toggle gps printing
 void toggleGps(bool turnGpsOn){
-
+  if (turnGpsOn) {
+    Cmds.isGpsImu = true;
+    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Enabled");
+  }
+  else {
+    Cmds.isGpsImu = false;
+    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Disabled");
+  }
 }
 
 // Toggle speed printing
 void toggleEncoder(bool turnEncOn){
-
+  if (turnEncOn) {
+    if (Cmds.isActivated) {
+        Cmds.isEnc = true;
+        Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is ON");
+    }
+    else if (!Cmds.isActivated) {
+        Cmds.isEnc = true;
+        Helpers::get().println("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
+        for (i = 0; i < RobotMotor::numMotors; i++) {
+            Helpers::get().print("ASTRO Motor ");
+            Helpers::get().print(i);
+            Helpers::get().print(" current velocity: ");
+            Helpers::get().println(motorList[i].getCurrentVelocity());
+        }
+    }
+  }
+  else {
+    Cmds.isEnc = false;
+    Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is OFF");
+  }
 }
 
 // Toggle acceleration limiter
 void toggleAcceleration(bool turnAccelOn){
-
+  if (turnAccelOn) {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = true;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        Helpers::get().println(msg);
+    }
+  }
+  else {
+    for (i = 0; i < RobotMotor::numMotors; i++) {
+        motorList[i].accLimit = false;
+        String msg = "ASTRO Motor " + String(i + 1);
+        msg += " Acceleration Limiter: ";
+        msg += String(motorList[i].accLimit ? "Open" : "CLose");
+        Helpers::get().println(msg);
+    }
+  }
 }
 
 // Print rover status (active or not)
@@ -460,9 +573,13 @@ void initSerialCommunications(void) {
 
   devMode = true; //if devMode is true then connection is through usb serial
 
-  Cmds.setBluetooth(&bluetooth);
-  Cmds.setMotorList(motorList);
-  Cmds.setServoList(servoList);
+  // Cmds.setBluetooth(&bluetooth);
+  // Cmds.setMotorList(motorList);
+  // Cmds.setServoList(servoList);
+
+  setBluetooth(&bluetooth);
+  setMotorList(motorList);
+  setServoList(servoList);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes
