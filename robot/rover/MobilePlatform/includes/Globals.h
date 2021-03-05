@@ -36,7 +36,7 @@ extern float minOutputSignal;
 extern int leftMotorDirection; // CCW =1 or CW =-1
 extern int rightMotorDirection; // CCW =1 or CW =-1
 extern float desiredVelocityRight;
-extern float  desiredVelocityLeft;
+extern float desiredVelocityLeft;
 extern String cmd;
 extern int motorNumber;
 

@@ -8,7 +8,7 @@
 #include "../internal_comms/include/CommandCenter.h"
 #include "../internal_comms/include/Serial.h"
 #include "includes/commands/WheelsCommandCenter.h"    
-// #include "includes/DcMotor.h"
+// #include "includes/DcMotor.h"  // Already included in Commands.h
 #include "includes/Globals.h"
 #include "includes/Commands.h"
 #include "includes/Helpers.h"
@@ -307,16 +307,16 @@ void serialHandler(void) {
 //   Cmds->servoList = servoList;
 // }
 
-void setPhone(ArduinoBlue phone){
+void setPhone(ArduinoBlue phone) {
   Cmds.phone = phone;
 }
-void setBluetooth(SoftwareSerial bluetooth){
+void setBluetooth(SoftwareSerial bluetooth) {
   Cmds.bluetooth = bluetooth;
 }
-void setMotorList(DcMotor motorList){
+void setMotorList(DcMotor motorList) {
   Cmds.motorList = motorList;
 }
-void setServoList(Servo servoList){
+void setServoList(Servo servoList) {
   Cmds.servoList = servoList;
 }
 
@@ -394,12 +394,33 @@ void openMotorsLoop(void) {
 }
 
 // Toggle joystick
-void toggleJoystick(bool turnJoystickOn){
-
+void toggleJoystick(bool turnJoystickOn) {
+  if (turnJoystickOn) {
+    if (Cmds.isActivated) {
+      stopMotors();
+      Cmds.isJoystickMode = true;
+      Helpers::get().println("ASTRO Joystick is active, don't use Serial over Bluetooth");
+    }
+    else if (!Cmds.isActivated) {
+      Cmds.isJoystickMode = true;
+      Helpers::get().println("ASTRO Joystick is active, don't use Serial over Bluetooth");
+    }
+  }
+  else {
+    if (Cmds.isActivated) {
+      stopMotors();
+      Cmds.isJoystickMode = false;
+      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled, use serial Bluetooth ");
+    }
+    else if (!Cmds.isActivated) {
+      Cmds.isJoystickMode = false;
+      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled, use serial Bluetooth ");
+    }
+  }
 }
 
 // Toggle gps printing
-void toggleGps(bool turnGpsOn){
+void toggleGps(bool turnGpsOn) {
   if (turnGpsOn) {
     Cmds.isGpsImu = true;
     Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Enabled");
@@ -411,7 +432,7 @@ void toggleGps(bool turnGpsOn){
 }
 
 // Toggle speed printing
-void toggleEncoder(bool turnEncOn){
+void toggleEncoder(bool turnEncOn) {
   if (turnEncOn) {
     if (Cmds.isActivated) {
         Cmds.isEnc = true;
@@ -435,7 +456,7 @@ void toggleEncoder(bool turnEncOn){
 }
 
 // Toggle acceleration limiter
-void toggleAcceleration(bool turnAccelOn){
+void toggleAcceleration(bool turnAccelOn) {
   if (turnAccelOn) {
     for (i = 0; i < RobotMotor::numMotors; i++) {
         motorList[i].accLimit = true;
@@ -457,31 +478,56 @@ void toggleAcceleration(bool turnAccelOn){
 }
 
 // Print rover status (active or not)
-void getRoverStatus(void){
+void getRoverStatus(void) {
 
 }
 
 // Throttle -49 to 49 and Steering -49 to 49
-void moveRover(int8_t roverThrottle, int8_t roverSteering){
-
-  // TODO: Fix this to work correctly with the wheels
-  throttle = Helpers::get().getValue(cmd, ':', 0).toFloat();
-  steering = Helpers::get().getValue(cmd, ':', 1).toFloat();
-  DcMotor::velocityHandler(motorList,throttle, steering);
-  
-  // Display the movement changes in console
-  String msg = "ASTRO left: " + String(desiredVelocityLeft);
-  msg += " -- right: " + String(desiredVelocityRight);
-  msg += " maxOutput: " + String(maxOutputSignal);
-  Helpers::get().println(msg);
-  
-  // Reset timer for reading battery, gps and imu data
-  Cmds.sinceThrottle = 0;
+void moveRover(int8_t roverThrottle, int8_t roverSteering) {
+  if (!Cmds.isActivated) {
+    Helpers::get().println("ASTRO Astro isn't activated yet!");
+  }
+  else {
+    throttle = roverThrottle; // Automatically converted to float
+    steering = roverSteering; // Automatically converted to float
+    Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
+    DcMotor::velocityHandler(motorList,throttle, steering);
+    // TODO: pass motorList correctly to velocityHandler (*motorList dynamic)
+    
+    // Displayed from globals.h
+    String msg = "ASTRO left: " + String(desiredVelocityLeft);
+    msg += " -- right: " + String(desiredVelocityRight);
+    msg += " maxOutput: " + String(maxOutputSignal);
+    Helpers::get().println(msg);
+    Cmds.sinceThrottle = 0;
+  }
 } 
 
 // Wheel number 0 to 5 and -255 to 255 
-void moveWheel(uint8_t wheelNumber, int16_t wheelPWM){
+void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
+  if (!Cmds.isActivated) {
+    Helpers::get().println("ASTRO Astro isn't activated yet!");
+  }
+  else {
+    motorNumber = (int) wheelNumber;
+    int motorSpeed = (int) wheelPWM;
+    int dir = 1;
+    Cmds.sinceThrottle = 0;
+    steering = 0;
 
+    if (motorSpeed < 0 ) {
+      dir = - 1;
+    }
+
+    if (motorNumber >= 1 && motorNumber <= 6) {
+      motorList[motorNumber-1].calcCurrentVelocity();
+      motorList[motorNumber-1].setVelocity(dir , abs(motorSpeed), motorList[motorNumber-1].getCurrentVelocity());
+      Helpers::get().println("ASTRO " + String(motorList[motorNumber-1].motorName) + String("'s desired speed: ") + String(motorList[motorNumber-1].desiredVelocity) + String(" PWM "));
+    }
+    else {
+      Helpers::get().println("ASTRO invalid motor  number");
+    }
+  }
 }
 //----------------------------------------TODO-------------------------------------
 
