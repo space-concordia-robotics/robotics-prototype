@@ -1,8 +1,22 @@
 
 #include "Navigation.h"
-
 #include <SoftwareSerial.h>
 #include <Servo.h>
+
+// TODO: Change to include instead of INCLUDES when make builds
+#include "includes/PinSetup.h"
+#include "../internal_comms/include/CommandCenter.h"
+#include "../internal_comms/include/Serial.h"
+#include "includes/commands/WheelsCommandCenter.h"    
+// #include "includes/DcMotor.h"
+#include "includes/Globals.h"
+#include "includes/Commands.h"
+#include "includes/Helpers.h"
+
+// TODO: Create method calls to Commands.cpp after internal_comms::readCommand(commandCenter)
+
+
+
 /*
 choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
 the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -19,8 +33,6 @@ should work.
 //#define UART_PORT Serial1
 //#endif
 
-
-
 SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
 
@@ -28,7 +40,6 @@ elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery 
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
-
 
 const float wheelBase = 0.33; //distance between left and right wheels
 const float radius = 0.14; // in m
@@ -43,6 +54,10 @@ const float kd = 40.625;
 float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
 
+// TODO: Change to the correct values later
+const uint8_t TX_TEENSY_3_6_PIN = 1;
+const uint8_t RX_TEENSY_3_6_PIN = 0;
+
 
 // Motor constructor initializations
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
@@ -54,14 +69,18 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor"); // Motor 5
 
 // List of motors
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB}; // 0,1,2,3,4,5 motors
-
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
+
+// Use to call commands 
 Commands Cmds;
+
+// To read commands from wheelscommandcenter
+internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
+
 /* function declarations */
 // initializers
 void attachServos(void); // attach pins to servo objects
-void initEncoders(void); // Encoder initiation (attach interrups and pinModes for wheel encoders
 void serialHandler(void); // Read String that automatically listens to all available ports and bluetooth. If uart is availble and reads who, its will switch devMode to false
 void initPids(void); // Initiate PID for DMotor
 // during operation
@@ -74,6 +93,7 @@ void initMotorEncoder2(void);
 void initMotorEncoder3(void);
 void initMotorEncoder4(void);
 void initMotorEncoder5(void);
+void initEncoders(void); // Encoder initiation (attach interrups and pinModes for wheel encoders
 
 // Set encoder interrupts
 void rf_encoder_interrupt(void);
@@ -84,30 +104,22 @@ void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
 
 // Initialization Serial, Serial1 and Bluetooth communications
-void initSerialCommunications(void)
+void initSerialCommunications(void);
 
-void initSerialCommunications(void) {
-  // initialize serial communications at 115200 bps:
-  Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
-  Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
-  Serial.setTimeout(SERIAL_TIMEOUT);
-  Serial1.setTimeout(SERIAL_TIMEOUT);
-  bluetooth.begin(9600);
-  bluetooth.setTimeout(50);
-  delay(300); // NECESSARY. Give time for serial port to set up
-
-  devMode = true; //if devMode is true then connection is through usb serial
-
-  Cmds.setBluetooth(&bluetooth);
-  Cmds.setMotorList(motorList);
-  Cmds.setServoList(servoList);
-}
+// Wheel command methods from WheelsCommandCenter.cpp
+void toggleMotors(bool turnMotorOn);
+void stopMotors(void);
+void closeMotorsLoop(void);
+void openMotorsLoop(void);
+void toggleJoystick(bool turnJoystickOn);
+void toggleGps(bool turnGpsOn);
+void toggleEncoder(bool turnEncOn);
+void toggleAcceleration(bool turnAccelOn);
+void getRoverStatus(void);
+void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
+void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255
 
 void setup() {
-
-  // TODO: Change to proper pins
-  // internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
-
   initSerialCommunications();
 
   // Initialize setup for pins from PinSetup.h
@@ -139,7 +151,7 @@ void loop() {
   // this represents the speed for throttle:steering
   // as well as direction by the positive/negative sign
 
-  serialHandler();
+  serialHandler();  // Step 1: Acquire command from serial
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
     Helpers::get().vbatt_read(V_SENSE_PIN);
@@ -228,6 +240,7 @@ void roverVelocityCalculator(void) {
   Helpers::get().println(" m ^ 2 / 6 ");
 }
 
+// Step 2: Acquire method based on command sent
 //! Figures out which serial being used
 void serialHandler(void) {
   if (devMode) {
@@ -241,12 +254,16 @@ void serialHandler(void) {
       Cmds.handler(cmd, "UART");
     }
     else if (Serial.available()) {
+      internal_comms::readCommand(commandCenter); // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+
+      /*
       cmd = Serial.readStringUntil('\n');
       cmd.trim();
       if (cmd == "who") {
          devMode = true;
       }
       Cmds.handler(cmd, "USB");
+      */
     }
     else if (bluetooth.available() && Cmds.bluetoothMode) {
       Cmds.bleHandler();
@@ -254,16 +271,77 @@ void serialHandler(void) {
   }
   else {
     if (Serial1.available()) {
+      internal_comms::readCommand(commandCenter); // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+
+      /*
       cmd = Serial1.readStringUntil('\n');
       cmd.trim();
       Helpers::get().ser_flush();
       Cmds.handler(cmd, "UART");
+      */
     }
     else if (Cmds.bluetoothMode) {
       Cmds.bleHandler();
     }
   }
 }
+
+// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
+
+// Toggle 0-5 motors
+void toggleMotors(bool turnMotorOn) {
+
+}
+
+// Emergency stop motors
+void stopMotors(void) {
+  DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle AND steering to 0
+}
+
+// Close motors loop
+void closeMotorsLoop(void) {
+
+}
+
+// Open motors loop
+void openMotorsLoop(void) {
+
+}
+
+// Toggle joystick
+void toggleJoystick(bool turnJoystickOn){
+
+}
+
+// Toggle gps printing
+void toggleGps(bool turnGpsOn){
+
+}
+
+// Toggle speed printing
+void toggleEncoder(bool turnEncOn){
+
+}
+
+// Toggle acceleration limiter
+void toggleAcceleration(bool turnAccelOn){
+
+}
+
+// Print rover status (active or not)
+void getRoverStatus(void){
+
+}
+
+// Throttle -49 to 49 and Steering -49 to 49
+void moveRover(int8_t roverThrottle, int8_t roverSteering){
+
+} 
+
+// Wheel number 0 to 5 and -255 to 255 
+void moveWheel(uint8_t wheelNumber, int16_t wheelPWM){
+
+} 
 
 //! Attach the servos to pins
 void attachServos() {
@@ -338,6 +416,23 @@ void initMotorEncoder5(void) {
   //    LB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 
+void initSerialCommunications(void) {
+  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
+  // initialize serial communications at 115200 bps:
+  Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
+  Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
+  Serial.setTimeout(SERIAL_TIMEOUT);
+  Serial1.setTimeout(SERIAL_TIMEOUT);
+  bluetooth.begin(9600);
+  bluetooth.setTimeout(50);
+  delay(300); // NECESSARY. Give time for serial port to set up
+
+  devMode = true; //if devMode is true then connection is through usb serial
+
+  Cmds.setBluetooth(&bluetooth);
+  Cmds.setMotorList(motorList);
+  Cmds.setServoList(servoList);
+}
 
 //! Initiate encoder for dcMotor objects and pinModes
 void initEncoders(void) {

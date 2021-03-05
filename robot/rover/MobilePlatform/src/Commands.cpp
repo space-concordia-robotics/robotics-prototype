@@ -16,7 +16,86 @@ void Commands::setPhone(ArduinoBlue* phone){
 }
 void Commands::handler(String cmd, String sender) {
 
-     Helpers::get().println("ASTRO GOT: " + cmd);
+    Helpers::get().println("ASTRO GOT: " + cmd);
+    if (cmd == activate_cmd) {
+        activate(sender);
+    }
+    else if (cmd == deactivate_cmd) {
+        deactivate(sender);
+    }
+    else if (cmd == ping_cmd) {
+        ping();
+    }
+    else if (cmd == who_cmd) {
+        who();
+    }
+    else if (cmd == reboot_cmd) {
+        rebootTeensy();
+    }
+    else if (cmd == bleOn_cmd ) {
+        bleOn(sender);
+    }
+    else if (cmd == bleOff_cmd) {
+        bleOff(sender);
+    }
+    else if (cmd == closeLoop_cmd) {
+        closeLoop();
+    }
+    else if (cmd == openLoop_cmd) {
+        openLoop();
+    }
+    else if (cmd == steerOff_cmd) {
+        steerOff();
+    }
+    else if (cmd == steerOn_cmd) {
+        steerOn();
+    }
+    else if (cmd == gpsOff_cmd) {
+        gpsOff();
+    }
+    else if (cmd == gpsOn_cmd) {
+        gpsOn();
+    }
+    else if (cmd == encOn_cmd) {
+        encOn();
+    }
+    else if (cmd == encOff_cmd) {
+        encOff();
+    }
+    else if (cmd == accOn_cmd) {
+        accOn();
+    }
+    else if (cmd == accOff_cmd) {
+        accOff();
+    }
+    else if (cmd == ttoOn_cmd) {
+        ttoOn();
+    }
+    else if (cmd == ttoOff_cmd) {
+        ttoOff();
+    }
+    else if (cmd == stop_cmd) {
+        stop();
+    }
+    else if (cmd == status_cmd) {
+        systemStatus();
+    }
+        // this is not safe enough, needs much stricter verification
+    else if (cmd.indexOf(":") > 0) {
+        controlWheelMotors(cmd);
+    }
+    else if (cmd[0] == '!' || cmd[0] == '@' || cmd[0] == '#' || cmd[0] == '$') {
+        controlCameraMotors (cmd);
+    }
+    else {
+        Helpers::get().println("ASTRO BOOOOOOO!!! Wrong command, try a different one, BIAAAAAA");
+    }
+}
+
+// TODO: Create new command handler to handle new commands from readCommand!!
+void Commands::handler(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
+
+    Helpers::get().println("ASTRO GOT: " + cmd);
     if (cmd == activate_cmd) {
         activate(sender);
     }

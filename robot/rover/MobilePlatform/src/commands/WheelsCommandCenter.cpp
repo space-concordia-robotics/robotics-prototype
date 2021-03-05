@@ -2,13 +2,11 @@
 // Created by Michael on 2021-01-23.
 //
 
-
 //TODO: Fix CMake
 //TODO: Get methods from MobilePlatform.ino 
 //TODO: Fix PinSetup.h (not sure what i need to do ngl)
 //TODO: Fix path from /includes to /include (And includes which use this path) and FIX CMAKE SO IT BUILDS!
 //TODO: Fix CMakeLists.txt and CMakeTemplate.txt.in from /robot/rover
-
 
 #include "../../includes/commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
 
@@ -30,27 +28,26 @@ Command messages
 /*
 Command functions
 */
-void setMotors(bool turnMotorOn);
+void toggleMotors(bool turnMotorOn);
 void stopMotors();
 void closeMotorsLoop();
 void openMotorsLoop();
-void setJoystick(bool turnJoystickOn);
-void setGps(bool turnGpsOn);
-void setEncoder(bool turnEncOn);
-void setAcceleration(bool turnAccelOn);
+void toggleJoystick(bool turnJoystickOn);
+void toggleGps(bool turnGpsOn);
+void toggleEncoder(bool turnEncOn);
+void toggleAcceleration(bool turnAccelOn);
 void getRoverStatus();
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255 
 
 void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
-
 /*
 Switch command recieved to perform specific function
 */
   switch(commandID)
   {
     case COMMAND_SET_MOTORS:
-      setMotors(*rawArgs);  // Set if ON or OFF
+      toggleMotors(*rawArgs);  // Set if ON or OFF
       break;
     case COMMAND_STOP_MOTORS_EMERGENCY:
       stopMotors();
@@ -62,16 +59,16 @@ Switch command recieved to perform specific function
       openMotorsLoop(); 
       break;
     case COMMAND_SET_JOYSTICK:
-      setJoystick(*rawArgs); // Set if ON or OFF
+      toggleJoystick(*rawArgs); // Set if ON or OFF
       break;
     case COMMAND_SET_GPS:
-      setGps(*rawArgs); // Set if ON or OFF
+      toggleGps(*rawArgs); // Set if ON or OFF
       break;
     case COMMAND_SET_ENCODER:
-      setEncoder(*rawArgs); // Set if ON or OFF
+      toggleEncoder(*rawArgs); // Set if ON or OFF
       break;
     case COMMAND_SET_ACCELERATION:
-      setAcceleration(*rawArgs); // Set if ON or OFF
+      toggleAcceleration(*rawArgs); // Set if ON or OFF
       break;
     case COMMAND_GET_ROVER_STATUS:
       getRoverStatus();
@@ -80,10 +77,11 @@ Switch command recieved to perform specific function
       moveRover(*rawArgs, *(++rawArgs));
       break;
     case COMMAND_MOVE_WHEEL:
-      wheelNumber = (*rawArgs)
-      int16_t PWM = 0; //00000000 00000000 
-      PWM = *(++rawArgs) << 8; //00000000 11111111 -> 11111111 00000000
-      PWM |= *(++rawArgs); //11111111 11111111
+      uint8_t wheelNumber = (*rawArgs);
+      // Assign 16bit PWM value from 8bit register size
+      int16_t PWM = 0; // 00000000 00000000 
+      PWM = *(++rawArgs) << 8; // 00000000 11111111 -> 11111111 00000000
+      PWM |= *(++rawArgs); // 11111111 11111111
       moveWheel(wheelNumber, PWM);
       break;
     default:
