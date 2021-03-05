@@ -24,7 +24,7 @@ def get_serial():
     return ser
 
 def attempt_usb(mcuName):
-    startListening = time.time() 
+    startListening = time.time()
     ser.write(str.encode('who\n'))
     while (time.time()-startListening < COMM_TIMEOUT):
         if ser.in_waiting:
@@ -69,7 +69,7 @@ def clear_buffer():
 
 def search_uart(baudrate, mcuName):
     """ Attempts to communicate with port ttySAC0 through UART at a specified baud rate.
-    
+
         Returns true if the communication is successful, false otherwise.
     """
     global ser
@@ -93,8 +93,8 @@ def search_uart(baudrate, mcuName):
     return False
 
 def search_usb(baudrate, ports, mcuName):
-    """ Searches provided USB ports for an MCU with a certain name 
-    
+    """ Searches provided USB ports for an MCU with a certain name
+
         Returns true if the MCU is found, false otherwise.
     """
     global ser
@@ -120,7 +120,7 @@ def search_usb(baudrate, ports, mcuName):
 
 def init_serial(baudrate, mcuName):
     cmd_args = rospy.myargv(argv=sys.argv)
-    if len(cmd_args) == 1: 
+    if len(cmd_args) == 1:
         if mcuName == 'PDS':
             protocol = PROTOCOL_UART
             rospy.loginfo('Using UART by default')
@@ -157,5 +157,5 @@ def init_serial(baudrate, mcuName):
 
     if not search_success:
         print("Search Unsuccessful")
-        
+
     return search_success

@@ -24,6 +24,8 @@ namespace internal_comms
         else
         {
             // Handle invalid command
+            // (Create error message and put it at the front of the queue so that the 
+            // TX2 can resend)
         }
 
         free(command->rawArgs);
@@ -33,11 +35,23 @@ namespace internal_comms
         command = nullptr;
     }
 
-    void sendMessage(Message* message)
+    void sendMessage(CommandCenter* commandCenter)
     {
-        Serial.write(message->messageID);
-        Serial.write(message->rawArgsLength);
-        Serial.write(message->rawArgs, message->rawArgsLength);
+        if (commandCenter->checkQueue()) {
+
+            const Message& message = commandCenter->messageQueue.front();
+            commandCenter->messageQueue.pop();
+
+
+            Serial.write(message.messageID);
+            Serial.write(message.rawArgsLength);
+            Serial.write(message.rawArgs, message.rawArgsLength);
+
+            // Then we probably should delete the message or store it somewhere for a few cycles
+
+        } else {
+            Serial.write("something"); // idk what to send but it should basically say that there is nothing to send.
+        }
     }
 
     void endSerial()

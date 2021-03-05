@@ -5,6 +5,7 @@
 //
 
 #include "Arduino.h"
+#include "Serial.h"
 #include <etl/queue.h>
 
 namespace internal_comms
@@ -43,7 +44,8 @@ namespace internal_comms
             /**
              * Queues messages so that they are ready to be sent
              * allows teensy.
-             * Returns something if full.
+             * Currently we do not do anything if the queue fills up.
+             * Hopefully we can find a decent queue size that will never fill.
              */
             void queueMessage(Message& message);
 
@@ -52,28 +54,27 @@ namespace internal_comms
              * that is ready to be sent over serial. 
              * It includes the stop byte.
              */
-            uint8_t* encodeMessage(Message* message);
+            uint8_t* encodeMessage(const Message* message);
 
-        private:
+            /**
+             * Check if the queue has something.
+             * returns true if there is something
+             * false if empty
+             */
+            bool checkQueue() const;
 
             /**
              * Holds the messages that are ready to be sent out 
              */
             etl::queue<const Message, 5> messageQueue;
 
+        private:
+
             /**
              * Reads the two bytes that make up the argument length and combines
              * them into an uint16_t
              */
             uint16_t readArgSize() const;
-
-            /**
-             * Every loop, this command gets executed,
-             * does not do anything if there are no messages in queue
-             */
-            void sendMessage();
-            
-            
     };
 
 }

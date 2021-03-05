@@ -4,6 +4,7 @@
 
 #include "include/CommandCenter.h"
 #include <etl/queue.h>
+#include "include/Serial.h"
 
 namespace internal_comms
 {
@@ -45,21 +46,13 @@ namespace internal_comms
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
         return ArgumentsLength;
     }
-
     
     void CommandCenter::queueMessage(Message& message)
     {
         messageQueue.push(message);
     }
 
-
-    void CommandCenter::sendMessage()
-    {
-        // something
-    }
-
-    uint8_t* encodeMessage(const Message* message) 
-    {
-        // basically take all the message data and encode into one large byte array
+    bool CommandCenter::checkQueue() const {
+        return !messageQueue.empty() ? true : false;
     }
 }
