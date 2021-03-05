@@ -479,7 +479,29 @@ void toggleAcceleration(bool turnAccelOn) {
 
 // Print rover status (active or not)
 void getRoverStatus(void) {
+  Helpers::get().println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
+    Helpers::get().println("ASTRO Astro has " + String(RobotMotor::numMotors) + " motors");
+    Helpers::get().println("ASTRO Wheels: " + String(Cmds.isActivated ? "ACTIVE" : "INACTIVE"));
+    Helpers::get().println("ASTRO Steering: " + String(Cmds.isSteering ? "Steering Control" : "Motor Control"));
+    Helpers::get().println("ASTRO Encoders: " + String(Cmds.isEnc ? "ON" : "OFF"));
+    Helpers::get().println("ASTRO GPS " + String(Cmds.gpsError ? "ERROR: " + Cmds.gpsErrorMsg : "Success"));
+    Helpers::get().println("ASTRO IMU " + String(Cmds.imuError ? "ERROR: " + Cmds.imuErrorMsg : "Success"));
+    Helpers::get().println("ASTRO Nav Stream: " + String(Cmds.isGpsImu ? "ON" : "OFF"));
+    Helpers::get().print("ASTRO Motor loop statuses: ");
+    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
+      Helpers::get().print(String(motorList[i].isOpenLoop ? "Open" : "CLose"));
+      if (i != RobotMotor::numMotors - 1) Helpers::get().print(", ");
+    }
+    Helpers::get().println("");
 
+    Helpers::get().print("ASTRO Motor accel: ");
+    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
+      Helpers::get().print((motorList[i].accLimit) ? "ON" : "OFF");
+      if (i != RobotMotor::numMotors - 1) Helpers::get().print(", ");
+    }
+    Helpers::get().println("");
+
+    Helpers::get().println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
 // Throttle -49 to 49 and Steering -49 to 49
@@ -488,8 +510,8 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     Helpers::get().println("ASTRO Astro isn't activated yet!");
   }
   else {
-    throttle = roverThrottle; // Automatically converted to float
-    steering = roverSteering; // Automatically converted to float
+    throttle = (float) roverThrottle;
+    steering = (float) roverSteering;
     Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
     DcMotor::velocityHandler(motorList,throttle, steering);
     // TODO: pass motorList correctly to velocityHandler (*motorList dynamic)
