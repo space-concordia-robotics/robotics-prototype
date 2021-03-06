@@ -13,10 +13,6 @@
 #include "includes/Commands.h"
 #include "includes/Helpers.h"
 
-// TODO: Create method calls to Commands.cpp after internal_comms::readCommand(commandCenter)
-
-
-
 /*
 choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
 the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
@@ -80,6 +76,7 @@ Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
 
 // Use to call commands 
 Commands Cmds;
+Commands* CmdsPtr;
 
 // To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
@@ -113,6 +110,10 @@ void lb_encoder_interrupt(void);
 void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
+void setPhone(ArduinoBlue* phone);
+void setBluetooth(SoftwareSerial* bluetooth);
+void setMotorList(DcMotor* motorList);
+void setServoList(Servo* servoList);
 void toggleMotors(bool turnMotorOn);
 void stopMotors(void);
 void closeMotorsLoop(void);
@@ -154,10 +155,6 @@ void setup() {
 }
 
 void loop() {
-  // incoming format example: "5: 7"
-  // this represents the speed for throttle:steering
-  // as well as direction by the positive/negative sign
-
   serialHandler();  // Step 1: Acquire command from serial
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
@@ -249,87 +246,99 @@ void roverVelocityCalculator(void) {
 // Step 2: Acquire method based on command sent
 //! Figures out which serial being used
 void serialHandler(void) {
-  if (devMode) {
-    if (Serial1.available()) {
-      cmd = Serial1.readStringUntil('\n');
-      cmd.trim();
-      Helpers::get().ser_flush();
-      if (cmd == "who") {
-        devMode = false ;
-      }
-      Cmds.handler(cmd, "UART");
-    }
-    else if (Serial.available()) {
-      internal_comms::readCommand(commandCenter); // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
-
-      /*
-      cmd = Serial.readStringUntil('\n');
-      cmd.trim();
-      if (cmd == "who") {
-         devMode = true;
-      }
-      Cmds.handler(cmd, "USB");
-      */
-    }
-    else if (bluetooth.available() && Cmds.bluetoothMode) {
-      Cmds.bleHandler();
-    }
+  if (Serial.available()) {
+    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+    internal_comms::readCommand(commandCenter); 
   }
-  else {
-    if (Serial1.available()) {
-      internal_comms::readCommand(commandCenter); // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+  
 
-      /*
-      cmd = Serial1.readStringUntil('\n');
-      cmd.trim();
-      Helpers::get().ser_flush();
-      Cmds.handler(cmd, "UART");
-      */
-    }
-    else if (Cmds.bluetoothMode) {
-      Cmds.bleHandler();
-    }
-  }
+  // if (devMode) {
+  //   if (Serial1.available()) {
+  //     cmd = Serial1.readStringUntil('\n');
+  //     cmd.trim();
+  //     Helpers::get().ser_flush();
+  //     if (cmd == "who") {
+  //       devMode = false ;
+  //     }
+  //     Cmds.handler(cmd, "UART");
+  //   }
+  //   else if (Serial.available()) {
+  //     cmd = Serial.readStringUntil('\n');
+  //     cmd.trim();
+  //     if (cmd == "who") {
+  //        devMode = true;
+  //     }
+  //     Cmds.handler(cmd, "USB");
+  //   }
+
+  //   // TODO: Integrate bluetooth features from commands
+  //   else if (bluetooth.available() && Cmds.bluetoothMode) {
+  //     Cmds.bleHandler();
+  //   }
+  // }
+  // else {
+  //   if (Serial1.available()) {
+  //     cmd = Serial1.readStringUntil('\n');
+  //     cmd.trim();
+  //     Helpers::get().ser_flush();
+  //     Cmds.handler(cmd, "UART");
+  //   }
+  //   // TODO: Integrate bluetooth features from commands
+  //   else if (Cmds.bluetoothMode) {
+  //     Cmds.bleHandler();
+  //   }
+  // }
 }
 
 //----------------------------------------TODO-------------------------------------
 // Implement the remaining changes to .ino using the Commands.cpp args
-// void setPhone(ArduinoBlue* phone){
-//   Cmds->phone = phone;
-// }
-// void setBluetooth(SoftwareSerial* bluetooth){
-//   Cmds->bluetooth = bluetooth;
-// }
-// void setMotorList(DcMotor* motorList){
-//   Cmds->motorList = motorList;
-// }
-// void setServoList(Servo* servoList){
-//   Cmds->servoList = servoList;
-// }
+void setPhone(ArduinoBlue* phone){
+  CmdsPtr->phone = phone;
+  // Cmds.phone = &phone;
+}
+void setBluetooth(SoftwareSerial* bluetooth){
+  CmdsPtr->bluetooth = bluetooth;
+  // Cmds.bluetooth = &bluetooth;
+}
+void setMotorList(DcMotor* motorList){
+  CmdsPtr->motorList = motorList;
+  // Cmds.motorList = &motorList;
+}
+void setServoList(Servo* servoList){
+  CmdsPtr->servoList = servoList;
+  // Cmds.servoList = &servoList;
+}
 
-void setPhone(ArduinoBlue phone) {
-  Cmds.phone = phone;
-}
-void setBluetooth(SoftwareSerial bluetooth) {
-  Cmds.bluetooth = bluetooth;
-}
-void setMotorList(DcMotor motorList) {
-  Cmds.motorList = motorList;
-}
-void setServoList(Servo servoList) {
-  Cmds.servoList = servoList;
-}
+// void setPhone(ArduinoBlue phone) {
+//   Cmds.newPhone = phone;
+// }
+// void setBluetooth(SoftwareSerial bluetooth) {
+//   Cmds.newBluetooth = bluetooth;
+// }
+// void setMotorList(DcMotor motorList) {
+//   Cmds.newMotorList = motorList;
+// }
+// void setServoList(Servo servoList) {
+//   Cmds.newServoList = servoList;
+// }
 
 //----------------------------------------TODO-------------------------------------
 // TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
 // Toggle 0-5 motors
 void toggleMotors(bool turnMotorOn) {
-  
+  if (turnMotorOn) {
+    Cmds.isActivated = true;
+    Helpers::get().println("ASTRO motors active!");
+  }
+  else {
+    Cmds.isActivated = false;
+    Helpers::get().println("ASTRO motors inactive!");
+  }
 }
 
 // Emergency stop all motors
 void stopMotors(void) {
-  DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle AND steering to 0
+  DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle and steering to 0
   // Not required to send as command to Navigation
 }
 
@@ -345,14 +354,7 @@ void closeMotorsLoop(void) {
   maxOutputSignal = MAX_RPM_VALUE; 
   minOutputSignal = MIN_RPM_VALUE;
   
-  // Why is this redone in the for loop??
   Helpers::get().println("ASTRO Bo!");
-  motorList[0].isOpenLoop = false;
-  motorList[1].isOpenLoop = false;
-  motorList[2].isOpenLoop = false;
-  motorList[3].isOpenLoop = false;
-  motorList[4].isOpenLoop = false;
-  motorList[5].isOpenLoop = false;
 
   // Set motors 0-5 open loop off
   for (i = 0; i < RobotMotor::numMotors; i++) {
@@ -374,14 +376,6 @@ void openMotorsLoop(void) {
   Helpers::get().println("ASTRO Turning encoders off first...");
   maxOutputSignal = MAX_PWM_VALUE; 
   minOutputSignal = MIN_PWM_VALUE;
-
-  // Why is this redone in the for loop??
-  motorList[0].isOpenLoop = true;
-  motorList[1].isOpenLoop = true;
-  motorList[2].isOpenLoop = true;
-  motorList[3].isOpenLoop = true;
-  motorList[4].isOpenLoop = true;
-  motorList[5].isOpenLoop = true;
 
   // Set motors 0-5 open loop on
   for (i = 0; i < RobotMotor::numMotors; i++) {
@@ -435,18 +429,18 @@ void toggleGps(bool turnGpsOn) {
 void toggleEncoder(bool turnEncOn) {
   if (turnEncOn) {
     if (Cmds.isActivated) {
-        Cmds.isEnc = true;
-        Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is ON");
+      Cmds.isEnc = true;
+      Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is ON");
     }
     else if (!Cmds.isActivated) {
-        Cmds.isEnc = true;
-        Helpers::get().println("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
-        for (i = 0; i < RobotMotor::numMotors; i++) {
-            Helpers::get().print("ASTRO Motor ");
-            Helpers::get().print(i);
-            Helpers::get().print(" current velocity: ");
-            Helpers::get().println(motorList[i].getCurrentVelocity());
-        }
+      Cmds.isEnc = true;
+      Helpers::get().println("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
+      for (i = 0; i < RobotMotor::numMotors; i++) {
+        Helpers::get().print("ASTRO Motor ");
+        Helpers::get().print(i);
+        Helpers::get().print(" current velocity: ");
+        Helpers::get().println(motorList[i].getCurrentVelocity());
+      }
     }
   }
   else {
@@ -510,10 +504,13 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     Helpers::get().println("ASTRO Astro isn't activated yet!");
   }
   else {
-    throttle = (float) roverThrottle;
-    steering = (float) roverSteering;
+    throttle = (float) roverThrottle; // From Globals.h
+    steering = (float) roverSteering; // From Globals.h
     Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
+    
+    DcMotor* motors[] = &motorList;
     DcMotor::velocityHandler(motorList,throttle, steering);
+    // DcMotor::velocityHandler(motors,throttle, steering);
     // TODO: pass motorList correctly to velocityHandler (*motorList dynamic)
     
     // Displayed from globals.h
@@ -535,7 +532,7 @@ void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
     int motorSpeed = (int) wheelPWM;
     int dir = 1;
     Cmds.sinceThrottle = 0;
-    steering = 0;
+    steering = 0; // From Globals.h
 
     if (motorSpeed < 0 ) {
       dir = - 1;
@@ -629,6 +626,9 @@ void initMotorEncoder5(void) {
 }
 
 void initSerialCommunications(void) {
+  // Use this pointer to set phone, bluetooth, motorlist, and servolist 
+  CmdsPtr = &Cmds;
+
   internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
@@ -685,7 +685,6 @@ void rf_encoder_interrupt(void) {
   RF.dt += micros() - RF.prevTime;
   RF.prevTime = micros();
   RF.encoderCount++;
-  //    motorList[0].setVelocity(1 , 0, motorList[0].getCurrentVelocity());
 }
 
 void rm_encoder_interrupt(void) {
@@ -704,8 +703,6 @@ void lf_encoder_interrupt(void) {
   LF.dt += micros() - LF.prevTime;
   LF.prevTime = micros();
   LF.encoderCount++;
-  //    Serial.println(LF.dt);
-  //    Serial.println(LF.encoderCount);
 }
 
 void lm_encoder_interrupt(void) {
