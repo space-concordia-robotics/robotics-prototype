@@ -505,6 +505,9 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     // THIS DOES NOT ALLOW TO USE SETTER METHODS DIRECTLY FROM .ino BECAUSE THEY ARE PRIVATELY ADDRESSABLE
     DcMotor::velocityHandler(Cmds.getMotorList(),throttle, steering);  // MOTORLIST MOVED TO PUBLIC BECAUSE COMMANDS.CPP NOT USED
 
+    // SOLUTION 3: MAKE THIS METHOD A FRIEND FUNCTION? Only friends can see their friend's private parts!
+    // Might work: DISCUSS THIS
+
     // Displayed from globals.h
     String msg = "ASTRO left: " + String(desiredVelocityLeft);
     msg += " -- right: " + String(desiredVelocityRight);
