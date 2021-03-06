@@ -291,39 +291,28 @@ void serialHandler(void) {
 }
 
 //----------------------------------------TODO-------------------------------------
+// WARNING: CURRENTLY USING THE SETTERS FROM COMMANDS.CPP!!!!
+// THIS MUST BE CHANGED TO SET ALL DIRECTLY WIHTIN THIS .ino FILE!
+// PROBLEMS CAUSED BECAUSE USING STATIC Cmds ASSIGNING POINTERS (ArduinoBlue*, SoftwareSerial*, DcMotor*, Servo*)
+// SOLUTION IS TO MAKE (ArduinoBlue*, SoftwareSerial*, DcMotor*, Servo*) ALL PUBLIC
+//---------------------------------------END OF NOTE-------------------------------
+
 // Implement the remaining changes to .ino using the Commands.cpp args
-void setPhone(ArduinoBlue* phone){
-  CmdsPtr->phone = phone;
-  // Cmds.phone = &phone;
-}
-void setBluetooth(SoftwareSerial* bluetooth){
-  CmdsPtr->bluetooth = bluetooth;
-  // Cmds.bluetooth = &bluetooth;
-}
+// void setPhone(ArduinoBlue* phone){
+//   this->phone = phone;
+// }
+// void setBluetooth(SoftwareSerial* bluetooth){
+//   this->bluetooth = bluetooth;
+// }
 void setMotorList(DcMotor* motorList){
-  CmdsPtr->motorList = motorList;
-  // Cmds.motorList = &motorList;
+  Cmds.motorList = motorList;
 }
-void setServoList(Servo* servoList){
-  CmdsPtr->servoList = servoList;
-  // Cmds.servoList = &servoList;
-}
+// void setServoList(Servo* servoList){
+//   this->servoList = servoList;
+// }
+//-------------------------------------END TODO-------------------------------------
 
-// void setPhone(ArduinoBlue phone) {
-//   Cmds.newPhone = phone;
-// }
-// void setBluetooth(SoftwareSerial bluetooth) {
-//   Cmds.newBluetooth = bluetooth;
-// }
-// void setMotorList(DcMotor motorList) {
-//   Cmds.newMotorList = motorList;
-// }
-// void setServoList(Servo servoList) {
-//   Cmds.newServoList = servoList;
-// }
 
-//----------------------------------------TODO-------------------------------------
-// TODO: Fill in these methods taking from Commands.cpp and moving ALL methods here!
 // Toggle 0-5 motors
 void toggleMotors(bool turnMotorOn) {
   if (turnMotorOn) {
@@ -508,11 +497,14 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     steering = (float) roverSteering; // From Globals.h
     Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
     
-    DcMotor* motors[] = &motorList;
-    DcMotor::velocityHandler(motorList,throttle, steering);
-    // DcMotor::velocityHandler(motors,throttle, steering);
-    // TODO: pass motorList correctly to velocityHandler (*motorList dynamic)
+    // SOLUTION 1: Set motorList as public data member in Commands.h
+    // THIS ALLOWS TO USE SETTER METHODS DIRECTLY FROM .ino BECAUSE THEY ARE PUBLICLY ADDRESSABLE
+    // DcMotor::velocityHandler(Cmds.motorList,throttle, steering); 
     
+    // SOLUTION 2: Use getter function to acquire motorList because it is private
+    // THIS DOES NOT ALLOW TO USE SETTER METHODS DIRECTLY FROM .ino BECAUSE THEY ARE PRIVATELY ADDRESSABLE
+    DcMotor::velocityHandler(Cmds.getMotorList(),throttle, steering);  // MOTORLIST MOVED TO PUBLIC BECAUSE COMMANDS.CPP NOT USED
+
     // Displayed from globals.h
     String msg = "ASTRO left: " + String(desiredVelocityLeft);
     msg += " -- right: " + String(desiredVelocityRight);
@@ -645,9 +637,9 @@ void initSerialCommunications(void) {
   // Cmds.setMotorList(motorList);
   // Cmds.setServoList(servoList);
 
-  setBluetooth(&bluetooth);
-  setMotorList(motorList);
-  setServoList(servoList);
+  Cmds.setBluetooth(&bluetooth);
+  Cmds.setMotorList(motorList);
+  Cmds.setServoList(servoList);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes

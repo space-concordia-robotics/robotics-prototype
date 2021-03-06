@@ -567,3 +567,7 @@ void Commands::setMotorList(DcMotor* motorList){
 void Commands::setServoList(Servo* servoList){
   this->servoList = servoList;
 }
+
+DcMotor* Commands::getMotorList(){
+  return this->motorList;
+}

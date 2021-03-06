@@ -9,10 +9,11 @@
 class Commands {
     ArduinoBlue* phone = nullptr;
     SoftwareSerial* bluetooth = nullptr;
-    DcMotor* motorList = nullptr;
+    // DcMotor* motorList = nullptr;
     Servo* servoList = nullptr;
 public:
     Commands();
+    DcMotor* motorList = nullptr;
     String s[4] = {"USB", "Ble-Serial", "Ble", "UART"};
     String activate_cmd = "activate";
     String deactivate_cmd = "deactivate";
@@ -91,6 +92,8 @@ public:
     void setBluetooth(SoftwareSerial* bluetooth);
     void setMotorList(DcMotor* motorList);
     void setServoList(Servo* servoList);
+
+    DcMotor* getMotorList();
 };
 
 #endif
