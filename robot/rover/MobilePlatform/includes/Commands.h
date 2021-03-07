@@ -7,13 +7,12 @@
 // Bluetooth removed to simplify code and reduce sources of error by Josh Glazer on 2019-05-30.
 //
 class Commands {
-    ArduinoBlue* phone = nullptr;
-    SoftwareSerial* bluetooth = nullptr;
-    // DcMotor* motorList = nullptr;
-    Servo* servoList = nullptr;
 public:
     Commands();
+    ArduinoBlue* phone = nullptr;
+    SoftwareSerial* bluetooth = nullptr;
     DcMotor* motorList = nullptr;
+    Servo* servoList = nullptr;
     String s[4] = {"USB", "Ble-Serial", "Ble", "UART"};
     String activate_cmd = "activate";
     String deactivate_cmd = "deactivate";

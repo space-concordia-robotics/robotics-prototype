@@ -2,6 +2,7 @@
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
+#include "ArduinoBlue.h"
 
 // TODO: Change to include instead of INCLUDES when make builds
 #include "includes/PinSetup.h"
@@ -29,15 +30,8 @@ should work.
 //#define UART_PORT Serial1
 //#endif
 
-//-----------------------------------TODO-----------------------------------
-// Update these variables with the new ones!
 SoftwareSerial bluetooth(9, 10);
 ArduinoBlue phone(bluetooth);
-
-// ArduinoBlue* phone = nullptr;
-// SoftwareSerial* bluetooth(9, 10);
-// DcMotor* motorList = nullptr;
-// Servo* servoList = nullptr;
 
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -76,7 +70,6 @@ Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
 
 // Use to call commands 
 Commands Cmds;
-Commands* CmdsPtr;
 
 // To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
@@ -85,8 +78,6 @@ internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 // initializers
 void attachServos(void); // attach pins to servo objects
 void serialHandler(void); // Read String that automatically listens to all available ports and bluetooth. If uart is availble and reads who, its will switch devMode to false
-void initPids(void); // Initiate PID for DMotor
-// during operation
 void roverVelocityCalculator(void);
 
 // Initialize motor encoders
@@ -114,6 +105,7 @@ void setPhone(ArduinoBlue* phone);
 void setBluetooth(SoftwareSerial* bluetooth);
 void setMotorList(DcMotor* motorList);
 void setServoList(Servo* servoList);
+DcMotor* getMotorList();
 void toggleMotors(bool turnMotorOn);
 void stopMotors(void);
 void closeMotorsLoop(void);
@@ -132,7 +124,6 @@ void setup() {
   // Initialize setup for pins from PinSetup.h
   initPins();
   initEncoders();
-  initPids();
 
   // Initialize servo motors
   attachServos();
@@ -155,7 +146,7 @@ void setup() {
 }
 
 void loop() {
-  serialHandler();  // Step 1: Acquire command from serial
+  serialHandler();  // Acquire command from serial
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
     Helpers::get().vbatt_read(V_SENSE_PIN);
@@ -243,75 +234,30 @@ void roverVelocityCalculator(void) {
   Helpers::get().println(" m ^ 2 / 6 ");
 }
 
-// Step 2: Acquire method based on command sent
-//! Figures out which serial being used
+// Acquire method based on command sent
 void serialHandler(void) {
   if (Serial.available()) {
     // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
     internal_comms::readCommand(commandCenter); 
   }
-  
-
-  // if (devMode) {
-  //   if (Serial1.available()) {
-  //     cmd = Serial1.readStringUntil('\n');
-  //     cmd.trim();
-  //     Helpers::get().ser_flush();
-  //     if (cmd == "who") {
-  //       devMode = false ;
-  //     }
-  //     Cmds.handler(cmd, "UART");
-  //   }
-  //   else if (Serial.available()) {
-  //     cmd = Serial.readStringUntil('\n');
-  //     cmd.trim();
-  //     if (cmd == "who") {
-  //        devMode = true;
-  //     }
-  //     Cmds.handler(cmd, "USB");
-  //   }
-
-  //   // TODO: Integrate bluetooth features from commands
-  //   else if (bluetooth.available() && Cmds.bluetoothMode) {
-  //     Cmds.bleHandler();
-  //   }
-  // }
-  // else {
-  //   if (Serial1.available()) {
-  //     cmd = Serial1.readStringUntil('\n');
-  //     cmd.trim();
-  //     Helpers::get().ser_flush();
-  //     Cmds.handler(cmd, "UART");
-  //   }
-  //   // TODO: Integrate bluetooth features from commands
-  //   else if (Cmds.bluetoothMode) {
-  //     Cmds.bleHandler();
-  //   }
-  // }
 }
 
-//----------------------------------------TODO-------------------------------------
-// WARNING: CURRENTLY USING THE SETTERS FROM COMMANDS.CPP!!!!
-// THIS MUST BE CHANGED TO SET ALL DIRECTLY WIHTIN THIS .ino FILE!
-// PROBLEMS CAUSED BECAUSE USING STATIC Cmds ASSIGNING POINTERS (ArduinoBlue*, SoftwareSerial*, DcMotor*, Servo*)
-// SOLUTION IS TO MAKE (ArduinoBlue*, SoftwareSerial*, DcMotor*, Servo*) ALL PUBLIC
-//---------------------------------------END OF NOTE-------------------------------
-
-// Implement the remaining changes to .ino using the Commands.cpp args
-// void setPhone(ArduinoBlue* phone){
-//   this->phone = phone;
-// }
-// void setBluetooth(SoftwareSerial* bluetooth){
-//   this->bluetooth = bluetooth;
-// }
+void setPhone(ArduinoBlue* phone){
+  Cmds.phone = phone;
+}
+void setBluetooth(SoftwareSerial* bluetooth){
+  Cmds.bluetooth = bluetooth;
+}
 void setMotorList(DcMotor* motorList){
   Cmds.motorList = motorList;
 }
-// void setServoList(Servo* servoList){
-//   this->servoList = servoList;
-// }
-//-------------------------------------END TODO-------------------------------------
+void setServoList(Servo* servoList){
+  Cmds.servoList = servoList;
+}
 
+DcMotor* getMotorList() {
+  return Cmds.motorList;
+}
 
 // Toggle 0-5 motors
 void toggleMotors(bool turnMotorOn) {
@@ -496,17 +442,9 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     throttle = (float) roverThrottle; // From Globals.h
     steering = (float) roverSteering; // From Globals.h
     Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
-    
-    // SOLUTION 1: Set motorList as public data member in Commands.h
-    // THIS ALLOWS TO USE SETTER METHODS DIRECTLY FROM .ino BECAUSE THEY ARE PUBLICLY ADDRESSABLE
-    // DcMotor::velocityHandler(Cmds.motorList,throttle, steering); 
-    
-    // SOLUTION 2: Use getter function to acquire motorList because it is private
-    // THIS DOES NOT ALLOW TO USE SETTER METHODS DIRECTLY FROM .ino BECAUSE THEY ARE PRIVATELY ADDRESSABLE
-    DcMotor::velocityHandler(Cmds.getMotorList(),throttle, steering);  // MOTORLIST MOVED TO PUBLIC BECAUSE COMMANDS.CPP NOT USED
 
-    // SOLUTION 3: MAKE THIS METHOD A FRIEND FUNCTION? Only friends can see their friend's private parts!
-    // Might work: DISCUSS THIS
+    // Set wheel throttle and steering
+    DcMotor::velocityHandler(getMotorList(),throttle, steering); 
 
     // Displayed from globals.h
     String msg = "ASTRO left: " + String(desiredVelocityLeft);
@@ -543,9 +481,6 @@ void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
     }
   }
 }
-//----------------------------------------TODO-------------------------------------
-
-
 
 //! Attach the servos to pins
 void attachServos() {
@@ -567,7 +502,6 @@ void initMotorEncoder0(void) {
   attachInterrupt(digitalPinToInterrupt(RF.encoderPinA), rf_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RF.encoderPinB), rf_encoder_interrupt, CHANGE);
   RF.pidController.setGainConstants(kp, ki, kd);
-  //    RF.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 
 void initMotorEncoder1(void) {
@@ -576,7 +510,6 @@ void initMotorEncoder1(void) {
   pinMode(RM.encoderPinA, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(RM.encoderPinA), rm_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RM.encoderPinB), rm_encoder_interrupt, CHANGE);
-  //    RM.pidController.setGainConstants(3.15, 0.0002, 0.0);
   RM.pidController.setGainConstants(kp, ki, kd);
 }
 
@@ -587,7 +520,6 @@ void initMotorEncoder2(void) {
   attachInterrupt(digitalPinToInterrupt(RB.encoderPinA), rb_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(RB.encoderPinB), rb_encoder_interrupt, CHANGE);
   RB.pidController.setGainConstants(kp, ki, kd);
-  //    RB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 
 void initMotorEncoder3(void) {
@@ -597,7 +529,6 @@ void initMotorEncoder3(void) {
   attachInterrupt(digitalPinToInterrupt(LF.encoderPinA), lf_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(LF.encoderPinB), lf_encoder_interrupt, CHANGE);
   LF.pidController.setGainConstants(kp, ki, kd);
-  //    LF.pidController.setGainConstants(kp, 0.0002, 0.0);
 }
 
 void initMotorEncoder4(void) {
@@ -607,7 +538,6 @@ void initMotorEncoder4(void) {
   attachInterrupt(digitalPinToInterrupt(LM.encoderPinA), lm_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(LM.encoderPinB), lm_encoder_interrupt, CHANGE);
   LM.pidController.setGainConstants(kp, ki, kd);
-  //    LM.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 
 void initMotorEncoder5(void) {
@@ -617,14 +547,11 @@ void initMotorEncoder5(void) {
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinA), lb_encoder_interrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(LB.encoderPinB), lb_encoder_interrupt, CHANGE);
   LB.pidController.setGainConstants(kp, ki, kd);
-  //    LB.pidController.setGainConstants(3.15, 0.0002, 0.0);
 }
 
 void initSerialCommunications(void) {
-  // Use this pointer to set phone, bluetooth, motorlist, and servolist 
-  CmdsPtr = &Cmds;
-
   internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
+
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
   Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
@@ -636,13 +563,10 @@ void initSerialCommunications(void) {
 
   devMode = true; //if devMode is true then connection is through usb serial
 
-  // Cmds.setBluetooth(&bluetooth);
-  // Cmds.setMotorList(motorList);
-  // Cmds.setServoList(servoList);
-
-  Cmds.setBluetooth(&bluetooth);
-  Cmds.setMotorList(motorList);
-  Cmds.setServoList(servoList);
+  setPhone(&phone);
+  setBluetooth(&bluetooth);
+  setMotorList(motorList);
+  setServoList(servoList);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes
@@ -653,27 +577,6 @@ void initEncoders(void) {
   initMotorEncoder3();
   initMotorEncoder4();
   initMotorEncoder5();
-}
-
-//! Initiate PID objects for Dc Motors
-void initPids(void) {
-  /*
-  RF.pidController.setJointVelocityTolerance(2.0 * RF.gearRatioReciprocal);
-  RM.pidController.setJointVelocityTolerance(2.0 * RM.gearRatioReciprocal);
-  RB.pidController.setJointVelocityTolerance(2.0 * RB.gearRatioReciprocal);
-
-  LF.pidController.setJointVelocityTolerance(2.0 * LF.gearRatioReciprocal);
-  LM.pidController.setJointVelocityTolerance(2.0 * LM.gearRatioReciprocal);
-  LB.pidController.setJointVelocityTolerance(2.0 * LB.gearRatioReciprocal);
-
-  RF.pidController.setOutputLimits(-50, 50, 5.0);
-  RM.pidController.setOutputLimits(-50, 50, 5.0);
-  RB.pidController.setOutputLimits(-50, 50, 5.0);
-
-  LF.pidController.setOutputLimits(-50, 50, 5.0);
-  LM.pidController.setOutputLimits(-50, 50, 5.0);
-  LB.pidController.setOutputLimits(-50, 50, 5.0);
-  */
 }
 
 void rf_encoder_interrupt(void) {
