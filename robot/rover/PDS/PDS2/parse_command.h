@@ -4,6 +4,7 @@
 /*
  * INCOMPLETE!!!!!!!!!!!!!
  */
+ 
 #include <Arduino.h>
 #include <Stepper.h> // Stepper Motor library (Won't be used in future application)
 #include "variables.h"
@@ -12,7 +13,7 @@
 #include "parse_command.h"
 
 
-void parseCommand() 
+void parseCommand() : public Setup
 {
     char *token = strtok(BUFFER, " ");
   
