@@ -1,5 +1,4 @@
 #include "temp_read.h"
-
 #include <Arduino.h>
 
 TempSens::TempSens(int MUX_S0, int MUX_S1, int MUX_S2, int MUX_output)

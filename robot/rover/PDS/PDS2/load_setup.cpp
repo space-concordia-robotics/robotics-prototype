@@ -62,8 +62,8 @@ float Setup::load_voltage()
 {
     int load = analogRead(multiSense);
     float Vout = ((float)load / 1023.0) * 5;
-    Serial.print("Load Value before conversion: ");
-    Serial.println(load);
+//    Serial.print("Load Value before conversion: ");
+//    Serial.println(load);
     
     return Vout;
 }

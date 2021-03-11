@@ -8,9 +8,12 @@
 
 //Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
 
+Setup mSense;
+
 void setup() 
 {
-    Serial.begin(SERIAL_BAUD_RATE);
+    Serial.begin(SERIAL_BAUD_RATE);    
+    mSense.enable_device("Multisense is enabled!", mSense.SEn);    
 }
 
 void loop() 
@@ -32,13 +35,11 @@ void loop()
             Serial.println("Command error: PDS received empty message");
         }
     }
-
-    Setup mSense;
-    mSense.enable_device("Multisense is enabled", mSense.SEn);    
+    
     float load_value = mSense.load_voltage();
-    Serial.print("Load Value after conversion: ");
-    Serial.print(load_value); 
-    Serial.println(" V");
+//    Serial.print("Load Value after conversion: ");
+//    Serial.print(load_value); 
+//    Serial.println(" V");
 
     if (load_value > 5)
     {
@@ -51,9 +52,9 @@ void loop()
     // Read Temperature Value
     float Temp1 = temperature.temp_read(0, 0, 0);
   
-    Serial.print("Temperature: "); 
-    Serial.print(Temp1);
-    Serial.println(" C"); 
+//    Serial.print("Temperature: "); 
+//    Serial.print(Temp1);
+//    Serial.println(" C"); 
 
     if (Temp1 > 35) // what temperature may be dangerous?
     {

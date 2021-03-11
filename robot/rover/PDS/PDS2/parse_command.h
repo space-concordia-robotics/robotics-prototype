@@ -3,9 +3,6 @@
 
 #include <Arduino.h>
 
-/*
- * INCOMPLETE!!!!!!!!!!!!!
- */
 
 class ParseCommand : public Setup
 {
@@ -19,15 +16,13 @@ class ParseCommand : public Setup
         {
             if (*token == 'S') 
             {   //disable all motors
-                // disable_multisense();
                 disable_all_motors();
                 Serial.println("Command: PDS disabling the motor!");
                 break;
             } 
             
             else if (*token == 'A') 
-            { //enable all motors
-                // enable_multisense();
+            { //enable all motors"
                 enable_all_motors();
                 Serial.println("Command: PDS enabling the motor!");
                 break;
