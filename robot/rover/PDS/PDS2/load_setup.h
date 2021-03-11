@@ -9,10 +9,9 @@
  */
 
 class Setup
-{
-    int pin;
-    
+{    
     public:
+        int fan=5, motor_input=7, multiSense=15, SEn=12;
     
         Setup();
         void enable_device(String message, int pin1);

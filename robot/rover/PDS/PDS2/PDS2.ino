@@ -19,17 +19,6 @@ void setup()
 
 void loop() 
 {
-    Setup s1;
-    s1.enable_device("first motor is enabled", 13);
-
-    delay(2000);
-
-    s1.disable_device("first motor is disable", 13);
-
-    delay(2000);
-
-
-  
     // listen to the serial port and parse an incoming message
 //    if (Serial.available()) 
 //    {
@@ -47,7 +36,7 @@ void loop()
 //    }
 
     Setup mSense;
-    mSense.enable_device("Multisense is enabled", SEn);    
+    mSense.enable_device("Multisense is enabled", mSense.SEn);    
     float load_value = mSense.load_voltage();
     Serial.print("Load Value after conversion: ");
     Serial.print(load_value); 
@@ -68,6 +57,11 @@ void loop()
     Serial.print("Temperature: "); 
     Serial.print(Temp1);
     Serial.println(" C"); 
+
+    if (Temp1 > 35) // what temperature may be dangerous?
+    {
+        Serial.print("ERROR! Temperature is too high!");
+    }    
 //    delay(1000);/
 
     

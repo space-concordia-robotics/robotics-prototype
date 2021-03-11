@@ -5,11 +5,11 @@
 
 Setup::Setup()
 {
-   pinMode(MultiSense, INPUT); // Feedback from output current
+   pinMode(multiSense, INPUT); // Feedback from output current
    pinMode(SEn, OUTPUT); // Enables MultiSense pin
 
    // Motor setting
-   pinMode(MOTOR_in, OUTPUT);  
+   pinMode(motor_input, OUTPUT);  
    //myStepper.setSpeed(5); // Set the speed to 5 rpm  
 }
 
@@ -36,7 +36,7 @@ int Setup::get_status(int pin1)
 
 float Setup::load_voltage()
 {
-    int load = analogRead(MultiSense);
+    int load = analogRead(multiSense);
     float Vout = ((float)load / 1023.0) * 5;
     Serial.print("Load Value before conversion: ");
     Serial.println(load);
