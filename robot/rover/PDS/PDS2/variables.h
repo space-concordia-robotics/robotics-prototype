@@ -9,11 +9,11 @@
  
 
 // MUX pins
-#define MUX_S0  2
-#define MUX_S1  3
-#define MUX_S2  4
-
-#define MUX_output A0
+//#define MUX_S0  2
+//#define MUX_S1  3
+//#define MUX_S2  4
+//
+//#define MUX_output A0
 
 // FANs pins
 #define Fans 5 // PB1
@@ -43,6 +43,14 @@
 
 
 // Number of steps per rotation for Stepper Motor (This will be removed for our application)
-const int stepsPerRevolution = 2048;
+// const int stepsPerRevolution = 2048;
 
 //#endif/
+
+
+
+/*
+ * 1. vn5050 (7050)  -->> how to simulate faulty condition? what to do if a faulty condition happens?
+ * 2. parseCommand  -->> we have a gui, we should make it work for the system
+ * 3. what to do with the temps?
+ */
