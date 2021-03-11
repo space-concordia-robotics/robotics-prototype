@@ -1,72 +1,71 @@
-//#ifndef
-//#define
+#ifndef COMMAND_H
+#define COMMAND_H
+
+#include <Arduino.h>
 
 /*
  * INCOMPLETE!!!!!!!!!!!!!
  */
- 
-#include <Arduino.h>
-#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
-#include "variables.h"
-#include "sensor_read.h"
-#include "load_setup.h"
-#include "parse_command.h"
 
-
-void parseCommand() : public Setup
+class ParseCommand : public Setup
 {
-    char *token = strtok(BUFFER, " ");
-  
-    while (token != NULL) 
+    public:
+    
+    void command()
     {
-        if (*token == 'S') 
-        {   //disable all motors
-            // disable_multisense();
-            disable_motor();
-            Serial.println("Command: PDS disabling the motor!");
-            break;
-        } 
-        
-        else if (*token == 'A') 
-        { //enable all motors
-            // enable_multisense();
-            enable_motor();
-            Serial.println("Command: PDS enabling the motor!");
-            break;
-        }
+        char *token = strtok(BUFFER, " ");
       
-        else if (*token == 'F') 
+        while (token != NULL) 
         {
-            token = strtok(NULL, " "); //find the next token
-            int fanNum = (int)*token - 48;
+            if (*token == 'S') 
+            {   //disable all motors
+                // disable_multisense();
+                disable_all_motors();
+                Serial.println("Command: PDS disabling the motor!");
+                break;
+            } 
             
-            if (fanNum == 1 || fanNum == 2) 
+            else if (*token == 'A') 
+            { //enable all motors
+                // enable_multisense();
+                enable_all_motors();
+                Serial.println("Command: PDS enabling the motor!");
+                break;
+            }
+          
+            else if (*token == 'F') 
             {
                 token = strtok(NULL, " "); //find the next token
-                int fanMode = (int)*token - 48;
+                int fanNum = (int)*token - 48;
                 
-                switch (fanNum) 
+                if (fanNum == 1 || fanNum == 2) 
                 {
-                    case 1:
-                        analogWrite(Fan_A_Pin, fanMode);
-                        break;
-                    case 2:
-                        analogWrite(Fan_B_Pin, fanMode);
-                        break;
-                }
-                
-                Serial.println("Command: PDS changing fan mode");
-            } 
-            break;
-        }
-        
-        else 
-        {
-            Serial.println("Command error: PDS invalid!"); 
-            break;
-        }
-        
-    } // end of while loop
-} // end of parseCommand
+                    token = strtok(NULL, " "); //find the next token
+                    int fanMode = (int)*token - 48;
+                    
+                    switch (fanNum) 
+                    {
+                        case 1:
+                            analogWrite(fan, fanMode);
+                            break;
+                        case 2:
+                            analogWrite(fan, fanMode);
+                            break;
+                    }
+                    
+                    Serial.println("Command: PDS changing fan mode");
+                } 
+                break;
+            }
+            
+            else 
+            {
+                Serial.println("Command error: PDS invalid!"); 
+                break;
+            }
+            
+        } // end of while loop
+    }
+}; // end of parseCommand
 
-//#endif/
+#endif

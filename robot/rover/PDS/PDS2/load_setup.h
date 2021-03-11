@@ -1,7 +1,7 @@
 #ifndef SETUP_H
 #define SETUP_H
 
-#include "variables.h"
+#include <Arduino.h>
 #include <Stepper.h> 
 
 /*

@@ -1,7 +1,6 @@
 //#ifndef
 //#define
 
-#include <Arduino.h>
 /*
  * Pins and Variable Definitions
  */
@@ -10,9 +9,7 @@
 #define CHAR_BUFF_SIZE 150
 #define SERIAL_BAUD_RATE 9600
 
-
-
-//char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
+char BUFFER[CHAR_BUFF_SIZE]; //!< used for sending/receiving/reading messages
 
 
 // Number of steps per rotation for Stepper Motor (This will be removed for our application)
