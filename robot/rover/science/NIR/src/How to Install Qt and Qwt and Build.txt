@@ -1,0 +1,62 @@
+Installing Qt 5.3
+==================
+
+Download QT 5.3 from:
+http://qt-project.org/downloads
+
+Download the Qt Online Installer
+- Run it
+- Click on Settings
+- Select System proxy settings, this should get you out of the proxy. If that does not work use: Manual proxy settings with 
+HTTP proxy: http://proxyconfig.itg.ti.com/proxy.pac    port: 80
+- Click OK
+- Click next
+- Wait for it to download all options
+- Place it in an empty directory. In my case C:\Qt
+- Click on triangle next to Qt 5.3
+- For Windows check: 
+        MinGW 4.8.2, 
+        msvc2013 64-bit, 
+        msvc2013 64-bit OpenGL,
+        all Source Components
+- For Mac/Unix check:
+        clang 64-bit, 
+        iOS, 
+        all Source Components			
+- Uncheck any Android, Windows phone, and Windows 8
+- Click next
+- Click install
+- Click on agreement
+- For Mac edit /Applications/Qt/5.3/clang_64/mkspecs/qdevice.pri
+	replace !host_build:QMAKE_MAC_SDK = macosx10.8
+	with !host_build:QMAKE_MAC_SDK = macosx10.9
+	Under QT Creater -> porjects, Manage Kits, clone Desktop Qt 5.3 clag 64-bit and set the debugger to lldb
+
+
+Installing qwt
+===============
+
+Download qwt from:
+http://sourceforge.net/projects/qwt/files/qwt/6.1.1/
+For Windows use:
+cd qwt-6.1.1
+qmake qwt.pro
+make
+make install
+
+Also, make sure to add C:\Qwt-6.1.1\lib to system PATH variable.
+Then 
+1.	clean NirscanNanoGUI project
+2.	Rightclick on NirscanNanoGUI project from QT and select “run qmake”
+3.	Build or Run.
+
+
+For Mac use:
+qwt-6.1.1.tar.bz2
+
+- Expand it to a directory, in Mac place in /usr/local/qwt-6.1.1
+- cd /usr/local/qwt-6.1.1
+- /Applications/Qt/5.3/clang_64/bin/qmake qwt.pro
+- sudo make
+- sudo make install  
+- sudo cp -r /usr/local/qwt-6.1.1/lib/qwt.framework /Library/Frameworks/.
