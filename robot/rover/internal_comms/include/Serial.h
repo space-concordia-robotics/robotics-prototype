@@ -13,8 +13,7 @@ namespace internal_comms {
 
     void startSerial(uint8_t rxPin, uint8_t txPin);
     void readCommand(CommandCenter* commandCenter);
-    void send(Message& message);
-//    void sendEmpty();
+    void sendMessage(Message& message);
     void endSerial();
 }
 

@@ -41,21 +41,24 @@ namespace internal_comms
             *
             * @return returns a command struct
             */
-            Command* processCommand() const;
+            static Command* processCommand() ;
 
             /**
             * Queues messages so that they are ready to be sent
             * allows teensy.
             * Currently we do not do anything if the queue fills up.
             * Hopefully we can find a decent queue size that will never fill.
+            * @message reference to message struct
             */
             void queueMessage(Message& message);
 
             /**
-            * Calls Serial::send() if there is something in the queue
-            * and frees up the memory
-            */
-            void sendMessage();
+             * @param cmdID command ID of message to send
+             * @param argSize number of arguments in the message
+             * @param args contains raw bytes of arguments
+             * @return returns a message struct
+             */
+            Message* createMessage(int cmdID, int argSize, byte *args);
 
 
             /**
@@ -69,10 +72,11 @@ namespace internal_comms
             * Reads the two bytes that make up the argument length and combines
             * them into an uint16_t
             */
-            uint16_t readArgSize() const;
+            static uint16_t readArgSize() ;
+
+
     };
 
     uint8_t waitForSerial();
 }
-
 #endif //INTERNAL_COMMS_COMMANDCENTER_H

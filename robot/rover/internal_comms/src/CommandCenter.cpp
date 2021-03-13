@@ -8,7 +8,7 @@
 
 namespace internal_comms
 {
-    Command* CommandCenter::processCommand() const
+    Command* CommandCenter::processCommand()
     {
         uint8_t commandID = waitForSerial();
         uint8_t deviceSending = waitForSerial();
@@ -38,7 +38,7 @@ namespace internal_comms
         return cmd;
     }
 
-    uint16_t CommandCenter::readArgSize() const 
+    uint16_t CommandCenter::readArgSize()
     {
         // Serial.read() returns size_t
         uint16_t byte1 = waitForSerial();
@@ -46,29 +46,20 @@ namespace internal_comms
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
         return ArgumentsLength;
     }
-    
+
+    Message* CommandCenter::createMessage(int msgID, int argSize, byte* args) {
+        auto* message = (Message*) malloc(sizeof(Message));
+        message->messageID = msgID;
+        message->rawArgsLength = argSize;
+        message->rawArgs = args;
+        return message;
+    }
+
     void CommandCenter::queueMessage(Message& message)
     {
         // We assume that the queue will never fill up
         // Thus, never fail...
         messageQueue.push(message);
-    }
-
-    void CommandCenter::sendMessage() {
-        if (!messageQueue.empty()) {
-            Message message = messageQueue.front();
-            messageQueue.pop();
-
-            Serial.write(message.messageID);
-            Serial.write(message.rawArgsLength);
-            Serial.write(message.rawArgs, message.rawArgsLength);
-
-            delete &message;
-
-        } else {
-            Serial.write(1);
-            Serial.write(0);
-        }
     }
 
     // Wait until there is something to read or 50ms have gone by

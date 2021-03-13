@@ -17,7 +17,7 @@ namespace internal_comms
 
     void readCommand(CommandCenter* commandCenter)
     {
-        Command* command = commandCenter->processCommand();
+        Command* command = CommandCenter::processCommand();
         if(command->isValid)
         {
             commandCenter->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
@@ -36,17 +36,24 @@ namespace internal_comms
         command = nullptr;
     }
 
-    //void send(Message& message)
-    //{
-            //Serial.write(message.messageID);
-            //Serial.write(message.rawArgsLength);
-            //Serial.write(message.rawArgs, message.rawArgsLength);
-    //}
+    void sendMessage(CommandCenter* commandCenter, int enablePin) {
+        if (digitalRead(enablePin)) {
+            if (!commandCenter->messageQueue.empty()) {
+                Message message = commandCenter->messageQueue.front();
+                commandCenter->messageQueue.pop();
 
-    //void sendEmpty() {
-        //Serial.write(1);
-        //Serial.write(0);
-    //}
+                Serial.write(message.messageID);
+                Serial.write(message.rawArgsLength);
+                Serial.write(message.rawArgs, message.rawArgsLength);
+
+                delete &message;
+
+            } else {
+                Serial.write(1);
+                Serial.write(0);
+            }
+        }
+    }
 
     void endSerial()
     {
