@@ -71,7 +71,7 @@ set(AUNIT_VERSION v1.4.1)
 
 set(UNIXHOSTDUINO_PATH  ${ARDUINO_EXTERNAL_LIB}/UnixHostDuino)
 set(UNIXHOSTDUINO_URL https://github.com/steamypotato/UnixHostDuino)
-set(UNIXHOSTDUINO_VERSION v0.3.4)
+set(UNIXHOSTDUINO_VERSION v0.3.5)
 
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})

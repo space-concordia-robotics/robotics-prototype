@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.10.2)
 #The project name is the only parameter that needs to be changed for any other project needing to do c++ unit testing
 project(ScienceTests)
 
-#The obj directory will hold the .o files that UnixHostDuino will generate to simulate the Arduino
-file(MAKE_DIRECTORY build/obj)
-
 #The target executable will reside in build/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/bin)
 

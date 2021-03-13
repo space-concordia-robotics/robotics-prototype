@@ -1,4 +1,3 @@
-#line 2 "basic.ino"
 #include "Carousel.h"
 Carousel carousel;
 #include "AUnit.h"
