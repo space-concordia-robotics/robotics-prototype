@@ -6,7 +6,6 @@
 //
 
 #include "Arduino.h"
-#include "Serial.h"
 #include <etl/queue.h>
 
 namespace internal_comms

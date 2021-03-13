@@ -5,7 +5,6 @@
 
 #include "CommandCenter.h"
 #include <etl/queue.h>
-#include "include/Serial.h"
 
 namespace internal_comms
 {
