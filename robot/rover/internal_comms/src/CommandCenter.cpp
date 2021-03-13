@@ -76,7 +76,7 @@ namespace internal_comms
             Serial.write(0);
         }
     }
-    
+
     // Wait until there is something to read or 50ms have gone by
     uint8_t waitForSerial() {
         unsigned long start = millis();
