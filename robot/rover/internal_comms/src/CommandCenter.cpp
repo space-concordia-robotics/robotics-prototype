@@ -3,7 +3,7 @@
 // And half of it was done by Tim
 //
 
-#include "include/CommandCenter.h"
+#include "CommandCenter.h"
 #include <etl/queue.h>
 #include "include/Serial.h"
 
@@ -11,14 +11,14 @@ namespace internal_comms
 {
     Command* CommandCenter::processCommand() const
     {
-        uint8_t commandID = Serial.read();
-        uint8_t deviceSending = Serial.read();
-        uint8_t deviceReceiving = Serial.read();
+        uint8_t commandID = waitForSerial();
+        uint8_t deviceSending = waitForSerial();
+        uint8_t deviceReceiving = waitForSerial();
         uint16_t argumentSize = readArgSize();
 
         auto* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
         uint16_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
-        uint8_t stopByte = Serial.read();
+        uint8_t stopByte = waitForSerial();
 
         auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
@@ -42,8 +42,8 @@ namespace internal_comms
     uint16_t CommandCenter::readArgSize() const 
     {
         // Serial.read() returns size_t
-        uint16_t byte1 = Serial.read();
-        uint8_t byte2 = Serial.read();
+        uint16_t byte1 = waitForSerial();
+        uint8_t byte2 = waitForSerial();
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
         return ArgumentsLength;
     }
@@ -75,5 +75,15 @@ namespace internal_comms
             Serial.write(1);
             Serial.write(0);
         }
+
+    // Wait until there is something to read or 50ms have gone by
+    uint8_t waitForSerial()
+    {
+        unsigned long start = millis();
+        while(!Serial.available()){
+            unsigned long current = millis() - start;
+            if (current > 50) break;
+        }
+        return Serial.read();
     }
 }

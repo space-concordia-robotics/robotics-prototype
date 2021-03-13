@@ -112,6 +112,8 @@ void printMotorState();
 void updateMotorState();
 float readMultiplexer(uint8_t channel);
 
+internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
+
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
   Serial.setTimeout(SERIAL_TIMEOUT_DELAY);

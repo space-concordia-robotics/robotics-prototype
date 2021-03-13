@@ -80,6 +80,7 @@ namespace internal_comms
             uint16_t readArgSize() const;
     };
 
+    uint8_t waitForSerial();
 }
 
 #endif //INTERNAL_COMMS_COMMANDCENTER_H
