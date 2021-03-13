@@ -40,7 +40,7 @@ private:
     uint8 m_curReferenceDataBlob[SCAN_DATA_BLOB_SIZE];
     scanResults m_scanResults;
     scanResults m_referenceResults;
-
+    int m_activeindex;
     int runScan(void *pData, int *pBytesRead);
 
     int createScanConfiguration();

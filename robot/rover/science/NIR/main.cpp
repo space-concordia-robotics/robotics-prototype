@@ -10,7 +10,7 @@ int main(int argc, const char **argv)
         cout << "Cannot initialize USB device!" << endl;
         return -1;
     }
-    //spec.scan();
+    spec.scan();
     spec.deinit();
     return 0;
 }

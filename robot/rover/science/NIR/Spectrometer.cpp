@@ -232,12 +232,6 @@ vector<double> Spectrometer::GetReflectance()
     return out;
 }
 
-int Spectrometer::fetchScan(unsigned char *buffer)
-{
-    size_t fileSize = NNO_GetFileSizeToRead(NNO_FILE_SCAN_DATA);
-    return NNO_GetFile(buffer, fileSize);
-}
-
 int Spectrometer::getAllConfigurations(void)
 {
     int num_records = NNO_GetNumScanCfg();
