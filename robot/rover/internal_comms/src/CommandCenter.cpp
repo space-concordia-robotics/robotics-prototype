@@ -61,7 +61,7 @@ namespace internal_comms
     }
 
     void CommandCenter::sendMessage() {
-        if (CommandCenter::checkQueue()) {
+        if (checkQueue()) {
             Message message = messageQueue.front();
             messageQueue.pop();
 

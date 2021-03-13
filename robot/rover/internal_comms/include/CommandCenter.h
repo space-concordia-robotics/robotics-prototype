@@ -69,7 +69,7 @@ namespace internal_comms
             /**
             * Holds the messages that are ready to be sent out 
             */
-            queue<const Message, 5> messageQueue;
+            etl::queue<Message, 5> messageQueue;
 
         private:
 
