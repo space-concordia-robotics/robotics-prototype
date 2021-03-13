@@ -16,7 +16,6 @@ namespace internal_comms {
     void send(Message& message);
     void sendEmpty();
     void endSerial();
-
 }
 
 #endif

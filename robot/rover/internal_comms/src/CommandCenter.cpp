@@ -16,11 +16,11 @@ namespace internal_comms
         uint8_t deviceReceiving = Serial.read();
         uint16_t argumentSize = readArgSize();
 
-        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
+        auto* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
         uint16_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         uint8_t stopByte = Serial.read();
 
-        Command* cmd = (Command*) malloc(sizeof(Command));
+        auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
         cmd->isValid = true;
         cmd->rawArgs = buffer;
@@ -57,10 +57,10 @@ namespace internal_comms
 
     bool CommandCenter::checkQueue() const {
         // Returns true if not empty
-        return !messageQueue.empty() ? true : false;
+        return !messageQueue.empty();
     }
 
-    void CommandCenter::sendMessage() const {
+    void CommandCenter::sendMessage() {
         if (CommandCenter::checkQueue()) {
             Message message = messageQueue.front();
             messageQueue.pop();
@@ -69,8 +69,7 @@ namespace internal_comms
             Serial.write(message.rawArgsLength);
             Serial.write(message.rawArgs, message.rawArgsLength);
 
-            delete message;
-            message = nullptr;
+            delete &message;
 
         } else {
             Serial.write(1);
