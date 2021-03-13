@@ -9,17 +9,16 @@
  find_library(DLPspec
          NAMES libdlpspec.a
          PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/DLP/src
+         REQUIRED
          )
- find_library(usb
-        NAMES libusb.so
-        PATHS /usr/lib/x86_64-linux-gnu/
-        )
  find_library(hidapi
          NAMES libhidapi-hidraw.so
-         PATHS /usr/local/lib/)
+         PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/hidapi-master/hidapi
+         REQUIRED
+         )
 
- message("Using DLP Spectrum library : ${DLPspec}")
- message("Using HIDapi library : ${hidapi}")
+ message(STATUS "Using DLP Spectrum library : ${DLPspec}")
+ message(STATUS "Using HIDapi library : ${hidapi}")
 
  file(GLOB DLP_SOURCES /home/nikolas/DLP/DLPsources/src/*.c)
  add_library(DLP SHARED ${DLP_SOURCES})
@@ -31,5 +30,4 @@
 
  add_executable(NIR_EXE main.cpp)
  target_include_directories(NIR_EXE PUBLIC src/ src/DLP/src src/Common/include src/hidapi-master/hidapi)
- #target_link_libraries(NIR_EXE ${hidapi})
  target_link_libraries(NIR_EXE Spectrum DLP core ${hidapi} )

@@ -10,8 +10,7 @@ int main(int argc, const char **argv)
         cout << "Cannot initialize USB device!" << endl;
         return -1;
     }
-    Spectrum result;
-    spec.scan(result);
-
+    //spec.scan();
+    spec.deinit();
     return 0;
 }

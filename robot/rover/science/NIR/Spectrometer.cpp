@@ -20,13 +20,14 @@ bool Spectrometer::init()
         return false;
     }
 
-    /*if(createScanConfiguration() != PASS){
+    if(createScanConfiguration() != PASS){
         cout << "Error creating configuration" << endl;
-    } */
+    }
+    //NNO_SetActiveScanIndex(1);
 
     m_ref_selection = SCAN_REF_FACTORY;
 
-//    printConfigurations();
+    printCurrentConfiguration();
 
     NNO_SetHibernate(false);
 
@@ -36,7 +37,7 @@ bool Spectrometer::init()
 }
 int Spectrometer::createScanConfiguration(){
     activeConfiguration.scanCfg.wavelength_start_nm = 420;
-    activeConfiguration.scanCfg.wavelength_end_nm = 420;
+    activeConfiguration.scanCfg.wavelength_end_nm = 1337;
 
     uScanConfig cfg;
     size_t bufferSize;
@@ -70,12 +71,11 @@ int Spectrometer::createScanConfiguration(){
 }
 void Spectrometer::deinit()
 {
-
     USB_Close();
     USB_Exit();
 }
 
-int Spectrometer::scan(Spectrum &spectrum)
+int Spectrometer::scan()
 {
     uint8_t pDataBlob[SCAN_DATA_BLOB_SIZE];
     uScanData *pData = (uScanData *)pDataBlob;
@@ -280,7 +280,16 @@ int Spectrometer::getAllConfigurations(void)
 
     return ret_val;
 }
-void Spectrometer::printConfigurations() {
+void Spectrometer::printCurrentConfiguration(){
+
+        cout << "Scan config : " << activeConfiguration.scanCfg.config_name << endl;
+        cout << "Scan type : " << (int)activeConfiguration.scanCfg.scan_type << endl;
+        cout << "Start wavelength : " << (int) activeConfiguration.scanCfg.wavelength_start_nm << endl;
+        cout << "End wavelength : " << (int) activeConfiguration.scanCfg.wavelength_end_nm << endl;
+        cout << "Width : " << (int) activeConfiguration.scanCfg.width_px<< endl;
+
+}
+void Spectrometer::printAllConfigurations() {
     for(int i = 0 ; i < cfg_list.size() ; i++){
 
         cout << "Scan config : " << cfg_list[i].scanCfg.config_name << endl;
