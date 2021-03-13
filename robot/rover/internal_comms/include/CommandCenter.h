@@ -52,13 +52,6 @@ namespace internal_comms
             void queueMessage(Message& message);
 
             /**
-            * Check if the queue has something.
-            * returns true if there is something
-            * false if empty
-            */
-            bool checkQueue() const;
-
-            /**
             * Calls Serial::send() if there is something in the queue
             * and frees up the memory
             */

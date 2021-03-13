@@ -54,13 +54,8 @@ namespace internal_comms
         messageQueue.push(message);
     }
 
-    bool CommandCenter::checkQueue() const {
-        // Returns true if not empty
-        return !messageQueue.empty();
-    }
-
     void CommandCenter::sendMessage() {
-        if (checkQueue()) {
+        if (!messageQueue.empty()) {
             Message message = messageQueue.front();
             messageQueue.pop();
 
