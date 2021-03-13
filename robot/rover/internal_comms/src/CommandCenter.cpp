@@ -1,5 +1,6 @@
 //
 // Created by cedric on 2020-10-14.
+// And half of it was done by Tim
 //
 
 #include "include/CommandCenter.h"
@@ -49,10 +50,31 @@ namespace internal_comms
     
     void CommandCenter::queueMessage(Message& message)
     {
+        // We assume that the queue will never fill up
+        // Thus, never fail...
         messageQueue.push(message);
     }
 
     bool CommandCenter::checkQueue() const {
+        // Returns true if not empty
         return !messageQueue.empty() ? true : false;
+    }
+
+    void CommandCenter::sendMessage() const {
+        if (CommandCenter::checkQueue()) {
+            Message message = messageQueue.front();
+            messageQueue.pop();
+
+            Serial.write(message.messageID);
+            Serial.write(message.rawArgsLength);
+            Serial.write(message.rawArgs, message.rawArgsLength);
+
+            delete message;
+            message = nullptr;
+
+        } else {
+            Serial.write(1);
+            Serial.write(0);
+        }
     }
 }

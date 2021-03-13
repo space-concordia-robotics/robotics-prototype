@@ -1,5 +1,6 @@
 //
 // Created by cedric on 2021-01-16
+// And mostly written by Tim
 //
 
 #include "include/Serial.h"
@@ -35,24 +36,17 @@ namespace internal_comms
         command = nullptr;
     }
 
-    void sendMessage(CommandCenter* commandCenter)
-    {
-        if (commandCenter->checkQueue()) {
+    //void send(Message& message)
+    //{
+            //Serial.write(message.messageID);
+            //Serial.write(message.rawArgsLength);
+            //Serial.write(message.rawArgs, message.rawArgsLength);
+    //}
 
-            const Message& message = commandCenter->messageQueue.front();
-            commandCenter->messageQueue.pop();
-
-
-            Serial.write(message.messageID);
-            Serial.write(message.rawArgsLength);
-            Serial.write(message.rawArgs, message.rawArgsLength);
-
-            // Then we probably should delete the message or store it somewhere for a few cycles
-
-        } else {
-            Serial.write("something"); // idk what to send but it should basically say that there is nothing to send.
-        }
-    }
+    //void sendEmpty() {
+        //Serial.write(1);
+        //Serial.write(0);
+    //}
 
     void endSerial()
     {

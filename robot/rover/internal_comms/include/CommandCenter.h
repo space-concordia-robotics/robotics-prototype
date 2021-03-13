@@ -2,6 +2,7 @@
 #define INTERNAL_COMMS_COMMANDCENTER_H
 //
 // Created by cedric on 2020-10-14.
+// And mostly written by Tim
 //
 
 #include "Arduino.h"
@@ -15,10 +16,10 @@ namespace internal_comms
         uint8_t* rawArgs; // Byte array with the bytes of the arguments
         uint16_t rawArgsLength; // Number of bytes in the rawArgs array
         bool isValid; // Whether the command is valid
-    } Command;
+ 
 
     typedef struct {
-        uint8_t messageID;
+        uint8_t messageID = 1;
         uint16_t rawArgsLength;
         uint8_t* rawArgs;
     } Message;
@@ -64,9 +65,16 @@ namespace internal_comms
             bool checkQueue() const;
 
             /**
+             * Calls Serial::send() if there is something in the queue
+             * and frees up the memory
+             */
+            void sendMessage() const;
+
+
+            /**
              * Holds the messages that are ready to be sent out 
              */
-            etl::queue<const Message, 5> messageQueue;
+            queue<const Message, 5> messageQueue;
 
         private:
 
