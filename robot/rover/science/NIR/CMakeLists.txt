@@ -20,9 +20,9 @@
  message(STATUS "Using DLP Spectrum library : ${DLPspec}")
  message(STATUS "Using HIDapi library : ${hidapi}")
 
- file(GLOB DLP_SOURCES /home/nikolas/DLP/DLPsources/src/*.c)
+ file(GLOB DLP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/DLP/src/*.c)
  add_library(DLP SHARED ${DLP_SOURCES})
- target_include_directories(DLP PRIVATE /home/nikolas/DLP/DLPsources/src/)
+ target_include_directories(DLP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/DLP/src/)
 
  add_library(Spectrum Spectrometer.cpp)
  target_include_directories(Spectrum PUBLIC src/ src/DLP/src src/Common/include src/hidapi-master/hidapi)
