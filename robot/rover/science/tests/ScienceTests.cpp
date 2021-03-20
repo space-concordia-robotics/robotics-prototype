@@ -2,14 +2,13 @@
 Carousel carousel;
 #include "AUnit.h"
 test(correct) {
-        carousel.eStop();
         int x = 1;
         assertEqual(x, 1);
 }
 
 test(incorrect) {
-        int x = 1;
-        assertNotEqual(x, 1);
+        int x = 3;
+        assertEqual(x, 3);
 }
 
 //----------------------------------------------------------------------------
