@@ -1,3 +1,6 @@
+//
+// Edited by Michael on 2021-03-20.
+//
 
 #include "Navigation.h"
 #include <SoftwareSerial.h>
@@ -9,9 +12,8 @@
 #include "../internal_comms/include/CommandCenter.h"
 #include "../internal_comms/include/Serial.h"
 #include "includes/commands/WheelsCommandCenter.h"    
-// #include "includes/DcMotor.h"  // Already included in Commands.h
 #include "includes/Globals.h"
-#include "includes/Commands.h"
+#include "includes/Commands.h"  // This automatically includes DcMotor.h
 #include "includes/Helpers.h"
 
 /*
@@ -29,9 +31,6 @@ should work.
 //// serial communication over uart with odroid, teensy plugged into pcb and odroid
 //#define UART_PORT Serial1
 //#endif
-
-SoftwareSerial bluetooth(9, 10);
-ArduinoBlue phone(bluetooth);
 
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
@@ -73,7 +72,6 @@ internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 /* function declarations */
 // initializers
 void attachServos(void); // attach pins to servo objects
-void serialHandler(void); // Read String that automatically listens to all available ports and bluetooth. If uart is availble and reads who, its will switch devMode to false
 void roverVelocityCalculator(void);
 
 // Initialize motor encoders
@@ -93,12 +91,10 @@ void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
 
-// Initialization Serial, Serial1 and Bluetooth communications
+// Initialization Serial and Serial1
 void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
-void setPhone(ArduinoBlue* phone);
-void setBluetooth(SoftwareSerial* bluetooth);
 void setMotorList(DcMotor* motorList);
 void setServoList(Servo* servoList);
 DcMotor* getMotorList();
@@ -142,7 +138,12 @@ void setup() {
 }
 
 void loop() {
-  serialHandler();  // Acquire command from serial
+
+  // Acquire method based on command sent from serial
+  if (Serial.available()) {
+    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+    internal_comms::readCommand(commandCenter); 
+  }
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
     Helpers::get().vbatt_read(V_SENSE_PIN);
@@ -230,20 +231,6 @@ void roverVelocityCalculator(void) {
   Helpers::get().println(" m ^ 2 / 6 ");
 }
 
-// Acquire method based on command sent
-void serialHandler(void) {
-  if (Serial.available()) {
-    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
-    internal_comms::readCommand(commandCenter); 
-  }
-}
-
-void setPhone(ArduinoBlue* phone){
-  Cmds.phone = phone;
-}
-void setBluetooth(SoftwareSerial* bluetooth){
-  Cmds.bluetooth = bluetooth;
-}
 void setMotorList(DcMotor* motorList){
   Cmds.motorList = motorList;
 }
@@ -324,22 +311,22 @@ void toggleJoystick(bool turnJoystickOn) {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = true;
-      Helpers::get().println("ASTRO Joystick is active, don't use Serial over Bluetooth");
+      Helpers::get().println("ASTRO Joystick is active");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = true;
-      Helpers::get().println("ASTRO Joystick is active, don't use Serial over Bluetooth");
+      Helpers::get().println("ASTRO Joystick is active");
     }
   }
   else {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = false;
-      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled, use serial Bluetooth ");
+      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = false;
-      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled, use serial Bluetooth ");
+      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled");
     }
   }
 }
@@ -553,14 +540,10 @@ void initSerialCommunications(void) {
   Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
   Serial.setTimeout(SERIAL_TIMEOUT);
   Serial1.setTimeout(SERIAL_TIMEOUT);
-  bluetooth.begin(9600);
-  bluetooth.setTimeout(50);
   delay(300); // NECESSARY. Give time for serial port to set up
 
   devMode = true; //if devMode is true then connection is through usb serial
 
-  setPhone(&phone);
-  setBluetooth(&bluetooth);
   setMotorList(motorList);
   setServoList(servoList);
 }

@@ -3,7 +3,6 @@
 //
 
 //TODO: Fix CMake
-//TODO: Get methods from MobilePlatform.ino 
 //TODO: Fix PinSetup.h (not sure what i need to do ngl)
 //TODO: Fix path from /includes to /include (And includes which use this path) and FIX CMAKE SO IT BUILDS!
 //TODO: Fix CMakeLists.txt and CMakeTemplate.txt.in from /robot/rover
@@ -86,7 +85,6 @@ Switch command recieved to perform specific function
       break;
     default:
         break; //Added so the cmake compiles
-        //Function which uses the arm to perform CBT of users choice
   }
 
 }
