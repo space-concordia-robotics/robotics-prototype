@@ -9,7 +9,15 @@ project(@Project_Name@)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+#TODO : Since there is still a project who does not have a /src directory containing all the .cpp files, else condition should be removed once every project has a proper /src directory
+#The reason it exists now is cuz if a project has a .cpp randomly somewhere but its not meant to be found, the recursive search would add it (would not happen when all the source
+#files for a project are in the /src directory
+
+IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+else()
 file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+endif()
 
 set(USER_SOURCES FALSE)
 
