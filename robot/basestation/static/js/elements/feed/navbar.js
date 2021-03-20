@@ -37,10 +37,10 @@ $(document).ready(() => {
     let url = window.location.pathname
     let toggleButtonID = 'toggle-'
 
-    if (url == '/rover') {
+    if (url == '/') {
       listener = ROVER_LISTENER_TASK
       toggleButtonID += 'rover-listener-btn'
-    } else if (url == '/' || url == '/arm') {
+    } else if (url == '/arm') {
       listener = ARM_LISTENER_TASK
       toggleButtonID += 'arm-listener-btn'
     } else if (url == '/science') {
