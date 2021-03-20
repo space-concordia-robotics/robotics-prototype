@@ -9,7 +9,7 @@ get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 file(GLOB TEST_SOURCE *.cpp)
 add_executable(${PROJECT_NAME} ${TEST_SOURCE})
 target_compile_options(${PROJECT_NAME} PUBLIC ${ARM_GXX_FLAGS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${PARENT_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PARENT_DIR}/include)
 set_target_properties(${PROJECT_NAME} PROPERTIES
 LINKER_LANGUAGE C 
 LINK_FLAGS ${ARM_GCC_LINKER_FLAGS}
@@ -23,4 +23,12 @@ teensycore
 -lm
 )
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMENT "Running test for ${PROJECT_NAME}"
+        COMMAND make
+        COMMAND ./${PROJECT_NAME}.out
+        COMMAND make clean
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        VERBATIM
+        )
 
