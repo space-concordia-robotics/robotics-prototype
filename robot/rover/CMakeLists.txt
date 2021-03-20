@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
+include(ExternalProject)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
@@ -247,8 +248,6 @@ foreach(path ${INOFILES})
  DEPENDS PidController_cleanup
  DEPENDS science_cleanup
  )
-
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR}/science/NIR)
 
 #Add the NIR an an external since it does not use the ARM compiler
 ExternalProject_Add(NIR
