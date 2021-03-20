@@ -38,8 +38,7 @@ namespace internal_comms
         return cmd;
     }
 
-    uint16_t CommandCenter::readArgSize()
-    {
+    uint16_t CommandCenter::readArgSize() {
         // Serial.read() returns size_t
         uint16_t byte1 = waitForSerial();
         uint8_t byte2 = waitForSerial();
@@ -47,23 +46,21 @@ namespace internal_comms
         return ArgumentsLength;
     }
 
-    Message* CommandCenter::createMessage(int msgID, int argSize, byte* args) {
+    Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
         auto* message = (Message*) malloc(sizeof(Message));
-        message->messageID = msgID;
-        message->rawArgsLength = argSize;
-        message->rawArgs = args;
+        message->messageID = messageID;
+        message->rawArgsLength = rawArgsLength;
+        message->rawArgs = rawArgs;
         return message;
     }
 
-    void CommandCenter::queueMessage(Message& message)
-    {
+    void CommandCenter::queueMessage(Message& message) {
         // We assume that the queue will never fill up
         // Thus, never fail...
         messageQueue.push(message);
     }
 
-    // Wait until there is something to read or 50ms have gone by
-    uint8_t waitForSerial() {
+    uint8_t CommandCenter::waitForSerial() {
         unsigned long start = millis();
         while(!Serial.available()){
             unsigned long current = millis() - start;
@@ -71,4 +68,65 @@ namespace internal_comms
         }
         return Serial.read();
     }
+    
+    void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin)
+    {
+        pinMode(rxPin, INPUT);
+        pinMode(txPin, OUTPUT); 
+        pinMode(enablePin, INPUT);
+        CommandCenter::enablePin = enablePin;
+
+        Serial.begin(COMMS_BAUDRATE);
+    }
+
+    void CommandCenter::readCommand()
+    {
+        Command* command = CommandCenter::processCommand();
+        if(command->isValid)
+        {
+            CommandCenter::executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
+        }
+        else
+        {
+            // Handle invalid command
+            // (Create error message and put it at the front of the queue so that the 
+            // TX2 can resend)
+        }
+
+        free(command->rawArgs);
+        command->rawArgs = nullptr;
+
+        delete command;
+        command = nullptr;
+    }
+
+    void CommandCenter::sendMessage() {
+        if (digitalRead(enablePin)) {
+            if (!messageQueue.empty()) {
+                Message message = messageQueue.front();
+                messageQueue.pop();
+
+                Serial.write(message.messageID);
+                Serial.write(message.rawArgsLength);
+                Serial.write(message.rawArgs, message.rawArgsLength);
+
+                delete &message;
+
+            } else {
+                Serial.write(1);
+                Serial.write(0);
+            }
+        }
+    }
+
+    void CommandCenter::sendMessage(Message& message) {
+        messageQueue.push(message);
+        sendMessage();
+    }
+
+    void CommandCenter::endSerial()
+    {
+        Serial.end();
+    }
 }
+

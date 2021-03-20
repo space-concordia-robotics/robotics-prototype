@@ -8,6 +8,8 @@
 #include "Arduino.h"
 #include <etl/queue.h>
 
+#define COMMS_BAUDRATE 57600L
+
 namespace internal_comms
 {
    typedef struct {
@@ -41,7 +43,7 @@ namespace internal_comms
             *
             * @return returns a command struct
             */
-            static Command* processCommand() ;
+            Command* processCommand() ;
 
             /**
             * Queues messages so that they are ready to be sent
@@ -53,12 +55,12 @@ namespace internal_comms
             void queueMessage(Message& message);
 
             /**
-             * @param cmdID command ID of message to send
-             * @param argSize number of arguments in the message
-             * @param args contains raw bytes of arguments
+             * @param messageID command ID of message to send
+             * @param rawArgsLength number of arguments in the message
+             * @param rawArgs contains raw bytes of arguments
              * @return returns a message struct
              */
-            Message* createMessage(int cmdID, int argSize, byte *args);
+            Message* createMessage(int messageID, int rawArgsLength, byte *rawArgs);
 
 
             /**
@@ -66,17 +68,48 @@ namespace internal_comms
             */
             etl::queue<Message, 5> messageQueue;
 
+            /**
+             * Starts serial connection with given pins. Enable pin is for 485 flow control
+             */
+            void startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin);
+
+            /**
+             * Reads data from serial port
+             */
+            void readCommand();
+
+            /**
+             * Sends first item of the queue if anything
+             */
+            void sendMessage();
+
+            /**
+             * Enqueues the message and sends top message if enablePin is high
+             */
+            void sendMessage(Message& message);
+
+            /**
+             * Closes serial connection
+             */
+            void endSerial();
+
         private:
+            uint8_t enablePin;
+
 
             /**
             * Reads the two bytes that make up the argument length and combines
             * them into an uint16_t
             */
-            static uint16_t readArgSize() ;
+            uint16_t readArgSize();
 
+            /**
+             * Waits until there is something to read or for 50ms,
+             * whichever comes first.
+             */
+            uint8_t waitForSerial();
 
     };
 
-    uint8_t waitForSerial();
 }
 #endif //INTERNAL_COMMS_COMMANDCENTER_H
