@@ -60,48 +60,24 @@ void Helpers::vbatt_read(int v_sense_pin) {
 void Helpers::print(String msg) {
   if (devMode) {
     Serial.print(msg);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
   else {
     Serial1.print(msg);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
 }
 void Helpers::println(String msg) {
   if (devMode) {
     Serial.println(msg);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
   else {
     Serial1.println(msg);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
 }
 void Helpers::printres(float msg, int a) {
   if (devMode) {
     Serial.print(msg, a);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
   else {
     Serial1.print(msg, a);
-    if (bluetoothMode) {
-      bluetooth.print(msg);
-      //            delay(50);
-    }
   }
 }
