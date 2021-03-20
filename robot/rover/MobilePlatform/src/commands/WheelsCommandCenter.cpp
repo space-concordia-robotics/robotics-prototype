@@ -2,9 +2,7 @@
 // Created by Michael on 2021-01-23.
 //
 
-//TODO: Fix CMake
-//TODO: Fix path from /includes to /include (And includes which use this path) and FIX CMAKE SO IT BUILDS!
-//TODO: Fix CMakeLists.txt and CMakeTemplate.txt.in from /robot/rover
+// Issue made to change includes to include, which requires changing the CMake
 
 #include "../../includes/commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
 
