@@ -153,44 +153,6 @@ const GREEN = 'rgb(61, 127, 127)'
 $(document).keydown(function (e) {
   if ((!$('#servo-val').is(':focus')) && (!$('#serial-command-input').is(':focus'))) {
     switch (e.which) {
-      case 73: // 'i' --> increase max throttle
-        lightUp('#max-throttle-increase > button')
-        $('#max-throttle-increase > button').css(
-          'background-color',
-          YELLOW)
-        maxSoftThrottle += maxThrottleIncrement
-        if (maxSoftThrottle > MAX_THROTTLE_SPEED) {
-          maxSoftThrottle = MAX_THROTTLE_SPEED
-        }
-        $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
-        break
-
-      case 74: // 'j' --> decrease max steering
-        lightUp('#max-steering-decrease > button')
-        $('#max-steering-decrease > button').css(
-          'background-color',
-          YELLOW)
-        maxSoftSteering -= maxSteeringIncrement
-        if (maxSoftSteering < 0) {
-          maxSoftSteering = 0
-        }
-        $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
-        break
-
-      case 75: // 'k' --> increase max steering
-        lightUp('#max-steering-increase > button')
-        $('#max-steering-increase > button').css(
-          'background-color',
-          YELLOW)
-        maxSoftSteering += maxSteeringIncrement
-        if (maxSoftSteering > MAX_STEERING_SPEED) {
-          maxSoftSteering = MAX_STEERING_SPEED
-        }
-        $('#max-steering-speed').text(maxSoftSteering)
-        lastCmdSent = new Date().getTime()
-        break
 
       case 76: // 'l' --> list all commands
         printCommandsList()
@@ -199,19 +161,6 @@ $(document).keydown(function (e) {
 
       case 81: // 'q' --> stop
         sendRoverCommand('stop')
-        break
-
-      case 85: // 'u' --> decrease max throttle
-        lightUp('#max-throttle-decrease > button')
-        $('#max-throttle-decrease > button').css(
-          'background-color',
-          YELLOW)
-        maxSoftThrottle -= maxThrottleIncrement
-        if (maxSoftThrottle < 0) {
-          maxSoftThrottle = 0
-        }
-        $('#max-throttle-speed').text(maxSoftThrottle)
-        lastCmdSent = new Date().getTime()
         break
 
       default:

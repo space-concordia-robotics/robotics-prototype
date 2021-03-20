@@ -3,12 +3,18 @@
 #include <include/Fan.h>
 #include <include/Funnel.h>
 #include <include/Pump.h>
-#include <include/commands/CommandCenter.h>
-#include <include/commands/ScienceCommandCenter.h>
+#include "../internal_comms/include/CommandCenter.h"
+#include "../internal_comms/include/Serial.h"
+#include "include/commands/ScienceCommandCenter.h"
 #include "include/Carousel.h"
 
 const uint8_t NUMBER_OF_STOPPABLES = 5;
 const uint8_t NUMBER_OF_UPDATABLES = 5;
+
+const uint8_t TX_TEENSY_4_0_PIN = 1;
+const uint8_t RX_TEENSY_4_0_PIN = 0;
+
+void updateSystems();
 
 Carousel* carousel = new Carousel();
 Laser* laser = new Laser();
@@ -16,21 +22,24 @@ Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
 Pump* pump = new Pump();
 
-CommandCenter* commandCenter = new ScienceCommandCenter();
+internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
 Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
 Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
 unsigned long time = micros();
 
-void updateSystems();
-
 void loop()
 {
+    if(Serial.available() > 0)
+        internal_comms::readCommand(commandCenter);
+
     updateSystems();
 }
 
 void setup()
-{}
+{
+    internal_comms::startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN);
+}
 
 /**
  * Calculates delta for each system and calls their update method.
