@@ -1,5 +1,5 @@
-#ifndef PINS_H
-#define PINS_H
+#ifndef PINSETUP_H
+#define PINSETUP_H
 
 #define V_SENSE_PIN 39 // for reading battery voltage
 
