@@ -46,9 +46,13 @@ const float kd = 40.625;
 float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
 
-// TODO: Change to the correct values later
-const uint8_t TX_TEENSY_3_6_PIN = 1;
+// Pins for Serial
 const uint8_t RX_TEENSY_3_6_PIN = 0;
+const uint8_t TX_TEENSY_3_6_PIN = 1;
+
+// Pins for Serial1
+const uint8_t RX_TEENSY_3_6_PIN_SERIAL1 = 9;
+const uint8_t TX_TEENSY_3_6_PIN_SERIAL1 = 10;
 
 // Motor constructor initializations
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
@@ -68,6 +72,7 @@ Commands Cmds;
 
 // To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
+internal_comms::CommandCenter* commandCenter1 = new WheelsCommandCenter();
 
 /* function declarations */
 // initializers
@@ -143,6 +148,10 @@ void loop() {
   if (Serial.available()) {
     // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
     internal_comms::readCommand(commandCenter); 
+  }
+  else if (Serial1.available()) {
+    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+    internal_comms::readCommand(commandCenter1); 
   }
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
@@ -533,7 +542,8 @@ void initMotorEncoder5(void) {
 }
 
 void initSerialCommunications(void) {
-  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
+  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);  // Start Serial
+  internal_comms::startSerial(TX_TEENSY_3_6_PIN_SERIAL1, RX_TEENSY_3_6_PIN_SERIAL1); // Start Serial1
 
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
