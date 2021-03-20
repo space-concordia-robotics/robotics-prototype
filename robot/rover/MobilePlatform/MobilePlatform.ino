@@ -7,7 +7,7 @@
 #include <Servo.h>
 #include "ArduinoBlue.h"
 
-// TODO: Change to include instead of INCLUDES when make builds
+// Issue made to change includes to include
 #include "includes/PinSetup.h"
 #include "../internal_comms/include/CommandCenter.h"
 #include "../internal_comms/include/Serial.h"
@@ -16,22 +16,7 @@
 #include "includes/Commands.h"  // This automatically includes DcMotor.h
 #include "includes/Helpers.h"
 
-/*
-choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
-the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
-should work.
-*/
-//#define DEVEL_MODE_1 1
-////#define DEVEL_MODE_2 2
-//
-//#if defined(DEVEL_MODE_1)
-//// serial communication over usb
-//#define UART_PORT Serial
-//#elif defined(DEVEL_MODE_2)
-//// serial communication over uart with odroid, teensy plugged into pcb and odroid
-//#define UART_PORT Serial1
-//#endif
-
+/* Global variables*/
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
@@ -74,7 +59,7 @@ Commands Cmds;
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 internal_comms::CommandCenter* commandCenter1 = new WheelsCommandCenter();
 
-/* function declarations */
+/* Function declarations */
 // initializers
 void attachServos(void); // attach pins to servo objects
 void roverVelocityCalculator(void);
@@ -115,6 +100,7 @@ void getRoverStatus(void);
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255
 
+// Initial teensy setup
 void setup() {
   initSerialCommunications();
 
@@ -142,8 +128,13 @@ void setup() {
   Cmds.setupMessage();
 }
 
+// Running the wheels
 void loop() {
-
+  /*
+  Choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
+  the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
+  should work.
+  */
   // Acquire method based on command sent from serial
   if (Serial.available()) {
     // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
