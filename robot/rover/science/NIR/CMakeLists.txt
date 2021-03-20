@@ -1,0 +1,4 @@
+ cmake_minimum_required(VERSION 3.10.2)
+ project(NIR)
+
+ set(core_srcs src/API.cpp src/usb.cpp src/Serial.c)
