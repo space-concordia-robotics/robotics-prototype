@@ -41,13 +41,9 @@ elapsedMillis sinceMC; // timer for reading battery, gps and imu data
 const float wheelBase = 0.33; //distance between left and right wheels
 const float radius = 0.14; // in m
 const float piRad = 0.10472; // Pi in radians
-//float kp = 23.5;
 const float kp = 14.1;
 const float ki = 0.282;
 const float kd = 40.625;
-//float kp = 10.0;
-//float ki = 0.02;
-//float kd = 0.05;
 float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
 String rotation; // Rotation direction of the whole rover
 
