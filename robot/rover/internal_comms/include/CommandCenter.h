@@ -5,7 +5,6 @@
 // And mostly written by Tim
 //
 
-#include <cstdint>
 #include "Arduino.h"
 #include <etl/queue.h>
 
