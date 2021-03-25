@@ -1,21 +1,27 @@
 #include <Arduino.h>
-#include "include/commands/DemoCommandCenter.h"
+#include "DemoCommandCenter.h"
 #include <cstdint>
 
-const uint8_t TX_TEENSY_4_0_PIN = 1;
-const uint8_t RX_TEENSY_4_0_PIN = 0;
+const uint8_t TX_TEENSY_3_6_PIN = 1;
+const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 10; // THIS IS A PLACE HOLDER UNTIL FLOW CONTROL CAN BE IMPLEMENTED
 
 internal_comms::CommandCenter* commandCenter = new DemoCommandCenter();
 
-void loop()
-{
-    if(Serial.available() > 0)
-        commandCenter->readCommand();
-
-}
-
 void setup()
 {
-    commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN);
+    Serial.begin(9600);
+      pinMode(LED_BUILTIN, OUTPUT);
+//    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
+}
+
+void loop()
+{ 
+  while(true){
+  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(1000);               // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);               // wait for a second
+  Serial.println("EPIC MEME");
+  }
 }
