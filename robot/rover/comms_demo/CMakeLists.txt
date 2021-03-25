@@ -42,7 +42,7 @@ OUTPUT_NAME ${PROJECT_NAME}.elf
  
 target_link_libraries(
 ${PROJECT_NAME}_EXE 
-internal_comms
+Adafruit;Encoder;Wire;Servo
 $<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
 teensycore
 -lm
