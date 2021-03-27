@@ -15,27 +15,21 @@ jobs:
     steps:
 
       - name: Clone repo
-        run: |
-          git clone https://github.com/space-concordia-robotics/robotics-prototype ~/robotics-prototype
-          cd ~/robotics-prototype
+        uses: actions/checkout@v2
 
       - name: Setup Environment
         run: |
-          cd ~/robotics-prototype
-          ./.github/workflows/environment.sh
+          ./environment.sh
 
       - name: Configure ROS environment
         run: |
-          cd ~/robotics-prototype
-          ./.github/workflows/ros.sh
+          ./ros.sh
 
       - name: Install teensyduino and run cmake on codebase
         run: |
           cd ~/robotics-prototype
-          ./.github/workflows/teensyduino.sh
-
+          ./teensyduino.sh
 
       - name: Run pytest
         run: |
-          cd ~/robotics-prototype 
           bash -c "source venv/bin/activate && source robot/rospackages/devel/setup.bash && pytest"
