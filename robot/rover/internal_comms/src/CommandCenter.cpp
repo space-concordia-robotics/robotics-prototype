@@ -15,11 +15,11 @@ namespace internal_comms
         uint8_t deviceReceiving = waitForSerial();
         uint16_t argumentSize = readArgSize();
 
-        auto* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
+        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
         uint16_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         uint8_t stopByte = waitForSerial();
 
-        auto* cmd = (Command*) malloc(sizeof(Command));
+        Command* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
         cmd->isValid = true;
         cmd->rawArgs = buffer;
@@ -47,7 +47,7 @@ namespace internal_comms
     }
 
     Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
-        auto* message = (Message*) malloc(sizeof(Message));
+        Message* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
         message->rawArgs = rawArgs;
@@ -84,7 +84,7 @@ namespace internal_comms
         Command* command = CommandCenter::processCommand();
         if(command->isValid)
         {
-            CommandCenter::executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
+            this->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
         }
         else
         {
