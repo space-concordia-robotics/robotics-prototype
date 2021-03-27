@@ -13,16 +13,16 @@ jobs:
 
       - name: Setup Environment
         run: |
-          ./environment.sh
+          ./.github/workflows/environment.sh
 
       - name: Configure ROS environment
         run: |
-          ./ros.sh
+          ./.github/workflows/ros.sh
 
       - name: Install teensyduino and run cmake on codebase
         run: |
-          cd ~/robotics-prototype
-          ./teensyduino.sh
+          ./.github/workflows/teensyduino.sh
+
 
       - name: Run pytest
         run: |
