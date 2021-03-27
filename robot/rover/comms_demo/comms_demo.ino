@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "DemoCommandCenter.h"
+#include "include/commands/DemoCommandCenter.h"
 #include <cstdint>
 
 const uint8_t TX_TEENSY_3_6_PIN = 1;
