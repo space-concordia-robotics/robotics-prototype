@@ -1,3 +1,6 @@
+// USB : Debug, UART : Production
+#define USB
+
 #include "Arduino.h"
 #include <include/Laser.h>
 #include <include/Fan.h>

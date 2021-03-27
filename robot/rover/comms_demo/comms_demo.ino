@@ -1,3 +1,6 @@
+// USB : Debug, UART : Production
+#define USB
+
 #include <Arduino.h>
 #include "include/commands/DemoCommandCenter.h"
 #include <cstdint>
