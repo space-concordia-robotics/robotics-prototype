@@ -10,6 +10,10 @@
 
 #define COMMS_BAUDRATE 57600L
 
+#ifdef UART
+#define Serial Serial1
+#endif
+
 namespace internal_comms
 {
    typedef struct {

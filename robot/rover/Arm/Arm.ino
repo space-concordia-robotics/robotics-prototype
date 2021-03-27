@@ -24,7 +24,8 @@
   This code began development sometime in July 2018 and is still being
   updated as of April 24 2019.
 */
-
+// USB : Debug, UART : Production
+#define USB
 #include "Includes.h"
 
 /* comms */

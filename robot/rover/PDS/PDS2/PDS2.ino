@@ -1,3 +1,5 @@
+// USB : Debug, UART : Production
+#define USB
 
 #include <Arduino.h>
 #include <Stepper.h> // Stepper Motor library (Won't be used in future application)
