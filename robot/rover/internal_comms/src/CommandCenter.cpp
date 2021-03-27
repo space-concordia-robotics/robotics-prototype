@@ -101,7 +101,7 @@ namespace internal_comms
     }
 
     void CommandCenter::sendMessage() {
-        if (digitalRead(enablePin)) {
+        //if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
                 messageQueue.pop();
@@ -110,13 +110,13 @@ namespace internal_comms
                 Serial.write(message.rawArgsLength);
                 Serial.write(message.rawArgs, message.rawArgsLength);
 
-                delete &message;
-
-            } else {
-                Serial.write(1);
-                Serial.write(0);
+                //delete &message;
             }
-        }
+            //else {
+                //Serial.write(1);
+                //Serial.write(0);
+            //}
+        //}
     }
 
     void CommandCenter::sendMessage(Message& message) {

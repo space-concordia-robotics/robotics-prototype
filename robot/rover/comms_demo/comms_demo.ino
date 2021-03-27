@@ -10,18 +10,16 @@ internal_comms::CommandCenter* commandCenter = new DemoCommandCenter();
 
 void setup()
 {
-    Serial.begin(9600);
-      pinMode(LED_BUILTIN, OUTPUT);
-//    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
+    //Serial.begin(9600);
+    pinMode(LED_BUILTIN, OUTPUT);
+    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
 }
 
 void loop()
 { 
-  while(true){
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);               // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);               // wait for a second
-  Serial.println("EPIC MEME");
-  }
+    if (Serial.available() > 0) {
+        commandCenter->readCommand();
+    } 
+
+    commandCenter->sendMessage();
 }
