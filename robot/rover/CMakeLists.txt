@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.2)
+include(ExternalProject)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
-
-include(ExternalProject)
-
 
 if(DEFINED ENV{ARDUINO_PATH})
 message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
@@ -72,19 +70,31 @@ set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
 set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
 set(TINYGPS_VERSION v1.0.2)
 
+set(AUNIT_PATH ${ARDUINO_EXTERNAL_LIB}/AUnit)
+set(AUNIT_URL https://github.com/bxparks/AUnit)
+set(AUNIT_VERSION v1.4.1)
+
+set(UNIXHOSTDUINO_PATH  ${ARDUINO_EXTERNAL_LIB}/UnixHostDuino)
+set(UNIXHOSTDUINO_URL https://github.com/steamypotato/UnixHostDuino)
+set(UNIXHOSTDUINO_VERSION v0.3.5)
+
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
+checkLibraries(AUnit ${AUNIT_VERSION} ${AUNIT_URL})
+checkLibraries(UnixHostDuino ${UNIXHOSTDUINO_VERSION} ${UNIXHOSTDUINO_URL})
 checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
+
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
 file(GLOB TEENSY_CORE_C_FILES ${TEENSY_CORE}/teensy3/*.c )
 file(GLOB TEENSY_CORE_CXX_FILES ${TEENSY_CORE}/teensy3/*.cpp)
 
-#function to find all subdirectories for a given directory, useful for finding paths to the teensy libraries
+
+#function to find all subdirectories for a given directory (non-recursive), useful for finding paths to the teensy libraries
 macro(getSubdirectories result curDir)
 
 file(GLOB subDirs LIST_DIRECTORIES true ${curDir}/*)
@@ -111,7 +121,10 @@ include_directories(
 	${TEENSY_CORE}/teensy3
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
+    ${AUNIT_PATH}/src
 )
+# TODO : use target include directories instead of this (especially the last line)
+
 #every compiler should use these common defines, copy pasted from the Teensyduino verbose output
 add_definitions(
 -D__MK66FX1M0__
@@ -155,7 +168,7 @@ if(NOT ${includes} STREQUAL "")
 target_include_directories(${libraryName} PRIVATE ${includes})
 endif()
 
-target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
+target_compile_options(${libraryName} PRIVATE ${ARM_GXX_FLAGS})
 endfunction() 
 
 #create default teensy libraries
@@ -176,6 +189,10 @@ createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
 
+#create the testing library
+file(GLOB_RECURSE AUNIT_SOURCES ${AUNIT_PATH}/*.cpp)
+createCppLibrary("${AUNIT_SOURCES}" AUNIT ${AUNIT_PATH}/src)
+
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
@@ -193,6 +210,7 @@ foreach(path ${INOFILES})
 
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES  Servo)
+
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
@@ -212,10 +230,10 @@ foreach(path ${INOFILES})
 
  endif()
  
- #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
- configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
- add_subdirectory(${project_dir}) 
- 
+  #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
+  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY)
+  add_subdirectory(${project_dir})
+
  endforeach()
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
@@ -230,7 +248,6 @@ foreach(path ${INOFILES})
  DEPENDS PidController_cleanup
  DEPENDS science_cleanup
  )
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR}/science/NIR)
 
 #Add the NIR an an external since it does not use the ARM compiler
 ExternalProject_Add(NIR
