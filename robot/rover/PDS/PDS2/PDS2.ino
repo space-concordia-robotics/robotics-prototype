@@ -33,6 +33,7 @@ void loop()
 
 
     // Read Load Voltage
+    /*
     enable_multisense();
     float load_value = load_voltage();
     Serial.print("Load Value after conversion: ");
@@ -45,12 +46,13 @@ void loop()
     Serial.print("Temperature: "); 
     Serial.print(Temp1);
     Serial.println(" C"); 
+    */
     delay(1000);
 }
 void pong()
 {
     Serial.println("PDS pong");
-    char msg[8] = {'P','D','S',' ','p','o','n','g'};
+    char msg[8] = {'I','G','N','U','S','T','E','R'};
     internal_comms::Message* message = commandCenter->createMessage(1, 8, msg);
     commandCenter->sendMessage(*message);
 }
