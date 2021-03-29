@@ -8,10 +8,10 @@
 #include "load_setup.h"
 #include "parse_command.h"
 #include "PDSCommandCenter.h"
-#include "Serial.h"
 
 const uint8_t TX_PIN = 1;
 const uint8_t RX_PIN = 0;
+const uint8_t ENABLE_PIN = 2; // no idea what this is supposed to be
 
 internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
 
@@ -19,7 +19,7 @@ void setup()
 {
     mux_settings();
     load_settings();
-    internal_comms::startSerial(RX_PIN, TX_PIN);
+    commandCenter->startSerial(RX_PIN, TX_PIN, ENABLE_PIN);
 }
 
 void loop() 
@@ -28,7 +28,7 @@ void loop()
     
     if (Serial.available() > 0) 
     {
-        internal_comms::readCommand(commandCenter);
+        commandCenter->readCommand();
     }
 
 
