@@ -50,6 +50,9 @@ void loop()
 void pong()
 {
     Serial.println("PDS pong");
+    char msg[8] = {'P','D','S',' ','p','o','n','g'};
+    internal_comms::Message* message = commandCenter->createMessage(1, 8, msg);
+    commandCenter->sendMessage(*message);
 }
 void error()
 {
