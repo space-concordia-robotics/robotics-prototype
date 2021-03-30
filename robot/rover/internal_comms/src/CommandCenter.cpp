@@ -110,6 +110,7 @@ namespace internal_comms
                 Serial.write(message.rawArgsLength);
                 Serial.write(message.rawArgs, message.rawArgsLength);
 
+                free( (void *) &message);
                 //delete &message;
             }
             //else {
