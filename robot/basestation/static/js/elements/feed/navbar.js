@@ -1,34 +1,34 @@
 $(document).ready(() => {
   function append_css(file) {
-      logInfo('Using theme : ' + file)
+    logInfo('Using theme : ' + file)
 
-      var link = document.createElement('link')
-      link.href = '/static/css/' + file + '.css'
-      link.type = 'text/css'
-      link.rel = 'stylesheet'
-      link.media = 'screen,print'
+    var link = document.createElement('link')
+    link.href = '/static/css/' + file + '.css'
+    link.type = 'text/css'
+    link.rel = 'stylesheet'
+    link.media = 'screen,print'
 
-      document.getElementsByTagName('head')[0].appendChild(link)
+    document.getElementsByTagName('head')[0].appendChild(link)
   }
 
   function prefer_theme(name) {
-      logInfo('Found theme : ' + name)
-      setCookie('theme', name, 365)  // setCookie() from helpers.js
-      append_css('themes/' + name)
+    logInfo('Found theme : ' + name)
+    setCookie('theme', name, 365)  // setCookie() from helpers.js
+    append_css('themes/' + name)
   }
 
   preferred_theme = getCookie('theme')  // getCookie() from helpers.js
   if (preferred_theme != '') {
-      prefer_theme(preferred_theme)
+    prefer_theme(preferred_theme)
   } else {
     prefer_theme('lofi')
   }
 
   $('#theme-mantis').click(function () {
-      prefer_theme('mantis')
+    prefer_theme('mantis')
   })
   $('#theme-lofi').click(function () {
-      prefer_theme('lofi')
+    prefer_theme('lofi')
   })
 
 
@@ -37,18 +37,21 @@ $(document).ready(() => {
     let url = window.location.pathname
     let toggleButtonID = 'toggle-'
 
-    if (url == '/rover') {
-        listener = ROVER_LISTENER_TASK
-        toggleButtonID += 'rover-listener-btn'
-    } else if (url == '/' || url == '/arm') {
-        listener = ARM_LISTENER_TASK
-        toggleButtonID += 'arm-listener-btn'
+    if (url == '/') {
+      listener = ROVER_LISTENER_TASK
+      toggleButtonID += 'rover-listener-btn'
+    } else if (url == '/arm') {
+      listener = ARM_LISTENER_TASK
+      toggleButtonID += 'arm-listener-btn'
     } else if (url == '/science') {
-        listener = SCIENCE_LISTENER_TASK
-        toggleButtonID += 'science-listener-btn'
+      listener = SCIENCE_LISTENER_TASK
+      toggleButtonID += 'science-listener-btn'
     } else if (url == '/pds') {
-        listener = PDS_LISTENER_TASK
-        toggleButtonID += 'pds-listener-btn'
+      listener = PDS_LISTENER_TASK
+      toggleButtonID += 'pds-listener-btn'
+    }
+    else {
+      return // Pages that don't have this button should not run the code below (See #367)
     }
 
     let serialType = $('#serial-type').text()
@@ -72,13 +75,13 @@ $(document).ready(() => {
 
   function isListenerOpen () {
     return (
-      (window.location.pathname == '/rover' &&
-        $('#toggle-rover-listener-btn')[0].checked == true) ||
-      (window.location.pathname == '/' &&
-        $('#toggle-arm-listener-btn')[0].checked == true) ||
-      (window.location.pathname == '/science' &&
-        $('#science-listener-btn')[0].checked == true)
-      // pds Listener
+        (window.location.pathname == '/rover' &&
+            $('#toggle-rover-listener-btn')[0].checked == true) ||
+        (window.location.pathname == '/' &&
+            $('#toggle-arm-listener-btn')[0].checked == true) ||
+        (window.location.pathname == '/science' &&
+            $('#science-listener-btn')[0].checked == true)
+        // pds Listener
     )
   }
 
@@ -135,10 +138,13 @@ $(document).ready(() => {
   $( '#streams-page' ).click(function() {
     window.open('stream')
   })
+  $( '#navigation-page' ).click(function() {
+    window.open('navigation')
+  })
 })
 
 /*
-function to display the navbar modal with the given title and body text
+  Display the navbar modal with the given title and body text
 */
 function navModalMessage (title, body){
   $('.modal-title').text(title)

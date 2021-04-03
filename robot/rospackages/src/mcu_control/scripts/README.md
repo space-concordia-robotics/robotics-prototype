@@ -15,6 +15,7 @@ It can be run directly via SSH, through the task_handler, or through the `app.py
 This node simultaneously behaves as a publisher, subscriber and service.
 It serves as an interface between the rover Teensy and the GUI, so it must be run on the Odroid.
 It subscribes to `/rover_command` messages which do not necessarily need feedback, responds to `/rover_request` requests which have expected responses, and publishes `/rover_joint_states` messages based on incoming speed data from the Teensy.
+It also subscribes to `/cmd_vel` to obtain twist commands for the rover's linear and angular motion.
 It also publishes `/battery_voltage` and `/rover_feedback`, the latter being general feedback not belonging to a specific subject.
 On top of the above, it also publishes speed (linear and angular) feedback through `/rover_twist` and heading, longitude and latitude through `/rover_position`.
 It can be run directly via SSH, through the task_handler, or through the `app.py` GUI when `rosbridge_websockets` is active.

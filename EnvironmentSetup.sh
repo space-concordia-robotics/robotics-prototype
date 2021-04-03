@@ -83,8 +83,7 @@ source venv/bin/activate
 
 # Install Requirements
 pip install -U pip
-pip install -r requirements.txt -r requirements-dev.txt
-
+pip install -r requirements.txt
 
 # Setup python and allow for module imports from within repo
 python setup.py develop
