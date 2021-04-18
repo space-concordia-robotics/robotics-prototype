@@ -204,9 +204,13 @@ foreach(path ${INOFILES})
  set(PROJECT_LIBRARIES  Servo)
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
+ elseif(${name} STREQUAL "comms_demo")
+  set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
+ continue()
+ elseif(${name} STREQUAL "PDS2")
  continue()
  
  elseif(${name} STREQUAL "MobilePlatform")

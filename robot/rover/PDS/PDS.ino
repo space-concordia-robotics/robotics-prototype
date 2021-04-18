@@ -1,3 +1,4 @@
+
 /*
    Concordia University - Space Concordia URC 2019
    Contributors:
@@ -111,6 +112,8 @@ void printMotorState();
 // sensor processing
 void updateMotorState();
 float readMultiplexer(uint8_t channel);
+
+internal_comms::CommandCenter* commandCenter = new PDSCommandCenter();
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);

@@ -2,6 +2,8 @@
 // Edited by Michael on 2021-03-20.
 //
 
+// USB : Debug, UART : Production
+#define USB
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
