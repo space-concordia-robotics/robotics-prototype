@@ -37,50 +37,65 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 4
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255 
 
 void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
-/*
-Switch command recieved to perform specific function
-*/
+
+  // Create message to add to queue of messages
+  Message* message = createMessage(commandID, rawArgsLength, rawArgs);
+
+  /*
+  Switch command recieved to perform specific function
+  */
   switch(commandID)
   {
     case COMMAND_SET_MOTORS:
-      toggleMotors(*rawArgs);  // Set if ON or OFF
+      this->enqueueSendMessage(message); // Add message to queue
+      this->toggleMotors(*rawArgs);  // Toggle ON or OFF
       break;
     case COMMAND_STOP_MOTORS_EMERGENCY:
-      stopMotors();
+      this->enqueueSendMessage(message); // Add message to queue
+      this->stopMotors();
       break;
     case COMMAND_CLOSE_MOTORS_LOOP:
-      closeMotorsLoop();
+      this->enqueueSendMessage(message); // Add message to queue
+      this->closeMotorsLoop();
       break;
     case COMMAND_OPEN_MOTORS_LOOP:
-      openMotorsLoop(); 
+      this->enqueueSendMessage(message); // Add message to queue
+      this->openMotorsLoop(); 
       break;
     case COMMAND_SET_JOYSTICK:
-      toggleJoystick(*rawArgs); // Set if ON or OFF
+      this->enqueueSendMessage(message); // Add message to queue
+      this->toggleJoystick(*rawArgs); // Toggle ON or OFF
       break;
     case COMMAND_SET_GPS:
-      toggleGps(*rawArgs); // Set if ON or OFF
+      this->enqueueSendMessage(message); // Add message to queue
+      this->toggleGps(*rawArgs); // Toggle ON or OFF
       break;
     case COMMAND_SET_ENCODER:
-      toggleEncoder(*rawArgs); // Set if ON or OFF
+      this->enqueueSendMessage(message); // Add message to queue
+      this->toggleEncoder(*rawArgs); // Toggle ON or OFF
       break;
     case COMMAND_SET_ACCELERATION:
-      toggleAcceleration(*rawArgs); // Set if ON or OFF
+      this->enqueueSendMessage(message); // Add message to queue
+      this->toggleAcceleration(*rawArgs); // Toggle ON or OFF
       break;
     case COMMAND_GET_ROVER_STATUS:
-      getRoverStatus();
+      this->enqueueSendMessage(message); // Add message to queue
+      this->getRoverStatus();
       break;
     case COMMAND_MOVE_ROVER:
-      moveRover(*rawArgs, *(++rawArgs));
+      this->enqueueSendMessage(message); // Add message to queue
+      this->moveRover(*rawArgs, *(++rawArgs));
       break;
     case COMMAND_MOVE_WHEEL:
-      uint8_t wheelNumber = (*rawArgs);
+      this->enqueueSendMessage(message); // Add message to queue
       // Assign 16bit PWM value from 8bit register size
-      int16_t PWM = 0; // 00000000 00000000 
-      PWM = *(++rawArgs) << 8; // 00000000 11111111 -> 11111111 00000000
-      PWM |= *(++rawArgs); // 11111111 11111111
-      moveWheel(wheelNumber, PWM);
+      uint8_t wheelNumber = (*rawArgs);
+      int16_t PWM = 0;
+      PWM = *(++rawArgs) << 8;
+      PWM |= *(++rawArgs);
+      this->moveWheel(wheelNumber, PWM);
       break;
     default:
-        break; //Added so the cmake compiles
+        break;
   }
 }

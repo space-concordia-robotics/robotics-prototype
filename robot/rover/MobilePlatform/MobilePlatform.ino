@@ -12,7 +12,6 @@
 // Issue made to change includes to include
 #include "includes/PinSetup.h"
 #include "../internal_comms/include/CommandCenter.h"
-#include "../internal_comms/include/Serial.h"
 #include "includes/commands/WheelsCommandCenter.h"    
 #include "includes/Globals.h"
 #include "includes/Commands.h"  // This automatically includes DcMotor.h
@@ -36,10 +35,7 @@ String rotation; // Rotation direction of the whole rover
 // Pins for Serial
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t TX_TEENSY_3_6_PIN = 1;
-
-// Pins for Serial1
-const uint8_t RX_TEENSY_3_6_PIN_SERIAL1 = 9;
-const uint8_t TX_TEENSY_3_6_PIN_SERIAL1 = 10;
+const uint8_t ENABLE_PIN = 10; // TEMPORARY BEFORE FLOW CONTROL IMPLEMENTED
 
 // Motor constructor initializations
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
@@ -59,7 +55,6 @@ Commands Cmds;
 
 // To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
-internal_comms::CommandCenter* commandCenter1 = new WheelsCommandCenter();
 
 /* Function declarations */
 // initializers
@@ -83,7 +78,7 @@ void lf_encoder_interrupt(void);
 void lm_encoder_interrupt(void);
 void lb_encoder_interrupt(void);
 
-// Initialization Serial and Serial1
+// Initialization Serial
 void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
@@ -132,19 +127,14 @@ void setup() {
 
 // Running the wheels
 void loop() {
-  /*
-  Choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
-  the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
-  should work.
-  */
   // Acquire method based on command sent from serial
   if (Serial.available()) {
-    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
-    internal_comms::readCommand(commandCenter); 
-  }
-  else if (Serial1.available()) {
-    // Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
-    internal_comms::readCommand(commandCenter1); 
+    /* 
+    1. Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
+    2. Read command performs executeCommand()
+    3. If the serial is not enabled (such as being used by the arm), then the command skips this
+    */
+    commandCenter->readCommand();
   }
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
@@ -214,6 +204,13 @@ void loop() {
     }
     sinceFeedbackPrint = 0;
   }
+
+  /*
+  Check if the message is available to be sent
+  If available, send the message to be read and pop it out of the message queue
+  If the message is unavailable, the message isn't removed from the queue
+  */
+  commandCenter->sendMessage();
 }
 
 void roverVelocityCalculator(void) {
@@ -535,17 +532,13 @@ void initMotorEncoder5(void) {
 }
 
 void initSerialCommunications(void) {
-  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);  // Start Serial
-  internal_comms::startSerial(TX_TEENSY_3_6_PIN_SERIAL1, RX_TEENSY_3_6_PIN_SERIAL1); // Start Serial1
+  // Create serial connection with teensy pins 0 and 1
+  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
 
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
-  Serial1.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
   Serial.setTimeout(SERIAL_TIMEOUT);
-  Serial1.setTimeout(SERIAL_TIMEOUT);
   delay(300); // NECESSARY. Give time for serial port to set up
-
-  devMode = true; //if devMode is true then connection is through usb serial
 
   setMotorList(motorList);
   setServoList(servoList);
