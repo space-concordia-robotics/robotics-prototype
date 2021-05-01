@@ -20,6 +20,7 @@
 #define COMMAND_RESET_SINGLE_MOTOR 13
 #define COMMAND_BUDGE_MOTORS 14
 #define COMMAND_MOVE_MULTIPLE_MOTORS 15
+#define COMMAND_PING 16
 
 void emergencyStop();
 void rebootTeensy();
@@ -38,6 +39,7 @@ void resetSingleMotor(uint8_t motorId);
 void switchMotorDirection(uint8_t motorId);
 void budgeMotors(uint8_t* motorsToMove, bool* moveCW);
 void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach);
+void pong();
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -92,6 +94,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_MOVE_MULTIPLE_MOTORS:
       moveMultipleMotors(0, 0);
+      break;
+    case COMMAND_PING:
+      pong();
       break;
   }
 

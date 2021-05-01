@@ -1062,3 +1062,10 @@ void emergencyStop()
 {
     stopAllMotors();
 }
+
+void pong() 
+{
+    char msg[8] = {'P','O','N','G'};
+    internal_comms::Message* message = commandCenter->createMessage(1, 8, msg);
+    commandCenter->sendMessage(*message);
+}
