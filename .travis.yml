@@ -71,6 +71,7 @@ notifications:
       - peter.granitski@spaceconcordia.ca
       - nikolas.darlas@spaceconcordia.ca
       - gabriel.martinica@spaceconcordia.ca
+      - shayrin.panahi@gmail.com
     on_success: change
     on_failure: change
 

@@ -30,6 +30,9 @@
 //#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
 //#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
 //#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case
+// USB : Debug, UART : Production
+#define USB
+//#include "Includes.h"
 
 // debug statements shouldn't be sent if ros is working
 #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
@@ -96,12 +99,12 @@
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
 
 #include "../internal_comms/include/CommandCenter.h"
-#include "../internal_comms/include/Serial.h"
 #include "include/commands/ArmCommandCenter.h"
 #include <cstdint>
 
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
+const uint8_t ENABLE_PIN = 2; // again, no idea what this is supposed to be
 
 enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
 int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
@@ -205,7 +208,7 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 */
 void setup() {
 
-  internal_comms::startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN);
+  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
   initEncoders();
   initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
@@ -235,7 +238,7 @@ void loop() {
   }
 
   if(Serial.available() > 0)
-      internal_comms::readCommand(commandCenter);
+      commandCenter->readCommand();
 
 } // end of loop
 

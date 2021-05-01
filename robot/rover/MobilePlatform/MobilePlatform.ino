@@ -1,4 +1,5 @@
-
+// USB : Debug, UART : Production
+#define USB
 #include "Navigation.h"
 
 #include <SoftwareSerial.h>

@@ -72,12 +72,17 @@ set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
 set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
 set(TINYGPS_VERSION v1.0.2)
 
+set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/EmbeddedTemplateLibrary)
+set(ETL_URL https://github.com/ETLCPP/etl)
+set(ETL_VERSION 19.4.3)
+
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
 checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
+checkLibraries(EmbeddedTemplateLibrary ${ETL_VERSION} ${ETL_URL})
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
@@ -149,13 +154,13 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 
 #This function will create a library and store it with the given name
 function(createCppLibrary sources libraryName includes)
-add_library(${libraryName} ${sources})
+        add_library(${libraryName} ${sources})
 
-if(NOT ${includes} STREQUAL "")
-target_include_directories(${libraryName} PRIVATE ${includes})
-endif()
+        if(NOT ${includes} STREQUAL "")
+        target_include_directories(${libraryName} PRIVATE ${includes})
+        endif()
 
-target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
+        target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
 #create default teensy libraries
@@ -169,9 +174,12 @@ createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/
 #create the external teensy libraries
 createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
-CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
-CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
+createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
+createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
+
+# For a library that doesn't have a cpp file, but only header files
+include_directories(${ETL_PATH}/include)
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
@@ -191,19 +199,24 @@ foreach(path ${INOFILES})
 
  set(Project_Name ${name})
 
+
  if(${name} STREQUAL "Arm")
  set(PROJECT_LIBRARIES Servo internal_comms)
  elseif(${name} STREQUAL "raman")
+  set(PROJECT_LIBRARIES internal_comms)
+ elseif(${name} STREQUAL "comms_demo")
   set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
  continue()
+ elseif(${name} STREQUAL "PDS2")
+ continue()
  
  elseif(${name} STREQUAL "MobilePlatform")
  
  set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
- set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH})
+ set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
 
  elseif(${name} STREQUAL "PidController")
