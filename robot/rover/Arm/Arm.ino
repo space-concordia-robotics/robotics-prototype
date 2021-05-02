@@ -98,7 +98,7 @@
 #define SERIAL_READ_TIMEOUT 20 //!< how often should the serial port be read
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
 
-#include "../internal_comms/include/CommandCenter.h"
+#include "CommandCenter.h"
 #include "include/commands/ArmCommandCenter.h"
 #include <cstdint>
 
