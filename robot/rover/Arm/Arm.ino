@@ -22,76 +22,32 @@
   appropriate command. The Teensy also has a software reboot command.
 
   This code began development sometime in July 2018 and is still being
-  updated as of April 24 2019.
+  updated as of May 2021
 */
 
-#define DEVEL_MODE_1 1 //!< serial communication over USB, everything unlocked
-//#define DEVEL_MODE_2 2 //!< serial communication over UART1, everything unlocked
-//#define DEBUG_MODE 3 //!< ROSserial communication over UART1, everything unlocked
-//#define USER_MODE 4 //!< ROSserial communication over UART1, functionality restricted
-//#define ENABLE_ROS 5 //!< if testing on a computer without ROSserial, comment this to stop errors from rosserial not being installed. obviously you can't use ROSserial if that's the case
-// USB : Debug, UART : Production
-#define USB
-//#include "Includes.h"
+#define UART
 
-// debug statements shouldn't be sent if ros is working
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#define DEBUG_MAIN 10 //!< debug messages during main loop
-//#define DEBUG_PARSING 11 //!< debug messages during parsing function
-//#define DEBUG_VERIFYING 12 //!< debug messages during verification function
-//#define DEBUG_ENCODERS 13 //!< debug messages during encoder interrupts
-//#define DEBUG_PID 14 //!< debug messages during pid loop calculations
-//#define DEBUG_SWITCHES 15 //!< debug messages during limit switch interrupts
-#define DEBUG_HOMING 16 //!< debug messages during homing sequence
-//#define DEBUG_DC_TIMER 17 //!< debug messages during dc timer interrupts
-//#define DEBUG_SERVO_TIMER 18 //!< debug messages during servo timer interrupts
-//#define DEBUG_STEPPER_4_TIMER 20 //!< debug messages during stepper 4 timer interrupts
-#endif
-
-/*
-  choosing serial vs serial1 should be compile-time: when it's plugged into the pcb,
-  the usb port is off-limits as it would cause a short-circuit. Thus only Serial1
-  should work.
-*/
-// serial communication over usb with pc, teensy not connected to odroid
-
-#if defined(DEVEL_MODE_1)
-#define UART_PORT Serial
-#elif defined(DEVEL_MODE_2)
-#define UART_PORT Serial1
-#endif
-#if defined(DEBUG_MODE) || defined(USER_MODE)
-#define USE_TEENSY_HW_SERIAL 0 // this will make ArduinoHardware.h use hardware serial instead of usb serial
-#endif
-/*
-  choosing serial1 vs rosserial could be compile-time, since serial1 is only really useful
-  for debugging and won't be used when the rover is in action. however, a runtime option
-  could be useful as in both cases the teensy is communicating solely with the odroid.
-  it might be desirable to switch between modes without recompiling.
-  finally, unlocking extra options should be runtime as it should be easily accessible.
-*/
-// includes must come after the above UART_PORT definition as it's used in other files.
-// perhaps it should be placed in pinsetup.h (which has to be renamed anyway)...
 #include <Servo.h>
 #include "include/PinSetup.h"
 #include "include/Parser.h"
 #include "include/Vsense.h"
-// #include "Notes.h" // holds todo info
-// #include "Ideas.h" // holds bits of code that haven't been implemented
 #include "include/PidController.h"
 #include "include/RobotMotor.h"
 #include "include/DcMotor.h"
 #include "include/ServoMotor.h"
+
 /* interrupt priorities */
 #define LIMIT_SWITCH_NVIC_PRIORITY 100 //!< limit switch interrupt priority is highest
 #define ENCODER_NVIC_PRIORITY LIMIT_SWITCH_NVIC_PRIORITY + 4 //!< encoder interrupt priority is second highest
 #define MOTOR_NVIC_PRIORITY ENCODER_NVIC_PRIORITY + 4 //!< motor timer interrupt priority is third highest
+
 /* heartbeat */
 #define MAX_GOOD_BLINKS 2
 #define MAX_BAD_BLINKS 10
 #define GOOD_BLINK_PERIOD 250
 #define BAD_BLINK_PERIOD 70
 #define HEARTBEAT_PERIOD 1000
+
 /* serial */
 #define BAUD_RATE 115200 //!< serial bit rate
 #define SERIAL_PRINT_INTERVAL 50 //!< how often should teensy send angle data
@@ -154,6 +110,7 @@ void respondToLimitSwitches(void); //!< move motor back into software angle rang
 void homeArmMotors(void); //!< arm homing routine. This function behaves differently each loop
 void rebootTeensy(void); //!< reboots the teensy using the watchdog timer
 void kickDog(void); //!< resets the watchdog timer. If the teensy is stuck in a loop and this is not called, teensy resets.
+
 // all interrupt service routines (ISRs) must be global functions to work
 // declare encoder interrupt service routines
 void m1_encoder_interrupt(void);
@@ -242,36 +199,10 @@ void loop() {
 
 } // end of loop
 
-/* initialization functions */
-void initComms(void) { //!< Starts up serial comms over USB or UART and uses ROSserial if the macro is defined
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.begin(BAUD_RATE);
-  UART_PORT.setTimeout(SERIAL_READ_TIMEOUT); // checks serial port every 50ms
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  nh.initNode();
-  nh.subscribe(cmdSubscriber);
-  nh.advertise(pub_m1);
-  nh.advertise(pub_m2);
-  nh.advertise(pub_m3);
-  nh.advertise(pub_m4);
-  nh.advertise(pub_m5);
-  nh.advertise(pub_m6);
-
-  m1_angle_msg.header.frame_id = m1FrameId;
-  m2_angle_msg.header.frame_id = m2FrameId;
-  m3_angle_msg.header.frame_id = m3FrameId;
-  m4_angle_msg.header.frame_id = m4FrameId;
-  m5_angle_msg.header.frame_id = m5FrameId;
-  m6_angle_msg.header.frame_id = m6FrameId;
-#endif
-}
 /*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
    This function also sets pid parameters and joint angle tolerances.
 */
 void initEncoders(void) {
-#ifdef DEBUG_MAIN
-  UART_PORT.println("ARM Attaching encoders to motor objects and attaching encoder interrupts, changing edge.");
-#endif
 
   motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
   attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
@@ -313,9 +244,6 @@ void initEncoders(void) {
     this function also sets angle limits for the joints
 */
 void initLimitSwitches(void) {
-#ifdef DEBUG_MAIN
-  UART_PORT.println("ARM Attaching limit switches to motor objects and attaching limit switch interrupts, falling edge.");
-#endif
 
   // c for clockwise/counterclockwise, f for flexion/extension, g for gripper (assuming only one switch)
   motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
@@ -355,9 +283,6 @@ void initLimitSwitches(void) {
 void initSpeedParams(void) {
   // set speed limits (in percentage). It also sets open loop gains to make sure the angle estimations are ok
   // Abtin thinks 50% should be a hard limit that can't be modified this easily
-#ifdef DEBUG_MAIN
-  UART_PORT.println("ARM Setting motor speeds and open loop gains.");
-#endif
 
   motor1.setMotorSpeed(50); // 60 rpm
   motor2.setMotorSpeed(42); // 32 rpm
@@ -388,9 +313,6 @@ void initSpeedParams(void) {
 }
 //! Attaches interrupt functions to motor timers. Also sets interrupt priorities.
 void initMotorTimers(void) {
-#ifdef DEBUG_MAIN
-  UART_PORT.println("ARM Starting up motor timer interrupts.");
-#endif
 
   dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
   dcTimer.priority(MOTOR_NVIC_PRIORITY);
@@ -398,40 +320,40 @@ void initMotorTimers(void) {
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
-/* functions which apply to all motors or to the teensy in general */
-void printMotorAngles(void) {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-  UART_PORT.print("ARM Motor Angles: ");
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motorArray[i]->calcCurrentAngle();
-    UART_PORT.print(motorArray[i]->getSoftwareAngle());
-    if (i < NUM_MOTORS - 1) {
-      UART_PORT.print(", ");
-    }
-    else {
-      UART_PORT.println("");
-    }
-  }
-  //UART_PORT.println(motor1.encoderCount);
-  //UART_PORT.println(motor2.encoderCount);
-  //UART_PORT.println(motor3.encoderCount);
-  //UART_PORT.println(digitalRead(motor3.encoderPinA));
-#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  float angles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    angles[i] = motorArray[i]->getSoftwareAngle();
-    angleMessages[i].position = &(angles[i]);
-    //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle();
-  }
-  pub_m1.publish(&m1_angle_msg);
-  pub_m2.publish(&m2_angle_msg);
-  pub_m3.publish(&m3_angle_msg);
-  pub_m4.publish(&m4_angle_msg);
-  pub_m5.publish(&m5_angle_msg);
-  pub_m6.publish(&m6_angle_msg);
-  nh.spinOnce(); // does it cause problems if i spin twice in loop()
-#endif
-}
+/** todo: KEEPING THIS, LEMINE WE SHOULD MAKE A COMMAND FOR THIS 
+
+    We don't need the ROS stuff from the elif (nh stuff)
+ **/
+
+/* void printMotorAngles(void) { */
+/* #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2) */
+/*   UART_PORT.print("ARM Motor Angles: "); */
+/*   for (int i = 0; i < NUM_MOTORS; i++) { */
+/*     motorArray[i]->calcCurrentAngle(); */
+/*     UART_PORT.print(motorArray[i]->getSoftwareAngle()); */
+/*     if (i < NUM_MOTORS - 1) { */
+/*       UART_PORT.print(", "); */
+/*     } */
+/*     else { */
+/*       UART_PORT.println(""); */
+/*     } */
+/*   } */
+/* #elif defined(DEBUG_MODE) || defined(USER_MODE) */
+/*   float angles[NUM_MOTORS]; */
+/*   for (int i = 0; i < NUM_MOTORS; i++) { */
+/*     angles[i] = motorArray[i]->getSoftwareAngle(); */
+/*     angleMessages[i].position = &(angles[i]); */
+/*     //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle(); */
+/*   } */
+/*   pub_m1.publish(&m1_angle_msg); */
+/*   pub_m2.publish(&m2_angle_msg); */
+/*   pub_m3.publish(&m3_angle_msg); */
+/*   pub_m4.publish(&m4_angle_msg); */
+/*   pub_m5.publish(&m5_angle_msg); */
+/*   pub_m6.publish(&m6_angle_msg); */
+/*   nh.spinOnce(); // does it cause problems if i spin twice in loop() */
+/* #endif */
+/* } */
 void clearBlinkState(void) {
   digitalWrite(LED_BUILTIN, LOW);
   blinkCount = 0;
@@ -468,9 +390,6 @@ void blinkLED(void) {
       }
     }
   }
-  else { // do nothing
-    ;
-  }
 }
 void respondToLimitSwitches(void) {
   for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
@@ -478,26 +397,12 @@ void respondToLimitSwitches(void) {
       motorArray[i]->checkForActualPress();
     }
     if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-#ifdef DEBUG_SWITCHES
-      UART_PORT.print("ARM motor "); UART_PORT.print(i + 1);
-      UART_PORT.println(" hit limit switch");
-#endif
       if (i == 5) { // gripper switches
         motorArray[i]->stopRotation(); // stop turning of course
         if (motorArray[i]->limitSwitchState == CLOCKWISE) {
-#ifdef DEBUG_SWITCHES
-          UART_PORT.println("ARM gripper hit a switch");
-          UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->maxSoftAngle);
-#endif
           motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
         }
         if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
-#ifdef DEBUG_SWITCHES
-          UART_PORT.println("ARM gripper hit a switch");
-          UART_PORT.print("ARM motor is at hard angle ");
-          UART_PORT.print(motorArray[i]->minSoftAngle);
-#endif
           motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
         }
         motorArray[i]->actualPress = false;
@@ -523,39 +428,19 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
   if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
     if (motorsToHome[homingMotor]) { // is this motor supposed to home?
       // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
-#ifdef DEBUG_HOMING
-      UART_PORT.print("ARM homing motor "); UART_PORT.print(homingMotor + 1);
-      UART_PORT.println(" inwards");
-#endif
       motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
       motorsToHome[homingMotor] = false; // set this to false so it only happens once
     }
     if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
       if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
         if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
-#ifdef DEBUG_HOMING
-          if (motorsToHome[homingMotor]) {
-            UART_PORT.print("ARM motor "); UART_PORT.print(homingMotor + 1);
-            UART_PORT.println(" homing 1 done and at safe angle");
-          }
-#endif
         }
         // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
         if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
-#ifdef DEBUG_HOMING
-          UART_PORT.print("ARM homing motor "); UART_PORT.print(homingMotor + 1);
-          UART_PORT.println(" outwards");
-#endif
           motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
         }
         else { // done finding angle limits, moving to home position and then next motor time
           if (! (motorArray[homingMotor]->startedZeroing) ) { // start zeroing
-#ifdef DEBUG_HOMING
-            if (motorsToHome[homingMotor]) {
-              UART_PORT.print("ARM motor "); UART_PORT.print(homingMotor + 1);
-              UART_PORT.println(" homing complete. now to move to 0 degrees");
-            }
-#endif
             motorArray[homingMotor]->forceToAngle(0.0);
             motorArray[homingMotor]->startedZeroing = true;
           }
@@ -564,12 +449,6 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
             //float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
             //if (fabs(angle) < tolerance * 3) { // within small enough angle range to move on to next motor
             if (fabs(angle) <= 1) { // changed angle for testing
-#ifdef DEBUG_HOMING
-              if (motorsToHome[homingMotor]) {
-                UART_PORT.print("ARM motor "); UART_PORT.print(homingMotor + 1);
-                UART_PORT.println(" zeroing complete.");
-              }
-#endif
               homingMotor--; // move on to the next motor
             }
             else { // not done going to zero, not doing anything
@@ -584,9 +463,6 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
     }
   }
   else { // done homing all the motors
-#ifdef DEBUG_HOMING
-    UART_PORT.println("ARM all motors done homing, reinitializing motor timers");
-#endif
     for (int i = 0; i < NUM_MOTORS; i++) {
       motorArray[i]->stopHoming();
     }
@@ -685,9 +561,6 @@ void m2_encoder_interrupt(void) {
   oldEncoderState <<= 2;
   oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
   motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor2.encoderModifier;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 2 "); UART_PORT.println(motor2.encoderCount);
-#endif
 }
 #endif
 #ifdef M3_ENCODER_PORT
@@ -696,9 +569,6 @@ void m3_encoder_interrupt(void) {
   oldEncoderState <<= 2;
   oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
   motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor3.encoderModifier;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 3 "); UART_PORT.println(motor3.encoderCount);
-#endif
 }
 #endif
 #ifdef M4_ENCODER_PORT
@@ -707,9 +577,6 @@ void m4_encoder_interrupt(void) {
   oldEncoderState <<= 2;
   oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
   motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor4.encoderModifier;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 4 "); UART_PORT.println(motor4.encoderCount);
-#endif
 }
 #endif
 #ifdef M5_ENCODER_PORT
@@ -718,9 +585,6 @@ void m5_encoder_interrupt(void) {
   oldEncoderState <<= 2;
   oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
   motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 5 "); UART_PORT.println(motor5.encoderCount);
-#endif
 }
 #endif
 #ifdef M6_ENCODER_PORT
@@ -729,9 +593,6 @@ void m6_encoder_interrupt(void) {
   oldEncoderState <<= 2;
   oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
   motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 6 "); UART_PORT.println(motor6.encoderCount);
-#endif
 }
 #endif
 
@@ -752,9 +613,6 @@ void m1CwISR(void) {
   // a hit is +1 or -1 depending on which switch was hit
   if (pinState == 0) {
     motor1.triggerState = CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m1 cw(right)");
-#endif
   }
   // if it's not a hit we set it to 0
   else {
@@ -769,9 +627,6 @@ void m1CcwISR(void) {
   int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
   if (pinState == 0) {
     motor1.triggerState = COUNTER_CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m1 ccw(left)");
-#endif
   }
   else {
     motor1.triggerState = 0;
@@ -785,9 +640,6 @@ void m2FlexISR(void) {
   int pinState = (M2_LIMIT_SW_FLEX_PORT >> M2_LIMIT_SW_FLEX_SHIFT ) & 1;
   if (pinState == 0) {
     motor2.triggerState = CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m2 cw(flex,down)");
-#endif
   }
   else {
     motor2.triggerState = 0;
@@ -801,9 +653,6 @@ void m2ExtendISR(void) {
   int pinState = (M2_LIMIT_SW_EXTEND_PORT >> M2_LIMIT_SW_EXTEND_SHIFT ) & 1;
   if (pinState == 0) {
     motor2.triggerState = COUNTER_CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m2 ccw(ext,up)");
-#endif
   }
   else {
     motor2.triggerState = 0;
@@ -817,9 +666,6 @@ void m3FlexISR(void) {
   int pinState = (M3_LIMIT_SW_FLEX_PORT >> M3_LIMIT_SW_FLEX_SHIFT ) & 1;
   if (pinState == 0) {
     motor3.triggerState = CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m3 cw(flex,down)");
-#endif
   }
   else {
     motor3.triggerState = 0;
@@ -833,9 +679,6 @@ void m3ExtendISR(void) {
   int pinState = (M3_LIMIT_SW_EXTEND_PORT >> M3_LIMIT_SW_EXTEND_SHIFT ) & 1;
   if (pinState == 0) {
     motor3.triggerState = COUNTER_CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m3 ccw(ext,up)");
-#endif
   }
   else {
     motor3.triggerState = 0;
@@ -849,9 +692,6 @@ void m4FlexISR(void) {
   int pinState = (M4_LIMIT_SW_FLEX_PORT >> M4_LIMIT_SW_FLEX_SHIFT ) & 1;
   if (pinState == 0) {
     motor4.triggerState = CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m4 cw(flex,down)");
-#endif
   }
   else {
     motor4.triggerState = 0;
@@ -865,9 +705,6 @@ void m4ExtendISR(void) {
   int pinState = (M4_LIMIT_SW_EXTEND_PORT >> M4_LIMIT_SW_EXTEND_SHIFT ) & 1;
   if (pinState == 0) {
     motor4.triggerState = COUNTER_CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m4 ccw(ext,up)");
-#endif
   }
   else {
     motor4.triggerState = 0;
@@ -891,9 +728,6 @@ void m6FlexISR(void) {
   // a hit is +1 or -1 depending on which switch was hit
   if (pinState == 0) {
     motor6.triggerState = CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m6 cw(open)");
-#endif
   }
   // if it's not a hit we set it to 0
   else {
@@ -908,9 +742,6 @@ void m6ExtendISR(void) {
   int pinState = (M6_LIMIT_SW_EXTEND_PORT >> M6_LIMIT_SW_EXTEND_SHIFT ) & 1;
   if (pinState == 0) {
     motor6.triggerState = COUNTER_CLOCKWISE;
-#ifdef DEBUG_SWITCHES
-    UART_PORT.println("ARM m6 ccw(close)");
-#endif
   }
   else {
     motor6.triggerState = 0;
