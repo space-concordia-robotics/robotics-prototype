@@ -13,7 +13,7 @@ from mcu_control.srv import *
 
 
 def handle_pong(data):
-    print("Received", data.join(" "))
+    print("Received", data.decode('utf-8'))
 
 def handle_get_angles(data):
     print("Received", data.join(" "))
@@ -39,22 +39,31 @@ teensy_pins = [arm_pin, wheel_pin, science_pin]
 
 ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
 
-running = True
 
 def listen_arm():
+    running = True
     while(running):
-        if ser.in_waiting > 0:
-            commandID = ser.read()
+        try:
+            print('waiting')
+            if ser.in_waiting > 0:
+                commandID = ser.read()
+                commandID = int.from_bytes(commandID, "big")
+                handler = get_handler(commandID)
+                if handler == None:
+                    print("No command with ID ", commandID, " was found")
 
-            handler = get_handler(commandID)
-            if handler == None:
-                print("No command with ID ", commandID, " was found")
+                argsLen = ser.read()
+                argsLen = int.from_bytes(argsLen, "big")
+                args = ser.read(argsLen)
+                print(args)
 
-            argsLen = ser.read()
-            args = ser.read(int.from_bytes(argsLen, "big"))
-            print(args)
-            handler(args)
-            break
+                try:
+                    handler(args)
+                except Exception as e:
+                    print(e)
+        except KeyboardInterrupt:
+            print("Arm node shutting down due to operator")
+            running = False
     ser.close()
 
 def send_command(command_name, args):
@@ -64,6 +73,12 @@ def send_command(command_name, args):
             ser.write(args) # todo: send each arg as a byte, also assume they will be strings so they will need to be casted to int/float first there's definitely more than one line of code to write
             return True
     return False
+
+def subscriber_callback(message):
+    ser = get_serial()
+    rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
+    command = str.encode(message.data + '\n')
+    ser.write(command) # send command to teensy
 
 if __name__ == '__main__':
     node_name = 'arm_node'
@@ -121,11 +136,6 @@ if __name__ == '__main__':
 #    reqInWaiting=False
 #    return armResponse
 
-def subscriber_callback(message):
-    ser = get_serial()
-    rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
-    command = str.encode(message.data + '\n')
-    ser.write(command) # send command to teensy
 
 #def publish_joint_states(message):
 #    # parse the data received from Teensy
