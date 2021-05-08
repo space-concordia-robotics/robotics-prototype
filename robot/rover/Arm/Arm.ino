@@ -896,7 +896,7 @@ void emergencyStop()
 
 void pong() 
 {
-    char msg[8] = {'P','O','N','G'};
-    internal_comms::Message* message = commandCenter->createMessage(1, 8, msg);
+    char msg[4] = {'P','O','N','G'};
+    internal_comms::Message* message = commandCenter->createMessage(1, 4, msg);
     commandCenter->sendMessage(*message);
 }
