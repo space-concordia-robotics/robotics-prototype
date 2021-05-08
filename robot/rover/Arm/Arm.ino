@@ -326,7 +326,7 @@ void printMotorAngles(void) {
     motorArray[i]->calcCurrentAngle();
     softwareAngles[i] = motorArray[i]->getSoftwareAngle();
   }
-  internal_comms::Message* message = commandCenter->createMessage(17, sizeof(float) * NUM_MOTORS, msg);
+  internal_comms::Message* message = commandCenter->createMessage(17, sizeof(softwareAngles), softwareAngles);
   commandCenter->sendMessage(*message);
 }
 void clearBlinkState(void) {
