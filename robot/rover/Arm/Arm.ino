@@ -325,35 +325,33 @@ void initMotorTimers(void) {
     We don't need the ROS stuff from the elif (nh stuff)
  **/
 
-/* void printMotorAngles(void) { */
-/* #if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2) */
-/*   UART_PORT.print("ARM Motor Angles: "); */
-/*   for (int i = 0; i < NUM_MOTORS; i++) { */
-/*     motorArray[i]->calcCurrentAngle(); */
-/*     UART_PORT.print(motorArray[i]->getSoftwareAngle()); */
-/*     if (i < NUM_MOTORS - 1) { */
-/*       UART_PORT.print(", "); */
-/*     } */
-/*     else { */
-/*       UART_PORT.println(""); */
-/*     } */
-/*   } */
-/* #elif defined(DEBUG_MODE) || defined(USER_MODE) */
-/*   float angles[NUM_MOTORS]; */
-/*   for (int i = 0; i < NUM_MOTORS; i++) { */
-/*     angles[i] = motorArray[i]->getSoftwareAngle(); */
-/*     angleMessages[i].position = &(angles[i]); */
-/*     //*(angleMessages[i].position) = motorArray[i]->getSoftwareAngle(); */
-/*   } */
-/*   pub_m1.publish(&m1_angle_msg); */
-/*   pub_m2.publish(&m2_angle_msg); */
-/*   pub_m3.publish(&m3_angle_msg); */
-/*   pub_m4.publish(&m4_angle_msg); */
-/*   pub_m5.publish(&m5_angle_msg); */
-/*   pub_m6.publish(&m6_angle_msg); */
-/*   nh.spinOnce(); // does it cause problems if i spin twice in loop() */
-/* #endif */
-/* } */
+void printMotorAngles(void) { 
+//#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
+/*
+  char msg[50] = "ARM Motor Angles: ";
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motorArray[i]->calcCurrentAngle();
+    char* buf;
+    sprintf(buf, "%f", motorArray[i]->getSoftwareAngle());
+    strcat(msg, buf);
+    if (i < NUM_MOTORS - 1) {
+      strcat(msg, ", ");
+    }
+    else {
+      strcat(msg, "\n");
+    }
+  }
+  internal_comms::Message* message = commandCenter->createMessage(1, 50, msg);
+  commandCenter->sendMessage(*message);
+//#elif defined(DEBUG_MODE) || defined(USER_MODE)
+  //float angles[NUM_MOTORS];
+  //for (int i = 0; i < NUM_MOTORS; i++) {
+  //  angles[i] = motorArray[i]->getSoftwareAngle();
+  //  angleMessages[i].position = &(angles[i]);
+  //}
+  */
+//#endif
+}
 void clearBlinkState(void) {
   digitalWrite(LED_BUILTIN, LOW);
   blinkCount = 0;
