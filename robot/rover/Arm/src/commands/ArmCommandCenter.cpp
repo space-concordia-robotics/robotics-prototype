@@ -21,6 +21,7 @@
 #define COMMAND_BUDGE_MOTORS 14
 #define COMMAND_MOVE_MULTIPLE_MOTORS 15
 #define COMMAND_PING 16
+#define COMMAND_PRINT_MOTOR_ANGLES 17
 
 void emergencyStop();
 void rebootTeensy();
@@ -40,6 +41,7 @@ void switchMotorDirection(uint8_t motorId);
 void budgeMotors(uint8_t* motorsToMove, bool* moveCW);
 void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach);
 void pong();
+void printMotorAngles(void);
 
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -97,6 +99,9 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       break;
     case COMMAND_PING:
       pong();
+      break;
+    case COMMAND_PRINT_MOTOR_ANGLES:
+      printMotorAngles();
       break;
   }
 

@@ -341,7 +341,7 @@ void printMotorAngles(void) {
       strcat(msg, "\n");
     }
   }
-  internal_comms::Message* message = commandCenter->createMessage(1, 50, msg);
+  internal_comms::Message* message = commandCenter->createMessage(17, 50, msg);
   commandCenter->sendMessage(*message);
 //#elif defined(DEBUG_MODE) || defined(USER_MODE)
   //float angles[NUM_MOTORS];
