@@ -49,23 +49,24 @@ def listen_arm():
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
                 handler = get_handler(commandID)
-                # print(commandID)
+                print("CommandID:", commandID)
                 if handler == None:
-                    # print("No command with ID ", commandID, " was found")
+                    print("No command with ID ", commandID, " was found")
                     ser.read_until() # 0A
                     continue
 
                 argsLen = ser.read()
                 argsLen = int.from_bytes(argsLen, "big")
-                # print(argsLen)
+                print("Number of bytes of arguments:", argsLen)
                 args = ser.read(argsLen)
-                # print(args)
+                print("Raw arguments:", args)
 
                 stopByte = ser.read()
+                stopByte = int.from_bytes(stopByte, "big")
+                print("Stop byte:", stopByte)
 
-                if int.from_bytes(stopByte, "big") != 10:
-                    pass
-                    # print("Warning : Invalid stop byte")
+                if stopByte != 16:
+                    print("Warning : Invalid stop byte")
 
                 try:
                     handler(args)

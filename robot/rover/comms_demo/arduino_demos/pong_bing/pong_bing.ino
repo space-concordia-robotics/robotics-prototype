@@ -25,32 +25,34 @@ void loop() {
   Serial.write(sizeof(pong));
   Serial.write(pong);
   Serial.write(0x0A);
+  Serial.flush();
 
-  delay(5);        // delay in between reads for stability
-
+  delay(1000);
+  
   char bing[] = {'B', 'I', 'N', 'G'};
   Serial.write(pingValue);
   Serial.write(sizeof(bing));
   Serial.write(bing);
   Serial.write(0x0A);
+  Serial.flush();
 
-  delay(5);        // delay in between reads for stability
-
-int motorsValue = 17;
-float motors[6];
-motors[0] = 0.0f;
-motors[1] = 1.25f;
-motors[2] = 1.375f;
-motors[3] = 1.425f;
-motors[4] = -2.25f;
-motors[5] = 2.0f;
-
-Serial.write(motorsValue);
-Serial.write(sizeof(motors));
-byte* motorsByte = (byte*)motors;
-Serial.write(motorsByte, sizeof(motors));
-  Serial.write(0x0A);
+  delay(1000);
   
- delay(5);        // delay in between reads for stability
+  int motorsValue = 17;
+  float motors[6];
+  motors[0] = 0.0f;
+  motors[1] = 1.25f;
+  motors[2] = 1.375f;
+  motors[3] = 1.425f;
+  motors[4] = -2.25f;
+  motors[5] = 2.0f;
+
+  Serial.write(motorsValue);
+  Serial.write(sizeof(motors));
+  byte* motorsByte = (byte*)motors;
+  Serial.write(motorsByte, sizeof(motors));
+  Serial.write(0x0A);
+  Serial.flush();
+  delay(1000);
 
 }
