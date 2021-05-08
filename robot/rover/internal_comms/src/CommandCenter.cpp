@@ -109,6 +109,7 @@ namespace internal_comms
                 Serial.write(message.messageID);
                 Serial.write(message.rawArgsLength);
                 Serial.write(message.rawArgs, message.rawArgsLength);
+                Serial.write(0x0A);
 
                 free( (void *) &message);
                 //delete &message;
