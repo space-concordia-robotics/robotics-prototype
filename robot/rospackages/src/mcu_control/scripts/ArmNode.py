@@ -42,7 +42,7 @@ ser = serial.Serial('/dev/ttyACM1', 57600) # you sure this is good for the jetso
 
 def listen_arm():
     try:
-        while(True):
+        while not rospy.is_shutdown():
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
@@ -62,7 +62,7 @@ def listen_arm():
                 except Exception as e:
                     print(e)
     except KeyboardInterrupt:
-        print("Arm node shutting down due to operator")
+        print("Arm node shutting down due to operator shutting down the node.")
     ser.close()
 
 def send_command(command_name, args):
