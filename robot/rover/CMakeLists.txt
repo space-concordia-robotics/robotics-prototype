@@ -201,7 +201,7 @@ foreach(path ${INOFILES})
 
 
  if(${name} STREQUAL "Arm")
- set(PROJECT_LIBRARIES  Servo)
+ set(PROJECT_LIBRARIES Servo internal_comms)
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  elseif(${name} STREQUAL "comms_demo")
