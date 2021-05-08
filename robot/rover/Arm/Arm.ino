@@ -320,37 +320,14 @@ void initMotorTimers(void) {
   servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
-/** todo: KEEPING THIS, LEMINE WE SHOULD MAKE A COMMAND FOR THIS 
-
-    We don't need the ROS stuff from the elif (nh stuff)
- **/
-
 void printMotorAngles(void) { 
-//#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-/*
-  char msg[50] = "ARM Motor Angles: ";
+  float softwareAngles[NUM_MOTORS];
   for (int i = 0; i < NUM_MOTORS; i++) {
     motorArray[i]->calcCurrentAngle();
-    char* buf;
-    sprintf(buf, "%f", motorArray[i]->getSoftwareAngle());
-    strcat(msg, buf);
-    if (i < NUM_MOTORS - 1) {
-      strcat(msg, ", ");
-    }
-    else {
-      strcat(msg, "\n");
-    }
+    softwareAngles[i] = motorArray[i]->getSoftwareAngle();
   }
-  internal_comms::Message* message = commandCenter->createMessage(17, 50, msg);
+  internal_comms::Message* message = commandCenter->createMessage(17, sizeof(float) * NUM_MOTORS, msg);
   commandCenter->sendMessage(*message);
-//#elif defined(DEBUG_MODE) || defined(USER_MODE)
-  //float angles[NUM_MOTORS];
-  //for (int i = 0; i < NUM_MOTORS; i++) {
-  //  angles[i] = motorArray[i]->getSoftwareAngle();
-  //  angleMessages[i].position = &(angles[i]);
-  //}
-  */
-//#endif
 }
 void clearBlinkState(void) {
   digitalWrite(LED_BUILTIN, LOW);
