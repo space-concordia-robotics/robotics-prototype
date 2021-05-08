@@ -37,23 +37,23 @@ science_pin = 15
 
 teensy_pins = [arm_pin, wheel_pin, science_pin]
 
-ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
+ser = serial.Serial('/dev/ttyACM1', 57600) # you sure this is good for the jetson tim?
 
 
 def listen_arm():
-    running = True
-    while(running):
-        try:
-            print('waiting')
+    try:
+        while(True):
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
                 handler = get_handler(commandID)
+                print(commandID)
                 if handler == None:
                     print("No command with ID ", commandID, " was found")
 
                 argsLen = ser.read()
                 argsLen = int.from_bytes(argsLen, "big")
+                print(argsLen)
                 args = ser.read(argsLen)
                 print(args)
 
@@ -61,9 +61,8 @@ def listen_arm():
                     handler(args)
                 except Exception as e:
                     print(e)
-        except KeyboardInterrupt:
-            print("Arm node shutting down due to operator")
-            running = False
+    except KeyboardInterrupt:
+        print("Arm node shutting down due to operator")
     ser.close()
 
 def send_command(command_name, args):
