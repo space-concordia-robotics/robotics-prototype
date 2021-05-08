@@ -5,6 +5,7 @@ import traceback
 import time
 import re
 import serial
+import struct
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -16,8 +17,9 @@ def handle_pong(data):
     print("Received", data.decode('utf-8'))
 
 def handle_get_angles(data):
-    print("Received", data.join(" "))
-    anglePub.publish(data) # todo: convert each value to the correct type
+    motorAngles = struct.unpack('f' * 6, data)
+    print("Received", list(map(lambda f: str(f), motorAngles)))
+    # anglePub.publish(data) # todo: convert each value to the correct type
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 out_commands = [("estop", 0), ] # todo add all commands...
@@ -37,7 +39,7 @@ science_pin = 15
 
 teensy_pins = [arm_pin, wheel_pin, science_pin]
 
-ser = serial.Serial('/dev/ttyACM1', 57600) # you sure this is good for the jetson tim?
+ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
 
 
 def listen_arm():
@@ -47,15 +49,23 @@ def listen_arm():
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
                 handler = get_handler(commandID)
-                print(commandID)
+                # print(commandID)
                 if handler == None:
-                    print("No command with ID ", commandID, " was found")
+                    # print("No command with ID ", commandID, " was found")
+                    ser.read_until() # 0A
+                    continue
 
                 argsLen = ser.read()
                 argsLen = int.from_bytes(argsLen, "big")
-                print(argsLen)
+                # print(argsLen)
                 args = ser.read(argsLen)
-                print(args)
+                # print(args)
+
+                stopByte = ser.read()
+
+                if int.from_bytes(stopByte, "big") != 10:
+                    pass
+                    # print("Warning : Invalid stop byte")
 
                 try:
                     handler(args)
