@@ -108,7 +108,7 @@ namespace internal_comms
         command = nullptr;
     }
 
-    void CommandCenter::sendDebug(char* debugMessage)
+    void CommandCenter::sendDebug(const char* debugMessage)
     {
         Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage) + 1, debugMessage);
         this->queueMessage(*message);

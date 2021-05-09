@@ -13,17 +13,20 @@ from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
 
-def handle_pong(data):
-    print("Received", data.decode('utf-8'))
+def handle_debug_string(data):
+    print("Debug:", data.decode('utf-8'))
 
-def handle_get_angles(data):
+def handle_pong(data):
+    print("Pong")
+
+def handle_send_motor_angles(data):
     motorAngles = struct.unpack('f' * 6, data)
     print("Received", list(map(lambda f: str(f), motorAngles)))
     # anglePub.publish(data) # todo: convert each value to the correct type
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 out_commands = [("estop", 0), ] # todo add all commands...
-in_commands = [("ping", 16, handle_pong), ("get_angles", 17, handle_get_angles)]
+in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_motor_angles", 2, handle_send_motor_angles)]
 
 
 def get_handler(commandId):
@@ -49,31 +52,34 @@ def listen_arm():
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
                 handler = get_handler(commandID)
-                print("CommandID:", commandID)
+                # print("CommandID:", commandID)
                 if handler == None:
-                    print("No command with ID ", commandID, " was found")
+                    # print("No command with ID ", commandID, " was found")
                     ser.read_until() # 0A
                     continue
 
                 argsLen = ser.read()
                 argsLen = int.from_bytes(argsLen, "big")
-                print("Number of bytes of arguments:", argsLen)
-                args = ser.read(argsLen)
-                print("Raw arguments:", args)
+                # print("Number of bytes of arguments:", argsLen)
+                args = None
+                if argsLen > 0:
+                    args = ser.read(argsLen)
+                    # print("Raw arguments:", args)
 
                 stopByte = ser.read()
                 stopByte = int.from_bytes(stopByte, "big")
-                print("Stop byte:", stopByte)
+                # print("Stop byte:", stopByte)
 
                 if stopByte != 16:
-                    print("Warning : Invalid stop byte")
+                    pass
+                    #print("Warning : Invalid stop byte")
 
                 try:
                     handler(args)
                 except Exception as e:
                     print(e)
     except KeyboardInterrupt:
-        print("Arm node shutting down due to operator shutting down the node.")
+        print("Node shutting down due to operator shutting down the node.")
     ser.close()
 
 def send_command(command_name, args):

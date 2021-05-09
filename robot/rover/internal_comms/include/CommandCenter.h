@@ -101,7 +101,7 @@ namespace internal_comms
             /**
              * Send debug message string
              */
-            void CommandCenter::sendDebug(char* debugMessage);
+            void CommandCenter::sendDebug(const char* debugMessage);
 
         private:
             uint8_t enablePin;

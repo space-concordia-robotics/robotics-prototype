@@ -21,7 +21,7 @@ void setup() {
 void loop() {
 //  // read the input on analog pin 0:
 
-  int pingValue;
+  int pingValue = 1;
   Serial.write(pingValue);
   Serial.write(0);
   Serial.write(0x0A);
@@ -30,15 +30,16 @@ void loop() {
   
 
   int debugMessageID = 0;
-  char* message = "bing";
-  Serial.write(sizeof(message) + 1);
+  const char* message = "bing bang boom!!";
+  Serial.write(debugMessageID);
+  Serial.write(strlen(message) + 1);
   Serial.write(message);
   Serial.write(0x0A);
 
 
   delay(1000);
   
-  int motorsValue = 17;
+  int motorsValue = 2;
   float motors[6];
   motors[0] = 0.0f;
   motors[1] = 1.25f;
