@@ -10,8 +10,10 @@
 
 #define COMMS_BAUDRATE 57600L
 
-#ifdef UART
-#define Serial Serial1
+#ifdef UART_PORT
+   #define Serial Serial1
+#elif USB_PORT
+   #define Serial Serial
 #endif
 
 namespace internal_comms
@@ -94,6 +96,12 @@ namespace internal_comms
              * Closes serial connection
              */
             void endSerial();
+
+
+            /**
+             * Send debug message string
+             */
+            void CommandCenter::sendDebug(char* debugMessage);
 
         private:
             uint8_t enablePin;

@@ -6,6 +6,8 @@
 #include "CommandCenter.h"
 #include <etl/queue.h>
 
+#define COMMAND_DEBUG_MSG 0
+
 namespace internal_comms
 {
     Command* CommandCenter::processCommand()
@@ -15,8 +17,15 @@ namespace internal_comms
         uint8_t deviceReceiving = waitForSerial();
         uint16_t argumentSize = readArgSize();
 
-        uint8_t* buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
-        uint16_t bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
+        uint8_t* buffer = nullptr;
+        uint16_t bytesRead = 0;
+
+        if(argumentSize > 0)
+        {
+            buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
+            bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
+        }
+
         uint8_t stopByte = waitForSerial();
 
         Command* cmd = (Command*) malloc(sizeof(Command));
@@ -39,7 +48,6 @@ namespace internal_comms
     }
 
     uint16_t CommandCenter::readArgSize() {
-        // Serial.read() returns size_t
         uint16_t byte1 = waitForSerial();
         uint8_t byte2 = waitForSerial();
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
@@ -100,6 +108,12 @@ namespace internal_comms
         command = nullptr;
     }
 
+    void CommandCenter::sendDebug(char* debugMessage)
+    {
+        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage) + 1, debugMessage);
+        this->queueMessage(*message);
+    }
+
     void CommandCenter::sendMessage() {
         //if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
@@ -108,7 +122,10 @@ namespace internal_comms
 
                 Serial.write(message.messageID);
                 Serial.write(message.rawArgsLength);
-                Serial.write(message.rawArgs, message.rawArgsLength);
+
+                if(message.rawArgsLength > 0)
+                    Serial.write(message.rawArgs, message.rawArgsLength);
+
                 Serial.write(0x0A);
 
                 free( (void *) &message);
