@@ -32,7 +32,7 @@ void loop() {
   int debugMessageID = 0;
   const char* message = "bing bang boom!!";
   Serial.write(debugMessageID);
-  Serial.write(strlen(message) + 1);
+  Serial.write(strlen(message));
   Serial.write(message);
   Serial.write(0x0A);
 
