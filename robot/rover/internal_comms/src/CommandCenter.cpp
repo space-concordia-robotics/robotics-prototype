@@ -110,7 +110,7 @@ namespace internal_comms
 
     void CommandCenter::sendDebug(const char* debugMessage)
     {
-        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage) + 1, debugMessage);
+        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), debugMessage);
         this->queueMessage(*message);
     }
 
