@@ -20,26 +20,26 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
 //  // read the input on analog pin 0:
-  int pingValue = 16;
-  char pong[] = {'P', 'O', 'N', 'G'};
+
+  int pingValue = 1;
   Serial.write(pingValue);
-  Serial.write(sizeof(pong));
-  Serial.write(pong);
+  Serial.write(0);
   Serial.write(0x0A);
-  Serial.flush();
 
   delay(1000);
   
-  char bing[] = {'B', 'I', 'N', 'G'};
-  Serial.write(pingValue);
-  Serial.write(sizeof(bing));
-  Serial.write(bing);
+
+  int debugMessageID = 0;
+  const char* message = "bing bang boom!!";
+  Serial.write(debugMessageID);
+  Serial.write(strlen(message));
+  Serial.write(message);
   Serial.write(0x0A);
-  Serial.flush();
+
 
   delay(1000);
   
-  int motorsValue = 17;
+  int motorsValue = 2;
   float motors[6];
   motors[0] = 0.0f;
   motors[1] = 1.25f;
@@ -53,7 +53,6 @@ void loop() {
   byte* motorsByte = (byte*)motors;
   Serial.write(motorsByte, sizeof(motors));
   Serial.write(0x0A);
-  Serial.flush();
   delay(1000);
 
 }

@@ -21,7 +21,7 @@
 #define COMMAND_BUDGE_MOTORS 14
 #define COMMAND_MOVE_MULTIPLE_MOTORS 15
 #define COMMAND_PING 16
-#define COMMAND_PRINT_MOTOR_ANGLES 17
+#define COMMAND_GET_MOTOR_ANGLES 17
 
 void emergencyStop();
 void rebootTeensy();
@@ -100,7 +100,7 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
     case COMMAND_PING:
       pong();
       break;
-    case COMMAND_PRINT_MOTOR_ANGLES:
+    case COMMAND_GET_MOTOR_ANGLES:
       printMotorAngles();
       break;
   }

@@ -25,7 +25,7 @@
   updated as of May 2021
 */
 
-#define UART
+#define UART_PORT
 
 #include <Servo.h>
 #include "include/PinSetup.h"
@@ -515,17 +515,11 @@ void m1_encoder_interrupt(void) {
      is cleared before accessing the array.
   */
   motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor1.encoderModifier;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 1 "); UART_PORT.println(motor1.encoderCount);
-#endif
 #endif
 #ifdef M1_SINGLE_CHANNEL
   //! use this version if only one encoder channel is working
   // this doesn't seem to work though so maybe don't... or fix it
   motor1.encoderCount += motor1.rotationDirection * 2;
-#ifdef DEBUG_ENCODERS
-  UART_PORT.print("ARM motor 1 "); UART_PORT.println(motor1.encoderCount);
-#endif
 #endif
 }
 #endif
@@ -871,7 +865,6 @@ void emergencyStop()
 
 void pong() 
 {
-    char msg[4] = {'P','O','N','G'};
-    internal_comms::Message* message = commandCenter->createMessage(1, 4, msg);
+    internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
     commandCenter->sendMessage(*message);
 }
