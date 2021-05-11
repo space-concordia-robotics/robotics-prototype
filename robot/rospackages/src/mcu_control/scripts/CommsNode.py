@@ -25,8 +25,8 @@ out_commands = [arm_out_commands, rover_out_commands, None, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
-        if commandId == in_command[selectedDevice][1]:
-            return in_command[selectedDevice][2]
+        if commandId == in_command[1]:
+            return in_command[2]
     return None
 
 # Pin definitions
@@ -66,7 +66,7 @@ def listen_arm():
 
                 if stopByte != 16:
                     pass
-                    #print("Warning : Invalid stop byte")
+                    # print("Warning : Invalid stop byte")
 
                 try:
                     handler(args)
