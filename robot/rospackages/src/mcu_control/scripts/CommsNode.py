@@ -12,35 +12,29 @@ from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
+from ArmCommands import arm_out_commands, arm_in_commands
+from RoverCommands import rover_out_commands, rover_in_commands
 
-def handle_debug_string(data):
-    print("Debug:", data.decode('utf-8'))
+ARM_SELECTED = 0
+ROVER_SELECTED = 1
+PDS_SELECTED = 2
+SCIENCE_SELECTED = 3
 
-def handle_pong(data):
-    print("Pong")
+in_commands = [arm_in_commands, rover_in_commands, None, None]
+out_commands = [arm_out_commands, rover_out_commands, None, None]
 
-def handle_send_motor_angles(data):
-    motorAngles = struct.unpack('f' * 6, data)
-    print("Received", list(map(lambda f: str(f), motorAngles)))
-    # anglePub.publish(data) # todo: convert each value to the correct type
-
-# https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
-out_commands = [("estop", 0), ] # todo add all commands...
-in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_motor_angles", 2, handle_send_motor_angles)]
-
-
-def get_handler(commandId):
-    for in_command in in_commands:
-        if commandId == in_command[1]:
-            return in_command[2]
+def get_handler(commandId, selectedDevice):
+    for in_command in in_commands[selectedDevice]:
+        if commandId == in_command[selectedDevice][1]:
+            return in_command[selectedDevice][2]
     return None
 
 # Pin definitions
-arm_pin = 11
-wheel_pin = 13
-science_pin = 15
+ARM_PIN = 11
+WHEEL_PIN = 13
+SCIENCE_PIN = 15
 
-teensy_pins = [arm_pin, wheel_pin, science_pin]
+teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
 
 ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
 
@@ -51,7 +45,7 @@ def listen_arm():
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
-                handler = get_handler(commandID)
+                handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
                 # print("CommandID:", commandID)
                 if handler == None:
                     # print("No command with ID ", commandID, " was found")
@@ -82,9 +76,9 @@ def listen_arm():
         print("Node shutting down due to operator shutting down the node.")
     ser.close()
 
-def send_command(command_name, args):
-    for out_command in out_commands:
-        if command_name == out_command[0]:
+def send_command(command_name, args, deviceToSendTo):
+    for out_command in out_commands[deviceToSendTo]:
+        if command_name == out_command[deviceToSendTo][0]:
             ser.write(len(args)) 
             ser.write(args) # todo: send each arg as a byte, also assume they will be strings so they will need to be casted to int/float first there's definitely more than one line of code to write
             return True
