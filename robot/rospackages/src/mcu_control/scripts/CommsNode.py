@@ -39,7 +39,7 @@ teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
 ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
 
 
-def listen_arm():
+def listen():
     try:
         while not rospy.is_shutdown():
             if ser.in_waiting > 0:
@@ -79,16 +79,20 @@ def listen_arm():
 def send_command(command_name, args, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
         if command_name == out_command[deviceToSendTo][0]:
-            ser.write(len(args)) 
-            ser.write(args) # todo: send each arg as a byte, also assume they will be strings so they will need to be casted to int/float first there's definitely more than one line of code to write
+            commandID = out_command[deviceToSendTo][1]
+            ser.write(commandID)
+            if args is not None and len(args) != 0:
+                number_of_arguments = 0 # todo figure out number of bytes
+                ser.write(args) # todo: send each arg as a byte, also assume they will be strings so they will need to be casted to int/float first there's definitely more than one line of code to write
             return True
     return False
 
-def subscriber_callback(message):
-    ser = get_serial()
+def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
-    command = str.encode(message.data + '\n')
-    ser.write(command) # send command to teensy
+    if message.data == 'reset':
+        send_command("reset_angles", [], ARM_SELECTED)
+    elif message.data == 'home':
+        send_command("home_motors", [], ARM_SELECTED)
 
 if __name__ == '__main__':
     node_name = 'arm_node'
@@ -106,14 +110,14 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
     feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
-    subscribe_topic = '/arm_command'
-    rospy.loginfo('Beginning to subscribe to "'+subscribe_topic+'" topic')
-    sub = rospy.Subscriber(subscribe_topic, String, subscriber_callback)
+    arm_command_topic = '/arm_command'
+    rospy.loginfo('Beginning to subscribe to "'+arm_command_topic+'" topic')
+    sub = rospy.Subscriber(arm_command_topic, String, arm_command_callback)
 
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     # serv = rospy.Service(service_name, ArmRequest, handle_client)
-    listen_arm()
+    listen()
 
 
 #def handle_client(req):

@@ -14,5 +14,5 @@ def handle_send_motor_angles(data):
     # anglePub.publish(data) # todo: convert each value to the correct type
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
-arm_out_commands = [("estop", 0), ] # todo add all commands...
+arm_out_commands = [("estop", 0), ("reset_angles", 3), ("home_motors", 4)] # todo add all commands...
 arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_motor_angles", 2, handle_send_motor_angles)]
