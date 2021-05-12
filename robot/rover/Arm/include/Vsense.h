@@ -12,14 +12,14 @@ void vbatt_read() {
   // = vsense * (10k+2k)/2k = vsense * 6 )
   float vbatt = vsense * 6.0; 
 
-  UART_PORT.print("ARM battery voltage: ");
-  UART_PORT.println(vbatt);
+  //UART_PORT.print("ARM battery voltage: ");
+  //UART_PORT.println(vbatt);
 
   if (vbatt < 12.0) {
-    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
+    //UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS LOW! DISCONNECT IMMEDIATELY");
   }
   else if (vbatt > 16.8) {
-    UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
+    //UART_PORT.println("ASTRO WARNING! BATTERY VOLTAGE IS HIGH! DISCONNECT IMMEDIATELY!");
   }
 };
 

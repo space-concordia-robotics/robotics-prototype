@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "PinSetup.h"
+#include "../include/PinSetup.h"
 
 void pinSetup(void) {
   pinMode(LED_BUILTIN, OUTPUT); // pin 13, heartbeat
