@@ -41,7 +41,14 @@ ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetso
 STOP_BYTE = 0x0A
 
 
-def listen():
+def main():
+    # this will:
+    # - check for any new messages to send to teensies
+    # - prompt and receive messages from teensies
+    # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
+    return
+
+def receieve_message():
     try:
         while not rospy.is_shutdown():
             if ser.in_waiting > 0:
@@ -123,9 +130,10 @@ def get_arg_bytes(args):
 
 
 if __name__ == '__main__':
-    node_name = 'arm_node'
+    node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
+
     angle_pub_topic = '/arm_joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
     anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
@@ -145,8 +153,7 @@ if __name__ == '__main__':
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     # serv = rospy.Service(service_name, ArmRequest, handle_client)
-    listen()
-
+    main()
 
 #def handle_client(req):
 #    ser = get_serial()
