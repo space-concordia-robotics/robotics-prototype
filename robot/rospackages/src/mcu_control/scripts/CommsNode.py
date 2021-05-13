@@ -85,6 +85,8 @@ def send_command(command_name, args, deviceToSendTo):
             ser.write(commandID)
             number_of_arguments = len(args)
 
+            # make sure to also send the number of bytes
+
             if args is not None and number_of_arguments != 0:
                 arg_bytes = get_arg_bytes(args)
                 for arg_byte in arg_bytes:
@@ -114,7 +116,7 @@ def get_arg_bytes(args):
     for arg in args:
         if re.match(r'^-?\d+(?:\.\d+)$', arg) is None: # Check if float
             new_bytes = bytearray(struct.pack("f", float(arg)))
-            bytes.append(new_bytes)
+            arg_bytes.append(new_bytes)
 
     return arg_bytes
 
