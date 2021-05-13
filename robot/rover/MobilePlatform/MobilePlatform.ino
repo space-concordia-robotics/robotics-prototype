@@ -47,6 +47,7 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor"); // Motor 5
 
 // List of motors
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB}; // 0,1,2,3,4,5 motors
+int motorLength = sizeof(motorList) / sizeof(motorList[0]);
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
 
@@ -82,6 +83,8 @@ void lb_encoder_interrupt(void);
 void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
+// 
+// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void setMotorList(DcMotor* motorList);
 void setServoList(Servo* servoList);
 DcMotor* getMotorList();
@@ -96,6 +99,15 @@ void toggleAcceleration(bool turnAccelOn);
 void getRoverStatus(void);
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255
+
+// Messages to send back to OBC from wheel Teensy
+// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
+void getLinearVelocity(void);
+void getRotationalVelocity(void);
+void getCurrentVelocity(void);
+void getDesiredVelocity(void);
+void getBatteryVoltage(int v_sense_pin);
+void pingWheels(void);
 
 // Initial teensy setup
 void setup() {
@@ -122,7 +134,9 @@ void setup() {
     maxOutputSignal = MAX_RPM_VALUE;
     minOutputSignal = MIN_RPM_VALUE;
   }
-  Cmds.setupMessage();
+
+  // TODO: Change with debug message to say the system is operational
+  // Cmds.setupMessage();
 }
 
 // Running the wheels
@@ -138,35 +152,29 @@ void loop() {
   }
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
-    Helpers::get().vbatt_read(V_SENSE_PIN);
+    getBatteryVoltage(V_SENSE_PIN);
     navHandler(Cmds);
     sinceSensorRead = 0;
   }
 
   if (sinceLedToggle > LED_BLINK_INTERVAL) {
-    Helpers::get().toggleLed();
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Toggle LED
     sinceLedToggle = 0;
   }
 
-  if (Cmds.sinceThrottle > THROTTLE_TIMEOUT && Cmds.throttleTimeOut) Cmds.stop(true);
+  if (Cmds.sinceThrottle > THROTTLE_TIMEOUT && Cmds.throttleTimeOut) {
+    stopMotors();
+  }
 
   if (sinceMC > MOTOR_CONTROL_INTERVAL && Cmds.isActivated) {
-    RF.calcCurrentVelocity();
-    RM.calcCurrentVelocity();
-    RB.calcCurrentVelocity();
-    LF.calcCurrentVelocity();
-    LM.calcCurrentVelocity();
-    LB.calcCurrentVelocity();
-
-    RF.setVelocity(RF.desiredDirection, fabs(RF.desiredVelocity), RF.getCurrentVelocity());
-    RM.setVelocity(RM.desiredDirection, fabs(RM.desiredVelocity), RM.getCurrentVelocity());
-    RB.setVelocity(RB.desiredDirection, fabs(RB.desiredVelocity), RB.getCurrentVelocity());
-    LF.setVelocity(LF.desiredDirection, fabs(LF.desiredVelocity), LF.getCurrentVelocity());
-    LM.setVelocity(LM.desiredDirection, fabs(LM.desiredVelocity), LM.getCurrentVelocity());
-    LB.setVelocity(LB.desiredDirection, fabs(LB.desiredVelocity), LB.getCurrentVelocity());
+    // Loop through motors to get and set their velocity
+    for (int i = 0; i < motorLength; i++) {
+      motorList[i].calcCurrentVelocity();
+      motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity);
+    }
 
     sinceMC = 0;
-  } // End of loop
+  }
 
   if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
     if (Cmds.isEnc) {
@@ -245,11 +253,9 @@ DcMotor* getMotorList() {
 void toggleMotors(bool turnMotorOn) {
   if (turnMotorOn) {
     Cmds.isActivated = true;
-    Helpers::get().println("ASTRO motors active!");
   }
   else {
     Cmds.isActivated = false;
-    Helpers::get().println("ASTRO motors inactive!");
   }
 }
 
@@ -266,12 +272,10 @@ void closeMotorsLoop(void) {
     stopMotors();
   }
 
-  Helpers::get().println("ASTRO Turning encoders on first...");
   toggleEncoder(true);
   maxOutputSignal = MAX_RPM_VALUE; 
   minOutputSignal = MIN_RPM_VALUE;
   
-  Helpers::get().println("ASTRO Bo!");
 
   // Set motors 0-5 open loop off
   for (i = 0; i < RobotMotor::numMotors; i++) {
@@ -279,7 +283,7 @@ void closeMotorsLoop(void) {
     String msg = "ASTRO Motor " + String(i + 1);
     msg += String(" loop status is: ");
     msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
-    Helpers::get().println(msg);
+    commandCenter->sendDebug(msg);
   }
 }
 
@@ -290,7 +294,6 @@ void openMotorsLoop(void) {
     stopMotors();
   }
 
-  Helpers::get().println("ASTRO Turning encoders off first...");
   maxOutputSignal = MAX_PWM_VALUE; 
   minOutputSignal = MIN_PWM_VALUE;
 
@@ -300,7 +303,7 @@ void openMotorsLoop(void) {
     String msg = "ASTRO Motor " + String(i + 1);
     msg += String(" loop status is: ");
     msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
-    Helpers::get().println(msg);
+    commandCenter->sendDebug(msg);
   }
 }
 
@@ -310,22 +313,22 @@ void toggleJoystick(bool turnJoystickOn) {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = true;
-      Helpers::get().println("ASTRO Joystick is active");
+      commandCenter->sendDebug("ASTRO Joystick is active");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = true;
-      Helpers::get().println("ASTRO Joystick is active");
+      commandCenter->sendDebug("ASTRO Joystick is active");
     }
   }
   else {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = false;
-      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled");
+      commandCenter->sendDebug("ASTRO ArduinoBlue Joystick is disabled");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = false;
-      Helpers::get().println("ASTRO ArduinoBlue Joystick is disabled");
+      commandCenter->sendDebug("ASTRO ArduinoBlue Joystick is disabled");
     }
   }
 }
@@ -334,11 +337,11 @@ void toggleJoystick(bool turnJoystickOn) {
 void toggleGps(bool turnGpsOn) {
   if (turnGpsOn) {
     Cmds.isGpsImu = true;
-    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Enabled");
+    commandCenter->sendDebug("ASTRO GPS and IMU Serial Stream is now Enabled");
   }
   else {
     Cmds.isGpsImu = false;
-    Helpers::get().println("ASTRO GPS and IMU Serial Stream is now Disabled");
+    commandCenter->sendDebug("ASTRO GPS and IMU Serial Stream is now Disabled");
   }
 }
 
@@ -347,11 +350,12 @@ void toggleEncoder(bool turnEncOn) {
   if (turnEncOn) {
     if (Cmds.isActivated) {
       Cmds.isEnc = true;
-      Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is ON");
+      commandCenter->sendDebug("ASTRO Velocity Readings Stream from Motor Encoders is ON");
+
     }
     else if (!Cmds.isActivated) {
       Cmds.isEnc = true;
-      Helpers::get().println("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
+      commandCenter->sendDebug("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
       for (i = 0; i < RobotMotor::numMotors; i++) {
         Helpers::get().print("ASTRO Motor ");
         Helpers::get().print(i);
@@ -362,7 +366,7 @@ void toggleEncoder(bool turnEncOn) {
   }
   else {
     Cmds.isEnc = false;
-    Helpers::get().println("ASTRO Velocity Readings Stream from Motor Encoders is OFF");
+    commandCenter->sendDebug("ASTRO Velocity Readings Stream from Motor Encoders is OFF");
   }
 }
 
@@ -374,7 +378,7 @@ void toggleAcceleration(bool turnAccelOn) {
         String msg = "ASTRO Motor " + String(i + 1);
         msg += " Acceleration Limiter: ";
         msg += String(motorList[i].accLimit ? "Open" : "CLose");
-        Helpers::get().println(msg);
+        commandCenter->sendDebug(msg);
     }
   }
   else {
@@ -383,14 +387,13 @@ void toggleAcceleration(bool turnAccelOn) {
         String msg = "ASTRO Motor " + String(i + 1);
         msg += " Acceleration Limiter: ";
         msg += String(motorList[i].accLimit ? "Open" : "CLose");
-        Helpers::get().println(msg);
+        commandCenter->sendDebug(msg);
     }
   }
 }
 
 // Print rover status (active or not)
 void getRoverStatus(void) {
-  Helpers::get().println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
     Helpers::get().println("ASTRO Astro has " + String(RobotMotor::numMotors) + " motors");
     Helpers::get().println("ASTRO Wheels: " + String(Cmds.isActivated ? "ACTIVE" : "INACTIVE"));
     Helpers::get().println("ASTRO Steering: " + String(Cmds.isSteering ? "Steering Control" : "Motor Control"));
@@ -410,15 +413,12 @@ void getRoverStatus(void) {
       Helpers::get().print((motorList[i].accLimit) ? "ON" : "OFF");
       if (i != RobotMotor::numMotors - 1) Helpers::get().print(", ");
     }
-    Helpers::get().println("");
-
-    Helpers::get().println("ASTRO ~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~");
 }
 
 // Throttle -49 to 49 and Steering -49 to 49
 void moveRover(int8_t roverThrottle, int8_t roverSteering) {
   if (!Cmds.isActivated) {
-    Helpers::get().println("ASTRO Astro isn't activated yet!");
+    commandCenter->sendDebug("ASTRO Astro isn't activated yet!");
   }
   else {
     throttle = (float) roverThrottle; // From Globals.h
@@ -432,7 +432,7 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
     String msg = "ASTRO left: " + String(desiredVelocityLeft);
     msg += " -- right: " + String(desiredVelocityRight);
     msg += " maxOutput: " + String(maxOutputSignal);
-    Helpers::get().println(msg);
+    commandCenter->sendDebug(msg);
     Cmds.sinceThrottle = 0;
   }
 } 
@@ -440,7 +440,7 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
 // Wheel number 0 to 5 and -255 to 255 
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
   if (!Cmds.isActivated) {
-    Helpers::get().println("ASTRO Astro isn't activated yet!");
+    commandCenter->sendDebug("ASTRO Astro isn't activated yet!");
   }
   else {
     motorNumber = (int) wheelNumber;
@@ -459,7 +459,7 @@ void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
       Helpers::get().println("ASTRO " + String(motorList[motorNumber-1].motorName) + String("'s desired speed: ") + String(motorList[motorNumber-1].desiredVelocity) + String(" PWM "));
     }
     else {
-      Helpers::get().println("ASTRO invalid motor  number");
+      commandCenter->sendDebug("ASTRO invalid motor  number");
     }
   }
 }
@@ -589,3 +589,52 @@ void lb_encoder_interrupt(void) {
   LB.prevTime = micros();
   LB.encoderCount++;
 }
+
+// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
+
+/*
+EXAMPLE FROM CEDRIC
+
+void printMotorAngles(void) {
+  float softwareAngles[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motorArray[i]->calcCurrentAngle();
+    softwareAngles[i] = motorArray[i]->getSoftwareAngle();
+  }
+  internal_comms::Message* message = commandCenter->createMessage(
+      2, sizeof(softwareAngles), (byte*)softwareAngles);
+  commandCenter->sendMessage(*message);
+}
+*/
+
+void getLinearVelocity() {
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  internal_comms::Message* message = commandCenter->createMessage(
+      2, sizeof(linearVelocity), (byte*)linearVelocity);
+  commandCenter->sendMessage(*message);
+}
+
+void getRotationalVelocity() {
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  internal_comms::Message* message = commandCenter->createMessage(
+      3, sizeof(rotationalVelocity), (byte*)rotationalVelocity);
+  commandCenter->sendMessage(*message);
+}
+
+void getCurrentVelocity(void);
+void getDesiredVelocity(void);
+
+void getBatteryVoltage(int v_sense_pin) {
+  float vsense = analogRead(v_sense_pin);
+  vsense *= 0.003225806; //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
+  float vbatt = vsense * 6.0;
+  commandCenter->sendDebug("ASTRO Battery voltage: " + String(vbatt));
+}
+
+void pingWheels() {
+  internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
+  commandCenter::sendMessage(*message);
+}
+
+
+

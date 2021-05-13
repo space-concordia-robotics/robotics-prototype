@@ -23,6 +23,11 @@ Command messages
 #define COMMAND_GET_ROVER_STATUS 8
 #define COMMAND_MOVE_ROVER 9
 #define COMMAND_MOVE_WHEEL 10
+#define COMMAND_GET_LINEAR_VELOCITY 11
+#define COMMAND_GET_ROTATIONAL_VELOCITY 12
+#define COMMAND_GET_CURRENT_VELOCITY 13
+#define COMMAND_GET_DESIRED_VELOCITY 14
+#define COMMAND_WHEELS_PING 69
 
 /*
 Command functions
@@ -98,6 +103,33 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
       PWM = *(++rawArgs) << 8;
       PWM |= *(++rawArgs);
       moveWheel(wheelNumber, PWM);
+      break;
+    }
+
+    // Commands to acquire values from wheel teensy to OBC
+    case COMMAND_GET_LINEAR_VELOCITY:
+    {
+      getLinearVelocity();
+      break;
+    }
+    case COMMAND_GET_ROTATIONAL_VELOCITY:
+    {
+      getRotationalVelocity();
+      break;
+    }
+    case COMMAND_GET_CURRENT_VELOCITY:
+    {
+      getCurrentVelocity();
+      break;
+    }
+    case COMMAND_GET_DESIRED_VELOCITY:
+    {
+      getDesiredVelcity();
+      break;
+    }
+    case COMMAND_WHEELS_PING:
+    {
+      pingWheels();
       break;
     }
     default:
