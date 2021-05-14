@@ -28,3 +28,4 @@ Twisted==20.3.0
 pytest==3.6.3
 pylint==2.5.3
 yapf==0.30.0
+Jetson.GPIO
