@@ -15,6 +15,8 @@ from mcu_control.srv import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
 
+import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
+
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
@@ -46,9 +48,11 @@ def main():
     # - check for any new messages to send to teensies
     # - prompt and receive messages from teensies
     # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
+
+    receive_message() # tim pls let me test
     return
 
-def receieve_message():
+def receive_message():
     try:
         while not rospy.is_shutdown():
             if ser.in_waiting > 0:
@@ -99,6 +103,17 @@ def send_command(command_name, args, deviceToSendTo):
 
         ser.write(commandID)
         ser.write(get_arg_bytes(command))
+
+        data_types = [element[0] for element in command[2]]
+
+        for argument in zip(args, data_types):
+            data = argument[0]
+            data_type = argument[1]
+
+            if data_type == dt.ARG_UINT8_ID:
+                ser.write(data)
+            elif data_type == dt.ARG_FLOAT32_ID:
+                ser.write(float(data)) #perhaps will fuck up
 
         # make sure to also send the number of bytes
 
