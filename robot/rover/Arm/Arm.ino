@@ -165,7 +165,7 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 */
 void setup() {
 
-  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
+  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, 1);
   initEncoders();
   initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
   initSpeedParams();
