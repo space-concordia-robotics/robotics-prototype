@@ -12,8 +12,8 @@ from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from mcu_control.srv import *
 
-from ArmCommands import arm_out_commands, arm_in_commands
-from RoverCommands import rover_out_commands, rover_in_commands
+from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
+from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
 
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
@@ -36,7 +36,7 @@ SCIENCE_PIN = 15
 
 teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
 
-ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
+ser = None
 
 STOP_BYTE = 0x0A
 
@@ -85,21 +85,29 @@ def receieve_message():
         print("Node shutting down due to operator shutting down the node.")
     ser.close()
 
-def send_command(command_name, args, deviceToSendTo):
+def get_command(command_name, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
         if command_name == out_command[deviceToSendTo][0]:
-            commandID = out_command[deviceToSendTo][1]
-            ser.write(commandID)
-            number_of_arguments = len(args)
+            return out_command
 
-            # make sure to also send the number of bytes
+    return None
 
-            if args is not None and number_of_arguments != 0:
-                arg_bytes = get_arg_bytes(args)
-                for arg_byte in arg_bytes:
-                    ser.write(arg_byte)
-                ser.write(STOP_BYTE)
-            return True
+def send_command(command_name, args, deviceToSendTo):
+    command = get_command(command_name, deviceToSendTo)
+    if command is not None:
+        commandID = command[1]
+
+        ser.write(commandID)
+        ser.write(get_arg_bytes(command))
+
+        # make sure to also send the number of bytes
+
+        # if args is not None and number_of_arguments != 0:
+        #     arg_bytes = get_arg_bytes(args)
+        #     for arg_byte in arg_bytes:
+        #         ser.write(arg_byte)
+        #     ser.write(STOP_BYTE)
+        # return True
     return False
 
 def arm_command_callback(message):
@@ -111,25 +119,26 @@ def arm_command_callback(message):
 def parse_command(message):
     full_command = message.split(" ")
     if full_command is not None:
-        command = full_command.pop(0)
-        args = full_command
-        if args is None:
-            args = []
-        return command, args
-    return "", []
+        command = full_command[1]
+        args = full_command[2:]
+        newArgs = []
+        for arg in args:
+            try:
+                newArgs.append(float(arg))
+            except ValueError:
+                newArgs.append(arg)
 
-def get_arg_bytes(args):
-    arg_bytes = []
-    for arg in args:
-        if re.match(r'^-?\d+(?:\.\d+)$', arg) is None: # Check if float
-            new_bytes = bytearray(struct.pack("f", float(arg)))
-            arg_bytes.append(new_bytes)
+        return command, newArgs
+    return None, []
 
-    return arg_bytes
+def get_arg_bytes(command_tuple):
+    return sum(command_tuple[2])
 
 
 
 if __name__ == '__main__':
+    ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
+
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
     rospy.loginfo('Initialized "'+node_name+'" node for pub/sub/service functionality')
