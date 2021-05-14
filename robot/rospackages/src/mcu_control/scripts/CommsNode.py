@@ -132,9 +132,7 @@ def parse_command(message):
     return None, []
 
 def get_arg_bytes(command_tuple):
-    return sum(command_tuple[2])
-
-
+    return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
