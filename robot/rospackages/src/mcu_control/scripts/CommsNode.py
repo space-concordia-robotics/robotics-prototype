@@ -7,6 +7,7 @@ import re
 import serial
 import struct
 from collections import deque
+import Jetson.GPIO as GPIO
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -20,8 +21,8 @@ import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
-PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
+PDS_SELECTED = 4
 
 in_commands = [arm_in_commands, rover_in_commands, None, None]
 out_commands = [arm_out_commands, rover_out_commands, None, None]
@@ -34,10 +35,12 @@ def get_handler(commandId, selectedDevice):
 
 # Pin definitions
 ARM_PIN = 11
-WHEEL_PIN = 13
+ROVER_PIN = 13
 SCIENCE_PIN = 15
+teensy_pins = [ARM_PIN, ROVER_PIN, SCIENCE_PIN]
 
-teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(teensy_pins, GPIO.OUT)
 
 ser = None
 
@@ -46,19 +49,10 @@ STOP_BYTE = 0x0A
 arm_queue= deque()
 rover_queue = deque()
 science_queue = deque()
-
-def main():
-    # this will:
-    # - check for any new messages to send to teensies
-    # - prompt and receive messages from teensies
-    # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
-
-    receive_message() # tim pls let me test
-    return
+command_queues = [arm_queue, rover_queue, science_queue]
 
 def receive_message():
-    try:
-        while not rospy.is_shutdown():
+        while True:
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
@@ -67,7 +61,6 @@ def receive_message():
                 if handler == None:
                     # print("No command with ID ", commandID, " was found")
                     ser.read_until() # 0A
-                    continue
 
                 argsLen = ser.read()
                 argsLen = int.from_bytes(argsLen, "big")
@@ -89,9 +82,8 @@ def receive_message():
                     handler(args)
                 except Exception as e:
                     print(e)
-    except KeyboardInterrupt:
-        print("Node shutting down due to operator shutting down the node.")
-    ser.close()
+                return
+
 
 def get_command(command_name, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
@@ -100,8 +92,9 @@ def get_command(command_name, deviceToSendTo):
 
     return None
 
-def send_command(command_name, args, deviceToSendTo):
-    command = get_command(command_name, deviceToSendTo)
+
+def send_command(cmd):
+    command = get_command(cmd[0], cmd[2])
     if command is not None:
         commandID = command[1]
 
@@ -110,7 +103,7 @@ def send_command(command_name, args, deviceToSendTo):
 
         data_types = [element[0] for element in command[2]]
 
-        for argument in zip(args, data_types):
+        for argument in zip(cmd[1], data_types):
             data = argument[0]
             data_type = argument[1]
 
@@ -119,22 +112,24 @@ def send_command(command_name, args, deviceToSendTo):
             elif data_type == dt.ARG_FLOAT32_ID:
                 ser.write(float(data)) #perhaps will fuck up
 
-        # make sure to also send the number of bytes
-
         # if args is not None and number_of_arguments != 0:
         #     arg_bytes = get_arg_bytes(args)
         #     for arg_byte in arg_bytes:
         #         ser.write(arg_byte)
         #     ser.write(STOP_BYTE)
         # return True
+
+        # might need to flush serial if buffer gets overloaded
     return False
+
 
 def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
     command, args = parse_command(message)
 
-    temp_struct = [command, args, ARM_SELECTED]
-    arm_queue.append(temp_struct)
+    temp_list = [command, args, ARM_SELECTED]
+    arm_queue.append(temp_list)
+
 
 def parse_command(message):
     full_command = message.split(" ")
@@ -151,8 +146,30 @@ def parse_command(message):
         return command, newArgs
     return None, []
 
+
 def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
+
+
+def main():
+    try:
+        while not rospy.is_shutdown():
+            # Sends a command to each teensy if there is anything to send 
+            for queue in command_queues:
+                if len(queue) > 0:
+                    cmd = queue.pop()
+                    send_command(cmd)
+
+            # Prompts each teensy to send something
+            for teensy in teensy_pins:
+                GPIO.output(teensy, 1)
+                receive_message()
+                GPIO.output(teensy, 0)
+
+    except KeyboardInterrupt:
+        print("Node shutting down due to operator shutting down the node.")
+    ser.close()
+
 
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim? # IDK, we will see
