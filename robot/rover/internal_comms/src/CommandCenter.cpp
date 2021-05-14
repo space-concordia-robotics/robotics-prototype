@@ -127,6 +127,7 @@ namespace internal_comms
                 messageQueue.pop();
 
                 Serial.write(message.messageID);
+                Serial.write(this->deviceID);
                 Serial.write(message.rawArgsLength);
 
                 if(message.rawArgsLength > 0)
