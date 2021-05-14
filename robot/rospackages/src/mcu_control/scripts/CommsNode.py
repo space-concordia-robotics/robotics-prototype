@@ -6,6 +6,7 @@ import time
 import re
 import serial
 import struct
+from collections import deque
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -42,6 +43,9 @@ ser = None
 
 STOP_BYTE = 0x0A
 
+arm_queue= deque()
+rover_queue = deque()
+science_queue = deque()
 
 def main():
     # this will:
@@ -129,7 +133,8 @@ def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
     command, args = parse_command(message)
 
-    send_command(command, args, ARM_SELECTED)
+    temp_struct = [command, args, ARM_SELECTED]
+    arm_queue.append(temp_struct)
 
 def parse_command(message):
     full_command = message.split(" ")
@@ -150,7 +155,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim?
+    ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim? # IDK, we will see
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
