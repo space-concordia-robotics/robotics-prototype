@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 
-class ParseCommand : public Setup
+class ParseCommand
 {
     public:
     
@@ -22,7 +22,7 @@ class ParseCommand : public Setup
             } 
             
             else if (*token == 'A') 
-            { //enable all motors"
+            { //enable all motors
                 enable_all_motors();
                 Serial.println("Command: PDS enabling the motor!");
                 break;
@@ -38,15 +38,7 @@ class ParseCommand : public Setup
                     token = strtok(NULL, " "); //find the next token
                     int fanMode = (int)*token - 48;
                     
-                    switch (fanNum) 
-                    {
-                        case 1:
-                            analogWrite(fan, fanMode);
-                            break;
-                        case 2:
-                            analogWrite(fan, fanMode);
-                            break;
-                    }
+                    //either fans are on or off, no speed control
                     
                     Serial.println("Command: PDS changing fan mode");
                 } 

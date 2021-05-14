@@ -1,21 +1,22 @@
 
-#include <Arduino.h>
-//#include <Stepper.h> // Stepper Motor library (Won't be used in future application)
+
+
 #include "variables.h"
 #include "load_setup.h"
 #include "parse_command.h"
 #include "temp_read.h"
 
-//Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
+TempSens temperature(12,11,10,19); // object argument is pin number in order (MUXS2,MUXS1,MUXS0,MUXoutput)
+//NOTE: TempSens senses battery voltage at channel 4, conversion is taken care by the header file.
 
-Setup mSense;
-
+Setup load_operation;
+float current,Temp;
 void setup() 
 {
-    Serial.begin(SERIAL_BAUD_RATE);    
-    mSense.enable_device("Multisense is enabled!", mSense.SEn);    
+    Serial.begin(SERIAL_BAUD_RATE);
 }
-
+void check_temp();
+void check_load_current();
 void loop() 
 {
     ParseCommand cmd;
@@ -35,30 +36,30 @@ void loop()
             Serial.println("Command error: PDS received empty message");
         }
     }
-    
-    float load_value = mSense.load_voltage();
-//    Serial.print("Load Value after conversion: ");
-//    Serial.print(load_value); 
-//    Serial.println(" V");
 
-    if (load_value > 5)
-    {
-        Serial.print("Faulty Condition");
-        //1. Interpret the load voltage
-        //2. Decide what to do after figuring out the motors' conditions
-    }
-    
-    TempSens temperature;
-    // Read Temperature Value
-    float Temp1 = temperature.temp_read(0, 0, 0);
-  
-//    Serial.print("Temperature: "); 
-//    Serial.print(Temp1);
-//    Serial.println(" C"); 
-
-    if (Temp1 > 35) // what temperature may be dangerous?
-    {
-        Serial.print("ERROR! Temperature is too high!");
-    }    
+   
     
 }
+
+void check_load_current()
+{
+   current= load_operation.load_current(1); //load_current(load_switch number) returns current in Ampere through motor number 
+   //add CTA  
+  
+ 
+ 
+ 
+ }
+
+ void check_temp()
+ {
+   Temp = temperature.read_value(0); //read_value(channel) returns temperature in C if channel !=4, for channel=4, it returns battery voltage
+   
+
+    if (Temp > 35) // what temperature may be dangerous?
+    {
+        Serial.print("Warning! Temperature is too high!");
+    }    
+  
+  
+  }

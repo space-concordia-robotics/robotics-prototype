@@ -1,35 +1,67 @@
 #include "temp_read.h"
 #include <Arduino.h>
 
-TempSens::TempSens(int MUX_S0, int MUX_S1, int MUX_S2, int MUX_output)
+
+TempSens::TempSens(int MUX_S2, int MUX_S1, int MUX_S0, int MUX_output)  //constructor is defined with pins connections
+ {
+    MUX_0=MUX_S0;
+    MUX_1=MUX_S1;
+    MUX_2=MUX_S2;
+    MUX_O=MUX_output;
+    pinMode(MUX_S0,OUTPUT);
+    pinMode(MUX_S1,OUTPUT);
+    pinMode(MUX_S2,OUTPUT);
+    pinMode(MUX_output,INPUT);
+ }
+
+void TempSens::select_channel(int ch) //ch 0 to 7
 {
-    // Prepare address pins for output
-    pinMode(MUX_S0, OUTPUT);
-    pinMode(MUX_S1, OUTPUT);
-    pinMode(MUX_S2, OUTPUT);
-    
-    pinMode(MUX_output, INPUT);  
+   digitalWrite(MUX_2,ch&7>>2);
+   digitalWrite(MUX_1,ch&3>>1);
+   digitalWrite(MUX_0,ch&1);
 }
 
-
-float TempSens::temp_read(int adrs0, int adrs1, int adrs2)
+float TempSens::read_value(int channel)
 {
-    int MUX_OUT = 0;
+  select_channel(channel); //select the channel
+  MUX_OUT=analogRead(MUX_O);          
+  if (channel!=4)
+    {
+       
+       Rntc = R1 * (1023.0 / MUX_OUT - 1.0);
+       log_Rntc = log(Rntc);
+       T = (1.0 / (c1 + c2*log_Rntc + c3*log_Rntc*log_Rntc*log_Rntc));
+       T = T - 273.15;
+       if (channel<4)
+       {
+       Serial.print("TempRead"); 
+       Serial.print(channel+1);
+       Serial.print(" ");
+       Serial.print(T);
+       Serial.println(" C"); 
+       return T;
+       }
+       else
+       {
+       Serial.print("Board_temp_read"); 
+       Serial.print(channel-4);
+       Serial.print(" ");
+       Serial.print(T);
+       Serial.println(" C"); 
+       return T;
+       }
+        
+        
+        }
+       
 
-    float R1 = 10000;
-    float log_Rntc, Rntc, T = 0;  
-  
-    //Write address to mux
-    digitalWrite(MUX_S0, adrs0);
-    digitalWrite(MUX_S1, adrs1);
-    digitalWrite(MUX_S2, adrs2);   
+ else  //channel 4 is connected to sense Battery voltage
 
-    MUX_OUT = analogRead(MUX_output);
-
-    Rntc = R1 * (1023.0 / (float)MUX_OUT - 1.0);
-    log_Rntc = log(Rntc);
-    T = (1.0 / (c1 + c2*log_Rntc + c3*log_Rntc*log_Rntc*log_Rntc));
-    T = T - 273.15;
-
-    return T;
+    {
+       Vbat=MUX_OUT*(4.3)/1024;
+       Serial.print("Battery Voltage "); 
+       Serial.print(Vbat);
+       Serial.println("V");
+       return Vbat;
+    }
 }

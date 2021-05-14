@@ -5,12 +5,24 @@
 
 Setup::Setup()
 {
-   pinMode(multiSense, INPUT); // Feedback from output current
-   pinMode(SEn, OUTPUT); // Enables MultiSense pin
+   pinMode(9,OUTPUT); // Defines Fan_EN output ,
 
-   // Motor setting
-   pinMode(motor_input, OUTPUT);  
-   //myStepper.setSpeed(5); // Set the speed to 5 rpm  
+   // Load switches pins
+   pinMode(15, OUTPUT);  // Load enable1 
+   pinMode(16, OUTPUT);  // Load enable2
+   pinMode(2, OUTPUT);   // Load enable3
+   pinMode(17, OUTPUT);  // Load enable4
+   pinMode(28, OUTPUT);  // Load enable5
+   pinMode(13, OUTPUT);  // Load enable6
+
+   // Current reading pins
+
+   pinMode(27,INPUT); // Sense read1
+   pinMode(26,INPUT); // Sense read2
+   pinMode(25,INPUT); // Sense read3
+   pinMode(24,INPUT); // Sense read4
+   pinMode(23,INPUT); // Sense read5
+   pinMode(22,INPUT); // Sense read6
 }
 
 
@@ -29,17 +41,17 @@ void Setup::disable_device(String message, int pin1)
 
 void Setup::enable_all_motors()
 {
-    PORTB |= 0B00000001; //motor one
-    PORTD |= 0B11000000; //motor two and three
-    PORTC |= 0B00111000; //motor four, five and six  
+    PORTB |= 0B00111010; //load switch 1,2,4,6 
+    PORTD |= 0B00010000; //load switch 3
+    PORTC |= 0B00100000; //load switch 5  
     Serial.println("All Motors are Enabled!");
 }
 
 void Setup::disable_all_motors()
 {
-    PORTB &= 0B11111110; //motor one
-    PORTD &= 0B00111111; //motor two and three
-    PORTC &= 0B11000111; //motor four, five and six  
+    PORTB &= 0B11000101; //load switch 1,2,4,6 
+    PORTD &= 0B11101111; //load switch 3
+    PORTC &= 0B11011111; //load switch 5 
     Serial.println("All Motors are Disabled!");  
 }
 
@@ -49,21 +61,23 @@ int Setup::get_status(int pin1)
     return digitalRead(pin1);
 }
 
-void Setup::get_status_motors()
+void Setup::get_status_motors()  //not returning? just reading?
 {
-    for (int i = 0; i < NUM_MOTORS; i++) 
+    for (int i = 0; i < 6; i++) 
     {
         motorState[i] = digitalRead(motorPins[i]);
     }    
 }
 
 
-float Setup::load_voltage()
+float Setup::load_current(int load_switch)
 {
-    int load = analogRead(multiSense);
-    float Vout = ((float)load / 1023.0) * 5;
-//    Serial.print("Load Value before conversion: ");
-//    Serial.println(load);
+    float current = (analogRead(28-load_switch)*0.01432109); // constant 0.01432109 derived from schematic and datasheet of vn5050
     
-    return Vout;
+    Serial.print("Current in the motor_");
+    Serial.print(load_switch);
+    Serial.print(" ");
+    Serial.print(current);
+    Serial.println(" A");
+    return current;
 }

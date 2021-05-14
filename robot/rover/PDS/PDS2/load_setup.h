@@ -2,21 +2,19 @@
 #define SETUP_H
 
 #include <Arduino.h>
-#include <Stepper.h> 
 
 /*
- * Load Settings
+ * Library deals with load operation and protection
+ * To avoid complexity, motor pins and current sensing pins are predefined
  */
 
 class Setup
 {    
-    int NUM_MOTORS = 6;
     int motorState[6];
-    int motorPins[6] = {1,2,3,4,5,6};    
+    int motorPins[6] = {15,16,2,17,28,13};    
     
     public:
-        int fan=5, motor_input=7, multiSense=15, SEn=12;
-    
+           
         Setup();
         void enable_device(String message, int pin1);
         void disable_device(String message, int pin1);        
@@ -26,13 +24,8 @@ class Setup
         int get_status(int pin1);
         void get_status_motors();
         
-        float load_voltage();    
+        float load_current(int load_switch);    
 };
 
-class Motor : public Setup
-{
-    public:
-        Motor();    
-};
 
 #endif
