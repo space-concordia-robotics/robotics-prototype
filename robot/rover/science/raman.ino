@@ -42,7 +42,7 @@ void loop()
 
 void setup()
 {
-    commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN);
+    commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN, 4);
 }
 
 /**
