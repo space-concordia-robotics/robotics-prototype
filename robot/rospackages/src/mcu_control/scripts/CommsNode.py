@@ -10,7 +10,7 @@ import struct
 import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
-from mcu_control.srv import *
+from robot.rospackages.src.mcu_control.srv import *
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
