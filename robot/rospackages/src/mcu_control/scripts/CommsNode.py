@@ -102,7 +102,7 @@ def send_command(command_name, args, deviceToSendTo):
         commandID = command[1]
 
         ser.write(commandID)
-        ser.write(get_arg_bytes(command))
+        ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
 
         data_types = [element[0] for element in command[2]]
 
