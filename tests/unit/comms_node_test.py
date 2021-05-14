@@ -1,4 +1,4 @@
-from robot.rospackages.src.mcu_control.scripts.CommsNode import parse_command, get_arg_bytes
+from robot.rospackages.src.mcu_control.scripts.CommsUtils import parse_command, get_arg_bytes
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 
 def test_parse_command():
