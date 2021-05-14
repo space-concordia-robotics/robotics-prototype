@@ -35,12 +35,6 @@ namespace internal_comms
         public:
 
             /**
-             * Constructor that is given a deviceID so that it can be included in outgoing messages
-             * @param deviceID The ID of this device
-             */
-            CommandCenter(uint8_t deviceID);
-
-            /**
             * Executes the command with the commandID with the raw arguments
             * @param commandID The ID of the command to execute
             * @param rawArgs The raw bytes consisting of the arguments
