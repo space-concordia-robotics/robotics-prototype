@@ -47,14 +47,16 @@ namespace internal_comms
         return cmd;
     }
 
-    uint16_t CommandCenter::readArgSize() {
+    uint16_t CommandCenter::readArgSize() 
+    {
         uint16_t byte1 = waitForSerial();
         uint8_t byte2 = waitForSerial();
         uint16_t ArgumentsLength = (byte1 << 8) | byte2;
         return ArgumentsLength;
     }
 
-    Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
+    Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) 
+    {
         Message* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
@@ -62,13 +64,15 @@ namespace internal_comms
         return message;
     }
 
-    void CommandCenter::queueMessage(Message& message) {
+    void CommandCenter::queueMessage(Message& message) 
+    {
         // We assume that the queue will never fill up
         // Thus, never fail...
         messageQueue.push(message);
     }
 
-    uint8_t CommandCenter::waitForSerial() {
+    uint8_t CommandCenter::waitForSerial() 
+    {
         unsigned long start = millis();
         while(!Serial.available()){
             unsigned long current = millis() - start;
@@ -77,8 +81,9 @@ namespace internal_comms
         return Serial.read();
     }
     
-    void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin)
+    void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin, uint8_t deviceID)
     {
+        CommandCenter::deviceID = deviceID;
         pinMode(rxPin, INPUT);
         pinMode(txPin, OUTPUT); 
         pinMode(enablePin, INPUT);
@@ -114,8 +119,9 @@ namespace internal_comms
         this->queueMessage(*message);
     }
 
-    void CommandCenter::sendMessage() {
-        //if (digitalRead(enablePin)) {
+    void CommandCenter::sendMessage() 
+    {
+        if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
                 messageQueue.pop();
@@ -131,14 +137,16 @@ namespace internal_comms
                 free( (void *) &message);
                 //delete &message;
             }
-            //else {
-                //Serial.write(1);
-                //Serial.write(0);
-            //}
-        //}
+            else {
+                Serial.write(1);
+                Serial.write(0);
+                Serial.write(0x0A);
+            }
+        }
     }
 
-    void CommandCenter::sendMessage(Message& message) {
+    void CommandCenter::sendMessage(Message& message) 
+    {
         messageQueue.push(message);
         sendMessage();
     }

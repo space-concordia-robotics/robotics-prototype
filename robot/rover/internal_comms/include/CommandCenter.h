@@ -35,6 +35,12 @@ namespace internal_comms
         public:
 
             /**
+             * Constructor that is given a deviceID so that it can be included in outgoing messages
+             * @param deviceID The ID of this device
+             */
+            CommandCenter(uint8_t deviceID);
+
+            /**
             * Executes the command with the commandID with the raw arguments
             * @param commandID The ID of the command to execute
             * @param rawArgs The raw bytes consisting of the arguments
@@ -66,7 +72,6 @@ namespace internal_comms
              */
             Message* createMessage(int messageID, int rawArgsLength, byte *rawArgs);
 
-
             /**
             * Holds the messages that are ready to be sent out 
             */
@@ -75,7 +80,7 @@ namespace internal_comms
             /**
              * Starts serial connection with given pins. Enable pin is for 485 flow control
              */
-            void startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin);
+            void startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin, uint8_t deviceID);
 
             /**
              * Reads data from serial port
@@ -97,7 +102,6 @@ namespace internal_comms
              */
             void endSerial();
 
-
             /**
              * Send debug message string
              */
@@ -105,7 +109,7 @@ namespace internal_comms
 
         private:
             uint8_t enablePin;
-
+            uint8_t deviceID;
 
             /**
             * Reads the two bytes that make up the argument length and combines
@@ -118,7 +122,6 @@ namespace internal_comms
              * whichever comes first.
              */
             uint8_t waitForSerial();
-
     };
 
 }
