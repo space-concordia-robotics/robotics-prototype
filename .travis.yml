@@ -54,8 +54,6 @@ script:
   - catkin_make
 
   # Run python unit tests
-  - sudo groupadd -f -r gpio
-  - sudo usermod -a -G gpio $(whoami)
   - cd $REPO_ROOT
   - pytest --continue-on-collection-errors
     
