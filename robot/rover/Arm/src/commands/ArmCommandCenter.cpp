@@ -38,8 +38,8 @@ void setMotorSpeed(uint8_t motorId, float speed);
 void setOpenLoopState(uint8_t motorId, bool isOpenLoop);
 void resetSingleMotor(uint8_t motorId);
 void switchMotorDirection(uint8_t motorId);
-void budgeMotors(uint8_t* motorsToMove, bool* moveCW);
-void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach);
+void budgeMotors(uint8_t[] motorActions)
+void moveMultipleMotors(float[] anglesToReach);
 void pong();
 void printMotorAngles(void);
 
