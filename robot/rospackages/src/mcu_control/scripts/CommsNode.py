@@ -69,8 +69,9 @@ def receive_message():
                     ser.read_until() # 0A
                     continue
 
-                argsLen = ser.read()
-                argsLen = int.from_bytes(argsLen, "big")
+                argsLenPart1 = ser.read()
+                argsLenPart2 = ser.read()
+                argsLen = int.from_bytes(argsLenPart1, "big") * 256 + int.from_bytes(argLenPart2, "big")
                 # print("Number of bytes of arguments:", argsLen)
                 args = None
                 if argsLen > 0:
