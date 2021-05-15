@@ -4,33 +4,39 @@
 
 // USB : Debug, UART : Production
 #define USB
+
+#include <cstdint>
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "ArduinoBlue.h"
 
 // Issue made to change includes to include
-#include "includes/PinSetup.h"
+// #include "../internal_comms/include/CommandCenter.h"
+#include "CommandCenter.h"
 #include "../internal_comms/include/CommandCenter.h"
 #include "includes/commands/WheelsCommandCenter.h"    
-#include "includes/Globals.h"
 #include "includes/Commands.h"  // This automatically includes DcMotor.h
+#include "includes/Globals.h"
 #include "includes/Helpers.h"
+#include "includes/PidController.h"
+#include "includes/PinSetup.h"
 
 /* Global variables*/
 elapsedMillis sinceFeedbackPrint; // timer for sending motor speeds and battery measurements
 elapsedMillis sinceLedToggle; // timer for heartbeat
 elapsedMillis sinceSensorRead; // timer for reading battery, gps and imu data
 elapsedMillis sinceMC; // timer for reading battery, gps and imu data
+float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
+String rotation; // Rotation direction of the whole rover
 
+// Specific values for calculations
 const float wheelBase = 0.33; //distance between left and right wheels
 const float radius = 0.14; // in m
 const float piRad = 0.10472; // Pi in radians
 const float kp = 14.1;
 const float ki = 0.282;
 const float kd = 40.625;
-float linearVelocity, rotationalVelocity, rightLinearVelocity, leftLinearVelocity;
-String rotation; // Rotation direction of the whole rover
 
 // Pins for Serial
 const uint8_t RX_TEENSY_3_6_PIN = 0;
@@ -47,9 +53,17 @@ DcMotor LB(LB_DIR, LB_PWM, GEAR_RATIO, "Rear Left Motor"); // Motor 5
 
 // List of motors
 DcMotor motorList[] = {RF, RM, RB, LF, LM, LB}; // 0,1,2,3,4,5 motors
-int motorLength = sizeof(motorList) / sizeof(motorList[0]);
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
+
+// Pointers to motors
+DcMotor* RFPtr = &RF;
+DcMotor* RMPtr = &RM;
+DcMotor* RBPtr = &RB;
+DcMotor* LFPtr = &LF;
+DcMotor* LMPtr = &LM;
+DcMotor* LBPtr = &LB;
+DcMotor* motorPtrList[] = {RFPtr, RMPtr, RBPtr, LFPtr, LMPtr, LBPtr};
 
 // Use to call commands 
 Commands Cmds;
@@ -83,7 +97,6 @@ void lb_encoder_interrupt(void);
 void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
-// 
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void setMotorList(DcMotor* motorList);
 void setServoList(Servo* servoList);
@@ -168,9 +181,9 @@ void loop() {
 
   if (sinceMC > MOTOR_CONTROL_INTERVAL && Cmds.isActivated) {
     // Loop through motors to get and set their velocity
-    for (int i = 0; i < motorLength; i++) {
+    for (int i = 0; i < NUM_MOTORS; i++) {
       motorList[i].calcCurrentVelocity();
-      motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity);
+      motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
     }
 
     sinceMC = 0;
@@ -607,8 +620,10 @@ void printMotorAngles(void) {
 }
 */
 
+// TODO: Ask why I AM GETTING ERROR-TYPE FOR CREATEMESSAGE OMGGGGG
 void getLinearVelocity() {
   // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 2 for sendLinearVelocity
   internal_comms::Message* message = commandCenter->createMessage(
       2, sizeof(linearVelocity), (byte*)linearVelocity);
   commandCenter->sendMessage(*message);
@@ -616,13 +631,35 @@ void getLinearVelocity() {
 
 void getRotationalVelocity() {
   // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 3 for sendRotationalVelocity
   internal_comms::Message* message = commandCenter->createMessage(
       3, sizeof(rotationalVelocity), (byte*)rotationalVelocity);
   commandCenter->sendMessage(*message);
 }
 
-void getCurrentVelocity(void);
-void getDesiredVelocity(void);
+void getCurrentVelocity() {
+  float currentVelocities[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    currentVelocities[i] = motorPtrList[i]->getCurrentVelocity();
+  }
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 4 for sendCurrentVelocity
+  internal_comms::Message* message = commandCenter->createMessage(
+      4, sizeof(currentVelocities), (byte*)currentVelocities);
+  commandCenter->sendMessage(*message);
+}
+
+void getDesiredVelocity() {
+  float desiredVelocities[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    desiredVelocities[i] = motorPtrList[i]->desiredVelocity;
+  }
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 5 for sendDesiredVelocity
+  internal_comms::Message* message = commandCenter->createMessage(
+      5, sizeof(desiredVelocities), (byte*)desiredVelocities);
+  commandCenter->sendMessage(*message);
+}
 
 void getBatteryVoltage(int v_sense_pin) {
   float vsense = analogRead(v_sense_pin);

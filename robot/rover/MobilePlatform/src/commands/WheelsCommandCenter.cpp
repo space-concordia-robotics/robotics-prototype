@@ -4,8 +4,9 @@
 
 // Issue made to change includes to include, which requires changing the CMake
 
-#include "../../includes/commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
-// #include "../../../internal_comms/include/CommandCenter.h"
+#include <cstdint>
+#include "includes/commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
+// #include "../../../include/CommandCenter.h"
 
 using namespace internal_comms;
 
@@ -43,6 +44,14 @@ void toggleAcceleration(bool turnAccelOn);
 void getRoverStatus();
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255 
+
+// Value getter functions
+void getLinearVelocity(void);
+void getRotationalVelocity(void);
+void getCurrentVelocity(void);
+void getDesiredVelocity(void);
+void getBatteryVoltage(int v_sense_pin);
+void pingWheels(void);
 
 void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -124,7 +133,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
     }
     case COMMAND_GET_DESIRED_VELOCITY:
     {
-      getDesiredVelcity();
+      getDesiredVelocity();
       break;
     }
     case COMMAND_WHEELS_PING:

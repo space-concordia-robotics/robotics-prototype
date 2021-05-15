@@ -8,6 +8,7 @@
 // R/L (right/left), F/M/B (forward, middle, back)
 
 /* motor driver pins (cytron) */
+#define NUM_MOTORS 6
 
 // direction pins
 #define RF_DIR   2
