@@ -15,9 +15,7 @@ from robot.rospackages.src.mcu_control.srv import *
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
-
-import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
-
+import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt 
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
@@ -54,7 +52,6 @@ def main():
     # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
 
     receive_message() # tim pls let me test
-    return
 
 def receive_message():
     try:
@@ -65,13 +62,13 @@ def receive_message():
                 handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
                 # print("CommandID:", commandID)
                 if handler == None:
-                    # print("No command with ID ", commandID, " was found")
+                    print("No command with ID ", commandID, " was found")
                     ser.read_until() # 0A
                     continue
 
-                argsLenPart1 = ser.read()
-                argsLenPart2 = ser.read()
-                argsLen = int.from_bytes(argsLenPart1, "big") * 256 + int.from_bytes(argLenPart2, "big")
+                argsLen = ser.read(2)
+                # print(argsLen)
+                argsLen = int.from_bytes(argsLen, "big")
                 # print("Number of bytes of arguments:", argsLen)
                 args = None
                 if argsLen > 0:
@@ -82,7 +79,7 @@ def receive_message():
                 stopByte = int.from_bytes(stopByte, "big")
                 # print("Stop byte:", stopByte)
 
-                if stopByte != 16:
+                if stopByte != STOP_BYTE:
                     pass
                     # print("Warning : Invalid stop byte")
 

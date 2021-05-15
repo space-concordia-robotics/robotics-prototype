@@ -19,7 +19,7 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-//  // read the input on analog pin 0:
+// read the input on analog pin 0:
 
   int pingValue = 1;
   Serial.write(pingValue);
