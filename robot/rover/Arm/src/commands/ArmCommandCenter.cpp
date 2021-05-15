@@ -38,7 +38,7 @@ void setMotorSpeed(uint8_t motorId, float speed);
 void setOpenLoopState(uint8_t motorId, bool isOpenLoop);
 void resetSingleMotor(uint8_t motorId);
 void switchMotorDirection(uint8_t motorId);
-void budgeMotors(uint8_t motorActions[])
+void budgeMotors(uint8_t motorActions[]);
 void moveMultipleMotors(float anglesToReach[]);
 void pong();
 void printMotorAngles(void);
@@ -100,7 +100,15 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       budgeMotors(rawArgs);
       break;
     case COMMAND_MOVE_MULTIPLE_MOTORS:
-      moveMultipleMotors(rawArgs);
+      float desiredAngles[6] = {
+        bytes_to_float(rawArgs), 
+        bytes_to_float(rawArgs),
+        bytes_to_float(rawArgs), 
+        bytes_to_float(rawArgs), 
+        bytes_to_float(rawArgs), 
+        bytes_to_float(rawArgs) 
+        };
+      moveMultipleMotors(desiredAngles);
       break;
     case COMMAND_PING:
       pong();
