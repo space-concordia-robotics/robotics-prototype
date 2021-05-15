@@ -13,7 +13,7 @@
 #define COMMAND_ARM_SPEED 6
 #define COMMAND_STOP_SINGLE_MOTOR 7
 #define COMMAND_GEAR_RATIO 8
-#define COMMAND_OPEN_LOOP_GAIN 9
+#define COMMAND_OPEN_LOOP_STATE 9
 #define COMMAND_PID_CONSTANTS 10
 #define COMMAND_MOTOR_SPEED 11
 #define COMMAND_OPEN_LOOP_STATE 12
@@ -43,6 +43,16 @@ void moveMultipleMotors(float[] anglesToReach);
 void pong();
 void printMotorAngles(void);
 
+
+// this modifies the pointer
+float bytes_to_float(const uint8_t* rawPointer)
+{
+  float f;
+  uchar bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
+  memcpy(&f, &bytes, sizeof(f));
+  return f;
+}
+
 void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
   switch(commandID)
@@ -66,36 +76,31 @@ void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* ra
       homeMotor(*rawArgs, *(++rawArgs));
       break;
     case COMMAND_ARM_SPEED:
-      setArmSpeed(1.0f);
+      setArmSpeed(bytes_to_float(rawArgs));
       break;
     case COMMAND_STOP_SINGLE_MOTOR:
       stopSingleMotor(*rawArgs);
       break;
     case COMMAND_GEAR_RATIO:
-      setGearRatioValue(*rawArgs, 1.0);
+      setGearRatioValue(*(rawArgs++), bytes_to_float(rawArgs));
       break;
     case COMMAND_OPEN_LOOP_GAIN:
-      setOpenLoopGain(*rawArgs, 1.0);
+      setOpenLoopGain(*(rawArgs++), bytes_to_float(rawArgs));
       break;
     case COMMAND_PID_CONSTANTS:
-      uint8_t motorId = *rawArgs;
-      rawArgs++;
-      float pid[3] = {1.0f, 1.0f, 1.0f};
-      setPidConstants(motorId, pid[0], pid[1], pid[2]);
+      setPidConstants(*(rawArgs++), bytes_to_float(rawArgs), bytes_to_float(rawArgs), bytes_to_float(rawArgs));
       break;
     case COMMAND_OPEN_LOOP_STATE:
-      setOpenLoopState(1, true);
+      setOpenLoopState(*(rawArgs++), *(rawArgs) == 1);
       break;
     case COMMAND_RESET_SINGLE_MOTOR:
       resetSingleMotor(*rawArgs);
       break;
     case COMMAND_BUDGE_MOTORS:
-      uint8_t motorsToMove[3] = {2, 4, 5};
-      bool moveCW[3] = {true, false, true};
-      budgeMotors(motorsToMove, moveCW);
+      budgeMotors(rawArgs);
       break;
     case COMMAND_MOVE_MULTIPLE_MOTORS:
-      moveMultipleMotors(0, 0);
+      moveMultipleMotors(rawArgs);
       break;
     case COMMAND_PING:
       pong();
