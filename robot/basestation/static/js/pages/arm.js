@@ -353,10 +353,10 @@ function gameLoop () {
     }
     // 'q' --> stop all motors
     if (keyState[81]) {
-      sendArmCommand('stop')
+      sendArmCommand('estop')
       lastCmdSent = new Date().getTime()
     } else if (toBudge) {
-      let cmd = 'budge '
+      let cmd = 'budge_motors '
       for (var motor in budgeArray) {
         cmd += budgeArray[motor]
         if (motor != 5) {
@@ -368,7 +368,7 @@ function gameLoop () {
 
     // 'o' --> reset angle values
     if (keyState[79]) {
-      sendArmCommand('reset')
+      sendArmCommand('reset_angles')
       lastCmdSent = new Date().getTime()
     }
 
