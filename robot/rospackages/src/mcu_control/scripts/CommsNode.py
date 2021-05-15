@@ -139,8 +139,8 @@ def arm_command_callback(message):
 def parse_command(message):
     full_command = message.split(" ")
     if full_command is not None:
-        command = full_command[1]
-        args = full_command[2:]
+        command = full_command[0]
+        args = full_command[1:]
         newArgs = []
         for arg in args:
             try:
