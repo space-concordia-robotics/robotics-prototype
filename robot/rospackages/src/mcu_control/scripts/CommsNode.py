@@ -17,7 +17,6 @@ from robot.rospackages.src.mcu_control.srv import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
 from robot.rospackages.src.mcu_control.scripts.CommsUtils import parse_command, get_arg_bytes
-
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 
 ARM_SELECTED = 0
@@ -60,10 +59,11 @@ def receive_message():
                 handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
                 # print("CommandID:", commandID)
                 if handler == None:
-                    # print("No command with ID ", commandID, " was found")
+                    print("No command with ID ", commandID, " was found")
                     ser.read_until() # 0A
 
-                argsLen = ser.read()
+                argsLen = ser.read(2)
+                # print(argsLen)
                 argsLen = int.from_bytes(argsLen, "big")
                 # print("Number of bytes of arguments:", argsLen)
                 args = None
@@ -75,7 +75,7 @@ def receive_message():
                 stopByte = int.from_bytes(stopByte, "big")
                 # print("Stop byte:", stopByte)
 
-                if stopByte != 16:
+                if stopByte != STOP_BYTE:
                     pass
                     # print("Warning : Invalid stop byte")
 
