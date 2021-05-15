@@ -21,7 +21,7 @@ arm_out_commands = [("estop", 0, []),
                     ("reboot", 1, []),
                     ("motors_stop", 2, []),
                     ("reset_angles", 3, []),
-                    ("home_motors", 4, []),
+                    ("home_motors", 4, [dt.ARG_UINT8]),
                     ("home", 5, [dt.ARG_UINT8, dt.ARG_UINT8]),
                     ("arm_speed", 6, [dt.ARG_FLOAT32]),
                     ("stop_single_motor", 7, [dt.ARG_UINT8]),
@@ -34,6 +34,6 @@ arm_out_commands = [("estop", 0, []),
                     ("budge_motors", 14, 6*[dt.ARG_UINT8]),
                     ("reset_single_motor", 15, 6*[dt.ARG_FLOAT32]),
                     ("ping", 16, []),
-                    ("get_motor_angles", 17, 6*[dt.ARG_FLOAT32])]
+                    ("get_motor_angles", 17, [])]
 
 arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_motor_angles", 2, handle_send_motor_angles)]
