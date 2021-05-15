@@ -48,7 +48,7 @@ void printMotorAngles(void);
 float bytes_to_float(const uint8_t* rawPointer)
 {
   float f;
-  uchar bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
+  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
   memcpy(&f, &bytes, sizeof(f));
   return f;
 }
