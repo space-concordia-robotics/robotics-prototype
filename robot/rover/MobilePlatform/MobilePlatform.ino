@@ -291,12 +291,12 @@ void closeMotorsLoop(void) {
   
 
   // Set motors 0-5 open loop off
-  for (i = 0; i < RobotMotor::numMotors; i++) {
+  for (i = 0; i < NUM_MOTORS; i++) {
     motorList[i].isOpenLoop = false;
     String msg = "ASTRO Motor " + String(i + 1);
     msg += String(" loop status is: ");
     msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
-    commandCenter->sendDebug(msg);
+    commandCenter->sendDebug(msg.c_str());
   }
 }
 
