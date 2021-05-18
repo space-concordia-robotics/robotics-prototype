@@ -56,7 +56,7 @@ DcMotor motorList[] = {RF, RM, RB, LF, LM, LB}; // 0,1,2,3,4,5 motors
 Servo frontSide, frontBase, rearSide, rearBase;
 Servo servoList[] = {frontSide, frontBase, rearSide, rearBase};
 
-// Pointers to motors
+// Pointers to DC motors
 DcMotor* RFPtr = &RF;
 DcMotor* RMPtr = &RM;
 DcMotor* RBPtr = &RB;
@@ -65,7 +65,14 @@ DcMotor* LMPtr = &LM;
 DcMotor* LBPtr = &LB;
 DcMotor* motorPtrList[] = {RFPtr, RMPtr, RBPtr, LFPtr, LMPtr, LBPtr};
 
-// Use to call commands 
+// Pointers to servo motors
+Servo* frontSidePtr = &frontSide;
+Servo* frontBasePtr = &frontBase;
+Servo* rearSidePtr = &rearSide;
+Servo* rearBasePtr = &rearBase;
+Servo* servoPtrList[] = {frontSidePtr, frontBasePtr, rearSidePtr, rearBasePtr};
+
+// Modified, used only to store values 
 Commands Cmds;
 
 // To read commands from wheelscommandcenter
@@ -98,8 +105,10 @@ void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
-void setMotorList(DcMotor* motorList);
-void setServoList(Servo* servoList);
+// void setMotorList(DcMotor* motorList);
+void setMotorList(DcMotor* motorPtrList);
+// void setServoList(Servo* servoList);
+void setServoList(Servo* servoPtrList);
 DcMotor* getMotorList();
 void toggleMotors(bool turnMotorOn);
 void stopMotors(void);
@@ -147,9 +156,6 @@ void setup() {
     maxOutputSignal = MAX_RPM_VALUE;
     minOutputSignal = MIN_RPM_VALUE;
   }
-
-  // TODO: Change with debug message to say the system is operational
-  // Cmds.setupMessage();
 }
 
 // Running the wheels
@@ -182,48 +188,10 @@ void loop() {
   if (sinceMC > MOTOR_CONTROL_INTERVAL && Cmds.isActivated) {
     // Loop through motors to get and set their velocity
     for (int i = 0; i < NUM_MOTORS; i++) {
-      motorList[i].calcCurrentVelocity();
-      motorList[i].setVelocity(motorList[i].desiredDirection, fabs(motorList[i].desiredVelocity), motorList[i].getCurrentVelocity());
+      motorPtrList[i]->calcCurrentVelocity();
+      motorPtrList[i]->setVelocity(motorPtrList[i]->desiredDirection, fabs(motorPtrList[i]->desiredVelocity), motorPtrList[i]->getCurrentVelocity());
     }
-
     sinceMC = 0;
-  }
-
-  if (sinceFeedbackPrint > FEEDBACK_PRINT_INTERVAL && Cmds.isActivated) {
-    if (Cmds.isEnc) {
-      Helpers::get().print("ASTRO Motor Speeds: ");
-      Helpers::get().print(RF.getCurrentVelocity());
-      Helpers::get().print(", ");
-      Helpers::get().print(RM.getCurrentVelocity());
-      Helpers::get().print(", ");
-      Helpers::get().print(RB.getCurrentVelocity());
-      Helpers::get().print(", ");
-      Helpers::get().print(LF.getCurrentVelocity());
-      Helpers::get().print(", ");
-      Helpers::get().print(LM.getCurrentVelocity());
-      Helpers::get().print(", ");
-      Helpers::get().println(LB.getCurrentVelocity());
-
-      roverVelocityCalculator();
-
-      Helpers::get().print("ASTRO Desired Velocities: ");
-      Helpers::get().print(String(RF.desiredVelocity) + ", ");
-      Helpers::get().print(String(RM.desiredVelocity) + ", ");
-      Helpers::get().print(String(RB.desiredVelocity) + ", ");
-      Helpers::get().print(String(LF.desiredVelocity) + ", ");
-      Helpers::get().print(String(LM.desiredVelocity) + ", ");
-      Helpers::get().println(String(LB.desiredVelocity));
-    }
-    else {
-      Helpers::get().print("ASTRO Motor Speeds: ");
-      Helpers::get().print(String(RF.desiredVelocity) + ", ");
-      Helpers::get().print(String(RM.desiredVelocity) + ", ");
-      Helpers::get().print(String(RB.desiredVelocity) + ", ");
-      Helpers::get().print(String(LF.desiredVelocity) + ", ");
-      Helpers::get().print(String(LM.desiredVelocity) + ", ");
-      Helpers::get().println(String(LB.desiredVelocity));
-    }
-    sinceFeedbackPrint = 0;
   }
 
   /*
@@ -234,32 +202,24 @@ void loop() {
   commandCenter->sendMessage();
 }
 
+void setMotorList(DcMotor* motorPtrList){
+  Cmds.motorList = motorPtrList;
+}
+
+void setServoList(Servo* servoPtrList){
+  Cmds.servoPtrList = servoPtrList;
+}
+
+DcMotor* getMotorList() {
+  return *motorPtrList;
+}
+
 void roverVelocityCalculator(void) {
   rightLinearVelocity = (RF.desiredDirection * RF.getCurrentVelocity() + RM.desiredDirection * RM.getCurrentVelocity() + RB.desiredDirection * RB.getCurrentVelocity()) * radius * piRad;
   leftLinearVelocity = (LF.desiredDirection * LF.getCurrentVelocity() + LM.desiredDirection * LM.getCurrentVelocity() + LB.desiredDirection * LB.getCurrentVelocity()) * radius * piRad;
 
   linearVelocity = (rightLinearVelocity - leftLinearVelocity)  / 6;
   rotationalVelocity = (leftLinearVelocity + rightLinearVelocity) / wheelBase;
-
-  Helpers::get().print("ASTRO ");
-  Helpers::get().print("Linear Velocity: ");
-  Helpers::get().print(linearVelocity);
-  Helpers::get().print(" m / s ");
-
-  Helpers::get().print("Rotational Velocity: ");
-  Helpers::get().print(rotationalVelocity);
-  Helpers::get().println(" m ^ 2 / 6 ");
-}
-
-void setMotorList(DcMotor* motorList){
-  Cmds.motorList = motorList;
-}
-void setServoList(Servo* servoList){
-  Cmds.servoList = servoList;
-}
-
-DcMotor* getMotorList() {
-  return Cmds.motorList;
 }
 
 // Toggle 0-5 motors
@@ -274,8 +234,8 @@ void toggleMotors(bool turnMotorOn) {
 
 // Emergency stop all motors
 void stopMotors(void) {
-  DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle and steering to 0
-  // Not required to send as command to Navigation
+  // DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle and steering to 0
+  DcMotor::velocityHandler(*motorPtrList,0, 0); // Set all motors throttle and steering to 0
 }
 
 // Close motors loop
@@ -288,15 +248,10 @@ void closeMotorsLoop(void) {
   toggleEncoder(true);
   maxOutputSignal = MAX_RPM_VALUE; 
   minOutputSignal = MIN_RPM_VALUE;
-  
 
   // Set motors 0-5 open loop off
   for (i = 0; i < NUM_MOTORS; i++) {
-    motorList[i].isOpenLoop = false;
-    String msg = "ASTRO Motor " + String(i + 1);
-    msg += String(" loop status is: ");
-    msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
-    commandCenter->sendDebug(msg.c_str());
+    motorPtrList[i]->isOpenLoop = false;
   }
 }
 
@@ -311,12 +266,8 @@ void openMotorsLoop(void) {
   minOutputSignal = MIN_PWM_VALUE;
 
   // Set motors 0-5 open loop on
-  for (i = 0; i < RobotMotor::numMotors; i++) {
-    motorList[i].isOpenLoop = true; 
-    String msg = "ASTRO Motor " + String(i + 1);
-    msg += String(" loop status is: ");
-    msg += String(motorList[i].isOpenLoop ? "Open" : "Close");
-    commandCenter->sendDebug(msg);
+  for (i = 0; i < NUM_MOTORS; i++) {
+    motorPtrList[i]->isOpenLoop = true; 
   }
 }
 
@@ -326,22 +277,18 @@ void toggleJoystick(bool turnJoystickOn) {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = true;
-      commandCenter->sendDebug("ASTRO Joystick is active");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = true;
-      commandCenter->sendDebug("ASTRO Joystick is active");
     }
   }
   else {
     if (Cmds.isActivated) {
       stopMotors();
       Cmds.isJoystickMode = false;
-      commandCenter->sendDebug("ASTRO ArduinoBlue Joystick is disabled");
     }
     else if (!Cmds.isActivated) {
       Cmds.isJoystickMode = false;
-      commandCenter->sendDebug("ASTRO ArduinoBlue Joystick is disabled");
     }
   }
 }
@@ -350,11 +297,9 @@ void toggleJoystick(bool turnJoystickOn) {
 void toggleGps(bool turnGpsOn) {
   if (turnGpsOn) {
     Cmds.isGpsImu = true;
-    commandCenter->sendDebug("ASTRO GPS and IMU Serial Stream is now Enabled");
   }
   else {
     Cmds.isGpsImu = false;
-    commandCenter->sendDebug("ASTRO GPS and IMU Serial Stream is now Disabled");
   }
 }
 
@@ -363,69 +308,59 @@ void toggleEncoder(bool turnEncOn) {
   if (turnEncOn) {
     if (Cmds.isActivated) {
       Cmds.isEnc = true;
-      commandCenter->sendDebug("ASTRO Velocity Readings Stream from Motor Encoders is ON");
 
     }
     else if (!Cmds.isActivated) {
       Cmds.isEnc = true;
-      commandCenter->sendDebug("ASTRO Motor Velocity Reading Stream is ON but will start printing values once the Rover is activated");
-      for (i = 0; i < RobotMotor::numMotors; i++) {
-        Helpers::get().print("ASTRO Motor ");
-        Helpers::get().print(i);
-        Helpers::get().print(" current velocity: ");
-        Helpers::get().println(motorList[i].getCurrentVelocity());
-      }
     }
   }
   else {
     Cmds.isEnc = false;
-    commandCenter->sendDebug("ASTRO Velocity Readings Stream from Motor Encoders is OFF");
   }
 }
 
 // Toggle acceleration limiter
 void toggleAcceleration(bool turnAccelOn) {
   if (turnAccelOn) {
-    for (i = 0; i < RobotMotor::numMotors; i++) {
-        motorList[i].accLimit = true;
-        String msg = "ASTRO Motor " + String(i + 1);
-        msg += " Acceleration Limiter: ";
-        msg += String(motorList[i].accLimit ? "Open" : "CLose");
-        commandCenter->sendDebug(msg);
+    for (i = 0; i < NUM_MOTORS; i++) {
+        motorPtrList[i]->accLimit = true;
     }
   }
   else {
-    for (i = 0; i < RobotMotor::numMotors; i++) {
-        motorList[i].accLimit = false;
-        String msg = "ASTRO Motor " + String(i + 1);
-        msg += " Acceleration Limiter: ";
-        msg += String(motorList[i].accLimit ? "Open" : "CLose");
-        commandCenter->sendDebug(msg);
+    for (i = 0; i < NUM_MOTORS; i++) {
+        motorPtrList[i]->accLimit = false;
     }
   }
 }
 
 // Print rover status (active or not)
 void getRoverStatus(void) {
-    Helpers::get().println("ASTRO Astro has " + String(RobotMotor::numMotors) + " motors");
-    Helpers::get().println("ASTRO Wheels: " + String(Cmds.isActivated ? "ACTIVE" : "INACTIVE"));
-    Helpers::get().println("ASTRO Steering: " + String(Cmds.isSteering ? "Steering Control" : "Motor Control"));
-    Helpers::get().println("ASTRO Encoders: " + String(Cmds.isEnc ? "ON" : "OFF"));
-    Helpers::get().println("ASTRO GPS " + String(Cmds.gpsError ? "ERROR: " + Cmds.gpsErrorMsg : "Success"));
-    Helpers::get().println("ASTRO IMU " + String(Cmds.imuError ? "ERROR: " + Cmds.imuErrorMsg : "Success"));
-    Helpers::get().println("ASTRO Nav Stream: " + String(Cmds.isGpsImu ? "ON" : "OFF"));
-    Helpers::get().print("ASTRO Motor loop statuses: ");
-    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-      Helpers::get().print(String(motorList[i].isOpenLoop ? "Open" : "CLose"));
-      if (i != RobotMotor::numMotors - 1) Helpers::get().print(", ");
-    }
-    Helpers::get().println("");
+  int statusMessages = 9;
+  String msgs[statusMessages];
+  msgs[0] = "ASTRO Astro has " + String(NUM_MOTORS) + " motors";
+  msgs[1] = "ASTRO Wheels: " + String(Cmds.isActivated ? "ACTIVE" : "INACTIVE");
+  msgs[2] = "ASTRO Steering: " + String(Cmds.isSteering ? "Steering Control" : "Motor Control");
+  msgs[3] = "ASTRO Encoders: " + String(Cmds.isEnc ? "ON" : "OFF");
+  msgs[4] = "ASTRO GPS " + String(Cmds.gpsError ? "ERROR: " + Cmds.gpsErrorMsg : "Success");
+  msgs[5] = "ASTRO IMU " + String(Cmds.imuError ? "ERROR: " + Cmds.imuErrorMsg : "Success");
+  msgs[6] = "ASTRO Nav Stream: " + String(Cmds.isGpsImu ? "ON" : "OFF");
+  
+  msgs[7] += "ASTRO Motor loop statuses: ";
+  for (int i = 0; i < NUM_MOTORS; i++) { //6 is hardcoded, should be using a macro
+    msgs[7] += String(motorPtrList[i]->isOpenLoop ? "Open" : "CLose");
+    if (i != NUM_MOTORS - 1) msgs[7] += ", ";
+  }
 
-    Helpers::get().print("ASTRO Motor accel: ");
-    for (int i = 0; i < RobotMotor::numMotors; i++) { //6 is hardcoded, should be using a macro
-      Helpers::get().print((motorList[i].accLimit) ? "ON" : "OFF");
-      if (i != RobotMotor::numMotors - 1) Helpers::get().print(", ");
-    }
+  msgs[8] += "ASTRO Motor accel: ";
+  for (int i = 0; i < NUM_MOTORS; i++) { //6 is hardcoded, should be using a macro
+    msgs[8] += (motorPtrList[i]->accLimit) ? "ON" : "OFF";
+    if (i != NUM_MOTORS - 1) msgs[8] += ", ";
+  }
+
+  for (int i = 0; i < statusMessages; i++) {
+    commandCenter->sendDebug(msgs[i].c_str());
+  }
+
 }
 
 // Throttle -49 to 49 and Steering -49 to 49
@@ -436,16 +371,11 @@ void moveRover(int8_t roverThrottle, int8_t roverSteering) {
   else {
     throttle = (float) roverThrottle; // From Globals.h
     steering = (float) roverSteering; // From Globals.h
-    Helpers::get().println("ASTRO Throttle: " + String(throttle) + String(" -- Steering: ") + String(steering));
 
     // Set wheel throttle and steering
     DcMotor::velocityHandler(getMotorList(),throttle, steering); 
 
     // Displayed from globals.h
-    String msg = "ASTRO left: " + String(desiredVelocityLeft);
-    msg += " -- right: " + String(desiredVelocityRight);
-    msg += " maxOutput: " + String(maxOutputSignal);
-    commandCenter->sendDebug(msg);
     Cmds.sinceThrottle = 0;
   }
 } 
@@ -467,9 +397,8 @@ void moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
     }
 
     if (motorNumber >= 1 && motorNumber <= 6) {
-      motorList[motorNumber-1].calcCurrentVelocity();
-      motorList[motorNumber-1].setVelocity(dir , abs(motorSpeed), motorList[motorNumber-1].getCurrentVelocity());
-      Helpers::get().println("ASTRO " + String(motorList[motorNumber-1].motorName) + String("'s desired speed: ") + String(motorList[motorNumber-1].desiredVelocity) + String(" PWM "));
+      motorPtrList[motorNumber-1]->calcCurrentVelocity();
+      motorPtrList[motorNumber-1]->setVelocity(dir , abs(motorSpeed), motorPtrList[motorNumber-1]->getCurrentVelocity());
     }
     else {
       commandCenter->sendDebug("ASTRO invalid motor  number");
@@ -553,8 +482,8 @@ void initSerialCommunications(void) {
   Serial.setTimeout(SERIAL_TIMEOUT);
   delay(300); // NECESSARY. Give time for serial port to set up
 
-  setMotorList(motorList);
-  setServoList(servoList);
+  setMotorList(*motorPtrList);
+  setServoList(*servoPtrList);
 }
 
 //! Initiate encoder for dcMotor objects and pinModes
@@ -604,36 +533,21 @@ void lb_encoder_interrupt(void) {
 }
 
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
-
-/*
-EXAMPLE FROM CEDRIC
-
-void printMotorAngles(void) {
-  float softwareAngles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motorArray[i]->calcCurrentAngle();
-    softwareAngles[i] = motorArray[i]->getSoftwareAngle();
-  }
-  internal_comms::Message* message = commandCenter->createMessage(
-      2, sizeof(softwareAngles), (byte*)softwareAngles);
-  commandCenter->sendMessage(*message);
-}
-*/
-
-// TODO: Ask why I AM GETTING ERROR-TYPE FOR CREATEMESSAGE OMGGGGG
 void getLinearVelocity() {
   // Create message and send to OBC (Wheel Teensy to OBC)
   // CommandID set to 2 for sendLinearVelocity
+  byte *linearVelocityByte = (byte *)&linearVelocity;
   internal_comms::Message* message = commandCenter->createMessage(
-      2, sizeof(linearVelocity), (byte*)linearVelocity);
+      2, sizeof(linearVelocityByte), linearVelocityByte);
   commandCenter->sendMessage(*message);
 }
 
 void getRotationalVelocity() {
   // Create message and send to OBC (Wheel Teensy to OBC)
   // CommandID set to 3 for sendRotationalVelocity
+  byte *rotationalVelocityByte = (byte *)&rotationalVelocity;
   internal_comms::Message* message = commandCenter->createMessage(
-      3, sizeof(rotationalVelocity), (byte*)rotationalVelocity);
+      3, sizeof(rotationalVelocityByte), (byte*)rotationalVelocityByte);
   commandCenter->sendMessage(*message);
 }
 
@@ -665,12 +579,13 @@ void getBatteryVoltage(int v_sense_pin) {
   float vsense = analogRead(v_sense_pin);
   vsense *= 0.003225806; //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
   float vbatt = vsense * 6.0;
-  commandCenter->sendDebug("ASTRO Battery voltage: " + String(vbatt));
+  String msg = "ASTRO Battery voltage: " + (String)(vbatt);
+  commandCenter->sendDebug(msg.c_str());
 }
 
 void pingWheels() {
-  internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
-  commandCenter::sendMessage(*message);
+  internal_comms::Message* message = commandCenter->createMessage(69, 0, nullptr);
+  commandCenter->sendMessage(*message);
 }
 
 

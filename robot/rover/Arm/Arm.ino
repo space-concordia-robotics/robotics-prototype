@@ -897,30 +897,17 @@ void setOpenLoopState(uint8_t motorId, bool isOpenLoop) {
   }
 }
 
-<<<<<<< HEAD
-void budgeMotors(uint8_t* motorsToMove, bool* moveCW) {
-  while (motorsToMove != 0) {
-    motorArray[(int)*motorsToMove - 1]->budge((*moveCW) ? CLOCKWISE
-                                                        : COUNTER_CLOCKWISE);
-    motorsToMove++;
-    moveCW++;
-  }
-=======
 #define MOVE_MOTOR_IDLE 0
 #define MOVE_MOTOR_FORWARD 1
 #define MOVE_MOTOR_BACKWARD 2
 
-void budgeMotors(uint8_t motorActions[])
-{
-    for(uint8_t i = 0; i < 6; i++)
-    {
-        if(motorActions != MOVE_MOTOR_IDLE)
-        {
-            bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
-            motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
-        }
+void budgeMotors(uint8_t motorActions[]) {
+  for (uint8_t i = 0; i < 6; i++) {
+    if (motorActions != MOVE_MOTOR_IDLE) {
+      bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
+      motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
     }
->>>>>>> e3c30af2ad0c9d2e8edd6fdf0d3e234949d67f7e
+  }
 }
 
 /**
@@ -934,23 +921,11 @@ void resetSingleMotor(uint8_t motorId) {
   motorArray[motorId - 1]->setSoftwareAngle(0.0);
 }
 
-<<<<<<< HEAD
-void moveMultipleMotors(uint8_t* motorsToMove, float* anglesToReach) {
-  while (*motorsToMove != 0) {
-    if (motorArray[(int)*motorsToMove - 1]->setDesiredAngle(*anglesToReach)) {
-      motorArray[(int)*motorsToMove - 1]->goToCommandedAngle();
-=======
-void moveMultipleMotors(float anglesToReach[])
-{
-    for(uint8_t i = 0; i < 6; i++)
-    {
-        if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
-            motorArray[i]->goToCommandedAngle();
-        }
->>>>>>> e3c30af2ad0c9d2e8edd6fdf0d3e234949d67f7e
+void moveMultipleMotors(float anglesToReach[]) {
+  for (uint8_t i = 0; i < 6; i++) {
+    if (motorArray[i]->setDesiredAngle(anglesToReach[i])) {
+      motorArray[i]->goToCommandedAngle();
     }
-    motorsToMove++;
-    anglesToReach++;
   }
 }
 
