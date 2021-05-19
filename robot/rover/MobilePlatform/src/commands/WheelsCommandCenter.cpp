@@ -28,6 +28,7 @@ Command messages
 #define COMMAND_GET_ROTATIONAL_VELOCITY 12
 #define COMMAND_GET_CURRENT_VELOCITY 13
 #define COMMAND_GET_DESIRED_VELOCITY 14
+#define COMMAND_GET_BATTERY_VOLTAGE 15
 #define COMMAND_WHEELS_PING 69
 
 /*
@@ -45,13 +46,22 @@ void getRoverStatus();
 void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
 void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255 
 
-// Value getter functions
+// Teensy to OBC value getters
 void getLinearVelocity(void);
 void getRotationalVelocity(void);
 void getCurrentVelocity(void);
 void getDesiredVelocity(void);
-void getBatteryVoltage(int v_sense_pin);
+void getBatteryVoltage(void);
 void pingWheels(void);
+
+// this modifies the pointer
+float bytes_to_float(const uint8_t* rawPointer)
+{
+  float f;
+  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
+  memcpy(&f, &bytes, sizeof(f));
+  return f;
+}
 
 void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
@@ -134,6 +144,11 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
     case COMMAND_GET_DESIRED_VELOCITY:
     {
       getDesiredVelocity();
+      break;
+    }
+    case COMMAND_GET_BATTERY_VOLTAGE:
+    {
+      getBatteryVoltage();
       break;
     }
     case COMMAND_WHEELS_PING:

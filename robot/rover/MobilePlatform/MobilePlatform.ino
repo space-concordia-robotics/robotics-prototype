@@ -18,7 +18,6 @@
 #include "includes/commands/WheelsCommandCenter.h"    
 #include "includes/Commands.h"  // This automatically includes DcMotor.h
 #include "includes/Globals.h"
-#include "includes/Helpers.h"
 #include "includes/PidController.h"
 #include "includes/PinSetup.h"
 
@@ -105,9 +104,7 @@ void initSerialCommunications(void);
 
 // Wheel command methods from WheelsCommandCenter.cpp
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
-// void setMotorList(DcMotor* motorList);
 void setMotorList(DcMotor* motorPtrList);
-// void setServoList(Servo* servoList);
 void setServoList(Servo* servoPtrList);
 DcMotor* getMotorList();
 void toggleMotors(bool turnMotorOn);
@@ -128,7 +125,7 @@ void getLinearVelocity(void);
 void getRotationalVelocity(void);
 void getCurrentVelocity(void);
 void getDesiredVelocity(void);
-void getBatteryVoltage(int v_sense_pin);
+void getBatteryVoltage(void);
 void pingWheels(void);
 
 // Initial teensy setup
@@ -171,7 +168,7 @@ void loop() {
   }
 
   if (sinceSensorRead > SENSOR_READ_INTERVAL) {
-    getBatteryVoltage(V_SENSE_PIN);
+    getBatteryVoltage();
     navHandler(Cmds);
     sinceSensorRead = 0;
   }
@@ -207,7 +204,7 @@ void setMotorList(DcMotor* motorPtrList){
 }
 
 void setServoList(Servo* servoPtrList){
-  Cmds.servoPtrList = servoPtrList;
+  Cmds.servoList = servoPtrList;
 }
 
 DcMotor* getMotorList() {
@@ -234,7 +231,6 @@ void toggleMotors(bool turnMotorOn) {
 
 // Emergency stop all motors
 void stopMotors(void) {
-  // DcMotor::velocityHandler(motorList,0, 0); // Set all motors throttle and steering to 0
   DcMotor::velocityHandler(*motorPtrList,0, 0); // Set all motors throttle and steering to 0
 }
 
@@ -532,6 +528,7 @@ void lb_encoder_interrupt(void) {
   LB.encoderCount++;
 }
 
+// Messages to get rover information
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void getLinearVelocity() {
   // Create message and send to OBC (Wheel Teensy to OBC)
@@ -575,15 +572,22 @@ void getDesiredVelocity() {
   commandCenter->sendMessage(*message);
 }
 
-void getBatteryVoltage(int v_sense_pin) {
-  float vsense = analogRead(v_sense_pin);
+void getBatteryVoltage() {
+  float vsense = analogRead(V_SENSE_PIN);
   vsense *= 0.003225806; //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
   float vbatt = vsense * 6.0;
-  String msg = "ASTRO Battery voltage: " + (String)(vbatt);
-  commandCenter->sendDebug(msg.c_str());
+
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 6 for vbatt
+  byte *vbattByte = (byte *)&vbatt;
+  internal_comms::Message* message = commandCenter->createMessage(
+      6, sizeof(vbattByte), (byte*)vbattByte);
+  commandCenter->sendMessage(*message);
 }
 
 void pingWheels() {
+  // Create message and send to OBC (Wheel Teensy to OBC)
+  // CommandID set to 69 for ping
   internal_comms::Message* message = commandCenter->createMessage(69, 0, nullptr);
   commandCenter->sendMessage(*message);
 }

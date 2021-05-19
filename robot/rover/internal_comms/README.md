@@ -17,12 +17,12 @@ Read the header and source files to understand what is happening. It is short an
 The process is as follows:
 1. In the teensy loop, call the `readCommand` method. This will trickle down into your implementation of `executeCommand` if the command is valid.
 2. Witin `executeCommand`, you must create a message struct using `createMessage`.
-3. If the commandID from the `executeCommand` is valid, add the created message to a queue using `sendMessage` within the case statement.  
+3. If the commandID from the `executeCommand` is valid, add the created message to a queue using `sendMessage(Message& message)` within the case statement.  
 ### Note ###
-This queue stores all messages which were sent, in case the message is received, but unable to be executed due to the UART pin being disabled. A UART pin can be disabled for a particular module if it is being used by a different module at a current moment. With the message added, then the latest message added to the queue is attempted to be sent. This is because the queue of messages must start by sending the latest message, and not the most recent! If this message is the only message in the queue, it is added, sent and removed from the queue.
+The queue's purpose is to keep track of previous messages, so that they can be performed once the serial pin is enabled for the particular module. This queue stores all messages which were called to be sent, in case the message is received, but unable to be executed due to the UART pin being disabled. A UART pin can be disabled for a particular module if it is being used by a different module at a current moment. With the message added, then the latest message added to the queue is attempted to be sent. This is because the queue of messages must start by sending the latest message, and not the most recent! If this message is the only message in the queue, it is added, sent and removed from the queue.
 
 4. After the message is added to the queue, call the associated .ino function depending on the commandID
-5. Within the function for the specific command, call `sendMessage` in your loop.  
+5. Within the function for the specific command, call `sendMessage()` in your loop.  
 ### Note ###
-`sendMessage` will check the message queue, send a message if the transceiver pin is enabled, and then pop the message out of the queue. If `sendMessage` fails, the message will remain in the queue to be performed later. The queue's purpose is to keep track of previous messages, so that they can be performed once the serial pin is enabled for the particular module. 
+`sendMessage()` will check if the transmission pin is enabled and pop the message out of the queue in order to be sent.  
 
