@@ -36,5 +36,6 @@ robot/rover/MobilePlatform/CMakeLists.txt
 robot/rover/PidController/CMakeLists.txt
 robot/rover/science/CMakeLists.txt
 robot/rover/comms_demo/CMakeLists.txt
+robot/rover/comms_demo/arduino_demos/pong_bing/CMakeLists.txt
 .clangd
 compile_commands.json
