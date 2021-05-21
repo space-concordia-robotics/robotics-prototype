@@ -33,7 +33,7 @@ def get_handler(commandId, selectedDevice):
             return in_command[2]
     return None
 
-# Pin definitions
+# Pin definitions WHICH ARE WRONG
 ARM_PIN = 11
 ROVER_PIN = 13
 SCIENCE_PIN = 15
@@ -52,7 +52,9 @@ science_queue = deque()
 command_queues = [arm_queue, rover_queue, science_queue]
 
 def receive_message():
-        while True:
+        start_time = time.time()
+        while (time.time() - start_time < 0.5):
+
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
