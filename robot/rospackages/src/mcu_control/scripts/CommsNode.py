@@ -101,6 +101,8 @@ def send_command(cmd):
     if command is not None:
         commandID = command[1]
 
+        # Must not forget to toggle TX2 RS-485 pin..
+
         ser.write(commandID)
         ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
 
