@@ -1,5 +1,5 @@
-#ifndef PINS_H
-#define PINS_H
+#ifndef PINSETUP_H
+#define PINSETUP_H
 
 #define V_SENSE_PIN 39 // for reading battery voltage
 
@@ -8,6 +8,7 @@
 // R/L (right/left), F/M/B (forward, middle, back)
 
 /* motor driver pins (cytron) */
+#define NUM_MOTORS 6
 
 // direction pins
 #define RF_DIR   2

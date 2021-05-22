@@ -16,7 +16,7 @@ void Commands::setPhone(ArduinoBlue* phone){
 }
 void Commands::handler(String cmd, String sender) {
 
-     Helpers::get().println("ASTRO GOT: " + cmd);
+    Helpers::get().println("ASTRO GOT: " + cmd);
     if (cmd == activate_cmd) {
         activate(sender);
     }
@@ -566,4 +566,8 @@ void Commands::setMotorList(DcMotor* motorList){
 }
 void Commands::setServoList(Servo* servoList){
   this->servoList = servoList;
+}
+
+DcMotor* Commands::getMotorList(){
+  return this->motorList;
 }
