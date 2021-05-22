@@ -58,7 +58,7 @@ namespace internal_comms
         Message* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
-        message->rawArgs = rawArgs;
+        memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
 
