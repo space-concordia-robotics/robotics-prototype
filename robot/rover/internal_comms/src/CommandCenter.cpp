@@ -127,9 +127,9 @@ namespace internal_comms
                     Serial.write(message.rawArgs, message.rawArgsLength);
 
                 Serial.write(0x0A);
-
-                free( (void *) &message);
-                //delete &message;
+                
+                free((void *)message.rawArgs);
+                free((void *)&message);
             }
             //else {
                 //Serial.write(1);
