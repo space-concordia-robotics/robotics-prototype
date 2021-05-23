@@ -471,7 +471,7 @@ void initMotorEncoder5(void) {
 
 void initSerialCommunications(void) {
   // Create serial connection with teensy pins 0 and 1
-  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
+  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, 2);
 
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
