@@ -33,10 +33,10 @@ def get_handler(commandId, selectedDevice):
             return in_command[2]
     return None
 
-# Pin definitions WHICH ARE WRONG
-ARM_PIN = 11
-ROVER_PIN = 13
-SCIENCE_PIN = 15
+# Pin definitions Not correct as of May 23, 2021
+ARM_PIN = 19
+ROVER_PIN = 21
+SCIENCE_PIN = 23
 teensy_pins = [ARM_PIN, ROVER_PIN, SCIENCE_PIN]
 
 GPIO.setmode(GPIO.BOARD)
@@ -130,7 +130,7 @@ def send_command(cmd):
 
 def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
-    command, args = parse_command(message)
+    command, args = parse_command(message.data)
 
     temp_list = [command, args, ARM_SELECTED]
     arm_queue.append(temp_list)
@@ -157,7 +157,8 @@ def main():
 
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim? # IDK, we will see
+    ser = serial.Serial('/dev/ttyS0', 57600) # you sure this is good for the jetson tim? # IDK, we will see
+
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
