@@ -1,8 +1,9 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
 #include "Helpers.h"
-#include "Pins.h"
+#include "PinSetup.h"
 #include "Globals.h"
+
 class PidController {
 public:
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
