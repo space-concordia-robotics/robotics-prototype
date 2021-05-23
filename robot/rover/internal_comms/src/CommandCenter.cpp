@@ -83,7 +83,7 @@ namespace internal_comms
     
     void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin, uint8_t deviceID)
     {
-        CommandCenter::deviceID = deviceID;
+        this->deviceID = deviceID;
         pinMode(rxPin, INPUT);
         pinMode(txPin, OUTPUT); 
         pinMode(enablePin, INPUT);
