@@ -58,6 +58,9 @@ def receive_message():
             if ser.in_waiting > 0:
                 commandID = ser.read()
                 commandID = int.from_bytes(commandID, "big")
+                deviceID = ser.read()
+                deviceID = int.from_bytes(deviceID, "big")
+
                 handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
                 # print("CommandID:", commandID)
                 if handler == None:

@@ -139,9 +139,9 @@ namespace internal_comms
                 free((void *)&message);
             }
             else {
-                Serial.write(1);
-                Serial.write(0);
-                Serial.write(0x0A);
+                /* Serial.write(1); */
+                /* Serial.write(0); */
+                /* Serial.write(0x0A); */
             }
         }
     }
