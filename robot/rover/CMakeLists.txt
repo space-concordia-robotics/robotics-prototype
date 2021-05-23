@@ -215,9 +215,8 @@ foreach(path ${INOFILES})
  
  elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
+ set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
-
 
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
