@@ -327,8 +327,6 @@ void printMotorAngles(void) {
         motorArray[i]->calcCurrentAngle();
         softwareAngles[i] = motorArray[i]->getSoftwareAngle();
     }
-    Serial1.print(softwareAngles[0]);
-    Serial1.print(((byte *)softwareAngles)[0]);
 
     internal_comms::Message* message = commandCenter->createMessage(2, 24, (byte*)softwareAngles);
     commandCenter->sendMessage(*message);

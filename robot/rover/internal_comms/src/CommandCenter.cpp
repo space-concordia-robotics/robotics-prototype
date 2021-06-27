@@ -60,7 +60,6 @@ namespace internal_comms
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
-        Serial.print("5");
         return message;
     }
 
@@ -133,13 +132,16 @@ namespace internal_comms
                 Serial.write(message.rawArgsLength);
 
                 if(message.rawArgsLength > 0)
+                    Serial.print("what");
                     Serial.write(message.rawArgs, message.rawArgsLength);
+                    free((void *)message.rawArgs);
+
+                Serial.print("here");
 
                 Serial.write(0x0A);
                 
                 Serial.print("before");
 
-                free((void *)message.rawArgs);
                 
                 Serial.print("between");
                 
