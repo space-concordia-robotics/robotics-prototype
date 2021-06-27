@@ -1,29 +1,29 @@
 /*
-  This is the main sketch which defines the control logic of the robotic arm of
-  the Space Concordia Division, which runs on a Teensy 3.6 that communicates
-  with an Nvidia Jetson TX2
+   This is the main sketch which defines the control logic of the robotic arm of
+   the Space Concordia Division, which runs on a Teensy 3.6 that communicates
+   with an Nvidia Jetson TX2
 
-  The code can be compiled for serial communication over usb (if connected to a
-  standard computer), or for serial communication over TX/RX pins (if connected
-  to the Odroid). In the latter case, communication can be done either directly
-  with Serial1, or with ROSserial, if integration in the ROS network is desired.
-  Currently, this code is built for the control of six motors: three DC motors,
-  one stepper motor, and two continuous rotation servos. Several helper classes
-  were written to abstract away the complexities of controlling different types
-  of motors and communicating with a master device.
+   The code can be compiled for serial communication over usb (if connected to a
+   standard computer), or for serial communication over TX/RX pins (if connected
+   to the Odroid). In the latter case, communication can be done either directly
+   with Serial1, or with ROSserial, if integration in the ROS network is desired.
+   Currently, this code is built for the control of six motors: three DC motors,
+   one stepper motor, and two continuous rotation servos. Several helper classes
+   were written to abstract away the complexities of controlling different types
+   of motors and communicating with a master device.
 
-  The code allows position control for all six of the arm's joints. It also
-  has a homing routine which depends on limit switches and sets the
-  0 degrees position for each joint. The code also allows to stop motors at
-  any point in time. Open loop control can be performed without the use of
-  encoders but results in imprecise and jerky control. Use of ramping allows
-  for less jerky control. The best control is closed loop control, which uses
-  encoders for smooth speed profiles. Many parameters can be adjusted with the
-  appropriate command. The Teensy also has a software reboot command.
+   The code allows position control for all six of the arm's joints. It also
+   has a homing routine which depends on limit switches and sets the
+   0 degrees position for each joint. The code also allows to stop motors at
+   any point in time. Open loop control can be performed without the use of
+   encoders but results in imprecise and jerky control. Use of ramping allows
+   for less jerky control. The best control is closed loop control, which uses
+   encoders for smooth speed profiles. Many parameters can be adjusted with the
+   appropriate command. The Teensy also has a software reboot command.
 
-  This code began development sometime in July 2018 and is still being
-  updated as of May 2021
-*/
+   This code began development sometime in July 2018 and is still being
+   updated as of May 2021
+ */
 
 #define UART_PORT
 
@@ -49,7 +49,7 @@
 #define HEARTBEAT_PERIOD 1000
 
 /* serial */
-#define BAUD_RATE 115200 //!< serial bit rate
+#define BAUD_RATE 57600 //!< serial bit rate
 #define SERIAL_PRINT_INTERVAL 50 //!< how often should teensy send angle data
 #define SERIAL_READ_TIMEOUT 20 //!< how often should the serial port be read
 #define BUFFER_SIZE 100 //!< size of the buffer for the serial commands
@@ -60,7 +60,8 @@
 
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
-const uint8_t ENABLE_PIN = 2; // again, no idea what this is supposed to be
+const uint8_t ENABLE_PIN = 25; // again, no idea what this is supposed to be
+const uint8_t TRANSMIT_PIN = 26; 
 
 enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
 int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
@@ -140,735 +141,738 @@ void servoInterrupt(void); //!< manages motors 5&6
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 /*! \brief Teensy setup. Calls many init functions to prep comms and motors.
 
-   \todo do housekeeping stuff
-   \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
-   \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
-   Floating point math doesn't seem bad, but at worst, convert float to int
-   before motor control and do int math inside interrupts.
-   \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
-   \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
-   \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
-   \todo Issue: interrupt functions must be defined outside of classes...
-   \todo Confirm all the pins will work with interrupts and not stepping on each other.
-   Do I send 3.3v to all interrupt pins simultaneously to test thing?
-   \todo Deal with overflow of encoderCount.. does it ever reach max value?
-   \todo What do I do for angles over 360? Do I keep counting up?
-   Do I keep count of how many rotations I've done?
-   \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
-   Ramping of stepper should be linear, higher level ramping should occur in gui.
-   The base station/odroid should be in charge of ramping up angles and the teensy
-   should just go to them? Perhaps if a large angle is requested there should
-   still be a way to stop it though.
-   \todo Determine whether it's worth it to use the built in quadrature decoders.
-   Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
-   Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
-*/
+  \todo do housekeeping stuff
+  \todo Implement error checking, clean up code, comment code, make sure ISR variables are volatile
+  \todo Make sure the math calculations are written correctly and calculate as quickly as possible.
+  Floating point math doesn't seem bad, but at worst, convert float to int
+  before motor control and do int math inside interrupts.
+  \todo (Nick) Finish implementing/integrating heartbeat and watchdog interrupt
+  \todo Figure out where to disable interrupts so that I don't read a value while it's being modified
+  \todo Determine the actual clockwise and counter-clockwise directions of motors based on their wiring in the arm itself
+  \todo Issue: interrupt functions must be defined outside of classes...
+  \todo Confirm all the pins will work with interrupts and not stepping on each other.
+  Do I send 3.3v to all interrupt pins simultaneously to test thing?
+  \todo Deal with overflow of encoderCount.. does it ever reach max value?
+  \todo What do I do for angles over 360? Do I keep counting up?
+  Do I keep count of how many rotations I've done?
+  \todo Different types of ramping profiles - trapezoid vs quintic polynomial?
+  Ramping of stepper should be linear, higher level ramping should occur in gui.
+  The base station/odroid should be in charge of ramping up angles and the teensy
+  should just go to them? Perhaps if a large angle is requested there should
+  still be a way to stop it though.
+  \todo Determine whether it's worth it to use the built in quadrature decoders.
+  Quadrature on ftm1,2: pins 3/4,29/30: cant use for pwm anymore.
+  Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
+ */
 void setup() {
 
-  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
-  initEncoders();
-  initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
-  initSpeedParams();
-  motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
-  motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
-  initMotorTimers();
+    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+    initEncoders();
+    initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
+    initSpeedParams();
+    motor3.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
+    motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
+    initMotorTimers();
 
-  // reset the elapsedMillis variables so that they're fresh upon entering the loop()
-  sinceAnglePrint = 0;
+    // reset the elapsedMillis variables so that they're fresh upon entering the loop()
+    sinceAnglePrint = 0;
 }
 
 /*! \brief Main code which loops forever. Parses commands, prints motor angles and blinks the builtin LED.
 
-   \todo There should be a check so that if the motor is moving away from the goal position
-   or has been moving for a while without reaching the expected angle, it stops...
-   like a timeout.
-   \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
-   \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
-   a check in the microcontroller that there's an issue (there can also be a check in the gui)
-   \todo Check to see if any global variables can be turned into static variables inside loop()
-   \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
-*/
+  \todo There should be a check so that if the motor is moving away from the goal position
+  or has been moving for a while without reaching the expected angle, it stops...
+  like a timeout.
+  \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
+  \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
+  a check in the microcontroller that there's an issue (there can also be a check in the gui)
+  \todo Check to see if any global variables can be turned into static variables inside loop()
+  \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
+ */
 void loop() {
-  respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
-  if (isHoming) { // not done homing the motors
-    homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
-  }
+    respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
+    if (isHoming) { // not done homing the motors
+        homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
+    }
 
-  if(Serial.available() > 0)
-      commandCenter->readCommand();
+    if(Serial.available() > 0)
+        commandCenter->readCommand();
 
 } // end of loop
 
 /*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
-   This function also sets pid parameters and joint angle tolerances.
-*/
+  This function also sets pid parameters and joint angle tolerances.
+ */
 void initEncoders(void) {
 
-  motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
-  attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
-  attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
+    motor1.attachEncoder(M1_ENCODER_A, M1_ENCODER_B, M1_ENCODER_PORT, M1_ENCODER_SHIFT, M1_ENCODER_RESOLUTION);
+    attachInterrupt(motor1.encoderPinA, m1_encoder_interrupt, CHANGE);
+    attachInterrupt(motor1.encoderPinB, m1_encoder_interrupt, CHANGE);
 
-  motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
-  attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
-  attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
+    motor2.attachEncoder(M2_ENCODER_A, M2_ENCODER_B, M2_ENCODER_PORT, M2_ENCODER_SHIFT, M2_ENCODER_RESOLUTION);
+    attachInterrupt(motor2.encoderPinA, m2_encoder_interrupt, CHANGE);
+    attachInterrupt(motor2.encoderPinB, m2_encoder_interrupt, CHANGE);
 
-  motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
-  attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
-  attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
+    motor3.attachEncoder(M3_ENCODER_A, M3_ENCODER_B, M3_ENCODER_PORT, M3_ENCODER_SHIFT, M3_ENCODER_RESOLUTION);
+    attachInterrupt(motor3.encoderPinA, m3_encoder_interrupt, CHANGE);
+    attachInterrupt(motor3.encoderPinB, m3_encoder_interrupt, CHANGE);
 
-  motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
-  attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
-  attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
+    motor4.attachEncoder(M4_ENCODER_A, M4_ENCODER_B, M4_ENCODER_PORT, M4_ENCODER_SHIFT, M4_ENCODER_RESOLUTION);
+    attachInterrupt(motor4.encoderPinA, m4_encoder_interrupt, CHANGE);
+    attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
-  // set activate PIDs
-  motor1.isOpenLoop = false; motor1.encoderModifier=-1;
-  motor2.isOpenLoop = false;
-  motor3.isOpenLoop = false;
-  motor4.isOpenLoop = false; motor4.encoderModifier=-1;
+    // set activate PIDs
+    motor1.isOpenLoop = false; motor1.encoderModifier=-1;
+    motor2.isOpenLoop = false;
+    motor3.isOpenLoop = false;
+    motor4.isOpenLoop = false; motor4.encoderModifier=-1;
 
-  // set pid gains
-  motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
-  motor2.pidController.setGainConstants(10.0, 0.0, 0.0);
-  motor3.pidController.setGainConstants(10.0, 0.0, 0.0);
-  motor4.pidController.setGainConstants(10.0, 0.0, 0.0);
+    // set pid gains
+    motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
+    motor2.pidController.setGainConstants(10.0, 0.0, 0.0);
+    motor3.pidController.setGainConstants(10.0, 0.0, 0.0);
+    motor4.pidController.setGainConstants(10.0, 0.0, 0.0);
 
-  // set motor shaft angle tolerances
-  motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
-  motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
-  motor3.pidController.setJointAngleTolerance(0.1);//2.0 * motor3.gearRatioReciprocal);
-  motor4.pidController.setJointAngleTolerance(0.1);//2.0 * motor4.gearRatioReciprocal);
-  motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
-  motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
+    // set motor shaft angle tolerances
+    motor1.pidController.setJointAngleTolerance(0.1);//2.0 * motor1.gearRatioReciprocal); // randomly chosen for dc
+    motor2.pidController.setJointAngleTolerance(0.1);//2.0 * motor2.gearRatioReciprocal);
+    motor3.pidController.setJointAngleTolerance(0.1);//2.0 * motor3.gearRatioReciprocal);
+    motor4.pidController.setJointAngleTolerance(0.1);//2.0 * motor4.gearRatioReciprocal);
+    motor5.pidController.setJointAngleTolerance(0.1);//2.0 * motor5.gearRatioReciprocal); // randomly chosen for servo
+    motor6.pidController.setJointAngleTolerance(0.1);//2.0 * motor6.gearRatioReciprocal);
 }
 /*! Each motor with limit switches needs to attach the limit switch and 2 ish interrupts.
-    this function also sets angle limits for the joints
-*/
+  this function also sets angle limits for the joints
+ */
 void initLimitSwitches(void) {
 
-  // c for clockwise/counterclockwise, f for flexion/extension, g for gripper (assuming only one switch)
-  motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
-  motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
-  motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
-  motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
-  //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
-  motor6.attachLimitSwitches(FLEXION_SWITCH, M6_LIMIT_SW_FLEX, M6_LIMIT_SW_EXTEND);
+    // c for clockwise/counterclockwise, f for flexion/extension, g for gripper (assuming only one switch)
+    motor1.attachLimitSwitches(REVOLUTE_SWITCH, M1_LIMIT_SW_CW, M1_LIMIT_SW_CCW);
+    motor2.attachLimitSwitches(FLEXION_SWITCH, M2_LIMIT_SW_FLEX, M2_LIMIT_SW_EXTEND);
+    motor3.attachLimitSwitches(FLEXION_SWITCH, M3_LIMIT_SW_FLEX, M3_LIMIT_SW_EXTEND);
+    motor4.attachLimitSwitches(FLEXION_SWITCH, M4_LIMIT_SW_FLEX, M4_LIMIT_SW_EXTEND);
+    //motor5.attachLimitSwitches(REVOLUTE_SWITCH, M5_LIMIT_SW_CW, M5_LIMIT_SW_CCW);
+    motor6.attachLimitSwitches(FLEXION_SWITCH, M6_LIMIT_SW_FLEX, M6_LIMIT_SW_EXTEND);
 
-  attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
-  //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor6.limSwitchFlex, m6FlexISR, LIM_SWITCH_DIR);
-  attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor1.limSwitchCw, m1CwISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor1.limSwitchCcw, m1CcwISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor2.limSwitchFlex, m2FlexISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor2.limSwitchExtend, m2ExtendISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor3.limSwitchFlex, m3FlexISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor3.limSwitchExtend, m3ExtendISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor4.limSwitchFlex, m4FlexISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor4.limSwitchExtend, m4ExtendISR, LIM_SWITCH_DIR);
+    //attachInterrupt(motor5.limSwitchCw, m5CwISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor6.limSwitchFlex, m6FlexISR, LIM_SWITCH_DIR);
+    attachInterrupt(motor6.limSwitchExtend, m6ExtendISR, LIM_SWITCH_DIR);
 
-  // set motor joint angle limits
-  motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
-  motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
-  motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
-  motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
-  // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
-  motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
+    // set motor joint angle limits
+    motor1.setAngleLimits(M1_MIN_HARD_ANGLE, M1_MAX_HARD_ANGLE, M1_MIN_SOFT_ANGLE, M1_MAX_SOFT_ANGLE);
+    motor2.setAngleLimits(M2_MIN_HARD_ANGLE, M2_MAX_HARD_ANGLE, M2_MIN_SOFT_ANGLE, M2_MAX_SOFT_ANGLE);
+    motor3.setAngleLimits(M3_MIN_HARD_ANGLE, M3_MAX_HARD_ANGLE, M3_MIN_SOFT_ANGLE, M3_MAX_SOFT_ANGLE);
+    motor4.setAngleLimits(M4_MIN_HARD_ANGLE, M4_MAX_HARD_ANGLE, M4_MIN_SOFT_ANGLE, M4_MAX_SOFT_ANGLE);
+    // motor5.setAngleLimits(M5_MIN_HARD_ANGLE, M5_MAX_HARD_ANGLE, M5_MIN_SOFT_ANGLE, M5_MAX_SOFT_ANGLE); // this joint should be able to spin freely
+    motor6.setAngleLimits(M6_MIN_HARD_ANGLE, M6_MAX_HARD_ANGLE, M6_MIN_SOFT_ANGLE, M6_MAX_SOFT_ANGLE);
 }
 /*! Sets pidController output limits for each motor, then sets openLoopSpeed for each motor.
-   Also sets openLoopGain for any non-stepper motor.
+  Also sets openLoopGain for any non-stepper motor.
 
-   \todo stepper doesn't have speed the way servos and dcs do??????
-   this is because stepper calculates speed using durations, but this means
-   openLoopGain and openLoopSpeed mean nothing for it???
-*/
+  \todo stepper doesn't have speed the way servos and dcs do??????
+  this is because stepper calculates speed using durations, but this means
+  openLoopGain and openLoopSpeed mean nothing for it???
+ */
 void initSpeedParams(void) {
-  // set speed limits (in percentage). It also sets open loop gains to make sure the angle estimations are ok
-  // Abtin thinks 50% should be a hard limit that can't be modified this easily
+    // set speed limits (in percentage). It also sets open loop gains to make sure the angle estimations are ok
+    // Abtin thinks 50% should be a hard limit that can't be modified this easily
 
-  motor1.setMotorSpeed(50); // 60 rpm
-  motor2.setMotorSpeed(42); // 32 rpm
-  motor3.setMotorSpeed(65); // 45 rpm
-  motor4.setMotorSpeed(30); // 60 rpm
-  motor5.setMotorSpeed(100);
-  motor6.setMotorSpeed(100);
+    motor1.setMotorSpeed(50); // 60 rpm
+    motor2.setMotorSpeed(42); // 32 rpm
+    motor3.setMotorSpeed(65); // 45 rpm
+    motor4.setMotorSpeed(30); // 60 rpm
+    motor5.setMotorSpeed(100);
+    motor6.setMotorSpeed(100);
 
-  // set pid slowest speed before it cuts power, to avoid noise and energy drain
-  motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
-  motor2.pidController.setSlowestSpeed(10.0); // needs to be tuned
-  motor3.pidController.setSlowestSpeed(5.0); // needs to be tuned
-  motor4.pidController.setSlowestSpeed(5.0); // needs to be tuned
-  //motor5.pidController.setSlowestSpeed(5.0); // servos have no closed loop
-  //motor6.pidController.setSlowestSpeed(5.0); // servos have no closed loop
+    // set pid slowest speed before it cuts power, to avoid noise and energy drain
+    motor1.pidController.setSlowestSpeed(5.0); // needs to be tuned
+    motor2.pidController.setSlowestSpeed(10.0); // needs to be tuned
+    motor3.pidController.setSlowestSpeed(5.0); // needs to be tuned
+    motor4.pidController.setSlowestSpeed(5.0); // needs to be tuned
+    //motor5.pidController.setSlowestSpeed(5.0); // servos have no closed loop
+    //motor6.pidController.setSlowestSpeed(5.0); // servos have no closed loop
 
-  // set open loop parameters. By default the motors are open loop,
-  // have constant velocity profiles (no ramping), operate at 50% max speed,
-  // and the gains should vary based on which motor it is
+    // set open loop parameters. By default the motors are open loop,
+    // have constant velocity profiles (no ramping), operate at 50% max speed,
+    // and the gains should vary based on which motor it is
 
-  // open loop gain is only for time-based open loop control
-  motor1.setOpenLoopGain(0.001); // needs to be tuned
-  motor2.setOpenLoopGain(0.0012); // needs to be tuned
-  motor3.setOpenLoopGain(0.004); // more or less tuned
-  motor4.setOpenLoopGain(0.04); // needs to be tuned
-  motor5.setOpenLoopGain(0.32);
-  motor6.setOpenLoopGain(0.25);
+    // open loop gain is only for time-based open loop control
+    motor1.setOpenLoopGain(0.001); // needs to be tuned
+    motor2.setOpenLoopGain(0.0012); // needs to be tuned
+    motor3.setOpenLoopGain(0.004); // more or less tuned
+    motor4.setOpenLoopGain(0.04); // needs to be tuned
+    motor5.setOpenLoopGain(0.32);
+    motor6.setOpenLoopGain(0.25);
 }
 //! Attaches interrupt functions to motor timers. Also sets interrupt priorities.
 void initMotorTimers(void) {
 
-  dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-  dcTimer.priority(MOTOR_NVIC_PRIORITY);
-  servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
-  servoTimer.priority(MOTOR_NVIC_PRIORITY);
+    dcTimer.begin(dcInterrupt, DC_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+    dcTimer.priority(MOTOR_NVIC_PRIORITY);
+    servoTimer.begin(servoInterrupt, SERVO_PID_PERIOD); // need to choose a period... went with 20ms because that's typical pwm period for servos...
+    servoTimer.priority(MOTOR_NVIC_PRIORITY);
 }
 
 void printMotorAngles(void) { 
-  float softwareAngles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motorArray[i]->calcCurrentAngle();
-    softwareAngles[i] = motorArray[i]->getSoftwareAngle();
-  }
-  internal_comms::Message* message = commandCenter->createMessage(2, sizeof(softwareAngles), (byte*)softwareAngles);
-  commandCenter->sendMessage(*message);
+    float softwareAngles[NUM_MOTORS];
+    for (int i = 0; i < NUM_MOTORS; i++) {
+        motorArray[i]->calcCurrentAngle();
+        softwareAngles[i] = motorArray[i]->getSoftwareAngle();
+    }
+    Serial1.print(softwareAngles[0]);
+    Serial1.print(((byte *)softwareAngles)[0]);
+
+    internal_comms::Message* message = commandCenter->createMessage(2, 24, (byte*)softwareAngles);
+    commandCenter->sendMessage(*message);
 }
 void clearBlinkState(void) {
-  digitalWrite(LED_BUILTIN, LOW);
-  blinkCount = 0;
-  sinceBlink = 0;
+    digitalWrite(LED_BUILTIN, LOW);
+    blinkCount = 0;
+    sinceBlink = 0;
 }
 void blinkLED(void) {
-  if (blinkType == HEARTBEAT && sinceBlink >= HEARTBEAT_PERIOD) {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
-    sinceBlink = 0;
-  }
-  else if (blinkType == GOOD_BLINK && sinceBlink >= GOOD_BLINK_PERIOD) {
-    if (blinkCount >= MAX_GOOD_BLINKS) {
-      blinkType = HEARTBEAT;
-      clearBlinkState();
+    if (blinkType == HEARTBEAT && sinceBlink >= HEARTBEAT_PERIOD) {
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+        sinceBlink = 0;
     }
-    else {
-      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
-      sinceBlink = 0;
-      if (digitalRead(LED_BUILTIN)) {
-        blinkCount++;
-      }
+    else if (blinkType == GOOD_BLINK && sinceBlink >= GOOD_BLINK_PERIOD) {
+        if (blinkCount >= MAX_GOOD_BLINKS) {
+            blinkType = HEARTBEAT;
+            clearBlinkState();
+        }
+        else {
+            digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+            sinceBlink = 0;
+            if (digitalRead(LED_BUILTIN)) {
+                blinkCount++;
+            }
+        }
     }
-  }
-  else if (blinkType == BAD_BLINK && sinceBlink >= BAD_BLINK_PERIOD) {
-    if (blinkCount >= MAX_BAD_BLINKS) {
-      blinkType = HEARTBEAT;
-      clearBlinkState();
+    else if (blinkType == BAD_BLINK && sinceBlink >= BAD_BLINK_PERIOD) {
+        if (blinkCount >= MAX_BAD_BLINKS) {
+            blinkType = HEARTBEAT;
+            clearBlinkState();
+        }
+        else {
+            digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
+            sinceBlink = 0;
+            if (digitalRead(LED_BUILTIN)) {
+                blinkCount++;
+            }
+        }
     }
-    else {
-      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // toggle pin state
-      sinceBlink = 0;
-      if (digitalRead(LED_BUILTIN)) {
-        blinkCount++;
-      }
-    }
-  }
 }
 void respondToLimitSwitches(void) {
-  for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
-    if (motorArray[i]->triggered) { // check if the switch was hit
-      motorArray[i]->checkForActualPress();
+    for (int i = 0; i < NUM_MOTORS; i++) { // I should maybe make a debouncer class?
+        if (motorArray[i]->triggered) { // check if the switch was hit
+            motorArray[i]->checkForActualPress();
+        }
+        if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
+            if (i == 5) { // gripper switches
+                motorArray[i]->stopRotation(); // stop turning of course
+                if (motorArray[i]->limitSwitchState == CLOCKWISE) {
+                    motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
+                }
+                if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
+                    motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
+                }
+                motorArray[i]->actualPress = false;
+                motorArray[i]->limitSwitchState = 0;
+                if (isHoming) {
+                    motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+                }
+            }
+            else {
+                motorArray[i]->atSafeAngle = false;
+                if (isHoming) {
+                    motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
+                }
+                motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
+            }
+        }
+        /*! \todo put code here to check if the motor should be at the end of its path but isn't?
+          well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
+         */
     }
-    if (motorArray[i]->actualPress) { // the switch was debounced and now we can react
-      if (i == 5) { // gripper switches
-        motorArray[i]->stopRotation(); // stop turning of course
-        if (motorArray[i]->limitSwitchState == CLOCKWISE) {
-          motorArray[i]->setSoftwareAngle(motorArray[i]->maxSoftAngle);
-        }
-        if (motorArray[i]->limitSwitchState == COUNTER_CLOCKWISE) {
-          motorArray[i]->setSoftwareAngle(motorArray[i]->minSoftAngle);
-        }
-        motorArray[i]->actualPress = false;
-        motorArray[i]->limitSwitchState = 0;
-        if (isHoming) {
-          motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
-        }
-      }
-      else {
-        motorArray[i]->atSafeAngle = false;
-        if (isHoming) {
-          motorArray[i]->homingDone = true; // just means that the switch was hit so homing round 2 can start if desired
-        }
-        motorArray[i]->goToSafeAngle(); // internally stops movement and calls forceToAngle to overwrite previous command
-      }
-    }
-    /*! \todo put code here to check if the motor should be at the end of its path but isn't?
-       well how would it know if it isn't if it doesn't hit the limit switch because of software limits?
-    */
-  }
 }
 void homeArmMotors(void) { //!< \todo print homing debug just for motors which are homing
-  if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
-    if (motorsToHome[homingMotor]) { // is this motor supposed to home?
-      // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
-      motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
-      motorsToHome[homingMotor] = false; // set this to false so it only happens once
-    }
-    if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
-      if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
-        if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
+    if (homingMotor >= 0 && homingMotor < NUM_MOTORS) { // make sure it's a valid motor
+        if (motorsToHome[homingMotor]) { // is this motor supposed to home?
+            // the homing direction should be set-able based on the homing command if single direction (or even both i guess)
+            motorArray[homingMotor]->homeMotor('i'); // start homing motor inwards
+            motorsToHome[homingMotor] = false; // set this to false so it only happens once
         }
-        // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
-        if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
-          motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
-        }
-        else { // done finding angle limits, moving to home position and then next motor time
-          if (! (motorArray[homingMotor]->startedZeroing) ) { // start zeroing
-            motorArray[homingMotor]->forceToAngle(0.0);
-            motorArray[homingMotor]->startedZeroing = true;
-          }
-          else { // check to see if done zeroing yet, if so move on to next
-            float angle = motorArray[homingMotor]->getSoftwareAngle();
-            //float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
-            //if (fabs(angle) < tolerance * 3) { // within small enough angle range to move on to next motor
-            if (fabs(angle) <= 1) { // changed angle for testing
-              homingMotor--; // move on to the next motor
+        if (motorArray[homingMotor]->homingDone) { // finished homing in a direction, set by motor timer interrupt
+            if (motorArray[homingMotor]->atSafeAngle) { // makes sure that joint is in permissible range
+                if (motorArray[homingMotor]->homingPass == 0) { // i can't see how this would ever be true?
+                }
+                // will only home outwards if it's double ended homing, otherwise it moves on to the next motor
+                if ( (motorArray[homingMotor]->homingType == DOUBLE_ENDED_HOMING) && (motorArray[homingMotor]->homingPass == 1) ) {
+                    motorArray[homingMotor]->homeMotor('o'); // start homing motor outwards
+                }
+                else { // done finding angle limits, moving to home position and then next motor time
+                    if (! (motorArray[homingMotor]->startedZeroing) ) { // start zeroing
+                        motorArray[homingMotor]->forceToAngle(0.0);
+                        motorArray[homingMotor]->startedZeroing = true;
+                    }
+                    else { // check to see if done zeroing yet, if so move on to next
+                        float angle = motorArray[homingMotor]->getSoftwareAngle();
+                        //float tolerance = motorArray[homingMotor]->pidController.getJointAngleTolerance();
+                        //if (fabs(angle) < tolerance * 3) { // within small enough angle range to move on to next motor
+                        if (fabs(angle) <= 1) { // changed angle for testing
+                            homingMotor--; // move on to the next motor
+                        }
+                        else { // not done going to zero, not doing anything
+                            ;
+                        }
+                    }
+                    }
+                }
             }
-            else { // not done going to zero, not doing anything
-              ;
+            else { // not done homing the motor, will not do anything special
+                ;
             }
-          }
         }
-      }
+        else { // done homing all the motors
+            for (int i = 0; i < NUM_MOTORS; i++) {
+                motorArray[i]->stopHoming();
+            }
+            isHoming = false;
+            // interesting idea is to start homing the next motor while the previous one is finishing up
+            // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
+            // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
+            homingMotor = -1; // reset it until next homing call
+        }
     }
-    else { // not done homing the motor, will not do anything special
-      ;
+    void rebootTeensy(void) { //!< software reset function using watchdog timer
+        WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
+        WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+        // The next 2 lines set the time-out value.
+        WDOG_TOVALL = 15; // This is the value (ms) that the watchdog timer compare itself to.
+        WDOG_TOVALH = 0; // End value (ms) WDT compares itself to.
+        WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
+                WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
+        WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
+        while (1); // infinite do nothing loop -- wait for the countdown
     }
-  }
-  else { // done homing all the motors
-    for (int i = 0; i < NUM_MOTORS; i++) {
-      motorArray[i]->stopHoming();
+    /*! This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
+      This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
+      Calling the kickDog() function will reset the time-out counter.
+
+      \todo Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().
+     */
+    void kickDog(void) {
+        /*
+           noInterrupts();
+           WDOG_REFRESH = 0xA602;
+           WDOG_REFRESH = 0xB480;
+           interrupts();
+         */
     }
-    isHoming = false;
-    // interesting idea is to start homing the next motor while the previous one is finishing up
-    // this would be a good place to call the goToNeutral function or whatever, or it should be its own thing for the sake of keeping things independent
-    // motorArray[homingMotor]->forceToAngle(motorArray[homingMotor]->neutralAngle);
-    homingMotor = -1; // reset it until next homing call
-  }
-}
-void rebootTeensy(void) { //!< software reset function using watchdog timer
-  WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
-  WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
-  // The next 2 lines set the time-out value.
-  WDOG_TOVALL = 15; // This is the value (ms) that the watchdog timer compare itself to.
-  WDOG_TOVALH = 0; // End value (ms) WDT compares itself to.
-  WDOG_STCTRLH = (WDOG_STCTRLH_ALLOWUPDATE | WDOG_STCTRLH_WDOGEN |
-                  WDOG_STCTRLH_WAITEN | WDOG_STCTRLH_STOPEN); // Enable WDG
-  WDOG_PRESC = 0; //Sets watchdog timer to tick at 1 kHz inseast of 1/4 kHz
-  while (1); // infinite do nothing loop -- wait for the countdown
-}
-/*! This function "kicks the dog". Refreshes its time-out counter. If not refreshed, system will be reset.
-  This reset is triggered when the time-out value set in rebootTeensy() is exceeded.
-  Calling the kickDog() function will reset the time-out counter.
 
-  \todo Figure out where to implement kickDog() function into loop() and what time-out value to set for rebootTeensy().
-*/
-void kickDog(void) {
-  /*
-    noInterrupts();
-    WDOG_REFRESH = 0xA602;
-    WDOG_REFRESH = 0xB480;
-    interrupts();
-  */
-}
+    /* timer interrupts */
+    void dcInterrupt(void) {
+        motor1.motorTimerInterrupt();
+        motor2.motorTimerInterrupt();
+        motor3.motorTimerInterrupt();
+        motor4.motorTimerInterrupt();
+    }
+    void servoInterrupt(void) {
+        motor5.motorTimerInterrupt();
+        motor6.motorTimerInterrupt();
+    }
 
-/* timer interrupts */
-void dcInterrupt(void) {
-  motor1.motorTimerInterrupt();
-  motor2.motorTimerInterrupt();
-  motor3.motorTimerInterrupt();
-  motor4.motorTimerInterrupt();
-}
-void servoInterrupt(void) {
-  motor5.motorTimerInterrupt();
-  motor6.motorTimerInterrupt();
-}
-
-/* encoder interrupts */
-//#define M1_SINGLE_CHANNEL 1
+    /* encoder interrupts */
+    //#define M1_SINGLE_CHANNEL 1
 #define M1_DUAL_CHANNEL 2
 #ifdef M1_ENCODER_PORT
-/*! encoder interrupt service routine
+    /*! encoder interrupt service routine
 
-   \todo can I make a skeleton function that gets called in these interrupts
-     that I can just pass the appropriate registers etc into?
-*/
-void m1_encoder_interrupt(void) {
+      \todo can I make a skeleton function that gets called in these interrupts
+      that I can just pass the appropriate registers etc into?
+     */
+    void m1_encoder_interrupt(void) {
 #ifdef M1_DUAL_CHANNEL
-  /*! encoder states are 4 bit values. Top 2 bits are the previous states
-     of encoder channels A and B, bottom 2 are current states.
-  */
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2; //!< shift current state into previous state
-  /*! put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
-     this is done by 1) grabbing the input register of the port,
-     2) shifting it until the relevant bits are in the lowest state,
-     and 3) clearing all the bits higher than the lowest 2
-     next, place said (current) pin states into the bottom 2 bits of oldEncoderState
-  */
-  oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
-  /*! the encoderStates[] array corresponds to the correct direction
-     for a specific set of prev and current encoder states.
-     The & operation ensures that anything above the lowest 4 bits
-     is cleared before accessing the array.
-  */
-  motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor1.encoderModifier;
+        /*! encoder states are 4 bit values. Top 2 bits are the previous states
+          of encoder channels A and B, bottom 2 are current states.
+         */
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2; //!< shift current state into previous state
+        /*! put the 2 relevant pin states from the relevant gpio port into memory, clearing the irrelevant bits
+          this is done by 1) grabbing the input register of the port,
+          2) shifting it until the relevant bits are in the lowest state,
+          and 3) clearing all the bits higher than the lowest 2
+          next, place said (current) pin states into the bottom 2 bits of oldEncoderState
+         */
+        oldEncoderState |= ((M1_ENCODER_PORT >> M1_ENCODER_SHIFT) & 0x03);
+        /*! the encoderStates[] array corresponds to the correct direction
+          for a specific set of prev and current encoder states.
+          The & operation ensures that anything above the lowest 4 bits
+          is cleared before accessing the array.
+         */
+        motor1.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor1.encoderModifier;
 #endif
 #ifdef M1_SINGLE_CHANNEL
-  //! use this version if only one encoder channel is working
-  // this doesn't seem to work though so maybe don't... or fix it
-  motor1.encoderCount += motor1.rotationDirection * 2;
+        //! use this version if only one encoder channel is working
+        // this doesn't seem to work though so maybe don't... or fix it
+        motor1.encoderCount += motor1.rotationDirection * 2;
 #endif
-}
+    }
 #endif
 
 #ifdef M2_ENCODER_PORT
-void m2_encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
-  motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor2.encoderModifier;
-}
+    void m2_encoder_interrupt(void) {
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2;
+        oldEncoderState |= ((M2_ENCODER_PORT >> M2_ENCODER_SHIFT) & 0x03);
+        motor2.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor2.encoderModifier;
+    }
 #endif
 #ifdef M3_ENCODER_PORT
-void m3_encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
-  motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor3.encoderModifier;
-}
+    void m3_encoder_interrupt(void) {
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2;
+        oldEncoderState |= ((M3_ENCODER_PORT >> M3_ENCODER_SHIFT) & 0x03);
+        motor3.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor3.encoderModifier;
+    }
 #endif
 #ifdef M4_ENCODER_PORT
-void m4_encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
-  motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor4.encoderModifier;
-}
+    void m4_encoder_interrupt(void) {
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2;
+        oldEncoderState |= ((M4_ENCODER_PORT >> M4_ENCODER_SHIFT) & 0x03);
+        motor4.encoderCount += encoderStates[(oldEncoderState & 0x0F)] * motor4.encoderModifier;
+    }
 #endif
 #ifdef M5_ENCODER_PORT
-void m5_encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
-  motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-}
+    void m5_encoder_interrupt(void) {
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2;
+        oldEncoderState |= ((M5_ENCODER_PORT >> M5_ENCODER_SHIFT) & 0x03);
+        motor5.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+    }
 #endif
 #ifdef M6_ENCODER_PORT
-void m6_encoder_interrupt(void) {
-  static unsigned int oldEncoderState = 0;
-  oldEncoderState <<= 2;
-  oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
-  motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
-}
+    void m6_encoder_interrupt(void) {
+        static unsigned int oldEncoderState = 0;
+        oldEncoderState <<= 2;
+        oldEncoderState |= ((M6_ENCODER_PORT >> M6_ENCODER_SHIFT) & 0x03);
+        motor6.encoderCount += encoderStates[(oldEncoderState & 0x0F)];
+    }
 #endif
 
-/* limit switch interrupts */
-/* //! limit switch interrupt service routine
-  \todo can I make a skeleton function that gets called in these interrupts
-     that I can just pass the appropriate registers etc into?
-*/
-void m1CwISR(void) {
-  // if the switch wasn't previously triggered then it starts a counter
-  if (!(motor1.triggered) && motor1.triggerState == 0) {
-    motor1.triggered = true;
-    motor1.sinceTrigger = 0;
-  }
-  // grab the state of the pin for the cw switch
-  int pinState = (M1_LIMIT_SW_CW_PORT >> M1_LIMIT_SW_CW_SHIFT ) & 1;
-  // since we care about falling edges, when it reads 0 it's a hit
-  // a hit is +1 or -1 depending on which switch was hit
-  if (pinState == 0) {
-    motor1.triggerState = CLOCKWISE;
-  }
-  // if it's not a hit we set it to 0
-  else {
-    motor1.triggerState = 0;
-  }
-}
-void m1CcwISR(void) {
-  if (!(motor1.triggered) && motor1.triggerState == 0) {
-    motor1.triggered = true;
-    motor1.sinceTrigger = 0;
-  }
-  int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor1.triggerState = COUNTER_CLOCKWISE;
-  }
-  else {
-    motor1.triggerState = 0;
-  }
-}
-void m2FlexISR(void) {
-  if (!(motor2.triggered) && motor2.triggerState == 0) {
-    motor2.triggered = true;
-    motor2.sinceTrigger = 0;
-  }
-  int pinState = (M2_LIMIT_SW_FLEX_PORT >> M2_LIMIT_SW_FLEX_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor2.triggerState = CLOCKWISE;
-  }
-  else {
-    motor2.triggerState = 0;
-  }
-}
-void m2ExtendISR(void) {
-  if (!(motor2.triggered) && motor2.triggerState == 0) {
-    motor2.triggered = true;
-    motor2.sinceTrigger = 0;
-  }
-  int pinState = (M2_LIMIT_SW_EXTEND_PORT >> M2_LIMIT_SW_EXTEND_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor2.triggerState = COUNTER_CLOCKWISE;
-  }
-  else {
-    motor2.triggerState = 0;
-  }
-}
-void m3FlexISR(void) {
-  if (!(motor3.triggered) && motor3.triggerState == 0) {
-    motor3.triggered = true;
-    motor3.sinceTrigger = 0;
-  }
-  int pinState = (M3_LIMIT_SW_FLEX_PORT >> M3_LIMIT_SW_FLEX_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor3.triggerState = CLOCKWISE;
-  }
-  else {
-    motor3.triggerState = 0;
-  }
-}
-void m3ExtendISR(void) {
-  if (!(motor3.triggered) && motor3.triggerState == 0) {
-    motor3.triggered = true;
-    motor3.sinceTrigger = 0;
-  }
-  int pinState = (M3_LIMIT_SW_EXTEND_PORT >> M3_LIMIT_SW_EXTEND_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor3.triggerState = COUNTER_CLOCKWISE;
-  }
-  else {
-    motor3.triggerState = 0;
-  }
-}
-void m4FlexISR(void) {
-  if (!(motor4.triggered) && motor4.triggerState == 0) {
-    motor4.triggered = true;
-    motor4.sinceTrigger = 0;
-  }
-  int pinState = (M4_LIMIT_SW_FLEX_PORT >> M4_LIMIT_SW_FLEX_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor4.triggerState = CLOCKWISE;
-  }
-  else {
-    motor4.triggerState = 0;
-  }
-}
-void m4ExtendISR(void) {
-  if (!(motor4.triggered) && motor4.triggerState == 0) {
-    motor4.triggered = true;
-    motor4.sinceTrigger = 0;
-  }
-  int pinState = (M4_LIMIT_SW_EXTEND_PORT >> M4_LIMIT_SW_EXTEND_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor4.triggerState = COUNTER_CLOCKWISE;
-  }
-  else {
-    motor4.triggerState = 0;
-  }
-}
-
-/*
-  void m5CwISR(void) {
-    ;
-  }
-*/
-void m6FlexISR(void) {
-  // if the switch wasn't previously triggered then it starts a counter
-  if (!(motor6.triggered) && motor6.triggerState == 0) {
-    motor6.triggered = true;
-    motor6.sinceTrigger = 0;
-  }
-  // grab the state of the pin for the cw switch
-  int pinState = (M6_LIMIT_SW_FLEX_PORT >> M6_LIMIT_SW_FLEX_SHIFT ) & 1;
-  // since we care about falling edges, when it reads 0 it's a hit
-  // a hit is +1 or -1 depending on which switch was hit
-  if (pinState == 0) {
-    motor6.triggerState = CLOCKWISE;
-  }
-  // if it's not a hit we set it to 0
-  else {
-    motor6.triggerState = 0;
-  }
-}
-void m6ExtendISR(void) {
-  if (!(motor6.triggered) && motor6.triggerState == 0) {
-    motor6.triggered = true;
-    motor6.sinceTrigger = 0;
-  }
-  int pinState = (M6_LIMIT_SW_EXTEND_PORT >> M6_LIMIT_SW_EXTEND_SHIFT ) & 1;
-  if (pinState == 0) {
-    motor6.triggerState = COUNTER_CLOCKWISE;
-  }
-  else {
-    motor6.triggerState = 0;
-  }
-}
-
-/**
-  Resets the motors to their original position.
-  Starts from the last motor and work inwards
- **/
-void homeAllMotors(uint8_t homingStyle)
-{
-    for (int i = NUM_MOTORS - 1; i >= 0; i--) { 
-        if (motorArray[i]->hasLimitSwitches) {
-            if (homingStyle == DOUBLE_ENDED_HOMING) {
-                motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
-            }
-            motorsToHome[i] = true;
+    /* limit switch interrupts */
+    /* //! limit switch interrupt service routine
+       \todo can I make a skeleton function that gets called in these interrupts
+       that I can just pass the appropriate registers etc into?
+     */
+    void m1CwISR(void) {
+        // if the switch wasn't previously triggered then it starts a counter
+        if (!(motor1.triggered) && motor1.triggerState == 0) {
+            motor1.triggered = true;
+            motor1.sinceTrigger = 0;
+        }
+        // grab the state of the pin for the cw switch
+        int pinState = (M1_LIMIT_SW_CW_PORT >> M1_LIMIT_SW_CW_SHIFT ) & 1;
+        // since we care about falling edges, when it reads 0 it's a hit
+        // a hit is +1 or -1 depending on which switch was hit
+        if (pinState == 0) {
+            motor1.triggerState = CLOCKWISE;
+        }
+        // if it's not a hit we set it to 0
+        else {
+            motor1.triggerState = 0;
+        }
+    }
+    void m1CcwISR(void) {
+        if (!(motor1.triggered) && motor1.triggerState == 0) {
+            motor1.triggered = true;
+            motor1.sinceTrigger = 0;
+        }
+        int pinState = (M1_LIMIT_SW_CCW_PORT >> M1_LIMIT_SW_CCW_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor1.triggerState = COUNTER_CLOCKWISE;
+        }
+        else {
+            motor1.triggerState = 0;
+        }
+    }
+    void m2FlexISR(void) {
+        if (!(motor2.triggered) && motor2.triggerState == 0) {
+            motor2.triggered = true;
+            motor2.sinceTrigger = 0;
+        }
+        int pinState = (M2_LIMIT_SW_FLEX_PORT >> M2_LIMIT_SW_FLEX_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor2.triggerState = CLOCKWISE;
+        }
+        else {
+            motor2.triggerState = 0;
+        }
+    }
+    void m2ExtendISR(void) {
+        if (!(motor2.triggered) && motor2.triggerState == 0) {
+            motor2.triggered = true;
+            motor2.sinceTrigger = 0;
+        }
+        int pinState = (M2_LIMIT_SW_EXTEND_PORT >> M2_LIMIT_SW_EXTEND_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor2.triggerState = COUNTER_CLOCKWISE;
+        }
+        else {
+            motor2.triggerState = 0;
+        }
+    }
+    void m3FlexISR(void) {
+        if (!(motor3.triggered) && motor3.triggerState == 0) {
+            motor3.triggered = true;
+            motor3.sinceTrigger = 0;
+        }
+        int pinState = (M3_LIMIT_SW_FLEX_PORT >> M3_LIMIT_SW_FLEX_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor3.triggerState = CLOCKWISE;
+        }
+        else {
+            motor3.triggerState = 0;
+        }
+    }
+    void m3ExtendISR(void) {
+        if (!(motor3.triggered) && motor3.triggerState == 0) {
+            motor3.triggered = true;
+            motor3.sinceTrigger = 0;
+        }
+        int pinState = (M3_LIMIT_SW_EXTEND_PORT >> M3_LIMIT_SW_EXTEND_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor3.triggerState = COUNTER_CLOCKWISE;
+        }
+        else {
+            motor3.triggerState = 0;
+        }
+    }
+    void m4FlexISR(void) {
+        if (!(motor4.triggered) && motor4.triggerState == 0) {
+            motor4.triggered = true;
+            motor4.sinceTrigger = 0;
+        }
+        int pinState = (M4_LIMIT_SW_FLEX_PORT >> M4_LIMIT_SW_FLEX_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor4.triggerState = CLOCKWISE;
+        }
+        else {
+            motor4.triggerState = 0;
+        }
+    }
+    void m4ExtendISR(void) {
+        if (!(motor4.triggered) && motor4.triggerState == 0) {
+            motor4.triggered = true;
+            motor4.sinceTrigger = 0;
+        }
+        int pinState = (M4_LIMIT_SW_EXTEND_PORT >> M4_LIMIT_SW_EXTEND_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor4.triggerState = COUNTER_CLOCKWISE;
+        }
+        else {
+            motor4.triggerState = 0;
         }
     }
 
-    homingMotor = NUM_MOTORS - 1;
-    isHoming = true;
-}
-
-void homeMotor(uint8_t motorId, uint8_t homingStyle)
-{
-    if (motorArray[motorId - 1]->hasLimitSwitches) {
-        if (homingStyle == DOUBLE_ENDED_HOMING) {
-            motorArray[motorId - 1]->homingType = DOUBLE_ENDED_HOMING;
+    /*
+       void m5CwISR(void) {
+       ;
+       }
+     */
+    void m6FlexISR(void) {
+        // if the switch wasn't previously triggered then it starts a counter
+        if (!(motor6.triggered) && motor6.triggerState == 0) {
+            motor6.triggered = true;
+            motor6.sinceTrigger = 0;
         }
-        motorsToHome[motorId - 1] = true;
-    }
-
-    homingMotor = motorId - 1;
-    isHoming = true;
-}
-
-void stopAllMotors()
-{
-    for (int i = 0; i < NUM_MOTORS; i++) {
-      motorArray[i]->stopRotation();
-      motorArray[i]->stopHoming();
-    }
-}
-
-void stopHoming()
-{
-    isHoming = false;
-    homingMotor = NUM_MOTORS - 1;
-    for (int i = 0; i < NUM_MOTORS; i++) {
-      motorsToHome[i] = false;
-    }
-}
-
-void resetAngles()
-{
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motorArray[i]->setSoftwareAngle(0.0);
-  }
-}
-
-void stopSingleMotor(uint8_t motorId)
-{
-    motorArray[motorId - 1]->stopRotation();
-}
-
-void setGearRatioValue(uint8_t motorId, float gearRatio)
-{
-    motorArray[motorId]->setGearRatio(gearRatio);
-}
-
-void setArmSpeed(float armSpeedFactor)
-{
-    if (armSpeedFactor > 0) {
-        for (int i = 0; i < NUM_MOTORS; i++) {
-            float newSpeed = ( motorArray[i]->getMotorSpeed() ) * armSpeedFactor;
-            if (newSpeed >= 100) {
-            motorArray[i]->setMotorSpeed(newSpeed);
-            }
+        // grab the state of the pin for the cw switch
+        int pinState = (M6_LIMIT_SW_FLEX_PORT >> M6_LIMIT_SW_FLEX_SHIFT ) & 1;
+        // since we care about falling edges, when it reads 0 it's a hit
+        // a hit is +1 or -1 depending on which switch was hit
+        if (pinState == 0) {
+            motor6.triggerState = CLOCKWISE;
+        }
+        // if it's not a hit we set it to 0
+        else {
+            motor6.triggerState = 0;
         }
     }
-}
-
-void setOpenLoopGain(uint8_t motorId, float gain)
-{
-    motorArray[motorId - 1]->setOpenLoopGain(gain);
-}
-
-void setPidConstants(uint8_t motorId, float kp, float ki, float kd)
-{
-    motorArray[motorId - 1]->pidController.setGainConstants(kp, ki, kd);
-}
-
-void setMotorSpeed(uint8_t motorId, float motorSpeed)
-{
-    motorArray[motorId - 1]->setMotorSpeed(motorSpeed);
-}
-
-void setOpenLoopState(uint8_t motorId, bool isOpenLoop)
-{
-    if (isOpenLoop) {
-      motorArray[motorId - 1]->isOpenLoop = true;
+    void m6ExtendISR(void) {
+        if (!(motor6.triggered) && motor6.triggerState == 0) {
+            motor6.triggered = true;
+            motor6.sinceTrigger = 0;
+        }
+        int pinState = (M6_LIMIT_SW_EXTEND_PORT >> M6_LIMIT_SW_EXTEND_SHIFT ) & 1;
+        if (pinState == 0) {
+            motor6.triggerState = COUNTER_CLOCKWISE;
+        }
+        else {
+            motor6.triggerState = 0;
+        }
     }
-    else
+
+    /**
+      Resets the motors to their original position.
+      Starts from the last motor and work inwards
+     **/
+    void homeAllMotors(uint8_t homingStyle)
     {
-      if (motorArray[motorId - 1]->hasEncoder) {
-        motorArray[motorId - 1]->isOpenLoop = false;
-      }
+        for (int i = NUM_MOTORS - 1; i >= 0; i--) { 
+            if (motorArray[i]->hasLimitSwitches) {
+                if (homingStyle == DOUBLE_ENDED_HOMING) {
+                    motorArray[i]->homingType = DOUBLE_ENDED_HOMING;
+                }
+                motorsToHome[i] = true;
+            }
+        }
+
+        homingMotor = NUM_MOTORS - 1;
+        isHoming = true;
     }
-}
+
+    void homeMotor(uint8_t motorId, uint8_t homingStyle)
+    {
+        if (motorArray[motorId - 1]->hasLimitSwitches) {
+            if (homingStyle == DOUBLE_ENDED_HOMING) {
+                motorArray[motorId - 1]->homingType = DOUBLE_ENDED_HOMING;
+            }
+            motorsToHome[motorId - 1] = true;
+        }
+
+        homingMotor = motorId - 1;
+        isHoming = true;
+    }
+
+    void stopAllMotors()
+    {
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            motorArray[i]->stopRotation();
+            motorArray[i]->stopHoming();
+        }
+    }
+
+    void stopHoming()
+    {
+        isHoming = false;
+        homingMotor = NUM_MOTORS - 1;
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            motorsToHome[i] = false;
+        }
+    }
+
+    void resetAngles()
+    {
+        for (int i = 0; i < NUM_MOTORS; i++) {
+            motorArray[i]->setSoftwareAngle(0.0);
+        }
+    }
+
+    void stopSingleMotor(uint8_t motorId)
+    {
+        motorArray[motorId - 1]->stopRotation();
+    }
+
+    void setGearRatioValue(uint8_t motorId, float gearRatio)
+    {
+        motorArray[motorId]->setGearRatio(gearRatio);
+    }
+
+    void setArmSpeed(float armSpeedFactor)
+    {
+        if (armSpeedFactor > 0) {
+            for (int i = 0; i < NUM_MOTORS; i++) {
+                float newSpeed = ( motorArray[i]->getMotorSpeed() ) * armSpeedFactor;
+                if (newSpeed >= 100) {
+                    motorArray[i]->setMotorSpeed(newSpeed);
+                }
+            }
+        }
+    }
+
+    void setOpenLoopGain(uint8_t motorId, float gain)
+    {
+        motorArray[motorId - 1]->setOpenLoopGain(gain);
+    }
+
+    void setPidConstants(uint8_t motorId, float kp, float ki, float kd)
+    {
+        motorArray[motorId - 1]->pidController.setGainConstants(kp, ki, kd);
+    }
+
+    void setMotorSpeed(uint8_t motorId, float motorSpeed)
+    {
+        motorArray[motorId - 1]->setMotorSpeed(motorSpeed);
+    }
+
+    void setOpenLoopState(uint8_t motorId, bool isOpenLoop)
+    {
+        if (isOpenLoop) {
+            motorArray[motorId - 1]->isOpenLoop = true;
+        }
+        else
+        {
+            if (motorArray[motorId - 1]->hasEncoder) {
+                motorArray[motorId - 1]->isOpenLoop = false;
+            }
+        }
+    }
 
 #define MOVE_MOTOR_IDLE 0
 #define MOVE_MOTOR_FORWARD 1
 #define MOVE_MOTOR_BACKWARD 2
 
-void budgeMotors(uint8_t motorActions[])
-{
-    for(uint8_t i = 0; i < 6; i++)
+    void budgeMotors(uint8_t motorActions[])
     {
-        if(motorActions != MOVE_MOTOR_IDLE)
+        for(uint8_t i = 0; i < 6; i++)
         {
-            bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
-            motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
+            if(motorActions != MOVE_MOTOR_IDLE)
+            {
+                bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
+                motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
+            }
         }
     }
-}
 
-/**
- * Changes the direction in case of backwards wiring
- **/
-void switchMotorDirection(uint8_t motorId)
-{
-    motorArray[motorId - 1] -> switchDirectionLogic();
-}
-
-void resetSingleMotor(uint8_t motorId)
-{
-    motorArray[motorId - 1]->setSoftwareAngle(0.0);
-}
-
-void moveMultipleMotors(float anglesToReach[])
-{
-    for(uint8_t i = 0; i < 6; i++)
+    /**
+     * Changes the direction in case of backwards wiring
+     **/
+    void switchMotorDirection(uint8_t motorId)
     {
-        if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
-            motorArray[i]->goToCommandedAngle();
+        motorArray[motorId - 1] -> switchDirectionLogic();
+    }
+
+    void resetSingleMotor(uint8_t motorId)
+    {
+        motorArray[motorId - 1]->setSoftwareAngle(0.0);
+    }
+
+    void moveMultipleMotors(float anglesToReach[])
+    {
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
+                motorArray[i]->goToCommandedAngle();
+            }
         }
     }
-}
 
-void emergencyStop()
-{
-    stopAllMotors();
-}
+    void emergencyStop()
+    {
+        stopAllMotors();
+    }
 
-void pong() 
-{
-    internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
-    commandCenter->sendMessage(*message);
-}
+    void pong() 
+    {
+        internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
+        commandCenter->sendMessage(*message);
+    }

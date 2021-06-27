@@ -75,7 +75,7 @@ namespace internal_comms
             /**
              * Starts serial connection with given pins. Enable pin is for 485 flow control
              */
-            void startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin);
+            void startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin, uint8_t transmitPin);
 
             /**
              * Reads data from serial port

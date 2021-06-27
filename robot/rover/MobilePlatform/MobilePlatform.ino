@@ -40,7 +40,8 @@ const float kd = 40.625;
 // Pins for Serial
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t TX_TEENSY_3_6_PIN = 1;
-const uint8_t ENABLE_PIN = 10; // TEMPORARY BEFORE FLOW CONTROL IMPLEMENTED
+const uint8_t ENABLE_PIN = 15;
+const uint8_t TRANSMIT_PIN = 14;
 
 // Motor constructor initializations
 DcMotor RF(RF_DIR, RF_PWM, GEAR_RATIO, "Front Right Motor");  // Motor 0
@@ -471,7 +472,7 @@ void initMotorEncoder5(void) {
 
 void initSerialCommunications(void) {
   // Create serial connection with teensy pins 0 and 1
-  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN);
+  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
   // initialize serial communications at 115200 bps:
   Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library

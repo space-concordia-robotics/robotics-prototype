@@ -47,75 +47,93 @@ void printMotorAngles(void);
 // this modifies the pointer
 float bytes_to_float(const uint8_t* rawPointer)
 {
-  float f;
-  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
-  memcpy(&f, &bytes, sizeof(f));
-  return f;
+    float f;
+    byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
+    memcpy(&f, &bytes, sizeof(f));
+    return f;
 }
 
-void ArmCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
+void ArmCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
-  switch(commandID)
-  {
-    case COMMAND_EMERGENCY_STOP:
-      emergencyStop();
-      break;
-    case COMMAND_REBOOT_TEENSY:
-      rebootTeensy();
-      break;
-    case COMMAND_STOP_MOTORS:
-      stopAllMotors();
-      break;
-    case COMMAND_RESET_ANGLES:
-      resetAngles();
-      break;
-    case COMMAND_HOME_MOTORS:
-      homeAllMotors(*rawArgs);
-      break;
-    case COMMAND_HOME:
-      homeMotor(*rawArgs, *(++rawArgs));
-      break;
-    case COMMAND_ARM_SPEED:
-      setArmSpeed(bytes_to_float(rawArgs));
-      break;
-    case COMMAND_STOP_SINGLE_MOTOR:
-      stopSingleMotor(*rawArgs);
-      break;
-    case COMMAND_GEAR_RATIO:
-      setGearRatioValue(*(rawArgs++), bytes_to_float(rawArgs));
-      break;
-    case COMMAND_OPEN_LOOP_GAIN:
-      setOpenLoopGain(*(rawArgs++), bytes_to_float(rawArgs));
-      break;
-    case COMMAND_PID_CONSTANTS:
-      setPidConstants(*(rawArgs++), bytes_to_float(rawArgs), bytes_to_float(rawArgs), bytes_to_float(rawArgs));
-      break;
-    case COMMAND_OPEN_LOOP_STATE:
-      setOpenLoopState(*(rawArgs++), *(rawArgs) == 1);
-      break;
-    case COMMAND_RESET_SINGLE_MOTOR:
-      resetSingleMotor(*rawArgs);
-      break;
-    case COMMAND_BUDGE_MOTORS:
-      budgeMotors(rawArgs);
-      break;
-    case COMMAND_MOVE_MULTIPLE_MOTORS:
-      float desiredAngles[6] = {
-        bytes_to_float(rawArgs), 
-        bytes_to_float(rawArgs),
-        bytes_to_float(rawArgs), 
-        bytes_to_float(rawArgs), 
-        bytes_to_float(rawArgs), 
-        bytes_to_float(rawArgs) 
-        };
-      moveMultipleMotors(desiredAngles);
-      break;
-    case COMMAND_PING:
-      pong();
-      break;
-    case COMMAND_GET_MOTOR_ANGLES:
-      printMotorAngles();
-      break;
-  }
+    int commandID = int(cmdID);
 
+    switch(commandID)
+    {
+        case COMMAND_EMERGENCY_STOP: {
+            emergencyStop();
+            break;
+                                     }
+        case COMMAND_REBOOT_TEENSY: {
+            rebootTeensy();
+            break;
+                                    }
+        case COMMAND_STOP_MOTORS: {
+            stopAllMotors();
+            break;
+                                  }
+        case COMMAND_RESET_ANGLES: {
+            resetAngles();
+            break;
+                                   }
+        case COMMAND_HOME_MOTORS: {
+            homeAllMotors(*rawArgs);
+            break;
+                                  }
+        case COMMAND_HOME: {
+            homeMotor(*rawArgs, *(++rawArgs));
+            break;
+                           }
+        case COMMAND_ARM_SPEED: {
+            setArmSpeed(bytes_to_float(rawArgs));
+            break;
+                                }
+        case COMMAND_STOP_SINGLE_MOTOR:{
+            stopSingleMotor(*rawArgs);
+            break;
+                                       }
+        case COMMAND_GEAR_RATIO: {
+            setGearRatioValue(*(rawArgs++), bytes_to_float(rawArgs));
+            break;
+                                 }
+        case COMMAND_OPEN_LOOP_GAIN: {
+            setOpenLoopGain(*(rawArgs++), bytes_to_float(rawArgs));
+            break;
+                                     }
+        case COMMAND_PID_CONSTANTS: {
+            setPidConstants(*(rawArgs++), bytes_to_float(rawArgs), bytes_to_float(rawArgs), bytes_to_float(rawArgs));
+            break;
+                                    }
+        case COMMAND_OPEN_LOOP_STATE: {
+            setOpenLoopState(*(rawArgs++), *(rawArgs) == 1);
+            break;
+                                      }
+        case COMMAND_RESET_SINGLE_MOTOR: {
+            resetSingleMotor(*rawArgs);
+            break;
+                                         }
+        case COMMAND_BUDGE_MOTORS: {
+            budgeMotors(rawArgs);
+            break;
+                                   }
+        case COMMAND_MOVE_MULTIPLE_MOTORS: {
+            float desiredAngles[6] = {
+                bytes_to_float(rawArgs), 
+                bytes_to_float(rawArgs),
+                bytes_to_float(rawArgs), 
+                bytes_to_float(rawArgs), 
+                bytes_to_float(rawArgs), 
+                bytes_to_float(rawArgs) 
+            };
+            moveMultipleMotors(desiredAngles);
+            break;
+                                           }
+        case COMMAND_PING: {
+            pong();
+            break;
+                           }
+        case COMMAND_GET_MOTOR_ANGLES: {
+            printMotorAngles();
+            break;
+                                      }
+    }
 }

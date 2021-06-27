@@ -19,7 +19,7 @@ if(NOT "${${PROJECT_NAME}_user_sources}" STREQUAL "")
 set(USER_SOURCES TRUE)
 add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
 
-target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes /home/michael/Arduino/libraries/LSM303;/home/michael/Arduino/libraries/ArduinoBlue/src;/home/michael/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control/src;/home/michael/Arduino/libraries/TinyGPS/src;/home/michael/Arduino/libraries/EmbeddedTemplateLibrary)
+target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes /home/roversim/Arduino/libraries/LSM303;/home/roversim/Arduino/libraries/ArduinoBlue/src;/home/roversim/Arduino/libraries/SparkFun_I2C_GPS_Reading_and_Control/src;/home/roversim/Arduino/libraries/TinyGPS/src;/home/roversim/Arduino/libraries/EmbeddedTemplateLibrary)
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 
 endif()
@@ -30,7 +30,7 @@ configure_file(${PROJECT_NAME}.ino ${PROJECT_NAME}.ino.cpp)
 add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME}_EXE PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes)
-target_include_directories(${PROJECT_NAME}_EXE PRIVATE /home/michael/Arduino/libraries/Adafruit_Motor_Shield_V2_Library)
+target_include_directories(${PROJECT_NAME}_EXE PRIVATE /home/roversim/Arduino/libraries/Adafruit_Motor_Shield_V2_Library)
 
 
 set_target_properties(
