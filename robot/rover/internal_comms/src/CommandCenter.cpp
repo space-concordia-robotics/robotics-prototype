@@ -137,15 +137,9 @@ namespace internal_comms
 
                 Serial.write(0x0A);
                 
-                Serial.print("before");
-
                 free((void *)message.rawArgs);
-                
-                Serial.print("between");
-                
                 free((void *)&message);
                 
-                Serial.print("after");
             }
             //else {
                 //Serial.write(1);
