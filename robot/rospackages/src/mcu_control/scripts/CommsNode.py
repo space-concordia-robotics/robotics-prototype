@@ -15,7 +15,7 @@ from robot.rospackages.src.mcu_control.srv import *
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
-import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt 
+import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
@@ -30,11 +30,12 @@ def get_handler(commandId, selectedDevice):
             return in_command[2]
     return None
 
-# Pin definitions
+# Pin definitions CHANGE THESE
 ARM_PIN = 11
 WHEEL_PIN = 13
 SCIENCE_PIN = 15
 
+# Change this as well
 teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
 
 ser = None
@@ -51,7 +52,7 @@ def main():
     # - prompt and receive messages from teensies
     # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
 
-    receive_message() # tim pls let me test
+    receive_message()
 
 def receive_message():
     try:
@@ -153,7 +154,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 57600) # you sure this is good for the jetson tim? # IDK, we will see
+    ser = serial.Serial('/dev/ttyS0', 57600)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
