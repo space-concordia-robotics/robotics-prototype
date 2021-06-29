@@ -25,8 +25,6 @@
    updated as of May 2021
  */
 
-#define UART_PORT
-
 #include <Servo.h>
 #include "include/PinSetup.h"
 #include "include/Parser.h"
@@ -60,7 +58,7 @@
 
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
-const uint8_t ENABLE_PIN = 25; // again, no idea what this is supposed to be
+const uint8_t ENABLE_PIN = 25; 
 const uint8_t TRANSMIT_PIN = 26; 
 
 enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
@@ -174,6 +172,11 @@ void setup() {
     motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
     initMotorTimers();
 
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+
     // reset the elapsedMillis variables so that they're fresh upon entering the loop()
     sinceAnglePrint = 0;
 }
@@ -195,11 +198,11 @@ void loop() {
         homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
     }
 
-    if(Serial.available() > 0)
+    if(Serial.available() > 0) {
         commandCenter->readCommand();
+    }
 
     commandCenter->sendMessage();
-
 } // end of loop
 
 /*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
@@ -330,7 +333,17 @@ void printMotorAngles(void) {
         softwareAngles[i] = motorArray[i]->getSoftwareAngle();
     }
 
-    internal_comms::Message* message = commandCenter->createMessage(2, 24, (byte*)softwareAngles);
+    byte *data = new byte[24];
+    
+    for (int i = 0; i < NUM_MOTORS; i++) {
+        byte *inByte = (byte*)(&softwareAngles[i]);
+        data[4*i] = inByte[0];
+        data[4*i+1] = inByte[1];
+        data[4*i+2] = inByte[2];
+        data[4*i+3] = inByte[3];
+    }
+
+    internal_comms::Message* message = commandCenter->createMessage(2, 24, data);
     commandCenter->sendMessage(*message);
 }
 void clearBlinkState(void) {
