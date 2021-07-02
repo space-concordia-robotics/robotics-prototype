@@ -7,7 +7,7 @@
 #include <etl/queue.h>
 
 #define COMMAND_DEBUG_MSG 0
-#define Serial Serial1
+/* #define Serial Serial1 */
 
 namespace internal_comms
 {
@@ -59,6 +59,7 @@ namespace internal_comms
         Message* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
+        message->rawArgs = malloc(rawArgsLength);
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
@@ -86,7 +87,8 @@ namespace internal_comms
         CommandCenter::enablePin = enablePin;
 
         Serial.begin(COMMS_BAUDRATE);
-        Serial.transmitterEnable(transmitPin);
+        Serial1.begin(COMMS_BAUDRATE);
+        //Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
     }
 
     void CommandCenter::readCommand()
@@ -103,17 +105,11 @@ namespace internal_comms
             // TX2 can resend)
         }
 
-        Serial.print("before free");
-
         free(command->rawArgs);
         command->rawArgs = nullptr;
 
-        Serial.print("before delete");
-
         delete command;
         command = nullptr;
-        Serial.print("after delete");
-
     }
 
     void CommandCenter::sendDebug(const char* debugMessage)
@@ -123,7 +119,7 @@ namespace internal_comms
     }
 
     void CommandCenter::sendMessage() {
-        if (digitalRead(enablePin)) {
+        /* if (digitalRead(enablePin)) { */
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
                 messageQueue.pop();
@@ -132,28 +128,19 @@ namespace internal_comms
                 Serial.write(message.rawArgsLength);
 
                 if(message.rawArgsLength > 0)
-                    Serial.print("what");
                     Serial.write(message.rawArgs, message.rawArgsLength);
-                    free((void *)message.rawArgs);
-
-                Serial.print("here");
 
                 Serial.write(0x0A);
                 
-                Serial.print("before");
-
+                free((void *)message.rawArgs);
+                // free((void *)&message); // this causes a crash, hint in cmake build log
                 
-                Serial.print("between");
-                
-                free((void *)&message);
-                
-                Serial.print("after");
             }
             //else {
                 //Serial.write(1);
                 //Serial.write(0);
             //}
-        }
+        /* } */
     }
 
     void CommandCenter::sendMessage(Message& message) {

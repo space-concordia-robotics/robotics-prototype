@@ -6,8 +6,8 @@
 # make sure dependencies are installed
 sudo apt install curl
 
-ARDUINO_IDE_VERSION="1.8.12"
-TEENSYDUINO_VERSION="152"
+ARDUINO_IDE_VERSION="1.8.13"
+TEENSYDUINO_VERSION="153"
 ARDUINO_IDE_FOLDER="$HOME/arduino-$ARDUINO_IDE_VERSION"
 ARDUINO_DOWNLOAD_URL="https://downloads.arduino.cc/arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz"
 TEENSYDUINO_DOWNLOAD_URL="https://www.pjrc.com/teensy/td_$TEENSYDUINO_VERSION/TeensyduinoInstall.linux64"
@@ -42,7 +42,7 @@ else
         
     # the following line requires sudo rights to complete the symlink
     # but everything else will work
-    bash "$HOME/arduino-$ARDUINO_IDE_VERSION/install.sh"
+    sudo bash "$HOME/arduino-$ARDUINO_IDE_VERSION/install.sh"
         
     # clean up
     rm arduino-$ARDUINO_IDE_VERSION-linux64.tar.xz
