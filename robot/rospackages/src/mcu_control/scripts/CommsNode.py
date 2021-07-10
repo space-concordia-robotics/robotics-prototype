@@ -55,14 +55,14 @@ def main():
 
     try:
         while not rospy.is_shutdown():
-            execute_commands()
+            send_queued_commands()
             # receive_message()
     except KeyboardInterrupt:
         print("Node shutting down due to operator shutting down the node.")
     ser.close()
 
 
-def execute_commands():
+def send_queued_commands():
     if (len(arm_queue) > 0):
         arm_command = arm_queue.popleft()
         send_command(arm_command[0], arm_command[1], arm_command[2])
