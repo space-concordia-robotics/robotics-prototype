@@ -12,6 +12,7 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control.srv import *
+from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
@@ -52,49 +53,56 @@ def main():
     # - prompt and receive messages from teensies
     # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
 
-    receive_message()
-
-def receive_message():
     try:
         while not rospy.is_shutdown():
-            if ser.in_waiting > 0:
-                commandID = ser.read()
-                commandID = int.from_bytes(commandID, "big")
-                handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
-                # print("CommandID:", commandID)
-                if handler == None:
-                    print("No command with ID ", commandID, " was found")
-                    ser.read_until() # 0A
-                    continue
-
-                argsLen = ser.read(2)
-                # print(argsLen)
-                argsLen = int.from_bytes(argsLen, "big")
-                # print("Number of bytes of arguments:", argsLen)
-                args = None
-                if argsLen > 0:
-                    args = ser.read(argsLen)
-                    # print("Raw arguments:", args)
-
-                stopByte = ser.read()
-                stopByte = int.from_bytes(stopByte, "big")
-                # print("Stop byte:", stopByte)
-
-                if stopByte != STOP_BYTE:
-                    pass
-                    # print("Warning : Invalid stop byte")
-
-                try:
-                    handler(args)
-                except Exception as e:
-                    print(e)
+            execute_commands()
+            # receive_message()
     except KeyboardInterrupt:
         print("Node shutting down due to operator shutting down the node.")
     ser.close()
 
+
+def execute_commands():
+    if (len(arm_queue) > 0):
+        arm_command = arm_queue.popleft()
+        send_command(arm_command[0], arm_command[1], arm_command[2])
+
+def receive_message():
+    if ser.in_waiting > 0:
+        commandID = ser.read()
+        commandID = int.from_bytes(commandID, "big")
+        handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
+        # print("CommandID:", commandID)
+        if handler == None:
+            print("No command with ID ", commandID, " was found")
+            ser.read_until() # 0A
+            # continue #idk why this is here lol
+
+        argsLen = ser.read(2)
+        # print(argsLen)
+        argsLen = int.from_bytes(argsLen, "big")
+        # print("Number of bytes of arguments:", argsLen)
+        args = None
+        if argsLen > 0:
+            args = ser.read(argsLen)
+            # print("Raw arguments:", args)
+
+        stopByte = ser.read()
+        stopByte = int.from_bytes(stopByte, "big")
+        # print("Stop byte:", stopByte)
+
+        if stopByte != STOP_BYTE:
+            pass
+            # print("Warning : Invalid stop byte")
+
+        try:
+            handler(args)
+        except Exception as e:
+            print(e)
+
 def get_command(command_name, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
-        if command_name == out_command[deviceToSendTo][0]:
+        if command_name == out_command[deviceToSendTo]:
             return out_command
 
     return None
@@ -104,7 +112,7 @@ def send_command(command_name, args, deviceToSendTo):
     if command is not None:
         commandID = command[1]
 
-        ser.write(commandID)
+        ser.write(commandID.to_bytes(1, 'big'))
         ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
 
         data_types = [element[0] for element in command[2]]
@@ -116,10 +124,9 @@ def send_command(command_name, args, deviceToSendTo):
             if data_type == dt.ARG_UINT8_ID:
                 ser.write(data)
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(float(data)) #perhaps will fuck up
+                ser.write(bytearray(struct.pack(">f", data))) #perhaps will fuck up
 
-        # make sure to also send the number of bytes
-
+        ser.write(STOP_BYTE.to_bytes(1, 'big'))
         # if args is not None and number_of_arguments != 0:
         #     arg_bytes = get_arg_bytes(args)
         #     for arg_byte in arg_bytes:
@@ -136,7 +143,8 @@ def arm_command_callback(message):
     arm_queue.append(temp_struct)
 
 def parse_command(message):
-    full_command = message.split(" ")
+    message
+    full_command = message.data.split(" ")
     if full_command is not None:
         command = full_command[0]
         args = full_command[1:]
@@ -166,7 +174,7 @@ if __name__ == '__main__':
 
     v_bat_topic = '/battery_voltage'
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
-    vBatPub = rospy.Publisher(v_bat_topic, Float32, queue_size=10)
+    vBatPub = rospy.Publisher(v_bat_topic, Voltage, queue_size=10)
 
     feedback_pub_topic = '/arm_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
@@ -179,5 +187,6 @@ if __name__ == '__main__':
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     # serv = rospy.Service(service_name, ArmRequest, handle_client)
+
     main()
 
