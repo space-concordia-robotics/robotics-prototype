@@ -122,7 +122,7 @@ def send_command(command_name, args, deviceToSendTo):
             data_type = argument[1]
 
             if data_type == dt.ARG_UINT8_ID:
-                ser.write(data)
+                ser.write(data.to_bytes(1, 'big'))
             elif data_type == dt.ARG_FLOAT32_ID:
                 ser.write(bytearray(struct.pack(">f", data))) #perhaps will fuck up
 
