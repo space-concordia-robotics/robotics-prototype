@@ -199,7 +199,7 @@ const GREEN = 'rgb(61, 127, 127)'
 
 function gameLoop () {
   if (millisSince(lastCmdSent) > MANUAL_CONTROL_THROTTLE_TIME) {
-    let budgeArray = ['~', '~', '~', '~', '~', '~']
+    let budgeArray = ['0', '0', '0', '0', '0', '0']
     let i = 0
     let toBudge = false
     // 'w' --> m1 ccw
@@ -210,7 +210,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -222,7 +222,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -235,7 +235,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -247,7 +247,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -260,7 +260,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -272,7 +272,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -285,7 +285,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -297,7 +297,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -310,7 +310,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -322,7 +322,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -335,7 +335,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'fwd'
+      budgeArray[i] = '1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }
@@ -347,7 +347,7 @@ function gameLoop () {
         YELLOW
       )
 
-      budgeArray[i] = 'back'
+      budgeArray[i] = '-1'
       toBudge = true
       lastCmdSent = new Date().getTime()
     }

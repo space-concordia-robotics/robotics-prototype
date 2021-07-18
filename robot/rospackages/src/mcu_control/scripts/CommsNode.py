@@ -122,9 +122,9 @@ def send_command(command_name, args, deviceToSendTo):
             data_type = argument[1]
 
             if data_type == dt.ARG_UINT8_ID:
-                ser.write(data.to_bytes(1, 'big'))
+                ser.write(int(data).to_bytes(1, 'big'))
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) #perhaps will fuck up
+                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         # if args is not None and number_of_arguments != 0:
@@ -150,10 +150,7 @@ def parse_command(message):
         args = full_command[1:]
         newArgs = []
         for arg in args:
-            try:
-                newArgs.append(float(arg))
-            except ValueError:
-                newArgs.append(arg)
+            newArgs.append(float(arg))
 
         return command, newArgs
     return None, []
