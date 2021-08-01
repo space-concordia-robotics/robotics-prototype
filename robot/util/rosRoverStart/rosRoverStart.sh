@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-HOME="/home/odroid"
+HOME="/home/nvidia"
 REPO_HOME="$HOME/Programming/robotics-prototype"
 ETHERNET_CONFIG_STATUS="$HOME/configEthernet/status_done"
 #CATKIN_WS_SETUP="$HOME/catkin_ws/devel/setup.bash" # catkin ws only for isolated prototyping
@@ -21,4 +21,4 @@ source "$REPO_HOME/venv/bin/activate"
 python3 "$REPO_HOME/setup.py" develop
 
 # source primary catkin_ws setup bash script and execute one launch script to rule them all
-source OPT_MELODIC_SETUP && source $ROS_PACKAGES_SETUP && roslaunch $ROSLAUNCH_FILE
+source $OPT_MELODIC_SETUP && source $ROS_PACKAGES_SETUP && roslaunch $ROSLAUNCH_FILE
