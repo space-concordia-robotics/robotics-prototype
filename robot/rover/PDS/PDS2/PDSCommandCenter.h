@@ -2,7 +2,7 @@
 #define PDSCOMMANDCENTER_H
 
 #include "CommandCenter.h" 
-#define COMMAND_PING 49
+#define COMMAND_PING 50
 #define COMMAND_DISABLE_ALL_MOTORS 51
 #define COMMAND_ENABLE_ALL_MOTORS 52
 #define COMMAND_MOTOR 53

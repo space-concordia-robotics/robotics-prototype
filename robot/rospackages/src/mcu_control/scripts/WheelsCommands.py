@@ -48,11 +48,11 @@ wheel_out_commands = [("set_motors", 0, [dt.ARG_UINT8]), ("motors_estop", 1, [])
                       ("get_rotational_velocity", 12, []),
                       ("get_current_velocity", 13, 6 * []),
                       ("get_desired_velocity", 14, 6 * []),
-                      ("get_battery_voltage", 15, []), ("ping", 69, [])]
+                      ("get_battery_voltage", 15, []), ("ping", 16, [])]
 
 wheel_in_commands = [
     ("debug_string", 0, handle_debug_string),
-    ("ping", 69, handle_pong),
+    ("ping", 1, handle_pong),
     ("send_linear_velocity", 2, handle_send_linear_velocity),
     ("send_rotational_velocity", 3, handle_send_rotational_velocity),
     ("send_current_velocity", 4, handle_send_current_velocity),

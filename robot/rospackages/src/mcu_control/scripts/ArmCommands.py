@@ -17,23 +17,23 @@ def handle_send_motor_angles(data):
     # anglePub.publish(data) # todo: convert each value to the correct type
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
-arm_out_commands = [("estop", 0, []),
-                    ("reboot", 1, []),
-                    ("motors_stop", 2, []),
-                    ("reset_angles", 3, []),
-                    ("home_motors", 4, [dt.ARG_UINT8]),
-                    ("home", 5, [dt.ARG_UINT8, dt.ARG_UINT8]),
-                    ("arm_speed", 6, [dt.ARG_FLOAT32]),
-                    ("stop_single_motor", 7, [dt.ARG_UINT8]),
-                    ("gear_ratio", 8, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
-                    ("open_loop_gain", 9, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
-                    ("pid_constants", 10, [dt.ARG_UINT8, dt.ARG_FLOAT32, dt.ARG_FLOAT32, dt.ARG_FLOAT32]),
-                    ("motor_speed", 11, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
-                    ("open_loop_state", 12, [dt.ARG_UINT8, dt.ARG_UINT8]),
-                    ("reset_single_motor", 13, [dt.ARG_UINT8]),
-                    ("budge_motors", 14, 6*[dt.ARG_UINT8]),
-                    ("reset_single_motor", 15, 6*[dt.ARG_FLOAT32]),
-                    ("ping", 16, []),
-                    ("get_motor_angles", 17, [])]
+arm_out_commands = [("estop", 75, []),
+                    ("reboot", 76, []),
+                    ("motors_stop", 77, []),
+                    ("reset_angles", 78, []),
+                    ("home_motors", 79, [dt.ARG_UINT8]),
+                    ("home", 80, [dt.ARG_UINT8, dt.ARG_UINT8]),
+                    ("arm_speed", 81, [dt.ARG_FLOAT32]),
+                    ("stop_single_motor", 82, [dt.ARG_UINT8]),
+                    ("gear_ratio", 83, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
+                    ("open_loop_gain", 84, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
+                    ("pid_constants", 85, [dt.ARG_UINT8, dt.ARG_FLOAT32, dt.ARG_FLOAT32, dt.ARG_FLOAT32]),
+                    ("motor_speed", 86, [dt.ARG_UINT8, dt.ARG_FLOAT32]),
+                    ("open_loop_state", 87, [dt.ARG_UINT8, dt.ARG_UINT8]),
+                    ("reset_single_motor", 88, [dt.ARG_UINT8]),
+                    ("budge_motors", 89, 6*[dt.ARG_UINT8]),
+                    ("reset_single_motor", 90, 6*[dt.ARG_FLOAT32]),
+                    ("ping", 91, []),
+                    ("get_motor_angles", 92, [])]
 
 arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_motor_angles", 2, handle_send_motor_angles)]
