@@ -88,7 +88,7 @@ namespace internal_comms
 
         Serial.begin(COMMS_BAUDRATE);
         Serial1.begin(COMMS_BAUDRATE);
-        //Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
     }
 
     void CommandCenter::readCommand()
@@ -133,7 +133,6 @@ namespace internal_comms
                 Serial.write(0x0A);
                 
                 free((void *)message.rawArgs);
-                // free((void *)&message); // this causes a crash, hint in cmake build log
                 
             }
             //else {
