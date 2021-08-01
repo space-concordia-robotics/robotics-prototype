@@ -7,6 +7,7 @@ import re
 import serial
 import struct
 from collections import deque
+import Jetson.GPIO as gpio
 
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -31,13 +32,16 @@ def get_handler(commandId, selectedDevice):
             return in_command[2]
     return None
 
-# Pin definitions CHANGE THESE
-ARM_PIN = 11
-WHEEL_PIN = 13
-SCIENCE_PIN = 15
+# Pin definitions
+NONE = [1,1,1]
+ARM = [0,0,1]
+ROVER = [0,0,0]
+PDS = [0,1,0]
+SCIENCE = [0,1,1]
+TX2 = [1,0,0]
+PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
+SW_PINS = [19,21,23]
 
-# Change this as well
-teensy_pins = [ARM_PIN, WHEEL_PIN, SCIENCE_PIN]
 
 ser = None
 
@@ -47,18 +51,19 @@ arm_queue= deque()
 rover_queue = deque()
 science_queue = deque()
 
+gpio.setwarnings(False)
+gpio.setmode(gpio.BOARD)
+gpio.setup(PIN_DESC, gpio.OUT)
+gpio.output(SW_PINS, NONE)
+
 def main():
-    # this will:
-    # - check for any new messages to send to teensies
-    # - prompt and receive messages from teensies
-    # - will try to balance the load between sending/receiving so that teensies don't get too much data at once.
 
     try:
         while not rospy.is_shutdown():
             send_queued_commands()
-            # receive_message()
+            receive_messages()
     except KeyboardInterrupt:
-        print("Node shutting down due to operator shutting down the node.")
+        print("Node shutting down due to shutting down node.")
     ser.close()
 
 
@@ -68,37 +73,43 @@ def send_queued_commands():
         send_command(arm_command[0], arm_command[1], arm_command[2])
 
 def receive_message():
-    if ser.in_waiting > 0:
-        commandID = ser.read()
-        commandID = int.from_bytes(commandID, "big")
-        handler = get_handler(commandID, ARM_SELECTED) # todo: pls change this to use whatever is actually selected
-        # print("CommandID:", commandID)
-        if handler == None:
-            print("No command with ID ", commandID, " was found")
-            ser.read_until() # 0A
-            # continue #idk why this is here lol
+    for device in range(3):
+        gpio.output(SW_PINS, PIN_DESC[device])
+        #time.sleep(0.5)
 
-        argsLen = ser.read(2)
-        # print(argsLen)
-        argsLen = int.from_bytes(argsLen, "big")
-        # print("Number of bytes of arguments:", argsLen)
-        args = None
-        if argsLen > 0:
-            args = ser.read(argsLen)
-            # print("Raw arguments:", args)
+        if ser.in_waiting > 0:
+            commandID = ser.read()
+            commandID = int.from_bytes(commandID, "big")
+            handler = get_handler(commandID, device)
+            # print("CommandID:", commandID)
+            if handler == None:
+                print("No command with ID ", commandID, " was found")
+                ser.read_until() # 0A
 
-        stopByte = ser.read()
-        stopByte = int.from_bytes(stopByte, "big")
-        # print("Stop byte:", stopByte)
+            argsLen = ser.read(2)
+            # print(argsLen)
+            argsLen = int.from_bytes(argsLen, "big")
+            # print("Number of bytes of arguments:", argsLen)
+            args = None
+            if argsLen > 0:
+                args = ser.read(argsLen)
+                # print("Raw arguments:", args)
 
-        if stopByte != STOP_BYTE:
-            pass
-            # print("Warning : Invalid stop byte")
+            stopByte = ser.read()
+            stopByte = int.from_bytes(stopByte, "big")
+            # print("Stop byte:", stopByte)
 
-        try:
-            handler(args)
-        except Exception as e:
-            print(e)
+            gpio.output(SW_PINS, NONE)
+
+            if stopByte != STOP_BYTE:
+                # print("Warning : Invalid stop byte")
+                pass
+
+            try:
+                handler(args)
+            except Exception as e:
+                print(e)
+
 
 def get_command(command_name, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
@@ -111,6 +122,8 @@ def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
     if command is not None:
         commandID = command[1]
+
+        gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
         ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
@@ -127,12 +140,7 @@ def send_command(command_name, args, deviceToSendTo):
                 ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
-        # if args is not None and number_of_arguments != 0:
-        #     arg_bytes = get_arg_bytes(args)
-        #     for arg_byte in arg_bytes:
-        #         ser.write(arg_byte)
-        #     ser.write(STOP_BYTE)
-        # return True
+        gpio.output(SW_PINS, NONE)
     return False
 
 def arm_command_callback(message):
@@ -159,7 +167,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyS0', 57600)
+    ser = serial.Serial('/dev/ttyS0', 57600, timeout = 1)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
