@@ -14,8 +14,8 @@ namespace internal_comms
     Command* CommandCenter::processCommand()
     {
         uint8_t commandID = waitForSerial();
-        uint8_t deviceSending = waitForSerial();
-        uint8_t deviceReceiving = waitForSerial();
+        /* uint8_t deviceSending = waitForSerial(); */
+        /* uint8_t deviceReceiving = waitForSerial(); */
         uint16_t argumentSize = readArgSize();
 
         uint8_t* buffer = nullptr;
@@ -119,7 +119,7 @@ namespace internal_comms
     }
 
     void CommandCenter::sendMessage() {
-        /* if (digitalRead(enablePin)) { */
+        if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
                 messageQueue.pop();
@@ -139,7 +139,7 @@ namespace internal_comms
                 //Serial.write(1);
                 //Serial.write(0);
             //}
-        /* } */
+        }
     }
 
     void CommandCenter::sendMessage(Message& message) {
