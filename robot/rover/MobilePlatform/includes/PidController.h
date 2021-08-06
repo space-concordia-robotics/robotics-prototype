@@ -1,13 +1,15 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
-#include "Helpers.h"
-#include "PinSetup.h"
-#include "Globals.h"
+
+#include "Arduino.h"
+
+
 
 class PidController {
 public:
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
-    PidController();
+    PidController(float,float,float);
+
     float updatePID(volatile float currentAngle, float desiredAngle);
     void setJointVelocityTolerance(float tolerance);
     void setOutputLimits(float minVal, float maxVal, float zeroVal);

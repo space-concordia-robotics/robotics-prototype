@@ -1,12 +1,14 @@
 #include "DcMotor.h"
 
-DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio, String motorName):// if no encoder
-        directionPin(dirPin), pwmPin(pwmPin)
+DcMotor::DcMotor(MotorNames name, uint8_t dirPin, uint8_t pwnPin, float gearRatio)
 {
+    this->name = name;
+    this->dirPin = dirPin;
+    this->pwmPin = pwnPin;
     // variables declared in RobotMotor require the this-> operator
     this -> gearRatio = gearRatio;
     this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
-    this -> motorName = motorName;
+
 }
 
 
@@ -15,58 +17,56 @@ void DcMotor::calcCurrentVelocity() {
 //    Serial.print(" ");
 //    Serial.print(encoderCount);
 //    Serial.println(" ");
+    uint32_t dt = InterruptHandler::getMotorDt(this->name);
+    uint32_t encoderCount = InterruptHandler::getEncoderCount(this->name);
 
     if (dt <= 0 || encoderCount <= 0) {
-        currentVelocity = 0;
+        this->currentVelocity = 0;
     }
     else {
-        currentVelocity = (float) (encoderCount * 60000000.0 * gearRatioReciprocal * encoderResolutionReciprocal / (float) (dt));
+        this->currentVelocity = (float) (encoderCount * 60000000.0 * gearRatioReciprocal * encoderResolutionReciprocal / (float) (dt));
     }
-
+    InterruptHandler::reset(this->name);
     encoderCount = 0;
     dt = 0;
     //  Serial.println(dt/1000);
 }
 
-float DcMotor::getCurrentVelocity(void) {
-    return currentVelocity;
-}
 
-void DcMotor::setVelocity(int motorDir, float dV, volatile float currentVelocity) {
+void DcMotor::setVelocity() {
 
-    desiredVelocity = dV;
-    desiredDirection = motorDir;
+    this->calcCurrentVelocity();
 //    Serial.print(motorName);
-    switch (motorDir) {
+    switch (this->desiredDirection) {
         case CW:
-            digitalWrite(directionPin, HIGH);
+            digitalWrite(this->dirPin, HIGH);
             break;
         case CCW:
-            digitalWrite(directionPin, LOW);
+            digitalWrite(this->dirPin, LOW);
             break;
     }
 
     if (isOpenLoop) {
 
-        output_pwm = desiredVelocity;
-        analogWrite(pwmPin, output_pwm);
+        int16_t output_pwm = desiredVelocity;
+        analogWrite(this->pwmPin, output_pwm);
 
     }
     else if (!isOpenLoop) {
         // THIS LOOKS WRONG
         // makes sure the speed is within the limits set in the pid during setup
         if (desiredVelocity > 30) {
-            desiredVelocity = 30;
+            this->desiredVelocity = 30;
         }
         else if (desiredVelocity < 0) {
-            desiredVelocity = 0;
+            this->desiredVelocity = 0;
         }
-        output_pwm = pidController.updatePID(currentVelocity, desiredVelocity);
+        int16_t output_pwm = pidController->updatePID(this->currentVelocity, this->desiredVelocity);
 
 //        Serial.print(output_pwm);
 //        Serial.print(" ");
 
-        analogWrite(pwmPin, fabs(output_pwm));
+        analogWrite(this->pwmPin, fabs(output_pwm));
 
     }
     //this -> desiredVelocity = output_pwm;
@@ -89,38 +89,67 @@ void DcMotor::setVelocity(int motorDir, float dV, volatile float currentVelocity
 
 }
 
-void DcMotor::velocityHandler(DcMotor* motors, float throttle, float steering) {
-  // steering of 0 means both motors at throttle.
-  // as steering moves away from 0, one motor keeps throttle.
-  // the other slows down or even reverses based on the steering value.
-  // multiplier is mapped between -1 and 1 so 0 means no speed and the extremes mean full throttle in either direction.
+void DcMotor::setEnabled(bool isEnabled) {
 
-  float multiplier = Helpers::get().mapFloat(fabs(steering), 0, MAX_INPUT_VALUE, 1, -1);
-  float leadingSideAbs = Helpers::get().mapFloat(fabs(throttle), 0, MAX_INPUT_VALUE, 0, maxOutputSignal);
-  float trailingSideAbs = leadingSideAbs * multiplier;
+}
 
-  int dir = 1;
-  if (throttle >= 0) dir = 1;
-  else if (throttle < 0) dir = -1;
+void DcMotor::closeLoop() {
 
-  if (steering < 0) { // turning left
-    desiredVelocityRight = leadingSideAbs * dir;
-    desiredVelocityLeft = trailingSideAbs * dir;
-  }
-  else { // turning right
-    desiredVelocityRight = trailingSideAbs * dir;
-    desiredVelocityLeft = leadingSideAbs * dir;
-  }
+    this->isEncoderEnabled = true;
+    maxOutputSignal = MAX_RPM_VALUE;
+    minOutputSignal = MIN_RPM_VALUE;
 
-  if (desiredVelocityLeft > 0) leftMotorDirection = CCW;
-  else leftMotorDirection = CW;
-  if (desiredVelocityRight < 0) rightMotorDirection = CCW;
-  else rightMotorDirection = CW;
+    this->isOpenLoop = false;
 
-  motors[0].setVelocity(rightMotorDirection, fabs(desiredVelocityRight), motors[0].getCurrentVelocity());
-  motors[1].setVelocity(rightMotorDirection, fabs(desiredVelocityRight), motors[1].getCurrentVelocity());
-  motors[2].setVelocity(rightMotorDirection, fabs(desiredVelocityRight), motors[2].getCurrentVelocity());
-  motors[3].setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), motors[3].getCurrentVelocity());
-  motors[4].setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), motors[4].getCurrentVelocity());
-  motors[5].setVelocity(leftMotorDirection, fabs(desiredVelocityLeft), motors[5].getCurrentVelocity());
+}
+
+void DcMotor::openLoop() {
+
+    maxOutputSignal = MAX_PWM_VALUE;
+    minOutputSignal = MIN_PWM_VALUE;
+
+    this->isOpenLoop = true;
+}
+
+void DcMotor::attachEncoder(int encA, int encB, float encRes, void (*handler) (void)) {
+    this->encoderPinA = encA;
+    this->encoderPinB= encB;
+    this->encoderResolution= encRes;
+    this->encoderResolutionReciprocal = 1/encRes;
+
+
+    pinMode(encB, INPUT_PULLUP);
+    pinMode(encA, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(encA), handler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(encB), handler, CHANGE);
+}
+
+void DcMotor::initPidController(float kp, float ki, float kd) {
+    this->pidController = new PidController(kp,ki,kd);
+}
+
+
+void DcMotor::updateDesiredVelocity(motor_direction desiredDirection, int16_t desiredVelocity) {
+    this->desiredDirection = desiredDirection;
+    this->desiredVelocity = desiredVelocity;
+}
+
+PidController *DcMotor::getPidController(void) const {
+    return this->pidController;
+}
+
+motor_direction DcMotor::getDesiredDirection() const {
+    return this->desiredDirection;
+}
+
+int16_t DcMotor::getDesiredVelocity() const {
+    return this->desiredVelocity;
+}
+
+float DcMotor::getCurrentVelocity() const {
+    return this->currentVelocity;
+}
+
+DcMotor::DcMotor() {
+
 }

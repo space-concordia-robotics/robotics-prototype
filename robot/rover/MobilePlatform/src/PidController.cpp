@@ -1,16 +1,11 @@
 #include "PidController.h"
 
-PidController::PidController() {
-    // default values
-    //    kp = 10.0;
-    //    ki = 0.0;
-    //    kd = 0.0;
-    jointVelocityTolerance = 1.0;
-    minOutputValue = -30.0;
-    maxOutputValue = 30.0;
-    slowestSpeed = 3.0;
-}
 
+PidController::PidController(float kp, float ki, float kd) {
+    this->kd = kd;
+    this->ki = ki;
+    this->kp = kp;
+}
 float PidController::updatePID(volatile float currentVelocity, float desiredVelocity) {
     error = desiredVelocity - currentVelocity; // these angle variables need to be obtained from the motor object
 
@@ -73,6 +68,11 @@ void PidController::setGainConstants(float kp, float ki, float kd) {
     this -> kp = kp;
     this -> ki = ki;
     this -> kd = kd;
+
+    jointVelocityTolerance = 1.0;
+    minOutputValue = -30.0;
+    maxOutputValue = 30.0;
+    slowestSpeed = 3.0;
 }
 
 void PidController::printPidParameters(void) {
