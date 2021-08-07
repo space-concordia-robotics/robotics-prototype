@@ -41,9 +41,9 @@ OUTPUT_NAME ${PROJECT_NAME}.elf
 )
  
 target_link_libraries(
-${PROJECT_NAME}_EXE 
-@PROJECT_LIBRARIES@
+${PROJECT_NAME}_EXE
 $<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
+@PROJECT_LIBRARIES@
 teensycore
 -lm
 ) 

@@ -16,20 +16,27 @@ namespace internal_comms
         uint8_t commandID = waitForSerial();
         /* uint8_t deviceSending = waitForSerial(); */
         /* uint8_t deviceReceiving = waitForSerial(); */
-        uint16_t argumentSize = readArgSize();
+        uint16_t argumentSize = waitForSerial();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
+
+        //Serial.write(commandID);
+
+        //Serial.write(argumentSize);
 
         if(argumentSize > 0)
         {
             buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
             bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         }
-
+        /*for(int i = 0 ; i < bytesRead ; i++){
+            Serial.write(buffer[i]);
+        }*/
         uint8_t stopByte = waitForSerial();
+        //Serial.write(stopByte);
 
-        Command* cmd = (Command*) malloc(sizeof(Command));
+        auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
         cmd->isValid = true;
         cmd->rawArgs = buffer;
@@ -56,10 +63,10 @@ namespace internal_comms
     }
 
     Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
-        Message* message = (Message*) malloc(sizeof(Message));
+        auto* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
-        message->rawArgs = malloc(rawArgsLength);
+        message->rawArgs = static_cast<uint8_t *>(malloc(rawArgsLength));
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
@@ -88,7 +95,7 @@ namespace internal_comms
 
         Serial.begin(COMMS_BAUDRATE);
         Serial1.begin(COMMS_BAUDRATE);
-        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+//        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
     }
 
     void CommandCenter::readCommand()
@@ -132,7 +139,7 @@ namespace internal_comms
 
                 Serial.write(0x0A);
                 
-                free((void *)message.rawArgs);
+                free(message.rawArgs);
                 
             }
             //else {

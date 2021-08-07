@@ -61,7 +61,7 @@ void Rover::moveWheel(uint8_t wheelName, const int16_t wheelPWM) {
         this->isSteering = 0; // From Globals.h
 
         motorList[wheelName].updateDesiredVelocity(direction , abs(wheelPWM));
-
+        motorList[wheelName].setVelocity();
 }
 
 void Rover::updateWheelsVelocity(){

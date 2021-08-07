@@ -134,7 +134,7 @@ private:
     volatile int rotationDirection = CCW;
 
     uint8_t throttleTimeout;
-    uint8_t areMotorsEnabled;
+    bool areMotorsEnabled = false;
     uint8_t isSteering = true;
     uint8_t accelerationLimiterEnabled = false;
     uint8_t servoCount;

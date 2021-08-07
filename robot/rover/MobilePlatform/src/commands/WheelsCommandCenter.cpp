@@ -27,8 +27,7 @@ float bytes_to_float(const uint8_t* rawPointer)
 
 void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
   // Create message to add to queue of messages
-  Message* message = createMessage(commandID, rawArgsLength, const_cast<uint8_t *>(rawArgs));
-
+  //Message* message = createMessage(commandID, rawArgsLength, const_cast<uint8_t *>(rawArgs));
   /*
   Switch command recieved to perform specific function
   */
@@ -62,24 +61,32 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
         toggleEncoder(*rawArgs); // Toggle ON or OFF
         break;
     }
-    case COMMAND_SET_ACCELERATION:
-      toggleAcceleration(*rawArgs); // Toggle ON or OFF
-      break;
+    case COMMAND_SET_ACCELERATION: {
+        toggleAcceleration(*rawArgs); // Toggle ON or OFF
+        break;
+    }
     case COMMAND_GET_ROVER_STATUS: {
         getRoverStatus();
 
     //    this->sendMessage(*message); // Add message to queue
         break;
     }
-    case COMMAND_MOVE_ROVER:
+    case COMMAND_MOVE_ROVER: {
         moveRover(*rawArgs, *(++rawArgs));
-      break;
+        break;
+    }
     case COMMAND_MOVE_WHEEL:
     {
       uint8_t wheelNumber = (*rawArgs);
+
+      //Serial.write(wheelNumber);
+
       int16_t PWM = 0;
       PWM = *(++rawArgs) << 8;
+      //Serial.write(PWM);
       PWM |= *(++rawArgs);
+      //Serial.write(PWM);
+
       moveWheel(wheelNumber, PWM);
       break;
     }
@@ -112,10 +119,11 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
     }
     case COMMAND_WHEELS_PING:
     {
-      pingWheels();
+        pingWheels();
       break;
     }
     default:
+        Serial.write("bad hex");
         break;
   }
 }

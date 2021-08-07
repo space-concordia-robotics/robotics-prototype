@@ -36,6 +36,7 @@ void DcMotor::calcCurrentVelocity() {
 void DcMotor::setVelocity() {
 
     this->calcCurrentVelocity();
+    Serial.write((int)this->currentVelocity);
 //    Serial.print(motorName);
     switch (this->desiredDirection) {
         case CW:
@@ -49,7 +50,9 @@ void DcMotor::setVelocity() {
     if (isOpenLoop) {
 
         int16_t output_pwm = desiredVelocity;
+        Serial.write(output_pwm);
         analogWrite(this->pwmPin, output_pwm);
+        Serial.write(1);
 
     }
     else if (!isOpenLoop) {
@@ -132,6 +135,9 @@ void DcMotor::initPidController(float kp, float ki, float kd) {
 void DcMotor::updateDesiredVelocity(motor_direction desiredDirection, int16_t desiredVelocity) {
     this->desiredDirection = desiredDirection;
     this->desiredVelocity = desiredVelocity;
+    Serial.write(desiredDirection);
+    Serial.write(desiredVelocity);
+    //setVelocity();
 }
 
 PidController *DcMotor::getPidController(void) const {
