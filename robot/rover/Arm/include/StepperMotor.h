@@ -2,7 +2,6 @@
 #define STEPPERMOTOR_H
 
 #include <Arduino.h>
-#include "PinSetup.h"
 #include "RobotMotor.h"
 
 #define MIN_STEP_INTERVAL 3000

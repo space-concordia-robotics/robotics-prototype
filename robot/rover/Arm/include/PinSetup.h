@@ -140,6 +140,7 @@
 
 // Motor 5 Wrist swivel
 #define M5_GEAR_RATIO      27.0 // worm gear
+// no angle limits/limit switches because it can spin indefinitely
 
 // Motor 6 Pinch
 #define M6_LIMIT_SW_FLEX 15 // LS 9 

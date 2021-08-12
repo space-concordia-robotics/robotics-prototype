@@ -3,14 +3,13 @@
 
 #include <Arduino.h>
 #include <Servo.h>
-#include "PinSetup.h"
 #include "RobotMotor.h"
 
 class ServoMotor: public RobotMotor {
   public:
     static int numServoMotors;
 
-    ServoMotor(int pwmPin, float gearRatio);
+    ServoMotor(float gearRatio);
     void motorTimerInterrupt(void);
     /* movement helper functions */
     bool calcTurningDuration(float angle); //!< guesstimates how long to turn at the preset open loop motor speed to get to the desired position
@@ -27,16 +26,13 @@ class ServoMotor: public RobotMotor {
     elapsedMillis timeCount; //!< how long has the servo been turning for
 
   private:
-    int pwmPin;
     Servo servo;
 };
 
 int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
 
-ServoMotor::ServoMotor(int pwmPin, float gearRatio):
-  pwmPin(pwmPin)
+ServoMotor::ServoMotor(float gearRatio)
 {
-  servo.attach(pwmPin);
   numServoMotors++;
   // variables declared in RobotMotor require the this-> operator
   setGearRatio(gearRatio);
