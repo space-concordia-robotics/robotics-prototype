@@ -844,15 +844,15 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
         }
     }
 
-#define MOVE_MOTOR_IDLE 0
-#define MOVE_MOTOR_FORWARD 1
-#define MOVE_MOTOR_BACKWARD 2
+#define MOVE_MOTOR_IDLE 0U
+#define MOVE_MOTOR_FORWARD 1U
+#define MOVE_MOTOR_BACKWARD 2U
 
     void budgeMotors(uint8_t motorActions[])
     {
         for(uint8_t i = 0; i < 6; i++)
         {
-            if(motorActions != MOVE_MOTOR_IDLE)
+            if(motorActions[i] != MOVE_MOTOR_IDLE)
             {
                 bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
                 motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
