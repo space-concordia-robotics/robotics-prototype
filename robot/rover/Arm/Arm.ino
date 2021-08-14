@@ -56,6 +56,10 @@
 #include "include/commands/ArmCommandCenter.h"
 #include <cstdint>
 
+#ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
+#define Serial Serial1
+#endif
+
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 25; 
