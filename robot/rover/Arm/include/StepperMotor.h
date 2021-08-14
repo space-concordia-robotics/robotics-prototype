@@ -201,7 +201,6 @@ void StepperMotor::singleStep() {
 }
 
 void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
-  static int oldDir = CLOCKWISE;
   if (!isOpenLoop) {
     motorSpeed = fabs(motorSpeed);
   }
@@ -212,17 +211,14 @@ void StepperMotor::setVelocity(int motorDir, float motorSpeed) {
   if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
     motorSpeed = pidController.getMinOutputValue();
   }
-  if (motorDir != oldDir) {
     switch (motorDir) {
       case CLOCKWISE:
-        digitalWriteFast(directionPin, LOW);
+        digitalWrite(directionPin, LOW);
         break;
       case COUNTER_CLOCKWISE:
-        digitalWriteFast(directionPin, HIGH);
+        digitalWrite(directionPin, HIGH);
         break;
     }
-    oldDir = motorDir;
-    //Serial.println("dir change");
   }
   singleStep();
   // slowest is STEP_INTERVAL1, fastest is STEP_INTERVAL4

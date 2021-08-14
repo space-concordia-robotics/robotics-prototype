@@ -231,10 +231,10 @@ void initEncoders(void) {
     attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
     // set activate PIDs
-    motor1.isOpenLoop = false; motor1.encoderModifier=-1;
+    motor1.isOpenLoop = false; //motor1.encoderModifier=-1;
     motor2.isOpenLoop = false;
     motor3.isOpenLoop = false;
-    motor4.isOpenLoop = false; motor4.encoderModifier=-1;
+    motor4.isOpenLoop = false; //motor4.encoderModifier=-1;
 
     // set pid gains
     motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
@@ -844,18 +844,18 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
         }
     }
 
-#define MOVE_MOTOR_IDLE 0U
-#define MOVE_MOTOR_FORWARD 1U
-#define MOVE_MOTOR_BACKWARD 2U
+#define MOVE_MOTOR_IDLE 0
+#define MOVE_MOTOR_FORWARD 1 //clockwise or flex
+#define MOVE_MOTOR_BACKWARD 2 //ccw or extend
 
-    void budgeMotors(uint8_t motorActions[])
+    void budgeMotors(const uint8_t motorActions[])
     {
         for(uint8_t i = 0; i < 6; i++)
         {
             if(motorActions[i] != MOVE_MOTOR_IDLE)
             {
-                bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
-                motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
+                bool moveCW = (motorActions[i] == MOVE_MOTOR_FORWARD);
+                motorArray[i]->budge(moveCW);
             }
         }
     }
@@ -873,10 +873,11 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
         motorArray[motorId - 1]->setSoftwareAngle(0.0);
     }
 
-    void moveMultipleMotors(float anglesToReach[])
+    void moveMultipleMotors(byte anglesToReach[])
     {
         for(uint8_t i = 0; i < 6; i++)
         {
+            Serial.print(anglesToReach[i]);
             if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
                 motorArray[i]->goToCommandedAngle();
             }

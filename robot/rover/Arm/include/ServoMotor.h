@@ -19,7 +19,7 @@ class ServoMotor: public RobotMotor {
         void setVelocity(int motorDir, float motorSpeed); //!< currently this actually activates the servo and makes it turn at a set speed/direction
         void goToCommandedAngle(void);
         void forceToAngle(float angle);
-        void budge(int dir);
+        void budge(bool dir);
 
         // stuff for open loop control
         unsigned int numMillis; //!< how many milliseconds for servo to reach desired position
@@ -60,17 +60,6 @@ void ServoMotor::motorTimerInterrupt(void) {
         if (!movementDone && timeCount < numMillis) {
             calcCurrentAngle();
             setVelocity(rotationDirection, openLoopSpeed);
-#ifdef DEBUG_SERVO_TIMER
-            UART_PORT.println("ARM motor");
-            UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
-            UART_PORT.print("ARM ");
-            UART_PORT.print(timeCount); UART_PORT.print("\t / ");
-            UART_PORT.print(numMillis); UART_PORT.println(" ms");
-            UART_PORT.print("ARM ");
-            UART_PORT.print(getSoftwareAngle()); UART_PORT.print("\t / ");
-            UART_PORT.print(getDesiredAngle()); UART_PORT.print("\t / ");
-            UART_PORT.print(startAngle); UART_PORT.println(" degrees");
-#endif
         }
         else {
             // really it should only do these tasks once, shouldn't repeat each interrupt the motor is done moving
@@ -95,12 +84,6 @@ void ServoMotor::motorTimerInterrupt(void) {
             else {
                 int dir = calcDirection(output);
                 setVelocity(dir, output);
-#ifdef DEBUG_SERVO_TIMER
-                UART_PORT.print("ARM motor ");
-                UART_PORT.print(rotationDirection); UART_PORT.println(" direction");
-                UART_PORT.print("ARM ");
-                UART_PORT.print(output); UART_PORT.println(" next output");
-#endif
             }
         }
         else {
@@ -189,19 +172,8 @@ void ServoMotor::goToCommandedAngle(void) {
         if (calcTurningDuration(openLoopError)) {
             timeCount = 0;
             movementDone = false;
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-#ifdef DEBUG_MAIN
-            UART_PORT.print("ARM $S,Success: motor");
-            UART_PORT.print(" to turn for ");
-            UART_PORT.print(numMillis);
-            UART_PORT.println(" milliseconds");
-#endif
-#endif
         }
         else {
-#if defined(DEVEL_MODE_1) || defined(DEVEL_MODE_2)
-            UART_PORT.println("ARM $E,Error: requested angle is too close to current angle. Motor not changing course.");
-#endif
         }
     }
     else {
@@ -228,13 +200,12 @@ void ServoMotor::forceToAngle(float angle) {
     }
 }
 
-void ServoMotor::budge(int dir) {
-
+void ServoMotor::budge(bool dir) {
     calcCurrentAngle();
     float ang = getSoftwareAngle();
     bool canMove = true;
     if (hasAngleLimits) {
-        if ( ( (dir > 0) && (ang > maxJointAngle) ) || ( (dir < 0) && (ang < minJointAngle) ) ) {
+        if ( ( (dir) && (ang > maxJointAngle) ) || ( (!dir) && (ang < minJointAngle) ) ) {
             canMove = false;
         }
     }
