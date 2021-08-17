@@ -1,3 +1,5 @@
+#ifndef DCMOTOR_H
+#define DCMOTOR_H
 #include <cstdio>
 #include "PidController.h"
 #define PULSES_PER_REV     14
@@ -13,14 +15,18 @@
 #define MIN_RPM_VALUE -MAX_RPM
 
 enum MotorNames{
-    LEFT_FRONT=0,
-    LEFT_MIDDLE=1,
-    LEFT_BACK=2,
-    RIGHT_FRONT=3,
-    RIGHT_MIDDLE=4,
-    RIGHT_BACK=5
+    FRONT_RIGHT=0,
+    MIDDLE_RIGHT=1,
+    REAR_RIGHT=2,
+    FRONT_LEFT=3,
+    MIDDLE_LEFT=4,
+    REAR_LEFT=5
 };
-enum motor_direction { CW = -1, CCW = 1 };
+
+enum motor_direction {
+    CW = -1,
+    CCW = 1
+};
 
 class InterruptHandler{
 public:
@@ -81,72 +87,72 @@ public:
 
     static uint32_t getEncoderCount(MotorNames name){
         switch (name) {
-            case RIGHT_FRONT:
+            case FRONT_RIGHT:
                 return RIGHT_FRONT_MOTOR_ENCODER_COUNT;
-            case RIGHT_MIDDLE:
+            case MIDDLE_RIGHT:
                 return RIGHT_MIDDLE_MOTOR_ENCODER_COUNT;
-            case RIGHT_BACK:
+            case REAR_RIGHT:
                 return RIGHT_BACK_MOTOR_ENCODER_COUNT;
-            case LEFT_FRONT:
+            case FRONT_LEFT:
                 return LEFT_FRONT_MOTOR_ENCODER_COUNT;
-            case LEFT_MIDDLE:
+            case MIDDLE_LEFT:
                 return LEFT_MIDDLE_MOTOR_ENCODER_COUNT;
-            case LEFT_BACK:
+            case REAR_LEFT:
                 return LEFT_BACK_MOTOR_ENCODER_COUNT;
 
         }
     }
     static uint32_t getMotorDt(MotorNames name){
         switch (name) {
-            case RIGHT_FRONT:
+            case FRONT_RIGHT:
                 return RIGHT_FRONT_MOTOR_DT;
-            case RIGHT_MIDDLE:
+            case MIDDLE_RIGHT:
                 return RIGHT_MIDDLE_MOTOR_DT;
-            case RIGHT_BACK:
+            case REAR_RIGHT:
                 return RIGHT_BACK_MOTOR_DT;
-            case LEFT_FRONT:
+            case FRONT_LEFT:
                 return LEFT_FRONT_MOTOR_DT;
-            case LEFT_MIDDLE:
+            case MIDDLE_LEFT:
                 return LEFT_MIDDLE_MOTOR_DT;
-            case LEFT_BACK:
+            case REAR_LEFT:
                 return LEFT_BACK_MOTOR_DT;
 
         }
     }
     static void reset(MotorNames name) {
         switch (name) {
-            case RIGHT_FRONT: {
+            case FRONT_RIGHT: {
                 RIGHT_FRONT_MOTOR_DT = 0;
                 RIGHT_FRONT_MOTOR_ENCODER_COUNT = 0;
                 RIGHT_FRONT_MOTOR_PREV_DT = 0;
                 break;
             }
-            case RIGHT_MIDDLE: {
+            case MIDDLE_RIGHT: {
                 RIGHT_MIDDLE_MOTOR_DT = 0;
                 RIGHT_MIDDLE_MOTOR_ENCODER_COUNT = 0;
                 RIGHT_MIDDLE_MOTOR_PREV_DT = 0;
                 break;
             }
-            case RIGHT_BACK: {
+            case REAR_RIGHT: {
                 RIGHT_BACK_MOTOR_DT = 0;
                 RIGHT_BACK_MOTOR_ENCODER_COUNT = 0;
                 RIGHT_BACK_MOTOR_PREV_DT=0;
             } break;
 
-            case LEFT_FRONT: {
-                InterruptHandler::LEFT_FRONT_MOTOR_DT = 0;
-                InterruptHandler::LEFT_FRONT_MOTOR_ENCODER_COUNT = 0;
-                InterruptHandler::LEFT_FRONT_MOTOR_PREV_DT = 0;
+            case FRONT_LEFT: {
+                LEFT_FRONT_MOTOR_DT = 0;
+                LEFT_FRONT_MOTOR_ENCODER_COUNT = 0;
+                LEFT_FRONT_MOTOR_PREV_DT = 0;
                 break;
             }
-            case LEFT_MIDDLE:{
+            case MIDDLE_LEFT:{
                 LEFT_MIDDLE_MOTOR_ENCODER_COUNT = 0;
                 LEFT_MIDDLE_MOTOR_DT = 0;
                 LEFT_MIDDLE_MOTOR_PREV_DT = 0;
                 break;
             }
 
-            case LEFT_BACK: {
+            case REAR_LEFT: {
                 LEFT_BACK_MOTOR_ENCODER_COUNT = 0;
                 LEFT_BACK_MOTOR_DT = 0;
                 LEFT_BACK_MOTOR_PREV_DT = 0;
@@ -156,42 +162,62 @@ public:
     }
 };
 
-class DcMotor {
+typedef struct DcMotorState{
+    MotorNames id;
 
-    bool isEnabled;
-    MotorNames name;
-    PidController* pidController;
-    bool isOpenLoop;
-    uint16_t maxOutputSignal;
-    uint16_t minOutputSignal;
-    float gearRatio;
-    float gearRatioReciprocal; // preemptively reduce floating point calculation time
+    int16_t desired_velocity;
+    float current_velocity;
 
-    volatile float currentVelocity;
-    uint8_t encoderPinA;
-    uint8_t encoderPinB;
-    float encoderResolution;
-    float encoderResolutionReciprocal;
-    bool isEncoderEnabled;
-    motor_direction desiredDirection;
-    int16_t desiredVelocity;
-    uint8_t dirPin;
-    uint8_t pwmPin;
-public:
-    void closeLoop();
-    void openLoop();
-    PidController* getPidController(void ) const;
-    void updateDesiredVelocity(motor_direction,int16_t);
-    void attachEncoder(int encA, int encB, float encRes,void (*)(void));
-    DcMotor(MotorNames, uint8_t , uint8_t , float );
-    void setVelocity(); // currently this actually activates the dc motor and makes it turn at a set speed/direction
-    void setEnabled(bool isEnabled);
-    void initPidController(float,float,float);
+    motor_direction desired_direction;
 
-    motor_direction getDesiredDirection() const;
+    float gear_ratio;
+    float gear_ratio_reciprocal;
+    float encoder_resolution_reciprocal;
 
-    int16_t getDesiredVelocity() const;
-    float getCurrentVelocity() const;
-    void calcCurrentVelocity();
-    DcMotor();
-};
+    int8_t max_output_signal;
+    int8_t min_output_signal;
+
+    uint8_t dir_pin;
+    uint8_t pwm_pin;
+
+    bool is_open_loop;
+
+    pidControllerState pid_controller;
+} DcMotorState;
+
+typedef struct{
+    float kp;
+    float ki;
+    float kd;
+} PidController;
+
+
+typedef struct {
+    bool is_throttle_timeout_enabled;
+    bool are_motors_enabled;
+    bool is_open_loop;
+} SystemState;
+
+namespace Motor {
+
+    extern DcMotorState motorList[6];
+    extern SystemState systemStatus;
+
+    void attachMotor(const MotorNames &, const uint8_t&, const uint8_t&, const float&);
+
+    void attachEncoder(const MotorNames &, const uint8_t&, const uint8_t&, const float&, void (*handler)(void));
+
+    void calculateCurrentVelocity(const MotorNames &);
+
+    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int16_t &);
+
+    void applyDesiredMotorVelocity(const MotorNames &);
+
+    void initPidController(const MotorNames &, const float&, const float&, const float&);
+
+}
+inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max){
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+#endif

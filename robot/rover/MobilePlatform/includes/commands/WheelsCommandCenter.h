@@ -50,8 +50,8 @@ public:
     void getBatteryVoltage(void);
     void pingWheels(void);
 
-    inline uint8_t* float2bytes(uint8_t* buffer, float value){
-        memcpy(buffer, (unsigned char*) (&value), 4);
+    inline void float2bytes(uint8_t* buffer, float value){
+        memcpy(buffer, (unsigned char*) (&value), sizeof(float));
     }
 };
 

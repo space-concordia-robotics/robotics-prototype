@@ -5,7 +5,7 @@
 // Issue made to change includes to include, which requires changing the CMake
 
 #include <cstdint>
-#include "commands/WheelsCommandCenter.h" //Change to /include once the CMake is fixed
+#include "commands/WheelsCommandCenter.h"
 
 
 using namespace internal_comms;
@@ -77,15 +77,19 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
     }
     case COMMAND_MOVE_WHEEL:
     {
-      uint8_t wheelNumber = (*rawArgs);
+      uint8_t wheelNumber = (*rawArgs++);
 
       //Serial.write(wheelNumber);
 
       int16_t PWM = 0;
-      PWM = *(++rawArgs) << 8;
+      //PWM = *(rawArgs++) << 8;
+
       //Serial.write(PWM);
-      PWM |= *(++rawArgs);
-      //Serial.write(PWM);
+      PWM = *(rawArgs++);
+
+      //PWM = -255;
+
+      Serial.write(PWM);
 
       moveWheel(wheelNumber, PWM);
       break;

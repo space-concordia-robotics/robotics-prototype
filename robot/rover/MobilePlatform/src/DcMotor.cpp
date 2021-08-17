@@ -1,80 +1,92 @@
 #include "DcMotor.h"
+namespace Motor {
+    DcMotorState motorList[6];
 
-DcMotor::DcMotor(MotorNames name, uint8_t dirPin, uint8_t pwnPin, float gearRatio)
-{
-    this->name = name;
-    this->dirPin = dirPin;
-    this->pwmPin = pwnPin;
-    // variables declared in RobotMotor require the this-> operator
-    this -> gearRatio = gearRatio;
-    this -> gearRatioReciprocal = 1 / gearRatio; // preemptively reduce floating point calculation time
+    void attachEncoder(const MotorNames& motorID, const uint8_t& encoderPinA, const uint8_t& encoderPinB, const float& encoder_res,
+                       void (*handler)(void)) {
 
-}
+        //->encoderResolution= encoder_res;
+        motorList[motorID].encoder_resolution_reciprocal = 1 / encoder_res;
 
 
-void DcMotor::calcCurrentVelocity() {
-//    Serial.print(dt);
-//    Serial.print(" ");
-//    Serial.print(encoderCount);
-//    Serial.println(" ");
-    uint32_t dt = InterruptHandler::getMotorDt(this->name);
-    uint32_t encoderCount = InterruptHandler::getEncoderCount(this->name);
-
-    if (dt <= 0 || encoderCount <= 0) {
-        this->currentVelocity = 0;
+        pinMode(encoderPinA, INPUT_PULLUP);
+        pinMode(encoderPinB, INPUT_PULLUP);
+        attachInterrupt(digitalPinToInterrupt(encoderPinA), handler, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(encoderPinB), handler, CHANGE);
     }
-    else {
-        this->currentVelocity = (float) (encoderCount * 60000000.0 * gearRatioReciprocal * encoderResolutionReciprocal / (float) (dt));
+
+    void attachMotor(const MotorNames &motorID, const uint8_t& dirPin,const uint8_t& pwmPin, const float& gearRatio) {
+        //motorList[motorID] = {};
+        motorList[motorID].dir_pin = dirPin;
+        motorList[motorID].pwm_pin = pwmPin;
+
+        motorList[motorID].gear_ratio = gearRatio;
+        motorList[motorID].gear_ratio_reciprocal = 1 / gearRatio;
+
+        pinMode(pwmPin, OUTPUT);
+        pinMode(dirPin, OUTPUT);
     }
-    InterruptHandler::reset(this->name);
-    encoderCount = 0;
-    dt = 0;
-    //  Serial.println(dt/1000);
-}
+
+    void initPidController(const MotorNames &motorID, const float& kp, const float& ki, const float& kd) {
+        motorList[motorID].pid_controller = {};
+
+        motorList[motorID].pid_controller.kd = kd;
+        motorList[motorID].pid_controller.kp = kp;
+        motorList[motorID].pid_controller.ki = ki;
+
+    }
+
+    void updateDesiredMotorVelocity(const MotorNames &motorID, const motor_direction &desired_direction,
+                                    const int16_t &desired_velocity) {
+        motorList[motorID].desired_velocity = desired_velocity;
+        motorList[motorID].desired_direction = desired_direction;
+    }
+
+    void applyDesiredMotorVelocity(const MotorNames &motorID) {
+
+        calculateCurrentVelocity(motorID);
+
+        auto &motor = motorList[motorID];
 
 
-void DcMotor::setVelocity() {
-
-    this->calcCurrentVelocity();
-    Serial.write((int)this->currentVelocity);
 //    Serial.print(motorName);
-    switch (this->desiredDirection) {
-        case CW:
-            digitalWrite(this->dirPin, HIGH);
-            break;
-        case CCW:
-            digitalWrite(this->dirPin, LOW);
-            break;
-    }
-
-    if (isOpenLoop) {
-
-        int16_t output_pwm = desiredVelocity;
-        Serial.write(output_pwm);
-        analogWrite(this->pwmPin, output_pwm);
-        Serial.write(1);
-
-    }
-    else if (!isOpenLoop) {
-        // THIS LOOKS WRONG
-        // makes sure the speed is within the limits set in the pid during setup
-        if (desiredVelocity > 30) {
-            this->desiredVelocity = 30;
+        switch (motor.desired_direction) {
+            case CW:
+                digitalWrite(motor.dir_pin, HIGH);
+                break;
+            case CCW:
+                digitalWrite(motor.dir_pin, LOW);
+                break;
         }
-        else if (desiredVelocity < 0) {
-            this->desiredVelocity = 0;
-        }
-        int16_t output_pwm = pidController->updatePID(this->currentVelocity, this->desiredVelocity);
+
+        motor.is_open_loop = true;
+
+        if (motor.is_open_loop) {
+
+            int16_t output_pwm = motor.desired_velocity;
+            Serial.write(motor.pwm_pin);
+            analogWrite(motor.pwm_pin, 190);
+
+
+        } else if (!motor.is_open_loop) {
+            // THIS LOOKS WRONG
+            // makes sure the speed is within the limits set in the pid during setup
+            if (motor.desired_velocity > 30) {
+                motor.desired_velocity = 30;
+            } else if (motor.desired_velocity < 0) {
+                motor.desired_velocity = 0;
+            }
+            int16_t output_pwm = updatePID(motor.pid_controller, motor.current_velocity, motor.desired_velocity);
 
 //        Serial.print(output_pwm);
 //        Serial.print(" ");
 
-        analogWrite(this->pwmPin, fabs(output_pwm));
+            analogWrite(motor.pwm_pin, fabs(output_pwm));
 
-    }
-    //this -> desiredVelocity = output_pwm;
+        }
+        //this -> desiredVelocity = output_pwm;
 
-    /* Acceleration limiter */
+        /* Acceleration limiter */
 //    if (accLimit) {
 //        final_output_pwm = output_pwm;
 //        dt2 = micros() - prevTime2;
@@ -90,46 +102,35 @@ void DcMotor::setVelocity() {
 //    }
 //    else analogWrite(pwmPin, output_pwm);
 
+//
+    }
+
+
+    void calculateCurrentVelocity(const MotorNames &motorID) {
+        auto &motor = motorList[motorID];
+        uint32_t dt = InterruptHandler::getMotorDt(motorID);
+        uint32_t encoderCount = InterruptHandler::getEncoderCount(motorID);
+
+        if (dt <= 0 || encoderCount <= 0) {
+            motor.current_velocity = 0;
+        } else {
+            //TODO : figure out the whole float weirdness. like can't i just cast to a int16_t ? do i really need a float
+            float calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
+                                                 motor.encoder_resolution_reciprocal / (float) (dt));
+            motor.current_velocity = calculated_velocity;
+            //motor.current_velocity = map(calculated_velocity,0,MAX);
+
+        }
+        InterruptHandler::reset(motorID);
+
+    }
 }
-
-void DcMotor::setEnabled(bool isEnabled) {
-
-}
-
-void DcMotor::closeLoop() {
-
-    this->isEncoderEnabled = true;
-    maxOutputSignal = MAX_RPM_VALUE;
-    minOutputSignal = MIN_RPM_VALUE;
-
-    this->isOpenLoop = false;
-
-}
-
-void DcMotor::openLoop() {
-
-    maxOutputSignal = MAX_PWM_VALUE;
-    minOutputSignal = MIN_PWM_VALUE;
-
-    this->isOpenLoop = true;
-}
-
-void DcMotor::attachEncoder(int encA, int encB, float encRes, void (*handler) (void)) {
-    this->encoderPinA = encA;
-    this->encoderPinB= encB;
-    this->encoderResolution= encRes;
-    this->encoderResolutionReciprocal = 1/encRes;
-
-
-    pinMode(encB, INPUT_PULLUP);
-    pinMode(encA, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(encA), handler, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(encB), handler, CHANGE);
-}
-
-void DcMotor::initPidController(float kp, float ki, float kd) {
-    this->pidController = new PidController(kp,ki,kd);
-}
+/*void updateDesiredMotorDirection(const MotorNames& motorID, const motor_direction& desiredDirection, const int16_t desiredVelocity){
+    auto& motor = motorList[motorID];
+    motor.desired_direction = desiredDirection;
+    motor.desired_velocity = desiredVelocity;
+} */
+/*
 
 
 void DcMotor::updateDesiredVelocity(motor_direction desiredDirection, int16_t desiredVelocity) {
@@ -140,22 +141,4 @@ void DcMotor::updateDesiredVelocity(motor_direction desiredDirection, int16_t de
     //setVelocity();
 }
 
-PidController *DcMotor::getPidController(void) const {
-    return this->pidController;
-}
-
-motor_direction DcMotor::getDesiredDirection() const {
-    return this->desiredDirection;
-}
-
-int16_t DcMotor::getDesiredVelocity() const {
-    return this->desiredVelocity;
-}
-
-float DcMotor::getCurrentVelocity() const {
-    return this->currentVelocity;
-}
-
-DcMotor::DcMotor() {
-
-}
+*/

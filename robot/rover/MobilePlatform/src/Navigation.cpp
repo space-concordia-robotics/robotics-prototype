@@ -1,6 +1,6 @@
 #include "Navigation.h"
 
-void Navigation::initNav(){
+/*initNav(){
     if (!gpsSpark.begin(Wire, 400000)) { // Wire corresponds to the SDA1,SCL1 on the Teensy 3.6 (pins 38,37)
         gpsError = true;
         //Log error
@@ -73,4 +73,4 @@ void Navigation::navHandler(){
             //Helpers::get().printres(gpsPlus.location.lng(), 5); // print the longitude with 6 digits after the decimal
         }
     }
-}
+}*/

@@ -1,6 +1,31 @@
 #include "PidController.h"
+int16_t updatePID(pidControllerState& pidState, volatile float currentVelocity, float desiredVelocity){
+    float error = desiredVelocity - currentVelocity; // these angle variables need to be obtained from the motor object
 
+    float pTerm = pidState.kp * error;
+//    iTerm += ki * error ;
+    pidState.iTerm += pidState.ki * ((error + pidState.previousError) / 2) * pidState.dt;
 
+    if (pidState.iTerm > 255) pidState.iTerm = 255;
+    if (pidState.iTerm < 0) pidState.iTerm = 0;
+    pidState.dTerm = pidState.kd * (error - pidState.previousError) / pidState.dt;
+//    dTerm = kd * (error - previousError) ;
+    float pidSum = pTerm + pidState.iTerm + pidState.dTerm;
+//    Serial.print(pidSum);
+
+//    Serial.print(" ");
+
+//    pidSum = constrain(pidSum, 0, 255);
+
+    if (pidSum > 255) pidSum = 255;
+    if (pidSum < 15) pidSum = 0;
+//    Serial.println(pidSum);
+    pidState.previousError = error;
+    pidState.dt = 0;
+    return static_cast<int16_t>(pidSum);
+}
+
+/*
 PidController::PidController(float kp, float ki, float kd) {
     this->kd = kd;
     this->ki = ki;
@@ -93,3 +118,4 @@ void PidController::printPidParameters(void) {
   UART_PORT.println(jointVelocityTolerance);
 #endif
 }
+*/

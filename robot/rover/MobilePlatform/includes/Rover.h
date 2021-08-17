@@ -12,44 +12,46 @@ const float wheelBase = 0.33;
 
 /***** MOTORS *****/
 
-// R/L (right/left), F/M/B (forward, middle, back)
 
-/* motor driver pins (cytron) */
 #define NUM_MOTORS 6
 
-// direction pins
-#define RF_DIR   2
-#define RM_DIR   11
-#define RB_DIR   26//12
-#define LF_DIR   24
-#define LM_DIR   25
-#define LB_DIR   12//26
+#define M6_RL_PWM 2
+#define M5_ML_PWM 3
+#define M4_FL_PWM 4
 
-// pwm pins
-#define RF_PWM   3
-#define RM_PWM   4
-#define RB_PWM   8//5
-#define LF_PWM   6
-#define LM_PWM   7
-#define LB_PWM   5//8
+#define M3_RR_PWM 5
+#define M2_MR_PWM 6
+#define M1_FR_PWM 7
 
-/* encoder pins */
 
-// right side encoders
-#define RF_EA    27
-#define RF_EB    28
-#define RM_EA    31
-#define RM_EB    32
-#define RB_EA    29
-#define RB_EB    30
+#define M6_RL_DIR 26
+#define M5_ML_DIR 25
+#define M4_FL_DIR 24
 
-// left side encoders
-#define LF_EA    37
-#define LF_EB    38
-#define LM_EA    36
-#define LM_EB    35
-#define LB_EA    33
-#define LB_EB    34
+#define M3_RR_DIR 12
+#define M2_MR_DIR 11
+#define M1_FR_DIR 10 //Check this one
+
+
+#define M6_RL_A 27
+#define M6_RL_B 28
+
+#define M5_ML_A 33
+#define M5_ML_B 34
+
+#define M4_FL_A 31
+#define M4_FL_B 32
+
+#define M3_RR_A 29
+#define M3_RR_B 30
+
+#define M2_MR_A 37
+#define M2_MR_B 38
+
+#define M1_FR_A 35
+#define M1_FR_B 36
+
+
 
 // CONTINUITY TEST SEPT 12 2019 TEENSY TO MOTORs
 // encodres
@@ -78,73 +80,41 @@ const float wheelBase = 0.33;
 #define FRONT_BASE_DEFAULT_PWM 65
 #define REAR_BASE_DEFAULT_PWM 35
 
+
+
 enum ServoNames{
     FRONT_SIDE_SERVO = 0,
     FRONT_BASE_SERVO = 1,
     REAR_SIDE_SERVO= 2,
     REAR_BASE_SERVO = 3
 };
-class Rover{
-public:
-    Rover();
-    void roverVelocityCalculator(void);
-    void stopMotors();
-    void attachMotor(MotorNames,uint8_t,uint8_t,float);
-    void closeAllMotorLoop();
-    void enableAllMotors(uint8_t state);
-    void moveWheel(uint8_t, const int16_t);
-    void steerRover(int8_t,int8_t);
-    void updateWheelsVelocity();
-    void controlCameraMotors(ServoNames servoID, uint16_t angle);
-    void openAllMotorLoop();
-    void writeServo(ServoNames, int16_t);
-    void setMotorPidGains(MotorNames,float,float,float);
-    void setMotorsEnabled(uint8_t);
-    uint8_t getMotorsEnabled() const;
-    float getLinearVelocity() const;
-    float getRotationalVelocity() const;
-    void setThrottleTimeout(const uint8_t &);
-    uint8_t getSteeringEnabled() const;
-    void setSteeringEnabled(const uint8_t&);
-    void attachServo(ServoNames,uint8_t);
 
-    void setAccelerationLimiter(uint8_t state);
-    uint8_t isThrottleTimeoutEnabled() const;
-    DcMotor motorList[6];
-    Servo servoList[4];
-    float getBatteryVoltage() const;
+typedef struct {
+    float right_linear_velocity;
+    float left_linear_velocity;
+    float linear_velocity;
+    float rotational_velocity;
+    int16_t max_output_signal;
+    int16_t min_output_signal;
+} RoverState;
 
-private:
-    float desiredVelocityRight;
-    float desiredVelocityLeft;
+namespace Rover {
+    extern RoverState roverState;
+    extern SystemState systemStatus;
 
-    motor_direction leftMotorDirection;
-    motor_direction rightMotorDirection;
+    void calculateRoverVelocity();
 
-    uint8_t motorCount = 0;
+    void attachServo(const ServoNames&, const uint8_t&);
 
-    float rightLinearVelocity;
-    float leftLinearVelocity;
-    float linearVelocity;
-    float rotationalVelocity;
+    void writeToServo(const ServoNames&, const int16_t&);
 
-    float maxOutputSignal;
-    float minOutputSignal;
+    void moveWheel(const MotorNames &, const int16_t&);
 
-    volatile int rotationDirection = CCW;
+    void openLoop();
 
-    uint8_t throttleTimeout;
-    bool areMotorsEnabled = false;
-    uint8_t isSteering = true;
-    uint8_t accelerationLimiterEnabled = false;
-    uint8_t servoCount;
+    void closeLoop();
 
-    inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }
+    void steerRover(const int8_t&, const int8_t&);
 
-
-
-
-};
+}
 #endif

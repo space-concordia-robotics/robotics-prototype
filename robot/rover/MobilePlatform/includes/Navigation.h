@@ -10,7 +10,7 @@
 
 #define SENSOR_TIMEOUT 20
 
-class Navigation {
+typedef struct {
     I2CGPS gpsSpark;  // I2C object
     TinyGPSPlus gpsPlus;   // GPS object
     LSM303 compass;
@@ -20,11 +20,12 @@ class Navigation {
     float heading;
     uint8_t imuTimeout;
 
-    void initNav();
-    bool readGps();
+} navigationState;
 
-    void navHandler();
-};
 
+void initNav();
+bool readGps();
+
+void navHandler();
 
 #endif
