@@ -40,7 +40,7 @@ ROVER = [0,0,0]
 PDS = [0,1,0]
 SCIENCE = [0,1,1]
 TX2 = [1,0,0]
-PIN_DESC=[ROVER,ARM,PDS,SCIENCE]
+PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
 SW_PINS = [19,21,23]
 
 
@@ -57,16 +57,6 @@ gpio.setmode(gpio.BOARD)
 gpio.setup(SW_PINS, gpio.OUT)
 gpio.output(SW_PINS, NONE)
 
-def twist_rover_callback(twist_msg):
-    """ Handles the twist message and sends it to the wheel MCU """
-    linear, angular = accelerate_twist(twist_msg)
-    print(linear)
-    #string_command = twist_to_rover_command(linear, angular)
-    #command = str.encode(string_command)
-    #ser.write(command) # send move command to wheel teensy
-    #ser.reset_input_buffer(
-
-    #ser.reset_output_buffer()
  
 def main():
 
@@ -92,7 +82,6 @@ def send_queued_commands():
 def receive_message():
     for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
-        #time.sleep(0.5)
         if ser.in_waiting > 0:
 
             commandID = ser.read()
@@ -139,12 +128,8 @@ def get_command(command_name, deviceToSendTo):
 
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
-    #print(command)
-    #print(len(command[2]))
-    #print(args[1]) 
     if command is not None:
         commandID = command[1]
-        print(commandID)
 
         gpio.output(SW_PINS, TX2)
         
@@ -188,6 +173,16 @@ def rover_command_callback(message):
 
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
+
+
+def twist_rover_callback(twist_msg):
+    """ Handles the twist message and sends it to the wheel MCU """
+    linear, angular = accelerate_twist(twist_msg)
+    string_command = twist_to_rover_command(linear, angular)
+    print(string_command)
+    #th, st = map(int, string_command.split(':'))
+    #rover_queue.append(['move_rover', [1, th, 1, st], ROVER_SELECTED])
+    #print(th,':',st)
 
 
 def parse_command(message):
