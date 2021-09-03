@@ -7,7 +7,7 @@
 #include <etl/queue.h>
 
 #define COMMAND_DEBUG_MSG 0
-/* #define Serial Serial1 */
+#define Serial Serial1
 
 namespace internal_comms
 {
@@ -95,7 +95,7 @@ namespace internal_comms
 
         Serial.begin(COMMS_BAUDRATE);
         Serial1.begin(COMMS_BAUDRATE);
-//        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
     }
 
     void CommandCenter::readCommand()

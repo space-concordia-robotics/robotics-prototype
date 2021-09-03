@@ -3,7 +3,6 @@
 //
 
 // USB : Debug, UART : Production
-#define USB
 
 #include <cmath>
 #include <cstdint>
@@ -109,7 +108,7 @@ void loop() {
     //delay(1000);
     //delay(100);
 
-    if (Serial.available()) {
+    if (Serial1.available()) {
     //  Serial.write(Serial.read());
     /*
     1. Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
@@ -120,18 +119,18 @@ void loop() {
     }
 
 
-  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
-
-      Rover::calculateRoverVelocity();
-      commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-
-      commandCenter->executeCommand(COMMAND_GET_LINEAR_VELOCITY, nullptr,0);
-      commandCenter->executeCommand(COMMAND_GET_ROTATIONAL_VELOCITY, nullptr,0);
-
-
-      //      navHandler(Cmds);
-    sinceSensorRead = 0;
-  }
+//  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
+//
+//      Rover::calculateRoverVelocity();
+//      commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
+//
+//      commandCenter->executeCommand(COMMAND_GET_LINEAR_VELOCITY, nullptr,0);
+//      commandCenter->executeCommand(COMMAND_GET_ROTATIONAL_VELOCITY, nullptr,0);
+//
+//
+//      //      navHandler(Cmds);
+//    sinceSensorRead = 0;
+//  }
 
   /*if (sinceLedToggle-millis() > LED_BLINK_INTERVAL) {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Toggle LED
@@ -143,11 +142,11 @@ void loop() {
     delay(500);
 
 
-    if (Rover::systemStatus.is_throttle_timeout_enabled &&
-          (sinceThrottleTimeout-millis() > THROTTLE_TIMEOUT)) {
-        sinceThrottleTimeout = millis();
-      Rover::stopMotors();
-    }
+//    if (Rover::systemStatus.is_throttle_timeout_enabled &&
+//          (sinceThrottleTimeout-millis() > THROTTLE_TIMEOUT)) {
+//        sinceThrottleTimeout = millis();
+//      Rover::stopMotors();
+//    }
     /*
   if (sinceMC-millis() > MOTOR_CONTROL_INTERVAL) {
     // Loop through motors to get and set their velocity
@@ -160,7 +159,7 @@ void loop() {
   If available, send the message to be read and pop it out of the message queue
   If the message is unavailable, the message isn't removed from the queue
 q  */
-  commandCenter->sendMessage();
+//  commandCenter->sendMessage();
 
 }
 
