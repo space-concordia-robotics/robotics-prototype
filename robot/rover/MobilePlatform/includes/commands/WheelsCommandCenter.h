@@ -39,14 +39,14 @@ public:
     void toggleEncoder(uint8_t turnEncOn);
     void toggleAcceleration(uint8_t turnAccelOn);
     void getRoverStatus();
-    void moveRover(int8_t roverThrottle, int8_t roverSteering); // Throttle -49 to 49 and Steering -49 to 49
-    void moveWheel(uint8_t wheelNumber, int16_t wheelPWM); // Wheel number 0 to 5 and -255 to 255
+    void moveRover(const uint16_t &,const uint16_t & ); // Throttle -49 to 49 and Steering -49 to 49
+    void moveWheel(const uint8_t& wheelNumber,const uint16_t&); // Wheel number 0 to 5 and -255 to 255
 
 // Teensy to OBC value getters
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
-    void getCurrentVelocity(void);
-    void getDesiredVelocity(void);
+    void getMotorVelocity(const uint8_t& wheelNumber);
+    void getMotorDesiredVelocity(const uint8_t&);
     void getBatteryVoltage(void);
     void pingWheels(void);
 

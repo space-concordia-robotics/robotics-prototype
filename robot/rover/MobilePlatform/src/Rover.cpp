@@ -7,54 +7,71 @@ namespace Rover {
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID, const int16_t& wheelPWM) {
-        const auto &direction = (wheelPWM < 0) ? CW : CCW;
+    void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int16_t& wheelPWM) {
+        //const auto &direction = (wheelPWM < 0) ? CW : CCW;
 
         //this->isSteering = 0; // From Globals.h
 
         Motor::updateDesiredMotorVelocity(motorID, direction, abs(wheelPWM));
         Motor::applyDesiredMotorVelocity(motorID);
     }
-    void steerRover(const int8_t& throttle, const int8_t& steering) {
+    void stopMotors(){
+        for(auto& motor : Motor::motorList ){
+            Motor::stop(motor.id);
+        }
+    }
+
+    void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
+
 
         float multiplier = mapFloat(abs(steering), 0, MAX_INPUT_VALUE, 1, -1);
-        float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, 0, roverState.max_output_signal);
+        float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, roverState.min_output_signal, roverState.max_output_signal);
         float trailingSideAbs = leadingSideAbs * multiplier;
 
-        int8_t dir = 1;
-        if (throttle >= 0) dir = CCW;
-        else if (throttle < 0) dir = CW;
+//        int8_t dir = 1;
+//        if (throttle >= 0) dir = CCW;
+//        else if (throttle < 0) dir = CW;
 
         int16_t desiredVelocityRight;
+
         int16_t desiredVelocityLeft;
 
         motor_direction leftMotorDirection;
+
         motor_direction rightMotorDirection;
 
-        if (steering < 0) { // turning left
-            desiredVelocityRight = static_cast<int16_t>( leadingSideAbs * dir);
-            desiredVelocityLeft = static_cast<int16_t>( trailingSideAbs * dir);
-        } else { // turning right
-            desiredVelocityRight = static_cast<int16_t>(trailingSideAbs * dir);
-            desiredVelocityLeft = static_cast<int16_t>(leadingSideAbs * dir);
+        if (steer_direction == LEFT) { // turning left
+            desiredVelocityRight = static_cast<int16_t>( leadingSideAbs );
+            desiredVelocityLeft = static_cast<int16_t>( trailingSideAbs );
+
+            leftMotorDirection = CW;
+            rightMotorDirection = CCW;
+
+
+        } else if (steer_direction == RIGHT){ // turning right
+            desiredVelocityRight = static_cast<int16_t>(trailingSideAbs );
+            desiredVelocityLeft = static_cast<int16_t>(leadingSideAbs);
+
+            leftMotorDirection = CCW;
+            rightMotorDirection = CW;
         }
 
-        if (desiredVelocityLeft > 0)
-            leftMotorDirection = CCW;
-        else
-            leftMotorDirection = CW;
+//        if (desiredVelocityLeft > 0)
+//            leftMotorDirection = CCW;
+//        else
+//            leftMotorDirection = CW;
+//
+//        if (desiredVelocityRight < 0)
+//            rightMotorDirection = CCW;
+//        else
+//            rightMotorDirection = CW;
 
-        if (desiredVelocityRight < 0)
-            rightMotorDirection = CCW;
-        else
-            rightMotorDirection = CW;
-
-        Motor::updateDesiredMotorVelocity(FRONT_RIGHT, rightMotorDirection, abs(desiredVelocityRight));
-        Motor::updateDesiredMotorVelocity(MIDDLE_RIGHT, rightMotorDirection, abs(desiredVelocityRight));
-        Motor::updateDesiredMotorVelocity(REAR_RIGHT, rightMotorDirection, abs(desiredVelocityRight));
-        Motor::updateDesiredMotorVelocity(FRONT_LEFT, leftMotorDirection, abs(desiredVelocityLeft));
-        Motor::updateDesiredMotorVelocity(MIDDLE_LEFT, leftMotorDirection, abs(desiredVelocityLeft));
-        Motor::updateDesiredMotorVelocity(REAR_LEFT, leftMotorDirection, abs(desiredVelocityLeft));
+        Motor::updateDesiredMotorVelocity(FRONT_RIGHT, rightMotorDirection, desiredVelocityRight);
+        Motor::updateDesiredMotorVelocity(MIDDLE_RIGHT, rightMotorDirection,desiredVelocityRight);
+        Motor::updateDesiredMotorVelocity(REAR_RIGHT, rightMotorDirection,desiredVelocityRight);
+        Motor::updateDesiredMotorVelocity(FRONT_LEFT, leftMotorDirection, desiredVelocityLeft);
+        Motor::updateDesiredMotorVelocity(MIDDLE_LEFT, leftMotorDirection,desiredVelocityLeft);
+        Motor::updateDesiredMotorVelocity(REAR_LEFT, leftMotorDirection, desiredVelocityLeft);
 
         //this->sinceThrottle = 0;
 
@@ -89,14 +106,10 @@ namespace Rover {
         servoList[servoID].attach(pin);
     }
 
-    void stopMotors() {
-        //steerRover(roverState, 0, 0);
-    }
-
     void closeLoop() {
 
         roverState.max_output_signal = MAX_RPM_VALUE;
-        roverState.min_output_signal = MIN_RPM_VALUE;
+        roverState.min_output_signal = 0;
 
         if (systemStatus.are_motors_enabled) {
             stopMotors();
@@ -108,7 +121,7 @@ namespace Rover {
     void openLoop() {
 
         roverState.max_output_signal = MAX_PWM_VALUE;
-        roverState.min_output_signal = MIN_PWM_VALUE;
+        roverState.min_output_signal = 0;
 
         if (systemStatus.are_motors_enabled) {
             stopMotors();

@@ -28,18 +28,21 @@ namespace Motor {
     }
 
     void initPidController(const MotorNames &motorID, const float& kp, const float& ki, const float& kd) {
-        motorList[motorID].pid_controller = {};
 
         motorList[motorID].pid_controller.kd = kd;
         motorList[motorID].pid_controller.kp = kp;
         motorList[motorID].pid_controller.ki = ki;
 
     }
-
+    void stop(const MotorNames &motorID){
+        analogWrite(motorList[motorID].pwm_pin,0);
+    }
     void updateDesiredMotorVelocity(const MotorNames &motorID, const motor_direction &desired_direction,
                                     const int16_t &desired_velocity) {
         motorList[motorID].desired_velocity = desired_velocity;
         motorList[motorID].desired_direction = desired_direction;
+
+        applyDesiredMotorVelocity(motorID);
     }
 
     void applyDesiredMotorVelocity(const MotorNames &motorID) {
@@ -48,24 +51,12 @@ namespace Motor {
 
         auto &motor = motorList[motorID];
 
-
-//    Serial.print(motorName);
-        switch (motor.desired_direction) {
-            case CW:
-                digitalWrite(motor.dir_pin, HIGH);
-                break;
-            case CCW:
-                digitalWrite(motor.dir_pin, LOW);
-                break;
-        }
-
-        motor.is_open_loop = true;
+        digitalWrite(motor.dir_pin,motor.desired_direction);
 
         if (motor.is_open_loop) {
 
             int16_t output_pwm = motor.desired_velocity;
-            Serial.write(motor.pwm_pin);
-            analogWrite(motor.pwm_pin, 190);
+            analogWrite(motor.pwm_pin, output_pwm);
 
 
         } else if (!motor.is_open_loop) {
@@ -81,7 +72,7 @@ namespace Motor {
 //        Serial.print(output_pwm);
 //        Serial.print(" ");
 
-            analogWrite(motor.pwm_pin, fabs(output_pwm));
+            analogWrite(motor.pwm_pin, abs(output_pwm));
 
         }
         //this -> desiredVelocity = output_pwm;
@@ -125,20 +116,3 @@ namespace Motor {
 
     }
 }
-/*void updateDesiredMotorDirection(const MotorNames& motorID, const motor_direction& desiredDirection, const int16_t desiredVelocity){
-    auto& motor = motorList[motorID];
-    motor.desired_direction = desiredDirection;
-    motor.desired_velocity = desiredVelocity;
-} */
-/*
-
-
-void DcMotor::updateDesiredVelocity(motor_direction desiredDirection, int16_t desiredVelocity) {
-    this->desiredDirection = desiredDirection;
-    this->desiredVelocity = desiredVelocity;
-    Serial.write(desiredDirection);
-    Serial.write(desiredVelocity);
-    //setVelocity();
-}
-
-*/

@@ -18,7 +18,7 @@ uint32_t sinceFeedbackPrint = millis(); // timer for sending motor speeds and ba
 uint32_t  sinceLedToggle = millis(); // timer for heartbeat
 uint32_t  sinceSensorRead = millis(); // timer for reading battery, gps and imu data
 uint32_t  sinceMC = millis(); // timer for reading battery, gps and imu data
-
+uint32_t sinceThrottleTimeout = millis();
 
 // Pins for Serial
 const uint8_t RX_TEENSY_3_6_PIN = 0;
@@ -96,18 +96,15 @@ void setup() {
   //initNav(Cmds);
 
   Rover::openLoop();
+
+  //Rover::systemStatus.is_throttle_timeout_enabled = false;
   //rover->openAllMotorLoop();
 }
 
 // Running the wheels
 void loop() {
 
-    digitalWrite(LED_BUILTIN,HIGH);
-
-    delay(1000);
-    digitalWrite(LED_BUILTIN,LOW);
-    delay(1000);
-  // Acquire method based on command sent from serial
+    // Acquire method based on command sent from serial
     //Serial.write(Serial.available());
     //delay(1000);
     //delay(100);
@@ -121,23 +118,36 @@ void loop() {
     */
         commandCenter->readCommand();
     }
-    /*
+
 
   if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
 
-    commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-    //navHandler(Cmds);
+      Rover::calculateRoverVelocity();
+      commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
+
+      commandCenter->executeCommand(COMMAND_GET_LINEAR_VELOCITY, nullptr,0);
+      commandCenter->executeCommand(COMMAND_GET_ROTATIONAL_VELOCITY, nullptr,0);
+
+
+      //      navHandler(Cmds);
     sinceSensorRead = 0;
   }
 
-  if (sinceLedToggle-millis() > LED_BLINK_INTERVAL) {
+  /*if (sinceLedToggle-millis() > LED_BLINK_INTERVAL) {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Toggle LED
     sinceLedToggle = 0;
-  }
-    */
-  /*if (sinceThrottle-millis() > THROTTLE_TIMEOUT) {
-    stopMotors();
   }*/
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(500);
+
+
+    if (Rover::systemStatus.is_throttle_timeout_enabled &&
+          (sinceThrottleTimeout-millis() > THROTTLE_TIMEOUT)) {
+        sinceThrottleTimeout = millis();
+      Rover::stopMotors();
+    }
     /*
   if (sinceMC-millis() > MOTOR_CONTROL_INTERVAL) {
     // Loop through motors to get and set their velocity
@@ -215,6 +225,7 @@ void WheelsCommandCenter::enableMotors(uint8_t turnMotorOn) {
 
 void WheelsCommandCenter::stopMotors() {
     //stopMotors();
+    Rover::stopMotors();
 }
 
 void WheelsCommandCenter::closeMotorsLoop() {
@@ -247,29 +258,47 @@ void WheelsCommandCenter::getRoverStatus() {
 
 }
 
-void WheelsCommandCenter::moveRover(int8_t roverThrottle, int8_t roverSteering) {
-    Rover::steerRover(roverThrottle,roverSteering);
+void WheelsCommandCenter::moveRover(const uint16_t & roverThrottle, const uint16_t& roverSteering) {
+
+    byte throttle_dir = roverThrottle>> 8;
+    byte throttle = roverThrottle & 0x0F;
+
+    byte steer_dir = roverSteering >> 8;
+    byte steer = roverSteering & 0x0F;
+
+    Rover::steerRover(throttle_dir,throttle,steer_dir,steer);
 }
 
-void WheelsCommandCenter::moveWheel(uint8_t wheelNumber, int16_t wheelPWM) {
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint16_t& velocity) {
 
-    Rover::moveWheel((MotorNames)wheelNumber,wheelPWM);
+    byte direction = velocity >> 8;
+    byte pwm_speed = velocity & 0x0F;
+    Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,pwm_speed);
 
 }
 
 void WheelsCommandCenter::getLinearVelocity(void) {
-
+    auto linear_velocity = Rover::roverState.linear_velocity;
+    uint8_t buffer[4];
+    float2bytes(buffer,linear_velocity);
+    internal_comms::Message* message = commandCenter->createMessage(
+            COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
+    commandCenter->sendMessage(*message);
 }
 
 void WheelsCommandCenter::getRotationalVelocity(void) {
-
+    auto rotational_velocity = Rover::roverState.rotational_velocity;
+    uint8_t buffer[4];
+    float2bytes(buffer,rotational_velocity);
+    internal_comms::Message* message = commandCenter->createMessage(
+            COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
+    commandCenter->sendMessage(*message);
 }
 
-void WheelsCommandCenter::getCurrentVelocity(void) {
+void WheelsCommandCenter::getMotorVelocity(const uint8_t& wheelNumber) {
+   }
 
-}
-
-void WheelsCommandCenter::getDesiredVelocity() {
+void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
 
 }
 
@@ -286,7 +315,7 @@ void WheelsCommandCenter::getBatteryVoltage() {
 
     float vbatt = vsense * 6.0;
     auto* buffer = (uint8_t *) malloc(4);
-
+    //uint8_t* buffer;
 
     float2bytes(buffer,vbatt);
 

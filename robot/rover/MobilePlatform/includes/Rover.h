@@ -30,7 +30,7 @@ const float wheelBase = 0.33;
 
 #define M3_RR_DIR 12
 #define M2_MR_DIR 11
-#define M1_FR_DIR 10 //Check this one
+#define M1_FR_DIR 8
 
 
 #define M6_RL_A 27
@@ -73,7 +73,9 @@ const float wheelBase = 0.33;
 
 #define LED_BLINK_INTERVAL 1000
 #define SENSOR_READ_INTERVAL 200
-#define THROTTLE_TIMEOUT 200
+//#define THROTTLE_TIMEOUT 200
+#define THROTTLE_TIMEOUT 3000
+
 #define MOTOR_CONTROL_INTERVAL 10
 
 #define SERVO_STOP 93
@@ -88,7 +90,10 @@ enum ServoNames{
     REAR_SIDE_SERVO= 2,
     REAR_BASE_SERVO = 3
 };
-
+enum SteerDirection{
+    LEFT = 0,
+    RIGHT = 1
+};
 typedef struct {
     float right_linear_velocity;
     float left_linear_velocity;
@@ -99,22 +104,32 @@ typedef struct {
 } RoverState;
 
 namespace Rover {
+
     extern RoverState roverState;
+
     extern SystemState systemStatus;
 
     void calculateRoverVelocity();
+
+
+    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int16_t &);
+
+
+    void updateAllMotorVelocities(const motor_direction &, const int16_t &);
+
 
     void attachServo(const ServoNames&, const uint8_t&);
 
     void writeToServo(const ServoNames&, const int16_t&);
 
-    void moveWheel(const MotorNames &, const int16_t&);
+    void moveWheel(const MotorNames &,const motor_direction&, const int16_t& );
 
     void openLoop();
 
     void closeLoop();
 
-    void steerRover(const int8_t&, const int8_t&);
+    void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering);
 
+    void stopMotors();
 }
 #endif

@@ -10,9 +10,9 @@
 #define MAX_INPUT_VALUE 49  // maximum speed signal from controller
 #define MIN_INPUT_VALUE -MAX_INPUT_VALUE // minimum speed signal from controller
 #define MAX_PWM_VALUE 255
-#define MIN_PWM_VALUE -MAX_PWM_VALUE
+#define MIN_PWM_VALUE 0
 #define MAX_RPM_VALUE MAX_RPM
-#define MIN_RPM_VALUE -MAX_RPM
+#define MIN_RPM_VALUE 0
 
 enum MotorNames{
     FRONT_RIGHT=0,
@@ -24,8 +24,8 @@ enum MotorNames{
 };
 
 enum motor_direction {
-    CW = -1,
-    CCW = 1
+    CW = HIGH,
+    CCW = LOW,
 };
 
 class InterruptHandler{
@@ -201,7 +201,6 @@ typedef struct {
 namespace Motor {
 
     extern DcMotorState motorList[6];
-    extern SystemState systemStatus;
 
     void attachMotor(const MotorNames &, const uint8_t&, const uint8_t&, const float&);
 
@@ -215,6 +214,7 @@ namespace Motor {
 
     void initPidController(const MotorNames &, const float&, const float&, const float&);
 
+    void stop(const MotorNames &);
 }
 inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max){
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

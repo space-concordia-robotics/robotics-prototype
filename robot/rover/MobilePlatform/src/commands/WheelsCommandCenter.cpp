@@ -72,26 +72,30 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
         break;
     }
     case COMMAND_MOVE_ROVER: {
-        moveRover(*rawArgs, *(++rawArgs));
+        const uint16_t throttle = *(++rawArgs);
+        const uint16_t steering = *(++rawArgs);
+
+        moveRover(throttle,steering);
         break;
     }
     case COMMAND_MOVE_WHEEL:
     {
       uint8_t wheelNumber = (*rawArgs++);
+      uint16_t pwm = (*rawArgs++);
 
-      //Serial.write(wheelNumber);
+      //int16_t PWM = (sign << 8) && (*rawArgs++);
+      //  Serial.println(PWM);
 
-      int16_t PWM = 0;
       //PWM = *(rawArgs++) << 8;
 
       //Serial.write(PWM);
-      PWM = *(rawArgs++);
+      //PWM = *(rawArgs++);
 
       //PWM = -255;
 
-      Serial.write(PWM);
+      //Serial.println(PWM,HEX);
 
-      moveWheel(wheelNumber, PWM);
+      moveWheel(wheelNumber,pwm);
       break;
     }
 
@@ -108,12 +112,15 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
     }
     case COMMAND_GET_CURRENT_VELOCITY:
     {
-      getCurrentVelocity();
+      //getMotorVelocity();
       break;
     }
     case COMMAND_GET_DESIRED_VELOCITY:
     {
-      getDesiredVelocity();
+//        uint8_t wheelNumber = *(rawArgs++);
+//
+//        getMotorDesiredVelocity(wheelNumber);
+//        //getDesiredVelocity();
       break;
     }
     case COMMAND_GET_BATTERY_VOLTAGE:
@@ -127,7 +134,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t*
       break;
     }
     default:
-        Serial.write("bad hex");
+        Serial.write("Invalid command ID");
         break;
   }
 }
