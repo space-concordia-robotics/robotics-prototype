@@ -56,6 +56,10 @@
 #include "include/commands/ArmCommandCenter.h"
 #include <cstdint>
 
+#ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
+#define Serial Serial1
+#endif
+
 const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 25; 
@@ -75,8 +79,8 @@ DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
 DcMotor motor3(M3_DIR_PIN, M3_PWM_PIN, M3_GEAR_RATIO);
 DcMotor motor4(M4_DIR_PIN, M4_PWM_PIN, M4_GEAR_RATIO);
-ServoMotor motor5(M5_PWM_PIN, M5_GEAR_RATIO);
-ServoMotor motor6(M6_PWM_PIN, M6_GEAR_RATIO);
+ServoMotor motor5(M5_GEAR_RATIO);
+ServoMotor motor6(M6_GEAR_RATIO);
 
 // motor array prep work: making pointers to motor objects
 DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3; DcMotor *m4 = &motor4;
@@ -172,10 +176,10 @@ void setup() {
     motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
     initMotorTimers();
 
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
-    digitalWrite(13, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 
     // reset the elapsedMillis variables so that they're fresh upon entering the loop()
     sinceAnglePrint = 0;
@@ -193,16 +197,20 @@ void setup() {
   \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
  */
 void loop() {
-    respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
-    if (isHoming) { // not done homing the motors
-        homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
-    }
+//    respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
+//    if (isHoming) { // not done homing the motors
+//        homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
+//    }
 
     if(Serial.available() > 0) {
         commandCenter->readCommand();
+        digitalWrite(LED_BUILTIN,HIGH);
+        delay(500);
+        digitalWrite(LED_BUILTIN,LOW);
+        delay(500);
     }
 
-    commandCenter->sendMessage();
+   commandCenter->sendMessage();
 } // end of loop
 
 /*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
@@ -227,10 +235,10 @@ void initEncoders(void) {
     attachInterrupt(motor4.encoderPinB, m4_encoder_interrupt, CHANGE);
 
     // set activate PIDs
-    motor1.isOpenLoop = false; motor1.encoderModifier=-1;
+    motor1.isOpenLoop = false; //motor1.encoderModifier=-1;
     motor2.isOpenLoop = false;
     motor3.isOpenLoop = false;
-    motor4.isOpenLoop = false; motor4.encoderModifier=-1;
+    motor4.isOpenLoop = false; //motor4.encoderModifier=-1;
 
     // set pid gains
     motor1.pidController.setGainConstants(10.0, 0.0, 0.0);
@@ -841,17 +849,17 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
     }
 
 #define MOVE_MOTOR_IDLE 0
-#define MOVE_MOTOR_FORWARD 1
-#define MOVE_MOTOR_BACKWARD 2
+#define MOVE_MOTOR_FORWARD 1 //clockwise or flex
+#define MOVE_MOTOR_BACKWARD 2 //ccw or extend
 
-    void budgeMotors(uint8_t motorActions[])
+    void budgeMotors(const uint8_t motorActions[])
     {
         for(uint8_t i = 0; i < 6; i++)
         {
-            if(motorActions != MOVE_MOTOR_IDLE)
+            if(motorActions[i] != MOVE_MOTOR_IDLE)
             {
-                bool moveCW = motorActions[i] == MOVE_MOTOR_BACKWARD;
-                motorArray[i]->budge(moveCW ? CLOCKWISE : COUNTER_CLOCKWISE);
+                bool moveCW = (motorActions[i] == MOVE_MOTOR_FORWARD);
+                motorArray[i]->budge(moveCW);
             }
         }
     }
@@ -869,10 +877,11 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
         motorArray[motorId - 1]->setSoftwareAngle(0.0);
     }
 
-    void moveMultipleMotors(float anglesToReach[])
+    void moveMultipleMotors(byte anglesToReach[])
     {
         for(uint8_t i = 0; i < 6; i++)
         {
+            //Serial.print(anglesToReach[i]);
             if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
                 motorArray[i]->goToCommandedAngle();
             }

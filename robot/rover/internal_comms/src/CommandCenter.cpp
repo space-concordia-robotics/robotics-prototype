@@ -7,7 +7,12 @@
 #include <etl/queue.h>
 
 #define COMMAND_DEBUG_MSG 0
+
+#define DEBUG
+
+#ifndef DEBUG
 #define Serial Serial1
+#endif
 
 namespace internal_comms
 {
@@ -16,25 +21,27 @@ namespace internal_comms
         uint8_t commandID = waitForSerial();
         /* uint8_t deviceSending = waitForSerial(); */
         /* uint8_t deviceReceiving = waitForSerial(); */
-        uint16_t argumentSize = waitForSerial();
+        uint16_t argumentSize = readArgSize();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
 
-        //Serial.write(commandID);
+        /* Serial.write(commandID); */
 
-        //Serial.write(argumentSize);
+        /* Serial.write(argumentSize); */
 
         if(argumentSize > 0)
         {
             buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
             bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         }
-        /*for(int i = 0 ; i < bytesRead ; i++){
-            Serial.write(buffer[i]);
-        }*/
+
+        /* for(int i = 0 ; i < bytesRead ; i++){ */
+        /*     Serial.write(buffer[i]); */
+        /* } */
+
         uint8_t stopByte = waitForSerial();
-        //Serial.write(stopByte);
+        /* Serial.write(stopByte); */
 
         auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
@@ -95,7 +102,9 @@ namespace internal_comms
 
         Serial.begin(COMMS_BAUDRATE);
         Serial1.begin(COMMS_BAUDRATE);
-        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+        #ifndef DEBUG
+            Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+        #endif
     }
 
     void CommandCenter::readCommand()
@@ -113,10 +122,9 @@ namespace internal_comms
         }
 
         free(command->rawArgs);
-        command->rawArgs = nullptr;
+        //command->rawArgs = nullptr;
 
         delete command;
-        command = nullptr;
     }
 
     void CommandCenter::sendDebug(const char* debugMessage)
@@ -138,7 +146,8 @@ namespace internal_comms
                     Serial.write(message.rawArgs, message.rawArgsLength);
 
                 Serial.write(0x0A);
-                
+
+
                 free(message.rawArgs);
                 
             }

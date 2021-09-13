@@ -79,10 +79,10 @@ def receive_message():
 
         if ser.in_waiting > 0:
             commandID = ser.read()
-            print(commandID)
+            
             commandID = int.from_bytes(commandID, "big")
             
-            
+            print(commandID)
             handler = get_handler(commandID, device)
             # print("CommandID:", commandID)
             if handler == None:

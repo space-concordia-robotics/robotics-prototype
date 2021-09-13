@@ -79,63 +79,8 @@ void setup() {
 void loop() {
 // read the input on analog pin 0:
 
-//    digitalWrite(RF_DIR,HIGH);
-//    analogWrite(RF_PWM,240); // Spins right middle
-
-    digitalWrite(M5_ML_DIR,LOW);
-    analogWrite(M5_ML_PWM,80);
-
-//    digitalWrite(RB_DIR,HIGH);
-//    analogWrite(RB_PWM,160); // does nothing
-
-    //digitalWrite(LF_DIR,HIGH);
-    //analogWrite(LF_PWM,160); // spins left middle
-
-    //digitalWrite(LM_DIR,HIGH);
-   // analogWrite(LM_PWM,230); // nothing
-
-  //  digitalWrite(LB_DIR,HIGH);
-   // analogWrite(LB_PWM,230); // nothing
+    Serial.print(0x02);
+    delay(500);
 
 
-
-  int pingValue = 1;
-  /*Serial.write(pingValue);
-  Serial.write(0);
-  Serial.write(0);
-  Serial.write(0x0A); */
-  digitalWrite(LED_BUILTIN,HIGH);
-
-  delay(1000);
-  digitalWrite(LED_BUILTIN,LOW);
-    delay(1000);
-    /*
-  int debugMessageID = 0;
-  const char* message = "bing bang boom!!";
-  Serial.write(debugMessageID);
-  Serial.write(0);
-  Serial.write(strlen(message));
-  Serial.write(message);
-  Serial.write(0x0A);
-
-
-  delay(1000);
-  
-  int motorsValue = 2;
-  float motors[6];
-  motors[0] = 0.0f;
-  motors[1] = 1.25f;/home/roversim/Downloads/WheelsCommandCenter.h
-  motors[2] = 1.375f;
-  motors[3] = 1.425f;
-  motors[4] = -2.25f;
-  motors[5] = 2.0f;
-
-  Serial.write(motorsValue);
-  Serial.write(0);
-  Serial.write(sizeof(motors));
-  byte* motorsByte = (byte*)motors;
-  Serial.write(motorsByte, sizeof(motors));
-  Serial.write(0x0A);
-  delay(1000);
-    */
 }

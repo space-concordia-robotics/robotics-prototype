@@ -37,23 +37,8 @@ void pinSetup(void) {
   pinMode(M4_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
   pinMode(M4_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
-  // servos
-
-  pinMode(M5_PWM_PIN, OUTPUT);
-  analogWrite(M5_PWM_PIN, SERVO_STOP);
-  /*
-    pinMode(M5_ENCODER_A, LIM_SWITCH_PULLSTATE);
-    pinMode(M5_ENCODER_B, LIM_SWITCH_PULLSTATE);
-  */
-
-  pinMode(M6_PWM_PIN, OUTPUT);
-  analogWrite(M6_PWM_PIN, SERVO_STOP);
+  // Servos
   pinMode(M6_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
   pinMode(M6_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
-
-  /*
-    pinMode(M6_ENCODER_A, INPUT_PULLUP);
-    pinMode(M6_ENCODER_B, INPUT_PULLUP);
-  */
 
 }

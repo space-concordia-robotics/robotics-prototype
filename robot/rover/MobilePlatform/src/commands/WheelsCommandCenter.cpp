@@ -11,132 +11,122 @@
 using namespace internal_comms;
 
 /*
-Command messages
-*/
-
-
+   Command messages
+   */
 
 // this modifies the pointer
 float bytes_to_float(const uint8_t* rawPointer)
 {
-  float f;
-  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
-  memcpy(&f, &bytes, sizeof(f));
-  return f;
+    float f;
+    byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
+    memcpy(&f, &bytes, sizeof(f));
+    return f;
 }
 
-void WheelsCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
-  // Create message to add to queue of messages
-  //Message* message = createMessage(commandID, rawArgsLength, const_cast<uint8_t *>(rawArgs));
-  /*
-  Switch command recieved to perform specific function
-  */
-  switch(commandID)
-  {
-    case COMMAND_SET_MOTORS: {
-        enableMotors(*rawArgs);  // Toggle ON or OFF
-        break;
-    }
-    case COMMAND_STOP_MOTORS_EMERGENCY: {
-        stopMotors();
-        break;
-    }
-    case COMMAND_CLOSE_MOTORS_LOOP: {
-        closeMotorsLoop();
-        break;
-    }
-    case COMMAND_OPEN_MOTORS_LOOP: {
-        openMotorsLoop();
-        break;
-    }
-    case COMMAND_SET_JOYSTICK: {
-        toggleJoystick(*rawArgs); // Toggle ON or OFF
-        break;
-    }
-    case COMMAND_SET_GPS: {
-        toggleGps(*rawArgs); // Toggle ON or OFF
-        break;
-    }
-    case COMMAND_SET_ENCODER: {
-        toggleEncoder(*rawArgs); // Toggle ON or OFF
-        break;
-    }
-    case COMMAND_SET_ACCELERATION: {
-        toggleAcceleration(*rawArgs); // Toggle ON or OFF
-        break;
-    }
-    case COMMAND_GET_ROVER_STATUS: {
-        getRoverStatus();
+void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
+    // Create message to add to queue of messages
+    //Message* message = createMessage(commandID, rawArgsLength, const_cast<uint8_t *>(rawArgs));
+    /*
+       Switch command recieved to perform specific function
+       */
 
-    //    this->sendMessage(*message); // Add message to queue
-        break;
-    }
-    case COMMAND_MOVE_ROVER: {
-        const uint16_t throttle = *(++rawArgs);
-        const uint16_t steering = *(++rawArgs);
+    int commandID = int(cmdID);
 
-        moveRover(throttle,steering);
-        break;
-    }
-    case COMMAND_MOVE_WHEEL:
+    switch(commandID)
     {
-      uint8_t wheelNumber = (*rawArgs++);
-      uint16_t pwm = (*rawArgs++);
+        case COMMAND_SET_MOTORS: {
+                                     enableMotors(*rawArgs);  // Toggle ON or OFF
+                                     break;
+                                 }
+        case COMMAND_STOP_MOTORS_EMERGENCY: {
+                                                stopMotors();
+                                                break;
+                                            }
+        case COMMAND_CLOSE_MOTORS_LOOP: {
+                                            closeMotorsLoop();
+                                            break;
+                                        }
+        case COMMAND_OPEN_MOTORS_LOOP: {
+                                           openMotorsLoop();
+                                           break;
+                                       }
+        case COMMAND_SET_JOYSTICK: {
+                                       toggleJoystick(*rawArgs); // Toggle ON or OFF
+                                       break;
+                                   }
+        case COMMAND_SET_GPS: {
+                                  toggleGps(*rawArgs); // Toggle ON or OFF
+                                  break;
+                              }
+        case COMMAND_SET_ENCODER: {
+                                      toggleEncoder(*rawArgs); // Toggle ON or OFF
+                                      break;
+                                  }
+        case COMMAND_SET_ACCELERATION: {
+                                           toggleAcceleration(*rawArgs); // Toggle ON or OFF
+                                           break;
+                                       }
+        case COMMAND_GET_ROVER_STATUS: {
+                                           getRoverStatus();
 
-      //int16_t PWM = (sign << 8) && (*rawArgs++);
-      //  Serial.println(PWM);
+                                           //    this->sendMessage(*message); // Add message to queue
+                                           break;
+                                       }
+        case COMMAND_MOVE_ROVER: {
+                                     const uint16_t throttle = *(++rawArgs);
+                                     const uint16_t steering = *(++rawArgs);
 
-      //PWM = *(rawArgs++) << 8;
+                                     moveRover(throttle,steering);
+                                     break;
+                                 }
+        case COMMAND_MOVE_WHEEL:
+                                 {
+                                     uint8_t wheelNumber = (*rawArgs++);
+                                     uint16_t pwm = (*rawArgs++);
 
-      //Serial.write(PWM);
-      //PWM = *(rawArgs++);
 
-      //PWM = -255;
 
-      //Serial.println(PWM,HEX);
+                                     moveWheel(wheelNumber,pwm);
+                                     break;
+                                 }
 
-      moveWheel(wheelNumber,pwm);
-      break;
+                                 // Commands to acquire values from wheel teensy to OBC
+        case COMMAND_GET_LINEAR_VELOCITY:
+                                 {
+                                     getLinearVelocity();
+                                     break;
+                                 }
+        case COMMAND_GET_ROTATIONAL_VELOCITY:
+                                 {
+                                     getRotationalVelocity();
+                                     break;
+                                 }
+        case COMMAND_GET_CURRENT_VELOCITY:
+                                 {
+                                     //getMotorVelocity();
+                                     break;
+                                 }
+        case COMMAND_GET_DESIRED_VELOCITY:
+                                 {
+                                     //        uint8_t wheelNumber = *(rawArgs++);
+                                     //
+                                     //        getMotorDesiredVelocity(wheelNumber);
+                                     //        //getDesiredVelocity();
+                                     break;
+                                 }
+        case COMMAND_GET_BATTERY_VOLTAGE:
+                                 {
+                                     getBatteryVoltage();
+                                     break;
+                                 }
+        case COMMAND_WHEELS_PING:
+                                 {
+                                     pingWheels();
+                                     break;
+                                 }
+        default:
+                                 break;
     }
-
-    // Commands to acquire values from wheel teensy to OBC
-    case COMMAND_GET_LINEAR_VELOCITY:
-    {
-      getLinearVelocity();
-      break;
-    }
-    case COMMAND_GET_ROTATIONAL_VELOCITY:
-    {
-      getRotationalVelocity();
-      break;
-    }
-    case COMMAND_GET_CURRENT_VELOCITY:
-    {
-      //getMotorVelocity();
-      break;
-    }
-    case COMMAND_GET_DESIRED_VELOCITY:
-    {
-//        uint8_t wheelNumber = *(rawArgs++);
-//
-//        getMotorDesiredVelocity(wheelNumber);
-//        //getDesiredVelocity();
-      break;
-    }
-    case COMMAND_GET_BATTERY_VOLTAGE:
-    {
-      getBatteryVoltage();
-      break;
-    }
-    case COMMAND_WHEELS_PING:
-    {
-        pingWheels();
-      break;
-    }
-    default:
-        Serial.write("Invalid command ID");
-        break;
-  }
 }
 
 

@@ -10,11 +10,11 @@
 
 #define COMMS_BAUDRATE 57600L
 
-#ifdef UART_PORT
-   #define Serial Serial1
-#elif USB_PORT
-   #define Serial Serial
-#endif
+//#ifdef UART_PORT
+//   #define Serial Serial1
+//#elif USB_PORT
+//   #define Serial Serial
+//#endif
 
 namespace internal_comms
 {

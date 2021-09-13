@@ -12,6 +12,12 @@
 #include "ArduinoBlue.h"
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
+//
+#define DEBUG
+
+#ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
+#define Serial Serial1
+#endif
 /* Global variables*/
 uint32_t sinceFeedbackPrint = millis(); // timer for sending motor speeds and battery measurements
 uint32_t  sinceLedToggle = millis(); // timer for heartbeat
@@ -20,9 +26,9 @@ uint32_t  sinceMC = millis(); // timer for reading battery, gps and imu data
 uint32_t sinceThrottleTimeout = millis();
 
 // Pins for Serial
-const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t TX_TEENSY_3_6_PIN = 1;
-const uint8_t ENABLE_PIN = 15; // TEMPORARY BEFORE FLOW CONTROL IMPLEMENTED
+const uint8_t RX_TEENSY_3_6_PIN = 0;
+const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
 
 
@@ -75,49 +81,42 @@ volatile uint32_t InterruptHandler::RIGHT_MIDDLE_MOTOR_DT=0;
 
 // Initial teensy setup
 void setup() {
-    pinMode(LED_BUILTIN,OUTPUT);
-    initSerialCommunications();
+    pinMode(13,OUTPUT);
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+
+    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+
     pinMode(V_SENSE_PIN, INPUT);
+
+
     // Initialize setup for pins from PinSetup.h
-  //initPins();
-  attachMotors();
-  attachEncoders();
-  initPidControllers();
+    // initPins();
+    attachMotors();
+    attachEncoders();
+    initPidControllers();
+    // Initialize servo motors
 
-    pinMode(ENABLE_PIN,OUTPUT);
-  digitalWrite(ENABLE_PIN,HIGH);
-  // Initialize servo motors
+    //attachServos();
+    //writeServoDefaultValues();
+    // Handle navigation commands each time a new command is received
+    // Looped and called as new commands are received 
+    //initNav(Cmds);
 
-  //attachServos();
-  //writeServoDefaultValues();
-  // Handle navigation commands each time a new command is received
-  // Looped and called as new commands are received 
-  //initNav(Cmds);
+    Rover::openLoop();
 
-  Rover::openLoop();
-
-  //Rover::systemStatus.is_throttle_timeout_enabled = false;
-  //rover->openAllMotorLoop();
+    //Rover::systemStatus.is_throttle_timeout_enabled = false;
+    //rover->openAllMotorLoop();
 }
 
 // Running the wheels
 void loop() {
-
-    // Acquire method based on command sent from serial
-    //Serial.write(Serial.available());
-    //delay(1000);
-    //delay(100);
-
-    if (Serial1.available()) {
-    //  Serial.write(Serial.read());
-    /*
-    1. Pointer to select the method (WheelsCommandCenter.cpp) to run based on the command
-    2. Read command performs executeCommand()
-    3. If the serial is not enabled (such as being used by the arm), then the command skips this
-    */
+    if(Serial.available() > 0) {
         commandCenter->readCommand();
-    }
 
+    }
+    commandCenter->sendMessage();
 
 //  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
 //
@@ -136,10 +135,6 @@ void loop() {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Toggle LED
     sinceLedToggle = 0;
   }*/
-    digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
-    digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
 
 
 //    if (Rover::systemStatus.is_throttle_timeout_enabled &&
@@ -154,12 +149,6 @@ void loop() {
     sinceMC = 0;
   }
     */
-  /*
-  Check if the message is available to be sent
-  If available, send the message to be read and pop it out of the message queue
-  If the message is unavailable, the message isn't removed from the queue
-q  */
-//  commandCenter->sendMessage();
 
 }
 
@@ -207,15 +196,6 @@ void writeServoDefaultValues(){
     Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
 
 }
-void initSerialCommunications(void) {
-  // Create serial connection with teensy pins 0 and 1
-  commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
-
-  // initialize serial communications at 115200 bps:
-    //Serial.begin(SERIAL_BAUD); // switched from 9600 as suggested to conform with the given gps library
- // Serial.setTimeout(SERIAL_TIMEOUT);
-
-}
 
 
 void WheelsCommandCenter::enableMotors(uint8_t turnMotorOn) {
@@ -259,7 +239,7 @@ void WheelsCommandCenter::getRoverStatus() {
 
 void WheelsCommandCenter::moveRover(const uint16_t & roverThrottle, const uint16_t& roverSteering) {
 
-    byte throttle_dir = roverThrottle>> 8;
+    byte throttle_dir = roverThrottle >> 8;
     byte throttle = roverThrottle & 0x0F;
 
     byte steer_dir = roverSteering >> 8;
@@ -303,10 +283,11 @@ void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
 
 
 void WheelsCommandCenter::pingWheels(void) {
-    // CommandID set to 69 for ping
-    internal_comms::Message* message = commandCenter->createMessage(COMMAND_WHEELS_PING, 0, nullptr);
+    internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
     commandCenter->sendMessage(*message);
+
 }
+
 
 void WheelsCommandCenter::getBatteryVoltage() {
     //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
