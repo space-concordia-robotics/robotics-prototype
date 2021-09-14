@@ -13,7 +13,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -81,10 +81,11 @@ volatile uint32_t InterruptHandler::RIGHT_MIDDLE_MOTOR_DT=0;
 
 // Initial teensy setup
 void setup() {
-    pinMode(13,OUTPUT);
-    digitalWrite(13, HIGH);
+    pinMode(LED_BUILTIN,OUTPUT);
+
+    digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
-    digitalWrite(13, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 
     commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
@@ -110,11 +111,19 @@ void setup() {
     //rover->openAllMotorLoop();
 }
 
+void blink(){
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(500);
+
+}
 // Running the wheels
 void loop() {
+        //blink();
     if(Serial.available() > 0) {
+        blink();
         commandCenter->readCommand();
-
     }
     commandCenter->sendMessage();
 
@@ -237,22 +246,20 @@ void WheelsCommandCenter::getRoverStatus() {
 
 }
 
-void WheelsCommandCenter::moveRover(const uint16_t & roverThrottle, const uint16_t& roverSteering) {
+void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering) {
 
-    byte throttle_dir = roverThrottle >> 8;
-    byte throttle = roverThrottle & 0x0F;
+    //    byte throttle_dir = roverThrottle >> 8;
+    //    byte throttle = roverThrottle & 0x0F;
+    //
+    //    byte steer_dir = roverSteering >> 8;
+    //    byte steer = roverSteering & 0x0F;
 
-    byte steer_dir = roverSteering >> 8;
-    byte steer = roverSteering & 0x0F;
-
-    Rover::steerRover(throttle_dir,throttle,steer_dir,steer);
+    Rover::steerRover(throttle_dir,throttle,steering_dir,steering);
 }
 
-void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint16_t& velocity) {
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
 
-    byte direction = velocity >> 8;
-    byte pwm_speed = velocity & 0x0F;
-    Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,pwm_speed);
+    Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,velocity);
 
 }
 
@@ -281,15 +288,13 @@ void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
 
 }
 
-
 void WheelsCommandCenter::pingWheels(void) {
     internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
     commandCenter->sendMessage(*message);
-
 }
 
-
 void WheelsCommandCenter::getBatteryVoltage() {
+
     //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
     auto vsense = (float)analogRead(V_SENSE_PIN) * 0.003225806;
 

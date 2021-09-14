@@ -8,7 +8,7 @@
 
 #define COMMAND_DEBUG_MSG 0
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define Serial Serial1
@@ -21,14 +21,13 @@ namespace internal_comms
         uint8_t commandID = waitForSerial();
         /* uint8_t deviceSending = waitForSerial(); */
         /* uint8_t deviceReceiving = waitForSerial(); */
-        uint16_t argumentSize = readArgSize();
+
+         uint16_t argumentSize = readArgSize();
+        //uint16_t argumentSize = waitForSerial();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
 
-        /* Serial.write(commandID); */
-
-        /* Serial.write(argumentSize); */
 
         if(argumentSize > 0)
         {
@@ -36,12 +35,7 @@ namespace internal_comms
             bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         }
 
-        /* for(int i = 0 ; i < bytesRead ; i++){ */
-        /*     Serial.write(buffer[i]); */
-        /* } */
-
         uint8_t stopByte = waitForSerial();
-        /* Serial.write(stopByte); */
 
         auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
@@ -110,6 +104,11 @@ namespace internal_comms
     void CommandCenter::readCommand()
     {
         Command* command = CommandCenter::processCommand();
+//        Serial.write(command->rawArgsLength);
+//        for(int i = 0 ; i < command->rawArgsLength ;i++){
+//            Serial.write(command->rawArgs[i]);
+//        }
+
         if(command->isValid)
         {
             this->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
@@ -134,6 +133,7 @@ namespace internal_comms
     }
 
     void CommandCenter::sendMessage() {
+
         if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
@@ -156,7 +156,8 @@ namespace internal_comms
                 //Serial.write(0);
             //}
         }
-    }
+
+        }
 
     void CommandCenter::sendMessage(Message& message) {
         messageQueue.push(message);

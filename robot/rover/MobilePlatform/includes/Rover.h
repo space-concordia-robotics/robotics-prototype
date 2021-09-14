@@ -112,17 +112,17 @@ namespace Rover {
     void calculateRoverVelocity();
 
 
-    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int16_t &);
+    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int8_t &);
 
 
-    void updateAllMotorVelocities(const motor_direction &, const int16_t &);
+    void updateAllMotorVelocities(const motor_direction &, const int8_t &);
 
 
     void attachServo(const ServoNames&, const uint8_t&);
 
     void writeToServo(const ServoNames&, const int16_t&);
 
-    void moveWheel(const MotorNames &,const motor_direction&, const int16_t& );
+    void moveWheel(const MotorNames &,const motor_direction&, const int8_t& );
 
     void openLoop();
 

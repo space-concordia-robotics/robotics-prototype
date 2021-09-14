@@ -7,54 +7,63 @@ namespace Rover {
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int16_t& wheelPWM) {
+    void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int8_t& wheelPWM) {
         //const auto &direction = (wheelPWM < 0) ? CW : CCW;
 
         //this->isSteering = 0; // From Globals.h
 
-        Motor::updateDesiredMotorVelocity(motorID, direction, abs(wheelPWM));
-        Motor::applyDesiredMotorVelocity(motorID);
+        Motor::updateDesiredMotorVelocity(motorID, direction, wheelPWM);
+        //Motor::applyDesiredMotorVelocity(motorID);
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-            Motor::stop(motor.id);
+            Serial.write(motor.pwm_pin);
+            //analogWrite(motor.pwm_pin,0);
         }
     }
 
+
     void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
+        //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
+        //float multiplier = mapFloat(abs(steering), 0, MAX_INPUT_VALUE, 1, -1);
+        float multiplier = 0.1;
 
+        float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, 0, roverState.max_output_signal);
 
-        float multiplier = mapFloat(abs(steering), 0, MAX_INPUT_VALUE, 1, -1);
-        float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, roverState.min_output_signal, roverState.max_output_signal);
         float trailingSideAbs = leadingSideAbs * multiplier;
 
 //        int8_t dir = 1;
 //        if (throttle >= 0) dir = CCW;
 //        else if (throttle < 0) dir = CW;
 
-        int16_t desiredVelocityRight;
+        uint8_t desiredVelocityRight;
 
-        int16_t desiredVelocityLeft;
+        uint8_t desiredVelocityLeft;
 
         motor_direction leftMotorDirection;
-
         motor_direction rightMotorDirection;
 
         if (steer_direction == LEFT) { // turning left
-            desiredVelocityRight = static_cast<int16_t>( leadingSideAbs );
-            desiredVelocityLeft = static_cast<int16_t>( trailingSideAbs );
+            desiredVelocityRight = (uint8_t)( leadingSideAbs );
+            desiredVelocityLeft = (uint8_t)( trailingSideAbs );
 
             leftMotorDirection = CW;
             rightMotorDirection = CCW;
 
 
         } else if (steer_direction == RIGHT){ // turning right
-            desiredVelocityRight = static_cast<int16_t>(trailingSideAbs );
-            desiredVelocityLeft = static_cast<int16_t>(leadingSideAbs);
+            desiredVelocityRight = (uint8_t)(trailingSideAbs );
+            desiredVelocityLeft = (uint8_t)(leadingSideAbs);
 
             leftMotorDirection = CCW;
             rightMotorDirection = CW;
         }
+//          Serial.write((int)multiplier);
+//          Serial.write((int)leadingSideAbs);
+//            Serial.write((int)trailingSideAbs);
+
+       // Serial.print(desiredVelocityLeft);
+       // Serial.print(desiredVelocityRight);
 
 //        if (desiredVelocityLeft > 0)
 //            leftMotorDirection = CCW;

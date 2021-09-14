@@ -16,7 +16,7 @@ namespace Motor {
     }
 
     void attachMotor(const MotorNames &motorID, const uint8_t& dirPin,const uint8_t& pwmPin, const float& gearRatio) {
-        //motorList[motorID] = {};
+        motorList[motorID] = {};
         motorList[motorID].dir_pin = dirPin;
         motorList[motorID].pwm_pin = pwmPin;
 
@@ -38,24 +38,29 @@ namespace Motor {
         analogWrite(motorList[motorID].pwm_pin,0);
     }
     void updateDesiredMotorVelocity(const MotorNames &motorID, const motor_direction &desired_direction,
-                                    const int16_t &desired_velocity) {
-        motorList[motorID].desired_velocity = desired_velocity;
+                                    const uint8_t &desired_velocity) {
         motorList[motorID].desired_direction = desired_direction;
+        motorList[motorID].desired_velocity = desired_velocity;
+
 
         applyDesiredMotorVelocity(motorID);
     }
 
     void applyDesiredMotorVelocity(const MotorNames &motorID) {
 
-        calculateCurrentVelocity(motorID);
-
+        //calculateCurrentVelocity(motorID);
         auto &motor = motorList[motorID];
 
         digitalWrite(motor.dir_pin,motor.desired_direction);
 
+        Serial.write(motor.pwm_pin);
+        Serial.write(motor.dir_pin);
+        Serial.write(motor.desired_velocity);
+
         if (motor.is_open_loop) {
 
-            int16_t output_pwm = motor.desired_velocity;
+
+            uint8_t output_pwm = motor.desired_velocity;
             analogWrite(motor.pwm_pin, output_pwm);
 
 

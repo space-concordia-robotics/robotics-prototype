@@ -165,7 +165,7 @@ public:
 typedef struct DcMotorState{
     MotorNames id;
 
-    int16_t desired_velocity;
+    uint8_t desired_velocity;
     float current_velocity;
 
     motor_direction desired_direction;
@@ -208,7 +208,7 @@ namespace Motor {
 
     void calculateCurrentVelocity(const MotorNames &);
 
-    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int16_t &);
+    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const uint8_t  &);
 
     void applyDesiredMotorVelocity(const MotorNames &);
 

@@ -50,37 +50,20 @@
 // the setup routine runs once when you press reset:
 void setup() {
     // initialize serial communication at 9600 bits per second:
-    Serial.begin(57600);
+    Serial.begin(9600);
     pinMode(LED_BUILTIN,OUTPUT);
 
-    pinMode(M1_FR_PWM, OUTPUT); //works
-    pinMode(M1_FR_DIR, OUTPUT); //nope
-
-    pinMode(M2_MR_PWM, OUTPUT); //works
-    pinMode(M2_MR_DIR, OUTPUT); //works
-
-    pinMode(M3_RR_DIR, OUTPUT); //works
-    pinMode(M3_RR_PWM, OUTPUT); //works
-
-    pinMode(M4_FL_DIR, OUTPUT); //works
-    pinMode(M4_FL_PWM, OUTPUT); //works
-
-    pinMode(M5_ML_DIR, OUTPUT); //works
-    pinMode(M5_ML_PWM, OUTPUT); //works
-
-    pinMode(M6_RL_DIR, OUTPUT); //works
-    pinMode(M6_RL_PWM, OUTPUT); //works
-
-
+}
+void blink(){
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(500);
 
 }
-
 // the loop routine runs over and over again forever:
 void loop() {
 // read the input on analog pin 0:
-
-    Serial.print(0x02);
-    delay(500);
-
+    blink();
 
 }

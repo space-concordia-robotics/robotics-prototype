@@ -153,8 +153,6 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
         motorSpeed = pidController.getMinOutputValue();
     }
 
-    //digitalWrite(directionPin, LOW);
-
     switch (motorDir) {
         case CLOCKWISE: {
             //PORTD |= (0 << 3);

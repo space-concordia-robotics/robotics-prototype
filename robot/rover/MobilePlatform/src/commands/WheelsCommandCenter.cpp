@@ -39,6 +39,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                      break;
                                  }
         case COMMAND_STOP_MOTORS_EMERGENCY: {
+
                                                 stopMotors();
                                                 break;
                                             }
@@ -73,20 +74,25 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                            break;
                                        }
         case COMMAND_MOVE_ROVER: {
-                                     const uint16_t throttle = *(++rawArgs);
-                                     const uint16_t steering = *(++rawArgs);
+                                     const uint8_t throttle_dir = *(rawArgs++);
+                                     const uint8_t throttle = *(rawArgs++);
 
-                                     moveRover(throttle,steering);
+                                     const uint8_t steering_dir = *(rawArgs++);
+                                     const uint8_t steering = *(rawArgs++);
+
+
+                                     moveRover(throttle_dir,throttle,steering_dir,steering);
+
                                      break;
                                  }
         case COMMAND_MOVE_WHEEL:
                                  {
                                      uint8_t wheelNumber = (*rawArgs++);
-                                     uint16_t pwm = (*rawArgs++);
+                                     uint8_t pwm_dir = (*rawArgs++);
+                                     uint8_t pwm= (*rawArgs++);
 
 
-
-                                     moveWheel(wheelNumber,pwm);
+                                      moveWheel(wheelNumber,pwm_dir,pwm);
                                      break;
                                  }
 
