@@ -13,7 +13,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //
-//#define DEBUG
+#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1

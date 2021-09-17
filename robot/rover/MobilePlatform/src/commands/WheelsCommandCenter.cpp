@@ -91,6 +91,9 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                      uint8_t pwm_dir = (*rawArgs++);
                                      uint8_t pwm= (*rawArgs++);
 
+//                                        Serial.write(wheelNumber);
+//                                        Serial.write(pwm_dir);
+//                                        Serial.write(pwm);
 
                                       moveWheel(wheelNumber,pwm_dir,pwm);
                                      break;

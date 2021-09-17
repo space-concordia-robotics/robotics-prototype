@@ -53,11 +53,8 @@ namespace Motor {
 
         digitalWrite(motor.dir_pin,motor.desired_direction);
 
-        Serial.write(motor.pwm_pin);
-        Serial.write(motor.dir_pin);
-        Serial.write(motor.desired_velocity);
 
-        if (motor.is_open_loop) {
+        if (true) {
 
 
             uint8_t output_pwm = motor.desired_velocity;

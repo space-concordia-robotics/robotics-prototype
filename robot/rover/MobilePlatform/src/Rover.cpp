@@ -18,7 +18,7 @@ namespace Rover {
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
             Serial.write(motor.pwm_pin);
-            //analogWrite(motor.pwm_pin,0);
+            analogWrite(motor.pwm_pin,0);
         }
     }
 
@@ -27,7 +27,9 @@ namespace Rover {
         //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
         //float multiplier = mapFloat(abs(steering), 0, MAX_INPUT_VALUE, 1, -1);
         float multiplier = 0.1;
-
+        if(steering == 0) {
+            multiplier = 1;
+        }
         float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, 0, roverState.max_output_signal);
 
         float trailingSideAbs = leadingSideAbs * multiplier;
@@ -43,21 +45,34 @@ namespace Rover {
         motor_direction leftMotorDirection;
         motor_direction rightMotorDirection;
 
-        if (steer_direction == LEFT) { // turning left
-            desiredVelocityRight = (uint8_t)( leadingSideAbs );
-            desiredVelocityLeft = (uint8_t)( trailingSideAbs );
+        if(steering > 0){
+            if (steer_direction == LEFT) { // turning left
+                desiredVelocityRight = (uint8_t)( leadingSideAbs );
+                desiredVelocityLeft = (uint8_t)( trailingSideAbs );
 
-            leftMotorDirection = CW;
-            rightMotorDirection = CCW;
+                leftMotorDirection = CW;
+                rightMotorDirection = CCW;
 
 
-        } else if (steer_direction == RIGHT){ // turning right
-            desiredVelocityRight = (uint8_t)(trailingSideAbs );
-            desiredVelocityLeft = (uint8_t)(leadingSideAbs);
+            } else if (steer_direction == RIGHT){ // turning right
+                desiredVelocityRight = (uint8_t)(trailingSideAbs );
+                desiredVelocityLeft = (uint8_t)(leadingSideAbs);
 
-            leftMotorDirection = CCW;
-            rightMotorDirection = CW;
+                leftMotorDirection = CCW;
+                rightMotorDirection = CW;
+            }
         }
+        else{
+//            leftMotorDirection = (motor_direction)throttle_direction;
+//            rightMotorDirection = (motor_direction)throttle_direction;
+            leftMotorDirection = (motor_direction)throttle_direction;
+            rightMotorDirection = (motor_direction)(~throttle_direction);
+
+            desiredVelocityRight = (uint8_t)(leadingSideAbs );
+            desiredVelocityLeft = (uint8_t)(trailingSideAbs );
+
+        }
+
 //          Serial.write((int)multiplier);
 //          Serial.write((int)leadingSideAbs);
 //            Serial.write((int)trailingSideAbs);

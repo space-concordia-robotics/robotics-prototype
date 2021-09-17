@@ -8,7 +8,7 @@
 
 #define COMMAND_DEBUG_MSG 0
 
-//#define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
 #define Serial Serial1
@@ -22,7 +22,7 @@ namespace internal_comms
         /* uint8_t deviceSending = waitForSerial(); */
         /* uint8_t deviceReceiving = waitForSerial(); */
 
-         uint16_t argumentSize = readArgSize();
+        uint16_t argumentSize = waitForSerial();
         //uint16_t argumentSize = waitForSerial();
 
         uint8_t* buffer = nullptr;
