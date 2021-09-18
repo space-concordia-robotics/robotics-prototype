@@ -13,7 +13,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -253,6 +253,8 @@ void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t &
     //
     //    byte steer_dir = roverSteering >> 8;
     //    byte steer = roverSteering & 0x0F;
+    commandCenter->sendDebug((const char*)throttle);
+    commandCenter->sendDebug((const char*)steering);
 
     Rover::steerRover(throttle_dir,throttle,steering_dir,steering);
 }

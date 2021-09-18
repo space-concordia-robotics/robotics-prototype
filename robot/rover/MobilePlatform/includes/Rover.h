@@ -94,6 +94,11 @@ enum SteerDirection{
     LEFT = 0,
     RIGHT = 1
 };
+enum ThrottleDirection{
+    BACKWARDS= 0,
+    FORWARD= 1
+};
+
 typedef struct {
     float right_linear_velocity;
     float left_linear_velocity;

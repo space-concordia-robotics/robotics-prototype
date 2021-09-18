@@ -8,7 +8,7 @@
 
 #define COMMAND_DEBUG_MSG 0
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define Serial Serial1
@@ -128,7 +128,7 @@ namespace internal_comms
 
     void CommandCenter::sendDebug(const char* debugMessage)
     {
-        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), debugMessage);
+        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), (byte*)debugMessage);
         this->queueMessage(*message);
     }
 
