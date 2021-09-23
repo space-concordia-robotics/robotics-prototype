@@ -8,7 +8,7 @@ import serial
 import struct
 from collections import deque
 import Jetson.GPIO as gpio
-
+from geometry_msgs.msg import Twist
 import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
@@ -16,15 +16,19 @@ from robot.rospackages.src.mcu_control.srv import *
 from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
-from robot.rospackages.src.mcu_control.scripts.RoverCommands import rover_out_commands, rover_in_commands
+from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
 
-in_commands = [arm_in_commands, rover_in_commands, None, None]
-out_commands = [arm_out_commands, rover_out_commands, None, None]
+
+
+
+in_commands = [arm_in_commands, wheel_in_commands, None, None]
+out_commands = [arm_out_commands, wheel_out_commands, None, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -53,15 +57,27 @@ science_queue = deque()
 
 gpio.setwarnings(False)
 gpio.setmode(gpio.BOARD)
-gpio.setup(PIN_DESC, gpio.OUT)
+gpio.setup(SW_PINS, gpio.OUT)
 gpio.output(SW_PINS, NONE)
 
+def twist_rover_callback(twist_msg):
+    """ Handles the twist message and sends it to the wheel MCU """
+    linear, angular = accelerate_twist(twist_msg)
+    print(linear)
+    #string_command = twist_to_rover_command(linear, angular)
+    #command = str.encode(string_command)
+    #ser.write(command) # send move command to wheel teensy
+    #ser.reset_input_buffer(
+
+    #ser.reset_output_buffer()
+ 
 def main():
 
     try:
         while not rospy.is_shutdown():
             send_queued_commands()
-            receive_messages()
+            receive_message()
+
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
     ser.close()
@@ -72,17 +88,23 @@ def send_queued_commands():
         arm_command = arm_queue.popleft()
         send_command(arm_command[0], arm_command[1], arm_command[2])
 
+    if (len(rover_queue) > 0):
+        rover_command = rover_queue.popleft()
+        send_command(rover_command[0], rover_command[1], rover_command[2])
+
 def receive_message():
-    for device in range(3):
+    for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
         #time.sleep(0.5)
-
         if ser.in_waiting > 0:
+
             commandID = ser.read()
+            print(commandID)
             commandID = int.from_bytes(commandID, "big")
+
             handler = get_handler(commandID, device)
             # print("CommandID:", commandID)
-            if handler == None:
+            if handler is None:
                 print("No command with ID ", commandID, " was found")
                 ser.read_until() # 0A
 
@@ -113,33 +135,42 @@ def receive_message():
 
 def get_command(command_name, deviceToSendTo):
     for out_command in out_commands[deviceToSendTo]:
-        if command_name == out_command[deviceToSendTo]:
+        if command_name == out_command[0]:
             return out_command
 
     return None
 
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
+    #print(command)
+    #print(len(command[2]))
+    #print(args[1]) 
     if command is not None:
         commandID = command[1]
+        print(commandID)
 
         gpio.output(SW_PINS, TX2)
-
+        
         ser.write(commandID.to_bytes(1, 'big'))
-        ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
+        #ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        arg_length = len(command[2]).to_bytes(1,'big')
+        print(arg_length)
+        ser.write(arg_length)
 
         data_types = [element[0] for element in command[2]]
-
         for argument in zip(args, data_types):
             data = argument[0]
             data_type = argument[1]
 
             if data_type == dt.ARG_UINT8_ID:
+                print(int(data).to_bytes(1,'big'))
                 ser.write(int(data).to_bytes(1, 'big'))
             elif data_type == dt.ARG_FLOAT32_ID:
+                print('hi')
                 ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
+        ser.flush()
         gpio.output(SW_PINS, NONE)
     return False
 
@@ -150,8 +181,15 @@ def arm_command_callback(message):
     temp_struct = [command, args, ARM_SELECTED]
     arm_queue.append(temp_struct)
 
+def rover_command_callback(message):
+    rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
+    command, args = parse_command(message)
+
+    temp_struct = [command, args, ROVER_SELECTED]
+    rover_queue.append(temp_struct)
+
+
 def parse_command(message):
-    message
     full_command = message.data.split(" ")
     if full_command is not None:
         command = full_command[0]
@@ -189,9 +227,16 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "'+arm_command_topic+'" topic')
     sub = rospy.Subscriber(arm_command_topic, String, arm_command_callback)
 
+    rover_command_topic = '/rover_command'
+    rospy.loginfo('Beginning to subscribe to "'+rover_command_topic+'" topic')
+    sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
+    
+    rover_twist_topic = '/rover_cmd_vel'
+    rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
+    rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
+
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     # serv = rospy.Service(service_name, ArmRequest, handle_client)
-
     main()
 

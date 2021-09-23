@@ -5,5 +5,6 @@
     <node pkg="task_handler" type="task_handler_server.py" name="task_handler_server" output="screen"/>
     <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen"/>
     <node pkg="mcu_control" type="PdsNode.py" name="PdsNode" output="screen"/>
+    <node pkg="mcu_control" type="CommsNode.py" name="CommsNode" output="screen"/>
     <!-- <node pkg="odroid_rx" type="rx_publisher.py" name="rx_publisher" output="screen"/> -->
 </launch>
