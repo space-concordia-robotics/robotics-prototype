@@ -176,6 +176,8 @@ void setup() {
     motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
     initMotorTimers();
 
+//    pinSetup();
+
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
     delay(1000);
