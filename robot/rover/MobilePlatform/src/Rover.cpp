@@ -8,29 +8,20 @@ namespace Rover {
     RoverState roverState;
 
     void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int8_t& wheelPWM) {
-        //const auto &direction = (wheelPWM < 0) ? CW : CCW;
-
-        //this->isSteering = 0; // From Globals.h
 
         Motor::updateDesiredMotorVelocity(motorID, direction, wheelPWM);
-        //Motor::applyDesiredMotorVelocity(motorID);
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-            Serial.write(motor.pwm_pin);
             analogWrite(motor.pwm_pin,0);
         }
     }
 
-
     void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
         //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
         //  WHY 49 ???
-        float multiplier = mapFloat(abs(steering), 0, MAX_INPUT_VALUE, 0, 1);
 
-
-
-        //float multiplier = 0.1;
+        float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
         if(steering == 0) {
             multiplier = 1;
         }
@@ -40,28 +31,20 @@ namespace Rover {
 
         float trailingSideAbs = leadingSideAbs * multiplier;
 
-//        int8_t dir = 1;
-//        if (throttle >= 0) dir = CCW;
-//        else if (throttle < 0) dir = CW;
 
         uint8_t desiredVelocityRight;
-
         uint8_t desiredVelocityLeft;
 
         motor_direction leftMotorDirection;
         motor_direction rightMotorDirection;
 
-        Serial.write(steering);
-
         if(steer_direction == LEFT){
             desiredVelocityRight = (uint8_t)( leadingSideAbs );
             desiredVelocityLeft = (uint8_t)( trailingSideAbs );
-
         }
         else{
             desiredVelocityRight = (uint8_t)(trailingSideAbs );
             desiredVelocityLeft = (uint8_t)(leadingSideAbs);
-
         }
         if(throttle_direction == FORWARD){
             leftMotorDirection = CCW;
@@ -71,17 +54,68 @@ namespace Rover {
             leftMotorDirection = CW;
             rightMotorDirection = CCW;
         }
+        int current_motor = 0;
 
-        Motor::updateDesiredMotorVelocity(FRONT_RIGHT, rightMotorDirection, desiredVelocityRight);
-        Motor::updateDesiredMotorVelocity(MIDDLE_RIGHT, rightMotorDirection,desiredVelocityRight);
-        Motor::updateDesiredMotorVelocity(REAR_RIGHT, rightMotorDirection,desiredVelocityRight);
-        Motor::updateDesiredMotorVelocity(FRONT_LEFT, leftMotorDirection, desiredVelocityLeft);
-        Motor::updateDesiredMotorVelocity(MIDDLE_LEFT, leftMotorDirection,desiredVelocityLeft);
-        Motor::updateDesiredMotorVelocity(REAR_LEFT, leftMotorDirection, desiredVelocityLeft);
 
-        //this->sinceThrottle = 0;
+        while(current_motor <= 5) {
+            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, rightMotorDirection,desiredVelocityRight);
+            //delay(25);
 
+            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), leftMotorDirection,desiredVelocityLeft);
+
+            current_motor++;
+        }
+        systemStatus.last_throttle = millis();
     }
+    void decelerateRover(){
+        //if(systemStatus.is_deccelerating){
+
+            for(auto& motor : Motor::motorList){
+
+                if(motor.desired_velocity <= 50){
+                    break;
+                }
+                uint8_t new_velocity = motor.desired_velocity - 1;
+
+                if(motor.desired_velocity < 10) {
+                    motor.desired_velocity = 0;
+//                    systemStatus.is_deccelerating = false;
+//                    break;
+                }
+                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
+
+                delay(2);
+
+            }
+      //  }
+
+//            auto motor = Motor::motorList[i];
+//            Serial.write(motor.id);
+//            if(motor.desired_velocity >= 0){
+//                uint8_t new_velocity = motor.desired_velocity - 10;
+//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
+//            }
+            //
+//            uint8_t new_velocity = motor.desired_velocity - 10;
+//
+//            Motor::updateDesiredMotorVelocity((MotorNames)i,motor.desired_direction,new_velocity);
+
+//            if(motor.desired_velocity >= 0){
+//                uint8_t new_velocity = motor.desired_velocity - 10;
+//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
+//            }
+
+        //
+        /*
+        for(auto& motor : Motor::motorList){
+            Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
+//            if(motor.desired_velocity >= 0){
+//                uint8_t new_velocity = motor.desired_velocity - 10;
+//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
+//            }
+        }*/
+    }
+
     void calculateRoverVelocity() {
 
         using namespace Motor;
@@ -132,14 +166,11 @@ namespace Rover {
         if (systemStatus.are_motors_enabled) {
             stopMotors();
         }
+        for(auto& motor : Motor::motorList){
+            motor.is_open_loop = true;
+        }
         systemStatus.is_open_loop = true;
     }
 
 
 }
-
-
-/*//! !FB, @FS, #RB, $RS
-void Rover::controlCameraMotors(ServoNames servoID, uint16_t angle) {
-    servoList[servoID].write(angle);
-}*/

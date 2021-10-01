@@ -28,14 +28,12 @@ namespace internal_comms
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
 
-
         if(argumentSize > 0)
         {
             buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
             bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         }
-
-        uint8_t stopByte = waitForSerial();
+       uint8_t stopByte = waitForSerial();
 
         auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;

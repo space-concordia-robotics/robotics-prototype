@@ -1,6 +1,5 @@
 #ifndef DCMOTOR_H
 #define DCMOTOR_H
-#include <cstdio>
 #include "PidController.h"
 #define PULSES_PER_REV     14
 #define GEAR_RATIO         188.61
@@ -54,112 +53,17 @@ public:
     static volatile u_int32_t RIGHT_BACK_MOTOR_DT;
     static volatile u_int32_t RIGHT_BACK_MOTOR_PREV_DT;
 
-    static void RightFrontMotorInterruptHandler(){
-        RIGHT_FRONT_MOTOR_ENCODER_COUNT++;
-        RIGHT_FRONT_MOTOR_DT = micros() - RIGHT_FRONT_MOTOR_PREV_DT;
-        RIGHT_FRONT_MOTOR_PREV_DT = micros();
-    }
-    static void RightMiddleMotorInterruptHandler(){
-        RIGHT_MIDDLE_MOTOR_ENCODER_COUNT++;
-        RIGHT_MIDDLE_MOTOR_DT = micros() - RIGHT_MIDDLE_MOTOR_PREV_DT;
-        RIGHT_MIDDLE_MOTOR_PREV_DT = micros();
-    }
-    static void RightBackMotorInterruptHandler(){
-        RIGHT_BACK_MOTOR_ENCODER_COUNT++;
-        RIGHT_BACK_MOTOR_DT = micros() - RIGHT_BACK_MOTOR_PREV_DT;
-        RIGHT_BACK_MOTOR_PREV_DT = micros();
-    }
-    static void LeftFrontMotorInterruptHandler(){
-        LEFT_FRONT_MOTOR_ENCODER_COUNT++;
-        LEFT_FRONT_MOTOR_DT = micros() - LEFT_FRONT_MOTOR_PREV_DT;
-        LEFT_FRONT_MOTOR_PREV_DT = micros();
-    }
-    static void LeftMiddleMotorInterruptHandler(){
-        LEFT_MIDDLE_MOTOR_ENCODER_COUNT++;
-        LEFT_MIDDLE_MOTOR_DT = micros() - LEFT_MIDDLE_MOTOR_PREV_DT;
-        LEFT_MIDDLE_MOTOR_PREV_DT = micros();
-    }
-    static void LeftBackMotorInterruptHandler(){
-        LEFT_BACK_MOTOR_ENCODER_COUNT++;
-        LEFT_BACK_MOTOR_DT = micros() - LEFT_BACK_MOTOR_PREV_DT;
-        LEFT_BACK_MOTOR_PREV_DT = micros();
-    }
+    static void RightFrontMotorInterruptHandler();
+    static void RightMiddleMotorInterruptHandler();
+    static void RightBackMotorInterruptHandler();
+    static void LeftFrontMotorInterruptHandler();
+    static void LeftMiddleMotorInterruptHandler();
+    static void LeftBackMotorInterruptHandler();
 
-    static uint32_t getEncoderCount(MotorNames name){
-        switch (name) {
-            case FRONT_RIGHT:
-                return RIGHT_FRONT_MOTOR_ENCODER_COUNT;
-            case MIDDLE_RIGHT:
-                return RIGHT_MIDDLE_MOTOR_ENCODER_COUNT;
-            case REAR_RIGHT:
-                return RIGHT_BACK_MOTOR_ENCODER_COUNT;
-            case FRONT_LEFT:
-                return LEFT_FRONT_MOTOR_ENCODER_COUNT;
-            case MIDDLE_LEFT:
-                return LEFT_MIDDLE_MOTOR_ENCODER_COUNT;
-            case REAR_LEFT:
-                return LEFT_BACK_MOTOR_ENCODER_COUNT;
+    static uint32_t getEncoderCount(MotorNames name);
+    static uint32_t getMotorDt(MotorNames name);
+    static void reset(MotorNames name);
 
-        }
-    }
-    static uint32_t getMotorDt(MotorNames name){
-        switch (name) {
-            case FRONT_RIGHT:
-                return RIGHT_FRONT_MOTOR_DT;
-            case MIDDLE_RIGHT:
-                return RIGHT_MIDDLE_MOTOR_DT;
-            case REAR_RIGHT:
-                return RIGHT_BACK_MOTOR_DT;
-            case FRONT_LEFT:
-                return LEFT_FRONT_MOTOR_DT;
-            case MIDDLE_LEFT:
-                return LEFT_MIDDLE_MOTOR_DT;
-            case REAR_LEFT:
-                return LEFT_BACK_MOTOR_DT;
-
-        }
-    }
-    static void reset(MotorNames name) {
-        switch (name) {
-            case FRONT_RIGHT: {
-                RIGHT_FRONT_MOTOR_DT = 0;
-                RIGHT_FRONT_MOTOR_ENCODER_COUNT = 0;
-                RIGHT_FRONT_MOTOR_PREV_DT = 0;
-                break;
-            }
-            case MIDDLE_RIGHT: {
-                RIGHT_MIDDLE_MOTOR_DT = 0;
-                RIGHT_MIDDLE_MOTOR_ENCODER_COUNT = 0;
-                RIGHT_MIDDLE_MOTOR_PREV_DT = 0;
-                break;
-            }
-            case REAR_RIGHT: {
-                RIGHT_BACK_MOTOR_DT = 0;
-                RIGHT_BACK_MOTOR_ENCODER_COUNT = 0;
-                RIGHT_BACK_MOTOR_PREV_DT=0;
-            } break;
-
-            case FRONT_LEFT: {
-                LEFT_FRONT_MOTOR_DT = 0;
-                LEFT_FRONT_MOTOR_ENCODER_COUNT = 0;
-                LEFT_FRONT_MOTOR_PREV_DT = 0;
-                break;
-            }
-            case MIDDLE_LEFT:{
-                LEFT_MIDDLE_MOTOR_ENCODER_COUNT = 0;
-                LEFT_MIDDLE_MOTOR_DT = 0;
-                LEFT_MIDDLE_MOTOR_PREV_DT = 0;
-                break;
-            }
-
-            case REAR_LEFT: {
-                LEFT_BACK_MOTOR_ENCODER_COUNT = 0;
-                LEFT_BACK_MOTOR_DT = 0;
-                LEFT_BACK_MOTOR_PREV_DT = 0;
-                break;
-            }
-        }
-    }
 };
 
 typedef struct DcMotorState{
@@ -174,8 +78,6 @@ typedef struct DcMotorState{
     float gear_ratio_reciprocal;
     float encoder_resolution_reciprocal;
 
-    int8_t max_output_signal;
-    int8_t min_output_signal;
 
     uint8_t dir_pin;
     uint8_t pwm_pin;
@@ -194,8 +96,17 @@ typedef struct{
 
 typedef struct {
     bool is_throttle_timeout_enabled;
+    bool is_passive_rover_feedback_enabled;
+
     bool are_motors_enabled;
     bool is_open_loop;
+
+    bool is_deccelerating;
+
+    uint32_t last_throttle;
+    bool has_moved;
+
+
 } SystemState;
 
 namespace Motor {
