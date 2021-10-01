@@ -135,9 +135,16 @@ def send_command(command_name, args, deviceToSendTo):
             data_type = argument[1]
 
             if data_type == dt.ARG_UINT8_ID:
-                ser.write(int(data).to_bytes(1, 'big'))
+                arg_int = int(data)
+
+                # This is necessary in order to overflow the value of the argument to negative numbers for when it is
+                # converted into a byte
+                if arg_int < 0:
+                    arg_int = arg_int + 256
+
+                ser.write(arg_int.to_bytes(1, 'big'))
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+                ser.write(bytearray(struct.pack(">f", data)))
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         gpio.output(SW_PINS, NONE)
