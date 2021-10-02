@@ -44,25 +44,22 @@ namespace Motor {
         motorList[motorID].desired_direction = desired_direction;
         motorList[motorID].desired_velocity = desired_velocity;
 
-
         applyDesiredMotorVelocity(motorID);
     }
-
     void applyDesiredMotorVelocity(const MotorNames &motorID) {
 
-        //calculateCurrentVelocity(motorID);
+
         auto &motor = motorList[motorID];
+
+        calculateMotorVelocity(motorID);
 
         digitalWrite(motor.dir_pin,motor.desired_direction);
 
         if (motor.is_open_loop) {
-
             uint8_t output_pwm = motor.desired_velocity;
-            //Serial.write(output_pwm);
             analogWrite(motor.pwm_pin, output_pwm);
-
-
         } else if (!motor.is_open_loop) {
+            //calculateCurrentVelocity(motorID);
             // THIS LOOKS WRONG
             // makes sure the speed is within the limits set in the pid during setup
             if (motor.desired_velocity > 30) {
@@ -70,10 +67,7 @@ namespace Motor {
             } else if (motor.desired_velocity < 0) {
                 motor.desired_velocity = 0;
             }
-            int16_t output_pwm = updatePID(motor.pid_controller, motor.current_velocity, motor.desired_velocity);
-
-//        Serial.print(output_pwm);
-//        Serial.print(" ");
+            int16_t output_pwm = updatePID(motor.pid_controller, motor.actual_velocity, motor.desired_velocity);
 
             analogWrite(motor.pwm_pin, abs(output_pwm));
 
@@ -100,18 +94,17 @@ namespace Motor {
     }
 
 
-    void calculateCurrentVelocity(const MotorNames &motorID) {
+    void calculateMotorVelocity(const MotorNames &motorID) {
         auto &motor = motorList[motorID];
         uint32_t dt = InterruptHandler::getMotorDt(motorID);
         uint32_t encoderCount = InterruptHandler::getEncoderCount(motorID);
 
         if (dt <= 0 || encoderCount <= 0) {
-            motor.current_velocity = 0;
+            motor.actual_velocity= 0;
         } else {
-            //TODO : figure out the whole float weirdness. like can't i just cast to a int16_t ? do i really need a float
             float calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
                                                  motor.encoder_resolution_reciprocal / (float) (dt));
-            motor.current_velocity = calculated_velocity;
+            motor.actual_velocity = calculated_velocity;
             //motor.current_velocity = map(calculated_velocity,0,MAX);
 
         }

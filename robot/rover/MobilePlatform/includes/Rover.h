@@ -74,15 +74,13 @@ const float wheelBase = 0.33;
 #define LED_BLINK_INTERVAL 1000
 #define SENSOR_READ_INTERVAL 200
 //#define THROTTLE_TIMEOUT 200
-#define THROTTLE_TIMEOUT 1500
+#define THROTTLE_TIMEOUT 250
 
 #define MOTOR_CONTROL_INTERVAL 10
 
 #define SERVO_STOP 93
 #define FRONT_BASE_DEFAULT_PWM 65
 #define REAR_BASE_DEFAULT_PWM 35
-
-
 
 enum ServoNames{
     FRONT_SIDE_SERVO = 0,
@@ -116,12 +114,9 @@ namespace Rover {
 
     void calculateRoverVelocity();
 
-
     void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int8_t &);
 
-
     void updateAllMotorVelocities(const motor_direction &, const int8_t &);
-
 
     void attachServo(const ServoNames&, const uint8_t&);
 

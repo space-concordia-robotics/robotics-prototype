@@ -70,7 +70,7 @@ typedef struct DcMotorState{
     MotorNames id;
 
     uint8_t desired_velocity;
-    float current_velocity;
+    float actual_velocity;
 
     motor_direction desired_direction;
 
@@ -117,7 +117,7 @@ namespace Motor {
 
     void attachEncoder(const MotorNames &, const uint8_t&, const uint8_t&, const float&, void (*handler)(void));
 
-    void calculateCurrentVelocity(const MotorNames &);
+    void calculateMotorVelocity(const MotorNames &);
 
     void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const uint8_t  &);
 

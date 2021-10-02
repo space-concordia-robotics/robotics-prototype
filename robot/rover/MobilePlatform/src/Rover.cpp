@@ -93,15 +93,15 @@ namespace Rover {
         using namespace Motor;
 
         roverState.right_linear_velocity =
-                (float) (motorList[FRONT_RIGHT].desired_direction * motorList[FRONT_RIGHT].current_velocity +
-                         motorList[MIDDLE_RIGHT].desired_direction * motorList[MIDDLE_RIGHT].current_velocity +
-                         motorList[REAR_RIGHT].desired_direction * motorList[REAR_RIGHT].current_velocity) * radius *
+                (float) (motorList[FRONT_RIGHT].desired_direction * motorList[FRONT_RIGHT].actual_velocity +
+                         motorList[MIDDLE_RIGHT].desired_direction * motorList[MIDDLE_RIGHT].actual_velocity +
+                         motorList[REAR_RIGHT].desired_direction * motorList[REAR_RIGHT].actual_velocity) * radius *
                 piRad;
 
         roverState.left_linear_velocity =
-                (float) (motorList[FRONT_LEFT].desired_direction * motorList[FRONT_LEFT].current_velocity +
-                         motorList[MIDDLE_LEFT].desired_direction * motorList[MIDDLE_LEFT].current_velocity +
-                         motorList[REAR_LEFT].desired_direction * motorList[REAR_LEFT].current_velocity) * radius *
+                (float) (motorList[FRONT_LEFT].desired_direction * motorList[FRONT_LEFT].actual_velocity +
+                         motorList[MIDDLE_LEFT].desired_direction * motorList[MIDDLE_LEFT].actual_velocity +
+                         motorList[REAR_LEFT].desired_direction * motorList[REAR_LEFT].actual_velocity) * radius *
                 piRad;
 
         roverState.linear_velocity = (roverState.right_linear_velocity - roverState.left_linear_velocity) / 6;

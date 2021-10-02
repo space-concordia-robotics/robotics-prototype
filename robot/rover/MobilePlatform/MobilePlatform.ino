@@ -36,6 +36,7 @@ void attachServos();
 void attachEncoders();
 void initPidControllers();
 void writeServoDefaultValues();
+
 // Messages to send back to OBC from wheel Teensy
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 
@@ -64,10 +65,10 @@ void setup() {
     writeServoDefaultValues();
 
     Rover::openLoop();
-
     Rover::systemStatus.is_throttle_timeout_enabled = true;
-    //Rover::systemStatus.last_throttle = millis();
+
     Rover::systemStatus.has_moved = false;
+    Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 }
 
 void loop() {
@@ -77,6 +78,8 @@ void loop() {
     commandCenter->sendMessage();
 
     if(Rover::systemStatus.is_passive_rover_feedback_enabled){
+        Rover::calculateRoverVelocity();
+        commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
 
     }
 //  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
@@ -92,13 +95,6 @@ void loop() {
 //    sinceSensorRead = 0;
 //  }
 //
-    /*
-  if (sinceMC-millis() > MOTOR_CONTROL_INTERVAL) {
-    // Loop through motors to get and set their velocity
-    //rover->updateWheelsVelocity();
-    sinceMC = 0;
-  }
-    */
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
     ( (millis() - Rover::systemStatus.last_throttle) > THROTTLE_TIMEOUT)) {
         Rover::decelerateRover();
@@ -192,7 +188,6 @@ void WheelsCommandCenter::getRoverStatus() {
 void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering) {
 
     Rover::steerRover(throttle_dir,throttle,steering_dir,steering);
-    Rover::systemStatus.has_moved = true;
 }
 
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
@@ -200,9 +195,8 @@ void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& di
     Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,velocity);
 
 }
-
 void WheelsCommandCenter::getLinearVelocity(void) {
-    auto linear_velocity = Rover::roverState.linear_velocity;
+    const float linear_velocity = Rover::roverState.linear_velocity;
     uint8_t buffer[4];
     float2bytes(buffer,linear_velocity);
     internal_comms::Message* message = commandCenter->createMessage(
@@ -211,7 +205,7 @@ void WheelsCommandCenter::getLinearVelocity(void) {
 }
 
 void WheelsCommandCenter::getRotationalVelocity(void) {
-    auto rotational_velocity = Rover::roverState.rotational_velocity;
+    const float rotational_velocity = Rover::roverState.rotational_velocity;
     uint8_t buffer[4];
     float2bytes(buffer,rotational_velocity);
     internal_comms::Message* message = commandCenter->createMessage(
@@ -220,7 +214,8 @@ void WheelsCommandCenter::getRotationalVelocity(void) {
 }
 
 void WheelsCommandCenter::getMotorVelocity(const uint8_t& wheelNumber) {
-   }
+
+}
 
 void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
 

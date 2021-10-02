@@ -35,7 +35,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
     switch(commandID)
     {
         case COMMAND_SET_MOTORS: {
-                                     enableMotors(*rawArgs);  // Toggle ON or OFF
+                                     enableMotors(*rawArgs);
                                      break;
                                  }
         case COMMAND_STOP_MOTORS_EMERGENCY: {
@@ -52,25 +52,24 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                            break;
                                        }
         case COMMAND_SET_JOYSTICK: {
-                                       toggleJoystick(*rawArgs); // Toggle ON or OFF
+                                       toggleJoystick(*rawArgs);
                                        break;
                                    }
         case COMMAND_SET_GPS: {
-                                  toggleGps(*rawArgs); // Toggle ON or OFF
+                                  toggleGps(*rawArgs);
                                   break;
                               }
         case COMMAND_SET_ENCODER: {
-                                      toggleEncoder(*rawArgs); // Toggle ON or OFF
+                                      toggleEncoder(*rawArgs);
                                       break;
                                   }
         case COMMAND_SET_ACCELERATION: {
-                                           toggleAcceleration(*rawArgs); // Toggle ON or OFF
+                                           toggleAcceleration(*rawArgs);
                                            break;
                                        }
         case COMMAND_GET_ROVER_STATUS: {
                                            getRoverStatus();
 
-                                           //    this->sendMessage(*message); // Add message to queue
                                            break;
                                        }
         case COMMAND_MOVE_ROVER: {
@@ -91,15 +90,10 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                      uint8_t pwm_dir = (*rawArgs++);
                                      uint8_t pwm= (*rawArgs++);
 
-//                                        Serial.write(wheelNumber);
-//                                        Serial.write(pwm_dir);
-//                                        Serial.write(pwm);
-
                                       moveWheel(wheelNumber,pwm_dir,pwm);
                                      break;
                                  }
 
-                                 // Commands to acquire values from wheel teensy to OBC
         case COMMAND_GET_LINEAR_VELOCITY:
                                  {
                                      getLinearVelocity();
