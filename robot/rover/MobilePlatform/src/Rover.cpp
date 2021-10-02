@@ -13,14 +13,18 @@ namespace Rover {
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-            analogWrite(motor.pwm_pin,0);
+            //analogWrite(motor.pwm_pin,0);
+            if(motor.desired_velocity <= 0){
+                continue;
+            };
+            Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
         }
     }
 
     void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
         //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
         //  WHY 49 ???
-
+        Serial.write(throttle);
         float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
         if(steering == 0) {
             multiplier = 1;
@@ -68,53 +72,21 @@ namespace Rover {
         systemStatus.last_throttle = millis();
     }
     void decelerateRover(){
-        //if(systemStatus.is_deccelerating){
 
             for(auto& motor : Motor::motorList){
 
-                if(motor.desired_velocity <= 50){
-                    break;
+                if(motor.desired_velocity <= 0){
+                    continue;
                 }
                 uint8_t new_velocity = motor.desired_velocity - 1;
 
-                if(motor.desired_velocity < 10) {
-                    motor.desired_velocity = 0;
-//                    systemStatus.is_deccelerating = false;
-//                    break;
+                if(new_velocity < 5) {
+                    new_velocity= 0;
                 }
                 Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-
                 delay(2);
-
             }
-      //  }
-
-//            auto motor = Motor::motorList[i];
-//            Serial.write(motor.id);
-//            if(motor.desired_velocity >= 0){
-//                uint8_t new_velocity = motor.desired_velocity - 10;
-//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-//            }
-            //
-//            uint8_t new_velocity = motor.desired_velocity - 10;
-//
-//            Motor::updateDesiredMotorVelocity((MotorNames)i,motor.desired_direction,new_velocity);
-
-//            if(motor.desired_velocity >= 0){
-//                uint8_t new_velocity = motor.desired_velocity - 10;
-//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-//            }
-
-        //
-        /*
-        for(auto& motor : Motor::motorList){
-            Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
-//            if(motor.desired_velocity >= 0){
-//                uint8_t new_velocity = motor.desired_velocity - 10;
-//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-//            }
-        }*/
-    }
+      }
 
     void calculateRoverVelocity() {
 

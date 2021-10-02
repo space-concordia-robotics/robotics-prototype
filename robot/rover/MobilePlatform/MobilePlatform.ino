@@ -99,10 +99,11 @@ void loop() {
     sinceMC = 0;
   }
     */
-//    if (Rover::systemStatus.is_throttle_timeout_enabled &&
-//    ( (millis() - Rover::systemStatus.last_throttle) > THROTTLE_TIMEOUT)) {
-//        Rover::decelerateRover();
-//    }
+    if (Rover::systemStatus.is_throttle_timeout_enabled &&
+    ( (millis() - Rover::systemStatus.last_throttle) > THROTTLE_TIMEOUT)) {
+        Rover::decelerateRover();
+        //Rover::stopMotors();
+    }
 
 }
 
