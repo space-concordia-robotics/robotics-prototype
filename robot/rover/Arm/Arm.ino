@@ -79,8 +79,8 @@ DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
 DcMotor motor3(M3_DIR_PIN, M3_PWM_PIN, M3_GEAR_RATIO);
 DcMotor motor4(M4_DIR_PIN, M4_PWM_PIN, M4_GEAR_RATIO);
-ServoMotor motor5(M5_GEAR_RATIO);
-ServoMotor motor6(M6_GEAR_RATIO);
+ServoMotor motor5(M5_GEAR_RATIO, 5);
+ServoMotor motor6(M6_GEAR_RATIO, 6);
 
 // motor array prep work: making pointers to motor objects
 DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3; DcMotor *m4 = &motor4;

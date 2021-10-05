@@ -2,14 +2,15 @@
 #define SERVOMOTOR_H
 
 #include <Arduino.h>
-#include <Servo.h>
+#include "LSSServoMotor.h"
 #include "RobotMotor.h"
 
 class ServoMotor: public RobotMotor {
     public:
         static int numServoMotors;
+        unsigned int servoId;
 
-        ServoMotor(float gearRatio);
+        ServoMotor(float gearRatio, int motorNum);
         void motorTimerInterrupt(void);
         /* movement helper functions */
         bool calcTurningDuration(float angle); //!< guesstimates how long to turn at the preset open loop motor speed to get to the desired position
@@ -26,14 +27,15 @@ class ServoMotor: public RobotMotor {
         elapsedMillis timeCount; //!< how long has the servo been turning for
 
     private:
-        Servo servo;
+        LSSServoMotor servo = LSSServoMotor(&Serial5);
 };
 
 int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
 
-ServoMotor::ServoMotor(float gearRatio)
+ServoMotor::ServoMotor(float gearRatio, int motorNum)
 {
     numServoMotors++;
+    this -> servoId = motorNum;
     // variables declared in RobotMotor require the this-> operator
     setGearRatio(gearRatio);
     this -> motorType = CONTINUOUS_SERVO;
@@ -134,7 +136,7 @@ bool ServoMotor::calcCurrentAngle(void) {
 }
 
 void ServoMotor::stopRotation(void) {
-    servo.writeMicroseconds(SERVO_STOP);
+    servo.writeServoCommand(servoId, "p", SERVO_STOP);
     movementDone = true;
     isBudging = false;
 }
@@ -160,7 +162,8 @@ void ServoMotor::setVelocity(int motorDir, float motorSpeed) {
     if (pulseTime < 1000) {
         pulseTime = 1000;
     }
-    servo.writeMicroseconds(pulseTime);
+
+    servo.writeServoCommand(servoId, "p", pulseTime);
 }
 
 void ServoMotor::goToCommandedAngle(void) {
