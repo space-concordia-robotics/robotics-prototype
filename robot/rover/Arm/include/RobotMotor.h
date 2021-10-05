@@ -175,11 +175,9 @@ void RobotMotor::setAngleLimits(float minH, float maxH, float minS, float maxS) 
 
 bool RobotMotor::withinJointAngleLimits(float angle) {
     if (!hasAngleLimits || (angle >= minJointAngle && angle <= maxJointAngle)) {
-        Serial.println("true");
         return true;
     }
     else {
-        Serial.println("false");
         return false;
     }
 }
@@ -206,7 +204,7 @@ int RobotMotor::calcDirection(float error) {
     else {
         rotationDirection = directionModifier * CLOCKWISE;
     }
-    Serial.println(rotationDirection);
+
     return rotationDirection;
 }
 
@@ -216,7 +214,7 @@ int RobotMotor::calcDirection(bool dir) {
     } else {
         rotationDirection = directionModifier * COUNTER_CLOCKWISE;
     }
-    Serial.println(rotationDirection);
+
     return rotationDirection;
 }
 

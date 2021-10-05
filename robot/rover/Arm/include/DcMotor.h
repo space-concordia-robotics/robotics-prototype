@@ -44,6 +44,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
 void DcMotor::motorTimerInterrupt(void) {
     if (isBudging) {
         if (sinceBudgeCommand < BUDGE_TIMEOUT) {
+            //Serial.write(rotationDirection);
             calcCurrentAngle();
             setVelocity(rotationDirection, openLoopSpeed);
         }
@@ -151,17 +152,24 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
     if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
         motorSpeed = pidController.getMinOutputValue();
     }
+
     switch (motorDir) {
-        case CLOCKWISE:
+        case CLOCKWISE: {
+            //PORTD |= (0 << 3);
             digitalWrite(directionPin, LOW);
-            break;
-        case COUNTER_CLOCKWISE: {
-            pinMode(directionPin, OUTPUT);
-            digitalWrite(directionPin, HIGH);
+            //Serial.print(motorDir);
             break;
         }
 
+        case COUNTER_CLOCKWISE: {
+            //PORTD |= (1 << 3);
+            pinMode(directionPin, OUTPUT);
+            digitalWrite(directionPin, HIGH);
+            //Serial.print(motorDir);
+            break;
+        }
     }
+
     int dutyCycle = motorSpeed * 255 / 100;
     analogWrite(pwmPin, dutyCycle);
 }

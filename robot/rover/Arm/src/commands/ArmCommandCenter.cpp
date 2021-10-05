@@ -116,7 +116,7 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* rawArg
             break;
                                    }
         case COMMAND_MOVE_MULTIPLE_MOTORS: {
-            moveMultipleMotors(rawArgs);
+            moveMultipleMotors((byte*)rawArgs);
             break;
                                            }
         case COMMAND_PING: {

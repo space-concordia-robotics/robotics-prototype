@@ -176,12 +176,10 @@ void setup() {
     motor4.switchDirectionLogic(); // motor is wired backwards? replaced with dc, needs new test
     initMotorTimers();
 
-//    pinSetup();
-
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
-    digitalWrite(13, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 
     // reset the elapsedMillis variables so that they're fresh upon entering the loop()
     sinceAnglePrint = 0;
@@ -199,16 +197,20 @@ void setup() {
   \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
  */
 void loop() {
-    respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
-    if (isHoming) { // not done homing the motors
-        homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
-    }
+//    respondToLimitSwitches(); // limit switch checks occur before listening for commands. This function behaves differently each loop
+//    if (isHoming) { // not done homing the motors
+//        homeArmMotors(); // Homing functionality ignores most message types. This function behaves differently each loop
+//    }
 
     if(Serial.available() > 0) {
         commandCenter->readCommand();
+        digitalWrite(LED_BUILTIN,HIGH);
+        delay(500);
+        digitalWrite(LED_BUILTIN,LOW);
+        delay(500);
     }
 
-    commandCenter->sendMessage();
+   commandCenter->sendMessage();
 } // end of loop
 
 /*! Each motor with an encoder needs to attach the encoder and 2 interrupts.
@@ -879,7 +881,7 @@ void homeArmMotors(void) { //!< \todo print homing debug just for motors which a
     {
         for(uint8_t i = 0; i < 6; i++)
         {
-            Serial.print(anglesToReach[i]);
+            //Serial.print(anglesToReach[i]);
             if(motorArray[i]->setDesiredAngle(anglesToReach[i])){
                 motorArray[i]->goToCommandedAngle();
             }

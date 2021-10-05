@@ -10,11 +10,11 @@
 
 #define COMMS_BAUDRATE 57600L
 
-#ifdef UART_PORT
-   #define Serial Serial1
-#elif USB_PORT
-   #define Serial Serial
-#endif
+//#ifdef UART_PORT
+//   #define Serial Serial1
+//#elif USB_PORT
+//   #define Serial Serial
+//#endif
 
 namespace internal_comms
 {
@@ -101,7 +101,7 @@ namespace internal_comms
             /**
              * Send debug message string
              */
-            void CommandCenter::sendDebug(const char* debugMessage);
+            void sendDebug(const char* debugMessage);
 
         private:
             uint8_t enablePin;

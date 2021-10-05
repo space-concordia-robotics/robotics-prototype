@@ -7,10 +7,12 @@
 #include <etl/queue.h>
 
 #define COMMAND_DEBUG_MSG 0
-#define DEBUG
-//#ifndef DEBUG
+
+//#define DEBUG
+
+#ifndef DEBUG
 #define Serial Serial1
-//#endif
+#endif
 
 namespace internal_comms
 {
@@ -19,7 +21,9 @@ namespace internal_comms
         uint8_t commandID = waitForSerial();
         /* uint8_t deviceSending = waitForSerial(); */
         /* uint8_t deviceReceiving = waitForSerial(); */
-        uint16_t argumentSize = readArgSize();
+
+        uint16_t argumentSize = waitForSerial();
+        //uint16_t argumentSize = waitForSerial();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
@@ -29,10 +33,9 @@ namespace internal_comms
             buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
             bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
         }
+       uint8_t stopByte = waitForSerial();
 
-        uint8_t stopByte = waitForSerial();
-
-        Command* cmd = (Command*) malloc(sizeof(Command));
+        auto* cmd = (Command*) malloc(sizeof(Command));
         cmd->commandID = commandID;
         cmd->isValid = true;
         cmd->rawArgs = buffer;
@@ -59,10 +62,10 @@ namespace internal_comms
     }
 
     Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
-        Message* message = (Message*) malloc(sizeof(Message));
+        auto* message = (Message*) malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
-        message->rawArgs = malloc(rawArgsLength);
+        message->rawArgs = static_cast<uint8_t *>(malloc(rawArgsLength));
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
@@ -91,14 +94,19 @@ namespace internal_comms
 
         Serial.begin(COMMS_BAUDRATE);
         Serial1.begin(COMMS_BAUDRATE);
-//#ifndef DEBUG
-        Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
-//#endif
+        #ifndef DEBUG
+            Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
+        #endif
     }
 
     void CommandCenter::readCommand()
     {
         Command* command = CommandCenter::processCommand();
+//        Serial.write(command->rawArgsLength);
+//        for(int i = 0 ; i < command->rawArgsLength ;i++){
+//            Serial.write(command->rawArgs[i]);
+//        }
+
         if(command->isValid)
         {
             this->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
@@ -111,19 +119,19 @@ namespace internal_comms
         }
 
         free(command->rawArgs);
-        command->rawArgs = nullptr;
+        //command->rawArgs = nullptr;
 
         delete command;
-        command = nullptr;
     }
 
     void CommandCenter::sendDebug(const char* debugMessage)
     {
-        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), debugMessage);
+        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), (byte*)debugMessage);
         this->queueMessage(*message);
     }
 
     void CommandCenter::sendMessage() {
+
         if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
@@ -136,8 +144,9 @@ namespace internal_comms
                     Serial.write(message.rawArgs, message.rawArgsLength);
 
                 Serial.write(0x0A);
-                
-                free((void *)message.rawArgs);
+
+
+                free(message.rawArgs);
                 
             }
             //else {
@@ -145,7 +154,8 @@ namespace internal_comms
                 //Serial.write(0);
             //}
         }
-    }
+
+        }
 
     void CommandCenter::sendMessage(Message& message) {
         messageQueue.push(message);
