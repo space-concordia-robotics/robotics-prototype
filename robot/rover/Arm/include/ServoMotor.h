@@ -69,7 +69,7 @@ void ServoMotor::motorTimerInterrupt(void) {
                 atSafeAngle = true; // alert homing stuff that it can go to next part
             }
             movementDone = true;
-            stopRotation();
+//            stopRotation();
         }
     }
     else if (!isOpenLoop) {

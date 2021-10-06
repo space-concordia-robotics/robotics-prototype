@@ -37,7 +37,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
     numDcMotors++;
     // variables declared in RobotMotor require the this-> operator
     setGearRatio(gearRatio);
-    motorType = DC_MOTOR;
+    this -> motorType = DC_MOTOR;
     hasEncoder = false;
 }
 

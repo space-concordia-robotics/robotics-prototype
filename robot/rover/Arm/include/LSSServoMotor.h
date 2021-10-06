@@ -57,7 +57,7 @@ char* LSSServoMotor::writeServoCommand(unsigned int servoId, const char* queryCo
 
     char* buff;
 
-    ServosSerialBus -> readBytesUntil('\r', buff, 5);
+    ServosSerialBus -> readBytesUntil('\r', buff, 10);
 
     return buff;
 }
