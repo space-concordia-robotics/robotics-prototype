@@ -204,10 +204,6 @@ void loop() {
 
     if(Serial.available() > 0) {
         commandCenter->readCommand();
-        digitalWrite(LED_BUILTIN,HIGH);
-        delay(500);
-        digitalWrite(LED_BUILTIN,LOW);
-        delay(500);
     }
 
    commandCenter->sendMessage();
