@@ -40,6 +40,9 @@ void LSSServoMotor::writeServoCommand(unsigned int servoId, const char* actionCo
     ServosSerialBus -> write(actionCommand);
     ServosSerialBus -> print(actionValue, DEC);
     ServosSerialBus -> write('\r');
+
+    // This delay is very important in order to avoid spamming the smart servos, it won't work otherwise
+    delay(1);
 }
 
 /**
@@ -54,6 +57,9 @@ char* LSSServoMotor::writeServoCommand(unsigned int servoId, const char* queryCo
     ServosSerialBus -> print(servoId, DEC);
     ServosSerialBus -> write(queryCommand);
     ServosSerialBus -> write('\r');
+
+    // This delay is very important in order to avoid spamming the smart servos, it won't work otherwise
+    delay(1);
 
     char* buff;
 
