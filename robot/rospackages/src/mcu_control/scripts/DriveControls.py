@@ -9,13 +9,14 @@ angular_acceleration_rate = 0.35
 max_speed = 0.5 # Maximum rover speed in (m/s)
 max_angular_speed = 1 # Maximum angular speed in (rad/s)
 
-max_throttle = 49
-max_steering = 49
+max_throttle = 255
+max_steering = 255
 
 expire_rate = 300 # A command lasts for 300 ms unless overwritten
 initial_ramp_factor = 3 
 
 def accelerate_twist(twist):
+    global last_speed_change_ms
     global last_speed_change_ms
     global last_linear_speed
     global last_angular_speed
@@ -91,9 +92,9 @@ def twist_to_rover_command(linear, angular):
     if linear_val == 0:
         throttle = abs(angular_val)
         if angular_val < 0:
-            steering = 49
+            steering = 255
         elif angular_val > 0:
-            steering = -49
+            steering = -255
     else:
         throttle = linear_val
         steering = 0
