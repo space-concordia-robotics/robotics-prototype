@@ -42,7 +42,6 @@ public:
     void moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering ); // Throttle -49 to 49 and Steering -49 to 49
     void moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity); // Wheel number 0 to 5 and -255 to 255
 
-// Teensy to OBC value getters
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
     void getMotorVelocity(const uint8_t& wheelNumber);

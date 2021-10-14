@@ -70,7 +70,10 @@ typedef struct DcMotorState{
     MotorNames id;
 
     uint8_t desired_velocity;
+    uint8_t current_velocity;
+
     float actual_velocity;
+    uint8_t max_pwm_value;
 
     motor_direction desired_direction;
 
@@ -101,11 +104,8 @@ typedef struct {
     bool are_motors_enabled;
     bool is_open_loop;
 
-    bool is_deccelerating;
-
-    uint32_t last_throttle;
-    bool has_moved;
-
+    uint32_t last_velocity_adjustment;
+    uint32_t last_move;
 
 } SystemState;
 

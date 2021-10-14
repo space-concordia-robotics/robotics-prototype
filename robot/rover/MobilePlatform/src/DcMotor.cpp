@@ -24,6 +24,9 @@ namespace Motor {
         motorList[motorID].gear_ratio_reciprocal = 1 / gearRatio;
 
         motorList[motorID].desired_velocity = 0;
+        motorList[motorID].current_velocity = 0;
+
+        motorList[motorID].max_pwm_value = 255;
 
         pinMode(pwmPin, OUTPUT);
         pinMode(dirPin, OUTPUT);
@@ -41,7 +44,9 @@ namespace Motor {
     }
     void updateDesiredMotorVelocity(const MotorNames &motorID, const motor_direction &desired_direction,
                                     const uint8_t &desired_velocity) {
-        motorList[motorID].desired_direction = desired_direction;
+
+
+        motorList[motorID].actual_velocity = desired_direction;
         motorList[motorID].desired_velocity = desired_velocity;
 
         applyDesiredMotorVelocity(motorID);
@@ -56,43 +61,10 @@ namespace Motor {
         digitalWrite(motor.dir_pin,motor.desired_direction);
 
         if (motor.is_open_loop) {
-            uint8_t output_pwm = motor.desired_velocity;
-            analogWrite(motor.pwm_pin, output_pwm);
-        } else if (!motor.is_open_loop) {
-            //calculateCurrentVelocity(motorID);
-            // THIS LOOKS WRONG
-            // makes sure the speed is within the limits set in the pid during setup
-            if (motor.desired_velocity > 30) {
-                motor.desired_velocity = 30;
-            } else if (motor.desired_velocity < 0) {
-                motor.desired_velocity = 0;
-            }
-            int16_t output_pwm = updatePID(motor.pid_controller, motor.actual_velocity, motor.desired_velocity);
-
-            analogWrite(motor.pwm_pin, abs(output_pwm));
-
+            analogWrite(motor.pwm_pin, motor.current_velocity);
         }
-        //this -> desiredVelocity = output_pwm;
 
-        /* Acceleration limiter */
-//    if (accLimit) {
-//        final_output_pwm = output_pwm;
-//        dt2 = micros() - prevTime2;
-//
-//        acc = ((float) output_pwm - (float) prev_output_pwm) / (float) dt2;
-//
-//        if (abs(acc) > 0.00051) {  // 0.00051 it the acceleration limit to go from 0 to full speed in 0.5 seconds. adjust this value for desired tuning
-//            output_pwm = ((acc < 0) ? -1 : 1) * 0.000151 * dt2 + prev_output_pwm;
-//        }
-//        prevTime2 = micros();
-//        prev_output_pwm = output_pwm;
-//        analogWrite(pwmPin, output_pwm);
-//    }
-//    else analogWrite(pwmPin, output_pwm);
-
-//
     }
-
 
     void calculateMotorVelocity(const MotorNames &motorID) {
         auto &motor = motorList[motorID];

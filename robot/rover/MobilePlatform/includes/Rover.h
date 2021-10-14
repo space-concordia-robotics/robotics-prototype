@@ -52,7 +52,6 @@ const float wheelBase = 0.33;
 #define M1_FR_B 36
 
 
-
 // CONTINUITY TEST SEPT 12 2019 TEENSY TO MOTORs
 // encodres
 // RR: 29,30
@@ -71,12 +70,9 @@ const float wheelBase = 0.33;
 #define RS_SERVO 16
 #define RB_SERVO 17
 
-#define LED_BLINK_INTERVAL 1000
-#define SENSOR_READ_INTERVAL 200
-//#define THROTTLE_TIMEOUT 200
-#define THROTTLE_TIMEOUT 250
+#define VELOCITY_ADJUSTMENT_INTERVAL 100
+#define ROVER_MOVE_TIMEOUT 250
 
-#define MOTOR_CONTROL_INTERVAL 10
 
 #define SERVO_STOP 93
 #define FRONT_BASE_DEFAULT_PWM 65
@@ -114,10 +110,6 @@ namespace Rover {
 
     void calculateRoverVelocity();
 
-    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const int8_t &);
-
-    void updateAllMotorVelocities(const motor_direction &, const int8_t &);
-
     void attachServo(const ServoNames&, const uint8_t&);
 
     void writeToServo(const ServoNames&, const int16_t&);
@@ -128,9 +120,11 @@ namespace Rover {
 
     void closeLoop();
 
-    void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering);
+    void moveRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering);
 
     void stopMotors();
+
+    void updateWheelVelocities();
 
     void decelerateRover();
 }

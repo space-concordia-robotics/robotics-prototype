@@ -4,7 +4,6 @@
 
 // USB : Debug, UART : Production
 
-#include <cmath>
 #include <cstdint>
 #include "Navigation.h"
 #include <SoftwareSerial.h>
@@ -26,7 +25,6 @@ const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
 
 
-// To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
 // Wheel command methods from WheelsCommandCenter.cpp
@@ -65,9 +63,8 @@ void setup() {
     writeServoDefaultValues();
 
     Rover::openLoop();
-    Rover::systemStatus.is_throttle_timeout_enabled = true;
 
-    Rover::systemStatus.has_moved = false;
+    Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 }
 
@@ -82,23 +79,12 @@ void loop() {
         commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
 
     }
-//  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
-//
-//      Rover::calculateRoverVelocity();
-//      commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-//
-//      commandCenter->executeCommand(COMMAND_GET_LINEAR_VELOCITY, nullptr,0);
-//      commandCenter->executeCommand(COMMAND_GET_ROTATIONAL_VELOCITY, nullptr,0);
-//
-//
-//      //      navHandler(Cmds);
-//    sinceSensorRead = 0;
-//  }
-//
+    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > 250){
+        Rover::updateWheelVelocities();
+    }
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
-    ( (millis() - Rover::systemStatus.last_throttle) > THROTTLE_TIMEOUT)) {
+    ( (millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
-        //Rover::stopMotors();
     }
 
 }
@@ -125,11 +111,9 @@ void initPidControllers(){
     Motor::initPidController(REAR_LEFT,14.1,0.282,40.625);
 }
 void attachEncoders(){
-
     Motor::attachEncoder(FRONT_RIGHT,M1_FR_A,M1_FR_B,PULSES_PER_REV,InterruptHandler::RightFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_RIGHT,M2_MR_A,M2_MR_B,PULSES_PER_REV,InterruptHandler::RightMiddleMotorInterruptHandler);
     Motor::attachEncoder(REAR_RIGHT,M3_RR_A,M3_RR_B,PULSES_PER_REV,InterruptHandler::RightBackMotorInterruptHandler);
-
     Motor::attachEncoder(FRONT_LEFT,M4_FL_A,M4_FL_B,PULSES_PER_REV,InterruptHandler::LeftFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_LEFT,M5_ML_A,M5_ML_B,PULSES_PER_REV,InterruptHandler::LeftMiddleMotorInterruptHandler);
     Motor::attachEncoder(REAR_LEFT,M6_RL_A,M6_RL_B,PULSES_PER_REV,InterruptHandler::LeftBackMotorInterruptHandler);
@@ -154,7 +138,7 @@ void WheelsCommandCenter::enableMotors(uint8_t turnMotorOn) {
 
 void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
-    Rover::systemStatus.last_throttle = millis();
+    //Rover::systemStatus.last_throttle = millis();
 }
 
 void WheelsCommandCenter::closeMotorsLoop() {
@@ -187,7 +171,7 @@ void WheelsCommandCenter::getRoverStatus() {
 
 void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering) {
 
-    Rover::steerRover(throttle_dir,throttle,steering_dir,steering);
+    Rover::moveRover(throttle_dir,throttle,steering_dir,steering);
 }
 
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {

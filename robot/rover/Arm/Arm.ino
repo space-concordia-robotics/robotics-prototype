@@ -190,10 +190,7 @@ void setup() {
   \todo There should be a check so that if the motor is moving away from the goal position
   or has been moving for a while without reaching the expected angle, it stops...
   like a timeout.
-  \todo What happens if a new command tells the motor to turn in opposite direction? Abrupt changes are bad.
-  \todo If the stepper is trying to turn but hasn't gotten anywhere, there should be
-  a check in the microcontroller that there's an issue (there can also be a check in the gui)
-  \todo Check to see if any global variables can be turned into static variables inside loop()
+  \todo What happens if a    variables inside loop()
   \todo I noticed that sending a new move command while motors are moving messes with open loop calculations?
  */
 void loop() {

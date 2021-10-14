@@ -13,24 +13,96 @@ namespace Rover {
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-            //analogWrite(motor.pwm_pin,0);
-            if(motor.desired_velocity <= 0){
+           if(motor.desired_velocity <= 0){
                 continue;
             };
             Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
         }
     }
+    void updateWheelVelocities(){
+        for(auto& motor : Motor::motorList ){
+
+          if(motor.current_velocity < motor.desired_velocity){
+                motor.current_velocity += 1;
+          }
+          else if(motor.current_velocity > motor.desired_velocity){
+                motor.current_velocity -= 1;
+          }
+          else return;
+
+          Motor::applyDesiredMotorVelocity(motor.id);
+          systemStatus.last_velocity_adjustment = millis();
+         }
+    }
+    /*
+     * 0 255 0 0 : THRUST FORWARD
+     * 1 255 0 0 : THRUST BACKWARD
+     *
+     * (0-1) 0 0 (0-255) : POINT TURN RIGHT
+     * (0-1) 0 1 (0-255) : POINT TURN LEFT
+
+     * 0 128 0 128 : FORWARD AND TURNING RIGHT
+     * 0 128 1 128 : FORWARD AND TURNING LEFT
+     *
+     * 1 128 0 128 : BACKWARDS AND TURNING RIGHT
+     * 0 128 0 128 : BACKWARDS AND TURNING LEFT
+     */
+    void moveRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering){
+        uint8_t right_motor_velocity;
+        uint8_t left_motor_velocity;
+
+        motor_direction right_motor_direction;
+        motor_direction left_motor_direction;
+
+        if(steering >= 250){
+            right_motor_velocity = steering;
+            left_motor_velocity = steering;
+
+            right_motor_velocity = (motor_direction)steer_direction;
+            left_motor_direction = (motor_direction)steer_direction;
+        }
+        else if(steering < 5){
+            right_motor_velocity = throttle;
+            left_motor_velocity = throttle;
+
+            left_motor_direction = (motor_direction)throttle_direction;
+            right_motor_direction = (motor_direction)(~throttle_direction);
+        }
+        else{
+            float multiplier = mapFloat(abs(steering), 5, 250, 0, 1);
+
+            auto trailing_motor_velocity = (uint8_t )(throttle * multiplier);
+            left_motor_direction = (motor_direction)throttle_direction;
+            right_motor_direction = (motor_direction)(~throttle_direction);
+
+            if(steer_direction == RIGHT){
+                left_motor_velocity = throttle ;
+                right_motor_velocity = trailing_motor_velocity;
+            }
+            else{
+                right_motor_velocity = throttle;
+                left_motor_velocity= trailing_motor_velocity;
+            }
+        }
+
+        int current_motor = 0;
+
+        while(current_motor <= 5) {
+            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,right_motor_velocity);
+            //delay(25);
+
+            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,left_motor_velocity);
+
+            current_motor++;
+        }
+        systemStatus.last_move = millis();
+    }
 
     void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
-        //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
-        //  WHY 49 ???
-        Serial.write(throttle);
         float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
         if(steering == 0) {
             multiplier = 1;
         }
-        //TODO : Figure out why the hell we need to map this
-        //float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, 0, roverState.max_output_signal);
         float leadingSideAbs = throttle;
 
         float trailingSideAbs = leadingSideAbs * multiplier;
@@ -69,7 +141,7 @@ namespace Rover {
 
             current_motor++;
         }
-        systemStatus.last_throttle = millis();
+        systemStatus.last_move = millis();
     }
     void decelerateRover(){
 
