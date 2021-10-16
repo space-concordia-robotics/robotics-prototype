@@ -22,11 +22,6 @@ enum MotorNames{
     REAR_LEFT=5
 };
 
-enum motor_direction {
-    CW = HIGH,
-    CCW = LOW,
-};
-
 class InterruptHandler{
 public:
     static volatile u_int32_t LEFT_FRONT_MOTOR_ENCODER_COUNT;
@@ -84,9 +79,6 @@ typedef struct DcMotorState{
 
     uint8_t dir_pin;
     uint8_t pwm_pin;
-
-    bool is_open_loop;
-    bool has_reached_target_velocity;
 
     pidControllerState pid_controller;
 } DcMotorState;

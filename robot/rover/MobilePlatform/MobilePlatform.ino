@@ -1,8 +1,3 @@
-//
-// Edited by Michael on 2021-03-20.
-//
-
-// USB : Debug, UART : Production
 
 #include <cstdint>
 #include "Navigation.h"
@@ -11,7 +6,7 @@
 #include "ArduinoBlue.h"
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
-//
+
 //#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
@@ -79,7 +74,8 @@ void loop() {
         commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
 
     }
-    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > 10){
+
+    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > ACCELERATION_RATE){
         Rover::updateWheelVelocities();
     }
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
@@ -176,7 +172,7 @@ void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t &
 
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
 
-    Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,velocity);
+    Rover::moveWheel((MotorNames)wheelNumber,direction,velocity);
 
 }
 void WheelsCommandCenter::getLinearVelocity(void) {

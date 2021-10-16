@@ -7,7 +7,7 @@ namespace Rover {
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int8_t& wheelPWM) {
+    void moveWheel(const MotorNames &motorID,const uint8_t & direction,const int8_t& wheelPWM) {
 
         Motor::updateDesiredMotorVelocity(motorID, direction, wheelPWM);
     }
@@ -20,6 +20,8 @@ namespace Rover {
         }
     }
     void updateWheelVelocities(){
+        systemStatus.last_velocity_adjustment = millis();
+
         for(auto& motor : Motor::motorList ){
 
           if(motor.current_velocity < motor.desired_velocity){
@@ -33,8 +35,8 @@ namespace Rover {
           }
 
           Motor::applyDesiredMotorVelocity(motor.id);
-          systemStatus.last_velocity_adjustment = millis();
          }
+
     }
     /*
      * 0 255 0 0 : THRUST FORWARD
@@ -106,19 +108,6 @@ namespace Rover {
         for(auto& motor : Motor::motorList){
             motor.desired_velocity = 0;
         }
-//            for(auto& motor : Motor::motorList){
-//
-//                if(motor.current_velocity <= 0){
-//                    continue;
-//                }
-//                uint8_t new_velocity = motor.current_velocity - 1;
-//
-//                if(new_velocity < 5) {
-//                    new_velocity= 0;
-//                }
-//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-//                delay(2);
-//            }
       }
 
     void calculateRoverVelocity() {
@@ -171,9 +160,7 @@ namespace Rover {
         if (systemStatus.are_motors_enabled) {
             stopMotors();
         }
-        for(auto& motor : Motor::motorList){
-            motor.is_open_loop = true;
-        }
+
         systemStatus.is_open_loop = true;
     }
 
