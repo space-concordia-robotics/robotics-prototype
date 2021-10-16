@@ -52,27 +52,14 @@ const float wheelBase = 0.33;
 #define M1_FR_B 36
 
 
-// CONTINUITY TEST SEPT 12 2019 TEENSY TO MOTORs
-// encodres
-// RR: 29,30
-// MR: 31,32
-// FR: 27,28
-// RL: 33,34
-// ML: 35,36
-// FL: 37,38
-
-/* camera servo pins */
-// F/R (front/rear), S/B (side/base)
-// TODO: fix this: confusing naming scheme. call them pan/tilt instead of side/base
-// pin definitions were changed because of above comment
 #define FS_SERVO 23//22
 #define FB_SERVO 22//23
 #define RS_SERVO 16
 #define RB_SERVO 17
 
 #define VELOCITY_ADJUSTMENT_INTERVAL 100
-#define ROVER_MOVE_TIMEOUT 250
-
+#define ROVER_MOVE_TIMEOUT 2500
+#define ACCELERATION_RATE 10
 
 #define SERVO_STOP 93
 #define FRONT_BASE_DEFAULT_PWM 65
@@ -87,10 +74,6 @@ enum ServoNames{
 enum SteerDirection{
     LEFT = 0,
     RIGHT = 1
-};
-enum ThrottleDirection{
-    BACKWARDS= 0,
-    FORWARD= 1
 };
 
 typedef struct {
@@ -114,7 +97,7 @@ namespace Rover {
 
     void writeToServo(const ServoNames&, const int16_t&);
 
-    void moveWheel(const MotorNames &,const motor_direction&, const int8_t& );
+    void moveWheel(const MotorNames &,const uint8_t &, const int8_t& );
 
     void openLoop();
 
