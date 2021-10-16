@@ -79,7 +79,7 @@ void loop() {
         commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
 
     }
-    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > 250){
+    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > 10){
         Rover::updateWheelVelocities();
     }
     if (Rover::systemStatus.is_throttle_timeout_enabled &&

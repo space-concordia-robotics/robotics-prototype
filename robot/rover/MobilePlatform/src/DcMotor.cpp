@@ -25,7 +25,7 @@ namespace Motor {
 
         motorList[motorID].desired_velocity = 0;
         motorList[motorID].current_velocity = 0;
-
+        motorList[motorID].has_reached_target_velocity = false;
         motorList[motorID].max_pwm_value = 255;
 
         pinMode(pwmPin, OUTPUT);
@@ -42,11 +42,11 @@ namespace Motor {
     void stop(const MotorNames &motorID){
         analogWrite(motorList[motorID].pwm_pin,0);
     }
-    void updateDesiredMotorVelocity(const MotorNames &motorID, const motor_direction &desired_direction,
+    void updateDesiredMotorVelocity(const MotorNames &motorID, const uint8_t &desired_direction,
                                     const uint8_t &desired_velocity) {
 
 
-        motorList[motorID].actual_velocity = desired_direction;
+        motorList[motorID].desired_direction = desired_direction;
         motorList[motorID].desired_velocity = desired_velocity;
 
         applyDesiredMotorVelocity(motorID);
@@ -56,7 +56,7 @@ namespace Motor {
 
         auto &motor = motorList[motorID];
 
-        calculateMotorVelocity(motorID);
+       // calculateMotorVelocity(motorID);
 
         digitalWrite(motor.dir_pin,motor.desired_direction);
 

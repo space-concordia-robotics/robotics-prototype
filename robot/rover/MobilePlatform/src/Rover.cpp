@@ -28,7 +28,9 @@ namespace Rover {
           else if(motor.current_velocity > motor.desired_velocity){
                 motor.current_velocity -= 1;
           }
-          else return;
+          else{
+              continue;
+          }
 
           Motor::applyDesiredMotorVelocity(motor.id);
           systemStatus.last_velocity_adjustment = millis();
@@ -51,29 +53,30 @@ namespace Rover {
         uint8_t right_motor_velocity;
         uint8_t left_motor_velocity;
 
-        motor_direction right_motor_direction;
-        motor_direction left_motor_direction;
+        uint8_t right_motor_direction;
+        uint8_t  left_motor_direction;
 
         if(steering >= 250){
             right_motor_velocity = steering;
             left_motor_velocity = steering;
 
-            right_motor_velocity = (motor_direction)steer_direction;
-            left_motor_direction = (motor_direction)steer_direction;
+            right_motor_direction = steer_direction;
+            left_motor_direction = steer_direction;
         }
         else if(steering < 5){
             right_motor_velocity = throttle;
             left_motor_velocity = throttle;
 
-            left_motor_direction = (motor_direction)throttle_direction;
-            right_motor_direction = (motor_direction)(~throttle_direction);
+            left_motor_direction = throttle_direction;
+            right_motor_direction = throttle_direction^0x01;
+
         }
         else{
             float multiplier = mapFloat(abs(steering), 5, 250, 0, 1);
 
             auto trailing_motor_velocity = (uint8_t )(throttle * multiplier);
-            left_motor_direction = (motor_direction)throttle_direction;
-            right_motor_direction = (motor_direction)(~throttle_direction);
+            left_motor_direction = throttle_direction;
+            right_motor_direction = throttle_direction^0x01;
 
             if(steer_direction == RIGHT){
                 left_motor_velocity = throttle ;
@@ -98,66 +101,24 @@ namespace Rover {
         systemStatus.last_move = millis();
     }
 
-    void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
-        float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
-        if(steering == 0) {
-            multiplier = 1;
-        }
-        float leadingSideAbs = throttle;
 
-        float trailingSideAbs = leadingSideAbs * multiplier;
-
-
-        uint8_t desiredVelocityRight;
-        uint8_t desiredVelocityLeft;
-
-        motor_direction leftMotorDirection;
-        motor_direction rightMotorDirection;
-
-        if(steer_direction == LEFT){
-            desiredVelocityRight = (uint8_t)( leadingSideAbs );
-            desiredVelocityLeft = (uint8_t)( trailingSideAbs );
-        }
-        else{
-            desiredVelocityRight = (uint8_t)(trailingSideAbs );
-            desiredVelocityLeft = (uint8_t)(leadingSideAbs);
-        }
-        if(throttle_direction == FORWARD){
-            leftMotorDirection = CCW;
-            rightMotorDirection = CW;
-        }
-        else{
-            leftMotorDirection = CW;
-            rightMotorDirection = CCW;
-        }
-        int current_motor = 0;
-
-
-        while(current_motor <= 5) {
-            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, rightMotorDirection,desiredVelocityRight);
-            //delay(25);
-
-            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), leftMotorDirection,desiredVelocityLeft);
-
-            current_motor++;
-        }
-        systemStatus.last_move = millis();
-    }
     void decelerateRover(){
-
-            for(auto& motor : Motor::motorList){
-
-                if(motor.desired_velocity <= 0){
-                    continue;
-                }
-                uint8_t new_velocity = motor.desired_velocity - 1;
-
-                if(new_velocity < 5) {
-                    new_velocity= 0;
-                }
-                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-                delay(2);
-            }
+        for(auto& motor : Motor::motorList){
+            motor.desired_velocity = 0;
+        }
+//            for(auto& motor : Motor::motorList){
+//
+//                if(motor.current_velocity <= 0){
+//                    continue;
+//                }
+//                uint8_t new_velocity = motor.current_velocity - 1;
+//
+//                if(new_velocity < 5) {
+//                    new_velocity= 0;
+//                }
+//                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
+//                delay(2);
+//            }
       }
 
     void calculateRoverVelocity() {

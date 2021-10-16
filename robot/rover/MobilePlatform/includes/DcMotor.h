@@ -75,7 +75,7 @@ typedef struct DcMotorState{
     float actual_velocity;
     uint8_t max_pwm_value;
 
-    motor_direction desired_direction;
+    uint8_t desired_direction;
 
     float gear_ratio;
     float gear_ratio_reciprocal;
@@ -86,6 +86,7 @@ typedef struct DcMotorState{
     uint8_t pwm_pin;
 
     bool is_open_loop;
+    bool has_reached_target_velocity;
 
     pidControllerState pid_controller;
 } DcMotorState;
@@ -119,7 +120,7 @@ namespace Motor {
 
     void calculateMotorVelocity(const MotorNames &);
 
-    void updateDesiredMotorVelocity(const MotorNames &, const motor_direction &, const uint8_t  &);
+    void updateDesiredMotorVelocity(const MotorNames &, const uint8_t &, const uint8_t  &);
 
     void applyDesiredMotorVelocity(const MotorNames &);
 

@@ -71,7 +71,7 @@ const float wheelBase = 0.33;
 #define RB_SERVO 17
 
 #define VELOCITY_ADJUSTMENT_INTERVAL 100
-#define ROVER_MOVE_TIMEOUT 250
+#define ROVER_MOVE_TIMEOUT 2500
 
 
 #define SERVO_STOP 93
