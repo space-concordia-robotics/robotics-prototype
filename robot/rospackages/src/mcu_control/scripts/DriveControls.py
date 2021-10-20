@@ -1,10 +1,11 @@
 import time
+from numpy import interp
 last_angular_speed = None
 last_linear_speed = None
 last_speed_change_ms = None
 
-linear_acceleration_rate = 0.2
-angular_acceleration_rate = 0.35
+linear_acceleration_rate = 0.5
+angular_acceleration_rate = 0.75
 
 max_speed = 0.5 # Maximum rover speed in (m/s)
 max_angular_speed = 1 # Maximum angular speed in (rad/s)
@@ -80,23 +81,47 @@ def twist_to_rover_command(linear, angular):
     elif angular < -max_angular_speed:
         angular = -max_angular_speed
 
-    linear_speed = linear / max_speed # linear_speed should now be in [-1, 1]
-    angular_speed = angular / max_angular_speed # angular_speed should now [-1,1]
+    #linear_speed = linear / max_speed # linear_speed should now be in [-1, 1]
+    #angular_speed = angular / max_angular_speed # angular_speed should now [-1,1]
 
-    linear_val = linear_speed * max_throttle
-    angular_val = angular_speed * max_steering
+    #linear_val = linear_speed * max_throttle
+    #angular_val = angular_speed * max_steering
 
-    throttle = 0
-    steering = 0
+    throttle = interp(linear,[-max_speed,max_speed],[-255,255])
+    steering = interp(angular,[-max_angular_speed,max_angular_speed],[-255,255])
+    
+    args = []
 
-    if linear_val == 0:
-        throttle = abs(angular_val)
-        if angular_val < 0:
-            steering = 255
-        elif angular_val > 0:
-            steering = -255
-    else:
-        throttle = linear_val
-        steering = 0
+    if throttle < 0 :
+        args.append(0)
+    else :
+        args.append(1)
 
-    return str(round(throttle)) + ':' + str(round(steering))
+    args.append(abs(throttle))
+
+    if steering < 0 :
+        args.append(0)
+    else :
+        args.append(1)
+
+    args.append(abs(steering))
+
+    print(str(args))
+    return args
+
+    #print(linear_val)
+    #print(angular_val)
+
+    #if linear_val == 0:
+    #    throttle = abs(angular_val)
+    #    if angular_val < 0:
+    #        steering = 49
+    #    elif angular_val > 0:
+    #        steering = -49
+    #else:
+    #    throttle = linear_val
+    #    steering = 0
+    #print(throttle)
+    #print(steering)
+
+    #return str(round(throttle)) + ':' + str(round(steering))

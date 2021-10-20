@@ -57,7 +57,21 @@ gpio.setmode(gpio.BOARD)
 gpio.setup(SW_PINS, gpio.OUT)
 gpio.output(SW_PINS, NONE)
 
- 
+def twist_rover_callback(twist_msg):
+    """ Handles the twist message and sends it to the wheel MCU """
+    linear, angular = accelerate_twist(twist_msg)
+    #print(linear)
+    #rospy.loginfo('hi')
+    args = twist_to_rover_command(linear, angular)
+    #command = str.encode(string_command)
+    #ser.write(command) # send move command to wheel teensy
+    #ser.reset_input_buffer(
+
+    rover_queue.append(['move_rover',args,ROVER_SELECTED])
+
+
+    #ser.reset_output_buffer()
+
 def main():
 
     try:
@@ -132,12 +146,11 @@ def send_command(command_name, args, deviceToSendTo):
         commandID = command[1]
 
         gpio.output(SW_PINS, TX2)
-        
+
         ser.write(commandID.to_bytes(1, 'big'))
         #ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
         arg_length = len(command[2]).to_bytes(1,'big')
         ser.write(arg_length)
-
         data_types = [element[0] for element in command[2]]
         for argument in zip(args, data_types):
             data = argument[0]
@@ -145,15 +158,13 @@ def send_command(command_name, args, deviceToSendTo):
 
             if data_type == dt.ARG_UINT8_ID:
                 arg_int = int(data)
-
-                # This is necessary in order to overflow the value of the argument to negative numbers for when it is
-                # converted into a byte
                 if arg_int < 0:
                     arg_int = arg_int + 256
 
-                ser.write(arg_int.to_bytes(1, 'big'))
+                ser.write(arg_int.to_bytes(1,'big'))
+
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data)))
+                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
@@ -173,16 +184,6 @@ def rover_command_callback(message):
 
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
-
-
-def twist_rover_callback(twist_msg):
-    """ Handles the twist message and sends it to the wheel MCU """
-    linear, angular = accelerate_twist(twist_msg)
-    string_command = twist_to_rover_command(linear, angular)
-    print(string_command)
-    #th, st = map(int, string_command.split(':'))
-    #rover_queue.append(['move_rover', [1, th, 1, st], ROVER_SELECTED])
-    #print(th,':',st)
 
 
 def parse_command(message):
