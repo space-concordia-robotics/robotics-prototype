@@ -6,6 +6,7 @@ ETHERNET_CONFIG_STATUS="$HOME/configEthernet/status_done"
 OPT_MELODIC_SETUP="/opt/ros/melodic/setup.bash" # ros system default workspace
 ROS_PACKAGES_SETUP="$REPO_HOME/robot/rospackages/devel/setup.bash"
 ROSLAUNCH_FILE="$REPO_HOME/robot/util/rosRoverStart/rover.launch"
+ACTIVATE_TEENSY_SCRIPT="$REPO_HOME/robot/util/toggleTeensy/activateTeensy.py"
 # wait for connection to configure itself via config-ethernet.service
 while [ `cat $ETHERNET_CONFIG_STATUS` == "0" ]
 do
@@ -19,6 +20,8 @@ cd $REPO_HOME
 source "$REPO_HOME/venv/bin/activate"
 
 python3 "$REPO_HOME/setup.py" develop
+
+python3 $ACTIVATE_TEENSY_SCRIPT
 
 # source primary catkin_ws setup bash script and execute one launch script to rule them all
 source $OPT_MELODIC_SETUP && source $ROS_PACKAGES_SETUP && roslaunch $ROSLAUNCH_FILE
