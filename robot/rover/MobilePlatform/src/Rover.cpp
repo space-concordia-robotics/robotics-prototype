@@ -58,25 +58,17 @@ namespace Rover {
         uint8_t right_motor_direction;
         uint8_t  left_motor_direction;
 
-        if(steering >= 250){
+        if(throttle == 0){
             right_motor_velocity = steering;
             left_motor_velocity = steering;
 
             right_motor_direction = steer_direction;
             left_motor_direction = steer_direction;
         }
-        else if(steering < 5){
-            right_motor_velocity = throttle;
-            left_motor_velocity = throttle;
-
-            left_motor_direction = throttle_direction;
-            right_motor_direction = throttle_direction^0x01;
-
-        }
         else{
-            float multiplier = mapFloat(abs(steering), 5, 250, 0, 1);
+            float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
 
-            auto trailing_motor_velocity = (uint8_t )(throttle * multiplier);
+            auto trailing_motor_velocity = (uint8_t )(throttle * (1-multiplier));
             left_motor_direction = throttle_direction;
             right_motor_direction = throttle_direction^0x01;
 
@@ -94,7 +86,6 @@ namespace Rover {
 
         while(current_motor <= 5) {
             Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,right_motor_velocity);
-            //delay(25);
 
             Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,left_motor_velocity);
 
