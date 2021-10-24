@@ -1,131 +1,73 @@
 //
-// Created by cedric on 2021-01-23.
+// Created by Marc on 2021-9-25.
 //
 
 #include "include/commands/ArmCommandCenter.h"
 
-#define COMMAND_EMERGENCY_STOP 75
-#define COMMAND_REBOOT_TEENSY 76
-#define COMMAND_STOP_MOTORS 77
-#define COMMAND_RESET_ANGLES 78
-#define COMMAND_HOME_MOTORS 79
-#define COMMAND_HOME 80
-#define COMMAND_ARM_SPEED 81
-#define COMMAND_STOP_SINGLE_MOTOR 82
-#define COMMAND_GEAR_RATIO 83
-#define COMMAND_OPEN_LOOP_GAIN 84
-#define COMMAND_PID_CONSTANTS 85
-#define COMMAND_MOTOR_SPEED 86
-#define COMMAND_OPEN_LOOP_STATE 87
-#define COMMAND_RESET_SINGLE_MOTOR 88
-#define COMMAND_BUDGE_MOTORS 89
-#define COMMAND_MOVE_MULTIPLE_MOTORS 90
-#define COMMAND_PING 91
-#define COMMAND_GET_MOTOR_ANGLES 92
+#include "Arduino.h"
 
-void emergencyStop();
-void rebootTeensy();
-void stopAllMotors();
-void resetAngles();
-void homeAllMotors(uint8_t homingStyle);
-void homeMotor(uint8_t motorId, uint8_t homingStyle);
-void setArmSpeed(float armSpeedFactor);
-void stopSingleMotor(uint8_t motorId);
-void setGearRatioValue(uint8_t motorId, float gearRatio);
-void setOpenLoopGain(uint8_t motorId, float gain);
-void setPidConstants(uint8_t motorId, float kp, float ki, float kd);
-void setMotorSpeed(uint8_t motorId, float speed);
-void setOpenLoopState(uint8_t motorId, bool isOpenLoop);
-void resetSingleMotor(uint8_t motorId);
-void switchMotorDirection(uint8_t motorId);
-void budgeMotors(const uint8_t motorActions[]);
-void moveMultipleMotors(byte anglesToReach[]);
+#define COMMAND_PING 75
+#define COMMAND_MOVE_BY 76
+#define SEND_MOTOR_ANGLES 77
+
+// Commands that expect a pointer are assumed to provide a pointer
+// to 6 values.
+
+void invalidCommand();
 void pong();
-void printMotorAngles(void);
-
+void sendMotorAngles();
+void moveMotorsBy(float* angles, uint16_t numAngles);
 
 // this modifies the pointer
-float bytes_to_float(const uint8_t* rawPointer)
-{
-    float f;
-    byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer), *(++rawPointer)};
-    memcpy(&f, &bytes, sizeof(f));
-    return f;
+float bytes_to_float(const uint8_t* rawPointer) {
+  float f;
+  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer),
+                  *(++rawPointer)};
+  memcpy(&f, &bytes, sizeof(f));
+  return f;
 }
 
-void ArmCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
+void ArmCommandCenter::executeCommand(const uint8_t cmdID,
+                                      const uint8_t* rawArgs,
+                                      const uint8_t rawArgsLength) {
+  int commandID = int(cmdID);
 
-    int commandID = int(cmdID);
-
-    switch(commandID)
-    {
-        case COMMAND_EMERGENCY_STOP: {
-            emergencyStop();
-            break;
-                                     }
-        case COMMAND_REBOOT_TEENSY: {
-            rebootTeensy();
-            break;
-                                    }
-        case COMMAND_STOP_MOTORS: {
-            stopAllMotors();
-            break;
-                                  }
-        case COMMAND_RESET_ANGLES: {
-            resetAngles();
-            break;
-                                   }
-        case COMMAND_HOME_MOTORS: {
-            homeAllMotors(*rawArgs);
-            break;
-                                  }
-        case COMMAND_HOME: {
-            homeMotor(*rawArgs, *(++rawArgs));
-            break;
-                           }
-        case COMMAND_ARM_SPEED: {
-            setArmSpeed(bytes_to_float(rawArgs));
-            break;
-                                }
-        case COMMAND_STOP_SINGLE_MOTOR:{
-            stopSingleMotor(*rawArgs);
-            break;
-                                       }
-        case COMMAND_GEAR_RATIO: {
-            setGearRatioValue(*(rawArgs++), bytes_to_float(rawArgs));
-            break;
-                                 }
-        case COMMAND_OPEN_LOOP_GAIN: {
-            setOpenLoopGain(*(rawArgs++), bytes_to_float(rawArgs));
-            break;
-                                     }
-        case COMMAND_PID_CONSTANTS: {
-            setPidConstants(*(rawArgs++), bytes_to_float(rawArgs), bytes_to_float(rawArgs), bytes_to_float(rawArgs));
-            break;
-                                    }
-        case COMMAND_OPEN_LOOP_STATE: {
-            setOpenLoopState(*(rawArgs++), *(rawArgs) == 1);
-            break;
-                                      }
-        case COMMAND_RESET_SINGLE_MOTOR: {
-            resetSingleMotor(*rawArgs);
-            break;
-                                         }
-        case COMMAND_BUDGE_MOTORS: {
-            budgeMotors(rawArgs);
-            break;
-                                   }
-        case COMMAND_MOVE_MULTIPLE_MOTORS: {
-            moveMultipleMotors(rawArgs);
-            break;
-                                           }
-        case COMMAND_PING: {
-            pong();
-            break;
-                           }
-        case COMMAND_GET_MOTOR_ANGLES: {
-            printMotorAngles();
-            break;
-                                      }
+  switch (commandID) {
+    case COMMAND_PING: {
+      pong();
+      break;
     }
+    case COMMAND_MOVE_BY: {
+      uint16_t numAngles = rawArgsLength / 4;
+      if (numAngles == 6) {
+        float* angles = (float*)malloc(sizeof(*angles) * numAngles);
+
+        for (int i = 0; i < numAngles; i++) {
+          angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
+        }
+
+        moveMotorsBy(angles, numAngles);
+        free(angles);
+        break;
+      } else {
+        invalidCommand();
+        /*Serial.write("wrong number of angles: ");
+        Serial.write(String(numAngles).c_str());
+        Serial.write("\n");*/
+        break;
+      }
+    }
+    case SEND_MOTOR_ANGLES: {
+      sendMotorAngles();
+      break;
+    }
+    default: {
+      invalidCommand();
+
+      /*Serial.write("invalid command id ");
+      char buffer[8];
+      snprintf(buffer, 8, "%d\n", commandID);
+      Serial.write(buffer);*/
+    }
+  }
 }
