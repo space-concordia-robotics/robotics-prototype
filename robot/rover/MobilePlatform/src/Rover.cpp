@@ -1,5 +1,7 @@
 #include "Rover.h"
 
+#include <cmath>
+
 namespace Rover {
 
     Servo servoList[6];
@@ -38,56 +40,49 @@ namespace Rover {
          }
 
     }
-    /*
-     * 0 255 0 0 : THRUST FORWARD
-     * 1 255 0 0 : THRUST BACKWARD
-     *
-     * (0-1) 0 0 (0-255) : POINT TURN RIGHT
-     * (0-1) 0 1 (0-255) : POINT TURN LEFT
+    void moveRover(const uint8_t & throttle_direction,const float & throttle, const uint8_t& steer_direction,const float& steering ){
 
-     * 0 128 0 128 : FORWARD AND TURNING RIGHT
-     * 0 128 1 128 : FORWARD AND TURNING LEFT
-     *
-     * 1 128 0 128 : BACKWARDS AND TURNING RIGHT
-     * 0 128 0 128 : BACKWARDS AND TURNING LEFT
-     */
-    void moveRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering){
-        uint8_t right_motor_velocity;
-        uint8_t left_motor_velocity;
+        float trailing_side_multiplier = 1 - steering;
+
+        float right_wheels_velocity,left_wheels_velocity;
+
+        if(steer_direction == LEFT){
+            left_wheels_velocity = throttle;
+            right_wheels_velocity = throttle  * trailing_side_multiplier;
+        }
+        else{
+            right_wheels_velocity = throttle;
+            left_wheels_velocity = throttle * trailing_side_multiplier;
+        }
+
+        float slip_track = 2.0f;
+
+        float r = (slip_track / 2.0f) * std::fabs(  (right_wheels_velocity +  left_wheels_velocity)/(right_wheels_velocity - left_wheels_velocity));
+
+        float r_prime = slip_track/2;
 
         uint8_t right_motor_direction;
         uint8_t  left_motor_direction;
 
-        if(throttle == 0){
-            right_motor_velocity = steering;
-            left_motor_velocity = steering;
-
-            right_motor_direction = steer_direction;
-            left_motor_direction = steer_direction;
+        //Point turn;
+        if(r_prime >= r){
+            right_motor_direction = throttle_direction;
+            left_motor_direction = throttle_direction;
         }
+        //Normal turn
         else{
-            float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
-
-            auto trailing_motor_velocity = (uint8_t )(throttle * (1-multiplier));
             left_motor_direction = throttle_direction;
             right_motor_direction = throttle_direction^0x01;
-
-            if(steer_direction == RIGHT){
-                left_motor_velocity = throttle ;
-                right_motor_velocity = trailing_motor_velocity;
-            }
-            else{
-                right_motor_velocity = throttle;
-                left_motor_velocity= trailing_motor_velocity;
-            }
         }
-
         int current_motor = 0;
 
-        while(current_motor <= 5) {
-            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,right_motor_velocity);
+        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(right_wheels_velocity,0,0.5,0,255);
+        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(left_wheels_velocity,0,0.5,0,255);
 
-            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,left_motor_velocity);
+        while(current_motor <= 5) {
+            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,right_wheels_pwm_velocity);
+
+            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,left_wheels_pwm_velocity);
 
             current_motor++;
         }

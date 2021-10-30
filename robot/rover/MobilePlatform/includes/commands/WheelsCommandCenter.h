@@ -39,8 +39,8 @@ public:
     void toggleEncoder(uint8_t turnEncOn);
     void toggleAcceleration(uint8_t turnAccelOn);
     void getRoverStatus();
-    void moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering ); // Throttle -49 to 49 and Steering -49 to 49
-    void moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity); // Wheel number 0 to 5 and -255 to 255
+    void moveRover(const uint8_t & throttle_dir,const float & throttle, const uint8_t& steering_dir,const float& steering );
+    void moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity);
 
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
