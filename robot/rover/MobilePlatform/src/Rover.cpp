@@ -41,10 +41,10 @@ namespace Rover {
         // float instantaneous_center_of_rotation_vehicle = (float)linear_y / (float) omega_z;
 
 
-        float slip_track = 2.0f;
+        float slip_track = 4.0f;
 
         float right_wheels_velocity = (omega_z * slip_track / 2)  + linear_y;
-        float left_wheels_velocity = (2 * linear_y - right_wheels_velocity);
+        float left_wheels_velocity = linear_y - (omega_z * slip_track)/2;
 
 
         float r = (slip_track / 2.0f) * std::fabs(  (right_wheels_velocity +  left_wheels_velocity)/(right_wheels_velocity - left_wheels_velocity));
@@ -66,8 +66,9 @@ namespace Rover {
         }
         int current_motor = 0;
 
-        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(right_wheels_velocity,0,0.5,0,255);
-        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(left_wheels_velocity,0,0.5,0,255);
+        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,1.0,0,255);
+        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,1.0,0,255);
+
 
         while(current_motor <= 5) {
             Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,(uint8_t )right_wheels_pwm_velocity);
