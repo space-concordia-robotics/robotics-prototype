@@ -33,22 +33,16 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
             break;
         }
         case COMMAND_MOVE_ROVER: {
-            const uint8_t throttle_dir = *(rawArgs++);
-          const uint8_t throttle = *(rawArgs++);
-          const uint8_t steering_dir = *(rawArgs++);
-          const uint8_t steering= *(rawArgs++);
-////
-//            float throttle;
-//            byte throttle_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
-//            memcpy(&throttle,&throttle_bytes,sizeof(throttle));
-//
-//            const uint8_t steering_dir = *(rawArgs++);
-//
-//            float steering;
-//            byte steering_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
-//            memcpy(&steering,&steering_bytes,sizeof(steering));
 
-            moveRover(throttle_dir,throttle,steering_dir,steering);
+            float linear;
+            byte throttle_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
+            memcpy(&linear,&throttle_bytes,sizeof(linear));
+
+            float angular;
+            byte steering_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
+            memcpy(&angular,&steering_bytes,sizeof(angular));
+
+            moveRover(linear,angular);
 
             break;
         }

@@ -129,9 +129,9 @@ void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
 }
 
-void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t & steering) {
+void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z) {
 
-    Rover::moveRover(throttle_dir,throttle,steering_dir,steering);
+    Rover::moveRover(linear_y,omega_z);
 }
 
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {

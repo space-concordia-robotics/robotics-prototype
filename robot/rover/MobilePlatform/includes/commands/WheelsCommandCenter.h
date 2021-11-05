@@ -31,8 +31,8 @@ class WheelsCommandCenter : public internal_comms::CommandCenter {
 
 public:
     void stopMotors();
-    void moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering );
-    void moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity);
+    void moveRover(const float &,const float& );
+    void moveWheel(const uint8_t& ,const uint8_t& ,const uint8_t& );
 
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
