@@ -1,8 +1,3 @@
-//
-// Created by Michael on 2021-01-23.
-//
-
-// Issue made to change includes to include, which requires changing the CMake
 
 #include <cstdint>
 #include "commands/WheelsCommandCenter.h"
@@ -10,11 +5,6 @@
 
 using namespace internal_comms;
 
-/*
-   Command messages
-   */
-
-// this modifies the pointer
 float bytes_to_float(const uint8_t* rawPointer)
 {
     float f;
@@ -34,49 +24,29 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
 
     switch(commandID)
     {
-        case COMMAND_SET_MOTORS: {
-            enableMotors(*rawArgs);
-            break;
-        }
+
         case COMMAND_STOP_MOTORS_EMERGENCY: {
             stopMotors();
             break;
         }
-        case COMMAND_CLOSE_MOTORS_LOOP: {
-            closeMotorsLoop();
-            break;
-        }
-        case COMMAND_OPEN_MOTORS_LOOP: {
-            openMotorsLoop();
-            break;
-        }
-        case COMMAND_SET_JOYSTICK: {
-            break;
-        }
-        case COMMAND_SET_GPS: {
-            break;
-        }
-        case COMMAND_SET_ENCODER: {
-            break;
-        }
-        case COMMAND_SET_ACCELERATION: {
-            break;
-                                       }
         case COMMAND_GET_ROVER_STATUS: {
             break;
         }
         case COMMAND_MOVE_ROVER: {
             const uint8_t throttle_dir = *(rawArgs++);
-
-            float throttle;
-            byte throttle_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
-            memcpy(&throttle,&throttle_bytes,sizeof(throttle));
-
-            const uint8_t steering_dir = *(rawArgs++);
-
-            float steering;
-            byte steering_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
-            memcpy(&steering,&steering_bytes,sizeof(steering));
+          const uint8_t throttle = *(rawArgs++);
+          const uint8_t steering_dir = *(rawArgs++);
+          const uint8_t steering= *(rawArgs++);
+////
+//            float throttle;
+//            byte throttle_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
+//            memcpy(&throttle,&throttle_bytes,sizeof(throttle));
+//
+//            const uint8_t steering_dir = *(rawArgs++);
+//
+//            float steering;
+//            byte steering_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
+//            memcpy(&steering,&steering_bytes,sizeof(steering));
 
             moveRover(throttle_dir,throttle,steering_dir,steering);
 

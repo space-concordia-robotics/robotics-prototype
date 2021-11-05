@@ -15,10 +15,9 @@ namespace Rover {
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-           if(motor.desired_velocity <= 0){
-                continue;
-            };
-            Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
+           if(motor.current_velocity > 0){
+               Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
+           }
         }
     }
     void updateWheelVelocities(){
@@ -32,27 +31,23 @@ namespace Rover {
           else if(motor.current_velocity > motor.desired_velocity){
                 motor.current_velocity -= 1;
           }
-          else{
-              continue;
-          }
-
           Motor::applyDesiredMotorVelocity(motor.id);
          }
 
     }
-    void moveRover(const uint8_t & throttle_direction,const float & throttle, const uint8_t& steer_direction,const float& steering ){
+    void moveRover(const uint8_t & throttle_direction,const uint8_t & throttle, const uint8_t& steer_direction,const uint8_t& steering ){
 
-        float trailing_side_multiplier = 1 - steering;
+        float trailing_side_multiplier = 1 - mapFloat(steering,0,255,0,1);
 
         float right_wheels_velocity,left_wheels_velocity;
 
         if(steer_direction == LEFT){
-            left_wheels_velocity = throttle;
-            right_wheels_velocity = throttle  * trailing_side_multiplier;
+            left_wheels_velocity = (float)throttle;
+            right_wheels_velocity = (float)throttle  * trailing_side_multiplier;
         }
         else{
-            right_wheels_velocity = throttle;
-            left_wheels_velocity = throttle * trailing_side_multiplier;
+            right_wheels_velocity = (float)throttle;
+            left_wheels_velocity = (float)throttle * trailing_side_multiplier;
         }
 
         float slip_track = 2.0f;
@@ -76,13 +71,13 @@ namespace Rover {
         }
         int current_motor = 0;
 
-        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(right_wheels_velocity,0,0.5,0,255);
-        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(left_wheels_velocity,0,0.5,0,255);
+        //auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(right_wheels_velocity,0,0.5,0,255);
+        //auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(left_wheels_velocity,0,0.5,0,255);
 
         while(current_motor <= 5) {
-            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,right_wheels_pwm_velocity);
+            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,(uint8_t )right_wheels_velocity);
 
-            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,left_wheels_pwm_velocity);
+            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,(uint8_t )left_wheels_velocity);
 
             current_motor++;
         }
@@ -125,30 +120,5 @@ namespace Rover {
         servoList[servoID] = Servo();
         servoList[servoID].attach(pin);
     }
-
-    void closeLoop() {
-
-        roverState.max_output_signal = MAX_RPM_VALUE;
-        roverState.min_output_signal = 0;
-
-        if (systemStatus.are_motors_enabled) {
-            stopMotors();
-        }
-        systemStatus.is_open_loop = false;
-
-    }
-
-    void openLoop() {
-
-        roverState.max_output_signal = MAX_PWM_VALUE;
-        roverState.min_output_signal = 0;
-
-        if (systemStatus.are_motors_enabled) {
-            stopMotors();
-        }
-
-        systemStatus.is_open_loop = true;
-    }
-
 
 }

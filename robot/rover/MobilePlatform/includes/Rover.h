@@ -100,11 +100,7 @@ namespace Rover {
 
     void moveWheel(const MotorNames &,const uint8_t &, const int8_t& );
 
-    void openLoop();
-
-    void closeLoop();
-
-    void moveRover(const uint8_t & throttle_direction, const float & throttle, const uint8_t & steer_direction,const float & steering);
+    void moveRover(const uint8_t & throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering);
 
     void stopMotors();
 

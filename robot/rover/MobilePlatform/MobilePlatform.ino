@@ -7,7 +7,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -56,8 +56,6 @@ void setup() {
 
     attachServos();
     writeServoDefaultValues();
-
-    Rover::openLoop();
 
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
@@ -127,45 +125,11 @@ void writeServoDefaultValues(){
     Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
 }
 
-
-void WheelsCommandCenter::enableMotors(uint8_t turnMotorOn) {
-    //rover->enableAllMotors( (bool) turnMotorOn);
-}
-
 void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
-    //Rover::systemStatus.last_throttle = millis();
 }
 
-void WheelsCommandCenter::closeMotorsLoop() {
-    Rover::closeLoop();
-}
-
-void WheelsCommandCenter::openMotorsLoop() {
-    Rover::openLoop();
-}
-
-void WheelsCommandCenter::toggleJoystick(uint8_t turnJoystickOn) {
-
-}
-
-void WheelsCommandCenter::toggleGps(uint8_t turnGpsOn) {
-
-}
-
-void WheelsCommandCenter::toggleEncoder(uint8_t turnEncOn) {
-
-}
-
-void WheelsCommandCenter::toggleAcceleration(uint8_t turnAccelOn) {
-
-}
-
-void WheelsCommandCenter::getRoverStatus() {
-
-}
-
-void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const float & throttle, const uint8_t& steering_dir,const float& steering) {
+void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t & steering) {
 
     Rover::moveRover(throttle_dir,throttle,steering_dir,steering);
 }
@@ -191,14 +155,6 @@ void WheelsCommandCenter::getRotationalVelocity(void) {
     internal_comms::Message* message = commandCenter->createMessage(
             COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
     commandCenter->sendMessage(*message);
-}
-
-void WheelsCommandCenter::getMotorVelocity(const uint8_t& wheelNumber) {
-
-}
-
-void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
-
 }
 
 void WheelsCommandCenter::pingWheels(void) {

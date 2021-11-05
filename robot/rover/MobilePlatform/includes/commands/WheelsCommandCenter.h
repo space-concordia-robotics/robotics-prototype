@@ -30,22 +30,12 @@ class WheelsCommandCenter : public internal_comms::CommandCenter {
     void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) override;
 
 public:
-    void enableMotors(uint8_t turnMotorOn);
     void stopMotors();
-    void closeMotorsLoop();
-    void openMotorsLoop();
-    void toggleJoystick(uint8_t turnJoystickOn);
-    void toggleGps(uint8_t turnGpsOn);
-    void toggleEncoder(uint8_t turnEncOn);
-    void toggleAcceleration(uint8_t turnAccelOn);
-    void getRoverStatus();
-    void moveRover(const uint8_t & throttle_dir,const float & throttle, const uint8_t& steering_dir,const float& steering );
+    void moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering );
     void moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity);
 
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
-    void getMotorVelocity(const uint8_t& wheelNumber);
-    void getMotorDesiredVelocity(const uint8_t&);
     void getBatteryVoltage(void);
     void pingWheels(void);
 

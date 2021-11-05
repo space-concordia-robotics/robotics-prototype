@@ -59,7 +59,6 @@ namespace Motor {
     }
     void applyDesiredMotorVelocity(const MotorNames &motorID) {
 
-
         auto &motor = motorList[motorID];
 
         digitalWrite(motor.dir_pin,motor.desired_direction);
@@ -80,7 +79,6 @@ namespace Motor {
                                                  motor.encoder_resolution_reciprocal / (float) (dt));
             motor.actual_velocity = calculated_velocity;
             //motor.current_velocity = map(calculated_velocity,0,MAX);
-
         }
         InterruptHandler::reset(motorID);
 
