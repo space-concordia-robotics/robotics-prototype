@@ -8,9 +8,9 @@ namespace Motor {
         //->encoderResolution= encoder_res;
         motorList[motorID].encoder_resolution_reciprocal = 1 / encoder_res;
 
-
         pinMode(encoderPinA, INPUT_PULLUP);
         pinMode(encoderPinB, INPUT_PULLUP);
+
         attachInterrupt(digitalPinToInterrupt(encoderPinA), handler, CHANGE);
         attachInterrupt(digitalPinToInterrupt(encoderPinB), handler, CHANGE);
     }
@@ -75,7 +75,7 @@ namespace Motor {
         if (dt <= 0 || encoderCount <= 0) {
             motor.actual_velocity= 0;
         } else {
-            float calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
+            auto calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
                                                  motor.encoder_resolution_reciprocal / (float) (dt));
             motor.actual_velocity = calculated_velocity;
             //motor.current_velocity = map(calculated_velocity,0,MAX);

@@ -1,9 +1,7 @@
-
 #include <cstdint>
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
-#include "ArduinoBlue.h"
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 
@@ -22,16 +20,13 @@ const uint8_t TRANSMIT_PIN = 14;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
-// Wheel command methods from WheelsCommandCenter.cpp
+
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void attachMotors();
 void attachServos();
 void attachEncoders();
 void initPidControllers();
 void writeServoDefaultValues();
-
-// Messages to send back to OBC from wheel Teensy
-// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 
 
 void blink(){

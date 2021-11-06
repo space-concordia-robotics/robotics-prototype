@@ -35,17 +35,19 @@ namespace Rover {
          }
 
     }
-    void moveRover(const float & linear_y,const float& omega_z ){
+    FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
 
 
-        // float instantaneous_center_of_rotation_vehicle = (float)linear_y / (float) omega_z;
-
-
-        float slip_track = 4.0f;
+        float slip_track = 1.5f;
 
         float right_wheels_velocity = (omega_z * slip_track / 2)  + linear_y;
         float left_wheels_velocity = linear_y - (omega_z * slip_track)/2;
 
+        const float right_max = (1.0f * slip_track / 2.0f) + 0.5f;
+        const float right_min = (-1.0f * slip_track / 2.0f) - 0.5f;
+
+        const float left_max = 0.5f - (-1.0f * slip_track)/2;
+        const float left_min = -0.5f - (1.0f * slip_track)/2;;
 
         float r = (slip_track / 2.0f) * std::fabs(  (right_wheels_velocity +  left_wheels_velocity)/(right_wheels_velocity - left_wheels_velocity));
 
@@ -66,8 +68,8 @@ namespace Rover {
         }
         int current_motor = 0;
 
-        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,1.0,0,255);
-        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,1.0,0,255);
+        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,right_max,0,255);
+        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,left_max,0,255);
 
 
         while(current_motor <= 5) {
