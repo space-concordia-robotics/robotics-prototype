@@ -1,4 +1,4 @@
-enableTeensys = 33
-enableLidar = 27
+enableTeensys = 35
+enableLidar = 29
 
 enablePins = [enableTeensys, enableLidar]
