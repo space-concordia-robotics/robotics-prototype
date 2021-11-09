@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import Jetson.GPIO as gpio
+from enablePins import enablePins
 
 gpio.setwarnings(False)
 gpio.setmode(gpio.BOARD)
 
-gpio.setup(33, gpio.OUT)
-gpio.output(33, gpio.LOW)
+gpio.setup(enablePins, gpio.OUT)
+gpio.output(enablePins, gpio.LOW)
