@@ -1,0 +1,14 @@
+[Unit]
+Description=Use dnsmasq to launch DHCP server for using Ouster OS1 3D lidar
+After=ip-emailer.service
+Wants=ip-emailer.service
+
+[Service]
+#User=nvidia
+# For some unkown reason this service stopped working when running as user nvidia
+User=root
+Type=simple
+ExecStart=/home/nvidia/Programming/robotics-prototype/robot/util/rosRoverStart/runLidarDhcpServerStart.sh
+
+[Install]
+WantedBy=multi-user.target
