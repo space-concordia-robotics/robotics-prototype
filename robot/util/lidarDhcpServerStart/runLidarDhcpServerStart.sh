@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-ROS_ROVER_START_DIR="/home/nvidia/Programming/robotics-prototype/robot/util/lidarDhcpServerStart"
-ROS_ROVER_START_SH="$ROS_ROVER_START_DIR/lidarDhcpServerStart.sh"
-ROS_ROVER_START_LOG="$ROS_ROVER_START_DIR/lidarDhcpServerStart.log"
-bash $ROS_ROVER_START_SH > $ROS_ROVER_START_LOG
+LIDAR_DHCP_SERVER_START_DIR="/home/nvidia/Programming/robotics-prototype/robot/util/lidarDhcpServerStart"
+LIDAR_DHCP_SERVER_START_SH="$LIDAR_DHCP_SERVER_START_DIR/lidarDhcpServerStart.sh"
+LIDAR_DHCP_SERVER_START_LOG="$LIDAR_DHCP_SERVER_START_DIR/lidarDhcpServerStart.log"
+bash $LIDAR_DHCP_SERVER_START_SH > $LIDAR_DHCP_SERVER_START_LOG
