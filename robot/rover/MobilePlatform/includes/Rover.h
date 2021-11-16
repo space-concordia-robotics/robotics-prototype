@@ -3,6 +3,8 @@
 #include "DcMotor.h"
 #include "Servo.h"
 
+const float width = 0.83;
+const float length = 1.2;
 
 const float radius = 0.14;
 const float piRad  = 0.10472;
@@ -11,7 +13,6 @@ const float wheelBase = 0.33;
 #define V_SENSE_PIN 39 // for reading battery voltage
 
 /***** MOTORS *****/
-
 
 #define NUM_MOTORS 6
 
@@ -23,7 +24,6 @@ const float wheelBase = 0.33;
 #define M2_MR_PWM 6
 #define M1_FR_PWM 7
 
-
 #define M6_RL_DIR 26
 #define M5_ML_DIR 25
 #define M4_FL_DIR 24
@@ -31,7 +31,6 @@ const float wheelBase = 0.33;
 #define M3_RR_DIR 12
 #define M2_MR_DIR 11
 #define M1_FR_DIR 8
-
 
 #define M6_RL_A 27
 #define M6_RL_B 28
@@ -50,7 +49,6 @@ const float wheelBase = 0.33;
 
 #define M1_FR_A 35
 #define M1_FR_B 36
-
 
 #define FS_SERVO 23//22
 #define FB_SERVO 22//23

@@ -38,6 +38,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
             byte throttle_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
             memcpy(&linear,&throttle_bytes,sizeof(linear));
 
+
             float angular;
             byte steering_bytes[4] = { *(rawArgs++),*(rawArgs++),*(rawArgs++),*(rawArgs++) };
             memcpy(&angular,&steering_bytes,sizeof(angular));
