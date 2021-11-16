@@ -42,7 +42,7 @@ wheel_out_commands = [("set_motors", 0, [dt.ARG_UINT8]), ("motors_estop", 1, [])
                       ("set_joystick", 4, [dt.ARG_UINT8]),
                       ("set_gps", 5, [dt.ARG_UINT8]), ("set_enc", 6, [dt.ARG_UINT8]),
                       ("set_acc", 7, [dt.ARG_UINT8]), ("get_rover_status", 8, []),
-                      ("move_rover", 9, 4 * [dt.ARG_UINT8]),
+                      ("move_rover", 9, 2 * [dt.ARG_FLOAT32]),
                       ("move_wheel", 10, 3 * [dt.ARG_UINT8]),
                       ("get_linear_velocity", 11, []),
                       ("get_rotational_velocity", 12, []),

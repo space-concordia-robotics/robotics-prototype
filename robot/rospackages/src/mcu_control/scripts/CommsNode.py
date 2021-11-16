@@ -148,14 +148,14 @@ def send_command(command_name, args, deviceToSendTo):
         gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-        #ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
-        arg_length = len(command[2]).to_bytes(1,'big')
+        arg_length = get_arg_bytes(command).to_bytes(1, 'big')
         ser.write(arg_length)
+
         data_types = [element[0] for element in command[2]]
         for argument in zip(args, data_types):
             data = argument[0]
             data_type = argument[1]
-
+        
             if data_type == dt.ARG_UINT8_ID:
                 arg_int = int(data)
                 if arg_int < 0:
@@ -164,7 +164,8 @@ def send_command(command_name, args, deviceToSendTo):
                 ser.write(arg_int.to_bytes(1,'big'))
 
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+                
+                ser.write(bytearray(struct.pack("f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
