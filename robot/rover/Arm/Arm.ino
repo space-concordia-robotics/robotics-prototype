@@ -6,13 +6,95 @@
 #include "CommandCenter.h"
 #include "include/commands/ArmCommandCenter.h"
 
+#define ENCODER_SERIAL Serial1
+#define SERIAL_EVENT serialEvent1
+#define ARM_PREAMBLE 0xA5
+#define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
+
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
+byte encoderTemp[ARM_PACKET_LENGTH];
+byte encoderData[ARM_PACKET_LENGTH];
+// 0 bytes received means waiting on next preamble
+// 1 means received preamble, 2 means received 1 preamble
+// and 1 data byte, etc.
+volatile byte encoderBytesReceived = 0;
+volatile bool newEncoderData = false;
+
 void setup() {
+  for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
+    encoderTemp[i] = 2;
+    encoderData[i] = 2;
+  }
+
+  ENCODER_SERIAL.begin(9600);
+  Serial.begin(9600);
+  while (!Serial) {
+    // wait for serial monitor
+  }
+  Serial.println("Hello!");
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  while (true) {
+    Serial.println("Hello world!");
+    delay(50);
+
+    if (newEncoderData) {
+      Serial.print("Encoder data: ");
+      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
+        Serial.print(encoderData[i], HEX);
+        Serial.print(" ");
+      }
+      Serial.println();
+      newEncoderData = false;
+    } else {
+      // debug only
+      /*Serial.print("Encoder temp: ");
+      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
+        Serial.print(encoderTemp[i], HEX);
+      }
+      Serial.print(" Bytes received: ");
+      Serial.print(encoderBytesReceived);
+      Serial.println();*/
+    }
+  }
+
+  /*
   pinMode(13, OUTPUT);
   Serial.begin(9600);
   commandCenter->startSerial(-1, -1, 24,
                              -1);  // not using transmitenable with usb
+                             */
+}
+
+void SERIAL_EVENT() {
+  byte read = ENCODER_SERIAL.read();
+  // check if waiting for preamble
+  if (encoderBytesReceived == 0) {
+    if (read == ARM_PREAMBLE) {
+      encoderTemp[0] = read;
+      encoderBytesReceived++;
+    } else {
+      // do nothing, wait on valid preamble
+    }
+  } else {
+    // here, not waiting on preamble (receiving some middle byte)
+    encoderTemp[encoderBytesReceived] = read;
+    encoderBytesReceived++;
+    if (encoderBytesReceived == ARM_PACKET_LENGTH) {
+      // if here, just received last byte of packet
+      // copy temp to shared memory
+      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
+        encoderData[i] = encoderTemp[i];
+      }
+      // signal new data packet
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+      newEncoderData = true;
+      // reset to waiting on preamble
+      encoderBytesReceived = 0;
+    }
+  }
 }
 
 /**
