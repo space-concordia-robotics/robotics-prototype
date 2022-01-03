@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 
-class ParseCommand
+class ParseCommand : public Setup
 {
     public:
     

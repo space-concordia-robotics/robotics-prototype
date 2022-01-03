@@ -11,7 +11,7 @@
 class Setup
 {    
     int motorState[6];
-    int motorPins[6] = {15,16,2,17,28,13};    
+    int motorPins[6] = {13,12,11,9,6,A5};    
     
     public:
            
@@ -20,6 +20,7 @@ class Setup
         void disable_device(String message, int pin1);        
         void enable_all_motors();
         void disable_all_motors();
+        float lookup(float value);
         
         int get_status(int pin1);
         void get_status_motors();
@@ -27,5 +28,10 @@ class Setup
         float load_current(int load_switch);    
 };
 
+class Motor : public Setup
+{
+    public:
+        Motor();    
+};
 
 #endif
