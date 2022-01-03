@@ -20,7 +20,7 @@ This folder contains startup services, more is explained in the README [here](ht
 This folder contains the MCU code for the arm as well as some (outdated) documentation and example code.
 
 ### MobilePlatform
-This foler contains MCU code for the mobile platform.
+This folder contains MCU code for the mobile platform.
 
 ### Science
 This folder contains MCU code for the science payload.

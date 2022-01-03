@@ -1,4 +1,4 @@
-EMAILER_DIR="/home/odroid/emailer"
+EMAILER_DIR="/home/$USER/emailer"
 
 if [ ! -d $EMAILER_DIR ]; then
     mkdir $EMAILER_DIR;

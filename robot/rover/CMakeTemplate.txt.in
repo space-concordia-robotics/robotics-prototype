@@ -50,11 +50,11 @@ set_target_properties(
 
 target_link_libraries(
         ${PROJECT_NAME}_EXE
-        @PROJECT_LIBRARIES@
         $<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
+        @PROJECT_LIBRARIES@
         teensycore
         -lm
-)
+) 
 
 add_custom_command(
         TARGET ${PROJECT_NAME}_EXE

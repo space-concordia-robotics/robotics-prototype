@@ -1,12 +1,29 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
-#include "Helpers.h"
-#include "Pins.h"
-#include "Globals.h"
+
+#include "Arduino.h"
+
+
+typedef struct {
+    float kp;
+    float ki;
+    float kd;
+    float error, previousError;
+    float errorSum;
+    float pTerm, iTerm, dTerm;
+    uint32_t dt;
+} pidControllerState;
+
+
+int16_t updatePID(pidControllerState&,volatile float, float);
+
+
+/*
 class PidController {
 public:
     // motor-dependent constants... currently arbitrary values. to be set in setup() probably
-    PidController();
+    PidController(float,float,float);
+
     float updatePID(volatile float currentAngle, float desiredAngle);
     void setJointVelocityTolerance(float tolerance);
     void setOutputLimits(float minVal, float maxVal, float zeroVal);
@@ -25,4 +42,5 @@ private:
     float errorSum;
     float pidSum; // pid output, must be checked before assigning this value to pidOutput
 };
+ */
 #endif
