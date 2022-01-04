@@ -7,7 +7,7 @@
 echo "[Set the target OS, ROS version"
 name_os_version=${name_os_version:="bionic"}
 name_ros_version=${name_ros_version:="melodic"}
-REPO=~/robotics-prototype
+REPO=$GITHUB_WORKSPACE
 
 echo "[Update the package lists and upgrade them]"
 sudo apt-get update -y

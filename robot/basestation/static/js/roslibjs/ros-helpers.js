@@ -577,14 +577,15 @@ function checkTaskStatuses () {
     console.log('currentChannel', currentChannel)
   })
   if (window.location.pathname == '/') {
-    // check arm listener status
-    requestTask(ARM_LISTENER_TASK, STATUS_CHECK, (msgs) => {
+	//@TODO: double check that we didn't fuck up the arm listener client side code
+    // check rover listener status
+    requestTask(ROVER_LISTENER_TASK, STATUS_CHECK, (msgs) => {
       printErrToConsole(msgs)
       if (msgs[0] && msgs.length == 2) {
         if (msgs[1].includes('not running')) {
-          $('#toggle-arm-listener-btn')[0].checked = false
+          $('#toggle-rover-listener-btn')[0].checked = false
         } else if (msgs[1].includes('running')) {
-          $('#toggle-arm-listener-btn')[0].checked = true
+          $('#toggle-rover-listener-btn')[0].checked = true
         }
       }
     })
@@ -684,6 +685,7 @@ function sendArmCommand (cmd) {
   arm_command_publisher.publish(command)
 }
 
+//@TODO: CHECK WHY THIS IS NOT BEING CALLED BY WASD KEYS IN ROVER PAGE
 function sendRoverCommand (cmd) {
   logDebug('Sending "' + cmd + '" to Rover Teensy')
   let command = new ROSLIB.Message({ data: cmd })

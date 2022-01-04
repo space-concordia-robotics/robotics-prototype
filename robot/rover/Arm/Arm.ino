@@ -26,7 +26,6 @@
 */
 
 #include "Includes.h"
-
 /* comms */
 char serialBuffer[BUFFER_SIZE]; //!< serial buffer used for early- and mid-stage testing without ROSserial
 
@@ -146,6 +145,7 @@ void servoInterrupt(void); //!< manages motors 5&6
    Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
 */
 void setup() {
+
   pinSetup();
   initComms();
   initEncoders();

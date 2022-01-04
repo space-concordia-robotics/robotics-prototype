@@ -54,8 +54,8 @@ rm TeensyduinoInstall.linux64
 
 export ARDUINO_PATH=$ARDUINO_PATH
 
-mkdir -p ~/robotics-prototype/robot/rover/build
-cd ~/robotics-prototype/robot/rover/build
+mkdir -p $GITHUB_WORKSPACE/robot/rover/build
+cd $GITHUB_WORKSPACE/robot/rover/build
 cmake ..
 make
  
