@@ -68,7 +68,7 @@ set(LSM303_VERSION 3.0.1)
 
 set(AUNIT_PATH ${ARDUINO_EXTERNAL_LIB}/AUnit)
 set(AUNIT_URL https://github.com/bxparks/AUnit)
-set(AUNIT_VERSION 1.6.0)
+set(AUNIT_VERSION v1.6.0)
 
 set(UNIXHOSTDUINO_PATH ${ARDUINO_EXTERNAL_LIB}/UnixHostDuino)
 set(UNIXHOSTDUINO_URL https://github.com/kbebs/UnixHostDuino)
