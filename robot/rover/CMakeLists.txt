@@ -186,22 +186,22 @@ foreach(path ${INOFILES})
  set(Project_Name ${name})
 
  if(${name} STREQUAL "Arm")
- set(PROJECT_LIBRARIES  Servo)
+    set(PROJECT_LIBRARIES  Servo)
  elseif(${name} STREQUAL "raman")
-  set(PROJECT_LIBRARIES internal_comms)
+    set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
- elseif(${name} STREQUAL "PDS")
- continue()
+ elseif(${name} STREQUAL "PDS") 
+    set(PROJECT_LIBRARIES internal_comms)
  
  elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
- set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
+    set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
+    set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
 
  elseif(${name} STREQUAL "PidController")
- set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
- set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
+     set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
+     set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
 
  endif()
  
