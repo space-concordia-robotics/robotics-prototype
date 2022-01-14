@@ -15,6 +15,8 @@
 #include "joy_comms_control.h"
 
 struct JoyCommsControl::Implement {
+    struct ButtonMappings;
+
     void joyCallback(const sensor_msgs::Joy::ConstPtr &joy);
 
     void sendCommsCommand(const sensor_msgs::Joy::ConstPtr &joy_msg);
@@ -33,30 +35,48 @@ struct JoyCommsControl::Implement {
 
     ros::Publisher comms_pub;
 
-    std::map<int, std_msgs::String> button_command_mappings;
+    std::vector<ButtonMappings> controller_mappings;
 };
+
+struct JoyCommsControl::Implement::ButtonMappings {
+    int buttonId;
+    std_msgs::String command_string;
+    int command_publish_rate;
+};
+
+void JoyCommsControl::MapButtonNamesToIds() {
+    for (int currentButtonId = BUTTON_CROSS; currentButtonId<=BUTTON_R3; ++currentButtonId) {
+        button_name_to_id_map.insert(
+                std::pair<const char*, int>(button_names[currentButtonId] , currentButtonId));
+    }
+}
+
+int JoyCommsControl::getButtonIdFromName(std::string button_name) {
+    return button_name_to_id_map.at(button_name.c_str());
+}
 
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     // Get controller mappings from ROS params
     XmlRpc::XmlRpcValue mappingsXML;
     nh_param->getParam("/controller_mappings", mappingsXML);
 
-    int buttonId;
-    std::string command;
-    std_msgs::String commandMessage;
+    Implement::ButtonMappings currentButtonMap;
+    std::string button_name, command;
     XmlRpc::XmlRpcValue mappingObject;
     if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < mappingsXML.size(); ++i) {
             mappingObject = mappingsXML[i];
 
-            buttonId = mappingObject[0];
+            button_name = static_cast<std::string>(mappingObject[0]).c_str();
+
+            currentButtonMap.buttonId = getButtonIdFromName(button_name);
 
             command = static_cast<std::string>(mappingObject[1]).c_str();
-            commandMessage.data = command;
+            currentButtonMap.command_string.data = command;
 
-            command = static_cast<std::string>(mappingObject[1]).c_str();
+            currentButtonMap.command_publish_rate = mappingObject[2];
 
-            pImplement->button_command_mappings.insert(std::pair<int, std_msgs::String>(buttonId, commandMessage));
+            pImplement->controller_mappings.push_back(currentButtonMap);
         }
     }
 }
@@ -88,7 +108,12 @@ void JoyCommsControl::Implement::sendCommsCommand(const sensor_msgs::Joy::ConstP
     std::vector<int> buttons = joy_msg->buttons;
     for (int i = 0; i<buttons.size(); ++i) {
         if (buttons[i] && i != enable_button) {
-            publish_command(button_command_mappings[i]);
+            for (ButtonMappings controller_mapping : controller_mappings) {
+                if (controller_mapping.buttonId == i) {
+                    publish_command(controller_mapping.command_string);
+                }
+            }
+
         }
     }
 }
