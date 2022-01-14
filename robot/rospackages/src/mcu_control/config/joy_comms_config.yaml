@@ -1,0 +1,5 @@
+enable_button: 5
+stop_command: "stop_motors"
+command_topic: /arm_command
+controller_mappings: [[0, "budge_motors 1 0 0 0 0 0", 30]]
+
