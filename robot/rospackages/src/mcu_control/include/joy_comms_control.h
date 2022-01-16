@@ -16,6 +16,8 @@ public:
     struct Implement;
 
 private:
+    const int QUEUE_LOOP_RATE = 120;
+
     // These enums are defined for PS4 controllers
     enum buttons {
         BUTTON_CROSS = 0,

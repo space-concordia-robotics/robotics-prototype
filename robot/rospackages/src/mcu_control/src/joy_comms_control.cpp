@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <boost/thread/thread.hpp>
 
 #include "joy_comms_control.h"
 
@@ -19,9 +20,11 @@ struct JoyCommsControl::Implement {
 
     void joyCallback(const sensor_msgs::Joy::ConstPtr &joy);
 
-    void sendCommsCommand(const sensor_msgs::Joy::ConstPtr &joy_msg);
+    void addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg);
 
     void publish_command(std_msgs::String command);
+
+    void manageQueue();
 
     ros::Subscriber joy_sub;
 
@@ -38,6 +41,9 @@ struct JoyCommsControl::Implement {
     std::vector<ButtonMappings> controller_mappings;
 };
 
+// Map format: {"COMMAND", PUBLISH_RATE"}
+std::vector<JoyCommsControl::Implement::ButtonMappings> publish_queue;
+
 struct JoyCommsControl::Implement::ButtonMappings {
     int buttonId;
     std_msgs::String command_string;
@@ -52,7 +58,7 @@ void JoyCommsControl::MapButtonNamesToIds() {
 }
 
 int JoyCommsControl::getButtonIdFromName(std::string button_name) {
-    return button_name_to_id_map.at(button_name.c_str());
+    return button_name_to_id_map[button_name.c_str()];
 }
 
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
@@ -82,6 +88,8 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
 }
 
 JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
+    MapButtonNamesToIds();
+
     pImplement = new Implement;
 
     nh_param->param<int>("/command_topic", pImplement->enable_button, 0);
@@ -104,13 +112,17 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
                                                           pImplement);
 }
 
-void JoyCommsControl::Implement::sendCommsCommand(const sensor_msgs::Joy::ConstPtr &joy_msg) {
+void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     std::vector<int> buttons = joy_msg->buttons;
+    ButtonMappings command_queue_entry;
     for (int i = 0; i<buttons.size(); ++i) {
         if (buttons[i] && i != enable_button) {
             for (ButtonMappings controller_mapping : controller_mappings) {
                 if (controller_mapping.buttonId == i) {
-                    publish_command(controller_mapping.command_string);
+                    command_queue_entry = controller_mapping;
+                    publish_queue.push_back(command_queue_entry);
+                } else {
+
                 }
             }
 
@@ -125,12 +137,18 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        sendCommsCommand(joy_msg);
+        addToCommandQueue(joy_msg);
     } else {
         if (!sent_disable_msg) {
             comms_pub.publish(stop_command);
             sent_disable_msg = true;
         }
+    }
+}
+
+void manageQueue() {
+    while (ros::ok()) {
+
     }
 }
 
