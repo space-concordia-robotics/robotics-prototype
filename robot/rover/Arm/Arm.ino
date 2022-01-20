@@ -20,43 +20,15 @@ void setup() {
   pinMode(LED, OUTPUT);
 
   ENCODER_SERIAL.begin(9600);
-  Serial.begin(9600);
-  /*while (true) {
-    Serial.println("Hello world");
-    delay(50);
-  }*/
+  /*Serial.begin(9600);
   while (!Serial) {
     // wait for serial monitor
     digitalWrite(LED, HIGH);
     delay(100);
     digitalWrite(LED, LOW);
     delay(100);
-  }
-
-  /*while (true) {
-    // Serial.println("Hello world!");
-    // delay(50);
-
-    if (newEncoderData) {
-      for (int i = 0; i <= 15; i++) {
-        EncoderData enc = encoderData[i];
-        Serial.print("Encoder ");
-        Serial.print(i);
-        Serial.print(" data: ");
-        Serial.print(enc.angle);
-        Serial.print(" ");
-        Serial.print(enc.temperatureData, HEX);
-        Serial.print(" ");
-        Serial.print(enc.CRC, HEX);
-        Serial.println();
-      }
-      Serial.print("\n\n");
-      newEncoderData = false;
-    }
   }*/
 
-  pinMode(13, OUTPUT);
-  Serial.begin(9600);
   commandCenter->startSerial(-1, -1, 24,
                              -1);  // not using transmitenable with usb
 }
@@ -175,7 +147,6 @@ void sendMotorAngles() {
 
   internal_comms::Message* message = commandCenter->createMessage(2, 24, data);
   commandCenter->sendMessage(*message);
-  //
 
   /*
     float angles[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
