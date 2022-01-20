@@ -4,6 +4,7 @@
 #include <Servo.h>
 
 #include "CommandCenter.h"
+#include "include/Encoder_Data.h"
 #include "include/commands/ArmCommandCenter.h"
 
 #define ENCODER_SERIAL Serial1
@@ -13,86 +14,104 @@
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
-byte encoderTemp[ARM_PACKET_LENGTH];
-byte encoderData[ARM_PACKET_LENGTH];
-// 0 bytes received means waiting on next preamble
-// 1 means received preamble, 2 means received 1 preamble
-// and 1 data byte, etc.
-volatile byte encoderBytesReceived = 0;
-volatile bool newEncoderData = false;
+EncoderData encoderData[15];
 
 void setup() {
-  for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
-    encoderTemp[i] = 2;
-    encoderData[i] = 2;
-  }
+  pinMode(LED, OUTPUT);
 
   ENCODER_SERIAL.begin(9600);
   Serial.begin(9600);
+  /*while (true) {
+    Serial.println("Hello world");
+    delay(50);
+  }*/
   while (!Serial) {
     // wait for serial monitor
+    digitalWrite(LED, HIGH);
+    delay(100);
+    digitalWrite(LED, LOW);
+    delay(100);
   }
-  Serial.println("Hello!");
 
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  while (true) {
-    Serial.println("Hello world!");
-    delay(50);
+  /*while (true) {
+    // Serial.println("Hello world!");
+    // delay(50);
 
     if (newEncoderData) {
-      Serial.print("Encoder data: ");
-      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
-        Serial.print(encoderData[i], HEX);
+      for (int i = 0; i <= 15; i++) {
+        EncoderData enc = encoderData[i];
+        Serial.print("Encoder ");
+        Serial.print(i);
+        Serial.print(" data: ");
+        Serial.print(enc.angle);
         Serial.print(" ");
+        Serial.print(enc.temperatureData, HEX);
+        Serial.print(" ");
+        Serial.print(enc.CRC, HEX);
+        Serial.println();
       }
-      Serial.println();
+      Serial.print("\n\n");
       newEncoderData = false;
-    } else {
-      // debug only
-      /*Serial.print("Encoder temp: ");
-      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
-        Serial.print(encoderTemp[i], HEX);
-      }
-      Serial.print(" Bytes received: ");
-      Serial.print(encoderBytesReceived);
-      Serial.println();*/
     }
-  }
+  }*/
 
-  /*
   pinMode(13, OUTPUT);
   Serial.begin(9600);
   commandCenter->startSerial(-1, -1, 24,
                              -1);  // not using transmitenable with usb
-                             */
 }
+
+// 0 bytes received means waiting on next preamble
+// 1 means received preamble, 2 means received 1 preamble and 1 data byte, etc.
+volatile byte encoderBytesReceived = 0;
+volatile bool newEncoderData = false;
+byte encoderTemp[ARM_PACKET_LENGTH];
+volatile byte tRead = 255;  // for debug only
+volatile int passedEvent = 0;
 
 void SERIAL_EVENT() {
   byte read = ENCODER_SERIAL.read();
+  tRead = read;
+  passedEvent = 1;
   // check if waiting for preamble
   if (encoderBytesReceived == 0) {
     if (read == ARM_PREAMBLE) {
       encoderTemp[0] = read;
       encoderBytesReceived++;
     } else {
+      digitalWrite(LED, HIGH);
       // do nothing, wait on valid preamble
     }
   } else {
     // here, not waiting on preamble (receiving some middle byte)
     encoderTemp[encoderBytesReceived] = read;
     encoderBytesReceived++;
+
+    // Do the address check once 2 received address.
+    if (encoderBytesReceived == 2) {
+      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
+      if (address > 15) {
+        // If address invalid, reset to waiting on preamble.
+        encoderBytesReceived = 0;
+        digitalWrite(LED, LOW);
+      }
+    }
+
     if (encoderBytesReceived == ARM_PACKET_LENGTH) {
       // if here, just received last byte of packet
-      // copy temp to shared memory
-      for (int i = 0; i < ARM_PACKET_LENGTH; i++) {
-        encoderData[i] = encoderTemp[i];
+      // copy temp to shared memory with the address as the index in the array
+      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
+      if (address <= 15) {  // check that the address arrived intact
+        EncoderData thisData;
+        thisData.setData(encoderTemp);
+        encoderData[address] = thisData;
+
+        // signal new data packet
+        newEncoderData = true;
       }
-      // signal new data packet
-      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-      newEncoderData = true;
       // reset to waiting on preamble
       encoderBytesReceived = 0;
+      digitalWrite(LED, LOW);
     }
   }
 }
@@ -136,9 +155,13 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
     Serial.write(buffer);
   }
 }
+
 #define NUM_MOTORS 6
 void sendMotorAngles() {
-  float softwareAngles[NUM_MOTORS] = {-10000000000, 2.0, 3.0, 4.0, 5.0, 6.0};
+  float softwareAngles[NUM_MOTORS];
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    softwareAngles[i] = encoderData[i].angle;
+  }
 
   byte* data = new byte[24];
 
@@ -170,4 +193,26 @@ void loop() {
     commandCenter->readCommand();
   }
   commandCenter->sendMessage();
+
+  /*if (newEncoderData) {
+    for (int i = 0; i <= 15; i++) {
+      EncoderData enc = encoderData[i];
+      Serial.print("Encoder ");
+      Serial.print(i);
+      Serial.print(" data: ");
+      Serial.print(enc.angle);
+      Serial.print(" ");
+      Serial.print(enc.temperatureData, HEX);
+      Serial.print(" ");
+      Serial.print(enc.CRC, HEX);
+      Serial.println();
+    }
+    Serial.print("\n\n");
+    newEncoderData = false;
+  } else if (passedEvent) {
+    Serial.print("last read: ");
+    Serial.print(tRead, HEX);
+    Serial.print("\r\n");
+    passedEvent = 0;
+  }*/
 }
