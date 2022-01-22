@@ -98,7 +98,7 @@ void accelerateWheel(uint8_t id,uint32_t rate, uint8_t direction){
     int currentPWM = 60;
     uint32_t startTime = millis();
     auto& motor = motorList[id];
-    analogWrite(motor.desired_direction,direction);
+    analogWrite(motor.dir_pin,direction);
 
     if( (millis() - startTime) > rate){
         currentPWM++;
