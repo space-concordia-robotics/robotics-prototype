@@ -18,11 +18,12 @@ void pong();
 void sendMotorAngles();
 void moveMotorsBy(float* angles, uint16_t numAngles);
 
-// this modifies the pointer
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
-  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer),
-                  *(++rawPointer)};
+  // I'm not going down the rabbit hole to figure out why the bytes in the float
+  // are in the wrong order, but interpreting the bytes flipped like this works.
+  byte bytes[] = {*(rawPointer + 3), *(rawPointer + 2), *(rawPointer + 1),
+                  *(rawPointer)};
   memcpy(&f, &bytes, sizeof(f));
   return f;
 }
@@ -51,9 +52,6 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         break;
       } else {
         invalidCommand();
-        /*Serial.write("wrong number of angles: ");
-        Serial.write(String(numAngles).c_str());
-        Serial.write("\n");*/
         break;
       }
     }

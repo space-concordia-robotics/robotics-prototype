@@ -19,7 +19,14 @@ EncoderData encoderData[15];
 void setup() {
   pinMode(LED, OUTPUT);
 
-  ENCODER_SERIAL.begin(9600);
+  // ENCODER_SERIAL.begin(9600);
+  // TODO: For testing, with no data
+  for (int i = 0; i < 6; i++) {
+    EncoderData datum = EncoderData();
+    datum.angle = 1.5 + i;
+    encoderData[i] = datum;
+  }
+
   /*Serial.begin(9600);
   while (!Serial) {
     // wait for serial monitor
@@ -117,15 +124,14 @@ void pong() {
 }
 
 void moveMotorsBy(float* angles, uint16_t numAngles) {
-  char buffer[8];
-  snprintf(buffer, 8, "%d", numAngles);
-  Serial.write(buffer);
-  Serial.write("Angles received");
-
-  for (int i = 0; i < numAngles; i++) {
-    sprintf(buffer, "%f\n", angles[i]);
-    Serial.write(buffer);
+  byte* data = new byte[128];
+  int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
+                   angles[1], angles[2], angles[3], angles[4], angles[5]);
+  if (r < 0 || r > 128) {
+    invalidCommand();
   }
+  internal_comms::Message* message = commandCenter->createMessage(0, r, data);
+  commandCenter->sendMessage(*message);
 }
 
 #define NUM_MOTORS 6
