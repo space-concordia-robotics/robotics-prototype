@@ -123,7 +123,12 @@ void setup(){
 
     attachMotors();
 
-    
+
+
+}
+
+void loop(){
+        
     accelerateWheel(FRONT_RIGHT,20,0);
     accelerateWheel(FRONT_RIGHT,20,1);
 
@@ -142,11 +147,4 @@ void setup(){
     accelerateWheel(REAR_LEFT,20,0);
     accelerateWheel(REAR_LEFT,20,1);
 
-
-}
-
-void loop(){
-    while(true){
-        blink();
-    }
 }
