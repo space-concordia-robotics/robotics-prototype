@@ -216,7 +216,6 @@ foreach(path ${INOFILES})
 
  set(Project_Name ${name})
 
-
  if(${name} STREQUAL "Arm")
   set(PROJECT_LIBRARIES Servo internal_comms)
  elseif(${name} STREQUAL "raman")
@@ -238,7 +237,7 @@ foreach(path ${INOFILES})
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
  set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
-
+ 
  endif()
  
   #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
