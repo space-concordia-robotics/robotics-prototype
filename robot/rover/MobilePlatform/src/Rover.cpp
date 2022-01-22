@@ -36,18 +36,8 @@ namespace Rover {
 
     }
 
-    void printFloat(float data){
-        uint8_t temp[4];
-        memcpy(temp,&data,4);
-        Serial.write(temp[0]);
-        Serial.write(temp[1]);
-        Serial.write(temp[2]);
-        Serial.write(temp[3]);
-
-    }
 
     FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
-
 
 
         float slip_track = 1.2f;

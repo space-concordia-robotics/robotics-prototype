@@ -55,8 +55,6 @@ void setup() {
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 
-
-
 }
 
 void loop() {
