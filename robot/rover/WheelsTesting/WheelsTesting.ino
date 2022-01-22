@@ -100,24 +100,30 @@ void accelerateWheel(uint8_t id,uint32_t rate, uint8_t direction){
     auto& motor = motorList[id];
     analogWrite(motor.dir_pin,direction);
 
+    while(true){
     if( (millis() - startTime) > rate){
         currentPWM++;
-        Serial.print(currentPWM);
         analogWrite(motor.pwm_pin,currentPWM);
         if(currentPWM >= 255){
             delay(2000);
+            Serial.print("Finished Testing motor ");
+            Serial.print(id);
+            Serial.print(" in direction ");
+            Serial.println(direction);  
             blink();
             return;
         }
     }
+    }
 }
 void setup(){
-    Serial.begin(9800);
-
+    Serial.begin(9600);
+    pinMode(13,OUTPUT);
     blink();
 
     attachMotors();
 
+    
     accelerateWheel(FRONT_RIGHT,20,0);
     accelerateWheel(FRONT_RIGHT,20,1);
 
