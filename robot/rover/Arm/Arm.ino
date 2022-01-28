@@ -3,7 +3,9 @@
 #define LED 13
 #include <Servo.h>
 
+// The includes from pinsetup come from Arm commandcenter
 #include "CommandCenter.h"
+#include "include/DcMotor.h"
 #include "include/Encoder_Data.h"
 #include "include/commands/ArmCommandCenter.h"
 
@@ -11,10 +13,12 @@
 #define SERIAL_EVENT serialEvent1
 #define ARM_PREAMBLE 0xA5
 #define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
+#define NUM_MOTORS 6
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
+DcMotor motors[NUM_MOTORS];
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -26,6 +30,13 @@ void setup() {
     datum.angle = 1.5 + i;
     encoderData[i] = datum;
   }
+  motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, HIGH);
+  motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, HIGH);
+  motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, HIGH);
+  motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  // Will have to be changed to allow for the UART motors
+  motors[4] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  motors[5] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
 
   /*Serial.begin(9600);
   while (!Serial) {
@@ -119,6 +130,7 @@ void pong() {
 }
 
 void moveMotorsBy(float* angles, uint16_t numAngles) {
+  // Right now, this only prints out back the received angles
   byte* data = new byte[128];
   int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
                    angles[1], angles[2], angles[3], angles[4], angles[5]);
@@ -129,7 +141,12 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
   commandCenter->sendMessage(*message);
 }
 
-#define NUM_MOTORS 6
+void setMotorSpeeds(float* angles) {
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motors[i].setSpeed(angles[i]);
+  }
+}
+
 void sendMotorAngles() {
   float softwareAngles[NUM_MOTORS];
   for (int i = 0; i < NUM_MOTORS; i++) {
@@ -148,21 +165,17 @@ void sendMotorAngles() {
 
   internal_comms::Message* message = commandCenter->createMessage(2, 24, data);
   commandCenter->sendMessage(*message);
-
-  /*
-    float angles[] = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
-    byte* data = malloc(sizeof(angles) * 6);
-    data[0] = 0x0a;
-    data[1] = 0xF3;
-    // memcpy(data, angles, sizeof(angles) * 6);
-    internal_comms::Message* message =
-        commandCenter->createMessage(2, sizeof(angles) * 6, data);
-    commandCenter->sendMessage(*message);*/
 }
 
 void loop() {
+  // Read and send messages
   if (Serial.available() > 0) {
     commandCenter->readCommand();
   }
   commandCenter->sendMessage();
+
+  // Do motor checks (ex stop after certain time of no messages)
+  for (int i = 0; i < NUM_MOTORS; i++) {
+    motors[i].doChecks();
+  }
 }

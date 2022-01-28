@@ -10,7 +10,9 @@ class DcMotor {
   int currentSpeed;
   float gearRatio;
 
-  DcMotor(int dirPin, int pwmPin, int enablePin, float gearRatio);
+  DcMotor(int dirPin, int pwmPin, float gearRatio, int dirPinForward);
+  DcMotor();
+
   /**
    * @param newSpeed Set speed, from -255 to +255. Positive is 'forward'.
    */
@@ -19,15 +21,14 @@ class DcMotor {
    * Does the autostop, or in future budge and angle move checks.
    * Should be called frequently.
    */
-  doChecks();
-  stop();
+  void doChecks();
+  void stop();
 
   unsigned int millisStartedMove;
 
  private:
   int directionPin;
   int pwmPin;
-  int enablePin;
   /**
    * @brief Which way to set the direction pin, HIGH or LOW,
    * when moving this motor 'forwards'
@@ -40,17 +41,21 @@ class DcMotor {
   static const unsigned int timeToWaitUntilStop = 1000;
 };
 
-DcMotor::DcMotor(int dirPin, int pwmPin, int enablePin, float gearRatio,
-                 int dirPinForward)
+DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio, int dirPinForward)
     : currentSpeed(0),
+      pwmPin(pwmPin),
       gearRatio(1.0),
       directionPin(dirPin),
-      pwmPin(pwmPin),
-      enablePin(enablePin),
       dirPinForward(dirPinForward) {}
 
-DcMotor::setSpeed(int newSpeed) {
-  digitalWrite(enablePin, HIGH);
+DcMotor::DcMotor()
+    : currentSpeed(0),
+      pwmPin(9),  // default is to set to the M1 pins
+      gearRatio(1.0),
+      directionPin(7),  // default is to set to the M1 pins
+      dirPinForward(HIGH) {}
+
+void DcMotor::setSpeed(int newSpeed) {
   // Set direction based on sign of speed
   digitalWrite(directionPin, newSpeed >= 0 ? dirPinForward : !dirPinForward);
   analogWrite(pwmPin, abs(newSpeed));  // Set speed
@@ -58,15 +63,12 @@ DcMotor::setSpeed(int newSpeed) {
   currentSpeed = newSpeed;
 }
 
-DcMotor::doChecks() {
+void DcMotor::doChecks() {
   if (millis() - millisStartedMove && currentSpeed != 0) {
     stop();
   }
 }
 
-DcMotor::stop() {
-  digitalWrite(enablePin, LOW);
-  analogWrite(pwmPin, 0);
-}
+void DcMotor::stop() { analogWrite(pwmPin, 0); }
 
 #endif

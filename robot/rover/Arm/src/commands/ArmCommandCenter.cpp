@@ -4,11 +4,13 @@
 
 #include "include/commands/ArmCommandCenter.h"
 
+#include "../../../robot/demos/RemoteArmControl/KeyboardBudge/PinSetup.h"
 #include "Arduino.h"
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
 #define SEND_MOTOR_ANGLES 77
+#define SET_MOTOR_SPEEDS 78
 
 // Commands that expect a pointer are assumed to provide a pointer
 // to 6 values.
@@ -17,6 +19,11 @@ void invalidCommand();
 void pong();
 void sendMotorAngles();
 void moveMotorsBy(float* angles, uint16_t numAngles);
+/**
+ * @brief Sets motor speeds.
+ * @param angles pointer to NUM_MOTOR floats.
+ */
+void setMotorSpeeds(float* angles);
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -48,6 +55,23 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         }
 
         moveMotorsBy(angles, numAngles);
+        free(angles);
+        break;
+      } else {
+        invalidCommand();
+        break;
+      }
+    }
+    case SET_MOTOR_SPEEDS: {
+      uint16_t numAngles = rawArgsLength / 4;
+      if (numAngles == NUM_MOTORS) {
+        float* angles = (float*)malloc(sizeof(*angles) * numAngles);
+
+        for (int i = 0; i < numAngles; i++) {
+          angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
+        }
+
+        setMotorSpeeds(angles);
         free(angles);
         break;
       } else {

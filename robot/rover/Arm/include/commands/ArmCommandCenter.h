@@ -6,6 +6,7 @@
 #define ARM_ARMCOMMANDCENTER_H
 
 #include "../../../internal_comms/include/CommandCenter.h"
+#include "../../../robot/demos/RemoteArmControl/KeyboardBudge/PinSetup.h"
 
 class ArmCommandCenter : public internal_comms::CommandCenter {
   void executeCommand(const uint8_t commandID, const uint8_t* rawArgs,

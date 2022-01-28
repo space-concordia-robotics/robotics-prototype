@@ -20,7 +20,8 @@ def handle_send_motor_angles(data):
 
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
-arm_out_commands = [("move_motors_by", 76, 6 * [dt.ARG_FLOAT32]), ("ping", 75, []),
+arm_out_commands = [("move_motors_by", 76, 6 * [dt.ARG_FLOAT32]),
+                    ("set_motor_speeds", 78, 6 * [dt.ARG_FLOAT32]), ("ping", 75, []),
                     ("invalid_test", 10, []), ("send_motor_angles", 77, [])]
 
 # Will have to change this also
