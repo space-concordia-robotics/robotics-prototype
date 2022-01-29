@@ -34,6 +34,7 @@ class DcMotor {
    * when moving this motor 'forwards'
    */
   int dirPinForward;
+  int dirPinBackward;
   /**
    * @brief Sets the amount of time (millis) to wait after starting a move
    * after which it should autostop.
@@ -46,7 +47,10 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio, int dirPinForward)
       pwmPin(pwmPin),
       gearRatio(1.0),
       directionPin(dirPin),
-      dirPinForward(dirPinForward) {}
+      dirPinForward(dirPinForward) {
+  dirPinBackward = dirPinForward == HIGH ? LOW : HIGH;
+  stop();
+}
 
 DcMotor::DcMotor()
     : currentSpeed(0),
@@ -57,7 +61,8 @@ DcMotor::DcMotor()
 
 void DcMotor::setSpeed(int newSpeed) {
   // Set direction based on sign of speed
-  digitalWrite(directionPin, newSpeed >= 0 ? dirPinForward : !dirPinForward);
+  digitalWrite(directionPin, newSpeed >= 0 ? dirPinForward : dirPinBackward);
+
   analogWrite(pwmPin, abs(newSpeed));  // Set speed
   millisStartedMove = millis();
   currentSpeed = newSpeed;

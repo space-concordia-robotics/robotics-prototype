@@ -14,11 +14,12 @@
 #define ARM_PREAMBLE 0xA5
 #define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
 #define NUM_MOTORS 6
+#define NUM_DC_MOTORS 4
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
-DcMotor motors[NUM_MOTORS];
+DcMotor motors[NUM_DC_MOTORS];
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -30,14 +31,15 @@ void setup() {
     datum.angle = 1.5 + i;
     encoderData[i] = datum;
   }
-  // motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, HIGH);
-  motors[0] = DcMotor(33, 2, 1.0, HIGH);  // TODO for test only
-  motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, HIGH);
-  motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, HIGH);
-  motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, LOW);
+  motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
+  motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, LOW);
+  motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, LOW);
+  pinSetup();
+
   // Will have to be changed to allow for the UART motors
-  motors[4] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
-  motors[5] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  // motors[4] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  // motors[5] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
 
   /*Serial.begin(9600);
   while (!Serial) {
@@ -47,9 +49,11 @@ void setup() {
     digitalWrite(LED, LOW);
     delay(100);
   }*/
-
-  commandCenter->startSerial(-1, -1, 24,
-                             -1);  // not using transmitenable with usb
+  // tx2 sends to 25,     output 26
+  // TX teensy, RX teensy, enable pin, transmit pin
+  commandCenter->startSerial(1, 0, 25, 26);
+  /*commandCenter->startSerial(-1, -1, 24,
+                             -1);*/  // not using transmitenable with usb
 }
 
 // 0 bytes received means waiting on next preamble
@@ -178,6 +182,16 @@ void sendMotorAngles() {
   commandCenter->sendMessage(*message);
 }
 
+void doChecksAndDelay(unsigned int delay) {
+  unsigned int startTime = millis();
+  while (millis() - startTime < delay) {
+    // Do motor checks (ex stop after certain time of no messages)
+    for (int i = 0; i < NUM_DC_MOTORS; i++) {
+      motors[i].doChecks();
+    }
+  }
+}
+
 void loop() {
   // Read and send messages
   if (Serial.available() > 0) {
@@ -185,8 +199,11 @@ void loop() {
   }
   commandCenter->sendMessage();
 
-  // Do motor checks (ex stop after certain time of no messages)
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    motors[i].doChecks();
+  for (int i = 0; i < NUM_DC_MOTORS; i++) {
+    motors[i].setSpeed(100);
+    doChecksAndDelay(1500);
+    motors[i].setSpeed(-100);
+    doChecksAndDelay(1500);
+    motors[i].stop();
   }
 }

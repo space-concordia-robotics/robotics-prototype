@@ -17,4 +17,10 @@ void pinSetup(void) {
 
   pinMode(M4_DIR_PIN, OUTPUT);
   pinMode(M4_STEP_PIN, OUTPUT);
+
+  /*pinMode(M5_DIR_PIN, OUTPUT);
+  pinMode(M5_STEP_PIN, OUTPUT);
+
+  pinMode(M6_DIR_PIN, OUTPUT);
+  pinMode(M6_STEP_PIN, OUTPUT);*/
 }

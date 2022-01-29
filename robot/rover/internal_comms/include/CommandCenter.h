@@ -110,7 +110,7 @@ class CommandCenter {
    * Reads the two bytes that make up the argument length and combines
    * them into an uint16_t
    */
-  uint16_t readArgSize();
+  uint8_t readArgSize();
 
   /**
    * Waits until there is something to read or for 50ms,
