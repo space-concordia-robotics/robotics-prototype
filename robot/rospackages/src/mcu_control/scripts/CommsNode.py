@@ -10,7 +10,7 @@ import re
 import serial
 import struct
 from collections import deque
-import Jetson.GPIO as gpio
+#import Jetson.GPIO as gpio # TODO readd for real thing
 from geometry_msgs.msg import Twist
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -56,10 +56,10 @@ arm_queue = deque()
 rover_queue = deque()
 science_queue = deque()
 
-gpio.setwarnings(False)
-gpio.setmode(gpio.BOARD)
-gpio.setup(SW_PINS, gpio.OUT)
-gpio.output(SW_PINS, NONE)
+#gpio.setwarnings(False) # TODO readd all these for real thing
+#gpio.setmode(gpio.BOARD)
+#gpio.setup(SW_PINS, gpio.OUT)
+#gpio.output(SW_PINS, NONE)
 
 
 def twist_rover_callback(twist_msg):
@@ -100,8 +100,9 @@ def send_queued_commands():
 
 
 def receive_message():
-    for device in range(2):
-        gpio.output(SW_PINS, PIN_DESC[device])
+    #for device in range(2): # TODO readd for real
+    for device in range(1):  # TODO remove for real
+        #gpio.output(SW_PINS, PIN_DESC[device]) # TODO readd for real
         if ser.in_waiting > 0:
 
             commandID = ser.read()
@@ -158,9 +159,9 @@ def send_command(command_name, args, deviceToSendTo):
         #gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-        #ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
-        arg_length = len(command[2]).to_bytes(1, 'big')
-        ser.write(arg_length)
+        ser.write(get_arg_bytes(command).to_bytes(2, 'big'))
+        #arg_length = len(command[2]).to_bytes(1, 'big')
+        #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
         for argument in zip(args, data_types):
             data = argument[0]

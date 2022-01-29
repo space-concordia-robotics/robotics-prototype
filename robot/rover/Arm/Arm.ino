@@ -30,7 +30,8 @@ void setup() {
     datum.angle = 1.5 + i;
     encoderData[i] = datum;
   }
-  motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, HIGH);
+  // motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, HIGH);
+  motors[0] = DcMotor(33, 2, 1.0, HIGH);  // TODO for test only
   motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, HIGH);
   motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, HIGH);
   motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
@@ -143,8 +144,18 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
 
 void setMotorSpeeds(float* angles) {
   for (int i = 0; i < NUM_MOTORS; i++) {
+    int angle = (int)(angles[i]);
     motors[i].setSpeed(angles[i]);
   }
+
+  byte* data = new byte[128];
+  int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
+                   angles[1], angles[2], angles[3], angles[4], angles[5]);
+  if (r < 0 || r > 128) {
+    invalidCommand();
+  }
+  internal_comms::Message* message = commandCenter->createMessage(0, r, data);
+  commandCenter->sendMessage(*message);
 }
 
 void sendMotorAngles() {

@@ -64,11 +64,15 @@ void DcMotor::setSpeed(int newSpeed) {
 }
 
 void DcMotor::doChecks() {
-  if (millis() - millisStartedMove && currentSpeed != 0) {
+  if ((millis() - millisStartedMove) > timeToWaitUntilStop &&
+      currentSpeed != 0) {
     stop();
   }
 }
 
-void DcMotor::stop() { analogWrite(pwmPin, 0); }
+void DcMotor::stop() {
+  analogWrite(pwmPin, 0);
+  currentSpeed = 0;
+}
 
 #endif
