@@ -29,4 +29,4 @@ pygame==1.9.6
 pytest==3.6.3
 pylint==2.5.3
 yapf==0.30.0
-Jetsion.GPIO
+Jetson.GPIO
