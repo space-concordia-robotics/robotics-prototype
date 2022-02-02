@@ -4,7 +4,7 @@ cycler==0.10.0
 empy==3.3.2
 kiwisolver==1.0.1
 more-itertools==4.2.0
-numpy==1.14.5
+numpy==1.21.0
 pluggy==0.6.0
 py==1.10.0
 pyparsing==2.2.0
