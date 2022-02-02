@@ -17,18 +17,18 @@ const float wheelBase = 0.33;
 #define NUM_MOTORS 6
 
 #define M6_RL_PWM 2
-#define M5_ML_PWM 3
+#define M5_ML_PWM 5
 #define M4_FL_PWM 4
 
-#define M3_RR_PWM 5
+#define M3_RR_PWM 3
 #define M2_MR_PWM 6
 #define M1_FR_PWM 7
 
 #define M6_RL_DIR 26
-#define M5_ML_DIR 25
+#define M5_ML_DIR 12
 #define M4_FL_DIR 24
 
-#define M3_RR_DIR 12
+#define M3_RR_DIR 25
 #define M2_MR_DIR 11
 #define M1_FR_DIR 8
 
@@ -56,7 +56,7 @@ const float wheelBase = 0.33;
 #define RB_SERVO 17
 
 #define VELOCITY_ADJUSTMENT_INTERVAL 100
-#define ROVER_MOVE_TIMEOUT 2500
+#define ROVER_MOVE_TIMEOUT 500
 
 #define ACCELERATION_RATE 5
 

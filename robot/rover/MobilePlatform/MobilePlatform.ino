@@ -16,7 +16,7 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
-
+uint32_t start = 0;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
@@ -31,9 +31,9 @@ void writeServoDefaultValues();
 
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
+    delay(250);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
+    delay(250);
 }
 
 void setup() {
@@ -55,7 +55,7 @@ void setup() {
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 
-
+    start = millis();
 
 }
 
@@ -63,6 +63,7 @@ void loop() {
     if(Serial.available() > 0) {
         commandCenter->readCommand();
     }
+
     commandCenter->sendMessage();
 
     if(Rover::systemStatus.is_passive_rover_feedback_enabled){
