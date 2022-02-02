@@ -39,6 +39,7 @@ DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio):// if no encoder
     setGearRatio(gearRatio);
     this -> motorType = DC_MOTOR;
     hasEncoder = false;
+    analogWriteFrequency(pwmPin, 18000);
 }
 
 void DcMotor::motorTimerInterrupt(void) {
