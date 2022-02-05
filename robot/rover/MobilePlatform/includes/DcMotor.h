@@ -1,11 +1,10 @@
 #ifndef DCMOTOR_H
 #define DCMOTOR_H
 #include "Arduino.h"
+
 #define PULSES_PER_REV     14
 #define GEAR_RATIO         188.61
 #define MAX_RPM            30
-
-
 
 enum MotorNames{
     FRONT_RIGHT=0,
@@ -62,14 +61,7 @@ typedef struct DcMotorState{
     uint8_t current_velocity;
 
     float actual_velocity;
-    uint8_t max_pwm_value;
-
     uint8_t desired_direction;
-
-    float gear_ratio;
-    float gear_ratio_reciprocal;
-    float encoder_resolution_reciprocal;
-
 
     uint8_t dir_pin;
     uint8_t pwm_pin;
@@ -78,11 +70,10 @@ typedef struct DcMotorState{
 
 
 
-typedef struct {bool is_throttle_timeout_enabled;
-    bool is_passive_rover_feedback_enabled;
+typedef struct {
 
-    bool are_motors_enabled;
-    bool is_open_loop;
+    bool is_throttle_timeout_enabled;
+    bool is_passive_rover_feedback_enabled;
 
     uint32_t last_velocity_adjustment;
     uint32_t last_move;
@@ -93,11 +84,9 @@ namespace Motor {
 
     extern DcMotorState motorList[6];
 
-    void attachMotor(const MotorNames &, const uint8_t&, const uint8_t&, const float&);
+    void attachMotor(const MotorNames &, const uint8_t&, const uint8_t&);
 
     void attachEncoder(const MotorNames &, const uint8_t&, const uint8_t&, const float&, void (*handler)(void));
-
-    void calculateMotorVelocity(const MotorNames &);
 
     void updateDesiredMotorVelocity(const MotorNames &, const uint8_t &, const uint8_t  &);
 

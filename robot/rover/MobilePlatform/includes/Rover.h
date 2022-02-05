@@ -3,6 +3,8 @@
 #include "DcMotor.h"
 #include "Servo.h"
 
+#include <cmath>
+
 const float width = 0.83;
 const float length = 1.2;
 

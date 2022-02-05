@@ -1,7 +1,5 @@
 #include "Rover.h"
 
-#include <cmath>
-
 namespace Rover {
 
     SystemState systemStatus;

@@ -38,9 +38,11 @@ void setup() {
 
     commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
+
     attachMotors();
     attachEncoders();
 
+    // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 
@@ -50,35 +52,40 @@ void loop() {
     if(Serial.available() > 0) {
         commandCenter->readCommand();
     }
-    commandCenter->sendMessage();
+    // Sort of un-used at the moment, but this can periodically transmit messages to the OBC which can define the status
+    // of the rover.
 
     if(Rover::systemStatus.is_passive_rover_feedback_enabled){
         Rover::calculateRoverVelocity();
         commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
 
     }
-
+    // The rover will update its own current velocity according to a time interval which is measured from when it
+    // last moved (in moveRover() )
     if( (millis() - Rover::systemStatus.last_velocity_adjustment) > ACCELERATION_RATE){
         Rover::updateWheelVelocities();
     }
+    // If the rover has not been commanded to move which a time interval, it must  be stopped (security risk).
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
     ( (millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
     }
 
+    // In case there are any messages queued in the transmit buffer, they should be sent.
+    commandCenter->sendMessage();
 }
 
 
 void attachMotors(){
+    Motor::attachMotor(FRONT_RIGHT,M1_FR_DIR,M1_FR_PWM);
+    Motor::attachMotor(MIDDLE_RIGHT,M2_MR_DIR,M2_MR_PWM);
+    Motor::attachMotor(REAR_RIGHT,M3_RR_DIR,M3_RR_PWM);
 
-    Motor::attachMotor(FRONT_RIGHT,M1_FR_DIR,M1_FR_PWM,GEAR_RATIO);
-    Motor::attachMotor(MIDDLE_RIGHT,M2_MR_DIR,M2_MR_PWM,GEAR_RATIO);
-    Motor::attachMotor(REAR_RIGHT,M3_RR_DIR,M3_RR_PWM,GEAR_RATIO);
-
-    Motor::attachMotor(FRONT_LEFT,M4_FL_DIR,M4_FL_PWM,GEAR_RATIO);
-    Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM,GEAR_RATIO);
-    Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM,GEAR_RATIO);
+    Motor::attachMotor(FRONT_LEFT,M4_FL_DIR,M4_FL_PWM);
+    Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM);
+    Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM);
 }
+// These are not currently operational
 void attachEncoders(){
     Motor::attachEncoder(FRONT_RIGHT,M1_FR_A,M1_FR_B,PULSES_PER_REV,InterruptHandler::RightFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_RIGHT,M2_MR_A,M2_MR_B,PULSES_PER_REV,InterruptHandler::RightMiddleMotorInterruptHandler);
