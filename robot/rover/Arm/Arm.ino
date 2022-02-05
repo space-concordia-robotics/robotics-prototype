@@ -1,42 +1,55 @@
 
 #include "Arduino.h"
 #define LED 13
+#include <HardwareSerial.h>
 #include <Servo.h>
 
-// The includes from pinsetup come from Arm commandcenter
 #include "CommandCenter.h"
 #include "include/DcMotor.h"
 #include "include/Encoder_Data.h"
+#include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
 
 #define ENCODER_SERIAL Serial1
 #define SERIAL_EVENT serialEvent1
 #define ARM_PREAMBLE 0xA5
 #define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
+
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
+#define NUM_SMART_SERVOS 2
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
+// SerialMotor serialMotors[NUM_SMART_SERVOS];
+// LSSServoMotor motorA(&Serial5);
 
 void setup() {
+  // Serial5.begin(115200);
+  /*while (true) {
+    Serial5.println("Hello");
+  }*/
+
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
   // ENCODER_SERIAL.begin(9600);
   // TODO: For testing, with no data
-  for (int i = 0; i < 6; i++) {
+  /*for (int i = 0; i < 6; i++) {
     EncoderData datum = EncoderData();
     datum.angle = 1.5 + i;
     encoderData[i] = datum;
-  }
+  }*/
+  pinSetup();
+
   motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, LOW);
   motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
   motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, LOW);
   motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, LOW);
-  pinSetup();
+  // serialMotors[0] = SerialMotor(LSSServoMotor(&Serial5), 5, 1.0);
+  // serialMotors[1] = SerialMotor(LSSServoMotor(&Serial5), 6, 1.0);
 
   // Will have to be changed to allow for the UART motors
   // motors[4] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
@@ -52,7 +65,7 @@ void setup() {
   }*/
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
-  commandCenter->startSerial(1, 0, 25, 26);
+  // commandCenter->startSerial(1, 0, 25, 26);
   /*commandCenter->startSerial(-1, -1, 24,
                              -1);*/  // not using transmitenable with usb
 }
@@ -190,6 +203,9 @@ void doChecksAndDelay(unsigned int delay) {
     for (int i = 0; i < NUM_DC_MOTORS; i++) {
       motors[i].doChecks();
     }
+    /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
+      serialMotors[i].doChecks();
+    }*/
   }
 }
 
@@ -198,14 +214,24 @@ void loop() {
   // Read and send messages
   if (Serial.available() > 0) {
     commandCenter->readCommand();
+    digitalWrite(LED, !digitalRead(LED));
   }
   commandCenter->sendMessage();
 
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
-    motors[i].setSpeed(100);
+    motors[i].setSpeed(150);
     doChecksAndDelay(1500);
-    motors[i].setSpeed(-100);
+    motors[i].setSpeed(-150);
     doChecksAndDelay(1500);
     motors[i].stop();
   }
+  /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
+    serialMotors[i].setSpeed(25);
+    doChecksAndDelay(1500);
+    serialMotors[i].setSpeed(-25);
+    doChecksAndDelay(1500);
+    serialMotors[i].stop();
+  }*/
+
+  // Serial5.println("Hello");
 }
