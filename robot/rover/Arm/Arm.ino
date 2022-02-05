@@ -23,6 +23,7 @@ DcMotor motors[NUM_DC_MOTORS];
 
 void setup() {
   pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
 
   // ENCODER_SERIAL.begin(9600);
   // TODO: For testing, with no data
@@ -193,6 +194,7 @@ void doChecksAndDelay(unsigned int delay) {
 }
 
 void loop() {
+  digitalWrite(LED, LOW);
   // Read and send messages
   if (Serial.available() > 0) {
     commandCenter->readCommand();
