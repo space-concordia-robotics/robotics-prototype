@@ -55,7 +55,13 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
             moveWheel(wheelNumber,pwm_dir,pwm);
             break;
         }
-
+        case COMMAND_MOVE_SERVO: {
+            uint8_t servoID = (*rawArgs++);
+            uint8_t angle = (*rawArgs++);
+            moveServo(servoID,angle);
+            break;
+        }
+        // Most of the command to get system parameters are in 'limbo' (waiting for encoders to work, and a proper handling of these things in the OBC)
         case COMMAND_GET_LINEAR_VELOCITY:
         {
             getLinearVelocity();

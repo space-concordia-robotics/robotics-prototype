@@ -20,6 +20,7 @@ internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
 void attachMotors();
 void attachEncoders();
+void attachServos();
 
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
@@ -40,6 +41,7 @@ void setup() {
 
     attachMotors();
     attachEncoders();
+    attachServos();
 
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
@@ -73,6 +75,12 @@ void loop() {
     commandCenter->sendMessage();
 }
 
+void attachServos(){
+    Rover::attachServo(CENTER_FRONT_1_SERVO,CF_1_SERVO);
+    Rover::attachServo( CENTER_FRONT_2_SERVO,CF_2_SERVO);
+    Rover::attachServo(CENTER_BACK_1_SERVO,CB_1_SERVO);
+    Rover::attachServo(CENTER_BACK_2_SERVO,CB_2_SERVO);
+}
 
 void attachMotors(){
     Motor::attachMotor(FRONT_RIGHT,M1_FR_DIR,M1_FR_PWM);
@@ -102,6 +110,9 @@ void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z
     Rover::moveRover(linear_y,omega_z);
 }
 
+void WheelsCommandCenter::moveServo(const uint8_t & servoID, const uint8_t & angle) {
+    Rover::moveServo((ServoNames)servoID,angle);
+}
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
 
     Rover::moveWheel((MotorNames)wheelNumber,direction,velocity);

@@ -2,6 +2,8 @@
 
 namespace Rover {
 
+    Servo servoList[6];
+
     SystemState systemStatus;
     RoverState roverState;
 
@@ -128,4 +130,14 @@ namespace Rover {
         roverState.rotational_velocity = (roverState.left_linear_velocity + roverState.right_linear_velocity) / wheelBase;
     }
 
+    void attachServo(const ServoNames& servoID,const uint8_t& pin) {
+
+        servoList[servoID] = Servo();
+        servoList[servoID].attach(pin);
+    }
+
+    // Angle is given by 0-180, if the value is > 180 than it is clipped to 180
+    void moveServo(const ServoNames& servo_id, const uint8_t & value) {
+        servoList[servo_id].write(value);
+    }
 }
