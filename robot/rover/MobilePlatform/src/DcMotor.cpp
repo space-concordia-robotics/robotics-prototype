@@ -26,6 +26,7 @@ namespace Motor {
 
         pinMode(pwmPin, OUTPUT);
         pinMode(dirPin, OUTPUT);
+        analogWriteFrequency(pwmPin, 18000);
     }
 
     void stop(const MotorNames &motorID){

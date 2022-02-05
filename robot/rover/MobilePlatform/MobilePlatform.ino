@@ -16,7 +16,6 @@ const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
 
-
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
 void attachMotors();
@@ -24,9 +23,9 @@ void attachEncoders();
 
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
+    delay(250);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
+    delay(250);
 }
 
 void setup() {
@@ -45,7 +44,6 @@ void setup() {
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
-
 }
 
 void loop() {

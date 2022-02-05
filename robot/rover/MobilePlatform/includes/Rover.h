@@ -19,18 +19,18 @@ const float wheelBase = 0.33;
 #define NUM_MOTORS 6
 
 #define M6_RL_PWM 2
-#define M5_ML_PWM 3
+#define M5_ML_PWM 5
 #define M4_FL_PWM 4
 
-#define M3_RR_PWM 5
+#define M3_RR_PWM 3
 #define M2_MR_PWM 6
 #define M1_FR_PWM 7
 
 #define M6_RL_DIR 26
-#define M5_ML_DIR 25
+#define M5_ML_DIR 12
 #define M4_FL_DIR 24
 
-#define M3_RR_DIR 12
+#define M3_RR_DIR 25
 #define M2_MR_DIR 11
 #define M1_FR_DIR 8
 
@@ -52,24 +52,9 @@ const float wheelBase = 0.33;
 #define M1_FR_A 35
 #define M1_FR_B 36
 
-#define ROVER_MOVE_TIMEOUT 2500
+#define ROVER_MOVE_TIMEOUT 500
 
 #define ACCELERATION_RATE 5
-
-#define SERVO_STOP 93
-#define FRONT_BASE_DEFAULT_PWM 65
-#define REAR_BASE_DEFAULT_PWM 35
-
-enum ServoNames{
-    FRONT_SIDE_SERVO = 0,
-    FRONT_BASE_SERVO = 1,
-    REAR_SIDE_SERVO= 2,
-    REAR_BASE_SERVO = 3
-};
-enum SteerDirection{
-    LEFT = 0,
-    RIGHT = 1
-};
 
 typedef struct {
     float right_linear_velocity;
