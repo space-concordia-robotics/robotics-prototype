@@ -1,5 +1,4 @@
 #include <cstdint>
-#include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "Rover.h"
@@ -20,14 +19,8 @@ const uint8_t TRANSMIT_PIN = 14;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
-
-// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void attachMotors();
-void attachServos();
 void attachEncoders();
-void initPidControllers();
-void writeServoDefaultValues();
-
 
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
@@ -47,10 +40,6 @@ void setup() {
 
     attachMotors();
     attachEncoders();
-    initPidControllers();
-
-    attachServos();
-    writeServoDefaultValues();
 
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
@@ -90,16 +79,6 @@ void attachMotors(){
     Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM,GEAR_RATIO);
     Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM,GEAR_RATIO);
 }
-void initPidControllers(){
-
-    Motor::initPidController(FRONT_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_RIGHT,14.1,0.282,40.625);
-
-    Motor::initPidController(FRONT_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_LEFT,14.1,0.282,40.625);
-}
 void attachEncoders(){
     Motor::attachEncoder(FRONT_RIGHT,M1_FR_A,M1_FR_B,PULSES_PER_REV,InterruptHandler::RightFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_RIGHT,M2_MR_A,M2_MR_B,PULSES_PER_REV,InterruptHandler::RightMiddleMotorInterruptHandler);
@@ -107,18 +86,6 @@ void attachEncoders(){
     Motor::attachEncoder(FRONT_LEFT,M4_FL_A,M4_FL_B,PULSES_PER_REV,InterruptHandler::LeftFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_LEFT,M5_ML_A,M5_ML_B,PULSES_PER_REV,InterruptHandler::LeftMiddleMotorInterruptHandler);
     Motor::attachEncoder(REAR_LEFT,M6_RL_A,M6_RL_B,PULSES_PER_REV,InterruptHandler::LeftBackMotorInterruptHandler);
-}
-void attachServos(){
-    Rover::attachServo(FRONT_BASE_SERVO,FB_SERVO);
-    Rover::attachServo(FRONT_SIDE_SERVO,FS_SERVO);
-    Rover::attachServo(REAR_SIDE_SERVO,RS_SERVO);
-    Rover::attachServo(REAR_BASE_SERVO,RB_SERVO);
-}
-void writeServoDefaultValues(){
-    Rover::writeToServo(FRONT_BASE_SERVO,FRONT_BASE_DEFAULT_PWM);
-    Rover::writeToServo(FRONT_SIDE_SERVO,SERVO_STOP);
-    Rover::writeToServo(REAR_BASE_SERVO,REAR_BASE_DEFAULT_PWM);
-    Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
 }
 
 void WheelsCommandCenter::stopMotors() {

@@ -50,12 +50,6 @@ const float wheelBase = 0.33;
 #define M1_FR_A 35
 #define M1_FR_B 36
 
-#define FS_SERVO 23//22
-#define FB_SERVO 22//23
-#define RS_SERVO 16
-#define RB_SERVO 17
-
-#define VELOCITY_ADJUSTMENT_INTERVAL 100
 #define ROVER_MOVE_TIMEOUT 2500
 
 #define ACCELERATION_RATE 5
@@ -91,10 +85,6 @@ namespace Rover {
     extern SystemState systemStatus;
 
     void calculateRoverVelocity();
-
-    void attachServo(const ServoNames&, const uint8_t&);
-
-    void writeToServo(const ServoNames&, const int16_t&);
 
     void moveWheel(const MotorNames &,const uint8_t &, const int8_t& );
 

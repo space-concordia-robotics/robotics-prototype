@@ -32,13 +32,6 @@ namespace Motor {
         pinMode(dirPin, OUTPUT);
     }
 
-    void initPidController(const MotorNames &motorID, const float& kp, const float& ki, const float& kd) {
-
-        motorList[motorID].pid_controller.kd = kd;
-        motorList[motorID].pid_controller.kp = kp;
-        motorList[motorID].pid_controller.ki = ki;
-
-    }
     void stop(const MotorNames &motorID){
         analogWrite(motorList[motorID].pwm_pin,0);
     }
@@ -47,6 +40,7 @@ namespace Motor {
         auto &motor = motorList[motorID];
 
 
+        // Prevent a new high speed in the other direction. To overcome this, first decelerate to 0 and then switch direction.
         if( (desired_direction != motor.desired_direction) && ( motor.current_velocity > 60) ){
             motor.desired_velocity = 0;
         }
@@ -61,12 +55,9 @@ namespace Motor {
 
         auto &motor = motorList[motorID];
 
-        digitalWrite(motor.dir_pin,motor.desired_direction);
-
-        analogWrite(motor.pwm_pin, motor.current_velocity);
-
     }
 
+    // Needs encoder feedback to work
     void calculateMotorVelocity(const MotorNames &motorID) {
         auto &motor = motorList[motorID];
         uint32_t dt = InterruptHandler::getMotorDt(motorID);
@@ -93,21 +84,17 @@ volatile uint32_t InterruptHandler::LEFT_MIDDLE_MOTOR_PREV_DT=0;
 volatile uint32_t InterruptHandler::LEFT_MIDDLE_MOTOR_DT=0;
 volatile uint32_t InterruptHandler::LEFT_MIDDLE_MOTOR_ENCODER_COUNT=0;
 
-
 volatile uint32_t InterruptHandler::LEFT_FRONT_MOTOR_PREV_DT=0;
 volatile uint32_t InterruptHandler::LEFT_FRONT_MOTOR_ENCODER_COUNT=0;
 volatile uint32_t InterruptHandler::LEFT_FRONT_MOTOR_DT=0;
-
 
 volatile uint32_t InterruptHandler::RIGHT_BACK_MOTOR_PREV_DT=0;
 volatile uint32_t InterruptHandler::RIGHT_BACK_MOTOR_ENCODER_COUNT=0;
 volatile uint32_t InterruptHandler::RIGHT_BACK_MOTOR_DT=0;
 
-
 volatile uint32_t InterruptHandler::RIGHT_FRONT_MOTOR_PREV_DT=0;
 volatile uint32_t InterruptHandler::RIGHT_FRONT_MOTOR_ENCODER_COUNT=0;
 volatile uint32_t InterruptHandler::RIGHT_FRONT_MOTOR_DT=0;
-
 
 volatile uint32_t InterruptHandler::RIGHT_MIDDLE_MOTOR_PREV_DT=0;
 volatile uint32_t InterruptHandler::RIGHT_MIDDLE_MOTOR_ENCODER_COUNT=0;

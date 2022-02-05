@@ -4,8 +4,6 @@
 
 namespace Rover {
 
-    Servo servoList[6];
-
     SystemState systemStatus;
     RoverState roverState;
 
@@ -20,6 +18,8 @@ namespace Rover {
            }
         }
     }
+    // Update current velocity of the wheel, based on whether it has reached the target velocity. This effect
+    // is how acceleration is done.
     void updateWheelVelocities(){
         systemStatus.last_velocity_adjustment = millis();
 
@@ -36,12 +36,14 @@ namespace Rover {
 
     }
 
-
+    // The kinematic model for this rover was taken from the paper "Considering Slip-Track for
+    // Energy-Efficient Paths of Skid-Steer Rovers".
     FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
 
-
+        // This is a fixed value that represents the diameter of the point turn
         float slip_track = 1.2f;
 
+        // This can be derived from the equation in the paper.
         float right_wheels_velocity = linear_y - ( omega_z * slip_track * 0.5f);
         float left_wheels_velocity = linear_y + ( omega_z * slip_track * 0.5f);
 
@@ -51,13 +53,13 @@ namespace Rover {
         if(left_wheels_velocity >= 1.0){
             left_wheels_velocity = 1.0;
         }
+        // Taken from the paper
         float r = (slip_track / 2.0f) * std::fabs(  (right_wheels_velocity +  left_wheels_velocity)/(right_wheels_velocity - left_wheels_velocity));
 
         float r_prime = slip_track/2.0f;
 
-        //Serial.write((uint8_t)right_wheels_velocity);
         uint8_t right_motor_direction;
-        uint8_t  left_motor_direction;
+        uint8_t left_motor_direction;
 
         //Point turn;
         if(r_prime >= r){
@@ -70,6 +72,8 @@ namespace Rover {
                 left_motor_direction = 0;
             }
             else {
+                // Since the velocity is calculated as a float, we can look at the sign bit (IEEE 754 representation) to figure out the sign of the number
+                // Also, this case is only when point turning, or when both wheels go in the same direction.
                 right_motor_direction = std::signbit(linear_y);
                 left_motor_direction = std::signbit(linear_y);
             }
@@ -85,6 +89,8 @@ namespace Rover {
         auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,1.0,0,255);
         auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,1.0,0,255);
 
+        // Go through each motor and update the speed, but actually symmetrically alternate from the far corners which motor is selected,
+        // which makes for easier for the rover to start moving
 
         while(current_motor <= 5) {
             Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,(uint8_t )right_wheels_pwm_velocity);
@@ -103,6 +109,7 @@ namespace Rover {
         }
       }
 
+      // From the old code, needs encoders to work (not tested)
     void calculateRoverVelocity() {
 
         using namespace Motor;
@@ -121,16 +128,6 @@ namespace Rover {
 
         roverState.linear_velocity = (roverState.right_linear_velocity - roverState.left_linear_velocity) / 6;
         roverState.rotational_velocity = (roverState.left_linear_velocity + roverState.right_linear_velocity) / wheelBase;
-    }
-
-    void writeToServo(const ServoNames& servo_id, const int16_t& value) {
-        servoList[servo_id].write(value);
-    }
-
-    void attachServo(const ServoNames& servoID,const uint8_t& pin) {
-
-        servoList[servoID] = Servo();
-        servoList[servoID].attach(pin);
     }
 
 }
