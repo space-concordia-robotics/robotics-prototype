@@ -77,7 +77,7 @@ void loop() {
 
 void attachServos(){
     Rover::attachServo(CENTER_FRONT_1_SERVO,CF_1_SERVO);
-    Rover::attachServo( CENTER_FRONT_2_SERVO,CF_2_SERVO);
+    Rover::attachServo(CENTER_FRONT_2_SERVO,CF_2_SERVO);
     Rover::attachServo(CENTER_BACK_1_SERVO,CB_1_SERVO);
     Rover::attachServo(CENTER_BACK_2_SERVO,CB_2_SERVO);
 }

@@ -1,7 +1,3 @@
-//
-// Created by Michael on 2021-01-23.
-//
-
 #ifndef WHEELS_WHEELSCOMMANDCENTER_H
 #define WHEELS_WHEELSCOMMANDCENTER_H
 
