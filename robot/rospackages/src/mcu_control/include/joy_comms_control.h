@@ -13,6 +13,7 @@ public:
     void MapButtonNamesToIds();
     int getButtonIdFromName(std::string button_name);
     void getControllerMappings(ros::NodeHandle *nh_param);
+    void publish_command_with_rate();
     struct Implement;
 
 private:
@@ -45,7 +46,15 @@ private:
                                 "BUTTON_L3",
                                 "BUTTON_R3",};
 
-    std::map<const char*, int> button_name_to_id_map;
+    struct cmp_str {
+        bool operator()(char const *a, char const *b) const
+        {
+            return std::strcmp(a, b) < 0;
+        }
+    };
+    std::map<const char*, int, cmp_str> button_name_to_id_map;
+    
+
 
     enum axes {
         JOY_LEFT_X = 0,

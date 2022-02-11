@@ -38,11 +38,10 @@ struct JoyCommsControl::Implement {
 
     ros::Publisher comms_pub;
 
-    std::vector<ButtonMappings> controller_mappings;
+    std_msgs::String commands[11];
+    int rates[11] = {-1};
+    int clicked[11];
 };
-
-// Map format: {"COMMAND", PUBLISH_RATE"}
-std::vector<JoyCommsControl::Implement::ButtonMappings> publish_queue;
 
 struct JoyCommsControl::Implement::ButtonMappings {
     int buttonId;
@@ -74,15 +73,12 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
             mappingObject = mappingsXML[i];
 
             button_name = static_cast<std::string>(mappingObject[0]).c_str();
-
-            currentButtonMap.buttonId = getButtonIdFromName(button_name);
+            int buttonId = getButtonIdFromName(button_name);
 
             command = static_cast<std::string>(mappingObject[1]).c_str();
-            currentButtonMap.command_string.data = command;
+            pImplement->commands[buttonId].data = command;
 
-            currentButtonMap.command_publish_rate = mappingObject[2];
-
-            pImplement->controller_mappings.push_back(currentButtonMap);
+            pImplement->rates[buttonId] = mappingObject[2];
         }
     }
 }
@@ -114,18 +110,21 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
 
 void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     std::vector<int> buttons = joy_msg->buttons;
-    ButtonMappings command_queue_entry;
-    for (int i = 0; i<buttons.size(); ++i) {
-        if (buttons[i] && i != enable_button) {
-            for (ButtonMappings controller_mapping : controller_mappings) {
-                if (controller_mapping.buttonId == i) {
-                    command_queue_entry = controller_mapping;
-                    publish_queue.push_back(command_queue_entry);
-                } else {
+    for (int i = 0; i < buttons.size(); ++i)
+    {
+        clicked[i] = buttons[i];
+    }
+}
 
-                }
-            }
-
+void JoyCommsControl::publish_command_with_rate() {
+    for (int i = 0; i < 11; ++i)
+    {
+        // TODO in last condition rate is used to check existance of command. consider changing it
+        if (i != pImplement->enable_button && pImplement->clicked[i] == 1 && pImplement->rates[i] > 0)
+        {
+            ros::Rate loop_rate(pImplement->rates[i]);
+            pImplement->publish_command(pImplement->commands[i]);
+            loop_rate.sleep();
         }
     }
 }
@@ -146,17 +145,15 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
     }
 }
 
-void manageQueue() {
-    while (ros::ok()) {
-
-    }
-}
-
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "joy_comms_control_node");
 
     ros::NodeHandle nh(""), nh_param("~");
     JoyCommsControl joy_control(&nh, &nh_param);
 
-    ros::spin();
+    while (ros::ok())
+    {
+        joy_control.publish_command_with_rate();
+        ros::spinOnce();
+    }
 }

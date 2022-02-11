@@ -1,5 +1,16 @@
 enable_button: 5
 stop_command: "stop_motors"
 command_topic: /arm_command
-controller_mappings: [["BUTTON_CROSS", "budge_motors 1 0 0 0 0 0", 30]]
-
+controller_mappings:
+  - - BUTTON_CROSS
+    - budge_motors 1 0 0 0 0 0
+    - 50
+  - - BUTTON_CIRCLE
+    - budge_motors 0 1 0 0 0 0
+    - 10
+  - - BUTTON_SQUARE
+    - budge_motors 0 0 1 0 0 0
+    - 10
+  - - BUTTON_TRIANGLE
+    - budge_motors 0 0 0 1 0 0
+    - 10
