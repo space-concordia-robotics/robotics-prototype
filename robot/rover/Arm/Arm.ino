@@ -24,14 +24,9 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
 // SerialMotor serialMotors[NUM_SMART_SERVOS];
-// LSSServoMotor motorA(&Serial5);
+// LSSServoMotor servoController(&Serial5);
 
 void setup() {
-  // Serial5.begin(115200);
-  /*while (true) {
-    Serial5.println("Hello");
-  }*/
-
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
@@ -48,12 +43,8 @@ void setup() {
   motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
   motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, LOW);
   motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, LOW);
-  // serialMotors[0] = SerialMotor(LSSServoMotor(&Serial5), 5, 1.0);
-  // serialMotors[1] = SerialMotor(LSSServoMotor(&Serial5), 6, 1.0);
-
-  // Will have to be changed to allow for the UART motors
-  // motors[4] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
-  // motors[5] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, HIGH);
+  // serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
+  // serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 
   /*Serial.begin(9600);
   while (!Serial) {
@@ -161,19 +152,19 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
 }
 
 void setMotorSpeeds(float* angles) {
-  for (int i = 0; i < NUM_MOTORS; i++) {
+  for (int i = 0; i < NUM_DC_MOTORS; i++) {
     int angle = (int)(angles[i]);
     motors[i].setSpeed(angles[i]);
   }
-
-  byte* data = new byte[128];
-  int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
-                   angles[1], angles[2], angles[3], angles[4], angles[5]);
-  if (r < 0 || r > 128) {
-    invalidCommand();
-  }
-  internal_comms::Message* message = commandCenter->createMessage(0, r, data);
-  commandCenter->sendMessage(*message);
+  /*
+    byte* data = new byte[128];
+    int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
+                     angles[1], angles[2], angles[3], angles[4], angles[5]);
+    if (r < 0 || r > 128) {
+      invalidCommand();
+    }
+    internal_comms::Message* message = commandCenter->createMessage(0, r, data);
+    commandCenter->sendMessage(*message);*/
 }
 
 void sendMotorAngles() {
@@ -217,21 +208,4 @@ void loop() {
     digitalWrite(LED, !digitalRead(LED));
   }
   commandCenter->sendMessage();
-
-  for (int i = 0; i < NUM_DC_MOTORS; i++) {
-    motors[i].setSpeed(150);
-    doChecksAndDelay(1500);
-    motors[i].setSpeed(-150);
-    doChecksAndDelay(1500);
-    motors[i].stop();
-  }
-  /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
-    serialMotors[i].setSpeed(25);
-    doChecksAndDelay(1500);
-    serialMotors[i].setSpeed(-25);
-    doChecksAndDelay(1500);
-    serialMotors[i].stop();
-  }*/
-
-  // Serial5.println("Hello");
 }
