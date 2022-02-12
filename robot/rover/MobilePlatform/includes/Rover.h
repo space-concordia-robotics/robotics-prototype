@@ -15,7 +15,7 @@ const float wheelBase = 0.33;
 
 /***** MOTORS *****/
 
-#define ROVER_MOVE_TIMEOUT 500
+#define ROVER_MOVE_TIMEOUT 250
 
 #define ACCELERATION_RATE 5
 
