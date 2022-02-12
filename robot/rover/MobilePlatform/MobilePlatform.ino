@@ -38,10 +38,9 @@ void setup() {
 
     commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
-
     attachMotors();
-    attachEncoders();
-    attachServos();
+    //attachEncoders();
+    //attachServos();
 
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
@@ -58,7 +57,6 @@ void loop() {
     if(Rover::systemStatus.is_passive_rover_feedback_enabled){
         Rover::calculateRoverVelocity();
         commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-
     }
     // The rover will update its own current velocity according to a time interval which is measured from when it
     // last moved (in moveRover() )
