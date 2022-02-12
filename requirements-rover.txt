@@ -24,7 +24,7 @@ pymongo==3.8.0
 image==1.5.27
 attrs==19.2.0
 ffmpeg-python==0.2.0
-Twisted==20.3.0
+Twisted==22.1.0
 pytest==3.6.3
 pylint==2.5.3
 yapf==0.30.0
