@@ -20,30 +20,42 @@ private:
     enum buttons {
         BUTTON_CROSS = 0,
         BUTTON_CIRCLE = 1,
-        BUTTON_SQUARE = 2,
-        BUTTON_TRIANGLE = 3,
+        BUTTON_TRIANGLE = 2,
+        BUTTON_SQUARE = 3,
         BUTTON_L1 = 4,
         BUTTON_R1 = 5,
-        BUTTON_SHARE = 6,
-        BUTTON_OPTION = 7,
-        BUTTON_HOME = 8,
-        BUTTON_L3 = 9,
-        BUTTON_R3 = 10,
+        BUTTON_L2 = 6,
+        BUTTON_R2 = 7,
+        BUTTON_SHARE = 8,
+        BUTTON_OPTION = 9,
+        BUTTON_HOME = 10,
+        BUTTON_L3 = 11,
+        BUTTON_R3 = 12,
+        BUTTON_DPAD_UP = 13,
+        BUTTON_DPAD_DOWN = 14,
+        BUTTON_DPAD_LEFT = 15,
+        BUTTON_DPAD_RIGHT = 16,
     };
 
-    const char* button_names[11] = {"BUTTON_CROSS",
+    const std::string button_names[17] = {"BUTTON_CROSS",
                                 "BUTTON_CIRCLE",
-                                "BUTTON_SQUARE",
                                 "BUTTON_TRIANGLE",
+                                "BUTTON_SQUARE",
                                 "BUTTON_L1",
                                 "BUTTON_R1",
+                                "BUTTON_L2",
+                                "BUTTON_R2",
                                 "BUTTON_SHARE",
                                 "BUTTON_OPTION",
                                 "BUTTON_HOME",
                                 "BUTTON_L3",
-                                "BUTTON_R3",};
+                                "BUTTON_R3",
+                                "BUTTON_DPAD_UP",
+                                "BUTTON_DPAD_DOWN",
+                                "BUTTON_DPAD_LEFT",
+                                "BUTTON_DPAD_RIGHT"};
 
-    std::map<const char*, int> button_name_to_id_map;
+    std::map<std::string, int> button_name_to_id_map;
 
     enum axes {
         JOY_LEFT_X = 0,

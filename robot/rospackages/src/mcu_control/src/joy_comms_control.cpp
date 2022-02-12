@@ -45,14 +45,14 @@ struct JoyCommsControl::Implement::ButtonMappings {
 };
 
 void JoyCommsControl::MapButtonNamesToIds() {
-    for (int currentButtonId = BUTTON_CROSS; currentButtonId<=BUTTON_R3; ++currentButtonId) {
+    for (int currentButtonId = BUTTON_CROSS; currentButtonId<=BUTTON_DPAD_RIGHT; ++currentButtonId) {
         button_name_to_id_map.insert(
-                std::pair<const char*, int>(button_names[currentButtonId] , currentButtonId));
+                std::pair<std::string, int>(button_names[currentButtonId], currentButtonId));
     }
 }
 
 int JoyCommsControl::getButtonIdFromName(std::string button_name) {
-    return button_name_to_id_map.at(button_name.c_str());
+    return button_name_to_id_map[button_name];
 }
 
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
@@ -83,6 +83,8 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
 
 JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
     pImplement = new Implement;
+
+    MapButtonNamesToIds();
 
     nh_param->param<int>("/command_topic", pImplement->enable_button, 0);
 
