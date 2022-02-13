@@ -63,6 +63,8 @@ private:
         JOY_RIGHT_X = 3,
         JOY_RIGHT_Y = 4,
         TRIGGER_R2 = 5,
+        DPAD_X = 6,
+        DPAD_Y = 7
     };
 
     Implement* pImplement;

@@ -38,9 +38,13 @@ struct JoyCommsControl::Implement {
 
     ros::Publisher comms_pub;
 
-    std_msgs::String commands[11];
-    int rates[11] = {-1};
-    int clicked[11];
+    std_msgs::String button_commands[11];
+    int button_rates[11] = {-1};
+    int buttons_clicked[11];
+
+    bool axes_moved[8];
+    float axes_values[8];
+    float axes_percentage[8];
 };
 
 struct JoyCommsControl::Implement::ButtonMappings {
@@ -76,9 +80,9 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
             int buttonId = getButtonIdFromName(button_name);
 
             command = static_cast<std::string>(mappingObject[1]).c_str();
-            pImplement->commands[buttonId].data = command;
+            pImplement->button_commands[buttonId].data = command;
 
-            pImplement->rates[buttonId] = mappingObject[2];
+            pImplement->button_rates[buttonId] = mappingObject[2];
         }
     }
 }
@@ -112,19 +116,36 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
     std::vector<int> buttons = joy_msg->buttons;
     for (int i = 0; i < buttons.size(); ++i)
     {
-        clicked[i] = buttons[i];
+        buttons_clicked[i] = buttons[i];
+    }
+    std::vector<float> axes = joy_msg->axes;
+    for (int i = 0; i < axes.size(); ++i)
+    {
+        float value = axes[i];
+        //triggers have a different behavior
+        if(i == TRIGGER_L2 || i == TRIGGER_R2){
+            //todo when joy starts it publishes triggers as 0 and hence will be registered as being pressed until it is pressed for the first time
+            axes_moved[i] = value != 1 ;
+            //this is a fix because triggers have value 0 when they are half pressed
+            axes_percentage[i] = (value - 1)/-2;
+        }else{
+            axes_moved[i] = value != 0 ;
+            axes_percentage[i] = value;
+        }
+        axes_values[i] = value;
     }
 }
 
 void JoyCommsControl::publish_command_with_rate() {
-    for (int i = 0; i < sizeof(pImplement->clicked); ++i)
+    //todo use length of buttons_clicked instead of 11
+    for (int i = 0; i < 11; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
-        if (i != pImplement->enable_button && pImplement->clicked[i] == 1 && pImplement->rates[i] > 0)
+        if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates[i] > 0)
         {
             //TODO this rate is not unique to each button when more than one is pressed
-            ros::Rate loop_rate(pImplement->rates[i]);
-            pImplement->publish_command(pImplement->commands[i]);
+            ros::Rate loop_rate(pImplement->button_rates[i]);
+            pImplement->publish_command(pImplement->button_commands[i]);
             loop_rate.sleep();
         }
     }
@@ -139,10 +160,11 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
         addToCommandQueue(joy_msg);
     } else {
-        //clear clicked array since enable button is not clicked
+        //clear buttons_clicked array since enable button is not clicked
         //consider moving it to "not publish" when enable is not clicked
-        for(int i =0; i< sizeof(clicked);i++){
-            clicked[i] = 0;
+        //todo use length of buttons_clicked instead of 11
+        for(int i =0; i< 11 ;i++){
+            buttons_clicked[i] = 0;
         }
 
         if (!sent_disable_msg) {
