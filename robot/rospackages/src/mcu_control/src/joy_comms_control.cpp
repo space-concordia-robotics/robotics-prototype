@@ -117,11 +117,12 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
 }
 
 void JoyCommsControl::publish_command_with_rate() {
-    for (int i = 0; i < 11; ++i)
+    for (int i = 0; i < sizeof(pImplement->clicked); ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
         if (i != pImplement->enable_button && pImplement->clicked[i] == 1 && pImplement->rates[i] > 0)
         {
+            //TODO this rate is not unique to each button when more than one is pressed
             ros::Rate loop_rate(pImplement->rates[i]);
             pImplement->publish_command(pImplement->commands[i]);
             loop_rate.sleep();
@@ -138,6 +139,12 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
         addToCommandQueue(joy_msg);
     } else {
+        //clear clicked array since enable button is not clicked
+        //consider moving it to "not publish" when enable is not clicked
+        for(int i =0; i< sizeof(clicked);i++){
+            clicked[i] = 0;
+        }
+
         if (!sent_disable_msg) {
             comms_pub.publish(stop_command);
             sent_disable_msg = true;
