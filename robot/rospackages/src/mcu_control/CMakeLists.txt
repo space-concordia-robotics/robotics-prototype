@@ -76,5 +76,7 @@ include_directories(
 )
 
 add_executable(joy_comms_control_node src/joy_comms_control.cpp)
+add_executable(joy_comms_control_node_wheels src/joy_comms_control_wheels.cpp)
 
 target_link_libraries(joy_comms_control_node ${catkin_LIBRARIES})
+target_link_libraries(joy_comms_control_node_wheels ${catkin_LIBRARIES})

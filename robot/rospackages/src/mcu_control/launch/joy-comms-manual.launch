@@ -1,0 +1,28 @@
+<launch>
+
+  <arg name="joy_dev_wheels" default="/dev/input/js0"/>
+  <arg name="joy_dev_arm" default="/dev/input/js1"/>
+  <arg name="joy_comms_config_file_wheels" default="$(find mcu_control)/config/joy_comms_config_wheels.yaml"/>
+  <arg name="joy_comms_config_file_arm" default="$(find mcu_control)/config/joy_comms_config_arm.yaml"/>
+
+  <node name="joy_node_wheels" pkg="joy" type="joy_node">
+    <param name="dev" value="$(arg joy_dev_wheels)"/>
+    <param name="coalesce_interval" value="0.05"/>
+    <param name="autorepeat_rate" value="10.0"/>
+  </node>
+
+  <node name="joy_node_arm" pkg="joy" type="joy_node">
+      <param name="dev" value="$(arg joy_dev_arm)"/>
+      <param name="coalesce_interval" value="0.05"/>
+      <param name="autorepeat_rate" value="10.0"/>
+    </node>
+
+  <node name="joy_comms_wheels" pkg="mcu_control" type="joy_comms_control_node_wheels">
+      <rosparam command="load" file="$(arg joy_comms_config_file_wheels)"/>
+    </node>
+
+  <node name="joy_comms_arm" pkg="mcu_control" type="joy_comms_control_node">
+    <rosparam command="load" file="$(arg joy_comms_config_file_arm)"/>
+  </node>
+  
+</launch>
