@@ -3,7 +3,7 @@
   <arg name="joy_dev" default="/dev/input/js0"/>
   <arg name="cmd_vel_out" default="rover_cmd_vel"/>
   <arg name="joy_config_file" default="$(find mcu_control)/config/joy_config.yaml"/>
-  <arg name="joy_comms_config_file" default="$(find mcu_control)/config/joy_comms_config.yaml"/>
+  <arg name="joy_comms_config_file" default="joy_comms_config_arm.yaml"/>
 
   <node name="joy_node" pkg="joy" type="joy_node">
     <param name="dev" value="$(arg joy_dev)"/>
