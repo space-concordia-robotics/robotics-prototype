@@ -12,6 +12,8 @@ public:
     JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param);
     void MapButtonNamesToIds();
     int getButtonIdFromName(std::string button_name);
+    int getAxisIdFromName(std::string button_name);
+    bool isButton(std::string control_name);
     void getControllerMappings(ros::NodeHandle *nh_param);
     void publish_command_with_rate();
     struct Implement;
@@ -19,7 +21,7 @@ public:
 private:
     const int QUEUE_LOOP_RATE = 120;
 
-    // These enums are defined for PS4 controllers
+    // These enums are defined for Xbox controllers
     enum buttons {
         BUTTON_CROSS = 0,
         BUTTON_CIRCLE = 1,
@@ -34,7 +36,7 @@ private:
         BUTTON_R3 = 10,
     };
 
-    const char* button_names[11] = {"BUTTON_CROSS",
+    std::string button_names[11] = {"BUTTON_CROSS",
                                 "BUTTON_CIRCLE",
                                 "BUTTON_SQUARE",
                                 "BUTTON_TRIANGLE",
@@ -46,15 +48,8 @@ private:
                                 "BUTTON_L3",
                                 "BUTTON_R3",};
 
-    struct cmp_str {
-        bool operator()(char const *a, char const *b) const
-        {
-            return std::strcmp(a, b) < 0;
-        }
-    };
-    std::map<const char*, int, cmp_str> button_name_to_id_map;
+    std::map<std::string, int> button_name_to_id_map;
     
-
 
     enum axes {
         JOY_LEFT_X = 0,
@@ -66,6 +61,18 @@ private:
         DPAD_X = 6,
         DPAD_Y = 7
     };
+
+    std::string axis_names[8] = {"JOY_LEFT_X",
+                                "JOY_LEFT_Y",
+                                "TRIGGER_L2",
+                                "JOY_RIGHT_X",
+                                "JOY_RIGHT_Y",
+                                "TRIGGER_R2",
+                                "DPAD_X",
+                                "DPAD_Y",};
+
+    std::map<std::string, int> axis_name_to_id_map;
+
 
     Implement* pImplement;
 };

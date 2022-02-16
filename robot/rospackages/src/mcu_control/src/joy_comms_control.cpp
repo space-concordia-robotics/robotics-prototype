@@ -42,7 +42,9 @@ struct JoyCommsControl::Implement {
     int button_rates[11] = {-1};
     int buttons_clicked[11];
 
-    bool axes_moved[8];
+    std_msgs::String axis_commands[8];
+    int axis_rates[8] = {-1};
+    int axes_moved[8];
     float axes_values[8];
     float axes_percentage[8];
 };
@@ -54,14 +56,24 @@ struct JoyCommsControl::Implement::ButtonMappings {
 };
 
 void JoyCommsControl::MapButtonNamesToIds() {
-    for (int currentButtonId = BUTTON_CROSS; currentButtonId<=BUTTON_R3; ++currentButtonId) {
-        button_name_to_id_map.insert(
-                std::pair<const char*, int>(button_names[currentButtonId] , currentButtonId));
+    for (int i = BUTTON_CROSS; i<=BUTTON_R3; ++i) {
+        button_name_to_id_map.insert(std::pair<std::string, int>(button_names[i], i));
+    }
+    for (int i = JOY_LEFT_X; i<=DPAD_Y; ++i) {
+        axis_name_to_id_map.insert(std::pair<std::string, int>(axis_names[i], i));
     }
 }
 
 int JoyCommsControl::getButtonIdFromName(std::string button_name) {
-    return button_name_to_id_map[button_name.c_str()];
+    return button_name_to_id_map[button_name];
+}
+
+int JoyCommsControl::getAxisIdFromName(std::string button_name) {
+    return axis_name_to_id_map[button_name];
+}
+
+bool JoyCommsControl::isButton(std::string control_name) {
+    return button_name_to_id_map.count(control_name);
 }
 
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
@@ -71,19 +83,32 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
 
     Implement::ButtonMappings currentButtonMap;
     std::string button_name, command;
+    int buttonId;
     XmlRpc::XmlRpcValue mappingObject;
     if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < mappingsXML.size(); ++i) {
             mappingObject = mappingsXML[i];
 
             button_name = static_cast<std::string>(mappingObject[0]).c_str();
-            int buttonId = getButtonIdFromName(button_name);
-
             command = static_cast<std::string>(mappingObject[1]).c_str();
-            pImplement->button_commands[buttonId].data = command;
+            //check if control pressed is a button or an axes by the name of the control and compare to the maps
+            //if button add to button comands else add to axes commands
+            if(isButton(button_name)){
+                buttonId = getButtonIdFromName(button_name);
 
-            pImplement->button_rates[buttonId] = mappingObject[2];
+                pImplement->button_commands[buttonId].data = command;
+
+                pImplement->button_rates[buttonId] = mappingObject[2];
+            }else{
+                buttonId = getAxisIdFromName(button_name);
+
+                pImplement->axis_commands[buttonId].data = command;
+
+                pImplement->axis_rates[buttonId] = mappingObject[2];
+            }
         }
+    }else{
+        std::cout << "mappingsXML type is not XmlRpc::XmlRpcValue::TypeArray. Make sure the paramater controller_mappings is there" << std::endl;
     }
 }
 
@@ -108,8 +133,7 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
 
     pImplement->comms_pub = nh->advertise<std_msgs::String>(pImplement->command_topic, 1, true);
 
-    pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback,
-                                                          pImplement);
+    pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback, pImplement);
 }
 
 void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg) {
@@ -125,11 +149,11 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
         //triggers have a different behavior
         if(i == TRIGGER_L2 || i == TRIGGER_R2){
             //todo when joy starts it publishes triggers as 0 and hence will be registered as being pressed until it is pressed for the first time
-            axes_moved[i] = value != 1 ;
+            axes_moved[i] = value != 1 ? 1 : 0;
             //this is a fix because triggers have value 0 when they are half pressed
             axes_percentage[i] = (value - 1)/-2;
         }else{
-            axes_moved[i] = value != 0 ;
+            axes_moved[i] = value < 0 ? -1 : (value > 0 ? 1 : 0);
             axes_percentage[i] = value;
         }
         axes_values[i] = value;
@@ -137,18 +161,45 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
 }
 
 void JoyCommsControl::publish_command_with_rate() {
+    //TODO take rate from config file for each button
+    ros::Rate loop_rate(10);
+    //loop through clicked buttons
     //todo use length of buttons_clicked instead of 11
     for (int i = 0; i < 11; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
         if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates[i] > 0)
         {
-            //TODO this rate is not unique to each button when more than one is pressed
-            ros::Rate loop_rate(pImplement->button_rates[i]);
             pImplement->publish_command(pImplement->button_commands[i]);
-            loop_rate.sleep();
         }
     }
+
+    //loop through moved axes
+    //todo use length of axes_moved instead of 8
+    for (int i = 0; i < 8; ++i)
+    {
+        // TODO in last condition rate is used to check existance of command. consider changing it
+        if (i != pImplement->enable_button && pImplement->axes_moved[i] != 0 && pImplement->axis_rates[i] > 0)
+        {
+            std::string commandAsString = pImplement->axis_commands[i].data;
+            int index = commandAsString.find('%');
+            std::string newCommandAsString = commandAsString.substr(0, index);
+            std_msgs::String command;
+            if(commandAsString[index+1] == 'b'){//the axis is treated as a button. pass 1 or -1
+                newCommandAsString.append(std::to_string(pImplement->axes_moved[i]));
+                newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
+                command.data = newCommandAsString;
+            }else{//the axis is treated as an axes. pass percentage multiplied by range
+                //todo get the range for each command
+                int range = 250;
+                newCommandAsString.append(std::to_string(pImplement->axes_percentage[i] * range));
+                newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
+                command.data = newCommandAsString;
+            }
+            pImplement->publish_command(command);
+        }
+    }
+    loop_rate.sleep();
 }
 
 void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
@@ -165,6 +216,9 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
         //todo use length of buttons_clicked instead of 11
         for(int i =0; i< 11 ;i++){
             buttons_clicked[i] = 0;
+        }
+        for(int i =0; i< 8 ;i++){
+            axes_moved[i] = 0;
         }
 
         if (!sent_disable_msg) {
