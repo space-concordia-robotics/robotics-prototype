@@ -1,5 +1,4 @@
 #include <cstdint>
-#include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include "Rover.h"
@@ -28,14 +27,12 @@ void attachEncoders();
 void initPidControllers();
 void writeServoDefaultValues();
 
-
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
+    delay(250);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
+    delay(250);
 }
-
 void setup() {
 
     pinMode(LED_BUILTIN,OUTPUT);
@@ -43,14 +40,13 @@ void setup() {
 
     blink();
 
-    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+    commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
     attachMotors();
     attachEncoders();
-    initPidControllers();
 
     attachServos();
-    writeServoDefaultValues();
+    //writeServoDefaultValues();
 
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
@@ -92,16 +88,7 @@ void attachMotors(){
     Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM,GEAR_RATIO);
     Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM,GEAR_RATIO);
 }
-void initPidControllers(){
 
-    Motor::initPidController(FRONT_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_RIGHT,14.1,0.282,40.625);
-
-    Motor::initPidController(FRONT_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_LEFT,14.1,0.282,40.625);
-}
 void attachEncoders(){
     Motor::attachEncoder(FRONT_RIGHT,M1_FR_A,M1_FR_B,PULSES_PER_REV,InterruptHandler::RightFrontMotorInterruptHandler);
     Motor::attachEncoder(MIDDLE_RIGHT,M2_MR_A,M2_MR_B,PULSES_PER_REV,InterruptHandler::RightMiddleMotorInterruptHandler);
@@ -116,12 +103,12 @@ void attachServos(){
     Rover::attachServo(REAR_SIDE_SERVO,RS_SERVO);
     Rover::attachServo(REAR_BASE_SERVO,RB_SERVO);
 }
-void writeServoDefaultValues(){
-    Rover::writeToServo(FRONT_BASE_SERVO,FRONT_BASE_DEFAULT_PWM);
-    Rover::writeToServo(FRONT_SIDE_SERVO,SERVO_STOP);
-    Rover::writeToServo(REAR_BASE_SERVO,REAR_BASE_DEFAULT_PWM);
-    Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
-}
+//void writeServoDefaultValues(){
+//    Rover::writeToServo(FRONT_BASE_SERVO,FRONT_BASE_DEFAULT_PWM);
+//    Rover::writeToServo(FRONT_SIDE_SERVO,SERVO_STOP);
+//    Rover::writeToServo(REAR_BASE_SERVO,REAR_BASE_DEFAULT_PWM);
+//    Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
+//}
 
 void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
@@ -132,9 +119,9 @@ void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z
     Rover::moveRover(linear_y,omega_z);
 }
 
-void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,uint8_t direction,uint8_t speed) {
 
-    Rover::moveWheel((MotorNames)wheelNumber,direction,velocity);
+    Rover::moveWheel((MotorNames)wheelNumber,direction,speed);
 
 }
 void WheelsCommandCenter::getLinearVelocity(void) {

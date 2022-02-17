@@ -15,64 +15,15 @@ const float wheelBase = 0.33;
 /***** MOTORS *****/
 
 #define NUM_MOTORS 6
-
-#define M6_RL_PWM 2
-#define M5_ML_PWM 3
-#define M4_FL_PWM 4
-
-#define M3_RR_PWM 5
-#define M2_MR_PWM 6
-#define M1_FR_PWM 7
-
-#define M6_RL_DIR 26
-#define M5_ML_DIR 25
-#define M4_FL_DIR 24
-
-#define M3_RR_DIR 12
-#define M2_MR_DIR 11
-#define M1_FR_DIR 8
-
-#define M6_RL_A 27
-#define M6_RL_B 28
-
-#define M5_ML_A 33
-#define M5_ML_B 34
-
-#define M4_FL_A 31
-#define M4_FL_B 32
-
-#define M3_RR_A 29
-#define M3_RR_B 30
-
-#define M2_MR_A 37
-#define M2_MR_B 38
-
-#define M1_FR_A 35
-#define M1_FR_B 36
-
-#define FS_SERVO 23//22
-#define FB_SERVO 22//23
-#define RS_SERVO 16
-#define RB_SERVO 17
-
-#define VELOCITY_ADJUSTMENT_INTERVAL 100
-#define ROVER_MOVE_TIMEOUT 2500
-
+#define ROVER_MOVE_TIMEOUT 500
 #define ACCELERATION_RATE 5
 
-#define SERVO_STOP 93
-#define FRONT_BASE_DEFAULT_PWM 65
-#define REAR_BASE_DEFAULT_PWM 35
 
 enum ServoNames{
     FRONT_SIDE_SERVO = 0,
     FRONT_BASE_SERVO = 1,
     REAR_SIDE_SERVO= 2,
     REAR_BASE_SERVO = 3
-};
-enum SteerDirection{
-    LEFT = 0,
-    RIGHT = 1
 };
 
 typedef struct {
@@ -96,7 +47,7 @@ namespace Rover {
 
     void writeToServo(const ServoNames&, const int16_t&);
 
-    void moveWheel(const MotorNames &,const uint8_t &, const int8_t& );
+    void moveWheel(const MotorNames &,uint8_t ,uint8_t);
 
     void moveRover(const float & ,const float &);
 

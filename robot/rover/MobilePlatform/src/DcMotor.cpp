@@ -1,12 +1,10 @@
 #include "DcMotor.h"
+
 namespace Motor {
     DcMotorState motorList[6];
 
     void attachEncoder(const MotorNames& motorID, const uint8_t& encoderPinA, const uint8_t& encoderPinB, const float& encoder_res,
                        void (*handler)(void)) {
-
-        //->encoderResolution= encoder_res;
-        motorList[motorID].encoder_resolution_reciprocal = 1 / encoder_res;
 
         pinMode(encoderPinA, INPUT_PULLUP);
         pinMode(encoderPinB, INPUT_PULLUP);
@@ -20,25 +18,15 @@ namespace Motor {
         motorList[motorID].dir_pin = dirPin;
         motorList[motorID].pwm_pin = pwmPin;
         motorList[motorID].id = motorID;
-        motorList[motorID].gear_ratio = gearRatio;
-        motorList[motorID].gear_ratio_reciprocal = 1 / gearRatio;
 
         motorList[motorID].desired_velocity = 0;
         motorList[motorID].current_velocity = 0;
 
-        motorList[motorID].max_pwm_value = 255;
-
+        analogWriteFrequency(pwmPin,18000);
         pinMode(pwmPin, OUTPUT);
         pinMode(dirPin, OUTPUT);
     }
 
-    void initPidController(const MotorNames &motorID, const float& kp, const float& ki, const float& kd) {
-
-        motorList[motorID].pid_controller.kd = kd;
-        motorList[motorID].pid_controller.kp = kp;
-        motorList[motorID].pid_controller.ki = ki;
-
-    }
     void stop(const MotorNames &motorID){
         analogWrite(motorList[motorID].pwm_pin,0);
     }
@@ -67,22 +55,22 @@ namespace Motor {
 
     }
 
-    void calculateMotorVelocity(const MotorNames &motorID) {
-        auto &motor = motorList[motorID];
-        uint32_t dt = InterruptHandler::getMotorDt(motorID);
-        uint32_t encoderCount = InterruptHandler::getEncoderCount(motorID);
-
-        if (dt <= 0 || encoderCount <= 0) {
-            motor.actual_velocity= 0;
-        } else {
-            auto calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
-                                                 motor.encoder_resolution_reciprocal / (float) (dt));
-            motor.actual_velocity = calculated_velocity;
-            //motor.current_velocity = map(calculated_velocity,0,MAX);
-        }
-        InterruptHandler::reset(motorID);
-
-    }
+//    void calculateMotorVelocity(const MotorNames &motorID) {
+//        auto &motor = motorList[motorID];
+//        uint32_t dt = InterruptHandler::getMotorDt(motorID);
+//        uint32_t encoderCount = InterruptHandler::getEncoderCount(motorID);
+//
+//        if (dt <= 0 || encoderCount <= 0) {
+//            motor.actual_velocity= 0;
+//        } else {
+//            auto calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
+//                                                 motor.encoder_resolution_reciprocal / (float) (dt));
+//            motor.actual_velocity = calculated_velocity;
+//            //motor.current_velocity = map(calculated_velocity,0,MAX);
+//        }
+//        InterruptHandler::reset(motorID);
+//
+//    }
 }
 
 volatile uint32_t InterruptHandler::LEFT_BACK_MOTOR_PREV_DT=0;

@@ -1,17 +1,7 @@
 #ifndef DCMOTOR_H
 #define DCMOTOR_H
-#include "PidController.h"
-#define PULSES_PER_REV     14
-#define GEAR_RATIO         188.61
-#define MAX_RPM            30
 
-
-#define MAX_INPUT_VALUE 49  // maximum speed signal from controller
-#define MIN_INPUT_VALUE -MAX_INPUT_VALUE // minimum speed signal from controller
-#define MAX_PWM_VALUE 255
-#define MIN_PWM_VALUE 0
-#define MAX_RPM_VALUE MAX_RPM
-#define MIN_RPM_VALUE 0
+#include "Config.h"
 
 enum MotorNames{
     FRONT_RIGHT=0,
@@ -68,34 +58,17 @@ typedef struct DcMotorState{
     uint8_t current_velocity;
 
     float actual_velocity;
-    uint8_t max_pwm_value;
 
     uint8_t desired_direction;
-
-    float gear_ratio;
-    float gear_ratio_reciprocal;
-    float encoder_resolution_reciprocal;
-
 
     uint8_t dir_pin;
     uint8_t pwm_pin;
 
-    pidControllerState pid_controller;
 } DcMotorState;
-
-typedef struct{
-    float kp;
-    float ki;
-    float kd;
-} PidController;
-
 
 typedef struct {
     bool is_throttle_timeout_enabled;
     bool is_passive_rover_feedback_enabled;
-
-    bool are_motors_enabled;
-    bool is_open_loop;
 
     uint32_t last_velocity_adjustment;
     uint32_t last_move;
@@ -110,13 +83,10 @@ namespace Motor {
 
     void attachEncoder(const MotorNames &, const uint8_t&, const uint8_t&, const float&, void (*handler)(void));
 
-    void calculateMotorVelocity(const MotorNames &);
-
     void updateDesiredMotorVelocity(const MotorNames &, const uint8_t &, const uint8_t  &);
 
     void applyDesiredMotorVelocity(const MotorNames &);
 
-    void initPidController(const MotorNames &, const float&, const float&, const float&);
 
     void stop(const MotorNames &);
 }
