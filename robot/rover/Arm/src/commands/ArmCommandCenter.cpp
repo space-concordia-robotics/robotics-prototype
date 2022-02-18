@@ -6,6 +6,7 @@
 
 #include "../../../robot/demos/RemoteArmControl/KeyboardBudge/PinSetup.h"
 #include "Arduino.h"
+#define LED 13
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
@@ -63,6 +64,10 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
       }
     }
     case SET_MOTOR_SPEEDS: {
+      digitalWrite(LED, HIGH);
+      delay(1000);
+      digitalWrite(LED, LOW);
+
       uint16_t numAngles = rawArgsLength / 4;
       if (numAngles == NUM_MOTORS) {
         float* angles = (float*)malloc(sizeof(*angles) * numAngles);

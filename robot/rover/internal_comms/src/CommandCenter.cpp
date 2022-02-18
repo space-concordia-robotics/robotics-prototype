@@ -11,7 +11,6 @@
 
 #define COMMAND_DEBUG_MSG 0
 
-#define DEBUG
 #ifndef DEBUG
 #define Serial Serial1
 #endif
@@ -59,7 +58,7 @@ Command* CommandCenter::processCommand() {
   return cmd;
 }
 
-uint8_t CommandCenter::readArgSize() { return waitForSerial(); }
+uint8_t CommandCenter::readArgSize() { return Serial.read(); }
 
 Message* CommandCenter::createMessage(int messageID, int rawArgsLength,
                                       byte* rawArgs) {
@@ -94,8 +93,9 @@ void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin,
   CommandCenter::enablePin = enablePin;
 
   Serial.begin(COMMS_BAUDRATE);
-  Serial1.begin(COMMS_BAUDRATE);
+
 #ifndef DEBUG
+  pinMode(transmitPin, OUTPUT);
   Serial.transmitterEnable(
       transmitPin);  // must disable this for testing with USB
 #endif

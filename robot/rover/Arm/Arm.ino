@@ -19,6 +19,10 @@
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
 
+#ifndef DEBUG
+#define Serial Serial1
+#endif
+
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
@@ -27,6 +31,7 @@ DcMotor motors[NUM_DC_MOTORS];
 // LSSServoMotor servoController(&Serial5);
 
 void setup() {
+  Serial.begin(9600);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
@@ -56,9 +61,10 @@ void setup() {
   }*/
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
-  // commandCenter->startSerial(1, 0, 25, 26);
+  commandCenter->startSerial(1, 0, 25, 26);
   /*commandCenter->startSerial(-1, -1, 24,
                              -1);*/  // not using transmitenable with usb
+  digitalWrite(LED, LOW);
 }
 
 // 0 bytes received means waiting on next preamble
@@ -121,12 +127,6 @@ void SERIAL_EVENT() {
  */
 
 void invalidCommand() {
-  /*for (int i = 0; i < 3; i++) {
-    digitalWrite(13, HIGH);
-    delay(100);
-    digitalWrite(13, LOW);
-    delay(100);
-  }*/
   char* allocedMessage = strdup("Invalid Arm command");
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
@@ -201,11 +201,17 @@ void doChecksAndDelay(unsigned int delay) {
 }
 
 void loop() {
-  digitalWrite(LED, LOW);
   // Read and send messages
-  if (Serial.available() > 0) {
+  if (Serial1.available() > 0) {
     commandCenter->readCommand();
-    digitalWrite(LED, !digitalRead(LED));
+    // digitalWrite(LED, !digitalRead(LED));
   }
   commandCenter->sendMessage();
+
+  /*char* allocedMessage = strdup("Invalid Arm command");
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
+  commandCenter->sendMessage(*message);*/
+
+  // Serial1.println("Hello world");
 }
