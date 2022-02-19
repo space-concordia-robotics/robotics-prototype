@@ -1,11 +1,15 @@
 enable_button: 5
 stop_command: "stop_motors"
 command_topic: /rover_command
-controller_mappings: [[ "BUTTON_L2", "move_wheel 3 0 200", "BUTTON_DPAD_UP", "move_wheel 3 1 200" ],
-                      [ "BUTTON_L2", "move_wheel 2 0 200", "BUTTON_DPAD_UP", "move_wheel 2 1 200" ],
-                      [ "BUTTON_L2", "move_wheel 5 0 200", "BUTTON_DPAD_UP", "move_wheel 5 1 200" ],
+sub_topic: /joy_wheels
+controller_mappings: [[ "BUTTON_L2", "move_wheels 0 0 0 0 0 0 0 200 0 200 0 200", "BUTTON_SHARE", "move_wheels 0 0 0 0 0 0 1 200 1 200 1 200"],
 
-                      [ "BUTTON_R2", "move_wheel 0 0 80", "BUTTON_TRIANGLE", "move_wheel 0 1 200" ],
-                      [ "BUTTON_R2", "move_wheel 1 0 150", "BUTTON_TRIANGLE", "move_wheel 1 1 200" ],
-                      [ "BUTTON_R2", "move_wheel 4 0 200", "BUTTON_TRIANGLE", "move_wheel 4 1 200" ]]
+                      [ "BUTTON_R2", "move_wheels 1 200 1 200 1 200 0 0 0 0 0 0", "BUTTON_OPTION", "move_wheels 0 200 0 200 0 200 0 0 0 0 0 0" ],
 
+                      [ "BUTTON_CROSS", "move_wheels 0 200 0 200 0 200 1 200 1 200 1 200", "BUTTON_HOME", "" ],
+
+                      [ "BUTTON_SQUARE", "move_wheels 1 200 1 200 1 200 0 200 0 200 0 200", "BUTTON_HOME", "" ],
+
+                      [ "BUTTON_TRIANGLE", "move_wheels 1 200 1 200 1 200 1 200 1 200 1 200", "BUTTON_HOME", "" ],
+
+                      [ "BUTTON_CIRCLE", "move_wheels 0 200 0 200 0 200 0 200 0 200 0 200", "BUTTON_HOME", "" ]]

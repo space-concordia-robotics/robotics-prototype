@@ -6,12 +6,13 @@
   <arg name="joy_comms_config_file_arm" default="$(find mcu_control)/config/joy_comms_config_arm.yaml"/>
 
   <node name="joy_node_wheels" pkg="joy" type="joy_node">
+    <remap from="/joy" to="/joy_wheels"/>
     <param name="dev" value="$(arg joy_dev_wheels)"/>
     <param name="coalesce_interval" value="0.05"/>
     <param name="autorepeat_rate" value="10.0"/>
   </node>
 
-  <node name="joy_node_arm" pkg="joy" type="joy_node">
+  <node name="joy_node" pkg="joy" type="joy_node">
       <param name="dev" value="$(arg joy_dev_arm)"/>
       <param name="coalesce_interval" value="0.05"/>
       <param name="autorepeat_rate" value="10.0"/>

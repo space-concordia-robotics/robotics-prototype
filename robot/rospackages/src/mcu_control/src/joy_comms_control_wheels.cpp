@@ -62,7 +62,7 @@ int JoyCommsControl::getButtonIdFromName(std::string button_name) {
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     // Get controller mappings from ROS params
     XmlRpc::XmlRpcValue mappingsXML;
-    nh_param->getParam("/controller_mappings", mappingsXML);
+    nh_param->getParam("controller_mappings", mappingsXML);
 
     Implement::ButtonMappings currentButtonMap;
     std::string button_name, command, toggle_alt_button, alt_command;
@@ -94,15 +94,15 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
 
     MapButtonNamesToIds();
 
-    nh_param->param<int>("/command_topic", pImplement->enable_button, 0);
+    nh_param->param<int>("command_topic", pImplement->enable_button, 0);
 
-    nh_param->param<int>("/enable_button", pImplement->enable_button, 0);
+    nh_param->param<int>("enable_button", pImplement->enable_button, 0);
 
     std::string stop_command;
-    nh_param->param<std::string>("/stop_command", stop_command, "stop");
+    nh_param->param<std::string>("stop_command", stop_command, "stop");
     pImplement->stop_command.data = stop_command;
 
-    nh_param->param<std::string>("/command_topic", pImplement->command_topic, "stop");
+    nh_param->param<std::string>("command_topic", pImplement->command_topic, "stop");
 
     getControllerMappings(nh_param);
 
@@ -110,7 +110,10 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
 
     pImplement->comms_pub = nh->advertise<std_msgs::String>(pImplement->command_topic, 5, true);
 
-    pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback,
+    std::string sub_topic;
+    nh_param->param<std::string>("sub_topic", sub_topic, "/joy_wheels");
+
+    pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>(sub_topic, 1, &JoyCommsControl::Implement::joyCallback,
                                                           pImplement);
 }
 
