@@ -14,6 +14,7 @@
 // Dc Motor pins
 
 #define NUM_MOTORS 6
+#include "Arduino.h"
 
 #define M6_RL_PWM 2
 #define M5_ML_PWM 5
@@ -51,6 +52,9 @@
 #define M1_FR_A 35
 #define M1_FR_B 36
 
+// GPS I2C
+#define I2C_SDA_0 18
+#define I2C_CLK_0 18
+
 
 #endif //ROVER_CONFIG_H
-

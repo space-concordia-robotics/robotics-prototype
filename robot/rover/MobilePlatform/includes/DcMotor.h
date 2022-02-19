@@ -1,11 +1,11 @@
 #ifndef DCMOTOR_H
 #define DCMOTOR_H
 
-#include "Arduino.h"
-
 #define PULSES_PER_REV     14
 #define GEAR_RATIO         188.61
 #define MAX_RPM            30
+
+#include "Config.h"
 
 enum MotorNames{
     FRONT_RIGHT=0,
@@ -68,7 +68,6 @@ typedef struct DcMotorState{
     uint8_t pwm_pin;
 
 } DcMotorState;
-
 
 
 typedef struct {

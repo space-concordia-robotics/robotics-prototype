@@ -15,9 +15,17 @@ const float wheelBase = 0.33;
 
 /***** MOTORS *****/
 
-#define ROVER_MOVE_TIMEOUT 250
-
+#define NUM_MOTORS 6
+#define ROVER_MOVE_TIMEOUT 500
 #define ACCELERATION_RATE 5
+
+
+enum ServoNames{
+    CENTER_FRONT_1_SERVO = 0,
+    CENTER_FRONT_2_SERVO= 1,
+    CENTER_BACK_1_SERVO = 2,
+    CENTER_BACK_2_SERVO = 3
+};
 
 typedef struct {
     float right_linear_velocity;
@@ -28,12 +36,7 @@ typedef struct {
     int16_t min_output_signal;
 } RoverState;
 
-enum ServoNames{
-    CENTER_FRONT_1_SERVO = 0,
-    CENTER_FRONT_2_SERVO= 1,
-    CENTER_BACK_1_SERVO = 2,
-    CENTER_BACK_2_SERVO = 3
-};
+
 namespace Rover {
 
     extern RoverState roverState;
@@ -42,7 +45,11 @@ namespace Rover {
 
     void calculateRoverVelocity();
 
-    void moveWheel(const MotorNames &,const uint8_t &, const int8_t& );
+    void attachServo(const ServoNames&, const uint8_t&);
+
+    void writeToServo(const ServoNames&, const int16_t&);
+
+    void moveWheel(const MotorNames &,uint8_t ,uint8_t);
 
     void moveRover(const float & ,const float &);
 

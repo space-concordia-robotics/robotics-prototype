@@ -7,9 +7,17 @@ namespace Rover {
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID,const uint8_t & direction,const int8_t& wheelPWM) {
+    void moveWheel(const MotorNames &motorID,uint8_t direction, uint8_t speed) {
 
-        Motor::updateDesiredMotorVelocity(motorID, direction, wheelPWM);
+        systemStatus.last_move = millis();
+        Motor::updateDesiredMotorVelocity(motorID,direction,speed);
+//        if(speed < 0){
+//            Motor::updateDesiredMotorVelocity(motorID,0,abs(speed));
+//        }
+//        else{
+//            Motor::updateDesiredMotorVelocity(motorID,1,abs(speed));
+//        }
+
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
@@ -36,64 +44,9 @@ namespace Rover {
 
     }
 
-
+    // This is a fixed value that represents the diameter of the point turn
     FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
 
-
-        float right_wheels_velocity = 0.0f;
-        float left_wheels_velocity = 0.0f;
-
-        uint8_t right_motor_direction = 0;
-        uint8_t left_motor_direction = 0;
-
-
-        if(std::fabs(linear_y) > 0) {
-
-            if(omega_z > 0){
-
-                right_wheels_velocity = std::fabs(linear_y);
-                left_wheels_velocity = std::fabs(omega_z) * std::fabs(linear_y);
-
-            }
-            else{
-                right_wheels_velocity = std::fabs(omega_z) * std::fabs(linear_y);
-                left_wheels_velocity =  std::fabs(linear_y);
-            }
-            right_motor_direction = std::signbit(linear_y);
-            left_motor_direction = !std::signbit(linear_y);
-        }
-
-        // POINT TURN
-        else if(linear_y ==0 && std::fabs(omega_z) > 0){
-            right_motor_direction = std::signbit(omega_z);
-            left_motor_direction = std::signbit(omega_z);
-
-            right_wheels_velocity = omega_z;
-            left_wheels_velocity = omega_z;
-        }
-        int current_motor = 0;
-
-        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,1.0,0,255);
-        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,1.0,0,255);
-
-        // Go through each motor and update the speed, but actually symmetrically alternate from the far corners which motor is selected,
-        // which makes for easier for the rover to start moving
-
-        while(current_motor <= 5) {
-            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,(uint8_t )right_wheels_pwm_velocity);
-
-            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,(uint8_t )left_wheels_pwm_velocity);
-
-            current_motor++;
-        }
-        systemStatus.last_move = millis();
-
-    }
-        // The kinematic model for this rover was taken from the paper "Considering Slip-Track for
-    // Energy-Efficient Paths of Skid-Steer Rovers".
-/*    FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
-
-        // This is a fixed value that represents the diameter of the point turn
         float slip_track = 1.2f;
 
         // This can be derived from the equation in the paper.
@@ -154,7 +107,6 @@ namespace Rover {
         }
         systemStatus.last_move = millis();
     }
-*/
 
     void decelerateRover(){
         for(auto& motor : Motor::motorList){

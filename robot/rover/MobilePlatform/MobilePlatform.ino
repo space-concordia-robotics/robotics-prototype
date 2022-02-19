@@ -3,8 +3,10 @@
 #include <Servo.h>
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
+#include "TinyGPS++.h"
+#include "SparkFun_I2C_GPS_Arduino_Library.h"
 
-//#define DEBUG
+#define I2C_MEASUREMENT_INTERVAL 100
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -17,30 +19,41 @@ const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
+uint32_t last_gps_measurement = 0;
+
+I2CGPS myI2CGPS;
+TinyGPSPlus myGPS;
 
 void attachMotors();
 void attachEncoders();
 void attachServos();
+void initPidControllers();
+void writeServoDefaultValues();
 
+ void double2bytes(uint8_t* buffer, double value){
+    memcpy(buffer, (unsigned char*) (&value), sizeof(double));
+}
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
     delay(250);
     digitalWrite(LED_BUILTIN,LOW);
     delay(250);
 }
-
 void setup() {
 
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
 
+    pinMode(I2C_SDA_0,OUTPUT_OPENDRAIN);
+
     blink();
 
-    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
-
+    commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+    myI2CGPS.begin();
     attachMotors();
-    //attachEncoders();
-    //attachServos();
+   attachEncoders();
+
+    attachServos();
 
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
@@ -68,7 +81,36 @@ void loop() {
     ( (millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
     }
+    if( (millis() - last_gps_measurement) > I2C_MEASUREMENT_INTERVAL){
+        last_gps_measurement = millis();
+        if(myI2CGPS.available()){
+            myGPS.encode(myI2CGPS.read());
+        }
 
+        if (myGPS.time.isUpdated() && myGPS.location.isValid()) //Check to see if new GPS info is available
+        {
+            double lat = myGPS.location.lat();
+            double longt = myGPS.location.lng();
+
+            uint8_t *lat_buffer = nullptr;
+            uint8_t* longt_buffer = nullptr;
+
+            double2bytes(lat_buffer,lat);
+            double2bytes(lat_buffer,longt);
+
+            byte data_buffer[16];
+            memcpy(data_buffer,lat_buffer,8);
+            memcpy(data_buffer+8,longt_buffer,8);
+
+            internal_comms::Message* message = commandCenter->createMessage(COMMAND_SEND_GPS,sizeof(data_buffer),data_buffer);
+
+            commandCenter->sendMessage(*message);
+        }
+        else
+        {
+            //publishError();
+        }
+    }
     // In case there are any messages queued in the transmit buffer, they should be sent.
     commandCenter->sendMessage();
 }
@@ -99,6 +141,13 @@ void attachEncoders(){
     Motor::attachEncoder(REAR_LEFT,M6_RL_A,M6_RL_B,PULSES_PER_REV,InterruptHandler::LeftBackMotorInterruptHandler);
 }
 
+//void writeServoDefaultValues(){
+//    Rover::writeToServo(FRONT_BASE_SERVO,FRONT_BASE_DEFAULT_PWM);
+//    Rover::writeToServo(FRONT_SIDE_SERVO,SERVO_STOP);
+//    Rover::writeToServo(REAR_BASE_SERVO,REAR_BASE_DEFAULT_PWM);
+//    Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
+//}
+
 void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
 }
@@ -111,10 +160,8 @@ void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z
 void WheelsCommandCenter::moveServo(const uint8_t & servoID, const uint8_t & angle) {
     Rover::moveServo((ServoNames)servoID,angle);
 }
-void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
-
-    Rover::moveWheel((MotorNames)wheelNumber,direction,velocity);
-
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,uint8_t direction,uint8_t speed) {
+    Rover::moveWheel((MotorNames)wheelNumber,direction,speed);
 }
 void WheelsCommandCenter::getLinearVelocity(void) {
     const float linear_velocity = Rover::roverState.linear_velocity;

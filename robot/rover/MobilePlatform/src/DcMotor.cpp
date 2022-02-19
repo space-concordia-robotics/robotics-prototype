@@ -1,4 +1,5 @@
 #include "DcMotor.h"
+
 namespace Motor {
     DcMotorState motorList[6];
 
@@ -52,7 +53,27 @@ namespace Motor {
 
         auto &motor = motorList[motorID];
 
+        digitalWrite(motor.dir_pin,motor.desired_direction);
+
+        analogWrite(motor.pwm_pin, motor.current_velocity);
     }
+
+//    void calculateMotorVelocity(const MotorNames &motorID) {
+//        auto &motor = motorList[motorID];
+//        uint32_t dt = InterruptHandler::getMotorDt(motorID);
+//        uint32_t encoderCount = InterruptHandler::getEncoderCount(motorID);
+//
+//        if (dt <= 0 || encoderCount <= 0) {
+//            motor.actual_velocity= 0;
+//        } else {
+//            auto calculated_velocity = (float) (encoderCount * 60000000.0 * motor.gear_ratio_reciprocal *
+//                                                 motor.encoder_resolution_reciprocal / (float) (dt));
+//            motor.actual_velocity = calculated_velocity;
+//            //motor.current_velocity = map(calculated_velocity,0,MAX);
+//        }
+//        InterruptHandler::reset(motorID);
+//
+//    }
 }
 
 volatile uint32_t InterruptHandler::LEFT_BACK_MOTOR_PREV_DT=0;

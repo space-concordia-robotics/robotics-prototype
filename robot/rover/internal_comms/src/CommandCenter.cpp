@@ -19,11 +19,8 @@ namespace internal_comms
     Command* CommandCenter::processCommand()
     {
         uint8_t commandID = waitForSerial();
-        /* uint8_t deviceSending = waitForSerial(); */
-        /* uint8_t deviceReceiving = waitForSerial(); */
 
         uint16_t argumentSize = waitForSerial();
-        //uint16_t argumentSize = waitForSerial();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;

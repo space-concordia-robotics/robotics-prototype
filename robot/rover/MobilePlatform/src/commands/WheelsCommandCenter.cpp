@@ -49,10 +49,17 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
         }
         case COMMAND_MOVE_WHEEL:{
             uint8_t wheelNumber = (*rawArgs++);
-            uint8_t pwm_dir = (*rawArgs++);
-            uint8_t pwm= (*rawArgs++);
-
-            moveWheel(wheelNumber,pwm_dir,pwm);
+            uint8_t direction = (*rawArgs++);
+            uint8_t speed = (*rawArgs++);
+            moveWheel(wheelNumber,direction,speed);
+            break;
+        }
+        case COMMAND_MOVE_WHEELS:{
+            for(int i = 0 ; i < 6 ; i++){
+                uint8_t direction = (*rawArgs++);
+                uint8_t speed = (*rawArgs++);
+                moveWheel(i,direction,speed);
+            }
             break;
         }
         case COMMAND_MOVE_SERVO: {
@@ -62,6 +69,7 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
             break;
         }
         // Most of the command to get system parameters are in 'limbo' (waiting for encoders to work, and a proper handling of these things in the OBC)
+
         case COMMAND_GET_LINEAR_VELOCITY:
         {
             getLinearVelocity();
