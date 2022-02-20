@@ -30,22 +30,22 @@ struct JoyCommsControl::Implement {
 
     int enable_button;
 
-    std_msgs::String stop_command;
+    std_msgs::String stop_commands[4];
 
     bool sent_disable_msg;
 
-    std::string command_topic;
+    std::string command_topics[4];
 
-    ros::Publisher comms_pub;
+    ros::Publisher comms_pubs[4];
 
     std_msgs::String button_commands_array[4][11];
     std_msgs::String button_commands[11];
-    int button_rates[11] = {-1};
+    int button_rates_array[4][11] = {-1};
     int buttons_clicked[11];
 
     std_msgs::String axis_commands_array[4][8];
     std_msgs::String axis_commands[8];
-    int axis_rates[8] = {-1};
+    int axis_rates_array[4][8] = {-1};
     int axes_moved[8];
     float axes_values[8];
     float axes_percentage[8];
@@ -105,13 +105,13 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
 
                     pImplement->button_commands_array[i][buttonId].data = command;
 
-                    pImplement->button_rates[buttonId] = mappingObject[2];
+                    pImplement->button_rates_array[i][buttonId] = mappingObject[2];
                 }else{
                     buttonId = getAxisIdFromName(button_name);
 
                     pImplement->axis_commands_array[i][buttonId].data = command;
 
-                    pImplement->axis_rates[buttonId] = mappingObject[2];
+                    pImplement->axis_rates_array[i][buttonId] = mappingObject[2];
                 }
             }
             pImplement->number_of_mappings = i+1;
@@ -130,26 +130,39 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     }
 }
 
+
+void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
+    XmlRpc::XmlRpcValue topicsXML;
+    XmlRpc::XmlRpcValue stopCommandsXML;
+
+    nh_param->getParam("/command_topics", topicsXML);
+    nh_param->getParam("/stop_commands", stopCommandsXML);
+
+    if (topicsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        for (int i = 0; i < topicsXML.size(); ++i) {
+            pImplement->command_topics[i] = static_cast<std::string>(topicsXML[i]).c_str();
+            pImplement->comms_pubs[i] = nh->advertise<std_msgs::String>(pImplement->command_topics[i], 1, true);
+        }
+    }
+    if (stopCommandsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        for (int i = 0; i < stopCommandsXML.size(); ++i) {
+            pImplement->stop_commands[i].data = static_cast<std::string>(stopCommandsXML[i]).c_str();
+        }
+    }
+}
+
 JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
     MapButtonNamesToIds();
 
     pImplement = new Implement;
 
-    nh_param->param<int>("/command_topic", pImplement->enable_button, 0);
-
     nh_param->param<int>("/enable_button", pImplement->enable_button, 0);
-
-    std::string stop_command;
-    nh_param->param<std::string>("/stop_command", stop_command, "stop");
-    pImplement->stop_command.data = stop_command;
-
-    nh_param->param<std::string>("/command_topic", pImplement->command_topic, "stop");
 
     getControllerMappings(nh_param);
 
     pImplement->sent_disable_msg = false;
 
-    pImplement->comms_pub = nh->advertise<std_msgs::String>(pImplement->command_topic, 1, true);
+    getCommandTopics(nh, nh_param);
 
     pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback, pImplement);
 }
@@ -186,7 +199,7 @@ void JoyCommsControl::publish_command_with_rate() {
     for (int i = 0; i < 11; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
-        if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates[i] > 0)
+        if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates_array[pImplement->current_mappings_index][i] > 0)
         {
             pImplement->publish_command(pImplement->button_commands[i]);
         }
@@ -197,7 +210,7 @@ void JoyCommsControl::publish_command_with_rate() {
     for (int i = 0; i < 8; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
-        if (i != pImplement->enable_button && pImplement->axes_moved[i] != 0 && pImplement->axis_rates[i] > 0)
+        if (i != pImplement->enable_button && pImplement->axes_moved[i] != 0 && pImplement->axis_rates_array[pImplement->current_mappings_index][i] > 0)
         {
             std::string commandAsString = pImplement->axis_commands[i].data;
             int index = commandAsString.find('%');
@@ -221,7 +234,7 @@ void JoyCommsControl::publish_command_with_rate() {
 }
 
 void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
-    comms_pub.publish(command);
+    comms_pubs[current_mappings_index].publish(command);
     sent_disable_msg = false;
 }
 
@@ -260,7 +273,7 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
                         axis_commands[i] = axis_commands_array[new_mapping_index][i];
                     }
                     current_mappings_index = new_mapping_index;
-                    std::cout << "Mapping changed" << std::endl;
+                    std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
                 }
                 
             }else{
@@ -281,7 +294,9 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
         }
 
         if (!sent_disable_msg) {
-            comms_pub.publish(stop_command);
+            for(int i = 0; i < number_of_mappings; ++i){
+                comms_pubs[i].publish(stop_commands[i]);
+            }
             sent_disable_msg = true;
         }
     }

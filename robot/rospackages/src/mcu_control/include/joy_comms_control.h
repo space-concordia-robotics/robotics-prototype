@@ -15,6 +15,7 @@ public:
     int getAxisIdFromName(std::string button_name);
     bool isButton(std::string control_name);
     void getControllerMappings(ros::NodeHandle *nh_param);
+    void getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_param);
     void publish_command_with_rate();
     struct Implement;
 
