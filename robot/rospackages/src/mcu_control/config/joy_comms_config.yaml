@@ -2,27 +2,23 @@ enable_button: 5
 stop_command: "stop_motors"
 command_topic: /arm_command
 controller_mappings:
-  - - BUTTON_CROSS
-    - budge_motors 0 0 0 0 1 0
-    - 50
-  - - BUTTON_TRIANGLE
-    - budge_motors 0 0 0 0 -1 0
-    - 10
-  - - BUTTON_CIRCLE
-    - budge_motors 0 0 0 0 0 1
-    - 10
-  - - BUTTON_SQUARE
-    - budge_motors 0 0 0 0 0 -1
-    - 10
-  - - JOY_LEFT_X
-    - budge_motors %b 0 0 0 0 0
-    - 10
-  - - JOY_LEFT_Y
-    - budge_motors 0 %b 0 0 0 0
-    - 10
-  - - JOY_RIGHT_X
-    - budge_motors 0 0 0 %b 0 0
-    - 10
-  - - JOY_RIGHT_Y
-    - budge_motors 0 0 %b 0 0 0
-    - 10
+# D pad left
+  - - ["BUTTON_CROSS","budge_motors 0 0 0 0 1 0",50]
+    - ["BUTTON_TRIANGLE","budge_motors 0 0 0 0 -1 0",10]
+    - ["BUTTON_CIRCLE","budge_motors 0 0 0 0 0 1",10]
+    - ["BUTTON_SQUARE","budge_motors 0 0 0 0 0 -1",10]
+    - ["JOY_LEFT_X","budge_motors %b 0 0 0 0 0",10]
+    - ["JOY_LEFT_Y","budge_motors 0 %b 0 0 0 0",10]
+    - ["JOY_RIGHT_X","budge_motors 0 0 %b 0 0 0",10]
+    - ["JOY_RIGHT_Y","budge_motors 0 0 0 %b 0 0",10]
+# D pad up
+  - - ["BUTTON_SQUARE","budge_motors 0 0 0 0 1 0",50]
+    - ["BUTTON_CIRCLE","budge_motors 0 0 0 0 -1 0",10]
+    - ["BUTTON_TRIANGLE","budge_motors 0 0 0 0 0 1",10]
+    - ["BUTTON_CROSS","budge_motors 0 0 0 0 0 -1",10]
+    - ["JOY_RIGHT_Y","budge_motors %b 0 0 0 0 0",10]
+    - ["JOY_RIGHT_X","budge_motors 0 %b 0 0 0 0",10]
+    - ["JOY_LEFT_Y","budge_motors 0 0 %b 0 0 0",10]
+    - ["JOY_LEFT_X","budge_motors 0 0 0 %b 0 0",10]
+# D pad right
+# D pad down

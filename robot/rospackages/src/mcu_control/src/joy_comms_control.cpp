@@ -38,15 +38,20 @@ struct JoyCommsControl::Implement {
 
     ros::Publisher comms_pub;
 
+    std_msgs::String button_commands_array[4][11];
     std_msgs::String button_commands[11];
     int button_rates[11] = {-1};
     int buttons_clicked[11];
 
+    std_msgs::String axis_commands_array[4][8];
     std_msgs::String axis_commands[8];
     int axis_rates[8] = {-1};
     int axes_moved[8];
     float axes_values[8];
     float axes_percentage[8];
+
+    int number_of_mappings = 0;
+    int current_mappings_index = 0;
 };
 
 struct JoyCommsControl::Implement::ButtonMappings {
@@ -87,25 +92,38 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     XmlRpc::XmlRpcValue mappingObject;
     if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < mappingsXML.size(); ++i) {
-            mappingObject = mappingsXML[i];
+            for (int j = 0; j < mappingsXML[i].size(); ++j){
 
-            button_name = static_cast<std::string>(mappingObject[0]).c_str();
-            command = static_cast<std::string>(mappingObject[1]).c_str();
-            //check if control pressed is a button or an axes by the name of the control and compare to the maps
-            //if button add to button comands else add to axes commands
-            if(isButton(button_name)){
-                buttonId = getButtonIdFromName(button_name);
+                mappingObject = mappingsXML[i][j];
 
-                pImplement->button_commands[buttonId].data = command;
+                button_name = static_cast<std::string>(mappingObject[0]).c_str();
+                command = static_cast<std::string>(mappingObject[1]).c_str();
+                //check if control pressed is a button or an axes by the name of the control and compare to the maps
+                //if button add to button comands else add to axes commands
+                if(isButton(button_name)){
+                    buttonId = getButtonIdFromName(button_name);
 
-                pImplement->button_rates[buttonId] = mappingObject[2];
-            }else{
-                buttonId = getAxisIdFromName(button_name);
+                    pImplement->button_commands_array[i][buttonId].data = command;
 
-                pImplement->axis_commands[buttonId].data = command;
+                    pImplement->button_rates[buttonId] = mappingObject[2];
+                }else{
+                    buttonId = getAxisIdFromName(button_name);
 
-                pImplement->axis_rates[buttonId] = mappingObject[2];
+                    pImplement->axis_commands_array[i][buttonId].data = command;
+
+                    pImplement->axis_rates[buttonId] = mappingObject[2];
+                }
             }
+            pImplement->number_of_mappings = i+1;
+        }
+        pImplement->current_mappings_index = 0;
+        for (int i = 0; i < 11; ++i)
+        {
+            pImplement->button_commands[i] = pImplement->button_commands_array[pImplement->current_mappings_index][i];
+        }
+        for (int i = 0; i < 8; ++i)
+        {
+            pImplement->axis_commands[i] = pImplement->axis_commands_array[pImplement->current_mappings_index][i];
         }
     }else{
         std::cout << "mappingsXML type is not XmlRpc::XmlRpcValue::TypeArray. Make sure the paramater controller_mappings is there" << std::endl;
@@ -209,7 +227,48 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        addToCommandQueue(joy_msg);
+        if (joy_msg->axes[DPAD_X] != 0 || joy_msg->axes[DPAD_Y] != 0) {
+            int new_mapping_index;
+            if (joy_msg->axes[DPAD_X] == 1)
+            {
+                new_mapping_index = 0;
+                
+            } else if (joy_msg->axes[DPAD_Y] == 1)
+            {
+                new_mapping_index = 1;
+                
+            } else if (joy_msg->axes[DPAD_X] == -1)
+            {
+                new_mapping_index = 2;
+
+            } else if (joy_msg->axes[DPAD_Y] == -1)
+            {
+                new_mapping_index = 3;
+            }
+            if (number_of_mappings > new_mapping_index)
+            {
+                if (current_mappings_index == new_mapping_index)
+                {
+                    std::cout << "Mapping already active. Nothing changed" << std::endl;
+                }else{
+                    for (int i = 0; i < 11; ++i)
+                    {
+                        button_commands[i] = button_commands_array[new_mapping_index][i];
+                    }
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        axis_commands[i] = axis_commands_array[new_mapping_index][i];
+                    }
+                    current_mappings_index = new_mapping_index;
+                    std::cout << "Mapping changed" << std::endl;
+                }
+                
+            }else{
+                std::cout << "No mapping provided. Nothing changed" << std::endl;
+            }
+        }else{
+            addToCommandQueue(joy_msg);
+        }
     } else {
         //clear buttons_clicked array since enable button is not clicked
         //consider moving it to "not publish" when enable is not clicked
