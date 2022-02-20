@@ -254,6 +254,7 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
                 {
                     std::cout << "Mapping already active. Nothing changed" << std::endl;
                 }else{
+                    comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
                     current_mappings_index = new_mapping_index;
                     std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
                 }
@@ -276,9 +277,7 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
         }
 
         if (!sent_disable_msg) {
-            for(int i = 0; i < number_of_mappings; ++i){
-                comms_pubs[i].publish(stop_commands[i]);
-            }
+            comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
             sent_disable_msg = true;
         }
     }
