@@ -130,6 +130,7 @@ void invalidCommand() {
 }
 
 void pong() {
+  digitalWrite(LED, !digitalRead(LED));
   internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);
@@ -148,9 +149,16 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
 }
 
 void setMotorSpeeds(float* angles) {
+  char* buff = (char*)malloc(256);
+  snprintf(buff, 256, "mtrs: %.2f %.2f %.2f %.2f %.2f %.2f\n", angles[0],
+           angles[1], angles[2], angles[3], angles[4], angles[5]);
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(buff), buff);
+  commandCenter->sendMessage(*message);
+
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
     int angle = (int)(angles[i]);
-    motors[i].setSpeed(angles[i]);
+    motors[i].setSpeed(angle);
   }
   /*
     byte* data = new byte[128];
@@ -196,22 +204,23 @@ void doChecksAndDelay(unsigned int delay) {
   }
 }
 
+void doMotorChecks() {
+  // Do motor checks (ex stop after certain time of no messages)
+  for (int i = 0; i < NUM_DC_MOTORS; i++) {
+    motors[i].doChecks();
+  }
+  /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
+    serialMotors[i].doChecks();
+  }*/
+}
+
 void loop() {
-  while (Serial1.available()) {
-    Serial.print(Serial1.read());
-    Serial.print(" ");
-  }
   // Read and send messages
-  /*if (Serial1.available() > 0) {
+  if (Serial1.available() > 0) {
     commandCenter->readCommand();
-    // digitalWrite(LED, !digitalRead(LED));
+    doMotorChecks();
   }
-  commandCenter->sendMessage();*/
-
-  /*char* allocedMessage = strdup("Invalid Arm command");
-  internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
-  commandCenter->sendMessage(*message);*/
-
-  // Serial1.println("Hello world");
+  doMotorChecks();
+  commandCenter->sendMessage();
+  doMotorChecks();
 }
