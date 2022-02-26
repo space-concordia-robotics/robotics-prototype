@@ -20,6 +20,9 @@ namespace internal_comms {
 Command* CommandCenter::processCommand() {
   uint8_t commandID = waitForSerial();
   uint8_t argumentSize = readArgSize();
+#undef Serial
+  Serial.printf("id %d argsize %d\n", commandID, argumentSize);
+#define Serial Serial1
 
   uint8_t* buffer = nullptr;
   uint16_t bytesRead = 0;

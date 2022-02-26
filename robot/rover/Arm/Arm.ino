@@ -19,10 +19,6 @@
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
 
-#ifndef DEBUG
-#define Serial Serial1
-#endif
-
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
@@ -75,7 +71,7 @@ byte encoderTemp[ARM_PACKET_LENGTH];
 volatile byte tRead = 255;  // for debug only
 volatile int passedEvent = 0;
 
-void SERIAL_EVENT() {
+void DEACTIVATED() {
   byte read = ENCODER_SERIAL.read();
   tRead = read;
   passedEvent = 1;
@@ -201,12 +197,16 @@ void doChecksAndDelay(unsigned int delay) {
 }
 
 void loop() {
+  while (Serial1.available()) {
+    Serial.print(Serial1.read());
+    Serial.print(" ");
+  }
   // Read and send messages
-  if (Serial1.available() > 0) {
+  /*if (Serial1.available() > 0) {
     commandCenter->readCommand();
     // digitalWrite(LED, !digitalRead(LED));
   }
-  commandCenter->sendMessage();
+  commandCenter->sendMessage();*/
 
   /*char* allocedMessage = strdup("Invalid Arm command");
   internal_comms::Message* message =
