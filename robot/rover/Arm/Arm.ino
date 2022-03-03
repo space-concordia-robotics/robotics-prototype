@@ -122,7 +122,20 @@ void DEACTIVATED() {
  * Implements all the Arm commands.
  */
 
+void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
+                    const uint8_t rawArgsLength) {
+  digitalWrite(LED, !digitalRead(LED));
+  char* buffer = (char*)malloc(256);
+  snprintf(buffer, 256, "Invalid command, ID %d, args length %d", cmdID,
+           rawArgsLength);
+
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(buffer), buffer);
+  commandCenter->sendMessage(*message);
+}
+
 void invalidCommand() {
+  digitalWrite(LED, !digitalRead(LED));
   char* allocedMessage = strdup("Invalid Arm command");
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
@@ -130,7 +143,6 @@ void invalidCommand() {
 }
 
 void pong() {
-  digitalWrite(LED, !digitalRead(LED));
   internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);
@@ -149,26 +161,10 @@ void moveMotorsBy(float* angles, uint16_t numAngles) {
 }
 
 void setMotorSpeeds(float* angles) {
-  char* buff = (char*)malloc(256);
-  snprintf(buff, 256, "mtrs: %.2f %.2f %.2f %.2f %.2f %.2f\n", angles[0],
-           angles[1], angles[2], angles[3], angles[4], angles[5]);
-  internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(buff), buff);
-  commandCenter->sendMessage(*message);
-
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
     int angle = (int)(angles[i]);
     motors[i].setSpeed(angle);
   }
-  /*
-    byte* data = new byte[128];
-    int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
-                     angles[1], angles[2], angles[3], angles[4], angles[5]);
-    if (r < 0 || r > 128) {
-      invalidCommand();
-    }
-    internal_comms::Message* message = commandCenter->createMessage(0, r, data);
-    commandCenter->sendMessage(*message);*/
 }
 
 void sendMotorAngles() {
@@ -189,19 +185,6 @@ void sendMotorAngles() {
 
   internal_comms::Message* message = commandCenter->createMessage(2, 24, data);
   commandCenter->sendMessage(*message);
-}
-
-void doChecksAndDelay(unsigned int delay) {
-  unsigned int startTime = millis();
-  while (millis() - startTime < delay) {
-    // Do motor checks (ex stop after certain time of no messages)
-    for (int i = 0; i < NUM_DC_MOTORS; i++) {
-      motors[i].doChecks();
-    }
-    /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
-      serialMotors[i].doChecks();
-    }*/
-  }
 }
 
 void doMotorChecks() {

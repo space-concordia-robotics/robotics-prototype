@@ -16,7 +16,8 @@
 // Commands that expect a pointer are assumed to provide a pointer
 // to 6 values.
 
-void invalidCommand();
+void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
+                    const uint8_t rawArgsLength);
 void pong();
 void sendMotorAngles();
 void moveMotorsBy(float* angles, uint16_t numAngles);
@@ -59,15 +60,11 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         free(angles);
         break;
       } else {
-        invalidCommand();
+        invalidCommand(cmdID, rawArgs, rawArgsLength);
         break;
       }
     }
     case SET_MOTOR_SPEEDS: {
-      digitalWrite(LED, HIGH);
-      delay(1000);
-      digitalWrite(LED, LOW);
-
       uint16_t numAngles = rawArgsLength / 4;
       if (numAngles == NUM_MOTORS) {
         float* angles = (float*)malloc(sizeof(*angles) * numAngles);
@@ -80,7 +77,7 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         free(angles);
         break;
       } else {
-        invalidCommand();
+        invalidCommand(cmdID, rawArgs, rawArgsLength);
         break;
       }
     }
@@ -89,7 +86,7 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
       break;
     }
     default: {
-      invalidCommand();
+      invalidCommand(cmdID, rawArgs, rawArgsLength);
 
       /*Serial.write("invalid command id ");
       char buffer[8];
