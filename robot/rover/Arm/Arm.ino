@@ -24,7 +24,7 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
 // SerialMotor serialMotors[NUM_SMART_SERVOS];
-// LSSServoMotor servoController(&Serial5);
+LSSServoMotor servoController(&Serial5);
 
 void setup() {
   Serial.begin(9600);
@@ -143,9 +143,10 @@ void invalidCommand() {
 }
 
 void pong() {
-  internal_comms::Message* message =
+  digitalWrite(LED, !digitalRead(LED));
+  /*internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
-  commandCenter->sendMessage(*message);
+  commandCenter->sendMessage(*message);*/
 }
 
 void moveMotorsBy(float* angles, uint16_t numAngles) {
@@ -165,6 +166,10 @@ void setMotorSpeeds(float* angles) {
     int angle = (int)(angles[i]);
     motors[i].setSpeed(angle);
   }
+  /*for (int i = NUM_DC_MOTORS; i < NUM_DC_MOTORS + NUM_SMART_SERVOS; i++) {
+    int angle = (int)(angles[i]);
+    motors[i].setSpeed(angle);
+  }*/
 }
 
 void sendMotorAngles() {

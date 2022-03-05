@@ -88,9 +88,9 @@ char* LSSServoMotor::writeQueryCommand(unsigned int servoId,
   // it won't work otherwise
   delay(1);
 
-  char* buff;
+  char* buff = (char*)malloc(15);
 
-  ServosSerialBus->readBytesUntil('\r', buff, 10);
+  ServosSerialBus->readBytesUntil('\r', buff, 15);
 
   return buff;
 }
