@@ -11,11 +11,11 @@
 
 #define COMMS_BAUDRATE 57600L
 
-#ifdef UART_PORT
-#define Serial Serial1
-#elif USB_PORT
-#define Serial Serial
-#endif
+//#ifdef UART_PORT
+//   #define Serial Serial1
+//#elif USB_PORT
+//   #define Serial Serial
+//#endif
 
 namespace internal_comms {
 typedef struct {
@@ -37,8 +37,6 @@ class CommandCenter {
    * Executes the command with the commandID with the raw arguments
    * @param commandID The ID of the command to execute
    * @param rawArgs The raw bytes consisting of the arguments
-   * @param rawArgsLength The length of args (as 1 byte, no idea who
-   * dreamt that up)
    */
   virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs,
                               const uint8_t rawArgsLength) = 0;
@@ -81,8 +79,7 @@ class CommandCenter {
                    uint8_t transmitPin);
 
   /**
-   * Reads data from serial port. Serial port must have data available,
-   * otherwise will exit immediately.
+   * Reads data from serial port
    */
   void readCommand();
 
@@ -113,7 +110,7 @@ class CommandCenter {
    * Reads the two bytes that make up the argument length and combines
    * them into an uint16_t
    */
-  uint16_t readArgSize();
+  uint8_t readArgSize();
 
   /**
    * Waits until there is something to read or for 50ms,

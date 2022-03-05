@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="joy_dev" default="/dev/input/js0"/>
+  <arg name="cmd_vel_out" default="rover_cmd_vel"/>
+  <arg name="joy_config_file" default="$(find mcu_control)/config/joy_config.yaml"/>
+
+  <node name="joy_node" pkg="joy" type="joy_node">
+    <param name="dev" value="$(arg joy_dev)"/>
+    <param name="coalesce_interval" value="0.05"/>
+    <param name="autorepeat_rate" value="10.0"/>
+  </node>
+
+  <node name="joy_teleop_node" pkg="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(arg joy_config_file)"/>
+    <remap from="cmd_vel" to="$(arg cmd_vel_out)"/>
+  </node>
+  
+</launch>

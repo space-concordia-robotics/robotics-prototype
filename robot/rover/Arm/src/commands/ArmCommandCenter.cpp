@@ -4,25 +4,35 @@
 
 #include "include/commands/ArmCommandCenter.h"
 
+#include "../../../robot/demos/RemoteArmControl/KeyboardBudge/PinSetup.h"
 #include "Arduino.h"
+#define LED 13
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
 #define SEND_MOTOR_ANGLES 77
+#define SET_MOTOR_SPEEDS 78
 
 // Commands that expect a pointer are assumed to provide a pointer
 // to 6 values.
 
-void invalidCommand();
+void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
+                    const uint8_t rawArgsLength);
 void pong();
 void sendMotorAngles();
 void moveMotorsBy(float* angles, uint16_t numAngles);
+/**
+ * @brief Sets motor speeds.
+ * @param angles pointer to NUM_MOTOR floats.
+ */
+void setMotorSpeeds(float* angles);
 
-// this modifies the pointer
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
-  byte bytes[] = {*rawPointer, *(++rawPointer), *(++rawPointer),
-                  *(++rawPointer)};
+  // I'm not going down the rabbit hole to figure out why the bytes in the float
+  // are in the wrong order, but interpreting the bytes flipped like this works.
+  byte bytes[] = {*(rawPointer + 3), *(rawPointer + 2), *(rawPointer + 1),
+                  *(rawPointer)};
   memcpy(&f, &bytes, sizeof(f));
   return f;
 }
@@ -50,10 +60,24 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         free(angles);
         break;
       } else {
-        invalidCommand();
-        /*Serial.write("wrong number of angles: ");
-        Serial.write(String(numAngles).c_str());
-        Serial.write("\n");*/
+        invalidCommand(cmdID, rawArgs, rawArgsLength);
+        break;
+      }
+    }
+    case SET_MOTOR_SPEEDS: {
+      uint16_t numAngles = rawArgsLength / 4;
+      if (numAngles == NUM_MOTORS) {
+        float* angles = (float*)malloc(sizeof(*angles) * numAngles);
+
+        for (int i = 0; i < numAngles; i++) {
+          angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
+        }
+
+        setMotorSpeeds(angles);
+        free(angles);
+        break;
+      } else {
+        invalidCommand(cmdID, rawArgs, rawArgsLength);
         break;
       }
     }
@@ -62,7 +86,7 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
       break;
     }
     default: {
-      invalidCommand();
+      invalidCommand(cmdID, rawArgs, rawArgsLength);
 
       /*Serial.write("invalid command id ");
       char buffer[8];

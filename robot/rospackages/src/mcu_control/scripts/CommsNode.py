@@ -108,7 +108,7 @@ def receive_message():
                 print("No command with ID ", commandID, " was found")
                 ser.read_until() # 0A
 
-            argsLen = ser.read(2)
+            argsLen = ser.read()
             # print(argsLen)
             argsLen = int.from_bytes(argsLen, "big")
             # print("Number of bytes of arguments:", argsLen)
@@ -148,9 +148,9 @@ def send_command(command_name, args, deviceToSendTo):
         gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-        #ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
-        arg_length = len(command[2]).to_bytes(1,'big')
-        ser.write(arg_length)
+        ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        #arg_length = len(command[2]).to_bytes(1,'big')
+        #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
         for argument in zip(args, data_types):
             data = argument[0]
@@ -177,6 +177,14 @@ def arm_command_callback(message):
 
     temp_struct = [command, args, ARM_SELECTED]
     arm_queue.append(temp_struct)
+
+def rover_command_callback(message):
+    rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
+    command, args = parse_command(message)
+
+    temp_struct = [command, args, ROVER_SELECTED]
+    rover_queue.append(temp_struct)
+
 
 def rover_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
