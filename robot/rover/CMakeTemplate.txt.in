@@ -2,24 +2,32 @@ file(MAKE_DIRECTORY build)
 set(CMAKE_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build")
 set(USER_SOURCES FALSE)
 
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.2)
 project(@Project_Name@)
 
 #create the library and elf directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+#TODO : Since there is still a project who does not have a /src directory containing all the .cpp files, else condition should be removed once every project has a proper /src directory
+#The reason it exists now is cuz if a project has a .cpp randomly somewhere but its not meant to be found, the recursive search would add it (would not happen when all the source
+#files for a project are in the /src directory
+
+IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+else()
 file(GLOB_RECURSE ${PROJECT_NAME}_user_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+endif()
 
 set(USER_SOURCES FALSE)
 
 #if there are other sources files in this directory, compile them into a library
 if(NOT "${${PROJECT_NAME}_user_sources}" STREQUAL "")
 
-set(USER_SOURCES TRUE)
+    set(USER_SOURCES TRUE)
 add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
 
-target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes @EXTERNAL_LIBARRIES_INCLUDE_DIRS@)
+target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes ${CMAKE_CURRENT_SOURCE_DIR}/include @EXTERNAL_LIBARRIES_INCLUDE_DIRS@)
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 
 endif()
@@ -34,30 +42,35 @@ target_include_directories(${PROJECT_NAME}_EXE PRIVATE @EXTERNAL_LIBRARIES_INCLU
 
 
 set_target_properties(
-${PROJECT_NAME}_EXE PROPERTIES 
-LINKER_LANGUAGE C 
-LINK_FLAGS ${ARM_GCC_LINKER_FLAGS} 
-OUTPUT_NAME ${PROJECT_NAME}.elf
+        ${PROJECT_NAME}_EXE PROPERTIES
+        LINKER_LANGUAGE C
+        LINK_FLAGS ${ARM_GCC_LINKER_FLAGS}
+        OUTPUT_NAME ${PROJECT_NAME}.elf
 )
- 
+
 target_link_libraries(
-${PROJECT_NAME}_EXE
-$<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
-@PROJECT_LIBRARIES@
-teensycore
--lm
+        ${PROJECT_NAME}_EXE
+        $<$<BOOL:${USER_SOURCES}>:${PROJECT_NAME}_user>
+        @PROJECT_LIBRARIES@
+        teensycore
+        -lm
 ) 
 
 add_custom_command(
-TARGET ${PROJECT_NAME}_EXE
-POST_BUILD
-COMMAND ${ARM_GCC_OBJCOPY} -O ihex -R.eeprom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
+        TARGET ${PROJECT_NAME}_EXE
+        POST_BUILD
+        COMMAND ${ARM_GCC_OBJCOPY} -O ihex -R.eeprom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
 )
 add_custom_command(OUTPUT ${PROJECT_NAME}_upload_command
-COMMAND ${TEENSY_LOADER_CLI} --mcu=${MCU} -s -v ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
-DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex 
+        COMMAND ${TEENSY_LOADER_CLI} --mcu=${MCU} -s -v ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
+        DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
 )
 
 add_custom_target(${PROJECT_NAME}
-DEPENDS ${PROJECT_NAME}_upload_command
-)	
+        DEPENDS ${PROJECT_NAME}_upload_command
+)
+
+#if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+#    set(project_sources ${PROJECT_NAME}_user)
+#    add_subdirectory(tests)
+#endif()
