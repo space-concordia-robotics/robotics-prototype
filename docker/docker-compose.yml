@@ -16,23 +16,25 @@ services:
         build:
             context: ../
             dockerfile: ./docker/rosbridge/Dockerfile
+            args:
+                - videoid=${VIDEOID:-44}
         depends_on:
             - ros-master
         environment:
             - "ROS_MASTER_URI=http://ros-master:11311"
         ports:
             - "9090:9090"
+            - "8080:8080"
         restart: always
         networks:
             - rp-network
+        devices:
+            - "/dev/video0:/dev/video0"
     prototype:
         build: ..
         depends_on:
             - ros-master
             - rosbridge
-        environment:
-            - "ROS_MASTER_URI=http://ros-master:11311"
-
         ports:
             - "5000:5000"
         restart: always

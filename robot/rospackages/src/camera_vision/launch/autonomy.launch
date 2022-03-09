@@ -1,6 +1,11 @@
 <launch>
+    <!-- The following commented lines are needed in kinetic for some reason -->
+    <!-- <arg name="device_path" /> -->
+    <!-- <arg name="image_width" /> -->
+    <!-- <arg name="image_height" /> -->
+    <!-- <arg name="name" /> -->
     <include file="$(find webcam_ar_track)/launch/webcam_indiv.launch" pass_all_args="true"/> 
-    <node pkg="camera_vision" type="ar_tracker.py" name="ar_tracker_$(arg __name)" output="screen"> 
-        <param name="cv_camera_node_name" type="string" value="$(arg __name)"/>
+    <node pkg="camera_vision" type="ar_tracker.py" name="ar_tracker_$(arg name)" output="screen"> 
+        <param name="cv_camera_node_name" type="string" value="$(arg name)"/>
     </node>
 </launch>

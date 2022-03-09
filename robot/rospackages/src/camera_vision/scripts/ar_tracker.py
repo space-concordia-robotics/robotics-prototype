@@ -8,7 +8,7 @@ from ar_track_alvar_msgs.msg import AlvarMarkers
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 
-class arTrackerDemo():
+class arTracker():
     def __init__(self):
         # necessary for handling images from topics
         self.node_name = 'ar_tracker'
@@ -91,7 +91,7 @@ class arTrackerDemo():
 
 def main(args):
     try:
-        arTrackerDemo()
+        arTracker()
         rospy.spin()
     except KeyboardInterrupt:
         print('shutting down ar_tracker node')
