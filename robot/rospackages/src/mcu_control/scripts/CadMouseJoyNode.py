@@ -18,37 +18,40 @@ def publishJoyMsg(axis, button):
   joy_pub.publish(cad_mouse_joy_msg)
 
 def readMouseInput():
+  axis = [0, 0, 0, 0, 0, 0]
+  button = [False, False]
   battery = -1
   charged = False
 
   with open(devpath, "rb", buffering=0) as MouseByteStream:
-    while True:
-      axis = [0, 0, 0, 0, 0, 0]
-      button = [False, False]
+    try:
+      while not rospy.is_shutdown():
+        data = MouseByteStream.read(16)
+        id = data[0]
+        if id == 1:
+          for i in range(0, 6):
+            axis_raw = data[2 * i + 1] + 256 * data[2 * i + 2]
+            if axis_raw > 32768:
+              axis_raw = axis_raw - 65536
+            axis[i] = axis_raw
+          print(axis)
+        elif id == 3:
+          button_raw = data[1]
+          button[0] = (button_raw & 0x1) != 0
+          button[1] = (button_raw & 0x2) != 0
+          print("Button: " + str(button))
+        elif id == 23:
+          battery = data[1]
+          charged = data[2] != 0
+          print("Battery:" + str(battery) + ", Charging: " + str(charged))
 
-      data = MouseByteStream.read(16)
-      id = data[0]
-      if id == 1:
-        for i in range(0, 6):
-          axis_raw = data[2 * i + 1] + 256 * data[2 * i + 2]
-          if axis_raw > 32768:
-            axis_raw = axis_raw - 65536
-          axis[i] = axis_raw
         publishJoyMsg(axis, button)
-        print(axis)
-      elif id == 3:
-        button_raw = data[1]
-        button[0] = (button_raw & 0x1) != 0
-        button[1] = (button_raw & 0x2) != 0
-        publishJoyMsg(axis, button)
-        print("Button: " + str(button))
-      elif id == 23:
-        battery = data[1]
-        charged = data[2] != 0
-        print("Battery:" + str(battery) + ", Charging: " + str(charged))
+
+    except KeyboardInterrupt:
+      print("Node shutting down due to shutting down node.")
 
 if __name__ == '__main__':
-  node_name = 'cad_mouse_joy'
+  node_name = 'cad_mouse_joy_node'
   rospy.init_node(node_name, anonymous=False) # only allow one node of this type
   rospy.loginfo('Initialized "'+node_name+'" node for pub functionality')
 
