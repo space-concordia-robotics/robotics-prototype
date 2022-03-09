@@ -53,7 +53,7 @@ SerialMotor::SerialMotor()
 
 void SerialMotor::setSpeed(int newSpeed) {
   // Set direction based on sign of speed
-  theMotor->writeActionCommand(motorID, "WD", newSpeed);
+  theMotor->writeActionCommand(motorID, "WR", newSpeed);
 
   millisStartedMove = millis();
   currentSpeed = newSpeed;

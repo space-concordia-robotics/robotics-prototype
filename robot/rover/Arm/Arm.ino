@@ -23,7 +23,7 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
 EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
-// SerialMotor serialMotors[NUM_SMART_SERVOS];
+SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
 void setup() {
@@ -44,8 +44,8 @@ void setup() {
   motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
   motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, LOW);
   motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, LOW);
-  // serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
-  // serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
+  serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
+  serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 
   /*Serial.begin(9600);
   while (!Serial) {
@@ -166,10 +166,10 @@ void setMotorSpeeds(float* angles) {
     int angle = (int)(angles[i]);
     motors[i].setSpeed(angle);
   }
-  /*for (int i = NUM_DC_MOTORS; i < NUM_DC_MOTORS + NUM_SMART_SERVOS; i++) {
-    int angle = (int)(angles[i]);
-    motors[i].setSpeed(angle);
-  }*/
+  for (int i = 0; i < NUM_SMART_SERVOS; i++) {
+    int angle = (int)(angles[NUM_DC_MOTORS + i]);
+    serialMotors[i].setSpeed(angle);
+  }
 }
 
 void sendMotorAngles() {
@@ -197,9 +197,17 @@ void doMotorChecks() {
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
     motors[i].doChecks();
   }
-  /*for (int i = 0; i < NUM_SMART_SERVOS; i++) {
+  for (int i = 0; i < NUM_SMART_SERVOS; i++) {
     serialMotors[i].doChecks();
-  }*/
+  }
+}
+
+void delayChecks(unsigned long delayMillis) {
+  unsigned long startTime = millis();
+  while (millis() - startTime < delayMillis) {
+    doMotorChecks();
+    delay(1);
+  }
 }
 
 void loop() {
