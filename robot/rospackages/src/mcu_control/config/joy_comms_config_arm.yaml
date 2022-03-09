@@ -4,8 +4,8 @@ command_topic: /arm_command
 controller_mappings: [["BUTTON_CROSS", "budge_motors 1 0 0 0 0 0", 30],
                       ["BUTTON_SQUARE", "budge_motors -1 0 0 0 0 0", 30],
 
-                      [ "BUTTON_CIRCLE", "budge_motors 0 1 0 0 0 0", 30 ],
-                      [ "BUTTON_TRIANGLE", "budge_motors 0 -1 0 0 0 0", 30 ],
+                      [ "BUTTON_TRIANGLE", "budge_motors 0 1 0 0 0 0", 30 ],
+                      [ "BUTTON_CIRCLE", "budge_motors 0 -1 0 0 0 0", 30 ],
 
                       [ "BUTTON_DPAD_DOWN", "budge_motors 0 0 1 0 0 0", 30 ],
                       [ "BUTTON_DPAD_LEFT", "budge_motors 0 0 -1 0 0 0", 30 ],
@@ -13,14 +13,14 @@ controller_mappings: [["BUTTON_CROSS", "budge_motors 1 0 0 0 0 0", 30],
                       [ "BUTTON_DPAD_RIGHT", "budge_motors 0 0 0 1 0 0", 30 ],
                       [ "BUTTON_DPAD_UP", "budge_motors 0 0 0 -1 0 0", 30 ],
 
-                      [ "BUTTON_OPTION", "budge_motors 0 0 0 0 1 0", 30 ],
-                      [ "BUTTON_SHARE", "budge_motors 0 0 0 0 -1 0", 30 ],
+                      [ "BUTTON_SHARE", "budge_motors 0 0 0 0 1 0", 30 ],
+                      [ "BUTTON_OPTION", "budge_motors 0 0 0 0 -1 0", 30 ],
 
                       [ "BUTTON_R2", "budge_motors 0 0 0 0 0 1", 30 ],
                       [ "BUTTON_L2", "budge_motors 0 0 0 0 0 -1", 30 ],
 
-                      [ "BUTTON_R3", "arm_speed 1", 30 ],
-                      [ "BUTTON_L3", "arm_speed 5", 30 ],
+                      [ "BUTTON_R3", "arm_speed 5", 30 ],
+                      [ "BUTTON_L3", "arm_speed 1", 30 ],
 
                       [ "BUTTON_HOME", "reboot", 30 ]]
 
