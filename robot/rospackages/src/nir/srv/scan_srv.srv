@@ -1,0 +1,4 @@
+uint16 start_wavelength
+uint16 end_wavelength
+
+string result
