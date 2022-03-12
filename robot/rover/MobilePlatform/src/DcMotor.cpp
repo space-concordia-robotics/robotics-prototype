@@ -27,6 +27,7 @@ namespace Motor {
 
         pinMode(pwmPin, OUTPUT);
         pinMode(dirPin, OUTPUT);
+        analogWriteFrequency(pwmPin, 18000);
     }
 
     void initPidController(const MotorNames &motorID, const float& kp, const float& ki, const float& kd) {
