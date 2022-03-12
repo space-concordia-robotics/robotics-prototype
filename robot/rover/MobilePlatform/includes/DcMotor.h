@@ -74,6 +74,7 @@ typedef struct {
 
     bool is_throttle_timeout_enabled;
     bool is_passive_rover_feedback_enabled;
+    bool is_gps_enabled;
 
     uint32_t last_velocity_adjustment;
     uint32_t last_move;
@@ -93,9 +94,6 @@ namespace Motor {
     void applyDesiredMotorVelocity(const MotorNames &);
 
     void stop(const MotorNames &);
-}
-inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max){
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 #endif

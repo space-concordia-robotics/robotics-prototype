@@ -1,7 +1,7 @@
 #ifndef WHEELS_WHEELSCOMMANDCENTER_H
 #define WHEELS_WHEELSCOMMANDCENTER_H
 
-#include "../../../internal_comms/include/CommandCenter.h"
+#include "CommandCenter.h"
 
 
 #define COMMAND_STOP_MOTORS_EMERGENCY 0
@@ -28,17 +28,12 @@ public:
     void stopMotors();
     void moveRover(const float &,const float& );
     void moveServo(const uint8_t&, const uint8_t&);
-    void moveWheel(const uint8_t& ,uint8_t ,uint8_t);
+    void moveWheel(const uint8_t& ,const uint8_t& ,const uint8_t&);
 
     void getLinearVelocity(void);
     void getRotationalVelocity(void);
     void getBatteryVoltage(void);
     void pingWheels(void);
-
-    inline void float2bytes(uint8_t* buffer, float value){
-        memcpy(buffer, (unsigned char*) (&value), sizeof(float));
-    }
-
 
 };
 

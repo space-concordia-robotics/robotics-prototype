@@ -2,12 +2,11 @@
 
 namespace Rover {
 
-    Servo servoList[6];
-
+    PWMServo servos[4];
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID,uint8_t direction, uint8_t speed) {
+    void moveWheel(const MotorNames &motorID,const uint8_t& direction,const uint8_t& speed) {
 
         systemStatus.last_move = millis();
         Motor::updateDesiredMotorVelocity(motorID,direction,speed);
@@ -137,12 +136,13 @@ namespace Rover {
 
     void attachServo(const ServoNames& servoID,const uint8_t& pin) {
 
-        servoList[servoID] = Servo();
-        servoList[servoID].attach(pin);
+        servos[servoID].attach(pin);
+        analogWrite(pin,0);
+        //moveServo(servoID,0);
     }
 
     // Angle is given by 0-180, if the value is > 180 than it is clipped to 180
     void moveServo(const ServoNames& servo_id, const uint8_t & value) {
-        servoList[servo_id].write(value);
+        servos[servo_id].write(value);
     }
 }
