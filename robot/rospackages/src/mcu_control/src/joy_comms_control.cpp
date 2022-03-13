@@ -44,6 +44,7 @@ struct JoyCommsControl::Implement {
 
     std_msgs::String axis_commands[4][8];
     int axis_rates[4][8] = {-1};
+    int axis_ranges[4][8] = {-1};
     int axes_moved[8];
     float axes_values[8];
     float axes_percentage[8];
@@ -110,6 +111,8 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
                     pImplement->axis_commands[i][buttonId].data = command;
 
                     pImplement->axis_rates[i][buttonId] = mappingObject[2];
+
+                    pImplement->axis_ranges[i][buttonId] = mappingObject[3];
                 }
             }
             pImplement->number_of_mappings = i+1;
@@ -212,7 +215,7 @@ void JoyCommsControl::publish_command_with_rate() {
                 command.data = newCommandAsString;
             }else{//the axis is treated as an axes. pass percentage multiplied by range
                 //todo get the range for each command
-                int range = 250;
+                int range = pImplement->axis_ranges[pImplement->current_mappings_index][i];
                 newCommandAsString.append(std::to_string(pImplement->axes_percentage[i] * range));
                 newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
                 command.data = newCommandAsString;

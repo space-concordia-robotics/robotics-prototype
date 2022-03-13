@@ -19,9 +19,9 @@ controller_mappings:
     - ["JOY_RIGHT_X","budge_motors 0 0 %b 0 0 0",10]
     - ["JOY_RIGHT_Y","budge_motors 0 0 0 %b 0 0",10]
 # D pad up
-  - - ["JOY_LEFT_X","move_wheels 0 0 %a",10]
-    - ["JOY_LEFT_Y","move_wheels 0 1 %a",10]
-    - ["JOY_RIGHT_X","move_wheels 1 0 %a",10]
-    - ["JOY_RIGHT_Y","move_wheels 1 1 %a",10]
+  - - ["JOY_LEFT_X","move_wheels 0 0 %a",10,100]
+    - ["JOY_LEFT_Y","move_wheels 0 1 %a",10,250]
+    - ["JOY_RIGHT_X","move_wheels 1 0 %a",10,50]
+    - ["JOY_RIGHT_Y","move_wheels 1 1 %a",10,250]
 # D pad right
 # D pad down
