@@ -29,6 +29,8 @@ LSSServoMotor servoController(&Serial5);
 void setup() {
   Serial.begin(9600);
   pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);
+  delay(500);
   digitalWrite(LED, LOW);
 
   // ENCODER_SERIAL.begin(9600);
@@ -125,21 +127,21 @@ void DEACTIVATED() {
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
   digitalWrite(LED, !digitalRead(LED));
-  char* buffer = (char*)malloc(256);
+  /*char* buffer = (char*)malloc(256);
   snprintf(buffer, 256, "Invalid command, ID %d, args length %d", cmdID,
            rawArgsLength);
 
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(buffer), buffer);
-  commandCenter->sendMessage(*message);
+  commandCenter->sendMessage(*message);*/
 }
 
 void invalidCommand() {
   digitalWrite(LED, !digitalRead(LED));
-  char* allocedMessage = strdup("Invalid Arm command");
+  /*char* allocedMessage = strdup("Invalid Arm command");
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
-  commandCenter->sendMessage(*message);
+  commandCenter->sendMessage(*message);*/
 }
 
 void pong() {
