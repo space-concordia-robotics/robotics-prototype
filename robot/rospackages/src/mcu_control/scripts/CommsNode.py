@@ -16,7 +16,7 @@ from robot.rospackages.src.mcu_control.srv import *
 from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
-from robot.rospackages.src.mcu_control.scripts.RoverCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
