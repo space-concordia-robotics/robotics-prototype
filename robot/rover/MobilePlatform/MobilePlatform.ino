@@ -1,12 +1,9 @@
-#include <cstdint>
-#include <SoftwareSerial.h>
-#include <Servo.h>
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 #include "TinyGPS++.h"
 #include "SparkFun_I2C_GPS_Arduino_Library.h"
 
-#define I2C_MEASUREMENT_INTERVAL 100
+#define I2C_MEASUREMENT_INTERVAL 1000
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -27,90 +24,82 @@ TinyGPSPlus myGPS;
 void attachMotors();
 void attachEncoders();
 void attachServos();
-void initPidControllers();
 void writeServoDefaultValues();
 
- void double2bytes(uint8_t* buffer, double value){
-    memcpy(buffer, (unsigned char*) (&value), sizeof(double));
-}
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(250);
+    delay(2000);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(250);
+    delay(2000);
 }
 void setup() {
 
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
 
-    pinMode(I2C_SDA_0,OUTPUT_OPENDRAIN);
-
-    blink();
-
     commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
-    myI2CGPS.begin();
+    //myI2CGPS.begin();
     attachMotors();
-   attachEncoders();
+    attachEncoders();
 
     attachServos();
+
+    blink();
 
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
+    Rover::systemStatus.is_gps_enabled = false;
 }
 
 void loop() {
-    if(Serial.available() > 0) {
+    if (Serial.available() > 0) {
         commandCenter->readCommand();
     }
     // Sort of un-used at the moment, but this can periodically transmit messages to the OBC which can define the status
     // of the rover.
 
-    if(Rover::systemStatus.is_passive_rover_feedback_enabled){
+    if (Rover::systemStatus.is_passive_rover_feedback_enabled) {
         Rover::calculateRoverVelocity();
-        commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
+        commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr, 0);
     }
     // The rover will update its own current velocity according to a time interval which is measured from when it
     // last moved (in moveRover() )
-    if( (millis() - Rover::systemStatus.last_velocity_adjustment) > ACCELERATION_RATE){
+    if ((millis() - Rover::systemStatus.last_velocity_adjustment) > ACCELERATION_RATE) {
         Rover::updateWheelVelocities();
     }
     // If the rover has not been commanded to move which a time interval, it must  be stopped (security risk).
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
-    ( (millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
+        ((millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
     }
-    if( (millis() - last_gps_measurement) > I2C_MEASUREMENT_INTERVAL){
-        last_gps_measurement = millis();
-        if(myI2CGPS.available()){
-            myGPS.encode(myI2CGPS.read());
-        }
+//    if( (millis() - last_gps_measurement) > I2C_MEASUREMENT_INTERVAL && Rover::systemStatus.is_gps_enabled) {
+//
+//        last_gps_measurement = millis();
+//        if (myI2CGPS.available()) {
+//            myGPS.encode(myI2CGPS.read());
+//        }
+//
+//        if (myGPS.time.isUpdated() && myGPS.location.isValid()) //Check to see if new GPS info is available
+//        {
+//            double lat = myGPS.location.lat();
+//            double lng = myGPS.location.lng();
+//
+//            uint8_t *lat_buffer = nullptr;
+//            uint8_t *lng_buffer = nullptr;
+//
+//            double2bytes(lat_buffer, lat);
+//            double2bytes(lat_buffer, lng);
+//
+//            byte data_buffer[16];
+//            memcpy(data_buffer, lat_buffer, 8);
+//            memcpy(data_buffer + 8, lng_buffer, 8);
+//
+//            internal_comms::Message *message = commandCenter->createMessage(COMMAND_SEND_GPS, sizeof(data_buffer),
+//                                                                            data_buffer);
+//
+//            commandCenter->sendMessage(*message); }
 
-        if (myGPS.time.isUpdated() && myGPS.location.isValid()) //Check to see if new GPS info is available
-        {
-            double lat = myGPS.location.lat();
-            double longt = myGPS.location.lng();
-
-            uint8_t *lat_buffer = nullptr;
-            uint8_t* longt_buffer = nullptr;
-
-            double2bytes(lat_buffer,lat);
-            double2bytes(lat_buffer,longt);
-
-            byte data_buffer[16];
-            memcpy(data_buffer,lat_buffer,8);
-            memcpy(data_buffer+8,longt_buffer,8);
-
-            internal_comms::Message* message = commandCenter->createMessage(COMMAND_SEND_GPS,sizeof(data_buffer),data_buffer);
-
-            commandCenter->sendMessage(*message);
-        }
-        else
-        {
-            //publishError();
-        }
-    }
     // In case there are any messages queued in the transmit buffer, they should be sent.
     commandCenter->sendMessage();
 }
@@ -160,7 +149,7 @@ void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z
 void WheelsCommandCenter::moveServo(const uint8_t & servoID, const uint8_t & angle) {
     Rover::moveServo((ServoNames)servoID,angle);
 }
-void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,uint8_t direction,uint8_t speed) {
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& speed) {
     Rover::moveWheel((MotorNames)wheelNumber,direction,speed);
 }
 void WheelsCommandCenter::getLinearVelocity(void) {
@@ -196,7 +185,6 @@ void WheelsCommandCenter::getBatteryVoltage() {
     //uint8_t* buffer;
 
     float2bytes(buffer,vbatt);
-
 
     internal_comms::Message* message = commandCenter->createMessage(
             COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);

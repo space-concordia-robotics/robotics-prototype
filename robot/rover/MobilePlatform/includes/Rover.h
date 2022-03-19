@@ -2,10 +2,10 @@
 #define ROVER_H
 #include "DcMotor.h"
 #include "Config.h"
+#include "Servo.h"
 
-
-const float width = 0.83;
-const float length = 1.2;
+#define ROVER_WIDTH 0.83
+#define ROVER_LENGTH 1.2
 
 const float radius = 0.14;
 const float piRad  = 0.10472;
@@ -26,6 +26,7 @@ enum ServoNames{
     CENTER_BACK_1_SERVO = 2,
     CENTER_BACK_2_SERVO = 3
 };
+extern PWMServo servos[4];
 
 typedef struct {
     float right_linear_velocity;
@@ -49,12 +50,9 @@ namespace Rover {
 
     void writeToServo(const ServoNames&, const int16_t&);
 
-    void moveWheel(const MotorNames &,uint8_t ,uint8_t);
+    void moveWheel(const MotorNames &,const uint8_t& ,const uint8_t&);
 
     void moveRover(const float & ,const float &);
-
-
-    void attachServo(const ServoNames&, const uint8_t&);
 
     void moveServo(const ServoNames&, const uint8_t&);
 

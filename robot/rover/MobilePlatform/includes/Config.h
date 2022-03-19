@@ -1,20 +1,20 @@
 #ifndef ROVER_CONFIG_H
 #define ROVER_CONFIG_H
 
+#include "Arduino.h"
+#include <cstdint>
+#include <SoftwareSerial.h>
+#include "PWMServo.h"
 #include <cmath>
-#include "Servo.h"
 
 // Servo pins
-
 #define CF_2_SERVO 23
 #define CF_1_SERVO 22
 #define CB_1_SERVO 16
 #define CB_2_SERVO 17
 
 // Dc Motor pins
-
 #define NUM_MOTORS 6
-#include "Arduino.h"
 
 #define M6_RL_PWM 2
 #define M5_ML_PWM 5
@@ -52,9 +52,13 @@
 #define M1_FR_A 35
 #define M1_FR_B 36
 
-// GPS I2C
-#define I2C_SDA_0 18
-#define I2C_CLK_0 18
-
-
+inline void double2bytes(uint8_t* buffer, double value){
+    memcpy(buffer, (unsigned char*) (&value), sizeof(double));
+}
+inline void float2bytes(uint8_t* buffer, float value){
+    memcpy(buffer, (unsigned char*) (&value), sizeof(float));
+}
+inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max){
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 #endif //ROVER_CONFIG_H

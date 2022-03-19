@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
+set (CMAKE_CXX_STANDARD 17)
 
 include(ExternalProject)
 
@@ -47,6 +48,7 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 #Pre-Installed Teensy libaries paths
 set(SERVO_PATH ${TEENSY_LIB}/Servo)
+set(SPI_PATH ${TEENSY_LIB}/SPI)
 set(SOFTWARESERIAL_PATH ${TEENSY_LIB}/SoftwareSerial)
 set(ENCODER_PATH ${TEENSY_LIB}/Encoder)
 set(WIRE_PATH ${TEENSY_LIB}/Wire)
@@ -116,6 +118,7 @@ include_directories(
 	${TEENSY_CORE}/teensy3
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
+    ${CMAKE_SOURCE_DIR}/internal_comms/include
 )
 #every compiler should use these common defines, copy pasted from the Teensyduino verbose output
 add_definitions(
@@ -164,15 +167,17 @@ function(createCppLibrary sources libraryName includes)
 endfunction() 
 
 #create default teensy libraries
-#the last argument in these functions is incase a library needs additional include paths
-createCppLibrary(${TEENSY_LIB}/Servo/Servo.cpp Servo "")
-createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial "")
+# The first arugment is the path of the source file, use a string for extra sources.
+# Second argument is the name of the actual library that is created and will be linked against
+# The last argument the additional include directories for the source file. By default it is relative to the location of the source file
+createCppLibrary(${SERVO_PATH}/Servo.cpp Servo "")
+createCppLibrary(${SPI_PATH}/SPI.cpp SPI "")
+
+createCppLibrary(${SOFTWARESERIAL_PATH}/SoftwareSerial.cpp SoftwareSerial "")
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
-#The last argument indicates if there are any additional include paths that are needed during the creation of a library
 #create the external teensy libraries
-createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
@@ -215,7 +220,7 @@ foreach(path ${INOFILES})
 
  elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
+ set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 SparkFunGPS SoftwareSerial TinyGPS SPI)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
  endif()
@@ -235,7 +240,6 @@ foreach(path ${INOFILES})
  COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/* ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
- DEPENDS PidController_cleanup
  DEPENDS science_cleanup
  )
 
