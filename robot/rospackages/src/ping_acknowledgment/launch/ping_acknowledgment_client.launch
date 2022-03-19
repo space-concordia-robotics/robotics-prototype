@@ -1,7 +1,0 @@
-<launch>
-    <arg name="ping_msg" default="default msg" /> 
-
-    <node name="ping_response_client" pkg="ping_acknowledgment" type="ping_response_client.py" output="screen" >
-        <param name="ping_msg" value="$(arg ping_msg)" type="string" />
-    </node>
-</launch>
