@@ -6,14 +6,12 @@
 #include "stdlib.h"
 
 #define MY_INTEGRATION_TIME   0.005          // 5 ms
-#define MY_SAMPLE_FILE        "sample.txt"   // the file to store the values to
 #define MY_SCAN_COUNT         10             // we take 10 scans
 
 ViSession   instr    = VI_NULL;                 // instrument handle
 FILE*       my_file  = NULL;                    // file handling
 
 
-void error_exit(ViStatus err);
 void waitKeypress(void);
 
 class CCD{
@@ -26,11 +24,12 @@ class CCD{
     ViChar*     rscPtr;                             // pointer to resource string
     time_t      t;                                  // time structure
 
-    void open(){
-        my_file = fopen(MY_SAMPLE_FILE, "w");
+    int openOutputFile(const char* filename){
+        my_file = fopen(filename, "w");
         if(my_file == NULL)  return -1;
+        return VI_SUCCESS;
     }
-    void openCCD(){
+    int openCCD(){
 
         // Find resources
         printf("Scanning for LC100 instruments ...\n");
@@ -44,6 +43,7 @@ class CCD{
         err = LC100_init(rscStr, VI_FALSE,VI_FALSE, &instr);
         // error handling
         if(err)  error_exit(err);
+        return VI_SUCCESS;
 
     }
     void configCCD(){
@@ -60,46 +60,49 @@ class CCD{
     }
 
     void scan(){
-        // request device status
-        err = LC100_getDeviceStatus(instr, &status);
-        // error handling
-        if(err)  error_exit(err);
 
-        // camera is idle -> we can trigger a scan
-        if(status == LC100_STATUS_IDLE)
-        {
-            // trigger scan
-            err = LC100_startScan(instr);
+        ViUInt32 i = 0;
+        while( i < MY_SCAN_COUNT ) {
+
+            // request device status
+            err = LC100_getDeviceStatus(instr, (ViInt32 *)&status);
+
             // error handling
-            if(err)  error_exit(err);
-        }
-        // camera has data available for transfer
-        if(status == LC100_STATUS_TRANSFER)
-        {
-            printf("Starting scan %d of %d ...\n\n", i+1, MY_SCAN_COUNT);
+            if (err) error_exit(err);
 
-            // trigger scan
-            err = LC100_getScanData(instr, data);
-            // error handling
-            if(err)  error_exit(err);
-
-            // add seperator
-            fprintf(my_file, "----------------- Scan No. %d -----------------\n", i+1);
-
-            // get time stamp
-            t = time(&t);
-
-            // store time stamp to file
-            fprintf(my_file, "%s\n", ctime(&t));
-
-            // store data to file
-            for(j = 0; j < LC100_NUM_PIXELS; j++)
-            {
-                fprintf(my_file, "Pixel: %4d - Value: %5d\n", j + 1, data[j]);
+            // camera is idle -> we can trigger a scan
+            if (status == LC100_STATUS_IDLE) {
+                // trigger scan
+                err = LC100_startScan(instr);
+                // error handling
+                if (err) error_exit(err);
             }
+            // camera has data available for transfer
+            if (status == LC100_STATUS_TRANSFER) {
+                printf("Starting scan %d of %d ...\n\n", i + 1, MY_SCAN_COUNT);
 
-            // one scan is done
-            i++;
+                // trigger scan
+                err = LC100_getScanData(instr, data);
+                // error handling
+                if (err) error_exit(err);
+
+                // add seperator
+                fprintf(my_file, "----------------- Scan No. %d -----------------\n", i + 1);
+
+                // get time stamp
+                t = time(&t);
+
+                // store time stamp to file
+                fprintf(my_file, "%s\n", ctime(&t));
+
+                // store data to file
+                for (int j = 0; j < LC100_NUM_PIXELS; j++) {
+                    fprintf(my_file, "Pixel: %4d - Value: %5d\n", j + 1, data[j]);
+                }
+
+                // one scan is done
+                i++;
+            }
         }
     }
     void close(){
@@ -110,6 +113,30 @@ class CCD{
 
         waitKeypress();
 
+    }
+    void waitKeypress(void)
+    {
+        printf("Press <ENTER> to exit\n");
+        while(getchar() == EOF);
+    }
+    void error_exit(ViStatus err)
+    {
+        ViChar ebuf[LC100_ERR_DESCR_BUFFER_SIZE];
+
+        // Print error
+        LC100_errorMessage (instr, err, ebuf);
+        fprintf(stderr, "ERROR: %s\n", ebuf);
+
+        // Close instrument handle if open
+        if(instr != VI_NULL) LC100_close(instr);
+
+        // Close file stream if open
+        if(my_file != NULL)  fclose(my_file);
+
+        // Exit program
+        waitKeypress();
+
+        exit(err);
     }
 };
 
