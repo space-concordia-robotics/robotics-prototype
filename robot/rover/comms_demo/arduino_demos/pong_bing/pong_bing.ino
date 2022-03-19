@@ -5,8 +5,9 @@
  * TLE5012 magnetic encoder. Implemented with SSC ( 3 wire SPI )
  */
 #define CS_PIN 10
-#define CLOCK_RATE 200000
+#define CLOCK_RATE 10000
 #define CRC_DEFAULT_VALUE 0xFF
+#define REG_STATUS    (0x00)
 #define REG_ANGLE_VAL (0x02)
 #define REG_ADC_X     (0x10)
 #define REG_ADC_Y     (0x11)
@@ -63,6 +64,7 @@ uint8_t CRC8(const uint8_t* message,uint8_t length){
     uint8_t crc = CRC_DEFAULT_VALUE;
 
     for(int i = 0 ; i < length ; i++){
+        Serial.write(*(message+1));
         crc = CRC_Table[crc ^ *(message + i)];
     }
     return (~crc);
@@ -90,7 +92,11 @@ void registerWrite16(uint8_t reg,uint16_t val){
     uint8_t message[6];
 
     uint8_t CRC = CRC8(message,sizeof(message));
-    if(CRC != (safety & 0x00FF)){
+
+    Serial.write(safety);
+    Serial.write(CRC);
+
+    if(CRC != (uint8_t)(safety & 0x00FF)){
         // CRC issue
     }
 
@@ -98,7 +104,6 @@ void registerWrite16(uint8_t reg,uint16_t val){
 
     SPI.endTransaction();
 }
-
 
 void registerRead16(uint8_t reg, uint16_t* data, uint8_t size){
     SPI.beginTransaction(TLE5012B_SPI_SETTINGS);
@@ -115,11 +120,22 @@ void registerRead16(uint8_t reg, uint16_t* data, uint8_t size){
     }
 
     uint16_t safety = SPI.transfer16(0x00);
-    uint16_t message[3] = {
-            command,data[0],safety
+    uint16_t message[2] = {
+            command,data[0]
     };
+    Serial.write(command >> 8);
+    Serial.write(command);
 
-    uint8_t CRC = CRC8((uint8_t* )message,6);
+    Serial.write(data[0] >> 8);
+    Serial.write(data[0]);
+
+    uint8_t CRC = CRC8((uint8_t* )message,4);
+
+//
+//    Serial.write(safety >> 8);
+//    Serial.write(safety);
+
+    Serial.write(CRC);
 
     if(CRC != (safety & 0x00FF)){
         // CRC issue
@@ -139,7 +155,15 @@ void loop() {
 
     uint16_t angle_val;
     registerRead16(REG_ANGLE_VAL,&angle_val,1);
-    float angle_deg = (float)(angle_val & 0x7FFF) / (powf(2,15)) * 360.f;
-   // Serial.print(angle_deg);
+
+    delay(1);
+
+//    uint16_t status;
+//    registerRead16(REG_STATUS,&status,1);
+//    Serial.write(status >> 8);
+//    Serial.write(status );
+
+//    float angle_deg = (float)(angle_val & 0x7FFF) / (powf(2,15)) * 360.f;
+//    Serial.println(angle_deg);
     delay(100);
 }
