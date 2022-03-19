@@ -1,10 +1,24 @@
 #include <Arduino.h>
 #include "SPI.h"
 
+/*
+ * TLE5012 magnetic encoder. Implemented with SSC ( 3 wire SPI )
+ */
 #define CS_PIN 10
 #define CLOCK_RATE 200000
 #define CRC_DEFAULT_VALUE 0xFF
-#define GENERATOR_POLYNOMIAL 0x11D
+#define REG_ANGLE_VAL (0x02)
+#define REG_ADC_X     (0x10)
+#define REG_ADC_Y     (0x11)
+#define REG_T_RAW     (0x15)
+#define REG_T25O      (0x30)
+#define REG_TCO_X     (0x0E)
+#define REG_TCO_Y     (0x0F)
+
+
+#define REG_X_OFFSET  (0x0A)
+#define REG_Y_OFFSET  (0x0B)
+
 
 #define PREDICTION_ENABLED
 const uint8_t CRC_Table[256]
@@ -40,6 +54,7 @@ const uint8_t CRC_Table[256]
 //The “crc” of the position [256] is 0xC4 -> 0xFF XOR 0x11D = 0xC4 (1 byte).
 0xC4};
 
+char status_msg_buffer[100];
 
 SPISettings TLE5012B_SPI_SETTINGS(CLOCK_RATE, MSBFIRST, SPI_MODE1);
 
@@ -53,6 +68,10 @@ uint8_t CRC8(const uint8_t* message,uint8_t length){
     return (~crc);
 }
 
+
+void calculateAngle(){
+
+}
 void registerWrite16(uint8_t reg,uint16_t val){
 
     SPI.beginTransaction(TLE5012B_SPI_SETTINGS);
@@ -102,12 +121,8 @@ void registerRead16(uint8_t reg, uint16_t* data, uint8_t size){
 
     uint8_t CRC = CRC8((uint8_t* )message,6);
 
-    Serial.write(safety);
-    Serial.write(CRC);
-
     if(CRC != (safety & 0x00FF)){
         // CRC issue
-       // Serial.print("hi");
     }
     digitalWrite(CS_PIN,HIGH);
 
@@ -123,7 +138,7 @@ void setup() {
 void loop() {
 
     uint16_t angle_val;
-    registerRead16(0x02,&angle_val,1);
+    registerRead16(REG_ANGLE_VAL,&angle_val,1);
     float angle_deg = (float)(angle_val & 0x7FFF) / (powf(2,15)) * 360.f;
    // Serial.print(angle_deg);
     delay(100);
