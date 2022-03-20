@@ -203,23 +203,28 @@ void JoyCommsControl::publish_command_with_rate() {
     for (int i = 0; i < 8; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
-        if (i != pImplement->enable_button && pImplement->axes_moved[i] != 0 && pImplement->axis_rates[pImplement->current_mappings_index][i] > 0)
+        if (pImplement->axes_moved[i] != 0 && pImplement->axis_rates[pImplement->current_mappings_index][i] > 0)
         {
             std::string commandAsString = pImplement->axis_commands[pImplement->current_mappings_index][i].data;
+            std::string newCommandAsString = commandAsString;
+            //replace the values in the command if % is present
             int index = commandAsString.find('%');
-            std::string newCommandAsString = commandAsString.substr(0, index);
-            std_msgs::String command;
-            if(commandAsString[index+1] == 'b'){//the axis is treated as a button. pass 1 or -1
-                newCommandAsString.append(std::to_string(pImplement->axes_moved[i]));
-                newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
-                command.data = newCommandAsString;
-            }else{//the axis is treated as an axes. pass percentage multiplied by range
-                //todo get the range for each command
-                int range = pImplement->axis_ranges[pImplement->current_mappings_index][i];
-                newCommandAsString.append(std::to_string(pImplement->axes_percentage[i] * range));
-                newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
-                command.data = newCommandAsString;
+            while(index != std::string::npos){
+                newCommandAsString = commandAsString.substr(0, index);
+                if(commandAsString[index+1] == 'b'){//the axis is treated as a button. pass 1 or -1
+                    newCommandAsString.append(std::to_string(pImplement->axes_moved[i]));
+                    newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
+                }else{//the axis is treated as an axes. pass percentage multiplied by range
+                    int range = pImplement->axis_ranges[pImplement->current_mappings_index][i];
+                    newCommandAsString.append(std::to_string(pImplement->axes_percentage[i] * range));
+                    newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
+                }
+
+                commandAsString = newCommandAsString;
+                index = commandAsString.find('%');
             }
+            std_msgs::String command;
+            command.data = newCommandAsString;
             pImplement->publish_command(command);
         }
     }
