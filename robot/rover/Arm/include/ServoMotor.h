@@ -2,7 +2,7 @@
 #define SERVOMOTOR_H
 
 #include <Arduino.h>
-#include "LSSServoMotor.h"
+#include "../../internal_comms/include/LSSServoMotor.h"
 #include "RobotMotor.h"
 
 class ServoMotor: public RobotMotor {

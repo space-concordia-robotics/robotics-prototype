@@ -5,25 +5,33 @@
 #ifndef ROVER_CAROUSEL_H
 #define ROVER_CAROUSEL_H
 
-#include "Stoppable.h"
-#include "Updatable.h"
 #include <cstdint>
 
+#include "../internal_comms/include/LSSServoMotor.h"
+#include "Stoppable.h"
+#include "Updatable.h"
+
 class Carousel : public Stoppable, public Updatable {
-    protected:
-        uint8_t currentCuvette;
+ protected:
+  // current cuvette, in the range of 0-7
+  uint8_t currentCuvette;
 
-    public:
-        void home();
-        void goToCuvette(uint8_t cuvetteId);
-        void nextCuvette();
-        void previousCuvette();
-        uint8_t getCurrentCuvette() const { return currentCuvette; }
+ private:
+  LSSServoMotor* theServo;
+  uint8_t servoID;
 
-        virtual void eStop() override;
-        virtual void update(unsigned long deltaMicroSeconds) override;
-        virtual ~Carousel();
+ public:
+  void home();
+  void goToCuvette(uint8_t cuvetteId);
+  void moveByDegrees(float degrees);
+  void nextCuvette();
+  void previousCuvette();
+  uint8_t getCurrentCuvette() const { return currentCuvette; }
+
+  virtual void eStop() override;
+  virtual void update(unsigned long deltaMicroSeconds) override;
+  virtual ~Carousel();
+  Carousel(LSSServoMotor* theServo, uint8_t servoID);
 };
 
-
-#endif //ROVER_CAROUSEL_H
+#endif  // ROVER_CAROUSEL_H
