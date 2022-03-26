@@ -30,21 +30,23 @@ struct JoyCommsControl::Implement {
 
     int enable_button;
 
-    std_msgs::String stop_commands[4];
+    std::vector<std_msgs::String>  stop_commands;
 
     bool sent_disable_msg;
 
-    std::string command_topics[4];
+    std::vector<std::string>  command_topics;
 
-    ros::Publisher comms_pubs[4];
+    std::vector<ros::Publisher>  comms_pubs;
 
-    std_msgs::String button_commands[4][11];
-    int button_rates[4][11] = {-1};
+    int numberOfButtons = 11;
+    std::vector<std::vector<std_msgs::String>> button_commands;
+    std::vector<std::vector<int>> button_rates;
     int buttons_clicked[11];
 
-    std_msgs::String axis_commands[4][8];
-    int axis_rates[4][8] = {-1};
-    int axis_ranges[4][8] = {-1};
+    int numberOfAxes = 8;
+    std::vector<std::vector<std_msgs::String>> axis_commands;
+    std::vector<std::vector<int>> axis_rates;
+    std::vector<std::vector<int>> axis_ranges;
     int axes_moved[8];
     float axes_values[8];
     float axes_percentage[8];
@@ -90,7 +92,38 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     int buttonId;
     XmlRpc::XmlRpcValue mappingObject;
     if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        //for each mapping
         for (int i = 0; i < mappingsXML.size(); ++i) {
+            //set up the command vectors for each mapping
+            //buttons
+            std::vector<std_msgs::String> buttons;
+            std::vector<int> buttonRates;
+            for (size_t i = 0; i < pImplement->numberOfButtons; i++)
+            {
+                std_msgs::String command;
+                buttons.push_back(command);
+
+                buttonRates.push_back(-1);                
+            }
+            pImplement->button_commands.push_back(buttons);
+            pImplement->button_rates.push_back(buttonRates);
+            //axes
+            std::vector<std_msgs::String> axes;
+            std::vector<int> axesRates;
+            std::vector<int> axesRanges;
+            for (size_t i = 0; i < pImplement->numberOfAxes; i++)
+            {
+                std_msgs::String command;
+                axes.push_back(command);
+
+                axesRates.push_back(-1);
+                axesRanges.push_back(-1);
+            }
+            pImplement->axis_commands.push_back(axes);
+            pImplement->axis_rates.push_back(axesRates);
+            pImplement->axis_ranges.push_back(axesRanges);
+            
+            //for each button
             for (int j = 0; j < mappingsXML[i].size(); ++j){
 
                 mappingObject = mappingsXML[i][j];
@@ -133,13 +166,15 @@ void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_
 
     if (topicsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < topicsXML.size(); ++i) {
-            pImplement->command_topics[i] = static_cast<std::string>(topicsXML[i]).c_str();
-            pImplement->comms_pubs[i] = nh->advertise<std_msgs::String>(pImplement->command_topics[i], 1, true);
+            pImplement->command_topics.push_back(static_cast<std::string>(topicsXML[i]).c_str());
+            pImplement->comms_pubs.push_back(nh->advertise<std_msgs::String>(pImplement->command_topics[i], 1, true));
         }
     }
     if (stopCommandsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < stopCommandsXML.size(); ++i) {
-            pImplement->stop_commands[i].data = static_cast<std::string>(stopCommandsXML[i]).c_str();
+            std_msgs::String stopCommand;
+            stopCommand.data = static_cast<std::string>(stopCommandsXML[i]).c_str();
+            pImplement->stop_commands.push_back(stopCommand);
         }
     }
 }
