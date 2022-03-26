@@ -9,7 +9,6 @@ command_topics:
   - /rover_command
 #number of mappings has to match the number of topics in command_topics and commands in stop_commands
 controller_mappings:
-# D pad left
   - - ["TRIGGER_R2","set_motor_speeds %a 0 0 0 0 0",10,250]
     - ["TRIGGER_L2","set_motor_speeds -%a 0 0 0 0 0",10,250]
     - ["JOY_LEFT_Y","set_motor_speeds 0 %a 0 0 0 0",10,250]
@@ -18,8 +17,5 @@ controller_mappings:
     - ["JOY_RIGHT_X","set_motor_speeds 0 0 0 0 %a 0",10,250]
     - ["BUTTON_CIRCLE","set_motor_speeds 0 0 0 0 0 250",10,250]
     - ["BUTTON_SQUARE","set_motor_speeds 0 0 0 0 0 -250",10,250]
-# D pad up
   - - ["TRIGGER_L2","move_wheels 0 %a 0 %a 0 %a 1 %a 1 %a 1 %a",10,250]
     - ["TRIGGER_R2","move_wheels 1 %a 1 %a 1 %a 0 %a 0 %a 0 %a",10,250]
-# D pad right
-# D pad down

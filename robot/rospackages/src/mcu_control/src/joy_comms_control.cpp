@@ -41,13 +41,13 @@ struct JoyCommsControl::Implement {
     int numberOfButtons = 11;
     std::vector<std::vector<std_msgs::String>> button_commands;
     std::vector<std::vector<int>> button_rates;
-    int buttons_clicked[11];
+    int buttons_clicked[11] = {0};
 
     int numberOfAxes = 8;
     std::vector<std::vector<std_msgs::String>> axis_commands;
     std::vector<std::vector<int>> axis_rates;
     std::vector<std::vector<int>> axis_ranges;
-    int axes_moved[8];
+    int axes_moved[8] = {0};
     float axes_values[8];
     float axes_percentage[8];
 
@@ -92,7 +92,7 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     int buttonId;
     XmlRpc::XmlRpcValue mappingObject;
     if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        //for each mapping
+        //for each layout
         for (int i = 0; i < mappingsXML.size(); ++i) {
             //set up the command vectors for each mapping
             //buttons
@@ -122,7 +122,7 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
             pImplement->axis_commands.push_back(axes);
             pImplement->axis_rates.push_back(axesRates);
             pImplement->axis_ranges.push_back(axesRanges);
-            
+
             //for each button
             for (int j = 0; j < mappingsXML[i].size(); ++j){
 
@@ -273,37 +273,23 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        if (joy_msg->axes[DPAD_X] != 0 || joy_msg->axes[DPAD_Y] != 0) {
+        if (joy_msg->buttons[BUTTON_SHARE] || joy_msg->buttons[BUTTON_OPTION]) {
             int new_mapping_index;
-            if (joy_msg->axes[DPAD_X] == 1)
+            if (joy_msg->buttons[BUTTON_OPTION])
             {
-                new_mapping_index = 0;
-                
-            } else if (joy_msg->axes[DPAD_Y] == 1)
-            {
-                new_mapping_index = 1;
-                
-            } else if (joy_msg->axes[DPAD_X] == -1)
-            {
-                new_mapping_index = 2;
-
-            } else if (joy_msg->axes[DPAD_Y] == -1)
-            {
-                new_mapping_index = 3;
+                new_mapping_index = (current_mappings_index + 1) % number_of_mappings;
             }
-            if (number_of_mappings > new_mapping_index)
+            if (joy_msg->buttons[BUTTON_SHARE])
             {
-                if (current_mappings_index == new_mapping_index)
-                {
-                    std::cout << "Mapping already active. Nothing changed" << std::endl;
-                }else{
-                    comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
-                    current_mappings_index = new_mapping_index;
-                    std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
-                }
-                
+                new_mapping_index = std::abs(current_mappings_index - 1) % number_of_mappings;
+            }
+            if (current_mappings_index == new_mapping_index)
+            {
+                std::cout << "Mapping already active. Nothing changed" << std::endl;
             }else{
-                std::cout << "No mapping provided. Nothing changed" << std::endl;
+                comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
+                current_mappings_index = new_mapping_index;
+                std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
             }
         }else{
             addToCommandQueue(joy_msg);
