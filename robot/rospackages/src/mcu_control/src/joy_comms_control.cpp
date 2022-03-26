@@ -207,7 +207,7 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
         float value = axes[i];
         //triggers have a different behavior
         if(i == TRIGGER_L2 || i == TRIGGER_R2){
-            //todo when joy starts it publishes triggers as 0 and hence will be registered as being pressed until it is pressed for the first time
+            //when joy starts it publishes triggers as 0 and hence will be registered as being pressed until it is pressed for the first time
             axes_moved[i] = value != 1 ? 1 : 0;
             //this is a fix because triggers have value 0 when they are half pressed
             axes_percentage[i] = (value - 1)/-2;
@@ -223,8 +223,7 @@ void JoyCommsControl::publish_command_with_rate() {
     //TODO take rate from config file for each button
     ros::Rate loop_rate(10);
     //loop through clicked buttons
-    //todo use length of buttons_clicked instead of 11
-    for (int i = 0; i < 11; ++i)
+    for (int i = 0; i < pImplement->numberOfButtons; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
         if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates[pImplement->current_mappings_index][i] > 0)
@@ -234,8 +233,7 @@ void JoyCommsControl::publish_command_with_rate() {
     }
 
     //loop through moved axes
-    //todo use length of axes_moved instead of 8
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < pImplement->numberOfAxes; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
         if (pImplement->axes_moved[i] != 0 && pImplement->axis_rates[pImplement->current_mappings_index][i] > 0)
@@ -297,11 +295,10 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
     } else {
         //clear buttons_clicked array since enable button is not clicked
         //consider moving it to "not publish" when enable is not clicked
-        //todo use length of buttons_clicked instead of 11
-        for(int i =0; i< 11 ;i++){
+        for(int i =0; i< numberOfButtons ;i++){
             buttons_clicked[i] = 0;
         }
-        for(int i =0; i< 8 ;i++){
+        for(int i =0; i< numberOfAxes ;i++){
             axes_moved[i] = 0;
         }
 
@@ -318,6 +315,7 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle nh(""), nh_param("~");
     JoyCommsControl joy_control(&nh, &nh_param);
 
+    std::cerr<< "WARNING: After running the joy_node from the joy package, press the R2 and L2 triggers once before using the controller." << std::endl;
     while (ros::ok())
     {
         joy_control.publish_command_with_rate();
