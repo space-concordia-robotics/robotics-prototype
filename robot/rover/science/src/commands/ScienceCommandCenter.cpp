@@ -5,6 +5,8 @@
 #include "include/commands/ScienceCommandCenter.h"
 
 #define COMMAND_MOVE_DEGREES 41
+#define COMMAND_NEXT_CUVETTE 42
+#define COMMAND_PREVIOUS_CUVETTE 43
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -18,6 +20,8 @@ float bytes_to_float(const uint8_t* rawPointer) {
 
 // These declare method, in raman.ino, that are needed by the command center
 void carousel_move_degrees(float degrees);
+void carousel_next_cuvette();
+void carousel_previous_cuvette();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -28,5 +32,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         float degrees = bytes_to_float(rawArgs);
         carousel_move_degrees(degrees);
       }
+    case COMMAND_NEXT_CUVETTE:
+      carousel_next_cuvette();
+    case COMMAND_PREVIOUS_CUVETTE:
+      carousel_previous_cuvette();
   }
 }

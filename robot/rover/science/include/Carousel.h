@@ -17,11 +17,14 @@ class Carousel : public Stoppable, public Updatable {
   uint8_t currentCuvette;
 
  private:
+  enum State { Uncalibrated, Calibrating, Operating };
   LSSServoMotor* theServo;
   uint8_t servoID;
+  State state;
 
  public:
   void home();
+  void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveByDegrees(float degrees);
   void nextCuvette();

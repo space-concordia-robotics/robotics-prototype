@@ -39,18 +39,24 @@ Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel,
                                                pump};
 unsigned long time = micros();
 
-// This contains the methods needed by command center
+/* -----
+This contains the methods needed by command center
+  ------
+  */
 void carousel_move_degrees(float degrees) { carousel->moveByDegrees(degrees); }
+void carousel_previous_cuvette() { carousel->previousCuvette(); }
+void carousel_next_cuvette() { carousel->nextCuvette(); }
+
+void setup() {
+  carousel->startCalibrating();
+  commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
+                             TRANSMIT_PIN);
+}
 
 void loop() {
   if (Serial.available() > 0) commandCenter->readCommand();
 
   updateSystems();
-}
-
-void setup() {
-  commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
-                             TRANSMIT_PIN);
 }
 
 /**
