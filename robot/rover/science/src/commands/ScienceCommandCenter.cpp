@@ -4,6 +4,8 @@
 
 #include "include/commands/ScienceCommandCenter.h"
 
+#include "../../include/SciencePinSetup.h"
+
 #define COMMAND_MOVE_DEGREES 41
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
@@ -32,9 +34,15 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         float degrees = bytes_to_float(rawArgs);
         carousel_move_degrees(degrees);
       }
+      break;
     case COMMAND_NEXT_CUVETTE:
       carousel_next_cuvette();
+      break;
     case COMMAND_PREVIOUS_CUVETTE:
       carousel_previous_cuvette();
+      break;
+    default:
+      Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
+      digitalWrite(LED, !digitalRead(LED));
   }
 }

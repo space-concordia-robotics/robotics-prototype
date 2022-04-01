@@ -1,5 +1,5 @@
 // USB : Debug, UART : Production
-#define USB
+#define UART
 
 #include <include/Fan.h>
 #include <include/Funnel.h>
@@ -10,6 +10,7 @@
 //#include "CommandCenter.h"
 #include "include/Carousel.h"
 #include "include/RamanSetup.h"
+#include "include/SciencePinSetup.h"
 #include "include/commands/ScienceCommandCenter.h"
 //#include <cstdint>
 
@@ -48,13 +49,21 @@ void carousel_previous_cuvette() { carousel->previousCuvette(); }
 void carousel_next_cuvette() { carousel->nextCuvette(); }
 
 void setup() {
+  pinMode(CAR_POS, INPUT);
+  pinMode(LED, OUTPUT);
+
+  digitalWrite(LED, HIGH);
+  delay(500);
+  digitalWrite(LED, LOW);
+
+  Serial5.begin(115200);
   carousel->startCalibrating();
   commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
                              TRANSMIT_PIN);
 }
 
 void loop() {
-  if (Serial.available() > 0) commandCenter->readCommand();
+  if (Serial1.available() > 0) commandCenter->readCommand();
 
   updateSystems();
 }

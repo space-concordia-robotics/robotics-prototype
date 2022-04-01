@@ -12,8 +12,8 @@ void Carousel::eStop() { theServo->writeActionCommand(servoID, "H"); }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
   if (state == State::Calibrating) {
-    if (!digitalRead(CAR_POS)) {
-      // if read switch, stop motor and have it hold the current position.
+    if (digitalRead(CAR_POS) == LOW /*pulled up*/) {
+      // if switch pressed, stop motor and have it hold the current position.
       theServo->writeActionCommand(servoID, "H");
       state = State::Operating;
     }
