@@ -16,21 +16,54 @@ const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
-uint32_t last_gps_measurement = 0;
 
 I2CGPS myI2CGPS;
 TinyGPSPlus myGPS;
+
+IntervalTimer gpsTimer;
 
 void attachMotors();
 void attachEncoders();
 void attachServos();
 void writeServoDefaultValues();
 
-void blink(){
+void blink(int dur){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(2000);
+    delay(dur);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(2000);
+    delay(dur);
+}
+
+// IRQ to be called when a new gps measurement will be taken
+void gpsIRQ(){
+    noInterrupts()
+    if(Rover::systemStatus.is_gps_enabled) {
+        if (myI2CGPS.available()) {
+            myGPS.encode(myI2CGPS.read());
+        }
+
+        if (myGPS.time.isUpdated() && myGPS.location.isValid()) //Check to see if new GPS info is available
+        {
+            blink(100);
+            double lat = myGPS.location.lat();
+            double lng = myGPS.location.lng();
+
+            uint8_t *lat_buffer = nullptr;
+            uint8_t *lng_buffer = nullptr;
+
+            double2bytes(lat_buffer, lat);
+            double2bytes(lat_buffer, lng);
+
+            byte data_buffer[16];
+            memcpy(data_buffer, lat_buffer, 8);
+            memcpy(data_buffer + 8, lng_buffer, 8);
+
+            auto msg= commandCenter->createMessage(COMMAND_SEND_GPS, sizeof(data_buffer),
+                                                                            data_buffer);
+            commandCenter->queueMessage(*msg);
+        }
+    }
+    interrupts()
 }
 void setup() {
 
@@ -38,18 +71,26 @@ void setup() {
     pinMode(V_SENSE_PIN, INPUT);
 
     commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
-    //myI2CGPS.begin();
+
+    if(!myI2CGPS.begin()){
+        blink(5000);
+    }
+
     attachMotors();
     attachEncoders();
 
-    attachServos();
+    //attachServos();
 
-    blink();
+    //blink(500);
 
     // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
     Rover::systemStatus.is_passive_rover_feedback_enabled = false;
-    Rover::systemStatus.is_gps_enabled = false;
+    Rover::systemStatus.is_gps_enabled = true;
+
+
+    gpsTimer.begin(gpsIRQ,1000000);
+
 }
 
 void loop() {
@@ -73,40 +114,14 @@ void loop() {
         ((millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
     }
-//    if( (millis() - last_gps_measurement) > I2C_MEASUREMENT_INTERVAL && Rover::systemStatus.is_gps_enabled) {
-//
-//        last_gps_measurement = millis();
-//        if (myI2CGPS.available()) {
-//            myGPS.encode(myI2CGPS.read());
-//        }
-//
-//        if (myGPS.time.isUpdated() && myGPS.location.isValid()) //Check to see if new GPS info is available
-//        {
-//            double lat = myGPS.location.lat();
-//            double lng = myGPS.location.lng();
-//
-//            uint8_t *lat_buffer = nullptr;
-//            uint8_t *lng_buffer = nullptr;
-//
-//            double2bytes(lat_buffer, lat);
-//            double2bytes(lat_buffer, lng);
-//
-//            byte data_buffer[16];
-//            memcpy(data_buffer, lat_buffer, 8);
-//            memcpy(data_buffer + 8, lng_buffer, 8);
-//
-//            internal_comms::Message *message = commandCenter->createMessage(COMMAND_SEND_GPS, sizeof(data_buffer),
-//                                                                            data_buffer);
-//
-//            commandCenter->sendMessage(*message); }
 
     // In case there are any messages queued in the transmit buffer, they should be sent.
     commandCenter->sendMessage();
 }
 
 void attachServos(){
-    Rover::attachServo(CENTER_FRONT_1_SERVO,CF_1_SERVO);
-    Rover::attachServo(CENTER_FRONT_2_SERVO,CF_2_SERVO);
+//    Rover::attachServo(CENTER_FRONT_1_SERVO,CF_1_SERVO);
+//    Rover::attachServo(CENTER_FRONT_2_SERVO,CF_2_SERVO);
     Rover::attachServo(CENTER_BACK_1_SERVO,CB_1_SERVO);
     Rover::attachServo(CENTER_BACK_2_SERVO,CB_2_SERVO);
 }

@@ -2,7 +2,7 @@
 
 namespace Rover {
 
-    PWMServo servos[4];
+    Servo servos[4];
     SystemState systemStatus;
     RoverState roverState;
 
@@ -137,8 +137,6 @@ namespace Rover {
     void attachServo(const ServoNames& servoID,const uint8_t& pin) {
 
         servos[servoID].attach(pin);
-        analogWrite(pin,0);
-        //moveServo(servoID,0);
     }
 
     // Angle is given by 0-180, if the value is > 180 than it is clipped to 180

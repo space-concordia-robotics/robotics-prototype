@@ -26,7 +26,7 @@ enum ServoNames{
     CENTER_BACK_1_SERVO = 2,
     CENTER_BACK_2_SERVO = 3
 };
-extern PWMServo servos[4];
+extern Servo servos[4];
 
 typedef struct {
     float right_linear_velocity;

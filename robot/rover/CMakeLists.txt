@@ -116,6 +116,7 @@ getSubdirectories(TEENSY_LIBRARIES ${TEENSY_LIB})
 include_directories(
  	${TEENSY_CORE}
 	${TEENSY_CORE}/teensy3
+    ${ARM_TOOLS}
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
     ${CMAKE_SOURCE_DIR}/internal_comms/include

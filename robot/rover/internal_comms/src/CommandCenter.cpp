@@ -142,14 +142,8 @@ namespace internal_comms
 
                 Serial.write(0x0A);
 
-
                 free(message.rawArgs);
-                
             }
-            //else {
-                //Serial.write(1);
-                //Serial.write(0);
-            //}
         }
 
         }
