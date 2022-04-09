@@ -22,58 +22,39 @@ public:
 private:
     const int QUEUE_LOOP_RATE = 120;
 
-    // These enums are defined for Xbox controllers
-    enum buttons {
-        BUTTON_CROSS = 0,
-        BUTTON_CIRCLE = 1,
-        BUTTON_SQUARE = 2,
-        BUTTON_TRIANGLE = 3,
-        BUTTON_L1 = 4,
-        BUTTON_R1 = 5,
-        BUTTON_SHARE = 6,
-        BUTTON_OPTION = 7,
-        BUTTON_HOME = 8,
-        BUTTON_L3 = 9,
-        BUTTON_R3 = 10,
-    };
-
-    std::string button_names[11] = {"BUTTON_CROSS",
+    const std::string share_name = "BUTTON_SHARE";
+    const std::string option_name = "BUTTON_OPTION";
+    const std::string button_names[17] = {"BUTTON_CROSS",
                                 "BUTTON_CIRCLE",
-                                "BUTTON_SQUARE",
                                 "BUTTON_TRIANGLE",
+                                "BUTTON_SQUARE",
                                 "BUTTON_L1",
                                 "BUTTON_R1",
-                                "BUTTON_SHARE",
-                                "BUTTON_OPTION",
+                                "BUTTON_L2",
+                                "BUTTON_R2",
+                                share_name,
+                                option_name,
                                 "BUTTON_HOME",
                                 "BUTTON_L3",
-                                "BUTTON_R3",};
+                                "BUTTON_R3",
+                                "BUTTON_DPAD_UP",
+                                "BUTTON_DPAD_DOWN",
+                                "BUTTON_DPAD_LEFT",
+                                "BUTTON_DPAD_RIGHT"};
 
     std::map<std::string, int> button_name_to_id_map;
-    
 
-    enum axes {
-        JOY_LEFT_X = 0,
-        JOY_LEFT_Y = 1,
-        TRIGGER_L2 = 2,
-        JOY_RIGHT_X = 3,
-        JOY_RIGHT_Y = 4,
-        TRIGGER_R2 = 5,
-        DPAD_X = 6,
-        DPAD_Y = 7
-    };
 
-    std::string axis_names[8] = {"JOY_LEFT_X",
+    const std::string trigger_l2_name = "TRIGGER_L2";
+    const std::string trigger_r2_name = "TRIGGER_R2";
+    std::string axis_names[6] = {"JOY_LEFT_X",
                                 "JOY_LEFT_Y",
-                                "TRIGGER_L2",
+                                trigger_l2_name,
                                 "JOY_RIGHT_X",
                                 "JOY_RIGHT_Y",
-                                "TRIGGER_R2",
-                                "DPAD_X",
-                                "DPAD_Y",};
+                                trigger_r2_name};
 
     std::map<std::string, int> axis_name_to_id_map;
-
 
     Implement* pImplement;
 };

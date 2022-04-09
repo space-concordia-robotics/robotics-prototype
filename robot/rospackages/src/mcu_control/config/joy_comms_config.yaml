@@ -1,4 +1,6 @@
 enable_button: 5
+next_layout_button: "BUTTON_OPTION"
+previous_layout_button: "BUTTON_SHARE"
 #number of commands has to match the number of mappings in controller_mappings and topics in command_topics
 stop_commands: 
   - "motors_stop"

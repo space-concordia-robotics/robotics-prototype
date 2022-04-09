@@ -38,18 +38,23 @@ struct JoyCommsControl::Implement {
 
     std::vector<ros::Publisher>  comms_pubs;
 
-    int numberOfButtons = 11;
+    int next_layout_button;
+    int previous_layout_button;
+    int trigger_l2;
+    int trigger_r2;
+
+    int numberOfButtons;
     std::vector<std::vector<std_msgs::String>> button_commands;
     std::vector<std::vector<int>> button_rates;
-    int buttons_clicked[11] = {0};
+    std::vector<int> buttons_clicked;
 
-    int numberOfAxes = 8;
+    int numberOfAxes;
     std::vector<std::vector<std_msgs::String>> axis_commands;
     std::vector<std::vector<int>> axis_rates;
     std::vector<std::vector<int>> axis_ranges;
-    int axes_moved[8] = {0};
-    float axes_values[8];
-    float axes_percentage[8];
+    std::vector<int>  axes_moved;
+    std::vector<float> axes_values;
+    std::vector<float> axes_percentage;
 
     int number_of_mappings = 0;
     int current_mappings_index = 0;
@@ -182,9 +187,24 @@ void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_
 JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
 
     pImplement = new Implement;
-
+    pImplement->numberOfButtons = sizeof(button_names)/sizeof(button_names[0]);
+    pImplement->numberOfAxes = sizeof(axis_names)/sizeof(axis_names[0]);
+    pImplement->buttons_clicked.resize(pImplement->numberOfButtons, 0);
+    pImplement->axes_moved.resize(pImplement->numberOfAxes, 0);
+    pImplement->axes_values.resize(pImplement->numberOfAxes);
+    pImplement->axes_percentage.resize(pImplement->numberOfAxes);
+    
     MapButtonNamesToIds();
     nh_param->param<int>("/enable_button", pImplement->enable_button, 0);
+    std::string next, previous;
+    nh_param->param<std::string>("/next_layout_button", next, option_name);
+    nh_param->param<std::string>("/previous_layout_button", previous, share_name);
+
+    pImplement->next_layout_button = button_name_to_id_map[next];
+    pImplement->previous_layout_button = button_name_to_id_map[previous];
+
+    pImplement->trigger_l2 = button_name_to_id_map[trigger_l2_name];
+    pImplement->trigger_r2 = button_name_to_id_map[trigger_r2_name];
 
     getControllerMappings(nh_param);
 
@@ -206,7 +226,7 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
     {
         float value = axes[i];
         //triggers have a different behavior
-        if(i == TRIGGER_L2 || i == TRIGGER_R2){
+        if(i == trigger_l2 || i == trigger_r2){
             //when joy starts it publishes triggers as 0 and hence will be registered as being pressed until it is pressed for the first time
             axes_moved[i] = value != 1 ? 1 : 0;
             //this is a fix because triggers have value 0 when they are half pressed
@@ -271,13 +291,13 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        if (joy_msg->buttons[BUTTON_SHARE] || joy_msg->buttons[BUTTON_OPTION]) {
+        if (joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button]) {
             int new_mapping_index;
-            if (joy_msg->buttons[BUTTON_OPTION])
+            if (joy_msg->buttons[next_layout_button])
             {
                 new_mapping_index = (current_mappings_index + 1) % number_of_mappings;
             }
-            if (joy_msg->buttons[BUTTON_SHARE])
+            if (joy_msg->buttons[previous_layout_button])
             {
                 new_mapping_index = std::abs(current_mappings_index - 1) % number_of_mappings;
             }
