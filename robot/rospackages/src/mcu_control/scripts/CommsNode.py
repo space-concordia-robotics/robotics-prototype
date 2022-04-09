@@ -53,7 +53,11 @@ science_queue = deque()
 
 gpio.setwarnings(False)
 gpio.setmode(gpio.BOARD)
-gpio.setup(PIN_DESC, gpio.OUT)
+# gpio.setup(PIN_DESC, gpio.OUT)
+gpio.setup(ROVER, gpio.OUT)
+gpio.setup(ARM, gpio.OUT)
+gpio.setup(PDS, gpio.OUT)
+gpio.setup(SCIENCE, gpio.OUT)
 gpio.output(SW_PINS, NONE)
 
 def main():
