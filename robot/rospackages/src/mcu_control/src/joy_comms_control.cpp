@@ -62,10 +62,10 @@ struct JoyCommsControl::Implement::ButtonMappings {
 };
 
 void JoyCommsControl::MapButtonNamesToIds() {
-    for (int i = BUTTON_CROSS; i<=BUTTON_R3; ++i) {
+    for (int i = 0; i < pImplement->numberOfButtons; ++i) {
         button_name_to_id_map.insert(std::pair<std::string, int>(button_names[i], i));
     }
-    for (int i = JOY_LEFT_X; i<=DPAD_Y; ++i) {
+    for (int i = 0; i< pImplement->numberOfAxes; ++i) {
         axis_name_to_id_map.insert(std::pair<std::string, int>(axis_names[i], i));
     }
 }
@@ -180,10 +180,10 @@ void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_
 }
 
 JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
-    MapButtonNamesToIds();
 
     pImplement = new Implement;
 
+    MapButtonNamesToIds();
     nh_param->param<int>("/enable_button", pImplement->enable_button, 0);
 
     getControllerMappings(nh_param);
