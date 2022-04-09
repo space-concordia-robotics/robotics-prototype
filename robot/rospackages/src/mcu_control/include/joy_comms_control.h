@@ -22,9 +22,17 @@ public:
 private:
     const int QUEUE_LOOP_RATE = 120;
 
+    enum controller_type {
+        PLAYSTATION = 1,
+        XBOX = 2
+    };
+
+    int controller_type;
+
+
     const std::string share_name = "BUTTON_SHARE";
     const std::string option_name = "BUTTON_OPTION";
-    const std::string button_names[17] = {"BUTTON_CROSS",
+    const std::string ps_button_names[17] = {"BUTTON_CROSS",
                                 "BUTTON_CIRCLE",
                                 "BUTTON_TRIANGLE",
                                 "BUTTON_SQUARE",
@@ -42,17 +50,41 @@ private:
                                 "BUTTON_DPAD_LEFT",
                                 "BUTTON_DPAD_RIGHT"};
 
+    std::string xbox_button_names[11] = {"BUTTON_CROSS",
+                                "BUTTON_CIRCLE",
+                                "BUTTON_SQUARE",
+                                "BUTTON_TRIANGLE",
+                                "BUTTON_L1",
+                                "BUTTON_R1",
+                                share_name,
+                                option_name,
+                                "BUTTON_HOME",
+                                "BUTTON_L3",
+                                "BUTTON_R3",};
+
+
     std::map<std::string, int> button_name_to_id_map;
 
 
     const std::string trigger_l2_name = "TRIGGER_L2";
     const std::string trigger_r2_name = "TRIGGER_R2";
-    std::string axis_names[6] = {"JOY_LEFT_X",
+    std::string ps_axis_names[6] = {"JOY_LEFT_X",
                                 "JOY_LEFT_Y",
                                 trigger_l2_name,
                                 "JOY_RIGHT_X",
                                 "JOY_RIGHT_Y",
                                 trigger_r2_name};
+
+
+
+    std::string xbox_axis_names[8] = {"JOY_LEFT_X",
+                                "JOY_LEFT_Y",
+                                trigger_l2_name,
+                                "JOY_RIGHT_X",
+                                "JOY_RIGHT_Y",
+                                trigger_r2_name,
+                                "DPAD_X",
+                                "DPAD_Y",};
 
     std::map<std::string, int> axis_name_to_id_map;
 
