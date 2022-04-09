@@ -9,6 +9,7 @@
 #define COMMAND_MOVE_DEGREES 41
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
+#define COMMAND_MOVE_N_CUVETTES 44
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
