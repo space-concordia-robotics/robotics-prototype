@@ -48,8 +48,8 @@ void carousel_move_degrees(float degrees) { carousel->moveByDegrees(degrees); }
 void carousel_previous_cuvette() { carousel->previousCuvette(); }
 void carousel_next_cuvette() { carousel->nextCuvette(); }
 void set_laser(int setup) {
-  if (setup == 1) 
-    laser->turnOn(); 
+  if (setup == 1)
+    laser->turnOn();
   else
     laser->turnOff();
 }
@@ -64,14 +64,16 @@ void setup() {
 
   pinMode(LASER, OUTPUT);
 
-  Serial5.begin(115200);
-  carousel->startCalibrating();
+  // Serial5.begin(115200);
+  //  carousel->startCalibrating();
   commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
                              TRANSMIT_PIN);
 }
 
 void loop() {
-  if (Serial1.available() > 0) commandCenter->readCommand();
+  if (Serial1.available() > 0) {
+    commandCenter->readCommand();
+  }
 
   updateSystems();
 }

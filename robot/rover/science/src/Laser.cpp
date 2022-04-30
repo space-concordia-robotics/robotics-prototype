@@ -4,6 +4,7 @@
 
 #include "include/Laser.h"
 #include "include/SciencePinSetup.h"
+#include "Arduino.h"
 
 void Laser::eStop() {
     

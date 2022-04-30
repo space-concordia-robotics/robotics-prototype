@@ -10,7 +10,7 @@
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
 #define COMMAND_MOVE_N_CUVETTES 44
-#define SET_LASER 36 
+#define SET_LASER 36
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -44,10 +44,11 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_PREVIOUS_CUVETTE:
       carousel_previous_cuvette();
       break;
-    case SET_LASER: 
+    case SET_LASER:
       set_laser(rawArgs[0]);
+      break;
     default:
-      Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
+      Serial.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));
   }
 }
