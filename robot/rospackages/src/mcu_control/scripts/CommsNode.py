@@ -17,6 +17,7 @@ from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control.scripts.ScienceCommands import science_out_commands, science_in_commands
 from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 ARM_SELECTED = 0
@@ -24,8 +25,8 @@ ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
 
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
-out_commands = [arm_out_commands, wheel_out_commands, None, None]
+in_commands = [arm_in_commands, wheel_in_commands, science_in_commands, None]
+out_commands = [arm_out_commands, wheel_out_commands, science_out_commands, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:

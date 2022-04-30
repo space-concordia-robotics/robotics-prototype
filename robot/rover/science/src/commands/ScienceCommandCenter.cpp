@@ -9,6 +9,7 @@
 #define COMMAND_MOVE_DEGREES 41
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
+#define SET_LASER 36 
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -24,6 +25,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 void carousel_move_degrees(float degrees);
 void carousel_next_cuvette();
 void carousel_previous_cuvette();
+void set_laser(int state);
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -41,6 +43,8 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_PREVIOUS_CUVETTE:
       carousel_previous_cuvette();
       break;
+    case SET_LASER: 
+      set_laser(rawArgs[0]);
     default:
       Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));
