@@ -3,9 +3,10 @@
 //
 
 #include "include/Laser.h"
+#include "include/SciencePinSetup.h"
 
 void Laser::eStop() {
-
+    
 }
 
 void Laser::update(unsigned long deltaMicroSeconds) {
@@ -13,11 +14,11 @@ void Laser::update(unsigned long deltaMicroSeconds) {
 }
 
 void Laser::turnOn() {
-
+    digitalWrite(LASER, HIGH);
 }
 
 void Laser::turnOff() {
-
+    digitalWrite(LASER, LOW);
 }
 
 bool Laser::isReady() {

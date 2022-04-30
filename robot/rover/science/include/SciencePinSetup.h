@@ -3,5 +3,6 @@
 
 #define CAR_POS 6  // carousel limit switch
 #define LED 13
+#define LASER 13
 
 #endif

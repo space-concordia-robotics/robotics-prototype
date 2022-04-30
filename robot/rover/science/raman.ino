@@ -47,6 +47,12 @@ This contains the methods needed by command center
 void carousel_move_degrees(float degrees) { carousel->moveByDegrees(degrees); }
 void carousel_previous_cuvette() { carousel->previousCuvette(); }
 void carousel_next_cuvette() { carousel->nextCuvette(); }
+void set_laser(int setup) {
+  if (setup == 1) 
+    laser->turnOn(); 
+  else
+    laser->turnOff();
+}
 
 void setup() {
   pinMode(CAR_POS, INPUT);
@@ -55,6 +61,8 @@ void setup() {
   digitalWrite(LED, HIGH);
   delay(500);
   digitalWrite(LED, LOW);
+
+  pinMode(LASER, OUTPUT);
 
   Serial5.begin(115200);
   carousel->startCalibrating();

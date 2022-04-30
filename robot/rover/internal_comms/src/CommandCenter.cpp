@@ -130,7 +130,7 @@ void CommandCenter::sendDebug(const char* debugMessage) {
 }
 
 void CommandCenter::sendMessage() {
-  if (digitalRead(enablePin)) {
+  // if (digitalRead(enablePin)) {
     if (!messageQueue.empty()) {
       Message message = messageQueue.front();
       messageQueue.pop();
@@ -149,7 +149,7 @@ void CommandCenter::sendMessage() {
 
       free((void*)message.rawArgs);
     }
-  }
+  // }
 }
 
 void CommandCenter::sendMessage(Message& message) {
