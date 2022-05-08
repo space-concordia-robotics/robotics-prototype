@@ -5,12 +5,19 @@
 #include "include/commands/ScienceCommandCenter.h"
 
 #include "../../include/SciencePinSetup.h"
+#include "include/HAL.h"
 
 #define COMMAND_MOVE_DEGREES 41
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
 #define COMMAND_MOVE_N_CUVETTES 44
-#define SET_LASER 36
+
+#define COMMAND_SET_LASER 36
+#define COMMAND_PUMP_PUMP 32
+#define COMMAND_PUMP_BACKPUMP 33
+#define COMMAND_PUMP_STOP 34
+
+#define COMMAND_SET_SERVO 43
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -38,17 +45,29 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         carousel_move_degrees(degrees);
       }
       break;
-    case COMMAND_NEXT_CUVETTE:
-      carousel_next_cuvette();
-      break;
-    case COMMAND_PREVIOUS_CUVETTE:
+      /*case COMMAND_NEXT_CUVETTE:
+        carousel_next_cuvette();
+        break;
+      case COMMAND_PREVIOUS_CUVETTE:
       carousel_previous_cuvette();
+      break;*/
+    case COMMAND_SET_LASER:
+      HAL::laser(rawArgs[0]);
       break;
-    case SET_LASER:
-      set_laser(rawArgs[0]);
+    case COMMAND_PUMP_PUMP:
+      HAL::pump(255, 1);
+      break;
+    case COMMAND_PUMP_BACKPUMP:
+      HAL::pump(255, 0);
+      break;
+    case COMMAND_PUMP_STOP:
+      HAL::pump(0, 1);
+      break;
+    case COMMAND_SET_SERVO:
+      HAL::servo(rawArgs[0], rawArgs[1]);
       break;
     default:
-      Serial.printf("command id %d args length %d", commandID, rawArgsLength);
+      Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));
   }
 }

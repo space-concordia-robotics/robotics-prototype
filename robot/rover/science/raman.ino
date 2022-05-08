@@ -9,10 +9,10 @@
 #include "Arduino.h"
 //#include "CommandCenter.h"
 #include "include/Carousel.h"
+#include "include/HAL.h"
 #include "include/RamanSetup.h"
 #include "include/SciencePinSetup.h"
 #include "include/commands/ScienceCommandCenter.h"
-//#include <cstdint>
 
 const uint8_t NUMBER_OF_STOPPABLES = 5;
 const uint8_t NUMBER_OF_UPDATABLES = 5;
@@ -25,8 +25,7 @@ const uint8_t TRANSMIT_PIN = 11;  // PLACE HOLDER
 
 void updateSystems();
 
-LSSServoMotor servoController(&Serial5);
-Carousel* carousel = new Carousel(&servoController, CAROUSEL_MOTOR_ID);
+Carousel* carousel = new Carousel(HAL::smartServo(), CAROUSEL_MOTOR_ID);
 Laser* laser = new Laser();
 Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
@@ -47,24 +46,12 @@ This contains the methods needed by command center
 void carousel_move_degrees(float degrees) { carousel->moveByDegrees(degrees); }
 void carousel_previous_cuvette() { carousel->previousCuvette(); }
 void carousel_next_cuvette() { carousel->nextCuvette(); }
-void set_laser(int setup) {
-  if (setup == 1)
-    laser->turnOn();
-  else
-    laser->turnOff();
-}
 
 void setup() {
-  pinMode(CAR_POS, INPUT);
-  pinMode(LED, OUTPUT);
-
+  HAL::pinSetup();
   digitalWrite(LED, HIGH);
   delay(500);
   digitalWrite(LED, LOW);
-
-  pinMode(LASER, OUTPUT);
-
-  // Serial5.begin(115200);
   //  carousel->startCalibrating();
   commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
                              TRANSMIT_PIN);
