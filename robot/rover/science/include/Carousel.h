@@ -8,10 +8,9 @@
 #include <cstdint>
 
 #include "../internal_comms/include/LSSServoMotor.h"
-#include "Stoppable.h"
 #include "Updatable.h"
 
-class Carousel : public Stoppable, public Updatable {
+class Carousel : public Updatable {
  protected:
   // current cuvette, in the range of 0-7
   uint8_t currentCuvette;
@@ -50,7 +49,6 @@ class Carousel : public Stoppable, public Updatable {
   void previousCuvette();
   uint8_t getCurrentCuvette() const { return currentCuvette; }
 
-  virtual void eStop() override;
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();
   Carousel(LSSServoMotor* theServo, uint8_t servoID);

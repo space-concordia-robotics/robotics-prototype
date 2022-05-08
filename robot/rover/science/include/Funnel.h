@@ -6,17 +6,15 @@
 #define ROVER_FUNNEL_H
 
 
-#include "Stoppable.h"
 #include "Updatable.h"
 #include <cstdint>
 
-class Funnel : public Stoppable, public Updatable {
+class Funnel : public Updatable {
     protected:
         uint8_t funnelPWM;
     public:
         virtual void funnel();
         virtual void update(unsigned long) override;
-        virtual void eStop() override;
         virtual ~Funnel();
 };
 

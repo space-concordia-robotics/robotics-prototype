@@ -12,10 +12,6 @@ void Funnel::update(unsigned long) {
 
 }
 
-void Funnel::eStop() {
-
-}
-
 Funnel::~Funnel() {
 
 }

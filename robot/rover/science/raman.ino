@@ -3,8 +3,6 @@
 
 #include <include/Fan.h>
 #include <include/Funnel.h>
-#include <include/Laser.h>
-#include <include/Pump.h>
 
 #include "Arduino.h"
 //#include "CommandCenter.h"
@@ -14,8 +12,7 @@
 #include "include/SciencePinSetup.h"
 #include "include/commands/ScienceCommandCenter.h"
 
-const uint8_t NUMBER_OF_STOPPABLES = 5;
-const uint8_t NUMBER_OF_UPDATABLES = 5;
+const uint8_t NUMBER_OF_UPDATABLES = 3;
 
 const uint8_t TX_TEENSY_4_0_PIN = 1;
 const uint8_t RX_TEENSY_4_0_PIN = 0;
@@ -26,17 +23,12 @@ const uint8_t TRANSMIT_PIN = 11;  // PLACE HOLDER
 void updateSystems();
 
 Carousel* carousel = new Carousel(HAL::smartServo(), CAROUSEL_MOTOR_ID);
-Laser* laser = new Laser();
 Fan* fan = new Fan();
 Funnel* funnel = new Funnel();
-Pump* pump = new Pump();
 
 internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
-Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel,
-                                               pump};
-Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel,
-                                               pump};
+Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, fan, funnel};
 unsigned long time = micros();
 
 /* -----
@@ -78,13 +70,4 @@ void updateSystems() {
   }
 
   time = micros();
-}
-
-/**
- * Stops all systems immediately.
- */
-void emergencyStop() {
-  for (auto& stoppable : stoppables) {
-    stoppable->eStop();
-  }
 }

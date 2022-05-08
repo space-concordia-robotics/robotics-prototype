@@ -6,10 +6,9 @@
 #define ROVER_FAN_H
 
 #include "Updatable.h"
-#include "Stoppable.h"
 #include <cstdint>
 
-class Fan :  public Stoppable, public Updatable {
+class Fan : public Updatable {
 
     protected:
         uint8_t fanPWM;
@@ -18,7 +17,6 @@ class Fan :  public Stoppable, public Updatable {
         void turnOff();
 
         virtual void update(unsigned long) override;
-        virtual void eStop() override;
         virtual ~Fan();
 };
 

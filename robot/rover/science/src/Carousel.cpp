@@ -12,8 +12,6 @@
 #define NUMBER_OF_CUVETTES 8
 #define DEGREES_PER_CUVETTE 360 / NUMBER_OF_CUVETTES
 
-void Carousel::eStop() { theServo->writeActionCommand(servoID, "H"); }
-
 void Carousel::update(unsigned long deltaMicroSeconds) {
   /*
   if (state == State::Calibrating) {
