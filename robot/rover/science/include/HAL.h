@@ -31,10 +31,17 @@ class SwitchCallback {
 
 class HAL {
  public:
+  /**
+   * @brief Sets up pin modes.
+   */
   static void pinSetup();
   /**
+   * @brief Emergency stop.
+   */
+  static void estop();
+  /**
    * Turns the laser on and off
-   * @param on Laser turns on iff on is 1
+   * @param on iff on is 1, laser turns on
    */
   static void laser(uint8_t on);
   /**
@@ -72,7 +79,6 @@ class HAL {
    */
   static void addLimitSwitchCallback(int switchId, pinCallback callback);
 
-  static void removeLimitSwitchCallback(int switchId, pinCallback callback);
   /**
    * @brief Adds function that will be called when there is a power problem
    * (for now, either HV or LV).
@@ -83,6 +89,7 @@ class HAL {
 
  private:
   static LSSServoMotor theSmartServo;
+  static int smartServoId;
   static void handleSwitches(int switchId, int switchPin);
   static void handleSwitch0();
   static void handleSwitch1();

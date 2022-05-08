@@ -4,6 +4,8 @@
 #define LED 13  // inbuilt led
 #define LASER 20
 
+#define CAROUSEL_MOTOR_ID 2
+
 #define LIMIT_SW_0 7  // let's say this is carousel position limit switch
 #define LIMIT_SW_1 8
 #define LIMIT_SW_2 11

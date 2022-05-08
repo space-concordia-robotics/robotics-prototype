@@ -18,6 +18,16 @@ void HAL::pinSetup() {
   Serial5.begin(57600);  // debug serial
 }
 
+void HAL::estop() {
+  laser(0);
+  pump(0, 0);
+  // TODO: check if this is really how to stop the servos
+  for (int i = 0; i < NUM_SERVOS; i++) {
+    servo(i, 127);
+  }
+  theSmartServo.writeActionCommand(CAROUSEL_MOTOR_ID, "H");
+}
+
 void HAL::laser(uint8_t on) {
   if (on == 1) {
     digitalWrite(LASER, HIGH);
@@ -99,8 +109,6 @@ void HAL::addLimitSwitchCallback(int switchId, pinCallback callback) {
   switchCallbacks[switchCallbacks.size()] = SwitchCallback(switchId, callback);
   interrupts();
 }
-
-void HAL::removeLimitSwitchCallback(int switchId, pinCallback callback) {}
 
 void HAL::handlePower() {
   for (size_t i = 0; i < powerCallbacks.size(); i++) {

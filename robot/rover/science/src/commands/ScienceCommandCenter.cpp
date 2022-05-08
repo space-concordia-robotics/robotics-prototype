@@ -7,6 +7,8 @@
 #include "../../include/SciencePinSetup.h"
 #include "include/HAL.h"
 
+#define COMMAND_ESTOP 25
+
 #define COMMAND_MOVE_DEGREES 41
 #define COMMAND_NEXT_CUVETTE 42
 #define COMMAND_PREVIOUS_CUVETTE 43
@@ -39,6 +41,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
                                           const uint8_t rawArgsLength) {
   switch (commandID) {
+    case COMMAND_ESTOP:
+      HAL::estop();
+      break;
     case COMMAND_MOVE_DEGREES:
       if (rawArgsLength == 4) {
         float degrees = bytes_to_float(rawArgs);
