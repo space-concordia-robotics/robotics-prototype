@@ -1,8 +1,8 @@
 enable_button: 5
 stop_command: "stop_motors"
 command_topic: /arm_command
-controller_mappings: [["BUTTON_CROSS", "set_motor_speeds 100 0 0 0 0 0", 30],
-                      ["BUTTON_SQUARE", "set_motor_speeds -100 0 0 0 0 0", 30],
+controller_mappings: [["BUTTON_CROSS", "set_motor_speeds 250 0 0 0 0 0", 30],
+                      ["BUTTON_SQUARE", "set_motor_speeds -250 0 0 0 0 0", 30],
 
                       [ "BUTTON_TRIANGLE", "set_motor_speeds 0 250 0 0 0 0", 30 ],
                       [ "BUTTON_CIRCLE", "set_motor_speeds 0 -250 0 0 0 0", 30 ],
