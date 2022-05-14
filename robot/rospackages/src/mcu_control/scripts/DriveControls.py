@@ -1,21 +1,23 @@
 import time
+from numpy import interp
 last_angular_speed = None
 last_linear_speed = None
 last_speed_change_ms = None
 
-linear_acceleration_rate = 0.2
-angular_acceleration_rate = 0.35
+linear_acceleration_rate = 0.5
+angular_acceleration_rate = 0.75
 
 max_speed = 0.5 # Maximum rover speed in (m/s)
 max_angular_speed = 1 # Maximum angular speed in (rad/s)
 
-max_throttle = 49
-max_steering = 49
+max_throttle = 255
+max_steering = 255
 
 expire_rate = 300 # A command lasts for 300 ms unless overwritten
 initial_ramp_factor = 3 
 
 def accelerate_twist(twist):
+    global last_speed_change_ms
     global last_speed_change_ms
     global last_linear_speed
     global last_angular_speed
@@ -79,23 +81,24 @@ def twist_to_rover_command(linear, angular):
     elif angular < -max_angular_speed:
         angular = -max_angular_speed
 
-    linear_speed = linear / max_speed # linear_speed should now be in [-1, 1]
-    angular_speed = angular / max_angular_speed # angular_speed should now [-1,1]
+    throttle = interp(linear,[-max_speed,max_speed],[-255,255])
+    steering = interp(angular,[-max_angular_speed,max_angular_speed],[-255,255])
+    
+    args = []
 
-    linear_val = linear_speed * max_throttle
-    angular_val = angular_speed * max_steering
+    if throttle < 0 :
+        args.append(0)
+    else :
+        args.append(1)
 
-    throttle = 0
-    steering = 0
+    args.append(abs(throttle))
 
-    if linear_val == 0:
-        throttle = abs(angular_val)
-        if angular_val < 0:
-            steering = 49
-        elif angular_val > 0:
-            steering = -49
-    else:
-        throttle = linear_val
-        steering = 0
+    if steering < 0 :
+        args.append(0)
+    else :
+        args.append(1)
 
-    return str(round(throttle)) + ':' + str(round(steering))
+    args.append(abs(steering))
+
+    print(str(args))
+    return args

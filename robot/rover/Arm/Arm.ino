@@ -64,7 +64,6 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 25; 
 const uint8_t TRANSMIT_PIN = 26; 
-
 enum blinkTypes {HEARTBEAT, GOOD_BLINK, BAD_BLINK}; //!< blink style depends on what's going on
 int blinkType = HEARTBEAT; //!< by default it should be the heartbeat. Will behave differently if message is received
 bool startBlinking = false; //!< if true, teensy blinks as response to a message
@@ -79,8 +78,8 @@ DcMotor motor1(M1_DIR_PIN, M1_PWM_PIN, M1_GEAR_RATIO);
 DcMotor motor2(M2_DIR_PIN, M2_PWM_PIN, M2_GEAR_RATIO);
 DcMotor motor3(M3_DIR_PIN, M3_PWM_PIN, M3_GEAR_RATIO);
 DcMotor motor4(M4_DIR_PIN, M4_PWM_PIN, M4_GEAR_RATIO);
-ServoMotor motor5(M5_GEAR_RATIO);
-ServoMotor motor6(M6_GEAR_RATIO);
+ServoMotor motor5(M5_GEAR_RATIO, 5);
+ServoMotor motor6(M6_GEAR_RATIO, 6);
 
 // motor array prep work: making pointers to motor objects
 DcMotor *m1 = &motor1; DcMotor *m2 = &motor2; DcMotor *m3 = &motor3; DcMotor *m4 = &motor4;
@@ -167,7 +166,6 @@ internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
   Quadrature on tpm1,2: pins 16/17, (tpm2 not implemented in teensy?).
  */
 void setup() {
-
     commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
     initEncoders();
     initLimitSwitches(); //!< \todo setJointAngleTolerance in here might need to be adjusted when gear ratio is adjusted!!! check other dependencies too!!!
@@ -201,10 +199,6 @@ void loop() {
 
     if(Serial.available() > 0) {
         commandCenter->readCommand();
-        digitalWrite(LED_BUILTIN,HIGH);
-        delay(500);
-        digitalWrite(LED_BUILTIN,LOW);
-        delay(500);
     }
 
    commandCenter->sendMessage();

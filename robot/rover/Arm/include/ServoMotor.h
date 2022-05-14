@@ -2,14 +2,15 @@
 #define SERVOMOTOR_H
 
 #include <Arduino.h>
-#include <Servo.h>
+#include "LSSServoMotor.h"
 #include "RobotMotor.h"
 
 class ServoMotor: public RobotMotor {
     public:
         static int numServoMotors;
+        unsigned int servoId;
 
-        ServoMotor(float gearRatio);
+        ServoMotor(float gearRatio, int motorNum);
         void motorTimerInterrupt(void);
         /* movement helper functions */
         bool calcTurningDuration(float angle); //!< guesstimates how long to turn at the preset open loop motor speed to get to the desired position
@@ -26,14 +27,15 @@ class ServoMotor: public RobotMotor {
         elapsedMillis timeCount; //!< how long has the servo been turning for
 
     private:
-        Servo servo;
+        LSSServoMotor servo = LSSServoMotor(&Serial5);
 };
 
 int ServoMotor::numServoMotors = 0; // must initialize variable outside of class
 
-ServoMotor::ServoMotor(float gearRatio)
+ServoMotor::ServoMotor(float gearRatio, int motorNum)
 {
     numServoMotors++;
+    this -> servoId = motorNum;
     // variables declared in RobotMotor require the this-> operator
     setGearRatio(gearRatio);
     this -> motorType = CONTINUOUS_SERVO;
@@ -67,7 +69,7 @@ void ServoMotor::motorTimerInterrupt(void) {
                 atSafeAngle = true; // alert homing stuff that it can go to next part
             }
             movementDone = true;
-            stopRotation();
+//            stopRotation();
         }
     }
     else if (!isOpenLoop) {
@@ -134,33 +136,34 @@ bool ServoMotor::calcCurrentAngle(void) {
 }
 
 void ServoMotor::stopRotation(void) {
-    servo.writeMicroseconds(SERVO_STOP);
+    servo.writeServoCommand(servoId, "H");
     movementDone = true;
     isBudging = false;
 }
 
 // takes a direction and offset from SERVO_STOP and sends appropriate pwm signal to servo
 void ServoMotor::setVelocity(int motorDir, float motorSpeed) {
-    if (!isOpenLoop) {
-        motorSpeed = fabs(motorSpeed);
-    }
-    // makes sure the speed is within the limits set in the pid during setup
-    if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
-        motorSpeed = pidController.getMaxOutputValue();
-    }
-    if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
-        motorSpeed = pidController.getMinOutputValue();
-    }
+//    if (!isOpenLoop) {
+//        motorSpeed = fabs(motorSpeed);
+//    }
+//    // makes sure the speed is within the limits set in the pid during setup
+//    if (motorSpeed * motorDir > pidController.getMaxOutputValue()) {
+//        motorSpeed = pidController.getMaxOutputValue();
+//    }
+//    if (motorSpeed * motorDir < pidController.getMinOutputValue()) {
+//        motorSpeed = pidController.getMinOutputValue();
+//    }
+//
+//    // pulse time varies from 1000 to 2000, 1500 being the midpoint, so 500 is the offset from 1500
+//    int pulseTime = SERVO_STOP + (motorSpeed * motorDir * 500 / 100);
+//    if (pulseTime > 2000) {
+//        pulseTime = 1000;
+//    }
+//    if (pulseTime < 1000) {
+//        pulseTime = -1000;
+//    }
 
-    // pulse time varies from 1000 to 2000, 1500 being the midpoint, so 500 is the offset from 1500
-    int pulseTime = SERVO_STOP + (motorSpeed * motorDir * 500 / 100);
-    if (pulseTime > 2000) {
-        pulseTime = 2000;
-    }
-    if (pulseTime < 1000) {
-        pulseTime = 1000;
-    }
-    servo.writeMicroseconds(pulseTime);
+    servo.writeServoCommand(servoId, "MD", motorDir * 100);
 }
 
 void ServoMotor::goToCommandedAngle(void) {

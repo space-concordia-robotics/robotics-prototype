@@ -9,7 +9,7 @@ def handle_debug_string(data):
     print("Debug:", data.decode('utf-8'))
 
 def handle_pong(data):
-    print("Pong")
+    print("Pongo")
 
 def handle_send_motor_angles(data):
     motorAngles = struct.unpack('f' * 6, data)

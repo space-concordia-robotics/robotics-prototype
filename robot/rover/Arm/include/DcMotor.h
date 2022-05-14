@@ -161,13 +161,16 @@ void DcMotor::setVelocity(int motorDir, float motorSpeed) {
             //Serial.print(motorDir);
             break;
         }
+
         case COUNTER_CLOCKWISE: {
             //PORTD |= (1 << 3);
+            pinMode(directionPin, OUTPUT);
             digitalWrite(directionPin, HIGH);
             //Serial.print(motorDir);
             break;
         }
     }
+
     int dutyCycle = motorSpeed * 255 / 100;
     analogWrite(pwmPin, dutyCycle);
 }

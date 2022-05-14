@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.2)
+include(ExternalProject)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
 set (CMAKE_CXX_STANDARD 17)
-
-include(ExternalProject)
-
 
 if(DEFINED ENV{ARDUINO_PATH})
 message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
@@ -86,12 +84,14 @@ checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SP
 checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
 checkLibraries(EmbeddedTemplateLibrary ${ETL_VERSION} ${ETL_URL})
 
+
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
 file(GLOB TEENSY_CORE_C_FILES ${TEENSY_CORE}/teensy3/*.c )
 file(GLOB TEENSY_CORE_CXX_FILES ${TEENSY_CORE}/teensy3/*.cpp)
 
-#function to find all subdirectories for a given directory, useful for finding paths to the teensy libraries
+
+#function to find all subdirectories for a given directory (non-recursive), useful for finding paths to the teensy libraries
 macro(getSubdirectories result curDir)
 
 file(GLOB subDirs LIST_DIRECTORIES true ${curDir}/*)
@@ -121,6 +121,8 @@ include_directories(
 	${TEENSY_LIBRARIES}
     ${CMAKE_SOURCE_DIR}/internal_comms/include
 )
+# TODO : use target include directories instead of this (especially the last line)
+
 #every compiler should use these common defines, copy pasted from the Teensyduino verbose output
 add_definitions(
 -D__MK66FX1M0__
@@ -207,7 +209,7 @@ foreach(path ${INOFILES})
 
 
  if(${name} STREQUAL "Arm")
- set(PROJECT_LIBRARIES Servo internal_comms)
+  set(PROJECT_LIBRARIES Servo internal_comms)
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  elseif(${name} STREQUAL "comms_demo")
@@ -226,10 +228,10 @@ foreach(path ${INOFILES})
 
  endif()
  
- #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
- configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
- add_subdirectory(${project_dir}) 
- 
+  #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
+  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY)
+  add_subdirectory(${project_dir})
+
  endforeach()
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
@@ -244,3 +246,9 @@ foreach(path ${INOFILES})
  DEPENDS science_cleanup
  )
 
+#Add the NIR an an external since it does not use the ARM compiler
+ExternalProject_Add(NIR
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/science/NIR
+        BUILD_ALWAYS 1
+        INSTALL_COMMAND ""
+        )
