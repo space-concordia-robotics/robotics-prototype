@@ -3,9 +3,7 @@
 
 #include "CommandCenter.h"
 
-
 #define COMMAND_STOP_MOTORS_EMERGENCY 0
-
 #define COMMAND_GET_ROVER_STATUS 2
 #define COMMAND_SEND_GPS 3
 #define COMMAND_MOVE_SERVO 7
