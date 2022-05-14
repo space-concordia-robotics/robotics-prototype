@@ -231,8 +231,8 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
     pImplement->next_layout_button = button_name_to_id_map[next];
     pImplement->previous_layout_button = button_name_to_id_map[previous];
 
-    pImplement->trigger_l2 = button_name_to_id_map[trigger_l2_name];
-    pImplement->trigger_r2 = button_name_to_id_map[trigger_r2_name];
+    pImplement->trigger_l2 = axis_name_to_id_map[trigger_l2_name];
+    pImplement->trigger_r2 = axis_name_to_id_map[trigger_r2_name];
 
     getControllerMappings(nh_param);
 
