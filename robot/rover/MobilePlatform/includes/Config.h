@@ -2,10 +2,12 @@
 #define ROVER_CONFIG_H
 
 #include "Arduino.h"
+#include "Servo.h"
 #include <cstdint>
 #include <SoftwareSerial.h>
-#include "PWMServo.h"
 #include <cmath>
+
+#define V_SENSE_PIN 39 // for reading battery voltage
 
 // Servo pins
 #define CF_2_SERVO 23

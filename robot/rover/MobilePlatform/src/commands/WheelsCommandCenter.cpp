@@ -13,17 +13,11 @@ float bytes_to_float(const uint8_t* rawPointer)
 }
 
 void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
-    // Create message to add to queue of messages
-    //Message* message = createMessage(commandID, rawArgsLength, const_cast<uint8_t *>(rawArgs));
-    /*
-       Switch command recieved to perform specific function
-       */
 
     int commandID = int(cmdID);
 
     switch(commandID)
     {
-
         case COMMAND_STOP_MOTORS_EMERGENCY: {
             stopMotors();
             break;

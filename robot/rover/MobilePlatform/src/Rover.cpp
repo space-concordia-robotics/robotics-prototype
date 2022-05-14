@@ -2,7 +2,7 @@
 
 namespace Rover {
 
-    PWMServo servos[4];
+    Servo servos[4];
     SystemState systemStatus;
     RoverState roverState;
 
@@ -10,13 +10,6 @@ namespace Rover {
 
         systemStatus.last_move = millis();
         Motor::updateDesiredMotorVelocity(motorID,direction,speed);
-//        if(speed < 0){
-//            Motor::updateDesiredMotorVelocity(motorID,0,abs(speed));
-//        }
-//        else{
-//            Motor::updateDesiredMotorVelocity(motorID,1,abs(speed));
-//        }
-
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
@@ -40,9 +33,7 @@ namespace Rover {
           }
           Motor::applyDesiredMotorVelocity(motor.id);
          }
-
     }
-
     // This is a fixed value that represents the diameter of the point turn
     FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
 
@@ -111,34 +102,11 @@ namespace Rover {
         for(auto& motor : Motor::motorList){
             motor.desired_velocity = 0;
         }
-      }
-
-      // From the old code, needs encoders to work (not tested)
-    void calculateRoverVelocity() {
-
-        using namespace Motor;
-
-        roverState.right_linear_velocity =
-                (float) (motorList[FRONT_RIGHT].desired_direction * motorList[FRONT_RIGHT].actual_velocity +
-                         motorList[MIDDLE_RIGHT].desired_direction * motorList[MIDDLE_RIGHT].actual_velocity +
-                         motorList[REAR_RIGHT].desired_direction * motorList[REAR_RIGHT].actual_velocity) * radius *
-                piRad;
-
-        roverState.left_linear_velocity =
-                (float) (motorList[FRONT_LEFT].desired_direction * motorList[FRONT_LEFT].actual_velocity +
-                         motorList[MIDDLE_LEFT].desired_direction * motorList[MIDDLE_LEFT].actual_velocity +
-                         motorList[REAR_LEFT].desired_direction * motorList[REAR_LEFT].actual_velocity) * radius *
-                piRad;
-
-        roverState.linear_velocity = (roverState.right_linear_velocity - roverState.left_linear_velocity) / 6;
-        roverState.rotational_velocity = (roverState.left_linear_velocity + roverState.right_linear_velocity) / wheelBase;
     }
 
     void attachServo(const ServoNames& servoID,const uint8_t& pin) {
-
         servos[servoID].attach(pin);
-        analogWrite(pin,0);
-        //moveServo(servoID,0);
+        moveServo(servoID,0);
     }
 
     // Angle is given by 0-180, if the value is > 180 than it is clipped to 180
