@@ -40,7 +40,7 @@ class DcMotor {
    * @brief Sets the amount of time (millis) to wait after starting a move
    * after which it should autostop.
    */
-  static const unsigned int timeToWaitUntilStop = 1000;
+  static const unsigned int timeToWaitUntilStop = 100;
 };
 
 DcMotor::DcMotor(int dirPin, int pwmPin, float gearRatio, int dirPinForward)
