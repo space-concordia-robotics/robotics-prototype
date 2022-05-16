@@ -39,7 +39,7 @@ class SerialMotor {
    * @brief Sets the amount of time (millis) to wait after starting a move
    * after which it should autostop.
    */
-  static const unsigned int timeToWaitUntilStop = 100;
+  static const unsigned int timeToWaitUntilStop = 175;
 };
 
 SerialMotor::SerialMotor(LSSServoMotor* motor, int motorID, float gearRatio)
