@@ -4,9 +4,13 @@
 
 #include "Arduino.h"
 
+// default instance of switch callback. someone tell me how to make this better
+// pls
+SwitchCallback s(0, [](int b) {});
 // Static members
-// SwitchCallback HAL::switchCallbacks[3] = {};
-// voidCallback HAL::switchCallbacks[3] = {};
+// both these C arrays are initialized empty
+SwitchCallback HAL::switchCallbacks[5] = {s, s, s, s, s};
+voidCallback HAL::powerCallbacks[3] = {[]() {}, []() {}, []() {}};
 int HAL::switchCallbacksSize = 0;
 int HAL::powerCallbacksSize = 0;
 etl::array<Servo*, NUM_SERVOS> HAL::servos = {};
@@ -29,6 +33,14 @@ void HAL::pinSetup() {
     servos[i] = newServo;
     servos[i]->attach(SERVO_0_PIN + i);
   }
+
+  attachInterrupt(digitalPinToInterrupt(LIMIT_SW_0), handleSwitch0, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_SW_1), handleSwitch1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_SW_2), handleSwitch2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LIMIT_SW_3), handleSwitch3, CHANGE);
+
+  attachInterrupt(digitalPinToInterrupt(HV_POWER_IRQ), handlePower, RISING);
+  attachInterrupt(digitalPinToInterrupt(LV_POWER_IRQ), handlePower, RISING);
 }
 
 void HAL::estop() {
@@ -90,7 +102,7 @@ uint8_t HAL::readLimitSwitch(uint8_t switchId) {
 
 void HAL::handleSwitches(int switchId, int switchPin) {
   int value = digitalRead(switchPin);
-  for (size_t i = 0; i < powerCallbacksSize; i++) {
+  for (size_t i = 0; i < switchCallbacksSize; i++) {
     if (switchCallbacks[i].switchId == switchId) {
       switchCallbacks[i].cb(value);
     }
@@ -103,23 +115,13 @@ void HAL::handleSwitch2() { handleSwitches(2, LIMIT_SW_2); }
 void HAL::handleSwitch3() { handleSwitches(3, LIMIT_SW_3); }
 
 void HAL::addLimitSwitchCallback(int switchId, pinCallback callback) {
-  switch (switchId) {
-    case 0:
-      attachInterrupt(digitalPinToInterrupt(LIMIT_SW_0), handleSwitch0, CHANGE);
-      break;
-    case 1:
-      attachInterrupt(digitalPinToInterrupt(LIMIT_SW_1), handleSwitch1, CHANGE);
-      break;
-    case 2:
-      attachInterrupt(digitalPinToInterrupt(LIMIT_SW_2), handleSwitch2, CHANGE);
-      break;
-    case 3:
-      attachInterrupt(digitalPinToInterrupt(LIMIT_SW_3), handleSwitch3, CHANGE);
-      break;
+  if (switchCallbacksSize < sizeof switchCallbacks) {
+    noInterrupts();
+    switchCallbacks[switchCallbacksSize++] = SwitchCallback(switchId, callback);
+    interrupts();
+  } else {
+    // TODO add feedback here once implemented.
   }
-  noInterrupts();
-  switchCallbacks[switchCallbacksSize++] = SwitchCallback(switchId, callback);
-  interrupts();
 }
 
 void HAL::handlePower() {
@@ -129,7 +131,9 @@ void HAL::handlePower() {
 }
 
 void HAL::addPowerCallback(voidCallback callback) {
-  attachInterrupt(digitalPinToInterrupt(HV_POWER_IRQ), handlePower, RISING);
-  attachInterrupt(digitalPinToInterrupt(LV_POWER_IRQ), handlePower, RISING);
-  powerCallbacks[powerCallbacksSize++] = callback;
+  if (powerCallbacksSize < sizeof powerCallbacks) {
+    powerCallbacks[powerCallbacksSize++] = callback;
+  } else {
+    // TODO add feedback once that's implemented.
+  }
 }

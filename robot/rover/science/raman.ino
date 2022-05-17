@@ -41,6 +41,11 @@ void carousel_move_degrees(float degrees) { carousel->moveByDegrees(degrees); }
 void carousel_previous_cuvette() { carousel->previousCuvette(); }
 void carousel_next_cuvette() { carousel->nextCuvette(); }
 
+void testCallback(int on) {
+  digitalWrite(LED, !digitalRead(LED));
+  //
+}
+
 void setup() {
   HAL::pinSetup();
   digitalWrite(LED, HIGH);
@@ -50,6 +55,11 @@ void setup() {
                              TRANSMIT_PIN);
   // signal setup is done by turning off builtin LED.
   digitalWrite(LED, LOW);
+
+  /*HAL::addLimitSwitchCallback(0, &testCallback);
+  HAL::addLimitSwitchCallback(1, &testCallback);
+  HAL::addLimitSwitchCallback(2, &testCallback);
+  HAL::addLimitSwitchCallback(3, &testCallback);*/
 }
 
 void loop() {

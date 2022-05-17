@@ -97,7 +97,7 @@ class HAL {
   static void handleSwitch2();
   static void handleSwitch3();
   static void handlePower();
-  static SwitchCallback switchCallbacks[3];
+  static SwitchCallback switchCallbacks[5];
   static int switchCallbacksSize;
   static voidCallback powerCallbacks[3];
   static int powerCallbacksSize;
