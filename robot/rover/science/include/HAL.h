@@ -3,10 +3,12 @@
 #ifndef HAL_H
 #define HAL_H
 
+#include <Servo.h>
 #include <etl/array.h>
 
 #include "../internal_comms/include/LSSServoMotor.h"
 #include "Arduino.h"
+#include "include/SciencePinSetup.h"
 
 /**
  * Typedef for the function that is called back when
@@ -56,10 +58,9 @@ class HAL {
    * @brief Moves the given pwm servo
    *
    * @param id from 0-3
-   * @param pwm Value from 0-255; will have to check if modifications are
-   * needed.
+   * @param angle Value from 0-180.
    */
-  static void servo(uint8_t id, uint8_t pwm);
+  static void servo(uint8_t id, uint8_t angle);
   /**
    * @return LSSServoMotor* The smart servo (that controls the cuvette motion)
    */
@@ -96,8 +97,11 @@ class HAL {
   static void handleSwitch2();
   static void handleSwitch3();
   static void handlePower();
-  static etl::array<SwitchCallback, 15> switchCallbacks;
-  static etl::array<voidCallback, 15> powerCallbacks;
+  static SwitchCallback switchCallbacks[3];
+  static int switchCallbacksSize;
+  static voidCallback powerCallbacks[3];
+  static int powerCallbacksSize;
+  static etl::array<Servo*, NUM_SERVOS> servos;
 };
 
 #endif

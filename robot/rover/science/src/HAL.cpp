@@ -1,7 +1,15 @@
 #include "include/HAL.h"
 
+#include <Servo.h>
+
 #include "Arduino.h"
-#include "include/SciencePinSetup.h"
+
+// Static members
+// SwitchCallback HAL::switchCallbacks[3] = {};
+// voidCallback HAL::switchCallbacks[3] = {};
+int HAL::switchCallbacksSize = 0;
+int HAL::powerCallbacksSize = 0;
+etl::array<Servo*, NUM_SERVOS> HAL::servos = {};
 
 void HAL::pinSetup() {
   pinMode(LIMIT_SW_0, INPUT);
@@ -16,6 +24,11 @@ void HAL::pinSetup() {
   pinMode(HV_POWER_ACK, OUTPUT);
   pinMode(LV_POWER_ACK, OUTPUT);
   Serial5.begin(57600);  // debug serial
+  for (int i = 0; i < NUM_SERVOS; i++) {
+    Servo* newServo = new Servo();
+    servos[i] = newServo;
+    servos[i]->attach(SERVO_0_PIN + i);
+  }
 }
 
 void HAL::estop() {
@@ -23,7 +36,7 @@ void HAL::estop() {
   pump(0, 0);
   // TODO: check if this is really how to stop the servos
   for (int i = 0; i < NUM_SERVOS; i++) {
-    servo(i, 127);
+    servo(i, 90);
   }
   theSmartServo.writeActionCommand(CAROUSEL_MOTOR_ID, "H");
 }
@@ -46,13 +59,12 @@ void HAL::pump(uint8_t pwm, uint8_t forward) {
   }
 }
 
-void HAL::servo(uint8_t servoId, uint8_t pwm) {
+void HAL::servo(uint8_t servoId, uint8_t angle) {
   if (servoId >= NUM_SERVOS) {
     Serial5.print("Cannot set servo with id ");
     Serial5.println(servoId);
   } else {
-    int servoPin = SERVO_0 + servoId;
-    analogWrite(servoPin, pwm);
+    servos[servoId]->write(angle);
   }
 }
 
@@ -78,7 +90,7 @@ uint8_t HAL::readLimitSwitch(uint8_t switchId) {
 
 void HAL::handleSwitches(int switchId, int switchPin) {
   int value = digitalRead(switchPin);
-  for (size_t i = 0; i < powerCallbacks.size(); i++) {
+  for (size_t i = 0; i < powerCallbacksSize; i++) {
     if (switchCallbacks[i].switchId == switchId) {
       switchCallbacks[i].cb(value);
     }
@@ -106,12 +118,12 @@ void HAL::addLimitSwitchCallback(int switchId, pinCallback callback) {
       break;
   }
   noInterrupts();
-  switchCallbacks[switchCallbacks.size()] = SwitchCallback(switchId, callback);
+  switchCallbacks[switchCallbacksSize++] = SwitchCallback(switchId, callback);
   interrupts();
 }
 
 void HAL::handlePower() {
-  for (size_t i = 0; i < powerCallbacks.size(); i++) {
+  for (size_t i = 0; i < powerCallbacksSize; i++) {
     powerCallbacks[i]();
   }
 }
@@ -119,5 +131,5 @@ void HAL::handlePower() {
 void HAL::addPowerCallback(voidCallback callback) {
   attachInterrupt(digitalPinToInterrupt(HV_POWER_IRQ), handlePower, RISING);
   attachInterrupt(digitalPinToInterrupt(LV_POWER_IRQ), handlePower, RISING);
-  powerCallbacks[powerCallbacks.size()] = callback;
+  powerCallbacks[powerCallbacksSize++] = callback;
 }

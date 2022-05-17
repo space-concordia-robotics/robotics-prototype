@@ -1,11 +1,13 @@
 // USB : Debug, UART : Production
 #define UART
 
+#include <Servo.h>
 #include <include/Fan.h>
 #include <include/Funnel.h>
 
+#include <Servo.cpp>
+
 #include "Arduino.h"
-//#include "CommandCenter.h"
 #include "include/Carousel.h"
 #include "include/HAL.h"
 #include "include/RamanSetup.h"
@@ -43,10 +45,11 @@ void setup() {
   HAL::pinSetup();
   digitalWrite(LED, HIGH);
   delay(500);
-  digitalWrite(LED, LOW);
   //  carousel->startCalibrating();
   commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
                              TRANSMIT_PIN);
+  // signal setup is done by turning off builtin LED.
+  digitalWrite(LED, LOW);
 }
 
 void loop() {

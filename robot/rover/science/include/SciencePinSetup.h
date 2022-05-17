@@ -19,7 +19,7 @@
 #define PUMP_FORWARD 16
 #define PUMP_BACK 17
 
-#define SERVO_0 2
+#define SERVO_0_PIN 2
 #define NUM_SERVOS 4
 
 #endif
