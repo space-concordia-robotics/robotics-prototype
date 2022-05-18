@@ -10,11 +10,6 @@
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
 
-#define ENCODER_SERIAL Serial1
-#define SERIAL_EVENT serialEvent1
-#define ARM_PREAMBLE 0xA5
-#define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
-
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
@@ -33,13 +28,6 @@ void setup() {
   delay(500);
   digitalWrite(LED, LOW);
 
-  // ENCODER_SERIAL.begin(9600);
-  // TODO: For testing, with no data
-  /*for (int i = 0; i < 6; i++) {
-    EncoderData datum = EncoderData();
-    datum.angle = 1.5 + i;
-    encoderData[i] = datum;
-  }*/
   pinSetup();
 
   motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, LOW);
@@ -49,76 +37,13 @@ void setup() {
   serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
   serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 
-  /*Serial.begin(9600);
-  while (!Serial) {
-    // wait for serial monitor
-    digitalWrite(LED, HIGH);
-    delay(100);
-    digitalWrite(LED, LOW);
-    delay(100);
-  }*/
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
   commandCenter->startSerial(1, 0, 25, 26);
-  /*commandCenter->startSerial(-1, -1, 24,
-                             -1);*/  // not using transmitenable with usb
+
   digitalWrite(LED, LOW);
 }
 
-// 0 bytes received means waiting on next preamble
-// 1 means received preamble, 2 means received 1 preamble and 1 data byte, etc.
-volatile byte encoderBytesReceived = 0;
-volatile bool newEncoderData = false;
-byte encoderTemp[ARM_PACKET_LENGTH];
-volatile byte tRead = 255;  // for debug only
-volatile int passedEvent = 0;
-
-void DEACTIVATED() {
-  byte read = ENCODER_SERIAL.read();
-  tRead = read;
-  passedEvent = 1;
-  // check if waiting for preamble
-  if (encoderBytesReceived == 0) {
-    if (read == ARM_PREAMBLE) {
-      encoderTemp[0] = read;
-      encoderBytesReceived++;
-    } else {
-      digitalWrite(LED, HIGH);
-      // do nothing, wait on valid preamble
-    }
-  } else {
-    // here, not waiting on preamble (receiving some middle byte)
-    encoderTemp[encoderBytesReceived] = read;
-    encoderBytesReceived++;
-
-    // Do the address check once 2 received address.
-    if (encoderBytesReceived == 2) {
-      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
-      if (address > 15) {
-        // If address invalid, reset to waiting on preamble.
-        encoderBytesReceived = 0;
-        digitalWrite(LED, LOW);
-      }
-    }
-
-    if (encoderBytesReceived == ARM_PACKET_LENGTH) {
-      // if here, just received last byte of packet
-      // copy temp to shared memory with the address as the index in the array
-      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
-      if (address <= 15) {  // check that the address arrived intact
-        EncoderData thisData;
-        thisData.setData(encoderTemp);
-        encoderData[address] = thisData;
-
-        // signal new data packet
-        newEncoderData = true;
-      }
-      // reset to waiting on preamble
-      encoderBytesReceived = 0;
-      digitalWrite(LED, LOW);
-    }
-  }
-}
 
 /**
  * Implements all the Arm commands.
@@ -127,28 +52,14 @@ void DEACTIVATED() {
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
   digitalWrite(LED, !digitalRead(LED));
-  /*char* buffer = (char*)malloc(256);
-  snprintf(buffer, 256, "Invalid command, ID %d, args length %d", cmdID,
-           rawArgsLength);
-
-  internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(buffer), buffer);
-  commandCenter->sendMessage(*message);*/
 }
 
 void invalidCommand() {
   digitalWrite(LED, !digitalRead(LED));
-  /*char* allocedMessage = strdup("Invalid Arm command");
-  internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
-  commandCenter->sendMessage(*message);*/
 }
 
 void pong() {
   digitalWrite(LED, !digitalRead(LED));
-  /*internal_comms::Message* message =
-      commandCenter->createMessage(1, 0, nullptr);
-  commandCenter->sendMessage(*message);*/
 }
 
 void moveMotorsBy(float* angles, uint16_t numAngles) {
