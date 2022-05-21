@@ -45,6 +45,8 @@ void carousel_next_cuvette() { carousel->nextCuvette(); }
 void pumpForward(float time) { pump->pumpFor(time); }
 void pumpBackward(float time) { pump->backpumpFor(time); }
 void pumpStop() { pump->stop(); }
+void startFunnel(float time) { funnel->runFor(time); }
+void stopFunnel() { funnel->stop(); }
 
 void testCallback(int on) {
   digitalWrite(LED, !digitalRead(LED));

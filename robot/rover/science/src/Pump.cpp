@@ -7,6 +7,8 @@
 #include "Arduino.h"
 #include "include/HAL.h"
 
+Pump::Pump(): isMoving(false), pumpTimeStarted(0), timeToPump(0) {}
+
 void Pump::pump() {
   HAL::pump(255, 1);
   isMoving = true;

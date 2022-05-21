@@ -13,9 +13,9 @@ class Pump : public Updatable{
     protected:
         unsigned long pumpTimeStarted;
         unsigned long timeToPump;
-        uint8_t pumpPWM;
         bool isMoving;
     public:
+        Pump();
         void pump();
         void backpump();
         void stop();

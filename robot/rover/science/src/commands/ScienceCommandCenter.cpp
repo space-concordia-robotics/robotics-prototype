@@ -19,6 +19,9 @@
 #define COMMAND_PUMP_BACKPUMP 33
 #define COMMAND_PUMP_STOP 34
 
+#define COMMAND_FUNNEL_EXEC 30
+#define COMMAND_FUNNEL_STOP 31
+
 #define COMMAND_SET_SERVO 43
 
 float bytes_to_float(const uint8_t* rawPointer) {
@@ -38,6 +41,8 @@ void carousel_previous_cuvette();
 void pumpForward(float time);
 void pumpBackward(float time);
 void pumpStop();
+void startFunnel(float time);
+void stopFunnel();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -72,6 +77,12 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       break;
     case COMMAND_SET_SERVO:
       HAL::servo(rawArgs[0], rawArgs[1]);
+      break;
+    case COMMAND_FUNNEL_EXEC:
+      startFunnel(bytes_to_float(rawArgs));
+      break;
+    case COMMAND_FUNNEL_STOP:
+      stopFunnel();
       break;
     default:
       Serial5.printf("command id %d args length %d", commandID, rawArgsLength);

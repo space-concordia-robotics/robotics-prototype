@@ -11,11 +11,16 @@
 
 class Funnel : public Updatable {
     protected:
-        uint8_t funnelPWM;
+        unsigned long funnelTimeStarted;
+        unsigned long timeToFunnel;
+        bool isMoving;
     public:
-        virtual void funnel();
+        Funnel();
+        void startFunnel();
+        void runFor(float ms);
+        void stop();
+        bool moving();
         virtual void update(unsigned long) override;
-        virtual ~Funnel();
 };
 
 
