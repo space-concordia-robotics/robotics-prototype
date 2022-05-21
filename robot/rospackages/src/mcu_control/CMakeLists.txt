@@ -40,6 +40,7 @@ add_message_files(
   FanSpeeds.msg
   Voltage.msg
   Currents.msg
+  CADMouse.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
