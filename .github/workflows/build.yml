@@ -24,6 +24,6 @@ jobs:
           ./.github/workflows/teensyduino.sh
 
 
-      - name: Run pytest
-        run: |
-          bash -c "source venv/bin/activate && source robot/rospackages/devel/setup.bash && pytest"
+          #      - name: Run pytest
+          #        run: |
+          #          bash -c "source venv/bin/activate && source robot/rospackages/devel/setup.bash && pytest"
