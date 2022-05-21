@@ -35,6 +35,9 @@ float bytes_to_float(const uint8_t* rawPointer) {
 void carousel_move_degrees(float degrees);
 void carousel_next_cuvette();
 void carousel_previous_cuvette();
+void pumpForward(float time);
+void pumpBackward(float time);
+void pumpStop();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -59,13 +62,13 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       HAL::laser(rawArgs[0]);
       break;
     case COMMAND_PUMP_PUMP:
-      HAL::pump(255, 1);
+      pumpForward(bytes_to_float(rawArgs));
       break;
     case COMMAND_PUMP_BACKPUMP:
-      HAL::pump(255, 0);
+      pumpBackward(bytes_to_float(rawArgs));
       break;
     case COMMAND_PUMP_STOP:
-      HAL::pump(0, 1);
+      pumpStop();
       break;
     case COMMAND_SET_SERVO:
       HAL::servo(rawArgs[0], rawArgs[1]);
