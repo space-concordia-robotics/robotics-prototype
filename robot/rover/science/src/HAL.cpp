@@ -89,11 +89,11 @@ uint8_t HAL::readLimitSwitch(uint8_t switchId) {
     case 0:
       return digitalRead(LIMIT_SW_0);
     case 1:
-      return digitalRead(LIMIT_SW_0);
+      return digitalRead(LIMIT_SW_1);
     case 2:
-      return digitalRead(LIMIT_SW_0);
+      return digitalRead(LIMIT_SW_2);
     case 3:
-      return digitalRead(LIMIT_SW_0);
+      return digitalRead(LIMIT_SW_3);
     default:
       Serial5.print("Cannot read limit switch with ID");
       Serial5.println(switchId);
