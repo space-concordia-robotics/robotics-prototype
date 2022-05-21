@@ -90,23 +90,6 @@ void WheelsCommandCenter::moveServo(const uint8_t & servoID, const uint8_t & ang
 void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& speed) {
     Rover::moveWheel((MotorNames)wheelNumber,direction,speed);
 }
-void WheelsCommandCenter::getLinearVelocity(void) {
-    const float linear_velocity = Rover::roverState.linear_velocity;
-    uint8_t buffer[4];
-    float2bytes(buffer,linear_velocity);
-    internal_comms::Message* message = commandCenter->createMessage(
-            COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
-    commandCenter->sendMessage(*message);
-}
-
-void WheelsCommandCenter::getRotationalVelocity(void) {
-    const float rotational_velocity = Rover::roverState.rotational_velocity;
-    uint8_t buffer[4];
-    float2bytes(buffer,rotational_velocity);
-    internal_comms::Message* message = commandCenter->createMessage(
-            COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
-    commandCenter->sendMessage(*message);
-}
 
 void WheelsCommandCenter::pingWheels(void) {
     internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
@@ -116,11 +99,10 @@ void WheelsCommandCenter::pingWheels(void) {
 void WheelsCommandCenter::getBatteryVoltage() {
 
     //convert to 3.3V reference from analog values (3.3/1023=0.003225806)
-    auto vsense = (float)analogRead(V_SENSE_PIN) * 0.003225806;
+    auto vsense = (float)analogRead(V_SENSE_PIN) * 0.003225806f;
 
-    float vbatt = vsense * 6.0;
+    float vbatt = vsense * 6.0f;
     auto* buffer = (uint8_t *) malloc(4);
-    //uint8_t* buffer;
 
     float2bytes(buffer,vbatt);
 
