@@ -35,7 +35,6 @@ float bytes_to_float(const uint8_t* rawPointer) {
 void carousel_move_degrees(float degrees);
 void carousel_next_cuvette();
 void carousel_previous_cuvette();
-void set_laser(int state);
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
