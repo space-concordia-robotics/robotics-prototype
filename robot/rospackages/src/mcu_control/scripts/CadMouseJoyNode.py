@@ -4,7 +4,7 @@ import rospy
 from sensor_msgs.msg import Joy
 from std_msgs.msg import Header
 
-devpath = "/dev/hidraw1"
+devpath = "/dev/cadmouse"
 
 def publishJoyMsg(axis, button):
   joy_msg_header = Header()
