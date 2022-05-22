@@ -1,0 +1,3 @@
+# Finds the spacemouse and attaches it to /dev/cadmouse, with RW-R--R-- 
+# permissions, so everyone can read it. 
+SUBSYSTEM=="hidraw", ATTRS{manufacturer}=="3Dconnexion", SYMLINK="cadmouse", MODE="644"

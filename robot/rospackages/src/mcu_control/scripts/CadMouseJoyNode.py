@@ -22,9 +22,8 @@ def readMouseInput():
   button = [False, False]
   battery = -1
   charged = False
-
-  with open(devpath, "rb", buffering=0) as MouseByteStream:
-    try:
+  try:
+    with open(devpath, "rb", buffering=0) as MouseByteStream:
       while not rospy.is_shutdown():
         data = MouseByteStream.read(16)
         id = data[0]
@@ -46,9 +45,14 @@ def readMouseInput():
           print("Battery:" + str(battery) + ", Charging: " + str(charged))
 
         publishJoyMsg(axis, button)
-
-    except KeyboardInterrupt:
-      print("Node shutting down due to shutting down node.")
+  except KeyboardInterrupt:
+    print("Node shutting down due to shutting down node.")
+  except FileNotFoundError:
+    print("-" * 30 + "\n")
+    print("ERROR: Could not find device file for 3D mouse. Make sure that the mouse is plugged "
+          "in or its dongle is and it has battery. If that is the case, add the udev rule, "
+          "it is in robotics-prototype/robot/util/udev-rules/10-cadmouse.rules, into "
+          "the appropriate folder, which on ubuntu is /lib/udev/rules.d")
 
 if __name__ == '__main__':
   node_name = 'cad_mouse_joy_node'
