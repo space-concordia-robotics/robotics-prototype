@@ -2,7 +2,7 @@
 // Created by william on 18/05/22.
 //
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <math.h>
 
 #include "ik-solver.h"
@@ -19,10 +19,10 @@ float getJointAngle1For2D(float endPointX, float endPointY, float beta) {
     float theta = atanf(ratio);
 
     // TODO: Spell check this lol
-    float alfa = atanf(endPointY / endPointX);
+    float alpha = atanf(endPointY / endPointX);
 
     // Handle edge cases i.e. X is negative
-    return alfa - theta;
+    return alpha - theta;
 }
 
 float getJointAngle2For2D(float endPointX, float endPointY) {
@@ -48,21 +48,21 @@ float getJointAngularSpeedBetweenPoints(float startPointX, float startPointY, fl
     float deltaJoint2Angle = endJoint2Angle - startJoint2Angle;
     float deltaJoint1Angle = endJoint1Angle - startJoint1Angle;
 
-    float deltaTime = deltaPosX / (linearSpeed * cos(deltaPosY / deltaPosX));
+    float deltaTime = deltaPosX / (linearSpeed * cosf(deltaPosY / deltaPosX));
 
     *joint2Speed = deltaJoint2Angle / deltaTime;
 
     *joint1Speed = deltaJoint1Angle / deltaTime;
 }
 
-int main() {
-    // Unit test 1
-    float endPointX = 2;
-    float endPointY = 3;
-
-    float beta = getJointAngle2For2D(endPointX, endPointY);
-
-    float alfa = getJointAngle1For2D(endPointX, endPointY, beta);
-
-    printf("beta: %f | alfa: %f", beta, alfa);
-}
+//int main() {
+//    // Unit test 1
+//    float endPointX = 10;
+//    float endPointY = 15;
+//
+//    float beta = getJointAngle2For2D(endPointX, endPointY);
+//
+//    float alpha = getJointAngle1For2D(endPointX, endPointY, beta);
+//
+//    printf("beta: %f | alpha: %f", beta, alpha);
+//}
