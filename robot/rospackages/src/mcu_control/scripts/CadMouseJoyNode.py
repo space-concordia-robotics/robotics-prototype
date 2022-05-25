@@ -17,6 +17,24 @@ def publishJoyMsg(axis, button):
 
   joy_pub.publish(cad_mouse_joy_msg)
 
+# This function is not used.
+def askAndAddUdevRule():
+  import os
+  import time
+  print("-" * 20)
+  print("Do you want to attempt to install and activate the udev rule? y/n")
+  answer = input()
+  if answer.lower() == 'y':
+    print("attempting to copy the udev rule...")
+    while os.getcwd().split("/")[-1] != "robotics-prototype" and os.getcwd() != "/":
+      os.chdir("..")
+    # os.system("cat robot/util/udev-rules/10-cadmouse.rules")
+    os.system("sudo cp ./robot/util/udev-rules/10-cadmouse.rules /lib/udev/rules.d/10-cadmouse.rules && sudo udevadm trigger && echo done")
+    print("attempting to run again...")
+    time.sleep(4)
+    readMouseInput()
+
+
 def readMouseInput():
   axis = [0, 0, 0, 0, 0, 0]
   button = [False, False]
@@ -48,11 +66,13 @@ def readMouseInput():
   except KeyboardInterrupt:
     print("Node shutting down due to shutting down node.")
   except FileNotFoundError:
-    print("-" * 30 + "\n")
+    import os
+    print("-" * 40 + "\n")
+    print("ERROR")
     print("ERROR: Could not find device file for 3D mouse. Make sure that the mouse is plugged "
           "in or its dongle is and it has battery. If that is the case, add the udev rule, "
-          "it is in robotics-prototype/robot/util/udev-rules/10-cadmouse.rules, into "
-          "the appropriate folder, which on ubuntu is /lib/udev/rules.d")
+          "see https://github.com/space-concordia-robotics/robotics-documentation/blob/main/software/cad-mouse-setup.md")
+    #askAndAddUdevRule()
 
 if __name__ == '__main__':
   node_name = 'cad_mouse_joy_node'
