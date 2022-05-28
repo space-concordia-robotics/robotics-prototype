@@ -10,6 +10,10 @@
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
 
+#ifndef DEBUG
+#define Serial Serial1
+#endif
+
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
@@ -22,7 +26,7 @@ SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
 void setup() {
-  Serial.begin(9600);
+  // Serial.begin(9600);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   delay(500);
@@ -126,7 +130,7 @@ void delayChecks(unsigned long delayMillis) {
 
 void loop() {
   // Read and send messages
-  if (Serial1.available() > 0) {
+  if (Serial.available() > 0) {
     commandCenter->readCommand();
     doMotorChecks();
   }
