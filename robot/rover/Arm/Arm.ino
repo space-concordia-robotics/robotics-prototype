@@ -44,7 +44,6 @@ void setup() {
   digitalWrite(LED, LOW);
 }
 
-
 /**
  * Implements all the Arm commands.
  */
@@ -54,12 +53,14 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
   digitalWrite(LED, !digitalRead(LED));
 }
 
-void invalidCommand() {
-  digitalWrite(LED, !digitalRead(LED));
-}
+void invalidCommand() { digitalWrite(LED, !digitalRead(LED)); }
 
 void pong() {
   digitalWrite(LED, !digitalRead(LED));
+  const char* pongMessage = strdup("pong");
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(pongMessage), pongMessage);
+  commandCenter->sendMessage(*message);
 }
 
 void moveMotorsBy(float* angles, uint16_t numAngles) {
