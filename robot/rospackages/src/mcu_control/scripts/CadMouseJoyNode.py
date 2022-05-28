@@ -70,9 +70,10 @@ def readMouseInput():
     print("-" * 40 + "\n")
     print("ERROR")
     print("ERROR: Could not find device file for 3D mouse. Make sure that the mouse is plugged "
-          "in or its dongle is and it has battery. If that is the case, add the udev rule, "
-          "see https://github.com/space-concordia-robotics/robotics-documentation/blob/main/software/cad-mouse-setup.md")
-    #askAndAddUdevRule()
+          "in or its dongle is and it has battery. If that is the case, add the udev rule. "
+          "This script will prompt you to add the udev rule. If it does not work, see"
+          "https://github.com/space-concordia-robotics/robotics-documentation/blob/main/software/cad-mouse-setup.md")
+    askAndAddUdevRule()
 
 if __name__ == '__main__':
   node_name = 'cad_mouse_joy_node'
