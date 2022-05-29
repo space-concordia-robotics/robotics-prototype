@@ -47,25 +47,8 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
       pong();
       break;
     }
-    case COMMAND_MOVE_BY: {
-      uint16_t numAngles = rawArgsLength / 4;
-      if (numAngles == 6) {
-        float* angles = (float*)malloc(sizeof(*angles) * numAngles);
-
-        for (int i = 0; i < numAngles; i++) {
-          angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
-        }
-
-        moveMotorsBy(angles, numAngles);
-        free(angles);
-        break;
-      } else {
-        invalidCommand(cmdID, rawArgs, rawArgsLength);
-        break;
-      }
-    }
     case SET_MOTOR_SPEEDS: {
-      uint16_t numAngles = rawArgsLength / 4;
+      uint16_t numAngles = rawArgsLength / sizeof(float);
       if (numAngles == NUM_MOTORS) {
         float* angles = (float*)malloc(sizeof(*angles) * numAngles);
 
@@ -80,10 +63,6 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         invalidCommand(cmdID, rawArgs, rawArgsLength);
         break;
       }
-    }
-    case SEND_MOTOR_ANGLES: {
-      sendMotorAngles();
-      break;
     }
     default: {
       invalidCommand(cmdID, rawArgs, rawArgsLength);

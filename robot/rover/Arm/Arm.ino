@@ -1,12 +1,9 @@
-
-#include "Arduino.h"
-#define LED 13
 #include <HardwareSerial.h>
 #include <Servo.h>
 
+#include "Arduino.h"
 #include "CommandCenter.h"
 #include "include/DcMotor.h"
-#include "include/Encoder_Data.h"
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
 
@@ -16,17 +13,16 @@
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
-EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
 SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
-  digitalWrite(LED, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
   pinSetup();
 
@@ -41,9 +37,8 @@ void setup() {
   // TX teensy, RX teensy, enable pin, transmit pin
   commandCenter->startSerial(1, 0, 25, 26);
 
-  digitalWrite(LED, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 }
-
 
 /**
  * Implements all the Arm commands.
@@ -51,28 +46,12 @@ void setup() {
 
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
-  digitalWrite(LED, !digitalRead(LED));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
-void invalidCommand() {
-  digitalWrite(LED, !digitalRead(LED));
-}
+void invalidCommand() { digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); }
 
-void pong() {
-  digitalWrite(LED, !digitalRead(LED));
-}
-
-void moveMotorsBy(float* angles, uint16_t numAngles) {
-  // Right now, this only prints out back the received angles
-  byte* data = new byte[128];
-  int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
-                   angles[1], angles[2], angles[3], angles[4], angles[5]);
-  if (r < 0 || r > 128) {
-    invalidCommand();
-  }
-  internal_comms::Message* message = commandCenter->createMessage(0, r, data);
-  commandCenter->sendMessage(*message);
-}
+void pong() { digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); }
 
 void setMotorSpeeds(float* angles) {
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
@@ -83,26 +62,6 @@ void setMotorSpeeds(float* angles) {
     int angle = (int)(angles[NUM_DC_MOTORS + i]);
     serialMotors[i].setSpeed(angle);
   }
-}
-
-void sendMotorAngles() {
-  float softwareAngles[NUM_MOTORS];
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    softwareAngles[i] = encoderData[i].angle;
-  }
-
-  byte* data = new byte[24];
-
-  for (int i = 0; i < NUM_MOTORS; i++) {
-    byte* inByte = (byte*)(&softwareAngles[i]);
-    data[4 * i] = inByte[0];
-    data[4 * i + 1] = inByte[1];
-    data[4 * i + 2] = inByte[2];
-    data[4 * i + 3] = inByte[3];
-  }
-
-  internal_comms::Message* message = commandCenter->createMessage(2, 24, data);
-  commandCenter->sendMessage(*message);
 }
 
 void doMotorChecks() {
@@ -127,9 +86,7 @@ void loop() {
   // Read and send messages
   if (Serial1.available() > 0) {
     commandCenter->readCommand();
-    doMotorChecks();
   }
   doMotorChecks();
   commandCenter->sendMessage();
-  doMotorChecks();
 }

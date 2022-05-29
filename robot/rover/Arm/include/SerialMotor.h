@@ -3,8 +3,7 @@
 
 #include <Arduino.h>
 
-#include "LSSServoMotor.h"
-#include "RobotMotor.h"
+#include "../../internal_comms/include/LSSServoMotor.h"
 
 class SerialMotor {
  public:
@@ -41,34 +40,5 @@ class SerialMotor {
    */
   static const unsigned int timeToWaitUntilStop = 175;
 };
-
-SerialMotor::SerialMotor(LSSServoMotor* motor, int motorID, float gearRatio)
-    : theMotor(motor),
-      gearRatio(gearRatio),
-      motorID(motorID),
-      currentSpeed(0) {}
-
-SerialMotor::SerialMotor()
-    : theMotor(nullptr), gearRatio(1.0), motorID(0), currentSpeed(0) {}
-
-void SerialMotor::setSpeed(int newSpeed) {
-  // Set direction based on sign of speed
-  theMotor->writeActionCommand(motorID, "WR", newSpeed);
-
-  millisStartedMove = millis();
-  currentSpeed = newSpeed;
-}
-
-void SerialMotor::doChecks() {
-  if ((millis() - millisStartedMove) > timeToWaitUntilStop &&
-      currentSpeed != 0) {
-    stop();
-  }
-}
-
-void SerialMotor::stop() {
-  theMotor->writeActionCommand(motorID, "H");
-  currentSpeed = 0;
-}
 
 #endif
