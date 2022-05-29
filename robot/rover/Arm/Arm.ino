@@ -10,6 +10,7 @@
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
 
+#define DEBUG
 #ifndef DEBUG
 #define Serial Serial1
 #endif
@@ -61,9 +62,9 @@ void invalidCommand() { digitalWrite(LED, !digitalRead(LED)); }
 
 void pong() {
   digitalWrite(LED, !digitalRead(LED));
-  const char* pongMessage = strdup("pong");
+  const char* pong = "pong";
   internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(pongMessage), pongMessage);
+      commandCenter->createMessage(0, strlen(pong), pong);
   commandCenter->sendMessage(*message);
 }
 

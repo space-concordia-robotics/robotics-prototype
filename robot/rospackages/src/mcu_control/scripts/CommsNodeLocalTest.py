@@ -111,7 +111,7 @@ def receive_message():
             argsLen = ser.read()
             # print(argsLen)
             argsLen = int.from_bytes(argsLen, "big")
-            # print("Number of bytes of arguments:", argsLen)
+            print("Number of bytes of arguments:", argsLen)
             args = None
             if argsLen > 0:
                 args = ser.read(argsLen)
@@ -210,7 +210,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
