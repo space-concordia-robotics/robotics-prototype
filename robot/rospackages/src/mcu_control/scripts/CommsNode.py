@@ -224,9 +224,9 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
     vBatPub = rospy.Publisher(v_bat_topic, Voltage, queue_size=10)
 
-    feedback_pub_topic = '/arm_feedback'
-    rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
-    feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
+    # feedback_pub_topic = '/arm_feedback'
+    # rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
+    # feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
     arm_command_topic = '/arm_command'
     rospy.loginfo('Beginning to subscribe to "'+arm_command_topic+'" topic')
