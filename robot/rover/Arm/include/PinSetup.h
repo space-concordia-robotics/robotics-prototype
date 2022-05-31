@@ -50,20 +50,7 @@
 // Motor 1 Shoulder swivel
 #define M1_DIR_PIN          7 // chooses the direction the motor turns in
 #define M1_PWM_PIN          9 // the speed of the motor is controlled by the pwm signal
-#define M1_ENCODER_A       37 // pin both pins need to be in the same port and next to each other in the register
-#define M1_ENCODER_B       38 // pin
-#define M1_ENCODER_PORT    GPIOC_PDIR // GPIO Port C Data Input Register (changes based on pins chosen)
-#define M1_ENCODER_SHIFT   CORE_PIN37_BIT // the position of the lower encoder pin bit in the input register. 
 
-#define M1_LIMIT_SW_CCW       23 // LS 1 limit switch, triggers when join over rotates
-#define M1_LIMIT_SW_CCW_PORT  GPIOC_PDIR // Pin port data input register
-#define M1_LIMIT_SW_CCW_SHIFT CORE_PIN23_BIT // location of pin in register
-#define M1_LIMIT_SW_CW        22 // LS 2
-#define M1_LIMIT_SW_CW_PORT   GPIOC_PDIR
-#define M1_LIMIT_SW_CW_SHIFT  CORE_PIN22_BIT
-
-#define M1_ENCODER_RESOLUTION 48
-#define M1_GEAR_RATIO         1.4*99.508*40.0 //TODO fix this based on gear reduction inside and outside motor
 #define M1_MIN_HARD_ANGLE     -175.0 // angle at which the join presses the limit switch
 #define M1_MAX_HARD_ANGLE     175.0
 #define M1_MIN_SOFT_ANGLE     -170.0 // hard angle with safety margin to avoid hitting limit switch after homing
@@ -72,20 +59,6 @@
 // Motor 2 Shoulder bend
 #define M2_DIR_PIN            3
 #define M2_PWM_PIN            5
-#define M2_ENCODER_A       11
-#define M2_ENCODER_B       12
-#define M2_ENCODER_PORT    GPIOC_PDIR
-#define M2_ENCODER_SHIFT   CORE_PIN11_BIT
-
-#define M2_LIMIT_SW_EXTEND    20 // LS 3  
-#define M2_LIMIT_SW_EXTEND_PORT  GPIOD_PDIR
-#define M2_LIMIT_SW_EXTEND_SHIFT CORE_PIN20_BIT
-#define M2_LIMIT_SW_FLEX      18 // LS 4
-#define M2_LIMIT_SW_FLEX_PORT    GPIOB_PDIR
-#define M2_LIMIT_SW_FLEX_SHIFT   CORE_PIN18_BIT
-
-#define M2_ENCODER_RESOLUTION 48
-#define M2_GEAR_RATIO         99.508*20.0*2.0 // planetary gear motor chained to worm gear drive
 #define M2_MIN_HARD_ANGLE     -65.0
 #define M2_MAX_HARD_ANGLE     23.0
 #define M2_MIN_SOFT_ANGLE     -62.0
@@ -94,20 +67,6 @@
 //Motor 3 Elbow bend
 #define M3_DIR_PIN         8
 #define M3_PWM_PIN         10
-#define M3_ENCODER_A          29
-#define M3_ENCODER_B          30
-#define M3_ENCODER_PORT       GPIOB_PDIR
-#define M3_ENCODER_SHIFT      CORE_PIN29_BIT
-
-#define M3_LIMIT_SW_EXTEND        16 // LS 5
-#define M3_LIMIT_SW_EXTEND_PORT   GPIOB_PDIR
-#define M3_LIMIT_SW_EXTEND_SHIFT  CORE_PIN16_BIT
-#define M3_LIMIT_SW_FLEX          21 // LS 6
-#define M3_LIMIT_SW_FLEX_PORT     GPIOD_PDIR
-#define M3_LIMIT_SW_FLEX_SHIFT    CORE_PIN21_BIT
-
-#define M3_ENCODER_RESOLUTION 48
-#define M3_GEAR_RATIO         .88*99.508*(40.0/14.0)*18.0*2.0 // belt reduction chained to worm gear drive
 #define M3_MIN_HARD_ANGLE     -145.0
 #define M3_MAX_HARD_ANGLE     65.0
 #define M3_MIN_SOFT_ANGLE     -140.0
@@ -116,20 +75,6 @@
 //Motor 4 Wrist bend
 #define M4_DIR_PIN        4
 #define M4_PWM_PIN        6
-#define M4_ENCODER_A        27
-#define M4_ENCODER_B        28
-#define M4_ENCODER_PORT    GPIOA_PDIR
-#define M4_ENCODER_SHIFT   CORE_PIN27_BIT
-
-#define M4_LIMIT_SW_EXTEND 19 // LS 7
-#define M4_LIMIT_SW_EXTEND_PORT  GPIOB_PDIR
-#define M4_LIMIT_SW_FLEX_SHIFT   CORE_PIN17_BIT
-#define M4_LIMIT_SW_FLEX   17 // LS 8
-#define M4_LIMIT_SW_FLEX_PORT    GPIOB_PDIR
-#define M4_LIMIT_SW_EXTEND_SHIFT CORE_PIN19_BIT
-
-#define M4_ENCODER_RESOLUTION 48
-#define M4_GEAR_RATIO      139.138*20.0 // belt reduction chained to worm gear drive
 #define M4_MIN_HARD_ANGLE  -90.0
 #define M4_MAX_HARD_ANGLE  75.0
 #define M4_MIN_SOFT_ANGLE  -85.0
@@ -143,12 +88,6 @@
 // no angle limits/limit switches because it can spin indefinitely
 
 // Motor 6 Pinch
-#define M6_LIMIT_SW_FLEX 15 // LS 9 
-#define M6_LIMIT_SW_FLEX_PORT  GPIOC_PDIR
-#define M6_LIMIT_SW_FLEX_SHIFT CORE_PIN15_BIT
-#define M6_LIMIT_SW_EXTEND 14 // LS 10 
-#define M6_LIMIT_SW_EXTEND_PORT  GPIOD_PDIR
-#define M6_LIMIT_SW_EXTEND_SHIFT CORE_PIN14_BIT
 
 #define M6_GEAR_RATIO      27.0
 #define M6_MIN_HARD_ANGLE   -75.0 //-120.0

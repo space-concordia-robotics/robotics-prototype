@@ -7,8 +7,8 @@
 
 #include <etl/queue.h>
 
+#include "../../Arm/include/ArmDebug.h"
 #include "Arduino.h"
-#include "include/ArmDebug.h"
 
 #define COMMAND_DEBUG_MSG 0
 
