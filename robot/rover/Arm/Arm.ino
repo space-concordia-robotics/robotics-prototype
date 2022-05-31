@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "CommandCenter.h"
+#include "include/ArmDebug.h"
 #include "include/DcMotor.h"
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"
@@ -18,7 +19,9 @@ SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
 void setup() {
+#ifndef DEBUG
   Serial.begin(9600);
+#endif
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
@@ -51,7 +54,13 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
 
 void invalidCommand() { digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); }
 
-void pong() { digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); }
+void pong() {
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  const char* pong = "pong";
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(pong), pong);
+  commandCenter->sendMessage(*message);
+}
 
 void setMotorSpeeds(float* angles) {
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
@@ -84,7 +93,7 @@ void delayChecks(unsigned long delayMillis) {
 
 void loop() {
   // Read and send messages
-  if (Serial1.available() > 0) {
+  if (Serial.available() > 0) {
     commandCenter->readCommand();
   }
   doMotorChecks();
