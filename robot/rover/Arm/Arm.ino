@@ -50,15 +50,24 @@ void setup() {
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-}
 
-void invalidCommand() { digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); }
+  /*const char* strMessage = "Invalid command";
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(strMessage), strMessage);
+  commandCenter->sendMessage(*message);*/
+
+  char buf[64];
+  snprintf(buf, sizeof(buf), "Invalid command id %d arg length %d", cmdID,
+           rawArgsLength);
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(buf), buf);
+  commandCenter->sendMessage(*message);
+}
 
 void pong() {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  const char* pong = "pong";
   internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(pong), pong);
+      commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);
 }
 

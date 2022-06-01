@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# IMPORTANT: see line 29 
+
 import sys
 import traceback
 import time
@@ -23,6 +25,11 @@ ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
+
+# set this to the device you want to receive commands from.
+# over USB, there is no way to select a device, so this node
+# needs to know which one it's 'hearing' from.
+receive_device = ARM_SELECTED
 
 in_commands = [arm_in_commands, wheel_in_commands, None, None]
 out_commands = [arm_out_commands, wheel_out_commands, None, None]
@@ -94,7 +101,8 @@ def send_queued_commands():
         send_command(rover_command[0], rover_command[1], rover_command[2])
 
 def receive_message():
-    for device in range(2):
+    # for device in range(1):
+        device = receive_device
         #gpio.output(SW_PINS, PIN_DESC[device])
         if ser.in_waiting > 0:
 
@@ -224,9 +232,9 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
     vBatPub = rospy.Publisher(v_bat_topic, Voltage, queue_size=10)
 
-    # feedback_pub_topic = '/arm_feedback'
-    # rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
-    # feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
+    feedback_pub_topic = '/arm_feedback'
+    rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
+    feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
 
     arm_command_topic = '/arm_command'
     rospy.loginfo('Beginning to subscribe to "'+arm_command_topic+'" topic')
