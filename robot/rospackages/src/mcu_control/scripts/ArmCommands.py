@@ -32,7 +32,7 @@ def handle_send_motor_angles(data):
 #                     ("invalid_test", 10, []), ("send_motor_angles", 77, [])]
 
 arm_out_commands = [("set_motor_speeds", 78, 6 * [dt.ARG_FLOAT32]), ("ping", 75, []),
-                    ("invalid_test", 10, [])]
+                    ("invalid_test", 10, []), ("debug_test", 79, []),]
 
 
 # arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong),

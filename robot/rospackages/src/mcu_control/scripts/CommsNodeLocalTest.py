@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-
-# IMPORTANT: see line 29 
+# This file is lightly modified from CommsNode, which allows local test.
+# The teensy you are using must be setup to communicate over usb, and not
+# Serial1.
+# IMPORTANT: see line 34 for which teensy and 223 for the serial port
 
 import sys
 import traceback
@@ -177,6 +179,8 @@ def send_command(command_name, args, deviceToSendTo):
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
         #gpio.output(SW_PINS, NONE)
+    else:
+        print("Command " + command_name + " not valid.")
     return False
 
 def arm_command_callback(message):

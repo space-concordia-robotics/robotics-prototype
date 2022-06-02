@@ -10,8 +10,9 @@
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
-#define SEND_MOTOR_ANGLES 77
+// #define SEND_MOTOR_ANGLES 77
 #define SET_MOTOR_SPEEDS 78
+#define COMMAND_DEBUG_TEST 79
 
 // Commands that expect a pointer are assumed to provide a pointer
 // to 6 values.
@@ -21,6 +22,8 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
 void pong();
 void sendMotorAngles();
 void moveMotorsBy(float* angles, uint16_t numAngles);
+void debug_test();
+
 /**
  * @brief Sets motor speeds.
  * @param angles pointer to NUM_MOTOR floats.
@@ -64,13 +67,11 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
         break;
       }
     }
+    case COMMAND_DEBUG_TEST:
+      debug_test();
+      break;
     default: {
       invalidCommand(cmdID, rawArgs, rawArgsLength);
-
-      /*Serial.write("invalid command id ");
-      char buffer[8];
-      snprintf(buffer, 8, "%d\n", commandID);
-      Serial.write(buffer);*/
     }
   }
 }

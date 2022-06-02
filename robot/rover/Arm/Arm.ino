@@ -50,18 +50,16 @@ void setup() {
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  // NOTE: this code is commented out since sending debug strings
+  // can overwhelm the bus if the teensy is seeing many invalid commands,
+  // which has happened in the past.
 
-  /*const char* strMessage = "Invalid command";
-  internal_comms::Message* message =
-      commandCenter->createMessage(0, strlen(strMessage), strMessage);
-  commandCenter->sendMessage(*message);*/
-
-  char buf[64];
+  /*char buf[64];
   snprintf(buf, sizeof(buf), "Invalid command id %d arg length %d", cmdID,
            rawArgsLength);
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(buf), buf);
-  commandCenter->sendMessage(*message);
+  commandCenter->sendMessage(*message);*/
 }
 
 void pong() {
@@ -92,12 +90,11 @@ void doMotorChecks() {
   }
 }
 
-void delayChecks(unsigned long delayMillis) {
-  unsigned long startTime = millis();
-  while (millis() - startTime < delayMillis) {
-    doMotorChecks();
-    delay(1);
-  }
+void debug_test() {
+  const char* strMessage = "This is a debug string";
+  internal_comms::Message* message =
+      commandCenter->createMessage(0, strlen(strMessage), strMessage);
+  commandCenter->sendMessage(*message);
 }
 
 void loop() {
