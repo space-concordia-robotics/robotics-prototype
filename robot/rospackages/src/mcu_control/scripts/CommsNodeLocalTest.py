@@ -2,7 +2,7 @@
 # This file is lightly modified from CommsNode, which allows local test.
 # The teensy you are using must be setup to communicate over usb, and not
 # Serial1.
-# IMPORTANT: see line 34 for which teensy and 223 for the serial port
+# IMPORTANT: see line 34 for which teensy and 225 for the serial port
 
 import sys
 import traceback
