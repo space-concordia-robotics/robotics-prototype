@@ -55,7 +55,7 @@ Command* CommandCenter::processCommand() {
   return cmd;
 }
 
-uint8_t CommandCenter::readArgSize() { return waitForSerial(); }
+uint16_t CommandCenter::readArgSize() { return waitForSerial(); }
 
 Message* CommandCenter::createMessage(int messageID, int rawArgsLength,
                                       byte* rawArgs) {

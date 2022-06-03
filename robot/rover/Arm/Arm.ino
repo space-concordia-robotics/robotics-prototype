@@ -49,7 +49,8 @@ void setup() {
 
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  
   // NOTE: this code is commented out since sending debug strings
   // can overwhelm the bus if the teensy is seeing many invalid commands,
   // which has happened in the past.
@@ -63,7 +64,7 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
 }
 
 void pong() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);
