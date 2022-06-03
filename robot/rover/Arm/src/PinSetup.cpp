@@ -6,8 +6,6 @@ void pinSetup(void) {
   pinMode(LED_BUILTIN, OUTPUT);  // pin 13, heartbeat
   digitalWrite(LED_BUILTIN, HIGH);
 
-  pinMode(V_SENSE, INPUT);  // battery sensing
-
   // DC motors
 
   pinMode(M1_PWM_PIN, OUTPUT);

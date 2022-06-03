@@ -4,7 +4,7 @@
 
 #include "include/commands/ArmCommandCenter.h"
 
-#include "../../../robot/demos/RemoteArmControl/KeyboardBudge/PinSetup.h"
+#include "include/PinSetup.h"
 #include "Arduino.h"
 #define LED 13
 

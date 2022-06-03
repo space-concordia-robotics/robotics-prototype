@@ -29,10 +29,10 @@ void setup() {
 
   pinSetup();
 
-  motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, LOW);
-  motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
-  motors[2] = DcMotor(M3_DIR_PIN, M3_STEP_PIN, 1.0, LOW);
-  motors[3] = DcMotor(M4_DIR_PIN, M4_STEP_PIN, 1.0, LOW);
+  motors[0] = DcMotor(M1_DIR_PIN, M1_PWM_PIN, 1.0, LOW);
+  motors[1] = DcMotor(M2_DIR_PIN, M2_PWM_PIN, 1.0, LOW);
+  motors[2] = DcMotor(M3_DIR_PIN, M3_PWM_PIN, 1.0, LOW);
+  motors[3] = DcMotor(M4_DIR_PIN, M4_PWM_PIN, 1.0, LOW);
   serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
   serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 

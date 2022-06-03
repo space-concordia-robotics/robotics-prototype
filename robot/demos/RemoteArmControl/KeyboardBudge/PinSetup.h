@@ -1,6 +1,6 @@
 #ifndef PINSETUP_H_MRS  // new version, by Marc
 #define PINSETUP_H_MRS
-
+// NOTE: replaced by a file in /home/marc/Programming/robotics-prototype/robot/rover/Arm/include/PinSetup.h
 // pin constants defined in core_pins.h, pins_teensy.c, pins_arduino.h
 
 /*

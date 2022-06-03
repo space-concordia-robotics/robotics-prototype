@@ -8,6 +8,7 @@ class DcMotor {
   // both these are positive or negative based on direction
   int currentSpeed, targetSpeed;
   float gearRatio;
+  unsigned int millisStartedMove, millisLastUpdate;
 
   DcMotor(int dirPin, int pwmPin, float gearRatio, int dirPinForward);
   DcMotor();
@@ -22,8 +23,6 @@ class DcMotor {
    */
   void doChecks();
   void stop();
-
-  unsigned int millisStartedMove, millisLastUpdate;
 
  private:
   int directionPin;
