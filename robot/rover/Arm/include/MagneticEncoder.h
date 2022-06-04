@@ -58,10 +58,10 @@ class TLE5012MagneticEncoder {
     int status;
     volatile union angle_union{
         float _float;
-        byte* _bytes;
+        byte _bytes[4];
     } angle;
 
-        ;
+
         TLE5012MagneticEncoder(uint8_t);
 
       /**

@@ -34,8 +34,10 @@ void TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-    uint8_t receivedAddress = SPI.transfer16(this->address);
-    checkAddress(this->address, receivedAddress);
+    uint8_t receivedAddress = SPI.transfer(this->address);
+
+    status = checkAddress(this->address, receivedAddress);
+    if(status != SUCCESS) return;
 
     // Send the command to the encoder
     SPI.transfer16(command);
@@ -76,8 +78,10 @@ void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-    uint8_t receivedAddress = SPI.transfer16(this->address);
-    checkAddress(this->address, receivedAddress);
+    uint8_t receivedAddress = SPI.transfer(this->address);
+
+    status = checkAddress(this->address, receivedAddress);
+    if(status != SUCCESS) return;
 
     // Send the command to the encoder
     SPI.transfer16(command);

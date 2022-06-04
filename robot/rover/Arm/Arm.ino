@@ -147,7 +147,7 @@ void debug_test() {
 }
 void sendEncoderData(const TLE5012MagneticEncoder& encoder){
     if(encoder.status == SUCCESS){
-        auto msg = commandCenter->createMessage(2,4,encoder.angle._bytes);
+        auto msg = commandCenter->createMessage(2,4,(byte*)encoder.angle._bytes);
         commandCenter->sendMessage(*msg);
     }
     else{
