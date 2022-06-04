@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# This file is lightly modified from CommsNode, which allows local test.
+# The teensy you are using must be setup to communicate over usb, and not
+# Serial1.
+# IMPORTANT: see line 34 for which teensy and 225 for the serial port
 
 import sys
 import traceback
@@ -7,7 +11,7 @@ import re
 import serial
 import struct
 from collections import deque
-import Jetson.GPIO as gpio
+# import Jetson.GPIO as gpio
 from geometry_msgs.msg import Twist
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -23,6 +27,11 @@ ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
+
+# set this to the device you want to receive commands from.
+# over USB, there is no way to select a device, so this node
+# needs to know which one it's 'hearing' from.
+receive_device = ARM_SELECTED
 
 in_commands = [arm_in_commands, wheel_in_commands, None, None]
 out_commands = [arm_out_commands, wheel_out_commands, None, None]
@@ -52,10 +61,10 @@ arm_queue= deque()
 rover_queue = deque()
 science_queue = deque()
 
-gpio.setwarnings(False)
-gpio.setmode(gpio.BOARD)
-gpio.setup(SW_PINS, gpio.OUT)
-gpio.output(SW_PINS, NONE)
+#gpio.setwarnings(False)
+#gpio.setmode(gpio.BOARD)
+#gpio.setup(SW_PINS, gpio.OUT)
+#gpio.output(SW_PINS, NONE)
 
 def twist_rover_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
@@ -94,8 +103,9 @@ def send_queued_commands():
         send_command(rover_command[0], rover_command[1], rover_command[2])
 
 def receive_message():
-    for device in range(2):
-        gpio.output(SW_PINS, PIN_DESC[device])
+    # for device in range(1):
+        device = receive_device
+        #gpio.output(SW_PINS, PIN_DESC[device])
         if ser.in_waiting > 0:
 
             commandID = ser.read()
@@ -111,7 +121,7 @@ def receive_message():
             argsLen = ser.read()
             # print(argsLen)
             argsLen = int.from_bytes(argsLen, "big")
-            # print("Number of bytes of arguments:", argsLen)
+            print("Number of bytes of arguments:", argsLen)
             args = None
             if argsLen > 0:
                 args = ser.read(argsLen)
@@ -121,7 +131,7 @@ def receive_message():
             stopByte = int.from_bytes(stopByte, "big")
             # print("Stop byte:", stopByte)
 
-            gpio.output(SW_PINS, NONE)
+            #gpio.output(SW_PINS, NONE)
 
             if stopByte != STOP_BYTE:
                 # print("Warning : Invalid stop byte")
@@ -145,7 +155,7 @@ def send_command(command_name, args, deviceToSendTo):
     if command is not None:
         commandID = command[1]
 
-        gpio.output(SW_PINS, TX2)
+        #gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
         ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
@@ -168,7 +178,9 @@ def send_command(command_name, args, deviceToSendTo):
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
-        gpio.output(SW_PINS, NONE)
+        #gpio.output(SW_PINS, NONE)
+    else:
+        print("Command " + command_name + " not valid.")
     return False
 
 def arm_command_callback(message):
@@ -210,7 +222,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
