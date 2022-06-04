@@ -7,13 +7,10 @@
 
 #include <etl/queue.h>
 
+#include "../../Arm/include/ArmDebug.h"
 #include "Arduino.h"
 
 #define COMMAND_DEBUG_MSG 0
-
-#ifndef DEBUG
-#define Serial Serial1
-#endif
 
 namespace internal_comms {
 
@@ -58,7 +55,7 @@ Command* CommandCenter::processCommand() {
   return cmd;
 }
 
-uint8_t CommandCenter::readArgSize() { return waitForSerial(); }
+uint16_t CommandCenter::readArgSize() { return waitForSerial(); }
 
 Message* CommandCenter::createMessage(int messageID, int rawArgsLength,
                                       byte* rawArgs) {
@@ -136,11 +133,7 @@ void CommandCenter::sendMessage() {
       messageQueue.pop();
 
       Serial.write(message.messageID);
-
-      uint8_t MSB = message.rawArgsLength >> 8;
-      uint8_t LSB = message.rawArgsLength & B11111111;
-      Serial.write(MSB);
-      Serial.write(LSB);
+      Serial.write(message.rawArgsLength);
 
       if (message.rawArgsLength > 0)
         Serial.write(message.rawArgs, message.rawArgsLength);
