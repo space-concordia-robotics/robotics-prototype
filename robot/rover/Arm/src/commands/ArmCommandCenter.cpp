@@ -6,7 +6,6 @@
 
 #include "include/PinSetup.h"
 #include "Arduino.h"
-#define LED 13
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
