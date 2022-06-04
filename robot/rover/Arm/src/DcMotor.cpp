@@ -32,9 +32,9 @@ void DcMotor::doChecks() {
   if ((millis() - millisStartedMove) > timeToWaitUntilStop &&
       currentSpeed != 0) {
     stop();
-  } else if (targetSpeed != currentSpeed && (millis() - millisLastUpdate) > 5) {
+  } else if (targetSpeed != currentSpeed && (millis() - millisLastUpdate) > 2) {
     // BRIEF: this increments/decrements the speed on the motor if it's been at
-    // least 5ms.
+    // least 2ms.
 
     int increment = targetSpeed > currentSpeed ? 1 : -1;
     currentSpeed += increment;
