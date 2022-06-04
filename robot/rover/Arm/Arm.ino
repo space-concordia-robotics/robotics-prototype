@@ -1,37 +1,53 @@
 
 #include "Arduino.h"
-#define LED 13
+#include "MagneticEncoder.h"
+#include "DcMotor.h"
+#include "SerialMotor.h"
+#include "commands/ArmCommandCenter.h"
+
+#include <IntervalTimer.h>
 #include <HardwareSerial.h>
 #include <Servo.h>
 
-#include "CommandCenter.h"
-#include "include/DcMotor.h"
-#include "include/Encoder_Data.h"
-#include "include/SerialMotor.h"
-#include "include/commands/ArmCommandCenter.h"
+#define ENCODER_1_ADDRESS      (0x09)
+#define ENCODER_2_ADDRESS      (0x0A)
+#define ENCODER_3_ADDRESS      (0x0B)
 
-#define ENCODER_SERIAL Serial1
-#define SERIAL_EVENT serialEvent1
+#define MAGNETIC_ENCODER_IRQ_RATE 1000
+#define ENCODER_SEND_RATE         100
+
+#define SERIAL_EVENT serialEven t1
 #define ARM_PREAMBLE 0xA5
 #define ARM_PACKET_LENGTH 6  // contains the preamble and CRC
-
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
-
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
-EncoderData encoderData[15];
 DcMotor motors[NUM_DC_MOTORS];
 SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
+TLE5012MagneticEncoder magneticEncoder1(ENCODER_1_ADDRESS);
+TLE5012MagneticEncoder magneticEncoder2(ENCODER_2_ADDRESS);
+TLE5012MagneticEncoder magneticEncoder3(ENCODER_3_ADDRESS);
+
+
+IntervalTimer magneticEncoderTimer1;
+uint32_t encodersLastSent = millis();
+
+void initMagneticEncoder();
+
+void magneticEncoder1IRQ();
+void magneticEncoder2IRQ();
+void magneticEncoder3IRQ();
+
 void setup() {
   Serial.begin(9600);
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
-  digitalWrite(LED, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
   // ENCODER_SERIAL.begin(9600);
   // TODO: For testing, with no data
@@ -41,6 +57,7 @@ void setup() {
     encoderData[i] = datum;
   }*/
   pinSetup();
+  initMagneticEncoder();
 
   motors[0] = DcMotor(M1_DIR_PIN, M1_STEP_PIN, 1.0, LOW);
   motors[1] = DcMotor(M2_DIR_PIN, M2_STEP_PIN, 1.0, LOW);
@@ -49,75 +66,48 @@ void setup() {
   serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
   serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 
-  /*Serial.begin(9600);
-  while (!Serial) {
-    // wait for serial monitor
-    digitalWrite(LED, HIGH);
-    delay(100);
-    digitalWrite(LED, LOW);
-    delay(100);
-  }*/
+  magneticEncoderTimer1.begin(magneticEncoder1IRQ,MAGNETIC_ENCODER_IRQ_RATE);
+//  magneticEncoderTimer2.begin(magneticEncoder2IRQ,MAGNETIC_ENCODER_IRQ_RATE);
+//  magneticEncoderTimer3.begin(magneticEncoder3IRQ,MAGNETIC_ENCODER_IRQ_RATE);
+
+
+    /*Serial.begin(9600);
+    while (!Serial) {
+      // wait for serial monitor
+      digitalWrite(LED, HIGH);
+      delay(100);
+      digitalWrite(LED, LOW);
+      delay(100);
+    }*/
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
   commandCenter->startSerial(1, 0, 25, 26);
   /*commandCenter->startSerial(-1, -1, 24,
                              -1);*/  // not using transmitenable with usb
-  digitalWrite(LED, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 // 0 bytes received means waiting on next preamble
 // 1 means received preamble, 2 means received 1 preamble and 1 data byte, etc.
-volatile byte encoderBytesReceived = 0;
-volatile bool newEncoderData = false;
-byte encoderTemp[ARM_PACKET_LENGTH];
 volatile byte tRead = 255;  // for debug only
 volatile int passedEvent = 0;
 
-void DEACTIVATED() {
-  byte read = ENCODER_SERIAL.read();
-  tRead = read;
-  passedEvent = 1;
-  // check if waiting for preamble
-  if (encoderBytesReceived == 0) {
-    if (read == ARM_PREAMBLE) {
-      encoderTemp[0] = read;
-      encoderBytesReceived++;
-    } else {
-      digitalWrite(LED, HIGH);
-      // do nothing, wait on valid preamble
-    }
-  } else {
-    // here, not waiting on preamble (receiving some middle byte)
-    encoderTemp[encoderBytesReceived] = read;
-    encoderBytesReceived++;
+void initMagneticEncoder(){
+    // Decimation filter to maximum
+    magneticEncoder1.SPIWrite16(REG_MOD1,0xC000);
 
-    // Do the address check once 2 received address.
-    if (encoderBytesReceived == 2) {
-      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
-      if (address > 15) {
-        // If address invalid, reset to waiting on preamble.
-        encoderBytesReceived = 0;
-        digitalWrite(LED, LOW);
-      }
-    }
+}
+void magneticEncoder1IRQ() {
 
-    if (encoderBytesReceived == ARM_PACKET_LENGTH) {
-      // if here, just received last byte of packet
-      // copy temp to shared memory with the address as the index in the array
-      unsigned char address = EncoderData::getAddress(encoderTemp[1]);
-      if (address <= 15) {  // check that the address arrived intact
-        EncoderData thisData;
-        thisData.setData(encoderTemp);
-        encoderData[address] = thisData;
+    uint16_t digitalAngle;
 
-        // signal new data packet
-        newEncoderData = true;
-      }
-      // reset to waiting on preamble
-      encoderBytesReceived = 0;
-      digitalWrite(LED, LOW);
+    magneticEncoder1.SPIRead16(REG_ANGLE_VAL,&digitalAngle,1);
+
+    if(magneticEncoder1.status == SUCCESS) {
+        // Note that the first bit is a status indicator, we don't need it for the actual angle.
+        float angle = (float) (digitalAngle & 0x7FFF) * 360.f / powf(2, 17);
+        magneticEncoder1.angle._float = angle;
     }
-  }
 }
 
 /**
@@ -126,7 +116,7 @@ void DEACTIVATED() {
 
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
-  digitalWrite(LED, !digitalRead(LED));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   /*char* buffer = (char*)malloc(256);
   snprintf(buffer, 256, "Invalid command, ID %d, args length %d", cmdID,
            rawArgsLength);
@@ -137,7 +127,7 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
 }
 
 void invalidCommand() {
-  digitalWrite(LED, !digitalRead(LED));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   /*char* allocedMessage = strdup("Invalid Arm command");
   internal_comms::Message* message =
       commandCenter->createMessage(0, strlen(allocedMessage), allocedMessage);
@@ -145,7 +135,7 @@ void invalidCommand() {
 }
 
 void pong() {
-  digitalWrite(LED, !digitalRead(LED));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   /*internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);*/
@@ -154,7 +144,7 @@ void pong() {
 void moveMotorsBy(float* angles, uint16_t numAngles) {
   // Right now, this only prints out back the received angles
   byte* data = new byte[128];
-  int r = snprintf(data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
+  int r = snprintf((char*)data, 128, "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f", angles[0],
                    angles[1], angles[2], angles[3], angles[4], angles[5]);
   if (r < 0 || r > 128) {
     invalidCommand();
@@ -211,7 +201,15 @@ void delayChecks(unsigned long delayMillis) {
     delay(1);
   }
 }
-
+void sendEncoderData(const TLE5012MagneticEncoder& encoder){
+    if(encoder.status == SUCCESS){
+        auto msg = commandCenter->createMessage(2,4,encoder.angle._bytes);
+        commandCenter->sendMessage(*msg);
+    }
+    else{
+        commandCenter->sendDebug(encoder.status_msg_buffer);
+    }
+}
 void loop() {
   // Read and send messages
   if (Serial1.available() > 0) {
@@ -221,4 +219,10 @@ void loop() {
   doMotorChecks();
   commandCenter->sendMessage();
   doMotorChecks();
+
+  if( (millis() - encodersLastSent) > ENCODER_SEND_RATE){
+      encodersLastSent = millis();
+      sendEncoderData(magneticEncoder1);
+  }
+
 }
