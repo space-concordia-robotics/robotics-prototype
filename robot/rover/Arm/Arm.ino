@@ -11,19 +11,22 @@
 #include "MagneticEncoder.h"
 #include "include/commands/ArmCommandCenter.h"
 
+// motor 1 - 4
+// motor 3 - 1
+// motor 2 - 2
+
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
 
-#define ENCODER_1_ADDRESS      (0x09)
-#define ENCODER_2_ADDRESS      (0x0A)
-#define ENCODER_3_ADDRESS      (0x0B)
+#define ENCODER_1_ADDRESS      (0x03+8)
+#define ENCODER_2_ADDRESS      (0x02+8)
+#define ENCODER_3_ADDRESS      (0x01+8)
 
-#define MAGNETIC_ENCODER_IRQ_RATE 1000
+#define MAGNETIC_ENCODER_IRQ_RATE 1'000'000
 #define ENCODER_SEND_RATE         100
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
-
 
 DcMotor motors[NUM_DC_MOTORS];
 SerialMotor serialMotors[NUM_SMART_SERVOS];
@@ -44,13 +47,9 @@ void magneticEncoder2IRQ();
 void magneticEncoder3IRQ();
 
 void setup() {
-#ifndef DEBUG
+
   Serial.begin(9600);
-#endif
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
+
 
   pinSetup();
   initMagneticEncoder();
@@ -70,30 +69,31 @@ void setup() {
   // TX teensy, RX teensy, enable pin, transmit pin
   commandCenter->startSerial(1, 0, 25, 26);
 
-  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void initMagneticEncoder(){
     // Decimation filter to maximum
-    magneticEncoder1.SPIWrite16(REG_MOD1,0xC000);
-
+    //magneticEncoder1.SPIWrite16(REG_MOD1,0xC000);
+    //magneticEncoder1.SPIWrite16(0x01,0x0001);
 }
 void magneticEncoder1IRQ() {
 
     uint16_t digitalAngle;
 
     magneticEncoder1.SPIRead16(REG_ANGLE_VAL,&digitalAngle,1);
+    //Serial.print(digitalAngle);
+    // Note that the first bit is a status indicator, we don't need it for the actual angle.
 
-    if(magneticEncoder1.status == SUCCESS) {
-        // Note that the first bit is a status indicator, we don't need it for the actual angle.
-        float angle = (float) (digitalAngle & 0x7FFF) * 360.f / powf(2, 17);
-        magneticEncoder1.angle._float = angle;
-    }
-  // tx2 sends to 25,     output 26
-  // TX teensy, RX teensy, enable pin, transmit pin
-  commandCenter->startSerial(1, 0, 25, 26);
+    float angle = (float)(digitalAngle & 0x7FFF) / (powf(2,15)) * 360.f;
+    Serial.println(angle);
+    magneticEncoder1.angle._float = angle;
 
-  digitalWrite(LED_BUILTIN, LOW);
+
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
 
 }
 
@@ -101,25 +101,28 @@ void magneticEncoder1IRQ() {
  * Implements all the Arm commands.
  */
 
-void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
-                    const uint8_t rawArgsLength) {
-
-
-}
-
 void invalidCommand() {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+
+    // NOTE: this code is commented out since       sending debug strings
+    // can overwhelm the bus if the teensy is seeing many invalid commands,
+    // which has happened in the past.
+
+    /*char buf[64];
+    snprintf(buf, sizeof(buf), "Invalid command id %d arg length %d", cmdID,
+             rawArgsLength);
+    internal_comms::Message* message =
+        commandCenter->createMessage(0, strlen(buf), buf);
+    commandCenter->sendMessage(*message);*/
 
 }
 
 void pong() {
-
+    //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    internal_comms::Message* message =
+            commandCenter->createMessage(1, 0, nullptr);
+    commandCenter->sendMessage(*message);
 }
-
-void moveMotorsBy(float* angles, uint16_t numAngles) {
-
-}
-
 void setMotorSpeeds(float* angles) {
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
     int angle = (int)(angles[i]);
@@ -133,11 +136,11 @@ void setMotorSpeeds(float* angles) {
 
 void doMotorChecks() {
   // Do motor checks (ex stop after certain time of no messages)
-  for (int i = 0; i < NUM_DC_MOTORS; i++) {
-    motors[i].doChecks();
+  for (auto & motor : motors) {
+    motor.doChecks();
   }
-  for (int i = 0; i < NUM_SMART_SERVOS; i++) {
-    serialMotors[i].doChecks();
+  for (auto & serialMotor : serialMotors) {
+    serialMotor.doChecks();
   }
 }
 
@@ -148,10 +151,12 @@ void debug_test() {
 void sendEncoderData(const TLE5012MagneticEncoder& encoder){
     if(encoder.status == SUCCESS){
         auto msg = commandCenter->createMessage(2,4,(byte*)encoder.angle._bytes);
-        commandCenter->sendMessage(*msg);
+        //Serial.println(encoder.angle._float);
+        //commandCenter->sendMessage(*msg);
     }
     else{
-        commandCenter->sendDebug(encoder.status_msg_buffer);
+        //Serial.println(encoder.status_msg_buffer);
+        //commandCenter->sendDebug(encoder.status_msg_buffer);
     }
 }
 void loop() {
@@ -159,9 +164,9 @@ void loop() {
   if (Serial.available() > 0) {
     commandCenter->readCommand();
   }
-  doMotorChecks();
+  //doMotorChecks();
   commandCenter->sendMessage();
-  doMotorChecks();
+  //doMotorChecks();
 
   if( (millis() - encodersLastSent) > ENCODER_SEND_RATE){
       encodersLastSent = millis();

@@ -30,47 +30,47 @@ void debug_test();
 void setMotorSpeeds(float* angles);
 
 float bytes_to_float(const uint8_t* rawPointer) {
-  float f;
-  // I'm not going down the rabbit hole to figure out why the bytes in the float
-  // are in the wrong order, but interpreting the bytes flipped like this works.
-  byte bytes[] = {*(rawPointer + 3), *(rawPointer + 2), *(rawPointer + 1),
-                  *(rawPointer)};
-  memcpy(&f, &bytes, sizeof(f));
-  return f;
+    float f;
+    // I'm not going down the rabbit hole to figure out why the bytes in the float
+    // are in the wrong order, but interpreting the bytes flipped like this works.
+    byte bytes[] = {*(rawPointer + 3), *(rawPointer + 2), *(rawPointer + 1),
+                    *(rawPointer)};
+    memcpy(&f, &bytes, sizeof(f));
+    return f;
 }
 
 void ArmCommandCenter::executeCommand(const uint8_t cmdID,
                                       const uint8_t* rawArgs,
                                       const uint8_t rawArgsLength) {
-  int commandID = int(cmdID);
+    int commandID = int(cmdID);
 
-  switch (commandID) {
-    case COMMAND_PING: {
-      pong();
-      break;
-    }
-    case SET_MOTOR_SPEEDS: {
-      uint16_t numAngles = rawArgsLength / sizeof(float);
-      if (numAngles == NUM_MOTORS) {
-        float* angles = (float*)malloc(sizeof(*angles) * numAngles);
-
-        for (int i = 0; i < numAngles; i++) {
-          angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
+    switch (commandID) {
+        case COMMAND_PING: {
+            pong();
+            break;
         }
+        case SET_MOTOR_SPEEDS: {
+            uint16_t numAngles = rawArgsLength / sizeof(float);
+            if (numAngles == NUM_MOTORS) {
+                auto* angles = (float*)malloc(sizeof(float) * numAngles);
 
-        setMotorSpeeds(angles);
-        free(angles);
-        break;
-      } else {
-        invalidCommand(cmdID, rawArgs, rawArgsLength);
-        break;
-      }
+                for (int i = 0; i < numAngles; i++) {
+                    angles[i] = bytes_to_float(rawArgs + i * sizeof(float));
+                }
+
+                setMotorSpeeds(angles);
+                free(angles);
+                break;
+            } else {
+                //invalidCommand(cmdID, rawArgs, rawArgsLength);
+                break;
+            }
+        }
+        case COMMAND_DEBUG_TEST:
+            debug_test();
+            break;
+        default: {
+            //invalidCommand(cmdID, rawArgs, rawArgsLength);
+        }
     }
-    case COMMAND_DEBUG_TEST:
-      debug_test();
-      break;
-    default: {
-      invalidCommand(cmdID, rawArgs, rawArgsLength);
-    }
-  }
 }

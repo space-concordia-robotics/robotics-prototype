@@ -34,10 +34,10 @@ void TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-    uint8_t receivedAddress = SPI.transfer(this->address);
-
-    status = checkAddress(this->address, receivedAddress);
-    if(status != SUCCESS) return;
+//    uint8_t receivedAddress = SPI.transfer(this->address);
+//
+//    status = checkAddress(this->address, receivedAddress);
+//    if(status != SUCCESS) return;
 
     // Send the command to the encoder
     SPI.transfer16(command);
@@ -78,20 +78,29 @@ void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-    uint8_t receivedAddress = SPI.transfer(this->address);
-
-    status = checkAddress(this->address, receivedAddress);
-    if(status != SUCCESS) return;
+//    uint8_t receivedAddress = SPI.transfer(this->address);
+//
+//    status = checkAddress(this->address, receivedAddress);
+//    if(status != SUCCESS) return;
 
     // Send the command to the encoder
     SPI.transfer16(command);
 
     // Receive the desired amount of words. Since it's SPI, but we aren't transmitting anything, use a placeholder value.
+    uint16_t buffer[size];
     for(int i = 0 ; i < size ; i++){
-        data[i] = SPI.transfer16(0x00);
+        buffer[i] = SPI.transfer16(0x00);
     }
+    memcpy(data,buffer,size);
+    // motor 1 - 4
+    // motor 3 - 1
+    // motor 2 - 2
+//    Serial.print(data[0]);
     // Safety word (2 bytes) contains the CRC (last byte) and some status flags
     uint16_t safety = SPI.transfer16(0x00);
+
+//    Serial.write(safety);
+//    Serial.write(safety >> 8);
 
     // Terminate SPI transaction
     digitalWrite(CS_PIN,HIGH);
@@ -105,15 +114,18 @@ void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size
     };
     // Verify CRC, using the command and the data words
     uint8_t CRC = CRC8((uint8_t* )message,sizeof(message));
-
+//    Serial.write(CRC);
     // Compare the CRC byte from the safety word and the computed byte
+
     if(CRC != (safety & 0x00FF)){
         status = CRC_FAIL;
+        //Serial.print("CRC_FAIL");
+
     }
     status = SUCCESS;
 }
 
 TLE5012MagneticEncoder::TLE5012MagneticEncoder(uint8_t slaveAddress) : address(slaveAddress) {
     SPI.begin();
-    pinMode(CS_PIN,OUTPUT);
+    pinMode(10,OUTPUT);
 }
