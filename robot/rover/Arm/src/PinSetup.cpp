@@ -5,8 +5,11 @@
 void pinSetup(void) {
   pinMode(LED_BUILTIN, OUTPUT);  // pin 13, heartbeat
   digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
 
-  // DC motors
+    // DC motors
 
   pinMode(M1_PWM_PIN, OUTPUT);
   pinMode(M1_DIR_PIN, OUTPUT);

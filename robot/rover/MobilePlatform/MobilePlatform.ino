@@ -1,7 +1,3 @@
-//
-// Edited by Michael on 2021-03-20.
-//
-
 // USB : Debug, UART : Production
 
 #include <cmath>
@@ -9,7 +5,6 @@
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
-#include "ArduinoBlue.h"
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //

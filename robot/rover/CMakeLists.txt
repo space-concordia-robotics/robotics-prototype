@@ -50,11 +50,8 @@ set(SPI_PATH ${TEENSY_LIB}/SPI)
 set(SOFTWARESERIAL_PATH ${TEENSY_LIB}/SoftwareSerial)
 set(ENCODER_PATH ${TEENSY_LIB}/Encoder)
 set(WIRE_PATH ${TEENSY_LIB}/Wire)
+set(TEENSY_TIMER_PATH ${ARDUINO_EXTERNAL_LIB}/TeensyTimerTool/src)
 
-#External Libaries paths
-set(ARDUINO_BLUE_PATH ${ARDUINO_EXTERNAL_LIB}/ArduinoBlue/src)
-set(ARDUINO_BLUE_URL https://github.com/purwar2016/ArduinoBlue-library)
-set(ARDUINO_BLUE_VERSION 3.0.1)
 
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
 set(SPARKFUN_GPS_URL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
@@ -77,7 +74,6 @@ set(ETL_URL https://github.com/ETLCPP/etl)
 set(ETL_VERSION 19.4.3)
 
 project(rover)
-checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
@@ -159,12 +155,15 @@ target_compile_options(teensycore PUBLIC ${ARM_GXX_FLAGS})
 file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.ino)
 
 #This function will create a library and store it with the given name
-function(createCppLibrary sources libraryName includes)
- add_library(${libraryName} ${sources})
+function(createCppLibrary srcDir libraryName)
 
- if(NOT ${includes} STREQUAL "")
-  target_include_directories(${libraryName} PRIVATE ${includes})
- endif()
+ file(GLOB_RECURSE ${libraryName}srcs ${srcDir}/*.cpp)
+
+ getSubdirectories(includeDirs ${srcDir})
+
+ add_library(${libraryName} ${${libraryName}srcs})
+
+ target_include_directories(${libraryName} PRIVATE ${includeDirs})
 
  target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction()
@@ -173,18 +172,19 @@ endfunction()
 # The first arugment is the path of the source file, use a string for extra sources.
 # Second argument is the name of the actual library that is created and will be linked against
 # The last argument the additional include directories for the source file. By default it is relative to the location of the source file
-createCppLibrary(${SERVO_PATH}/Servo.cpp Servo "")
-createCppLibrary(${SPI_PATH}/SPI.cpp SPI "")
+createCppLibrary(${SERVO_PATH} Servo)
+createCppLibrary(${SPI_PATH} SPI)
 
-createCppLibrary(${SOFTWARESERIAL_PATH}/SoftwareSerial.cpp SoftwareSerial "")
-createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
-createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
+createCppLibrary(${SOFTWARESERIAL_PATH} SoftwareSerial)
+createCppLibrary(${ENCODER_PATH}  Encoder)
+createCppLibrary(${WIRE_PATH} Wire)
 
 #create the external teensy libraries
-createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
-createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
-createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
-createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
+createCppLibrary(${ADAFRUIT_PATH} Adafruit)
+createCppLibrary(${SPARKFUN_GPS_PATH} SparkFunGPS)
+createCppLibrary(${LSM303_PATH} LSM303)
+createCppLibrary(${TINYGPS_PATH} TinyGPS)
+createCppLibrary(${TEENSY_TIMER_PATH} TeensyTimer)
 
 # For a library that doesn't have a cpp file, but only header files
 include_directories(${ETL_PATH}/include)
@@ -209,7 +209,8 @@ foreach(path ${INOFILES})
 
 
  if(${name} STREQUAL "Arm")
-  set(PROJECT_LIBRARIES Servo internal_comms SPI)
+  set(PROJECT_LIBRARIES Servo internal_comms SPI TeensyTimer)
+  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${TEENSY_TIMER_PATH})
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  elseif(${name} STREQUAL "comms_demo")
@@ -224,7 +225,7 @@ foreach(path ${INOFILES})
  elseif(${name} STREQUAL "MobilePlatform")
 
   set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 SparkFunGPS SoftwareSerial TinyGPS SPI)
-  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
+  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
  endif()
 

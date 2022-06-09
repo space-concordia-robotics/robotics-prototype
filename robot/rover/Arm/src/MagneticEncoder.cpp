@@ -11,20 +11,7 @@ int TLE5012MagneticEncoder::checkAddress(uint8_t txAddress, uint8_t rxAddress) {
     return ADDRESS_FAIL;
 }
 
-void TLE5012MagneticEncoder::checkError(int code) {
-    if(code == SUCCESS){
-        strncpy(status_msg_buffer,"Successful transaction", 100);
-    }
-    else if(code == ADDRESS_FAIL){
-        strncpy(status_msg_buffer,"Addressing with encoder slave failed", 100);
-    }
-    else if(code == CRC_FAIL){
-        strncpy(status_msg_buffer,"CRC check failed", 100);
-    }
-}
-
-
-void TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
+int TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
     SPI.beginTransaction(TLE5012B_SPI_SETTINGS);
 
     // Form the command from the format specified by the datasheet. The leading 0 signifies write
@@ -34,10 +21,11 @@ void TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-//    uint8_t receivedAddress = SPI.transfer(this->address);
-//
+    uint8_t receivedAddress = SPI.transfer(this->address);
+
 //    status = checkAddress(this->address, receivedAddress);
-//    if(status != SUCCESS) return;
+//    if(status != SUCCESS)
+//        return ADDRESS_FAIL;
 
     // Send the command to the encoder
     SPI.transfer16(command);
@@ -62,13 +50,13 @@ void TLE5012MagneticEncoder::SPIWrite16(uint8_t reg, uint16_t val) {
 
     // Compare the CRC byte from the safety word and the computed byte
     if(CRC != (safety & 0x00FF)){
-        status = CRC_FAIL;
+        return CRC_FAIL;
     }
-
-    status = SUCCESS;
+    return SUCCESS;
 }
 
-void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size) {
+int TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size) {
+
     SPI.beginTransaction(TLE5012B_SPI_SETTINGS);
 
     // Form the command from the format specified by the datasheet. The leading 1 signifies read.
@@ -78,30 +66,23 @@ void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-//    uint8_t receivedAddress = SPI.transfer(this->address);
-//
-//    status = checkAddress(this->address, receivedAddress);
-//    if(status != SUCCESS) return;
+    uint8_t receivedAddress = SPI.transfer(this->address);
+    Serial.write(receivedAddress);
+
+    //status = checkAddress(this->address, receivedAddress);
+
+    //    if(status != SUCCESS)
+//        return ADDRESS_FAIL;
 
     // Send the command to the encoder
     SPI.transfer16(command);
 
     // Receive the desired amount of words. Since it's SPI, but we aren't transmitting anything, use a placeholder value.
-    uint16_t buffer[size];
+//    uint16_t buffer[size];
     for(int i = 0 ; i < size ; i++){
-        buffer[i] = SPI.transfer16(0x00);
+        data[i] = SPI.transfer16(0x00);
     }
-    memcpy(data,buffer,size);
-    // motor 1 - 4
-    // motor 3 - 1
-    // motor 2 - 2
-//    Serial.print(data[0]);
-    // Safety word (2 bytes) contains the CRC (last byte) and some status flags
     uint16_t safety = SPI.transfer16(0x00);
-
-//    Serial.write(safety);
-//    Serial.write(safety >> 8);
-
     // Terminate SPI transaction
     digitalWrite(CS_PIN,HIGH);
 
@@ -113,19 +94,53 @@ void TLE5012MagneticEncoder::SPIRead16(uint8_t reg, uint16_t *data, uint8_t size
             static_cast<uint16_t>((data[0] >> 8) | (data[0] << 8))
     };
     // Verify CRC, using the command and the data words
-    uint8_t CRC = CRC8((uint8_t* )message,sizeof(message));
-//    Serial.write(CRC);
+    uint8_t CRC = CRC8((uint8_t*)message,sizeof(message));
+
     // Compare the CRC byte from the safety word and the computed byte
-
-    if(CRC != (safety & 0x00FF)){
-        status = CRC_FAIL;
-        //Serial.print("CRC_FAIL");
-
+    if(CRC != (safety & 0xFF)){
+        return CRC_FAIL;
     }
-    status = SUCCESS;
+    return SUCCESS;
 }
 
 TLE5012MagneticEncoder::TLE5012MagneticEncoder(uint8_t slaveAddress) : address(slaveAddress) {
     SPI.begin();
     pinMode(10,OUTPUT);
+}
+
+void TLE5012MagneticEncoder::computeAngle() {
+
+    uint16_t x_raw;
+    uint16_t y_raw;
+    uint16_t t_raw;
+    uint16_t t250;
+    uint16_t tco_x_t;
+    uint16_t tco_y_t;
+    uint16_t x_offset;
+    uint16_t y_offset;
+    uint16_t synch;
+    uint16_t ortho;
+    uint16_t ang_base;
+
+    SPIRead16(REG_ADC_X,&x_raw,1);
+    SPIRead16(REG_ADC_Y,&y_raw,1);
+    SPIRead16(REG_T_RAW,&t_raw,1);
+    SPIRead16(REG_TCO_X,&tco_x_t,1);
+    SPIRead16(REG_TCO_Y,&tco_y_t,1);
+    SPIRead16(REG_X_OFFSET,&x_offset,1);
+    SPIRead16(REG_Y_OFFSET,&y_offset,1);
+    SPIRead16(REG_SYNCH,&synch,1);
+    SPIRead16(REG_IFAB,&ortho,1);
+    SPIRead16(REG_MOD3,&ang_base,1);
+    SPIRead16(REG_T25O,&t250,1);
+
+    uint16_t o_x = x_offset + ((tco_x_t * (t_raw - t250 - 439)) >> 10);
+    uint16_t o_y = y_offset + ((tco_x_t * (t_raw - t250 - 439)) >> 10);
+
+    uint16_t x_1 = x_raw - o_x;
+    uint16_t y_1 = y_raw - o_y;
+
+    uint16_t y_2 = (y_1 * synch + (16384)) >> 14;
+
+
 }

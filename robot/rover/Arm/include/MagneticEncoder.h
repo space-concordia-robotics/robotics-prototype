@@ -23,6 +23,9 @@
 #define REG_TCO_Y     (0x0F)
 #define REG_X_OFFSET  (0x0A)
 #define REG_Y_OFFSET  (0x0B)
+#define REG_SYNCH     (0x0C)
+#define REG_IFAB      (0x0D)
+#define REG_MOD3      (0x09)
 
 const uint8_t CRC_Table[256]
 {
@@ -48,21 +51,29 @@ const uint8_t CRC_Table[256]
 };
 const SPISettings TLE5012B_SPI_SETTINGS(CLOCK_RATE, MSBFIRST, SPI_MODE1);
 
+
+inline void checkError(int code, char** msg_buffer) {
+    if(code == SUCCESS){
+        strncpy(*msg_buffer,"Successful transaction", 100);
+    }
+    else if(code == ADDRESS_FAIL){
+        strncpy(*msg_buffer,"Addressing with encoder slave failed", 100);
+    }
+    else if(code == CRC_FAIL){
+        strncpy(*msg_buffer,"CRC check failed", 100);
+    }
+}
 class TLE5012MagneticEncoder {
 
     uint8_t address;
 
     public:
 
-    char *status_msg_buffer;
-    int status;
-    volatile union angle_union{
-        float _float;
-        byte _bytes[4];
-    } angle;
+    volatile char *status_msg_buffer;
+    volatile int status;
+    volatile uint16_t raw_angle;
 
-
-        TLE5012MagneticEncoder(uint8_t);
+    TLE5012MagneticEncoder(uint8_t);
 
       /**
        * setting the data in the object from the byte array
@@ -75,15 +86,13 @@ class TLE5012MagneticEncoder {
        * If the data is invalid, returns without setting.
        */
 
-      void SPIWrite16(uint8_t reg,uint16_t val);
-      void SPIRead16(uint8_t reg, uint16_t* data, uint8_t size);
-
+      int SPIWrite16(uint8_t reg,uint16_t val);
+      int SPIRead16(uint8_t reg, uint16_t* data, uint8_t size);
+      void computeAngle();
       /**
         * Returns the address from the received data if it is valid
         * (with respect to the complement) or 255 otherwise
        */
-      void checkError(int code);
-
       int checkAddress(uint8_t txAddress, uint8_t rxAddress);
 
       /**
@@ -97,6 +106,7 @@ class TLE5012MagneticEncoder {
           }
           return (~crc);
       }
+
     };
 
 
