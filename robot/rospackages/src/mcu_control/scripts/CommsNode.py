@@ -98,7 +98,7 @@ def receive_message():
     for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
         if ser.in_waiting == 0:
-            time.wait(0.05)
+            time.sleep(0.05)
         if ser.in_waiting > 0:
 
             commandID = ser.read()
