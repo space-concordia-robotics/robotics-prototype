@@ -14,6 +14,7 @@ from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control.srv import *
 from mcu_control.msg import Voltage
+import time
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
@@ -96,6 +97,8 @@ def send_queued_commands():
 def receive_message():
     for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
+        if ser.in_waiting == 0:
+            time.wait(0.05)
         if ser.in_waiting > 0:
 
             commandID = ser.read()
