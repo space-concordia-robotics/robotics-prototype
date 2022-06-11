@@ -60,17 +60,8 @@ gpio.output(SW_PINS, NONE)
 def twist_rover_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     linear, angular = accelerate_twist(twist_msg)
-    #print(linear)
-    #rospy.loginfo('hi')
     args = twist_to_rover_command(linear, angular)
-    #command = str.encode(string_command)
-    #ser.write(command) # send move command to wheel teensy
-    #ser.reset_input_buffer(
-
     rover_queue.append(['move_rover',args,ROVER_SELECTED])
-
-
-    #ser.reset_output_buffer()
 
 def main():
 
@@ -244,4 +235,5 @@ if __name__ == '__main__':
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')
     # serv = rospy.Service(service_name, ArmRequest, handle_client)
     main()
+
 
