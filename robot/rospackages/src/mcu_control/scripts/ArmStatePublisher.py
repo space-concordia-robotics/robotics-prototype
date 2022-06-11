@@ -6,69 +6,68 @@ import rospy
 from sensor_msgs.msg import JointState
 
 # Global variables
-ser = None
+absSer = None
 
 anglesReceived = 0
 
 # angleData format: (absAddress, jointAngle)
 # Address is hex number
 angleData = dict([("90", None),
-                 ("A0", None)])
-
-# angleData = dict([("90", None),
-#                  ("A0", None),
-#                  ("C0", None)])
+                 ("A0", None),
+                 ("C0", None)])
 
 def main():
     try:
         while not rospy.is_shutdown():
-            receive_angles()
+            if absSer.in_waiting > 0:
+                receive_angles(absSer.readline())
+                publish_arm_angles(angleData, anglePub)
 
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
-    ser.close()
+    absSer.close()
 
-def receive_angles():
-    if ser.in_waiting > 0:
-        absLine = ser.readline().decode('utf-8').split(',')
+def receive_angles(absDataString):
+    absLine = absDataString.decode('utf-8').split(',')
 
-        absAddressHex = absLine[0]
-        absAngle = float(absLine[1])
+    absAddressHex = absLine[0]
+    absAngle = float(absLine[1])
 
-        if angleData[absAddressHex] is None:
-            angleData[absAddressHex] = absAngle
-            global anglesReceived
-            anglesReceived += 1
-
-            if anglesReceived == len(angleData):
-                publish_arm_angles(angleData)
-                anglesReceived = 0
-
-                for address in angleData:
-                    angleData[address] = None;
+    if angleData[absAddressHex] is None:
+        angleData[absAddressHex] = absAngle
+        global anglesReceived
+        anglesReceived += 1
 
 
-def publish_arm_angles(angleData):
-    msg = JointState()
-    # msg.header = data.header
 
-    # TODO: joint names will be taken from the urdf file
-    for key in angleData:
-        msg.name.append("angle_" + str(key))
-        msg.position.append(radians(angleData[key]))
 
-    # msg.name.append("upbase_joint")
-    # msg.name.append("prox_joint")
-    # msg.name.append("distal_joint")
-    # msg.name.append("wrist_flex_joint")
-    # msg.name.append("wrist_twist_joint")
-    # msg.name.append("finger1_joint")
-    # msg.name.append("finger2_joint")
+def publish_arm_angles(angleData, anglePub):
+    global anglesReceived
+    if anglesReceived == len(angleData):
+        msg = JointState()
+        # msg.header = data.header
 
-    anglePub.publish(msg)
+        # TODO: joint names will be taken from the urdf file
+        for key in angleData:
+            msg.name.append("angle_" + str(key))
+            msg.position.append(radians(angleData[key]))
+
+        # msg.name.append("upbase_joint")
+        # msg.name.append("prox_joint")
+        # msg.name.append("distal_joint")
+        # msg.name.append("wrist_flex_joint")
+        # msg.name.append("wrist_twist_joint")
+        # msg.name.append("finger1_joint")
+        # msg.name.append("finger2_joint")
+
+        anglePub.publish(msg)
+        anglesReceived = 0
+
+        for address in angleData:
+            angleData[address] = None
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyACM0', 57600, timeout=1)
+    absSer = serial.Serial('/dev/ttyACM0', 57600, timeout=1)
 
     node_name = 'ArmPublisher'
     rospy.init_node(node_name, anonymous=False)  # only allow one node of this type

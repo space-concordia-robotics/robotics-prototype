@@ -3,6 +3,8 @@ import rospy
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 from std_msgs.msg import String
 
+import robot.rospackages.src.mcu_control.scripts.ArmStatePublisher
+
 # All handlers should start with handle_ , while unrelated functions should not.
 
 
@@ -22,9 +24,8 @@ def handle_pong(data):
 
 
 def handle_send_motor_angles(data):
-    motorAngles = struct.unpack(('f' * 6), data)
-    print("Received", list(map(lambda f: str(f), motorAngles)))
-    anglePub.publish(data) # todo: convert each value to the correct type
+    receive_angles(data)
+    publish_arm_angles(angleData, anglePub)
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 # arm_out_commands = [("move_motors_by", 76, 6 * [dt.ARG_FLOAT32]),
@@ -37,4 +38,5 @@ arm_out_commands = [("set_motor_speeds", 78, 6 * [dt.ARG_FLOAT32]), ("ping", 75,
 
 # arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong),
 #                    ("send_motor_angles", 2, handle_send_motor_angles)]
-arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong)]
+arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong),
+                   ("send_motor_angles", 2, handle_send_motor_angles)]

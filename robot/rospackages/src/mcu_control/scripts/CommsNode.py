@@ -228,7 +228,7 @@ if __name__ == '__main__':
     sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
     
     rover_twist_topic = '/rover_cmd_vel'
-    rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
+    rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist, twist_rover_callback)
     rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
 
     service_name = '/arm_request'
