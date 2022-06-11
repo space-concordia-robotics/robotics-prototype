@@ -20,15 +20,17 @@ def main():
     try:
         while not rospy.is_shutdown():
             if absSer.in_waiting > 0:
-                receive_angles(absSer.readline())
-                publish_arm_angles(angleData, anglePub)
+                message = absSer.readline().decode('utf-8')
+
+                receive_angles(message[2:len(message)])
+                publish_arm_angles(anglePub)
 
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
     absSer.close()
 
 def receive_angles(absDataString):
-    absLine = absDataString.decode('utf-8').split(',')
+    absLine = absDataString.split(' ')
 
     absAddressHex = absLine[0]
     absAngle = float(absLine[1])
@@ -41,7 +43,7 @@ def receive_angles(absDataString):
 
 
 
-def publish_arm_angles(angleData, anglePub):
+def publish_arm_angles(anglePub):
     global anglesReceived
     if anglesReceived == len(angleData):
         msg = JointState()

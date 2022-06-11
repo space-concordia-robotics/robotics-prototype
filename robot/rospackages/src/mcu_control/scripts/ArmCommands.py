@@ -24,8 +24,8 @@ def handle_pong(data):
 
 
 def handle_send_motor_angles(data):
-    receive_angles(data)
-    publish_arm_angles(angleData, anglePub)
+    receive_angles(data.decode('utf-8'))
+    publish_arm_angles(anglePub)
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 # arm_out_commands = [("move_motors_by", 76, 6 * [dt.ARG_FLOAT32]),
