@@ -21,6 +21,10 @@ def handle_pong(data):
     feedbackPub.publish("Pong")
 
 
+def handle_power(data):
+    print("Received", data)
+
+
 def handle_send_motor_angles(data):
     motorAngles = struct.unpack(('f' * 6), data)
     print("Received", list(map(lambda f: str(f), motorAngles)))
@@ -32,9 +36,9 @@ def handle_send_motor_angles(data):
 #                     ("invalid_test", 10, []), ("send_motor_angles", 77, [])]
 
 arm_out_commands = [("set_motor_speeds", 78, 6 * [dt.ARG_FLOAT32]), ("ping", 75, []),
-                    ("invalid_test", 10, []), ("debug_test", 79, []),]
+                    ("invalid_test", 10, []), ("debug_test", 79, []), ("get_power", 80, [])]
 
 
 # arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong),
 #                    ("send_motor_angles", 2, handle_send_motor_angles)]
-arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong)]
+arm_in_commands = [("debug_string", 0, handle_debug_string), ("ping", 1, handle_pong), ("send_power", 80, handle_power)]

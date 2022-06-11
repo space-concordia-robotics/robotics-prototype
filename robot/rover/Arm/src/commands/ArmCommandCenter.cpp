@@ -4,14 +4,15 @@
 
 #include "include/commands/ArmCommandCenter.h"
 
-#include "include/PinSetup.h"
 #include "Arduino.h"
+#include "include/PinSetup.h"
 
 #define COMMAND_PING 75
 #define COMMAND_MOVE_BY 76
 // #define SEND_MOTOR_ANGLES 77
 #define SET_MOTOR_SPEEDS 78
 #define COMMAND_DEBUG_TEST 79
+#define COMMAND_GET_POWER 80
 
 // Commands that expect a pointer are assumed to provide a pointer
 // to 6 values.
@@ -68,6 +69,9 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
     }
     case COMMAND_DEBUG_TEST:
       debug_test();
+      break;
+    case COMMAND_GET_POWER:
+      getServoPower();
       break;
     default: {
       invalidCommand(cmdID, rawArgs, rawArgsLength);

@@ -11,6 +11,8 @@
 #define NUM_MOTORS 6
 #define NUM_DC_MOTORS 4
 #define NUM_SMART_SERVOS 2
+#define BASE_SERVO_ID 5
+#define GRIP_SERVO_ID 6
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
@@ -33,8 +35,8 @@ void setup() {
   motors[1] = DcMotor(M2_DIR_PIN, M2_PWM_PIN, 1.0, LOW);
   motors[2] = DcMotor(M3_DIR_PIN, M3_PWM_PIN, 1.0, LOW);
   motors[3] = DcMotor(M4_DIR_PIN, M4_PWM_PIN, 1.0, LOW);
-  serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
-  serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
+  serialMotors[0] = SerialMotor(&servoController, BASE_SERVO_ID, 1.0);
+  serialMotors[1] = SerialMotor(&servoController, GRIP_SERVO_ID, 1.0);
 
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
@@ -49,8 +51,8 @@ void setup() {
 
 void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
                     const uint8_t rawArgsLength) {
-  //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  
+  // digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+
   // NOTE: this code is commented out since sending debug strings
   // can overwhelm the bus if the teensy is seeing many invalid commands,
   // which has happened in the past.
@@ -64,7 +66,7 @@ void invalidCommand(const uint8_t cmdID, const uint8_t* rawArgs,
 }
 
 void pong() {
-  //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  // digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   internal_comms::Message* message =
       commandCenter->createMessage(1, 0, nullptr);
   commandCenter->sendMessage(*message);
@@ -79,6 +81,18 @@ void setMotorSpeeds(float* angles) {
     int angle = (int)(angles[NUM_DC_MOTORS + i]);
     serialMotors[i].setSpeed(angle);
   }
+}
+
+void getServoPower() {
+  const char* velocity = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QV");
+  const char* current = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QC");
+  const char* power = velocity + current;
+  internal_comms::Message* message =
+      commandCenter->createMessage(80, strlen(power), power);
+  commandCenter->sendMessage(*message);
+
+  free(velocity);
+  free(current);
 }
 
 void doMotorChecks() {
