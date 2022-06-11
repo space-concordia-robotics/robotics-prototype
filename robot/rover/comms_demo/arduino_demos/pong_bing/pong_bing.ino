@@ -117,10 +117,11 @@ void registerRead16(int address,uint8_t reg, uint8_t size) {
     }
     else {
         float angle_deg = (float) (data & 0x7FFF) / (powf(2, 15)) * 360.f;
-//        Serial.print("Encoder ");
-//        Serial.print(address,HEX);
-//        Serial.print(" Angle : ");
-//        Serial.println(angle_deg);
+
+        Serial.print(address,HEX);
+        Serial.print(",");
+        Serial.println(angle_deg);
+
     }
     total_requests_ctn++;
     digitalWrite(CS_PIN,HIGH);
@@ -133,26 +134,23 @@ void setup() {
     SPI.begin();
 }
 
-void loop() {
-
-    uint16_t angle_val;
+void loop() {;
 //    registerRead16(0x90,REG_ANGLE_VAL,1);
 //    delay(2);
 //    registerRead16(0xA0,REG_ANGLE_VAL,1);
 //    delay(2);
-    registerRead16(0xC0,REG_ANGLE_VAL,1);
-    delay(2);
+    registerRead16(0x90,REG_ANGLE_VAL,1);
+    delay(500);
 
-    if( (total_requests_ctn % 300) == 0){
-        Serial.print("total requests : ");
-        Serial.println(total_requests_ctn);
-        Serial.print("CRC fails : ");
-        Serial.println(crc_fail_cnt);
-        Serial.print("Address fails : ");
-        Serial.println(device_lost_cnt);
-
-
-        delay(500);
-    }
+//    if( (total_requests_ctn % 300) == 0){
+//        Serial.print("total requests : ");
+//        Serial.println(total_requests_ctn);
+//        Serial.print("CRC fails : ");
+//        Serial.println(crc_fail_cnt);
+//        Serial.print("Address fails : ");
+//        Serial.println(device_lost_cnt);
+//
+//        delay(500);
+//    }
 
 }

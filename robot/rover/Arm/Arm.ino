@@ -1,31 +1,22 @@
-
-
 #include <HardwareSerial.h>
 #include <Servo.h>
 #include "Arduino.h"
 #include "CommandCenter.h"
-#include "TeensyTimerTool.h"
 #include "include/ArmDebug.h"
 #include "include/DcMotor.h"
 #include "include/SerialMotor.h"
 #include "MagneticEncoder.h"
 #include "include/commands/ArmCommandCenter.h"
 
-using namespace TeensyTimerTool;
-// motor 1 - 4
-// motor 3 - 1
-// motor 2 - 2
-
-#define NUM_MOTORS 6
-#define NUM_DC_MOTORS 4
-#define NUM_SMART_SERVOS 2
+#define NUM_MOTORS             6
+#define NUM_DC_MOTORS          4
+#define NUM_SMART_SERVOS       2
 
 #define ENCODER_1_ADDRESS      (0x90)
 #define ENCODER_2_ADDRESS      (0xA0)
 #define ENCODER_3_ADDRESS      (0xB0)
 
-#define MAGNETIC_ENCODER_IRQ_RATE 250'000
-#define ENCODER_SEND_RATE         100
+#define ENCODER_SAMPLE_RATE    500
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 
@@ -33,24 +24,19 @@ DcMotor motors[NUM_DC_MOTORS];
 SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
-TLE5012MagneticEncoder encoder1(ENCODER_1_ADDRESS);
-TLE5012MagneticEncoder encoder2(ENCODER_2_ADDRESS);
-TLE5012MagneticEncoder encoder3(ENCODER_3_ADDRESS);
+Encoder encoder1,encoder2,encoder3;
+Encoder encoders[] = {encoder1,encoder2,encoder3};
 
-IntervalTimer encoder1Timer;
-
-uint32_t encodersLastSent = millis();
+uint32_t encodersLastSample = millis();
 
 void initMagneticEncoder();
-
-void encoder1IRQ();
-void encoder2IRQ();
-void encoder3IRQ();
+void encoderSample(Encoder& encoder);
 
 void setup() {
 
-  Serial.begin(9600);
-
+#ifdef DEBUG
+Serial.begin(9600);
+#endif
 
   pinSetup();
   initMagneticEncoder();
@@ -62,27 +48,31 @@ void setup() {
   serialMotors[0] = SerialMotor(&servoController, 5, 1.0);
   serialMotors[1] = SerialMotor(&servoController, 6, 1.0);
 
-  encoder1Timer.begin(encoder1IRQ,1'000'000);
-  //  Serial.print(static_cast<char>(err));
-//  magneticEncoderTimer2.begin(magneticEncoder2IRQ,MAGNETIC_ENCODER_IRQ_RATE);
-//  magneticEncoderTimer3.begin(magneticEncoder3IRQ,MAGNETIC_ENCODER_IRQ_RATE);
 
   // tx2 sends to 25,     output 26
   // TX teensy, RX teensy, enable pin, transmit pin
   commandCenter->startSerial(1, 0, 25, 26);
-
 }
 
 void initMagneticEncoder(){
-    // Decimation filter to maximum
-    //magneticEncoder1.SPIWrite16(REG_MOD1,0xC000);
-    //magneticEncoder1.SPIWrite16(0x01,0x0001);
-}
-void encoder1IRQ() {
+    SPI.begin();
+    pinMode(CS_PIN,OUTPUT);
 
-    uint16_t raw_angle;
-    encoder1.status =  encoder1.SPIRead16(REG_ANGLE_VAL, &raw_angle, 1);
-    //checkError(encoder1.status, const_cast<char **>(&encoder1.status_msg_buffer));
+    encoder1.address = ENCODER_1_ADDRESS;
+    encoder2.address = ENCODER_2_ADDRESS;
+    encoder3.address = ENCODER_3_ADDRESS;
+
+    for(Encoder e : encoders) {
+        // Decimation filter to maximum
+        //EncoderWrite16(e.address,REG_MOD1, 0xC000);
+        // Activation Status (Set monitoring flags)
+        //EncoderWrite16(e.address,REG_MOD1, 0x02FF);
+
+    }
+}
+void encoderSample(Encoder& encoder) {
+    encoder.status =  EncoderRead16(encoder.address,REG_ANGLE_VAL, &encoder.angle._raw, 1);
+    updateState(encoder);
 }
 
 /**
@@ -136,22 +126,16 @@ void debug_test() {
   const char* strMessage = "This is a debug string";
   commandCenter->sendDebug(strMessage);
 }
-void sendEncoderData(const TLE5012MagneticEncoder& encoder){
-    //Serial.write(0x01);
+void sendEncoderData(Encoder& encoder){
 
-    if(true){
+    if(encoder.status == OK){
+        encoder.angle._float = (float)(encoder.angle._raw & 0x7FFF) / (powf(2,15)) * 360.f;
 
-        float angle = (float)(encoder.raw_angle & 0x7FFF) / (powf(2,15)) * 360.f;
-        Serial.println(angle);
-        byte angle_bytes[4];
-        memcpy(angle_bytes, (unsigned char*) (&angle), sizeof(float));
-
-        //auto msg = commandCenter->createMessage(2,4,angle_bytes);
-        //commandCenter->sendMessage(*msg);
+        auto msg = commandCenter->createMessage(2,4,encoder.angle._bytes);
+        commandCenter->sendMessage(*msg);
     }
     else{
-        Serial.println(*encoder.status_msg_buffer);
-        //commandCenter->sendDebug(encoder.status_msg_buffer);
+        commandCenter->sendDebug(encoder.status_msg);
     }
 }
 void loop() {
@@ -159,12 +143,14 @@ void loop() {
   if (Serial.available() > 0) {
     commandCenter->readCommand();
   }
-  //doMotorChecks();
-    //doMotorChecks();
+  doMotorChecks();
 
-    if( (millis() - encodersLastSent) > ENCODER_SEND_RATE){
-        encodersLastSent = millis();
-//        /sendEncoderData(encoder1);
+  if( (millis() - encodersLastSample) > ENCODER_SAMPLE_RATE){
+      encodersLastSample = millis();
+      for(Encoder e : encoders){
+            encoderSample(e);
+            sendEncoderData(encoder1);
+        }
     }
     commandCenter->sendMessage();
 

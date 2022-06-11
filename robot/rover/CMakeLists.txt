@@ -50,7 +50,6 @@ set(SPI_PATH ${TEENSY_LIB}/SPI)
 set(SOFTWARESERIAL_PATH ${TEENSY_LIB}/SoftwareSerial)
 set(ENCODER_PATH ${TEENSY_LIB}/Encoder)
 set(WIRE_PATH ${TEENSY_LIB}/Wire)
-set(TEENSY_TIMER_PATH ${ARDUINO_EXTERNAL_LIB}/TeensyTimerTool/src)
 
 
 set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Control/src)
@@ -184,7 +183,6 @@ createCppLibrary(${ADAFRUIT_PATH} Adafruit)
 createCppLibrary(${SPARKFUN_GPS_PATH} SparkFunGPS)
 createCppLibrary(${LSM303_PATH} LSM303)
 createCppLibrary(${TINYGPS_PATH} TinyGPS)
-createCppLibrary(${TEENSY_TIMER_PATH} TeensyTimer)
 
 # For a library that doesn't have a cpp file, but only header files
 include_directories(${ETL_PATH}/include)
@@ -209,8 +207,7 @@ foreach(path ${INOFILES})
 
 
  if(${name} STREQUAL "Arm")
-  set(PROJECT_LIBRARIES Servo internal_comms SPI TeensyTimer)
-  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${TEENSY_TIMER_PATH})
+  set(PROJECT_LIBRARIES Servo internal_comms SPI)
  elseif(${name} STREQUAL "raman")
   set(PROJECT_LIBRARIES internal_comms)
  elseif(${name} STREQUAL "comms_demo")
