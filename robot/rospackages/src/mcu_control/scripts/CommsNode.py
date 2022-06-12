@@ -98,7 +98,7 @@ def receive_message():
     for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
         if ser.in_waiting == 0:
-            time.sleep(0.05)
+            time.sleep(0.001)
         if ser.in_waiting > 0:
 
             commandID = ser.read()
@@ -112,7 +112,7 @@ def receive_message():
                 ser.read_until() # 0A
 
             argsLen = ser.read()
-            # print(argsLen)
+            print('arg len '+ str(argsLen))
             argsLen = int.from_bytes(argsLen, "big")
             # print("Number of bytes of arguments:", argsLen)
             args = None
@@ -121,6 +121,7 @@ def receive_message():
                 # print("Raw arguments:", args)
 
             stopByte = ser.read()
+            print('stop :' + str(stopByte))
             stopByte = int.from_bytes(stopByte, "big")
             # print("Stop byte:", stopByte)
 
