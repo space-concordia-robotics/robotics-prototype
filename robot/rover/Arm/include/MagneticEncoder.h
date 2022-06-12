@@ -43,7 +43,7 @@ struct Encoder {
     uint8_t address;
     union angle_union {
         float _float;
-        byte *_bytes;
+        byte _bytes[sizeof(float)];
         uint16_t _raw;
     } angle;
     int status;

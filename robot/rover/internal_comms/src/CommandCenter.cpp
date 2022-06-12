@@ -59,10 +59,11 @@ uint16_t CommandCenter::readArgSize() { return waitForSerial(); }
 
 Message* CommandCenter::createMessage(int messageID, int rawArgsLength,
                                       byte* rawArgs) {
-  Message* message = (Message*)malloc(sizeof(Message));
+    auto* message = (Message*)malloc(sizeof(Message));
   message->messageID = messageID;
   message->rawArgsLength = rawArgsLength;
-  message->rawArgs = malloc(rawArgsLength);
+  message->rawArgs = (uint8_t *)(malloc(rawArgsLength));
+
   memcpy(message->rawArgs, rawArgs, rawArgsLength);
   return message;
 }
@@ -122,13 +123,30 @@ void CommandCenter::readCommand() {
 
 void CommandCenter::sendDebug(const char* debugMessage) {
   Message* message = this->createMessage(COMMAND_DEBUG_MSG,
-                                         strlen(debugMessage), debugMessage);
+                                         strlen(debugMessage), (byte *) debugMessage);
   this->queueMessage(*message);
 }
 
 void CommandCenter::sendMessage() {
-  if (digitalRead(enablePin)) {
+    #ifdef DEBUG
     if (!messageQueue.empty()) {
+        Message message = messageQueue.front();
+        messageQueue.pop();
+
+        Serial.write(message.messageID);
+        Serial.write(message.rawArgsLength);
+
+        if (message.rawArgsLength > 0)
+            Serial.write(message.rawArgs, message.rawArgsLength);
+
+        Serial.write(0x0A);
+
+        free((void*)message.rawArgs);
+    }
+    #else
+
+   if (digitalRead(enablePin)){
+      if (!messageQueue.empty()) {
       Message message = messageQueue.front();
       messageQueue.pop();
 
@@ -141,8 +159,9 @@ void CommandCenter::sendMessage() {
       Serial.write(0x0A);
 
       free((void*)message.rawArgs);
-    }
-  }
+     }
+   }
+#endif
 }
 
 void CommandCenter::sendMessage(Message& message) {

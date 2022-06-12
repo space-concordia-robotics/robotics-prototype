@@ -14,7 +14,7 @@
 
 #define ENCODER_1_ADDRESS      (0x90)
 #define ENCODER_2_ADDRESS      (0xA0)
-#define ENCODER_3_ADDRESS      (0xB0)
+#define ENCODER_3_ADDRESS      (0xC0)
 
 #define ENCODER_SAMPLE_RATE    500
 
@@ -25,7 +25,7 @@ SerialMotor serialMotors[NUM_SMART_SERVOS];
 LSSServoMotor servoController(&Serial5);
 
 Encoder encoder1,encoder2,encoder3;
-Encoder encoders[] = {encoder1,encoder2,encoder3};
+Encoder* encoders[] = {&encoder1};
 
 uint32_t encodersLastSample = millis();
 
@@ -55,6 +55,7 @@ Serial.begin(9600);
 }
 
 void initMagneticEncoder(){
+
     SPI.begin();
     pinMode(CS_PIN,OUTPUT);
 
@@ -62,7 +63,7 @@ void initMagneticEncoder(){
     encoder2.address = ENCODER_2_ADDRESS;
     encoder3.address = ENCODER_3_ADDRESS;
 
-    for(Encoder e : encoders) {
+    for(auto& e : encoders) {
         // Decimation filter to maximum
         //EncoderWrite16(e.address,REG_MOD1, 0xC000);
         // Activation Status (Set monitoring flags)
@@ -72,7 +73,7 @@ void initMagneticEncoder(){
 }
 void encoderSample(Encoder& encoder) {
     encoder.status =  EncoderRead16(encoder.address,REG_ANGLE_VAL, &encoder.angle._raw, 1);
-    updateState(encoder);
+    //updateState(encoder);
 }
 
 /**
@@ -131,27 +132,32 @@ void sendEncoderData(Encoder& encoder){
     if(encoder.status == OK){
         encoder.angle._float = (float)(encoder.angle._raw & 0x7FFF) / (powf(2,15)) * 360.f;
 
-        auto msg = commandCenter->createMessage(2,4,encoder.angle._bytes);
+        byte data_msg[5] = {encoder.address,0,0,0,0};
+        memcpy(&data_msg[1],encoder.angle._bytes,sizeof(float));
+        auto msg = commandCenter->createMessage(2,sizeof(data_msg),data_msg);
         commandCenter->sendMessage(*msg);
     }
     else{
-        commandCenter->sendDebug(encoder.status_msg);
+        Serial.print(encoder.status);
+       // commandCenter->sendDebug(encoder.status_msg);
     }
+
 }
 void loop() {
   // Read and send messages
-  if (Serial.available() > 0) {
-    commandCenter->readCommand();
-  }
+//  if (Serial.available() > 0) {
+//    commandCenter->readCommand();
+//  }
   doMotorChecks();
 
   if( (millis() - encodersLastSample) > ENCODER_SAMPLE_RATE){
+
       encodersLastSample = millis();
-      for(Encoder e : encoders){
-            encoderSample(e);
-            sendEncoderData(encoder1);
+      for(auto e : encoders){
+            encoderSample(*e);
+            sendEncoderData(*e);
         }
     }
-    commandCenter->sendMessage();
+  commandCenter->sendMessage();
 
 }

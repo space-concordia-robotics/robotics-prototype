@@ -118,8 +118,10 @@ void registerRead16(int address,uint8_t reg, uint8_t size) {
     else {
         float angle_deg = (float) (data & 0x7FFF) / (powf(2, 15)) * 360.f;
 
+        Serial.print(3);
+        Serial.print(" ");
         Serial.print(address,HEX);
-        Serial.print(",");
+        Serial.print(" ");
         Serial.println(angle_deg);
 
     }
@@ -135,12 +137,12 @@ void setup() {
 }
 
 void loop() {;
-//    registerRead16(0x90,REG_ANGLE_VAL,1);
-//    delay(2);
-//    registerRead16(0xA0,REG_ANGLE_VAL,1);
-//    delay(2);
     registerRead16(0x90,REG_ANGLE_VAL,1);
-    delay(500);
+    delay(200);
+    registerRead16(0xA0,REG_ANGLE_VAL,1);
+    delay(200);
+    registerRead16(0xC0,REG_ANGLE_VAL,1);
+    delay(200);
 
 //    if( (total_requests_ctn % 300) == 0){
 //        Serial.print("total requests : ");

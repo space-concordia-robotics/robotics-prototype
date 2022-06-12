@@ -3,8 +3,8 @@
 int checkAddress(uint8_t txAddress, uint8_t rxAddress) {
 
     uint8_t lower = txAddress & 0xF0;
-
     if(rxAddress == (lower | (lower >>4))){
+
         return OK;
     }
     return ADDRESS_FAIL;
@@ -66,21 +66,21 @@ int EncoderRead16(uint8_t address, uint8_t reg, uint16_t *data, uint8_t size) {
     digitalWrite(CS_PIN, LOW);
 
     // Address check (1 byte)
-    uint8_t receivedAddress = SPI.transfer(reg);
+    uint8_t receivedAddress = SPI.transfer(address);
 
-    int status = checkAddress(address, receivedAddress);
-
-    if(status != OK)
-        return status;
-
+//    Serial.println(receivedAddress,HEX);
+//    Serial.println(address,HEX);
+    if(checkAddress(address, receivedAddress) != OK){
+        return ADDRESS_FAIL;
+    }
     // Send the command to the encoder
     SPI.transfer16(command);
 
     // Receive the desired amount of words. Since it's SPI, but we aren't transmitting anything, use a placeholder value.
-
     for(int i = 0 ; i < size ; i++){
         data[i] = SPI.transfer16(0x00);
     }
+
     uint16_t safety = SPI.transfer16(0x00);
 
     // Terminate SPI transaction
