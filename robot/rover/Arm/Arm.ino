@@ -16,7 +16,7 @@
 #define ENCODER_2_ADDRESS      (0xA0)
 #define ENCODER_3_ADDRESS      (0xC0)
 
-#define ENCODER_SAMPLE_RATE    500
+#define ENCODER_SAMPLE_RATE    1000
 
 internal_comms::CommandCenter* commandCenter = new ArmCommandCenter();
 

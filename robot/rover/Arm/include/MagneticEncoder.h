@@ -5,7 +5,7 @@
 #include "SPI.h"
 
 #define CRC_DEFAULT_VALUE 0xFF
-#define CS_PIN            10
+#define CS_PIN            16
 #define CLOCK_RATE        10000
 
 #define REG_STATUS    (0x00)
