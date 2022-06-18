@@ -41,7 +41,7 @@ PDS = [0,1,0]
 SCIENCE = [0,1,1]
 TX2 = [1,0,0]
 PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
-SW_PINS = [19,21,23]
+SW_PINS = [15,13,11]
 
 
 ser = None
