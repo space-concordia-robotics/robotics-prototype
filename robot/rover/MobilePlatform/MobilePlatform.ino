@@ -4,6 +4,8 @@
 
 // USB : Debug, UART : Production
 
+#include "APA102.h"
+#include <SPI.h>
 #include <cmath>
 #include <cstdint>
 #include "Navigation.h"
@@ -13,7 +15,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //
-//#define DEBUG
+#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -47,8 +49,12 @@ void blink(){
     digitalWrite(LED_BUILTIN,LOW);
     delay(500);
 }
+APA102 light(&SPI, 20);
 
 void setup() {
+    SPI.begin();
+    light.setAll(10, 0, 0, 1);
+    light.send();
 
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
@@ -72,6 +78,8 @@ void setup() {
 }
 
 void loop() {
+    light.setAll(millis() % 256, 0, 0, 5);
+    light.send();
     if(Serial.available() > 0) {
         commandCenter->readCommand();
     }
