@@ -60,6 +60,9 @@ inline void double2bytes(uint8_t* buffer, double value){
 inline void float2bytes(uint8_t* buffer, float value){
     memcpy(buffer, (unsigned char*) (&value), sizeof(float));
 }
+inline void int2bytes(uint8_t* buffer, int value){
+    memcpy(buffer, (unsigned char*) (&value), sizeof(int));
+}
 inline float mapFloat(float x, float in_min, float in_max, float out_min, float out_max){
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

@@ -83,13 +83,39 @@ void setMotorSpeeds(float* angles) {
   }
 }
 
-void getServoPower() {
-  const char* velocity = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QV");
+int extractValueFromString(const char* strValue) {
+  int i = strlen(strValue) - 2, p = 1;
+  int result = 0;
+  while (strValue[i - 1] != 'Q' && i >= 0) {
+    result += (strValue[i] - '0') * p;
+    p *= 10;
+    i--;
+  }
+  return result;
+}
+
+void ArmCommandCenter::getServoPower() {
+  const char* voltage = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QV");
   const char* current = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QC");
-  const char* power = velocity + current;
+
+  // Extract int and convert to bytes
+  int vol = extractValueFromString(velocity);
+  int cur = extractValueFromString(current);
+  uint8_t* velBuffer = (uint8_t*)malloc(4);
+  uint8_t* curBuffer = (uint8_t*)malloc(4);
+  int2bytes(velBuffer, vol);
+  int2bytes(curBuffer, cur);
+
+  // Concatenate into one buffer
+  uint8_t* buffer[4];
+  memcpy(buffer, velBuffer, sizeof(velBuffer));
+  memcpy(buffer + sizeof(velBuffer), curBuffer, sizeof(curBuffer));
+
+  // Send message with resulting buffer containing current and velocity readings
   internal_comms::Message* message =
-      commandCenter->createMessage(80, strlen(power), power);
+      commandCenter->createMessage(80, sizeof(buffer), buffer);
   commandCenter->sendMessage(*message);
+  free(buffer);
 
   free(velocity);
   free(current);
