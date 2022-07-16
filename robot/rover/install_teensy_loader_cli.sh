@@ -17,7 +17,7 @@ else
 	curl https://github.com/PaulStoffregen/teensy_loader_cli/archive/master.zip -L -o teensy_loader_cli.zip
 	unzip -q teensy_loader_cli.zip 
 	make -s -C teensy_loader_cli-master
-	mv teensy_loader_cli-master/teensy_loader_cli /home/nikolas/arduino-1.8.12/hardware/tools
+	mv teensy_loader_cli-master/teensy_loader_cli /home/$USER/arduino-1.8.12/hardware/tools
 	rm -rf teensy_loader_cli.zip teensy_loader_cli-master
 fi 
 

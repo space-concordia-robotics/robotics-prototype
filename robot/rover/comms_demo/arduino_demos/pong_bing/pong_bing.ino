@@ -1,26 +1,36 @@
-#include <Arduino.h>
-uint32_t currentTime;
+#include "Arduino.h"
+#include <Servo.h>
 
-// the setup routine runs once when you press reset:
+Servo servo1;  // create servo object to control a servo
+Servo servo2;  // create servo object to control a servo
+
+// twelve servo objects can be created on most boards
+
+int pos = 0;    // variable to store the servo position
+
 void setup() {
-    // initialize serial communication at 9600 bits per second:
-    Serial.begin(9600);
-    pinMode(LED_BUILTIN,OUTPUT);
-    currentTime = millis();
-}
-void blink(){
-    digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
-    digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
+    servo1.attach(16);  // attaches the servo on pin 9 to the servo object
+    servo1.attach(17);  // attaches the servo on pin 9 to the servo object
 
 }
-// the loop routine runs over and over again forever:
+
 void loop() {
-// read the input on analog pin 0:
-if(millis() - currentTime > 2000){
-    blink();
-    currentTime = millis();
-}
-
+    for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+        // in steps of 1 degree
+        servo1.write(pos);              // tell servo to go to position in variable 'pos'
+        delay(15);                       // waits 15ms for the servo to reach the position
+    }
+    for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+        servo1.write(pos);              // tell servo to go to position in variable 'pos'
+        delay(15);                       // waits 15ms for the servo to reach the position
+    }
+    for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+        // in steps of 1 degree
+        servo2.write(pos);              // tell servo to go to position in variable 'pos'
+        delay(15);                       // waits 15ms for the servo to reach the position
+    }
+    for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+        servo2.write(pos);              // tell servo to go to position in variable 'pos'
+        delay(15);                       // waits 15ms for the servo to reach the position
+    }
 }
