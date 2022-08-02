@@ -19,6 +19,9 @@ from collections import deque
 
 command_queue = deque()
 
+PDS1_ERROR_CORRECTION = [45, 0, 0, 0, 0, 17]
+PDS2_ERROR_CORRECTION = [45, 0, 0, 0, 0, 55]
+
 # Kill power to all motors
 def handle_estop():
     pds1SetOffOkay = PacketOutSetSwitchChannel().setOff(*range(0,4)).send(port, 1).isOkay()
@@ -74,6 +77,8 @@ def send_command(command_name, args, deviceToSendTo):
 
         commandHandler = pds_command_handlers[commandID]
 
+        print(commandHandler)
+
         commandHandler(args)
 
 def publish_pds_data():
@@ -84,34 +89,36 @@ def publish_pds_data():
     temp = ThermistorTemps()
     fanSpeed = FanSpeeds()
 
-    # try:
-    packetOutChannels = PacketOutReadSwitchChannel()
-    packetOutBatteryChannel = PacketOutReadBatteryChannel()
+    try:
+        packetOutChannels = PacketOutReadSwitchChannel()
+        packetOutBatteryChannel = PacketOutReadBatteryChannel()
 
-    # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
-    voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
+        # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
+        voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
+        voltagesRawPds1 = voltagesRawPds1 - PDS1_ERROR_CORRECTION
 
-    # PDS2 - [0] to [5]: wheel motor drivers
-    voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
+        # PDS2 - [0] to [5]: wheel motor drivers
+        voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
+        voltagesRawPds2 = voltagesRawPds2 - PDS2_ERROR_CORRECTION
 
-    batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
+        batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
 
-    voltagesPds1, voltagesPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw)
+        voltagesPds1, voltagesPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw)
 
-    armMotorVoltages, wheelMotorVoltages, OBCVoltage, POEVoltage = voltageChannelsParser(voltagesPds1, voltagesPds2)
+        armMotorVoltages, wheelMotorVoltages, OBCVoltage, POEVoltage = voltageChannelsParser(voltagesPds1, voltagesPds2)
 
-    armCurrents.effort = channelVoltagesToCurrents(armMotorVoltages)
-    wheelCurrents.effort = channelVoltagesToCurrents(wheelMotorVoltages)
+        armCurrents.effort = channelVoltagesToCurrents(armMotorVoltages)
+        wheelCurrents.effort = channelVoltagesToCurrents(wheelMotorVoltages)
 
-    armCurrentPub.publish(armCurrents)
-    wheelCurrentPub.publish(wheelCurrents)
+        armCurrentPub.publish(armCurrents)
+        wheelCurrentPub.publish(wheelCurrents)
 
-    batteryVoltagePub.publish(batteryVoltage)
+        batteryVoltagePub.publish(batteryVoltage)
 
-    # except Exception as e:
-    #     print('type error: ' + str(e))
-    #     rospy.logwarn('trouble parsing PDS sensor data')
-    #     return
+    except Exception as e:
+        print('type error: ' + str(e))
+        rospy.logwarn('trouble parsing PDS sensor data')
+        return
     return
 
 def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
