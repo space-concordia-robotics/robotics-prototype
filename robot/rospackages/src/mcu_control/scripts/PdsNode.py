@@ -26,15 +26,20 @@ K_RAW_CONVERSION = 5 / 8704
 K_RAW_CONVERSION_BATTERY = 43 / 51200
 
 # Kill power to all motors
-def handle_estop(args):
-    pds1SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,4)]).send(port, 1).isOkay()
-    pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 2).isOkay()
+def handle_estop(motorsToStop):
+    if bool(motorsToStop[0]):
+        pds1SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0, 4)]).send(port, 1).isOkay()
+        if pds1SetOffOkay is not True:
+            feedbackPub.publish("[ERROR]: eStop: PDS1 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Stopped motors for arm")
 
-    if pds1SetOffOkayPacket or pds2SetOffOkayPacket is not True:
-        feedbackPub.publish("[ERROR]: eStop for one of the PDS boards threw an exception")
-    else:
-        feedbackPub.publish("[INFO]: eStop triggered")
-
+    if bool(motorsToStop[1]):
+        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 1).isOkay()
+        if pds2SetOffOkay is not True:
+            feedbackPub.publish("[ERROR]: eStop: PDS2 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Stopped motors for wheels")
 
 def handle_ping(args):
     pds1PingContent = PacketOutPing().setPingContent([12, 34, 56, 78]).send(port, 1).getPingContent()
@@ -44,16 +49,16 @@ def handle_ping(args):
     feedbackPub.publish(f"[INFO]: ping responses: PDS1: {pds1PingContent} | PDS2: {pds2PingContent}")
 
 def handle_enable_motors(motorsToEnable):
-    if motorsToEnable[0]:
+    if bool(motorsToEnable[0]):
         pds1SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0, 4)]).send(port, 1).isOkay()
         if pds1SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable arm motors: PDS1 board threw an exception")
         else:
             feedbackPub.publish("[INFO]: Enabled motors for arm")
 
-    if motorsToEnable[1]:
+    if bool(motorsToEnable[1]):
         pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 1).isOkay()
-        if pds1SetOnOkay is not True:
+        if pds2SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable wheel motors: PDS2 board threw an exception")
         else:
             feedbackPub.publish("[INFO]: Enabled motors for wheels")
