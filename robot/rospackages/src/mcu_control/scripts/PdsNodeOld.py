@@ -5,7 +5,9 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
+# from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
+
+import robot.rospackages.src.mcu_control.scripts.PdsAdapter
 
 import rospy
 from std_msgs.msg import String, Float32
@@ -39,37 +41,37 @@ requests = {
 
 
 def handle_client(req):
-    ser = get_serial()
+    # ser = get_serial()
     global reqFeedback
     global reqInWaiting
 
-    pdsResponse = ArmRequestResponse()
-    timeout = 0.3 # 300ms timeout
-    reqInWaiting = True
-    sinceRequest = time.time()
+    # pdsResponse = ArmRequestResponse()
+    # timeout = 0.3 # 300ms timeout
+    # reqInWaiting = True
+    # sinceRequest = time.time()
+    #
+    # rospy.loginfo('received ' + req.msg + ' request from GUI, sending to PDS MCU')
+    # ser.write(str.encode(req.msg + '\n')) # ping the teensy
 
-    rospy.loginfo('received ' + req.msg + ' request from GUI, sending to PDS MCU')
-    ser.write(str.encode(req.msg + '\n')) # ping the teensy
+    # while pdsResponse.success is False and ((time.time() - sinceRequest) < timeout):
+    #     if reqFeedback is not '':
+    #         for request in requests:
+    #             for response in requests[request]:
+    #                 if request == req.msg and response in reqFeedback:
+    #                     pdsResponse.response = reqFeedback
+    #                     pdsResponse.success = True
+    #                     break
+    #         if pdsResponse.success:
+    #             break
+    #         else:
+    #             pdsResponse.response = reqFeedback
+    #     rospy.Rate(100).sleep()
 
-    while pdsResponse.success is False and ((time.time() - sinceRequest) < timeout):
-        if reqFeedback is not '':
-            for request in requests:
-                for response in requests[request]:
-                    if request == req.msg and response in reqFeedback:
-                        pdsResponse.response = reqFeedback
-                        pdsResponse.success = True
-                        break
-            if pdsResponse.success:
-                break
-            else:
-                pdsResponse.response = reqFeedback
-        rospy.Rate(100).sleep()
-
-    rospy.loginfo('took ' + str(time.time() - sinceRequest) + ' seconds, sending this back to GUI: ')
-    rospy.loginfo(pdsResponse)
-    reqFeedback = ''
-    reqInWaiting = False
-    return pdsResponse
+    # rospy.loginfo('took ' + str(time.time() - sinceRequest) + ' seconds, sending this back to GUI: ')
+    # rospy.loginfo(pdsResponse)
+    # reqFeedback = ''
+    # reqInWaiting = False
+    # return pdsResponse
 
 def pds_command_subscriber_callback(message):
     ser = get_serial()
@@ -183,33 +185,33 @@ if __name__ == '__main__':
     reqInWaiting = False
     try:
         while not rospy.is_shutdown():
-            # if I try reading from the serial port inside callbacks, bad things happen
-            # instead I send the data elsewhere if required but only read from serial here.
-            # not sure if I need the same precautions when writing but so far it seems ok.
-            if ser.in_waiting:
-                data = ''
-                feedback = None
-                try:
-                    data = ser.readline().decode()
-                    feedback = stripFeedback(data)
-                except Exception as e:
-                    print("type error: " + str(e))
-                    rospy.logwarn('trouble reading from serial port')
-                if feedback is not None:
-                    if feedback.startswith('PDS '):
-                        feedback=feedback.split('PDS ')[1]
-                        publish_pds_data(feedback)
-                    else:
-                        if reqInWaiting:
-                            reqFeedback += feedback + '\r\n' # pass data to request handler
-                        else:
-                            if 'WARNING' in feedback:
-                                rospy.logwarn(feedback)
-                            #rospy.loginfo(feedback)
-                            feedbackPub.publish(feedback)
-                else:
-                    rospy.loginfo('got raw data: ' + data)
-            rospy.Rate(100).sleep()
+            # # if I try reading from the serial port inside callbacks, bad things happen
+            # # instead I send the data elsewhere if required but only read from serial here.
+            # # not sure if I need the same precautions when writing but so far it seems ok.
+            # if ser.in_waiting:
+            #     data = ''
+            #     feedback = None
+            #     try:
+            #         data = ser.readline().decode()
+            #         feedback = stripFeedback(data)
+            #     except Exception as e:
+            #         print("type error: " + str(e))
+            #         rospy.logwarn('trouble reading from serial port')
+            #     if feedback is not None:
+            #         if feedback.startswith('PDS '):
+            #             feedback=feedback.split('PDS ')[1]
+            #             publish_pds_data(feedback)
+            #         else:
+            #             if reqInWaiting:
+            #                 reqFeedback += feedback + '\r\n' # pass data to request handler
+            #             else:
+            #                 if 'WARNING' in feedback:
+            #                     rospy.logwarn(feedback)
+            #                 #rospy.loginfo(feedback)
+            #                 feedbackPub.publish(feedback)
+            #     else:
+            #         rospy.loginfo('got raw data: ' + data)
+            # rospy.Rate(100).sleep()
     except rospy.ROSInterruptException:
         pass
 
