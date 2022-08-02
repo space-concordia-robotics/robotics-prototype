@@ -95,11 +95,20 @@ def publish_pds_data():
 
         # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
         voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
-        voltagesRawPds1 = voltagesRawPds1 - PDS1_ERROR_CORRECTION
+
+        # Error correction for raw values
+        zipVoltageRawCorrection = zip(voltagesRawPds1, PDS1_ERROR_CORRECTION)
+        index = 0
+        for voltageRaw, correction in zipVoltageRawCorrection:
+            voltagesRawPds1[index] = voltageRaw - correction
 
         # PDS2 - [0] to [5]: wheel motor drivers
         voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
-        voltagesRawPds2 = voltagesRawPds2 - PDS2_ERROR_CORRECTION
+        
+        zipVoltageRawCorrection = zip(voltagesRawPds2, PDS2_ERROR_CORRECTION)
+        index = 0
+        for voltageRaw, correction in zipVoltageRawCorrection:
+            voltagesRawPds2[index] = voltageRaw - correction
 
         batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
 
@@ -191,7 +200,7 @@ if __name__ == '__main__':
 
     def shutdown_hook():
         rospy.logwarn('This node (' + node_name + ') is shutting down')
-        ser.close() # good practice to close the serial port
+        port.close()
         time.sleep(1)  # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)
