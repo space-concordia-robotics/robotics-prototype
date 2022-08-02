@@ -23,11 +23,12 @@ PDS1_ERROR_CORRECTION = [45, 0, 0, 0, 0, 17]
 PDS2_ERROR_CORRECTION = [45, 0, 0, 0, 0, 55]
 
 K_RAW_CONVERSION = 5 / 8704
+K_RAW_CONVERSION_BATTERY = 43 / 51200
 
 # Kill power to all motors
-def handle_estop():
-    pds1SetOffOkay = PacketOutSetSwitchChannel().setOff(*range(0,4)).send(port, 1).isOkay()
-    pds2SetOffOkay = PacketOutSetSwitchChannel().setOff().send(port, 1).isOkay()
+def handle_estop(args):
+    pds1SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,4)]).send(port, 1).isOkay()
+    pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 2).isOkay()
 
     if pds1SetOffOkayPacket or pds2SetOffOkayPacket is not True:
         feedbackPub.publish("[ERROR]: eStop for one of the PDS boards threw an exception")
@@ -35,7 +36,7 @@ def handle_estop():
         feedbackPub.publish("[INFO]: eStop triggered")
 
 
-def handle_ping():
+def handle_ping(args):
     pds1PingContent = PacketOutPing().setPingContent([12, 34, 56, 78]).send(port, 1).getPingContent()
     # TODO: Update address for PDS2
     pds2PingContent = PacketOutPing().setPingContent([12, 34, 56, 78]).send(port, 1).getPingContent()
@@ -43,16 +44,16 @@ def handle_ping():
     feedbackPub.publish(f"[INFO]: ping responses: PDS1: {pds1PingContent} | PDS2: {pds2PingContent}")
 
 def handle_enable_motors(motorsToEnable):
-    if "arm" in motorsToEnable:
-        pds1SetOnOkay = PacketOutSetSwitchChannel().setOn(*range(0, 4)).send(port, 1).isOkay()
-        if pds1SetOffOkayPacket or pds2SetOffOkayPacket is not True:
+    if motorsToEnable[0]:
+        pds1SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0, 4)]).send(port, 1).isOkay()
+        if pds1SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable arm motors: PDS1 board threw an exception")
         else:
             feedbackPub.publish("[INFO]: Enabled motors for arm")
 
-    if "wheels" in motorsToEnable:
-        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn().send(port, 1).isOkay()
-        if pds1SetOffOkayPacket or pds2SetOffOkayPacket is not True:
+    if motorsToEnable[1]:
+        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 1).isOkay()
+        if pds1SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable wheel motors: PDS2 board threw an exception")
         else:
             feedbackPub.publish("[INFO]: Enabled motors for wheels")
@@ -62,8 +63,8 @@ pds_command_handlers = dict([(pds_out_commands[0][1], handle_estop), (pds_out_co
 
 def send_queued_commands():
     if (len(command_queue) > 0):
-        arm_command = arm_queue.popleft()
-        send_command(arm_command[0], arm_command[1], arm_command[2])
+        command = command_queue.popleft()
+        send_command(command[0], command[1], command[2])
 
 def command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to PDS')
@@ -74,12 +75,13 @@ def command_callback(message):
 
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
+    rospy.loginfo(f"Command: {command}")
     if command is not None:
         commandID = command[1]
 
         commandHandler = pds_command_handlers[commandID]
 
-        print(commandHandler)
+        rospy.loginfo(commandHandler)
 
         commandHandler(args)
 
@@ -133,10 +135,16 @@ def publish_pds_data():
     return
 
 def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
-    return voltagesRawPds1 * K_RAW_CONVERSION, voltagesRawPds2 * K_RAW_CONVERSION, batteryVoltageRaw * K_RAW_CONVERSION
+    return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), rawBatteryVoltageConversion(batteryVoltageRaw)
+
+def rawAproxRawVoltagesConversion(voltagesRaw):
+    return [x * K_RAW_CONVERSION for x in voltagesRaw]
 
 def rawBatteryVoltageConversion(rawVoltage):
-    return rawVoltage
+    return rawVoltage * K_RAW_CONVERSION_BATTERY
+
+def pdsVoltageCalculation(pdsNum):
+    return pdsNum
 
 def channelVoltagesToCurrents(voltages):
     return voltages
@@ -195,6 +203,7 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
             publish_pds_data()
+            send_queued_commands()
 
             rosRate.sleep()
     except rospy.ROSInterruptException:
