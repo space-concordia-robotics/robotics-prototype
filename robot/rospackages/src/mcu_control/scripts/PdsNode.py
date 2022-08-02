@@ -94,7 +94,7 @@ def publish_pds_data():
     # PDS2 - [0] to [5]: wheel motor drivers
     voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
 
-    batteryVoltageRaw = packetOutBatteryChannel.send(port).getMeasurement()
+    batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
 
     voltagesPds1, voltagesPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw)
 
