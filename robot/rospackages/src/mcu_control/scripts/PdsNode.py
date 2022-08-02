@@ -22,6 +22,8 @@ command_queue = deque()
 PDS1_ERROR_CORRECTION = [45, 0, 0, 0, 0, 17]
 PDS2_ERROR_CORRECTION = [45, 0, 0, 0, 0, 55]
 
+K_RAW_CONVERSION = 5 / 8704
+
 # Kill power to all motors
 def handle_estop():
     pds1SetOffOkay = PacketOutSetSwitchChannel().setOff(*range(0,4)).send(port, 1).isOkay()
@@ -131,7 +133,7 @@ def publish_pds_data():
     return
 
 def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
-    return voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw
+    return voltagesRawPds1 * K_RAW_CONVERSION, voltagesRawPds2 * K_RAW_CONVERSION, batteryVoltageRaw * K_RAW_CONVERSION
 
 def rawBatteryVoltageConversion(rawVoltage):
     return rawVoltage
