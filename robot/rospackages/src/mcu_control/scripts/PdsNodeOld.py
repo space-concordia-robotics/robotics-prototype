@@ -185,33 +185,8 @@ if __name__ == '__main__':
     reqInWaiting = False
     try:
         while not rospy.is_shutdown():
-            # # if I try reading from the serial port inside callbacks, bad things happen
-            # # instead I send the data elsewhere if required but only read from serial here.
-            # # not sure if I need the same precautions when writing but so far it seems ok.
-            # if ser.in_waiting:
-            #     data = ''
-            #     feedback = None
-            #     try:
-            #         data = ser.readline().decode()
-            #         feedback = stripFeedback(data)
-            #     except Exception as e:
-            #         print("type error: " + str(e))
-            #         rospy.logwarn('trouble reading from serial port')
-            #     if feedback is not None:
-            #         if feedback.startswith('PDS '):
-            #             feedback=feedback.split('PDS ')[1]
-            #             publish_pds_data(feedback)
-            #         else:
-            #             if reqInWaiting:
-            #                 reqFeedback += feedback + '\r\n' # pass data to request handler
-            #             else:
-            #                 if 'WARNING' in feedback:
-            #                     rospy.logwarn(feedback)
-            #                 #rospy.loginfo(feedback)
-            #                 feedbackPub.publish(feedback)
-            #     else:
-            #         rospy.loginfo('got raw data: ' + data)
-            # rospy.Rate(100).sleep()
+
+            rospy.Rate(100).sleep()
     except rospy.ROSInterruptException:
         pass
 
