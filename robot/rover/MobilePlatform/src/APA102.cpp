@@ -1,9 +1,9 @@
 #include "APA102.h"
 
 #define START_FRAME_SIZE 4
-SPISettings settingsA(100000000, MSBFIRST, SPI_MODE0); 
 
-APA102::APA102(SPIClass* spi, int numOfLEDs): spi(spi), numOfLEDs(numOfLEDs){
+APA102::APA102(int numOfLEDs, int mosiPin, int clockPin)
+                        : numOfLEDs(numOfLEDs), mosiPin(mosiPin), clockPin(clockPin) {
   int sizeEndFrame = numOfLEDs/16;
   if (sizeEndFrame * 8 < (numOfLEDs / 2)) {
     sizeEndFrame++;
@@ -24,15 +24,16 @@ APA102::APA102(SPIClass* spi, int numOfLEDs): spi(spi), numOfLEDs(numOfLEDs){
   }  
 }
 void APA102::send() {
-  spi->beginTransaction(settingsA);
+  //spi->beginTransaction(settingsA);
   for (int i = 0; i < bufSize; i++) {
-    spi->transfer(buf[i]);
-    Serial.print(buf[i]);
-    Serial.print(" ");
+    shiftOut(mosiPin, clockPin, MSBFIRST, buf[i]);
+    //spi->transfer(buf[i]);
+    //Serial.print(buf[i]);
+    //Serial.print(" ");
   }
-  Serial.println();
+  //Serial.println();
 
-  spi->endTransaction();
+  //spi->endTransaction();
 }
 
 void APA102::setColor(int index, int r, int g, int b, int brightness) {

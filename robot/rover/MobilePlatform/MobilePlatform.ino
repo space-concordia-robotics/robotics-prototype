@@ -5,7 +5,6 @@
 // USB : Debug, UART : Production
 
 #include "APA102.h"
-#include <SPI.h>
 #include <cmath>
 #include <cstdint>
 #include "Navigation.h"
@@ -26,6 +25,8 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
+const uint8_t LIGHT_MOSI = 21;
+const uint8_t LIGHT_CLOCK = 20;
 
 
 // To read commands from wheelscommandcenter
@@ -49,15 +50,13 @@ void blink(){
     digitalWrite(LED_BUILTIN,LOW);
     delay(500);
 }
-APA102 light(&SPI, 20);
+APA102 light(20, 21, 20);
 
 void setup() {
-    SPI.begin();
-    light.setAll(10, 0, 0, 1);
-    light.send();
-
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
+    pinMode(LIGHT_CLOCK, OUTPUT);
+    pinMode(LIGHT_MOSI, OUTPUT);
 
     blink();
 
@@ -78,8 +77,9 @@ void setup() {
 }
 
 void loop() {
-    light.setAll(millis() % 256, 0, 0, 5);
+    light.setAll(10, 0, 0, 2);
     light.send();
+    delay(10);
     if(Serial.available() > 0) {
         commandCenter->readCommand();
     }
