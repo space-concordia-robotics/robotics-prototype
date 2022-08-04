@@ -127,6 +127,11 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
                                      pingWheels();
                                      break;
                                  }
+        case COMMAND_WHEELS_BLINK: {
+            uint8_t on = (*rawArgs++);
+            handleBlink(on);
+            break;
+        }
         default:
                                  break;
     }

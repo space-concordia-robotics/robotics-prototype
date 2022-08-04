@@ -24,6 +24,7 @@
 #define COMMAND_GET_DESIRED_VELOCITY 14
 #define COMMAND_GET_BATTERY_VOLTAGE 15
 #define COMMAND_WHEELS_PING 16
+#define COMMAND_WHEELS_BLINK 17
 
 class WheelsCommandCenter : public internal_comms::CommandCenter {
 
@@ -49,6 +50,8 @@ public:
     void getMotorDesiredVelocity(const uint8_t&);
     void getBatteryVoltage(void);
     void pingWheels(void);
+    
+    void handleBlink(uint8_t on); 
 
     inline void float2bytes(uint8_t* buffer, float value){
         memcpy(buffer, (unsigned char*) (&value), sizeof(float));
