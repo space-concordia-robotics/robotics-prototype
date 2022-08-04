@@ -35,7 +35,7 @@ def handle_estop(motorsToStop):
             feedbackPub.publish("[INFO]: Stopped motors for arm")
 
     if bool(motorsToStop[1]):
-        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 1).isOkay()
+        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 2).isOkay()
         if pds2SetOffOkay is not True:
             feedbackPub.publish("[ERROR]: eStop: PDS2 board threw an exception")
         else:
@@ -57,7 +57,7 @@ def handle_enable_motors(motorsToEnable):
             feedbackPub.publish("[INFO]: Enabled motors for arm")
 
     if bool(motorsToEnable[1]):
-        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 1).isOkay()
+        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 2).isOkay()
         if pds2SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable wheel motors: PDS2 board threw an exception")
         else:
@@ -80,7 +80,6 @@ def command_callback(message):
 
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
-    rospy.loginfo(f"Command: {command}")
     if command is not None:
         commandID = command[1]
 
