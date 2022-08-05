@@ -103,7 +103,7 @@ bool JoyCommsControl::isButton(std::string control_name) {
 void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
     // Get controller mappings from ROS params
     XmlRpc::XmlRpcValue mappingsXML;
-    nh_param->getParam("/controller_mappings", mappingsXML);
+    nh_param->getParam("controller_mappings", mappingsXML);
 
     Implement::ButtonMappings currentButtonMap;
     std::string button_name, command;
@@ -179,8 +179,8 @@ void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_
     XmlRpc::XmlRpcValue topicsXML;
     XmlRpc::XmlRpcValue stopCommandsXML;
 
-    nh_param->getParam("/command_topics", topicsXML);
-    nh_param->getParam("/stop_commands", stopCommandsXML);
+    nh_param->getParam("command_topics", topicsXML);
+    nh_param->getParam("stop_commands", stopCommandsXML);
 
     if (topicsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < topicsXML.size(); ++i) {
@@ -201,7 +201,7 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
 
     pImplement = new Implement;
 
-    nh_param->param<int>("/controller_type", controller_type, 1);
+    nh_param->param<int>("controller_type", controller_type, 1);
 
     if (controller_type == PLAYSTATION)
     {
@@ -223,10 +223,10 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
     pImplement->axes_percentage.resize(pImplement->numberOfAxes);
     
     MapButtonNamesToIds();
-    nh_param->param<int>("/enable_button", pImplement->enable_button, 0);
+    nh_param->param<int>("enable_button", pImplement->enable_button, 0);
     std::string next, previous;
-    nh_param->param<std::string>("/next_layout_button", next, option_name);
-    nh_param->param<std::string>("/previous_layout_button", previous, share_name);
+    nh_param->param<std::string>("next_layout_button", next, option_name);
+    nh_param->param<std::string>("previous_layout_button", previous, share_name);
 
     pImplement->next_layout_button = button_name_to_id_map[next];
     pImplement->previous_layout_button = button_name_to_id_map[previous];
