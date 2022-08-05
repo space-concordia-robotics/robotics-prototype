@@ -146,16 +146,19 @@ namespace Rover {
     // Toggles the activity light every 500ms (configureable) if it's set to blink
     void handleActivityLight() {
         if (roverState.blinking && (millis() - roverState.timeBlinkUpdated) > 500) {
-            if (roverState.lightOn) {
-                roverState.light.setAll(0, 0, 0, 0);
-            } else {
-                roverState.light.setAll(20, 0, 0, 1);
-            }
-            roverState.light.send();
+            setActivityLight(!roverState.lightOn);
             roverState.lightOn = !roverState.lightOn;
             roverState.timeBlinkUpdated = millis();
+        }
     }
-}
 
+    void setActivityLight(uint8_t on) {
+        if (on) {
+            roverState.light.setAll(20, 0, 0, 1);
+        } else {
+            roverState.light.setAll(0, 0, 0, 0);
+        }
+        roverState.light.send();
+    }
 
 }

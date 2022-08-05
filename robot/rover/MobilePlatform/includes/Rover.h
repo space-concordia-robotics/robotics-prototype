@@ -141,5 +141,7 @@ namespace Rover {
     void decelerateRover();
 
     void handleActivityLight();
+
+    void setActivityLight(uint8_t on);
 }
 #endif

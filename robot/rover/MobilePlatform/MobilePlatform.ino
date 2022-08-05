@@ -233,15 +233,12 @@ void WheelsCommandCenter::pingWheels(void) {
 
 void WheelsCommandCenter::handleBlink(uint8_t on) {
     using namespace Rover;
+    Rover::setActivityLight(on);
     if (on) {
-        roverState.light.setAll(20, 0, 0, 1);
         roverState.timeBlinkUpdated = millis();
-    } else {
-        roverState.light.setAll(0, 0, 0, 0);
     }
     roverState.lightOn = (bool)on;
     roverState.blinking = roverState.lightOn;
-    roverState.light.send();
 }
 
 void WheelsCommandCenter::getBatteryVoltage() {
