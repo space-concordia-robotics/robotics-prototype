@@ -144,7 +144,7 @@ def publishSwitchChannelAndBatteryData():
 def publishTemps():
     temp = ThermistorTemps()
 
-    temp.therms = PacketInReadTempChannel().packetOutBatteryChannel.send(port, 1).getMeasurement()
+    temp.therms = PacketOutReadTempChannel().send(port, 1).getMeasurement()
 
     tempPub.publish(temp)
 
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     rospy.loginfo('Begining to publish to "' + arm_current_pub_topic + '" topic')
     armCurrentPub = rospy.Publisher(arm_current_pub_topic, Currents, queue_size=10)
 
-    # Probably PacketInReadTempChannel
+    # Probably PacketOutReadTempChannel
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
     tempPub = rospy.Publisher(temp_pub_topic, ThermistorTemps, queue_size = 10)
