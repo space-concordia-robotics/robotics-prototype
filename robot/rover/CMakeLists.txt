@@ -45,7 +45,6 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 #Pre-Installed Teensy libaries paths
 set(SERVO_PATH ${TEENSY_LIB}/Servo)
-set(SPI_PATH ${TEENSY_LIB}/SPI)
 set(SOFTWARESERIAL_PATH ${TEENSY_LIB}/SoftwareSerial)
 set(ENCODER_PATH ${TEENSY_LIB}/Encoder)
 set(WIRE_PATH ${TEENSY_LIB}/Wire)
@@ -181,7 +180,6 @@ endfunction()
 #the last argument in these functions is incase a library needs additional include paths
 createCppLibrary(${TEENSY_LIB}/Servo/Servo.cpp Servo "")
 createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial "")
-createCppLibrary(${SPI_PATH}/SPI.cpp SPI "")
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
@@ -233,7 +231,7 @@ foreach(path ${INOFILES})
  
  elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS SPI)
+ set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial TinyGPS)
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
  elseif(${name} STREQUAL "PidController")
