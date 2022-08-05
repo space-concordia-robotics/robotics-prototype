@@ -90,53 +90,63 @@ def send_command(command_name, args, deviceToSendTo):
         commandHandler(args)
 
 def publish_pds_data():
-    # create the messages to be published
-    batteryVoltage = Voltage()
-    wheelCurrents = Currents()
-    armCurrents = Currents()
-    temp = ThermistorTemps()
-    fanSpeed = FanSpeeds()
-
     try:
-        packetOutChannels = PacketOutReadSwitchChannel()
-        packetOutBatteryChannel = PacketOutReadBatteryChannel()
+        publishSwitchChannelAndBatteryData()
 
-        # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
-        voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
-
-        # Error correction for raw values
-        zipVoltageRawCorrection = zip(voltagesRawPds1, PDS1_ERROR_CORRECTION)
-        index = 0
-        for voltageRaw, correction in zipVoltageRawCorrection:
-            voltagesRawPds1[index] = voltageRaw - correction
-
-        # PDS2 - [0] to [5]: wheel motor drivers
-        voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
-        
-        zipVoltageRawCorrection = zip(voltagesRawPds2, PDS2_ERROR_CORRECTION)
-        index = 0
-        for voltageRaw, correction in zipVoltageRawCorrection:
-            voltagesRawPds2[index] = voltageRaw - correction
-
-        batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
-
-        voltagesPds1, voltagesPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw)
-
-        armMotorVoltages, wheelMotorVoltages, OBCVoltage, POEVoltage = voltageChannelsParser(voltagesPds1, voltagesPds2)
-
-        armCurrents.effort = channelVoltagesToCurrents(armMotorVoltages)
-        wheelCurrents.effort = channelVoltagesToCurrents(wheelMotorVoltages)
-
-        armCurrentPub.publish(armCurrents)
-        wheelCurrentPub.publish(wheelCurrents)
-
-        batteryVoltagePub.publish(batteryVoltage)
+        publishTemps()
 
     except Exception as e:
         print('type error: ' + str(e))
         rospy.logwarn('trouble parsing PDS sensor data')
         return
     return
+
+def publishSwitchChannelAndBatteryData():
+    batteryVoltage = Voltage()
+    wheelCurrents = Currents()
+    armCurrents = Currents()
+
+    packetOutChannels = PacketOutReadSwitchChannel()
+    packetOutBatteryChannel = PacketOutReadBatteryChannel()
+
+    # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
+    voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
+
+    # Error correction for raw values
+    zipVoltageRawCorrection = zip(voltagesRawPds1, PDS1_ERROR_CORRECTION)
+    index = 0
+    for voltageRaw, correction in zipVoltageRawCorrection:
+        voltagesRawPds1[index] = voltageRaw - correction
+
+    # PDS2 - [0] to [5]: wheel motor drivers
+    voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
+
+    zipVoltageRawCorrection = zip(voltagesRawPds2, PDS2_ERROR_CORRECTION)
+    index = 0
+    for voltageRaw, correction in zipVoltageRawCorrection:
+        voltagesRawPds2[index] = voltageRaw - correction
+
+    batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
+
+    currentPds1, currentPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2,
+                                                                          batteryVoltageRaw)
+
+    armMotorCurrents, wheelMotorCurrents, OBCVoltage, POEVoltage = voltageChannelsParser(currentPds1, currentPds2)
+
+    armCurrents.effort = armMotorCurrents
+    wheelCurrents.effort = wheelMotorCurrents
+
+    armCurrentPub.publish(armCurrents)
+    wheelCurrentPub.publish(wheelCurrents)
+
+    batteryVoltagePub.publish(batteryVoltage)
+
+def publishTemps():
+    temp = ThermistorTemps()
+
+    temp.therms = PacketInReadTempChannel().packetOutBatteryChannel.send(port, 1).getMeasurement()
+
+    tempPub.publish(temp)
 
 def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
     return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), rawBatteryVoltageConversion(batteryVoltageRaw)
@@ -146,12 +156,6 @@ def rawAproxRawVoltagesConversion(voltagesRaw):
 
 def rawBatteryVoltageConversion(rawVoltage):
     return rawVoltage * K_RAW_CONVERSION_BATTERY
-
-def pdsVoltageCalculation(pdsNum):
-    return pdsNum
-
-def channelVoltagesToCurrents(voltages):
-    return voltages
 
 def voltageChannelsParser(voltagesPds1, voltagesPds2):
     armMotorVoltages = voltagesPds1[:4]
@@ -186,13 +190,13 @@ if __name__ == '__main__':
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
     tempPub = rospy.Publisher(temp_pub_topic, ThermistorTemps, queue_size = 10)
 
-    fan_speeds_pub_topic = '/fan_speeds'
-    rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
-    fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, FanSpeeds, queue_size = 10)
+    # fan_speeds_pub_topic = '/fan_speeds'
+    # rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
+    # fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, FanSpeeds, queue_size = 10)
 
-    # error_flags_topic = '/pds_flags'
-    # rospy.loginfo('Beginning to publish to "' + error_flags_topic + '" topic')
-    # flagsPub = rospy.Publisher(error_flags_topic, String, queue_size = 10)
+    error_flags_topic = '/pds_flags'
+    rospy.loginfo('Beginning to publish to "' + error_flags_topic + '" topic')
+    flagsPub = rospy.Publisher(error_flags_topic, String, queue_size = 10)
 
     feedback_pub_topic = '/pds_feedback'
     rospy.loginfo('Beginning to publish to "' + feedback_pub_topic + '" topic')
