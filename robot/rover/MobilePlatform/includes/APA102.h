@@ -1,5 +1,5 @@
 #ifndef APA102_H
-#define APA102_h
+#define APA102_H
 
 #include "Arduino.h"
 

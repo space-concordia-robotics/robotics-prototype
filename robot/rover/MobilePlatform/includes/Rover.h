@@ -2,6 +2,7 @@
 #define ROVER_H
 #include "DcMotor.h"
 #include "Servo.h"
+#include "APA102.h"
 
 
 const float radius = 0.14;
@@ -104,6 +105,11 @@ typedef struct {
     float rotational_velocity;
     int16_t max_output_signal;
     int16_t min_output_signal;
+    // timestamp when the last rising/falling edge of the blink cycle happened
+    unsigned int timeBlinkUpdated = 0;
+    bool lightOn = false;
+    bool blinking = false;
+    APA102 light = APA102(20, 21, 20);
 } RoverState;
 
 namespace Rover {
@@ -133,5 +139,7 @@ namespace Rover {
     void stopMotors();
 
     void decelerateRover();
+
+    void handleActivityLight();
 }
 #endif

@@ -14,7 +14,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 //
-// #define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
 #define Serial Serial1
@@ -43,7 +43,6 @@ void writeServoDefaultValues();
 // Messages to send back to OBC from wheel Teensy
 // https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 
-void pollBlink();
 
 void blink(){
     digitalWrite(LED_BUILTIN,HIGH);
@@ -51,7 +50,6 @@ void blink(){
     digitalWrite(LED_BUILTIN,LOW);
     delay(500);
 }
-APA102 light(20, 21, 20);
 
 void setup() {
     pinMode(LED_BUILTIN,OUTPUT);
@@ -82,7 +80,7 @@ void loop() {
         commandCenter->readCommand();
     }
     commandCenter->sendMessage();
-    pollBlink();
+    Rover::handleActivityLight();
 
     if(Rover::systemStatus.is_passive_rover_feedback_enabled){
         Rover::calculateRoverVelocity();
@@ -233,34 +231,17 @@ void WheelsCommandCenter::pingWheels(void) {
     commandCenter->sendMessage(*message);
 }
 
-// timestamp when the last rising/falling edge of the blink cycle happened
-unsigned int timeBlinkUpdated = 0;
-bool lightOn = false;
-bool blinking = false;
-
-void pollBlink() {
-    if (blinking && (millis() - timeBlinkUpdated) > 500) {
-        if (lightOn) {
-            light.setAll(0, 0, 0, 0);
-        } else {
-            light.setAll(20, 0, 0, 1);
-        }
-        light.send();
-        lightOn = !lightOn;
-        timeBlinkUpdated = millis();
-    }
-}
-
 void WheelsCommandCenter::handleBlink(uint8_t on) {
+    using namespace Rover;
     if (on) {
-        light.setAll(20, 0, 0, 1);
-        timeBlinkUpdated = millis();
+        roverState.light.setAll(20, 0, 0, 1);
+        roverState.timeBlinkUpdated = millis();
     } else {
-        light.setAll(0, 0, 0, 0);
+        roverState.light.setAll(0, 0, 0, 0);
     }
-    lightOn = (bool)on;
-    blinking = lightOn;
-    light.send();
+    roverState.lightOn = (bool)on;
+    roverState.blinking = roverState.lightOn;
+    roverState.light.send();
 }
 
 void WheelsCommandCenter::getBatteryVoltage() {
