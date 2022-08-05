@@ -139,10 +139,20 @@ def send_command(command_name, args, deviceToSendTo):
         gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-        ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+
+        if commandID != 10:
+            ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        
         #arg_length = len(command[2]).to_bytes(1,'big')
         #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
+
+        # MEGA STUPID WORKAROUND, DIRE SITUATION, PLEASE DON'T REUSE THIS
+        if commandID == 10:
+            ser.write((12).to_bytes(1, 'big'))
+            args, data_types = move_wheels_dumb_workaround(args)
+            print(f'args: {args} | dataTypes: {data_types}')
+
         for argument in zip(args, data_types):
             data = argument[0]
             data_type = argument[1]
@@ -161,6 +171,16 @@ def send_command(command_name, args, deviceToSendTo):
         ser.flush()
         gpio.output(SW_PINS, NONE)
     return False
+
+def move_wheels_dumb_workaround(args):
+    # Wheel command is different on teensy, convert to ("move_wheels", 10, 12 * [dt.ARG_UINT8])
+    newArgs = []
+
+    for i in range(0,6):
+        newArgs.append(int(args[i] < 0))
+        newArgs.append(int(abs(args[i])))
+
+    return newArgs, 12 * [dt.ARG_UINT8_ID]
 
 def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
