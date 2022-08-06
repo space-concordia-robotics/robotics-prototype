@@ -119,6 +119,7 @@ typedef struct {
     bool lightOn = false;
     bool blinking = false;
     APA102 light = APA102(ACTIVITY_NUM_LIGHTS, ACTIVITY_MOSI, ACTIVITY_CLK);
+    uint8_t r, g, b;
 } RoverState;
 
 namespace Rover {
@@ -149,8 +150,11 @@ namespace Rover {
 
     void decelerateRover();
 
+    // These functions are to be used by the MobilePlatofrm code
     void handleActivityLight();
-
+    void setActivityBlinking(uint8_t on);
+    // These functions are used internally by the above functions
     void setActivityLight(uint8_t on);
+    void setActivityColor(uint8_t r, uint8_t g, uint8_t b);
 }
 #endif

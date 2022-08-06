@@ -231,14 +231,15 @@ void WheelsCommandCenter::pingWheels(void) {
     commandCenter->sendMessage(*message);
 }
 
+// Defines functions from WheelsCommandCenter.h
 void WheelsCommandCenter::handleBlink(uint8_t on) {
-    using namespace Rover;
-    Rover::setActivityLight(on);
-    if (on) {
-        roverState.timeBlinkUpdated = millis();
-    }
-    roverState.lightOn = (bool)on;
-    roverState.blinking = roverState.lightOn;
+    Rover::setActivityColor(20, 0, 0);
+    Rover::setActivityBlinking(on);
+}
+
+void WheelsCommandCenter::handleBlinkColor(uint8_t r, uint8_t g, uint8_t b) {
+    Rover::setActivityColor(r, g, b);
+    Rover::setActivityBlinking(1);
 }
 
 void WheelsCommandCenter::getBatteryVoltage() {
