@@ -1,7 +1,6 @@
 #ifndef ROVER_H
 #define ROVER_H
 #include "DcMotor.h"
-#include "Servo.h"
 #include "APA102.h"
 
 

@@ -1,10 +1,4 @@
 #include "APA102.h"
-/*#include <cmath>
-#include <cstdint>
-#include "Navigation.h"
-#include <SoftwareSerial.h>
-#include <Servo.h>
-#include "ArduinoBlue.h"*/
 
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
@@ -18,8 +12,6 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
-const uint8_t LIGHT_MOSI = 21;
-const uint8_t LIGHT_CLOCK = 20;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
@@ -37,8 +29,8 @@ void blink(int dur){
 void setup() {
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
-    pinMode(LIGHT_CLOCK, OUTPUT);
-    pinMode(LIGHT_MOSI, OUTPUT);
+    pinMode(ACTIVITY_CLK, OUTPUT);
+    pinMode(ACTIVITY_MOSI, OUTPUT);
 
     commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
