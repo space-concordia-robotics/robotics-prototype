@@ -1,29 +1,28 @@
-// USB : Debug, UART : Production
-#define USB
+#include "Arduino.h"
+/*
+  Blink
+  Turns on an LED on for one second, then off for one second, repeatedly.
 
-#include <Arduino.h>
-#include "include/commands/DemoCommandCenter.h"
-#include <cstdint>
+  This example code is in the public domain.
+ */
 
-const uint8_t TX_TEENSY_3_6_PIN = 1;
-const uint8_t RX_TEENSY_3_6_PIN = 0;
-const uint8_t ENABLE_PIN = 10; // This is the pin that the TX2 enables to say "you can send"
-const uint8_t TRANSMIT_PIN = 11; // This is the pin that the teensy uses to flip its own RS-485 into transmit
+// Pin 13 has an LED connected on most Arduino boards.
+// Pin 11 has the LED on Teensy 2.0
+// Pin 6  has the LED on Teensy++ 2.0
+// Pin 13 has the LED on Teensy 3.0
+// give it a name:
+int led = 13;
 
-internal_comms::CommandCenter* commandCenter = new DemoCommandCenter();
-
-void setup()
-{
-    //Serial.begin(9600);
-    pinMode(LED_BUILTIN, OUTPUT);
-    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+// the setup routine runs once when you press reset:
+void setup() {
+    // initialize the digital pin as an output.
+    pinMode(led, OUTPUT);
 }
 
-void loop()
-{ 
-    if (Serial.available() > 0) {
-        commandCenter->readCommand();
-    } 
-
-    commandCenter->sendMessage();
+// the loop routine runs over and over again forever:
+void loop() {
+    digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(1000);               // wait for a second
+    digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+    delay(1000);               // wait for a second
 }

@@ -1,22 +1,15 @@
-//
-// Edited by Michael on 2021-03-20.
-//
-
-// USB : Debug, UART : Production
-
 #include "APA102.h"
-#include <cmath>
+/*#include <cmath>
 #include <cstdint>
 #include "Navigation.h"
 #include <SoftwareSerial.h>
 #include <Servo.h>
-#include "ArduinoBlue.h"
+#include "ArduinoBlue.h"*/
+
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
-//
-//#define DEBUG
 
-#ifndef DEBUG // in ../internal_comms/src/CommandCenter.cpp
+#ifndef DEBUG
 #define Serial Serial1
 #endif
 
@@ -28,28 +21,18 @@ const uint8_t TRANSMIT_PIN = 14;
 const uint8_t LIGHT_MOSI = 21;
 const uint8_t LIGHT_CLOCK = 20;
 
-
-// To read commands from wheelscommandcenter
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
-// Wheel command methods from WheelsCommandCenter.cpp
-// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
 void attachMotors();
 void attachServos();
-void attachEncoders();
-void initPidControllers();
-void writeServoDefaultValues();
 
-// Messages to send back to OBC from wheel Teensy
-// https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=963483371
-
-
-void blink(){
+void blink(int dur){
     digitalWrite(LED_BUILTIN,HIGH);
-    delay(500);
+    delay(dur);
     digitalWrite(LED_BUILTIN,LOW);
-    delay(500);
+    delay(dur);
 }
+
 
 void setup() {
     pinMode(LED_BUILTIN,OUTPUT);
@@ -57,148 +40,67 @@ void setup() {
     pinMode(LIGHT_CLOCK, OUTPUT);
     pinMode(LIGHT_MOSI, OUTPUT);
 
-    blink();
-
-    commandCenter->startSerial(TX_TEENSY_3_6_PIN, RX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
+    commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
     attachMotors();
-    attachEncoders();
-    initPidControllers();
-
     attachServos();
-    writeServoDefaultValues();
 
-    Rover::openLoop();
+    blink(500);
+
+    // Here different parameters of how the system should behave can be set
     Rover::systemStatus.is_throttle_timeout_enabled = true;
-
-    Rover::systemStatus.has_moved = false;
-    Rover::systemStatus.is_passive_rover_feedback_enabled = false;
 }
 
 void loop() {
-    if(Serial.available() > 0) {
+    if (Serial.available() > 0) {
         commandCenter->readCommand();
     }
-    commandCenter->sendMessage();
     Rover::handleActivityLight();
+    // Sort of un-used at the moment, but this can periodically transmit messages to the OBC which can define the status
+    // of the rover.
 
-    if(Rover::systemStatus.is_passive_rover_feedback_enabled){
-        Rover::calculateRoverVelocity();
-        commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-
+    // The rover will update its own current velocity according to a time interval which is measured from when it
+    // last moved (in moveRover() )
+    if ((millis() - Rover::systemStatus.last_velocity_adjustment) > ACCELERATION_RATE) {
+        Rover::updateWheelVelocities();
     }
-//  if (sinceSensorRead-millis() > SENSOR_READ_INTERVAL) {
-//
-//      Rover::calculateRoverVelocity();
-//      commandCenter->executeCommand(COMMAND_GET_BATTERY_VOLTAGE, nullptr,0);
-//
-//      commandCenter->executeCommand(COMMAND_GET_LINEAR_VELOCITY, nullptr,0);
-//      commandCenter->executeCommand(COMMAND_GET_ROTATIONAL_VELOCITY, nullptr,0);
-//
-//
-//      //      navHandler(Cmds);
-//    sinceSensorRead = 0;
-//  }
-//
+    // If the rover has not been commanded to move which a time interval, it must  be stopped (security risk).
     if (Rover::systemStatus.is_throttle_timeout_enabled &&
-    ( (millis() - Rover::systemStatus.last_throttle) > THROTTLE_TIMEOUT)) {
+        ((millis() - Rover::systemStatus.last_move) > ROVER_MOVE_TIMEOUT)) {
         Rover::decelerateRover();
-        //Rover::stopMotors();
     }
 
+    // In case there are any messages queued in the transmit buffer, they should be sent.
+    commandCenter->sendMessage();
 }
 
+void attachServos(){
+    Rover::attachServo(CENTER_BACK_1_SERVO,CB_1_SERVO);
+    Rover::attachServo(CENTER_BACK_2_SERVO,CB_2_SERVO);
+}
 
 void attachMotors(){
+    Motor::attachMotor(FRONT_RIGHT,M1_FR_DIR,M1_FR_PWM);
+    Motor::attachMotor(MIDDLE_RIGHT,M2_MR_DIR,M2_MR_PWM);
+    Motor::attachMotor(REAR_RIGHT,M3_RR_DIR,M3_RR_PWM);
 
-    Motor::attachMotor(FRONT_RIGHT,M1_FR_DIR,M1_FR_PWM,GEAR_RATIO);
-    Motor::attachMotor(MIDDLE_RIGHT,M2_MR_DIR,M2_MR_PWM,GEAR_RATIO);
-    Motor::attachMotor(REAR_RIGHT,M3_RR_DIR,M3_RR_PWM,GEAR_RATIO);
-
-    Motor::attachMotor(FRONT_LEFT,M4_FL_DIR,M4_FL_PWM,GEAR_RATIO);
-    Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM,GEAR_RATIO);
-    Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM,GEAR_RATIO);
+    Motor::attachMotor(FRONT_LEFT,M4_FL_DIR,M4_FL_PWM);
+    Motor::attachMotor(MIDDLE_LEFT,M5_ML_DIR,M5_ML_PWM);
+    Motor::attachMotor(REAR_LEFT,M6_RL_DIR,M6_RL_PWM);
 }
-void initPidControllers(){
-
-    Motor::initPidController(FRONT_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_RIGHT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_RIGHT,14.1,0.282,40.625);
-
-    Motor::initPidController(FRONT_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(MIDDLE_LEFT,14.1,0.282,40.625);
-    Motor::initPidController(REAR_LEFT,14.1,0.282,40.625);
-}
-void attachEncoders(){
-
-    Motor::attachEncoder(FRONT_RIGHT,M1_FR_A,M1_FR_B,PULSES_PER_REV,InterruptHandler::RightFrontMotorInterruptHandler);
-    Motor::attachEncoder(MIDDLE_RIGHT,M2_MR_A,M2_MR_B,PULSES_PER_REV,InterruptHandler::RightMiddleMotorInterruptHandler);
-    Motor::attachEncoder(REAR_RIGHT,M3_RR_A,M3_RR_B,PULSES_PER_REV,InterruptHandler::RightBackMotorInterruptHandler);
-
-    Motor::attachEncoder(FRONT_LEFT,M4_FL_A,M4_FL_B,PULSES_PER_REV,InterruptHandler::LeftFrontMotorInterruptHandler);
-    Motor::attachEncoder(MIDDLE_LEFT,M5_ML_A,M5_ML_B,PULSES_PER_REV,InterruptHandler::LeftMiddleMotorInterruptHandler);
-    Motor::attachEncoder(REAR_LEFT,M6_RL_A,M6_RL_B,PULSES_PER_REV,InterruptHandler::LeftBackMotorInterruptHandler);
-}
-void attachServos(){
-    Rover::attachServo(FRONT_BASE_SERVO,FB_SERVO);
-    Rover::attachServo(FRONT_SIDE_SERVO,FS_SERVO);
-    Rover::attachServo(REAR_SIDE_SERVO,RS_SERVO);
-    Rover::attachServo(REAR_BASE_SERVO,RB_SERVO);
-}
-void writeServoDefaultValues(){
-    Rover::writeToServo(FRONT_BASE_SERVO,FRONT_BASE_DEFAULT_PWM);
-    Rover::writeToServo(FRONT_SIDE_SERVO,SERVO_STOP);
-    Rover::writeToServo(REAR_BASE_SERVO,REAR_BASE_DEFAULT_PWM);
-    Rover::writeToServo(REAR_SIDE_SERVO,SERVO_STOP);
-}
-
-
-void WheelsCommandCenter::enableMotors(uint8_t turnMotorOn) {
-    //rover->enableAllMotors( (bool) turnMotorOn);
-}
-
 void WheelsCommandCenter::stopMotors() {
     Rover::stopMotors();
-    Rover::systemStatus.last_throttle = millis();
 }
 
-void WheelsCommandCenter::closeMotorsLoop() {
-    Rover::closeLoop();
+void WheelsCommandCenter::moveRover(const float & linear_y,const float & omega_z) {
+    Rover::moveRover(linear_y,omega_z);
 }
 
-void WheelsCommandCenter::openMotorsLoop() {
-    Rover::openLoop();
+void WheelsCommandCenter::moveServo(const uint8_t & servoID, const uint8_t & angle) {
+    Rover::moveServo((ServoNames)servoID,angle);
 }
-
-void WheelsCommandCenter::toggleJoystick(uint8_t turnJoystickOn) {
-
-}
-
-void WheelsCommandCenter::toggleGps(uint8_t turnGpsOn) {
-
-}
-
-void WheelsCommandCenter::toggleEncoder(uint8_t turnEncOn) {
-
-}
-
-void WheelsCommandCenter::toggleAcceleration(uint8_t turnAccelOn) {
-
-}
-
-void WheelsCommandCenter::getRoverStatus() {
-
-}
-
-void WheelsCommandCenter::moveRover(const uint8_t & throttle_dir,const uint8_t & throttle, const uint8_t& steering_dir,const uint8_t& steering) {
-
-    Rover::steerRover(throttle_dir,throttle,steering_dir,steering);
-}
-
-void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& velocity) {
-
-    Rover::moveWheel((MotorNames)wheelNumber,(motor_direction)direction,velocity);
-
+void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& direction,const uint8_t& speed) {
+    Rover::moveWheel((MotorNames)wheelNumber,direction,speed);
 }
 void WheelsCommandCenter::getLinearVelocity(void) {
     const float linear_velocity = Rover::roverState.linear_velocity;
@@ -216,14 +118,6 @@ void WheelsCommandCenter::getRotationalVelocity(void) {
     internal_comms::Message* message = commandCenter->createMessage(
             COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
     commandCenter->sendMessage(*message);
-}
-
-void WheelsCommandCenter::getMotorVelocity(const uint8_t& wheelNumber) {
-
-}
-
-void WheelsCommandCenter::getMotorDesiredVelocity(const uint8_t& wheelNumber) {
-
 }
 
 void WheelsCommandCenter::pingWheels(void) {
@@ -252,7 +146,6 @@ void WheelsCommandCenter::getBatteryVoltage() {
     //uint8_t* buffer;
 
     float2bytes(buffer,vbatt);
-
 
     internal_comms::Message* message = commandCenter->createMessage(
             COMMAND_GET_BATTERY_VOLTAGE, sizeof(buffer), buffer);
