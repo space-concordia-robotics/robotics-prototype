@@ -83,6 +83,15 @@ const float wheelBase = 0.33;
 #define FRONT_BASE_DEFAULT_PWM 65
 #define REAR_BASE_DEFAULT_PWM 35
 
+/* Constants for the activity light  */
+#define ACTIVITY_MOSI 21
+#define ACTIVITY_CLK  20
+#define ACTIVITY_BLINK_PERIOD  500
+#define ACTIVITY_NUM_LIGHTS 20
+#define ACTIVITY_BRIGHTNESS 1
+#define ACTIVITY_DEFAULT_COLOR 20, 0, 0
+
+
 enum ServoNames{
     FRONT_SIDE_SERVO = 0,
     FRONT_BASE_SERVO = 1,
@@ -109,7 +118,7 @@ typedef struct {
     unsigned int timeBlinkUpdated = 0;
     bool lightOn = false;
     bool blinking = false;
-    APA102 light = APA102(20, 21, 20);
+    APA102 light = APA102(ACTIVITY_NUM_LIGHTS, ACTIVITY_MOSI, ACTIVITY_CLK);
 } RoverState;
 
 namespace Rover {
