@@ -15,17 +15,13 @@ from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control.srv import *
 from mcu_control.msg import Voltage
 
+from robot.rospackages.src.mcu_control.scripts.CommandParser import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
 from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
-ARM_SELECTED = 0
-ROVER_SELECTED = 1
-PDS_SELECTED = 2
-SCIENCE_SELECTED = 3
 
 in_commands = [arm_in_commands, wheel_in_commands, None, None]
-out_commands = [arm_out_commands, wheel_out_commands, None, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -123,14 +119,6 @@ def receive_message():
             except Exception as e:
                 print(e)
 
-
-def get_command(command_name, deviceToSendTo):
-    for out_command in out_commands[deviceToSendTo]:
-        if command_name == out_command[0]:
-            return out_command
-
-    return None
-
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
     if command is not None:
@@ -203,19 +191,6 @@ def rover_command_callback(message):
 
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
-
-
-def parse_command(message):
-    full_command = message.data.split(" ")
-    if full_command is not None:
-        command = full_command[0]
-        args = full_command[1:]
-        newArgs = []
-        for arg in args:
-            newArgs.append(float(arg))
-
-        return command, newArgs
-    return None, []
 
 def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])

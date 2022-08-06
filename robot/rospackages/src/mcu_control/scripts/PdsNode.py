@@ -5,7 +5,9 @@ import traceback
 import time
 import re
 
-from robot.rospackages.src.mcu_control.scripts.SerialUtil import init_serial, get_serial
+from robot.rospackages.src.mcu_control.scripts.CommandParser import *
+
+from robot.rospackages.src.mcu_control.scripts.PdsAdapter import *
 
 import rospy
 from std_msgs.msg import String, Float32
@@ -13,110 +15,85 @@ from geometry_msgs.msg import Point
 from mcu_control.msg import ThermistorTemps, FanSpeeds, Voltage, Currents
 from mcu_control.srv import *
 
-mcuName = 'PDS'
+from collections import deque
 
-# todo: test ros+website over network with teensy
-# todo: make a MCU serial class that holds the port initialization stuff and returns a reference?
-# todo: put similar comments and adjustments to code in the publisher and server demo scrips once finalized
+command_queue = deque()
 
-requests = {
-    'PDS T 1' : ['ON'],
-    'PDS T 0' : ['OFF'],
-    'who' : ['pds'], #@TODO: MCU code can't handle this request, fix it
-    'PDS M 1 1' : ['toggling'],
-    'PDS M 1 0' : ['toggling'],
-    'PDS M 2 1' : ['toggling'],
-    'PDS M 2 0' : ['toggling'],
-    'PDS M 3 1' : ['toggling'],
-    'PDS M 3 0' : ['toggling'],
-    'PDS M 4 1' : ['toggling'],
-    'PDS M 4 0' : ['toggling'],
-    'PDS M 5 1' : ['toggling'],
-    'PDS M 5 0' : ['toggling'],
-    'PDS M 6 1' : ['toggling'],
-    'PDS M 6 0' : ['toggling']
-}
+PDS1_ERROR_CORRECTION = [45, 0, 0, 0, 0, 17]
+PDS2_ERROR_CORRECTION = [45, 0, 0, 0, 0, 55]
 
+K_RAW_CONVERSION = 5 / 8704
+K_RAW_CONVERSION_BATTERY = 43 / 51200
 
-def handle_client(req):
-    ser = get_serial()
-    global reqFeedback
-    global reqInWaiting
+# Kill power to all motors
+def handle_estop(motorsToStop):
+    if bool(motorsToStop[0]):
+        pds1SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0, 4)]).send(port, 1).isOkay()
+        if pds1SetOffOkay is not True:
+            feedbackPub.publish("[ERROR]: eStop: PDS1 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Stopped motors for arm")
 
-    pdsResponse = ArmRequestResponse()
-    timeout = 0.3 # 300ms timeout
-    reqInWaiting = True
-    sinceRequest = time.time()
+    if bool(motorsToStop[1]):
+        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 2).isOkay()
+        if pds2SetOffOkay is not True:
+            feedbackPub.publish("[ERROR]: eStop: PDS2 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Stopped motors for wheels")
 
-    rospy.loginfo('received ' + req.msg + ' request from GUI, sending to PDS MCU')
-    ser.write(str.encode(req.msg + '\n')) # ping the teensy
+def handle_ping(args):
+    pds1PingContent = PacketOutPing().setPingContent([12, 34, 56, 78]).send(port, 1).getPingContent()
+    # TODO: Update address for PDS2
+    pds2PingContent = PacketOutPing().setPingContent([12, 34, 56, 78]).send(port, 1).getPingContent()
 
-    while pdsResponse.success is False and ((time.time() - sinceRequest) < timeout):
-        if reqFeedback is not '':
-            for request in requests:
-                for response in requests[request]:
-                    if request == req.msg and response in reqFeedback:
-                        pdsResponse.response = reqFeedback
-                        pdsResponse.success = True
-                        break
-            if pdsResponse.success:
-                break
-            else:
-                pdsResponse.response = reqFeedback
-        rospy.Rate(100).sleep()
+    feedbackPub.publish(f"[INFO]: ping responses: PDS1: {pds1PingContent} | PDS2: {pds2PingContent}")
 
-    rospy.loginfo('took ' + str(time.time() - sinceRequest) + ' seconds, sending this back to GUI: ')
-    rospy.loginfo(pdsResponse)
-    reqFeedback = ''
-    reqInWaiting = False
-    return pdsResponse
+def handle_enable_motors(motorsToEnable):
+    if bool(motorsToEnable[0]):
+        pds1SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0, 4)]).send(port, 1).isOkay()
+        if pds1SetOnOkay is not True:
+            feedbackPub.publish("[ERROR]: Enable arm motors: PDS1 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Enabled motors for arm")
 
-def pds_command_subscriber_callback(message):
-    ser = get_serial()
-    rospy.loginfo('received: ' + message.data + ' command from GUI, sending to PDS')
-    command = str.encode(message.data + '\n')
-    ser.write(command)  # send command to PDS
-    return
+    if bool(motorsToEnable[1]):
+        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 2).isOkay()
+        if pds2SetOnOkay is not True:
+            feedbackPub.publish("[ERROR]: Enable wheel motors: PDS2 board threw an exception")
+        else:
+            feedbackPub.publish("[INFO]: Enabled motors for wheels")
 
-def publish_pds_data(message):
-    # parse the data received from PDS
-    # converts message from string to float
-    dataPDS = message.split(',') # returns an array of ALL data from the PDS
+pds_command_handlers = dict([(pds_out_commands[0][1], handle_estop), (pds_out_commands[1][1], handle_ping),
+                             (pds_out_commands[2][1], handle_enable_motors)])
 
-    # create the message to be published
-    voltage = Voltage()
-    current = Currents()
-    temp = ThermistorTemps()
-    fanSpeed = FanSpeeds()
+def send_queued_commands():
+    if (len(command_queue) > 0):
+        command = command_queue.popleft()
+        send_command(command[0], command[1], command[2])
 
+def command_callback(message):
+    rospy.loginfo('received: ' + message.data + ' command, sending to PDS')
+    command, args = parse_command(message)
+
+    temp_struct = [command, args, PDS_SELECTED]
+    command_queue.append(temp_struct)
+
+def send_command(command_name, args, deviceToSendTo):
+    command = get_command(command_name, deviceToSendTo)
+    if command is not None:
+        commandID = command[1]
+
+        commandHandler = pds_command_handlers[commandID]
+
+        rospy.loginfo(commandHandler)
+
+        commandHandler(args)
+
+def publish_pds_data():
     try:
-        voltage.data = float(dataPDS[0])
+        publishSwitchChannelAndBatteryData()
 
-        current.effort = [float(data) for data in dataPDS[1:7]]
-        currents = ','.join([str(x) for x in current.effort])
-
-        temp.therm1 = float(dataPDS[7])
-        temp.therm2 = float(dataPDS[8])
-        temp.therm3 = float(dataPDS[9])
-        temps = ','.join([str(x) for x in [temp.therm1, temp.therm2, temp.therm3]])
-
-        fanSpeed.fan1 = float(dataPDS[10])
-        fanSpeed.fan2 = float(dataPDS[11])
-        fanSpeeds = ','.join([str(x) for x in [fanSpeed.fan1, fanSpeed.fan2]])
-
-        firstFlag = dataPDS[12].split(' ')
-        flagsMsg = ','.join([str(x) for x in firstFlag + [data[13], dataPDS[14].strip('\r')]])
-
-        rospy.loginfo('voltage: ' + str(voltage.data))
-        rospy.loginfo('temps: ' + str(temps))
-        rospy.loginfo('currents: ' + str(currents))
-        rospy.loginfo('fan speeds: ' + str(fanSpeeds))
-        
-        voltagePub.publish(voltage)
-        currentPub.publish(current)
-        tempPub.publish(temp)
-        fanSpeedsPub.publish(fanSpeed)
-        flagsPub.publish(flagsMsg)
+        publishTemps()
 
     except Exception as e:
         print('type error: ' + str(e))
@@ -124,35 +101,98 @@ def publish_pds_data(message):
         return
     return
 
-def stripFeedback(data):
-    startStrips = ['PDS ', 'Command', 'Motor']
-    endStrips = ['\r\n', '\n']
-    for strip in startStrips:
-        if data.startswith(strip) and data.count(strip) == 1:
-            data = re.split('\r\n|\n', data)[0]
-            return data
-    return None
+def publishSwitchChannelAndBatteryData():
+    batteryVoltage = Voltage()
+    wheelCurrents = Currents()
+    armCurrents = Currents()
+
+    packetOutChannels = PacketOutReadSwitchChannel()
+    packetOutBatteryChannel = PacketOutReadBatteryChannel()
+
+    # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
+    voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
+
+    # Error correction for raw values
+    zipVoltageRawCorrection = zip(voltagesRawPds1, PDS1_ERROR_CORRECTION)
+    index = 0
+    for voltageRaw, correction in zipVoltageRawCorrection:
+        voltagesRawPds1[index] = voltageRaw - correction
+
+    # PDS2 - [0] to [5]: wheel motor drivers
+    voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
+
+    zipVoltageRawCorrection = zip(voltagesRawPds2, PDS2_ERROR_CORRECTION)
+    index = 0
+    for voltageRaw, correction in zipVoltageRawCorrection:
+        voltagesRawPds2[index] = voltageRaw - correction
+
+    batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
+
+    currentPds1, currentPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2,
+                                                                          batteryVoltageRaw)
+
+    armMotorCurrents, wheelMotorCurrents, OBCVoltage, POEVoltage = voltageChannelsParser(currentPds1, currentPds2)
+
+    armCurrents.effort = armMotorCurrents
+    wheelCurrents.effort = wheelMotorCurrents
+
+    armCurrentPub.publish(armCurrents)
+    wheelCurrentPub.publish(wheelCurrents)
+
+    batteryVoltagePub.publish(batteryVoltage)
+
+def publishTemps():
+    temp = ThermistorTemps()
+
+    temp.therms = PacketOutReadTempChannel().send(port, 1).getMeasurement()
+
+    tempPub.publish(temp)
+
+def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
+    return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), rawBatteryVoltageConversion(batteryVoltageRaw)
+
+def rawAproxRawVoltagesConversion(voltagesRaw):
+    return [x * K_RAW_CONVERSION for x in voltagesRaw]
+
+def rawBatteryVoltageConversion(rawVoltage):
+    return rawVoltage * K_RAW_CONVERSION_BATTERY
+
+def voltageChannelsParser(voltagesPds1, voltagesPds2):
+    armMotorVoltages = voltagesPds1[:4]
+    wheelMotorVoltages = voltagesPds2
+
+    OBCVoltage = voltagesPds1[4]
+    POEVoltage = voltagesPds1[5]
+
+    return armMotorVoltages, wheelMotorVoltages, OBCVoltage, POEVoltage
+
 
 if __name__ == '__main__':
     node_name = 'pds_node'
     rospy.init_node(node_name, anonymous = False)  # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-    voltage_pub_topic = '/battery_voltage'
-    rospy.loginfo('Beginning to publish to "' + voltage_pub_topic + '" topic')
-    voltagePub = rospy.Publisher(voltage_pub_topic, Voltage, queue_size = 10)
+    # PacketOutReadBatteryChannel
+    battery_voltage_pub_topic = '/battery_voltage'
+    rospy.loginfo('Beginning to publish to "' + battery_voltage_pub_topic + '" topic')
+    batteryVoltagePub = rospy.Publisher(battery_voltage_pub_topic, Voltage, queue_size = 10)
 
-    current_pub_topic = '/wheel_motor_currents'
-    rospy.loginfo('Begining to publish to "' + current_pub_topic + '" topic')
-    currentPub = rospy.Publisher(current_pub_topic, Currents, queue_size = 10)
+    wheel_current_pub_topic = '/wheel_motor_currents'
+    rospy.loginfo('Begining to publish to "' + wheel_current_pub_topic + '" topic')
+    wheelCurrentPub = rospy.Publisher(wheel_current_pub_topic, Currents, queue_size = 10)
 
+    arm_current_pub_topic = '/arm_motor_currents'
+    rospy.loginfo('Begining to publish to "' + arm_current_pub_topic + '" topic')
+    armCurrentPub = rospy.Publisher(arm_current_pub_topic, Currents, queue_size=10)
+
+    # Probably PacketOutReadTempChannel
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
     tempPub = rospy.Publisher(temp_pub_topic, ThermistorTemps, queue_size = 10)
 
-    fan_speeds_pub_topic = '/fan_speeds'
-    rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
-    fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, FanSpeeds, queue_size = 10)
+    # fan_speeds_pub_topic = '/fan_speeds'
+    # rospy.loginfo('Beginning to publish to "' + fan_speeds_pub_topic + '" topic')
+    # fanSpeedsPub = rospy.Publisher(fan_speeds_pub_topic, FanSpeeds, queue_size = 10)
 
     error_flags_topic = '/pds_flags'
     rospy.loginfo('Beginning to publish to "' + error_flags_topic + '" topic')
@@ -164,58 +204,22 @@ if __name__ == '__main__':
 
     subscribe_topic = '/pds_command'
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
-    sub = rospy.Subscriber(subscribe_topic, String, pds_command_subscriber_callback)
+    sub = rospy.Subscriber(subscribe_topic, String, command_callback)
 
-    service_name = '/pds_request'
-    rospy.loginfo('Waiting for "' + service_name + '" service request from client')
-    serv = rospy.Service(service_name, ArmRequest, handle_client)
+    rosRate = rospy.Rate(100)
 
-    search_success = init_serial(9600, mcuName)
-
-    if not search_success:
-        sys.exit(1)
-
-    # service requests are implicitly handled but only at the rate the node publishes at
-    ser = get_serial()
-    global reqFeedback
-    reqFeedback = ''
-    global reqInWaiting
-    reqInWaiting = False
     try:
         while not rospy.is_shutdown():
-            # if I try reading from the serial port inside callbacks, bad things happen
-            # instead I send the data elsewhere if required but only read from serial here.
-            # not sure if I need the same precautions when writing but so far it seems ok.
-            if ser.in_waiting:
-                data = ''
-                feedback = None
-                try:
-                    data = ser.readline().decode()
-                    feedback = stripFeedback(data)
-                except Exception as e:
-                    print("type error: " + str(e))
-                    rospy.logwarn('trouble reading from serial port')
-                if feedback is not None:
-                    if feedback.startswith('PDS '):
-                        feedback=feedback.split('PDS ')[1]
-                        publish_pds_data(feedback)
-                    else:
-                        if reqInWaiting:
-                            reqFeedback += feedback + '\r\n' # pass data to request handler
-                        else:
-                            if 'WARNING' in feedback:
-                                rospy.logwarn(feedback)
-                            #rospy.loginfo(feedback)
-                            feedbackPub.publish(feedback)
-                else:
-                    rospy.loginfo('got raw data: ' + data)
-            rospy.Rate(100).sleep()
+            publish_pds_data()
+            send_queued_commands()
+
+            rosRate.sleep()
     except rospy.ROSInterruptException:
         pass
 
     def shutdown_hook():
         rospy.logwarn('This node (' + node_name + ') is shutting down')
-        ser.close() # good practice to close the serial port
+        port.close()
         time.sleep(1)  # give ROS time to deal with the node closing (rosbridge especially)
 
     rospy.on_shutdown(shutdown_hook)
