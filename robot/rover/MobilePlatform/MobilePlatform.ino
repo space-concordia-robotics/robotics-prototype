@@ -127,7 +127,7 @@ void WheelsCommandCenter::pingWheels(void) {
 
 // Defines functions from WheelsCommandCenter.h
 void WheelsCommandCenter::handleBlink(uint8_t on) {
-    Rover::setActivityColor(20, 0, 0);
+    Rover::setActivityColor(ACTIVITY_DEFAULT_COLOR);
     Rover::setActivityBlinking(on);
 }
 
