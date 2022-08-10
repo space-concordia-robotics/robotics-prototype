@@ -20,8 +20,8 @@ class arTracker():
         self.node_name = 'ar_tracker'
         rospy.init_node(self.node_name)
         # make sure to use `rosparam set ~camera_node_name video0Cam` 
-        #cv_camera_node_name = rospy.get_param('~camera_node_name')
-        cv_camera_node_name = 'video0Cam'
+        cv_camera_node_name = rospy.get_param('~camera_node_name')
+        #cv_camera_node_name = 'video0Cam'
 
         self.is_marker_seen = False
 
@@ -116,8 +116,8 @@ class arTracker():
         # these dimensions are for @PeterGhimself's laptop cam (dell inspiron 15 7000 gaming)
         # ideally this should be actually tested with the rovers cams (logitech c920s) and ajusted accordingly
         # so that the default behavior is catered to the rover
-        MAX_HEIGHT = 848
-        MAX_WIDTH  = 480
+        MAX_HEIGHT = 640
+        MAX_WIDTH  = 360
 
         HALF_HEIGHT = MAX_HEIGHT / 2 
         HALF_WIDTH = MAX_WIDTH / 2 
