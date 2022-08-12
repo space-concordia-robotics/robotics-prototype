@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>webcam_ar_track</name>
+  <version>0.0.0</version>
+  <description>The webcam_ar_track package</description>
+
+  <maintainer email="robotics@spaceconcordia.ca">Space Concordia Robotics</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
+

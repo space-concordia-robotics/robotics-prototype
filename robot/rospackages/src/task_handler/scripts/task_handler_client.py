@@ -84,7 +84,7 @@ if __name__ == '__main__':
     ports = []
 
     # all known tasks to be handled by the handler
-    known_tasks = ['arm_listener', 'rover_listener', 'science_listener', 'camera_stream', 'camera_ports']
+    known_tasks = ['arm_listener', 'rover_listener', 'science_listener', 'camera_stream', 'camera_ports', 'ar_stream']
     # symlinks fixed to specific physical usb ports
     competition_ports = ['/dev/videoFront', '/dev/videoRear', '/dev/videoArmScience']
 
