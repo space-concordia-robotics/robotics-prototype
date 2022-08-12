@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/space-concordia-robotics/robotics-prototype.svg?branch=master)](https://travis-ci.org/space-concordia-robotics/robotics-prototype)
+![ROS CI](https://github.com/space-concordia-robotics/robotics-prototype/workflows/ROS%20CI/badge.svg)
 
 # robotics-prototype
 This repo contains the Robotics software team code.
@@ -82,7 +82,7 @@ It will get installed in the `venv`, and not conflict with other projects instal
 
 ### Install [dependencies](https://pip.pypa.io/en/stable/user_guide/#requirements-files)
 ```
-(venv) $ pip install -r requirements.txt -r requirements-dev.txt
+(venv) $ pip install -r requirements.txt
 ```
 ### Setup [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode)
 Still in the root directory,

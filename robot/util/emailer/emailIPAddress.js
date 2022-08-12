@@ -9,7 +9,9 @@ const EMAILS_FILE_NAME = 'emails.txt'
 // fallback to default emails if there's and issue with the emails file
 const DEFAULT_EMAILS = [
     'davidhuculak5@gmail.com',
-    'petergranitski@gmail.com'
+    'petergranitski@gmail.com',
+    'william.wells@spaceconcordia.ca',
+    'cedric.martens@spaceconcordia.ca'
 ]
 
 let ourIP
@@ -78,9 +80,9 @@ const sendEmail = async ip => {
 
     const emails = await getEmailsFromFile()
     let mailOptions = {
-        from: '"Mr. odroid sir" <concordiacourseplanner@gmail.com>', // sender address
+        from: '"Mr. NVIDIA gamer" <concordiacourseplanner@gmail.com>', // sender address
         to: emails.join(', '), // list of receivers
-        subject: 'The IP Address of the odroid', // Subject line
+        subject: 'Greetings gamers. The IP Address of the Jetson is...', // Subject line
         html: message // html body
     }
 

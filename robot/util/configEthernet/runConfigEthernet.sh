@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-bash /home/odroid/configEthernet/configEthernet.sh > /home/odroid/configEthernet/configEthernet.log
+bash /home/nvidia/configEthernet/configEthernet.sh > /home/nvidia/configEthernet/configEthernet.log

@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.2)
+include(ExternalProject)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(MCU mk66fx1m0)
-
-include(ExternalProject)
-
+set (CMAKE_CXX_STANDARD 17)
 
 if(DEFINED ENV{ARDUINO_PATH})
 message(STATUS "Path to Arduino : $ENV{ARDUINO_PATH}")
@@ -18,7 +17,7 @@ set(ARDUINO_PATH $ENV{ARDUINO_PATH})
 set(ARDUINO_CORE ${ARDUINO_PATH}/hardware/arduino/avr/cores/arduino)
 set(TEENSY_CORE ${ARDUINO_PATH}/hardware/teensy/avr/cores)
 set(TEENSY_LIB ${ARDUINO_PATH}/hardware/teensy/avr/libraries)
-set(ARDUINO_EXTERNAL_LIB /home/$ENV{USER}/Arduino/libraries)
+set(ARDUINO_EXTERNAL_LIB $ENV{HOME}/Arduino/libraries)
 set(ARM_TOOLS ${ARDUINO_PATH}/hardware/tools)
 set(ARM_LIB ${ARM_TOOLS}/arm/arm-none-eabi/lib)
 set(ARM_GCC_OBJCOPY ${ARM_TOOLS}/arm/bin/arm-none-eabi-objcopy)
@@ -47,6 +46,7 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 
 #Pre-Installed Teensy libaries paths
 set(SERVO_PATH ${TEENSY_LIB}/Servo)
+set(SPI_PATH ${TEENSY_LIB}/SPI)
 set(SOFTWARESERIAL_PATH ${TEENSY_LIB}/SoftwareSerial)
 set(ENCODER_PATH ${TEENSY_LIB}/Encoder)
 set(WIRE_PATH ${TEENSY_LIB}/Wire)
@@ -66,20 +66,32 @@ set(ADAFRUIT_VERSION 1.0.9)
 
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_URL https://github.com/pololu/lsm303-arduino)
-set(LSM303_VERSION 3.0.1) 
+set(LSM303_VERSION 3.0.1)
+
+set(TINYGPS_PATH ${ARDUINO_EXTERNAL_LIB}/TinyGPS/src)
+set(TINYGPS_URL https://github.com/mikalhart/TinyGPSPlus)
+set(TINYGPS_VERSION v1.0.2)
+
+set(ETL_PATH ${ARDUINO_EXTERNAL_LIB}/EmbeddedTemplateLibrary)
+set(ETL_URL https://github.com/ETLCPP/etl)
+set(ETL_VERSION 19.4.3)
 
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
 checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
+checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
+checkLibraries(EmbeddedTemplateLibrary ${ETL_VERSION} ${ETL_URL})
+
 
 #find all teensy sources files that will need to be compiled into a single 'core' library
 file(GLOB TEENSY_CORE_S_FILES ${TEENSY_CORE}/teensy3/*.S)
 file(GLOB TEENSY_CORE_C_FILES ${TEENSY_CORE}/teensy3/*.c )
 file(GLOB TEENSY_CORE_CXX_FILES ${TEENSY_CORE}/teensy3/*.cpp)
 
-#function to find all subdirectories for a given directory, useful for finding paths to the teensy libraries
+
+#function to find all subdirectories for a given directory (non-recursive), useful for finding paths to the teensy libraries
 macro(getSubdirectories result curDir)
 
 file(GLOB subDirs LIST_DIRECTORIES true ${curDir}/*)
@@ -104,9 +116,13 @@ getSubdirectories(TEENSY_LIBRARIES ${TEENSY_LIB})
 include_directories(
  	${TEENSY_CORE}
 	${TEENSY_CORE}/teensy3
+    ${ARM_TOOLS}
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
+    ${CMAKE_SOURCE_DIR}/internal_comms/include
 )
+# TODO : use target include directories instead of this (especially the last line)
+
 #every compiler should use these common defines, copy pasted from the Teensyduino verbose output
 add_definitions(
 -D__MK66FX1M0__
@@ -144,35 +160,43 @@ file(GLOB_RECURSE INOFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_
 
 #This function will create a library and store it with the given name
 function(createCppLibrary sources libraryName includes)
-add_library(${libraryName} ${sources})
+        add_library(${libraryName} ${sources})
 
+        if(NOT ${includes} STREQUAL "")
+        target_include_directories(${libraryName} PRIVATE ${includes})
+        endif()
 
-if(NOT ${includes} STREQUAL "")
-target_include_directories(${libraryName} PRIVATE ${includes})
-endif()
-
-target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
+        target_compile_options(${libraryName} PUBLIC ${ARM_GXX_FLAGS})
 endfunction() 
 
 #create default teensy libraries
-#the last argument in these functions is incase a library needs additional include paths
-createCppLibrary(${TEENSY_LIB}/Servo/Servo.cpp Servo "")
-createCppLibrary(${TEENSY_LIB}/SoftwareSerial/SoftwareSerial.cpp SoftwareSerial "")
+# The first arugment is the path of the source file, use a string for extra sources.
+# Second argument is the name of the actual library that is created and will be linked against
+# The last argument the additional include directories for the source file. By default it is relative to the location of the source file
+createCppLibrary(${SERVO_PATH}/Servo.cpp Servo "")
+createCppLibrary(${SPI_PATH}/SPI.cpp SPI "")
+
+createCppLibrary(${SOFTWARESERIAL_PATH}/SoftwareSerial.cpp SoftwareSerial "")
 createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
 #create the external teensy libraries
-
-createCppLibrary(${ARDUINO_BLUE_PATH}/ArduinoBlue.cpp ArduinoBlue "")
 createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
-CreateCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
-CreateCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
+createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
+createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
+createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
+
+# For a library that doesn't have a cpp file, but only header files
+include_directories(${ETL_PATH}/include)
+
+#libraries should be created before the executables
+add_subdirectory(internal_comms)
 
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
  get_filename_component(project_dir ${path} DIRECTORY)
  get_filename_component(name ${path} NAME_WE)
- 
+
  #creates a command which runs a few bash commands to delete the current subproject. 
  #These are useless on their own and need to be attached to a target to work 
  add_custom_command(
@@ -182,30 +206,35 @@ foreach(path ${INOFILES})
  )
 
  set(Project_Name ${name})
- 
- if(${name} STREQUAL "Arm")
- set(PROJECT_LIBRARIES  Servo)
 
+ if(${name} STREQUAL "Arm")
+  set(PROJECT_LIBRARIES Servo internal_comms)
+ elseif(${name} STREQUAL "raman")
+  set(PROJECT_LIBRARIES internal_comms)
+ elseif(${name} STREQUAL "comms_demo")
+  set(PROJECT_LIBRARIES internal_comms)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")
  continue()
- 
+ elseif(${name} STREQUAL "PDS2")
+ continue()
+
  elseif(${name} STREQUAL "MobilePlatform")
  
- set(PROJECT_LIBRARIES Servo Wire LSM303 ArduinoBlue SparkFunGPS SoftwareSerial)
- set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} )
+ set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 SparkFunGPS SoftwareSerial TinyGPS SPI)
+ set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
  set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
-
+ 
  endif()
  
- #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
- configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY) 
- add_subdirectory(${project_dir}) 
- 
+  #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
+  configure_file(CMakeTemplate.txt.in ${CMAKE_CURRENT_SOURCE_DIR}/${project_dir}/CMakeLists.txt @ONLY)
+  add_subdirectory(${project_dir})
+
  endforeach()
 
  #this builds a target, which can be called be built from the command line to delete ALL generated files, and directories. 
@@ -217,7 +246,12 @@ foreach(path ${INOFILES})
  COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/build/* ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug
  DEPENDS Arm_cleanup
  DEPENDS MobilePlatform_cleanup
- DEPENDS PidController_cleanup
  DEPENDS science_cleanup
  )
 
+#Add the NIR an an external since it does not use the ARM compiler
+ExternalProject_Add(NIR
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/science/NIR
+        BUILD_ALWAYS 1
+        INSTALL_COMMAND ""
+        )

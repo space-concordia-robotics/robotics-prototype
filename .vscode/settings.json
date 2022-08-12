@@ -1,8 +1,8 @@
 {
     "python.pythonPath": "venv/bin/python",
-    "python.unitTest.pyTestEnabled": true,
+    "python.testing.pytestEnabled": true,
     "python.formatting.provider": "yapf",
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "python.linting.lintOnSave": true,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,

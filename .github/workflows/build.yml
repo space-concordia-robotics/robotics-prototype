@@ -1,0 +1,29 @@
+name: ROS CI
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    container: ros:melodic-ros-base
+    steps:
+
+      - name: Clone repo
+        uses: actions/checkout@v2
+
+      - name: Setup Environment
+        run: |
+          ./.github/workflows/environment.sh
+
+      - name: Configure ROS environment
+        run: |
+          ./.github/workflows/ros.sh
+
+      - name: Install teensyduino and run cmake on codebase
+        run: |
+          ./.github/workflows/teensyduino.sh
+
+
+          #      - name: Run pytest
+          #        run: |
+          #          bash -c "source venv/bin/activate && source robot/rospackages/devel/setup.bash && pytest"

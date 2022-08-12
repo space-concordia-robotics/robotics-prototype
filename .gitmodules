@@ -7,3 +7,6 @@
 [submodule "tf2_web_republisher"]
 	path = robot/rospackages/src/tf2_web_republisher
 	url = https://github.com/RobotWebTools/tf2_web_republisher
+[submodule "autonomy-packages"]
+	path = robot/rospackages/src/autonomy-packages
+	url = https://github.com/space-concordia-robotics/autonomy-packages

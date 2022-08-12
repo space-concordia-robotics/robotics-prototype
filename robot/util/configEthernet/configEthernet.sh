@@ -2,7 +2,7 @@
 # This script checks if the internet can be reached from a regular ethernet connection type
 # If the regular ethernet configuration cannot ping google severs, the rocket configuration is loaded
 
-STATUS_FILE="/home/odroid/configEthernet/status_done"
+STATUS_FILE="/home/nvidia/configEthernet/status_done"
 
 # "I'm working"
 echo 0 > $STATUS_FILE

@@ -5,7 +5,7 @@
   "main": "emailIPAddress.js",
   "dependencies": {
     "ip": "^1.1.5",
-    "nodemailer": "^4.3.1"
+    "nodemailer": "^6.6.1"
   },
   "devDependencies": {},
   "scripts": {
