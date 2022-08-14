@@ -24,16 +24,9 @@ APA102::APA102(int numOfLEDs, int mosiPin, int clockPin)
   }  
 }
 void APA102::send() {
-  //spi->beginTransaction(settingsA);
   for (int i = 0; i < bufSize; i++) {
     shiftOut(mosiPin, clockPin, MSBFIRST, buf[i]);
-    //spi->transfer(buf[i]);
-    //Serial.print(buf[i]);
-    //Serial.print(" ");
   }
-  //Serial.println();
-
-  //spi->endTransaction();
 }
 
 void APA102::setColor(int index, int r, int g, int b, int brightness) {
