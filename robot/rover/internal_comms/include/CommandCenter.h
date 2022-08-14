@@ -8,6 +8,14 @@
 #include "Arduino.h"
 #include <etl/queue.h>
 
+// USB debug flag
+// #define DEBUG
+
+#ifndef DEBUG
+#define Serial Serial1
+#endif
+
+
 #define COMMS_BAUDRATE 57600L
 
 //#ifdef UART_PORT

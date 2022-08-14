@@ -1,13 +1,23 @@
 #ifndef ROVER_H
 #define ROVER_H
-
 #include "DcMotor.h"
+#include "APA102.h"
+
 
 /***** MOTORS *****/
 
 #define NUM_MOTORS 6
 #define ROVER_MOVE_TIMEOUT 250
 #define ACCELERATION_RATE 5
+
+
+/* Constants for the activity light  */
+#define ACTIVITY_MOSI 21
+#define ACTIVITY_CLK  20
+#define ACTIVITY_BLINK_PERIOD  500
+#define ACTIVITY_NUM_LIGHTS 40
+#define ACTIVITY_BRIGHTNESS 31
+#define ACTIVITY_DEFAULT_COLOR 255, 0, 0
 
 
 enum ServoNames{
@@ -25,6 +35,12 @@ typedef struct {
     float rotational_velocity;
     int16_t max_output_signal;
     int16_t min_output_signal;
+    // timestamp when the last rising/falling edge of the blink cycle happened
+    unsigned int timeBlinkUpdated = 0;
+    bool lightOn = false;
+    bool blinking = false;
+    APA102 light = APA102(ACTIVITY_NUM_LIGHTS, ACTIVITY_MOSI, ACTIVITY_CLK);
+    uint8_t r, g, b;
 } RoverState;
 
 
@@ -47,5 +63,12 @@ namespace Rover {
     void updateWheelVelocities();
 
     void decelerateRover();
+
+    // These functions are to be used by the MobilePlatofrm code
+    void handleActivityLight();
+    void setActivityBlinking(uint8_t on);
+    // These functions are used internally by the above functions
+    void setActivityLight(uint8_t on);
+    void setActivityColor(uint8_t r, uint8_t g, uint8_t b);
 }
 #endif
