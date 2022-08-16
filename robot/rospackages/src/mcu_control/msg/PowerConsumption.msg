@@ -1,0 +1,2 @@
+string description
+float64 wattHours

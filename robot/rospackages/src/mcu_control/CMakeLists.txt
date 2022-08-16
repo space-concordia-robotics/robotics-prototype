@@ -40,6 +40,8 @@ add_message_files(
   FanSpeeds.msg
   Voltage.msg
   Currents.msg
+  PowerConsumption.msg
+  PowerReport.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
