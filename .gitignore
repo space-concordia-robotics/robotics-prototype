@@ -39,3 +39,5 @@ robot/rover/comms_demo/CMakeLists.txt
 robot/rover/comms_demo/arduino_demos/pong_bing/CMakeLists.txt
 .clangd
 compile_commands.json
+
+Power-Report*.csv

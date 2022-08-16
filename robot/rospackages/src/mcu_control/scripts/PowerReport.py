@@ -24,9 +24,8 @@ def provide_report(data):
     return latest_power_report
 
 def write_report():
-    now = datetime.datetime.now()
-    timestamp = f'{now.year}-{now.month}-{now.day}T{now.hour}:{now.minute}:{now.second}'
-    filename = 'Power-Report' + timestamp + '.csv'
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    filename = '../../../../../Power-Report_' + timestamp + '.csv'
     with open(filename, 'w', newline='') as report_file:
         writer = csv.writer(report_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
