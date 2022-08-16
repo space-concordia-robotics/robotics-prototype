@@ -25,6 +25,8 @@ add_service_files(
   ## arm
   ArmRequest.srv
   ScienceRequest.srv
+  ## for power report
+  PowerReportProvider.srv
 )
 
 add_message_files(

@@ -10,12 +10,16 @@ import re
 import rospy
 from std_msgs.msg import String, Float32
 from mcu_control.msg import Voltage, Currents, PowerConsumption, PowerReport
+from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, PowerReportProviderResponse
+
 
 wheel_watt_hours = []
 latest_power_report = PowerReport()
 pub = None
 prevTime = None
 
+def provide_report(data):
+    return latest_power_report
 
 def wheelCurrentCallback(data):
     global wheel_watt_hours, pub, prevTime
@@ -43,11 +47,14 @@ def initData():
     latest_power_report.report = [PowerConsumption(description='wheels', wattHours=0)]
 
 def start():
+    initData()
     rospy.init_node('power_report_node', anonymous = False)
     rospy.Subscriber('wheel_motor_currents', Currents, wheelCurrentCallback)
+    
     global pub
     pub = rospy.Publisher('power_consumption', PowerReport, queue_size = 10)
-    initData()
+    s = rospy.Service('power_report_provider', PowerReportProvider, provide_report)
+
     rospy.spin()
 
 if __name__ == '__main__':
