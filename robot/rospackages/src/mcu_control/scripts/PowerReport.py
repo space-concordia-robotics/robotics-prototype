@@ -16,6 +16,7 @@ latest_power_report = PowerReport()
 pub = None
 prevTime = None
 
+
 def wheelCurrentCallback(data):
     global wheel_watt_hours, pub, prevTime
     time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
@@ -31,21 +32,22 @@ def wheelCurrentCallback(data):
         latest_power_report.report[0] = PowerConsumption("wheels", wheel_power)
 
         rospy.loginfo('wheel watt hours: ' + str(wheel_watt_hours))
-    else:
-        # if this is the first time, initialize the watt_hours array
-        wheel_watt_hours = [0 for i in range(len(data.effort))]
-        latest_power_report.report = [0]
     prevTime = time
     pub.publish(latest_power_report)
 
 
-
+def initData():
+    global wheel_watt_hours, latest_power_report
+    wheel_watt_hours = [0, 0, 0, 0, 0, 0]
+    latest_power_report = PowerReport()
+    latest_power_report.report = [PowerConsumption(description='wheels', wattHours=0)]
 
 def start():
     rospy.init_node('power_report_node', anonymous = False)
     rospy.Subscriber('wheel_motor_currents', Currents, wheelCurrentCallback)
     global pub
     pub = rospy.Publisher('power_consumption', PowerReport, queue_size = 10)
+    initData()
     rospy.spin()
 
 if __name__ == '__main__':
