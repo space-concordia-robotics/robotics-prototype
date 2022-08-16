@@ -11,7 +11,8 @@ import rospy
 from std_msgs.msg import String, Float32
 from mcu_control.msg import Voltage, Currents, PowerConsumption, PowerReport
 from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, PowerReportProviderResponse
-
+import csv
+import datetime
 
 wheel_watt_hours = []
 latest_power_report = PowerReport()
@@ -22,13 +23,24 @@ running = False
 def provide_report(data):
     return latest_power_report
 
+def write_report():
+    now = datetime.datetime.now()
+    timestamp = f'{now.year}-{now.month}-{now.day}T{now.hour}:{now.minute}:{now.second}'
+    filename = 'Power-Report' + timestamp + '.csv'
+    with open(filename, 'w', newline='') as report_file:
+        writer = csv.writer(report_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['Description', 'Power consumption (Wh-H)'])
+        for subsystem in latest_power_report.report:
+            writer.writerow([subsystem.description, str(subsystem.wattHours)])
+
 def action_callback(message):
     global running
     if message.data == 'start':
-        running = True
         initData()
+        running = True
     elif message.data == 'stop':
         running = False
+        write_report()
     else:
         rospy.loginfo('invalid command')
 
