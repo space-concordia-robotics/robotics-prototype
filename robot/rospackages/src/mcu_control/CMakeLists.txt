@@ -40,7 +40,7 @@ add_message_files(
   RoverMarkerList.msg
   ThermistorTemps.msg
   FanSpeeds.msg
-  Voltage.msg
+  Voltages.msg
   Currents.msg
   PowerConsumption.msg
   PowerReport.msg

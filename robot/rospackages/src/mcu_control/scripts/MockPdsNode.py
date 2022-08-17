@@ -13,7 +13,7 @@ from decimal import *
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point
-from mcu_control.msg import ThermistorTemps, Voltage, Currents
+from mcu_control.msg import ThermistorTemps, Voltages, Currents
 
 
 def get_parameter_value(parameter, values, value_before_increment,
@@ -222,34 +222,34 @@ def publish_mock_data(voltages, temps, currents):
     rate = rospy.Rate(rospy_rate)
 
     # Initialize publishers (Voltage, ThermistorTemps, Currents)
-    voltage = Voltage()
+    voltage = Voltages()
     thermistor_temps = ThermistorTemps()
     wheel_currents = Currents()
-    wheel_voltage = Voltage()
+    wheel_voltage = Voltages()
     arm_currents = Currents()
-    arm_voltages = Voltage()
+    arm_voltages = Voltages()
     obc_current = Currents()
-    obc_voltage = Voltage()
+    obc_voltage = Voltages()
     poe_current = Currents()
-    poe_voltage = Voltage()
-    pub_voltage = rospy.Publisher('battery_voltage', Voltage, queue_size=10)
+    poe_voltage = Voltages()
+    pub_voltage = rospy.Publisher('battery_voltage', Voltages, queue_size=10)
     pub_temp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
     pub_wheel_current = rospy.Publisher(
         'wheel_motor_currents', Currents, queue_size=10)
     pub_wheel_voltage = rospy.Publisher(
-        'wheel_motor_voltages', Voltage, queue_size=10)
+        'wheel_motor_voltages', Voltages, queue_size=10)
     pub_arm_current = rospy.Publisher(
         'arm_motor_currents', Currents, queue_size=10)
     pub_arm_voltage = rospy.Publisher(
-        'arm_motor_voltages', Voltage, queue_size=10)
+        'arm_motor_voltages', Voltages, queue_size=10)
     pub_obc_current = rospy.Publisher(
         'obc_current', Currents, queue_size=10)
     pub_obc_voltage = rospy.Publisher(
-        'obc_voltage', Voltage, queue_size=10)
+        'obc_voltage', Voltages, queue_size=10)
     pub_poe_current = rospy.Publisher(
         'poe_current', Currents, queue_size=10)
     pub_poe_voltage = rospy.Publisher(
-        'poe_voltage', Voltage, queue_size=10)
+        'poe_voltage', Voltages, queue_size=10)
 
     # Initialize 1 starting voltage increment rate
     # Using default value if not initialized in launch file

@@ -2,7 +2,7 @@
 
 import rospy
 from std_msgs.msg import String, Float32
-from mcu_control.msg import Voltage, Currents, PowerConsumption, PowerReport
+from mcu_control.msg import Voltages, Currents, PowerConsumption, PowerReport
 from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, PowerReportProviderResponse
 import csv
 import datetime
@@ -166,13 +166,13 @@ def subscribe_to_PDS():
     global pds_feeds
     # subscribe to PDS feeds and store them
     pds_feeds = [rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback),
-                 rospy.Subscriber('wheel_motor_voltages', Voltage, wheel_voltage_callback),
+                 rospy.Subscriber('wheel_motor_voltages', Voltages, wheel_voltage_callback),
                  rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
-                 rospy.Subscriber('arm_motor_voltages', Voltage, arm_voltage_callback),
+                 rospy.Subscriber('arm_motor_voltages', Voltages, arm_voltage_callback),
                  rospy.Subscriber('obc_current', Currents, obc_current_callback),
-                 rospy.Subscriber('obc_voltage', Voltage, obc_voltage_callback),
+                 rospy.Subscriber('obc_voltage', Voltages, obc_voltage_callback),
                  rospy.Subscriber('poe_current', Currents, poe_current_callback),
-                 rospy.Subscriber('poe_voltage', Voltage, poe_voltage_callback)]
+                 rospy.Subscriber('poe_voltage', Voltages, poe_voltage_callback)]
 
 def unsubscribe_from_PDS():
     """Unsubscribes from all PDS current and voltage feeds."""
