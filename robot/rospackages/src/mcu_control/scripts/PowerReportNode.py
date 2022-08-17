@@ -104,7 +104,7 @@ def action_callback(message):
         unsubscribe_from_PDS()
         write_report()
     else:
-        rospy.loginfo('invalid command')
+        rospy.logerr('invalid command')
 
 
 def wheel_current_callback(data):
@@ -133,13 +133,22 @@ def obc_current_callback(data):
     latest_power_report.report[2] = PowerConsumption(obc_data.description, obc_data.total_power, obc_data.watt_hours)
     rospy.loginfo('obc watt hours: ' + str(obc_data.total_power))
 
+def obc_voltage_callback(data):
+    global obc_data
+    obc_data.voltages = data.data
+
 def poe_current_callback(data):
     global poe_data, pub, latest_power_report
     poe_data.update(data.effort)
     latest_power_report.report[3] = PowerConsumption(poe_data.description, poe_data.total_power, poe_data.watt_hours)
     rospy.loginfo('poe watt hours: ' + str(poe_data.total_power))
 
+def poe_voltage_callback(data):
+    global poe_data
+    poe_data.voltages = data.data
+
 def initData():
+    """Reset all data for power consumption to 0."""
     global subsystems, latest_power_report
     # reset the current power report
     latest_power_report = PowerReport()
@@ -152,16 +161,21 @@ def initData():
     latest_power_report.report = report
 
 def subscribe_to_PDS():
+    """Subscribes to the voltage and current feeds of the PDS and
+    stores them in pds_feeds"""
     global pds_feeds
     # subscribe to PDS feeds and store them
     pds_feeds = [rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback),
-             rospy.Subscriber('wheel_motor_voltages', Voltage, wheel_voltage_callback),
-             rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
-             rospy.Subscriber('arm_motor_voltages', Voltage, arm_voltage_callback),
-             rospy.Subscriber('obc_current', Currents, obc_current_callback),
-             rospy.Subscriber('poe_current', Currents, poe_current_callback)]
+                 rospy.Subscriber('wheel_motor_voltages', Voltage, wheel_voltage_callback),
+                 rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
+                 rospy.Subscriber('arm_motor_voltages', Voltage, arm_voltage_callback),
+                 rospy.Subscriber('obc_current', Currents, obc_current_callback),
+                 rospy.Subscriber('obc_voltage', Voltage, obc_voltage_callback),
+                 rospy.Subscriber('poe_current', Currents, poe_current_callback),
+                 rospy.Subscriber('poe_voltage', Voltage, poe_voltage_callback)]
 
 def unsubscribe_from_PDS():
+    """Unsubscribes from all PDS current and voltage feeds."""
     global pds_feeds
     for feed in pds_feeds:
         feed.unregister()
@@ -173,7 +187,7 @@ def start():
     # subscribe for start/stop commands
     rospy.Subscriber('power_report_command', String, action_callback)
 
-    # publisher for power consumption, and setup service that provides them 
+    # publisher for power consumption, and setup service that provides power reports
     global pub
     pub = rospy.Publisher('power_consumption', PowerReport, queue_size = 10)
     s = rospy.Service('power_report_provider', PowerReportProvider, provide_report)
