@@ -36,7 +36,9 @@ class SubsystemData:
 
 wheel_data = SubsystemData(6, 'wheels')
 arm_data = SubsystemData(6, 'arm motors')
-subsystems = [wheel_data, arm_data]
+obc_data = SubsystemData(1, 'onboard computer')
+poe_data = SubsystemData(1, 'power over ethernet injector')
+subsystems = [wheel_data, arm_data, obc_data, poe_data]
 latest_power_report = PowerReport()
 pub = None
 running = False
@@ -57,11 +59,17 @@ def write_report():
         writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
         for subsystem in subsystems:
-            for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
-                writer.writerow([subsystem.description + ' ' + str(i), str(motor_consumption)])
-            writer.writerow([])
-            writer.writerow([subsystem.description + ' total', subsystem.total_power])
-            writer.writerow([])
+            # break down per sensor if there are multiple sensors per subsystem
+            if len(subsystem.watt_hours) > 1:
+                for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
+                    writer.writerow([subsystem.description + ' ' + str(i), str(motor_consumption)])
+                writer.writerow([])
+                writer.writerow([subsystem.description + ' total', subsystem.total_power])
+                writer.writerow([])
+            # just write down the subsystem's consumption if there is one sensor for the system
+            else:
+                writer.writerow([subsystem.description, subsystem.total_power])
+                writer.writerow([])
 
 def action_callback(message):
     global running
@@ -89,6 +97,19 @@ def arm_current_callback(data):
         latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power)
         rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
 
+def obc_current_callback(data):
+    global obc_data, running, pub, latest_power_report
+    if running:
+        obc_data.update(data.effort)
+        latest_power_report.report[2] = PowerConsumption(obc_data.description, obc_data.total_power)
+        rospy.loginfo('obc watt hours: ' + str(obc_data.total_power))
+
+def poe_current_callback(data):
+    global poe_data, running, pub, latest_power_report
+    if running:
+        poe_data.update(data.effort)
+        latest_power_report.report[3] = PowerConsumption(poe_data.description, poe_data.total_power)
+        rospy.loginfo('poe watt hours: ' + str(poe_data.total_power))
 
 def initData():
     global subsystems, latest_power_report
@@ -105,6 +126,9 @@ def start():
     # subscribe to PDS feeds
     rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback)
     rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback)
+    rospy.Subscriber('obc_current', Currents, obc_current_callback)
+    rospy.Subscriber('poe_current', Currents, poe_current_callback)
+    
     # subscribe for start/stop commands
     rospy.Subscriber('power_report_command', String, action_callback)
 
