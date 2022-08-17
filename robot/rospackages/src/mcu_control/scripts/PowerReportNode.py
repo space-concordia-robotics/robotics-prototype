@@ -9,6 +9,8 @@ import datetime
 import os
 
 class SubsystemData:
+    """This class handles the energy consumption calculations. Every time
+    current data comes in, this is run to update the power consumption."""
     def __init__(self, numberOfMotors, description):
         self.watt_hours = []
         for i in range(numberOfMotors):
@@ -44,10 +46,14 @@ pub = None
 running = False
 
 def provide_report(data):
+    """This is a service that provides the latest cumulative power
+    consumption figures."""
     return latest_power_report
 
 def write_report():
-    global subsystems
+    """Writes a csv power report in home/Power_Reports where
+    the filename is Power-Report_timestamp."""
+    global latest_power_report
 
     folder = os.path.expanduser("~") + '/Power_Reports'
     if not os.path.exists(folder):
@@ -58,20 +64,23 @@ def write_report():
     with open(filename, 'w', newline='') as report_file:
         writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
-        for subsystem in subsystems:
+        for subsystem in latest_power_report.report:
             # break down per sensor if there are multiple sensors per subsystem
-            if len(subsystem.watt_hours) > 1:
-                for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
+            if len(subsystem.individualWattHours) > 1:
+                for i, motor_consumption in enumerate(subsystem.individualWattHours, 1):
                     writer.writerow([subsystem.description + ' ' + str(i), str(motor_consumption)])
                 writer.writerow([])
-                writer.writerow([subsystem.description + ' total', subsystem.total_power])
+                writer.writerow([subsystem.description + ' total', subsystem.totalWattHours])
                 writer.writerow([])
             # just write down the subsystem's consumption if there is one sensor for the system
             else:
-                writer.writerow([subsystem.description, subsystem.total_power])
+                writer.writerow([subsystem.description, subsystem.totalWattHours])
                 writer.writerow([])
 
 def action_callback(message):
+    """Runs when a message is sent to power_report_command, and starts or
+    stops power measuring appropriately. When it stops measuring, it
+    produces a CSV report; when is starts, it resets everything."""
     global running
     if message.data == 'start':
         initData()
@@ -87,38 +96,41 @@ def wheel_current_callback(data):
     global wheel_data, running, pub, latest_power_report
     if running:
         wheel_data.update(data.effort)
-        latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power)
+        latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power, wheel_data.watt_hours)
         rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
 
 def arm_current_callback(data):
     global arm_data, running, pub, latest_power_report
     if running:
         arm_data.update(data.effort)
-        latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power)
+        latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power, arm_data.watt_hours)
         rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
 
 def obc_current_callback(data):
     global obc_data, running, pub, latest_power_report
     if running:
         obc_data.update(data.effort)
-        latest_power_report.report[2] = PowerConsumption(obc_data.description, obc_data.total_power)
+        latest_power_report.report[2] = PowerConsumption(obc_data.description, obc_data.total_power, obc_data.watt_hours)
         rospy.loginfo('obc watt hours: ' + str(obc_data.total_power))
 
 def poe_current_callback(data):
     global poe_data, running, pub, latest_power_report
     if running:
         poe_data.update(data.effort)
-        latest_power_report.report[3] = PowerConsumption(poe_data.description, poe_data.total_power)
+        latest_power_report.report[3] = PowerConsumption(poe_data.description, poe_data.total_power, poe_data.watt_hours)
         rospy.loginfo('poe watt hours: ' + str(poe_data.total_power))
 
 def initData():
     global subsystems, latest_power_report
+    # reset the current power report
+    latest_power_report = PowerReport()
+    report = []
     # reset the internal power data
     for subsystem in subsystems:
         subsystem.reset()
-    # reset the current power report
-    latest_power_report = PowerReport()
-    latest_power_report.report = [PowerConsumption(description=system.description, wattHours=0) for system in subsystems]
+        individualWattHours = subsystem.watt_hours.copy()
+        report.append(PowerConsumption(description=subsystem.description, totalWattHours=0, individualWattHours=individualWattHours))
+    latest_power_report.report = report
 
 def start():
     initData()
