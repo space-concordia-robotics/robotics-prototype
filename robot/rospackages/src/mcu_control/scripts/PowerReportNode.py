@@ -7,11 +7,6 @@ from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, Pow
 import csv
 import datetime
 
-wheel_data = None
-latest_power_report = PowerReport()
-pub = None
-running = False
-
 class SubsystemData:
     def __init__(self, numberOfMotors, description):
         self.watt_hours = []
@@ -20,6 +15,9 @@ class SubsystemData:
         self.total_power = 0
         self.prev_time = None
         self.description = description
+    
+    def reset(self):
+        self.__init__(len(self.watt_hours), self.description)
 
     def update(self, currents):
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
@@ -35,6 +33,10 @@ class SubsystemData:
                 self.total_power += x
         self.prev_time = time
 
+wheel_data = SubsystemData(6, 'wheels')
+latest_power_report = PowerReport()
+pub = None
+running = False
 
 def provide_report(data):
     return latest_power_report
@@ -43,10 +45,13 @@ def write_report():
     timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     filename = '../../../../../Power-Report_' + timestamp + '.csv'
     with open(filename, 'w', newline='') as report_file:
-        writer = csv.writer(report_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
-        for subsystem in latest_power_report.report:
-            writer.writerow([subsystem.description, str(subsystem.wattHours)])
+        subsystems = [wheel_data]
+        for subsystem in subsystems:
+            for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
+                writer.writerow([subsystem.description + ' ' + str(i) , str(motor_consumption)])
+            writer.writerow([subsystem.description + ' total', subsystem.total_power])
 
 def action_callback(message):
     global running
@@ -70,7 +75,7 @@ def wheel_current_callback(data):
 
 def initData():
     global wheel_data, latest_power_report
-    wheel_data = SubsystemData(6, 'wheels')
+    wheel_data.reset()
     latest_power_report = PowerReport()
     latest_power_report.report = [PowerConsumption(description='wheels', wattHours=0)]
 
