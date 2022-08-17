@@ -9,31 +9,40 @@ import datetime
 import os
 
 class SubsystemData:
-    """This class handles the energy consumption calculations. Every time
-    current data comes in, this is run to update the power consumption."""
-    def __init__(self, numberOfMotors, description):
+    """This class handles the energy consumption calculations and 
+    stores data needed for that. Must call update() with the new
+    current data when it comes in, and set self.voltages to the
+    voltage data for each sensor/motor in the subsystem as it
+    is updated."""
+    def __init__(self, number_of_motors, description):
         self.watt_hours = []
-        for i in range(numberOfMotors):
+        for i in range(number_of_motors):
             self.watt_hours.append(0)
         self.total_power = 0
         self.prev_time = None
         self.description = description
+        # This is a default value! 
+        self.voltages = [12] * number_of_motors
     
     def reset(self):
         self.__init__(len(self.watt_hours), self.description)
 
     def update(self, currents):
+        """Every time current data comes in, this is run to update the power consumption."""
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
             # find power consumed since last datapoint
             delta_hours = (time - self.prev_time) / (60 * 60)
             for i in range(len(currents)):
-                self.watt_hours[i] += currents[i] * delta_hours * 12
+                self.watt_hours[i] += currents[i] * self.voltages[i] * delta_hours
                 # NOTE: voltage not accurate!!
-            # now, sum up all wheels and put in report
+            # now, sum up all motors
             self.total_power = 0
             for x in self.watt_hours:
                 self.total_power += x
+        # if this is the first time since start that we have current, just
+        # store the prev time (since don't know for how long this current
+        # is valid)
         self.prev_time = time
 
 wheel_data = SubsystemData(6, 'wheels')
