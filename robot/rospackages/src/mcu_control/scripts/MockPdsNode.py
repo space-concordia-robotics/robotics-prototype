@@ -323,12 +323,12 @@ def publish_mock_data(voltages, temps, currents):
         if current_voltage is not None:
             voltage.data = float(current_voltage)
         # Set temperatures 1-3
-        if current_temps[0] is not None:
-            thermistor_temps.therm1 = float(current_temps[0])
-        if current_temps[1] is not None:
-            thermistor_temps.therm2 = float(current_temps[1])
-        if current_temps[2] is not None:
-            thermistor_temps.therm3 = float(current_temps[2])
+        #if current_temps[0] is not None:
+        #    thermistor_temps.therm1 = float(current_temps[0])
+        #if current_temps[1] is not None:
+        #    thermistor_temps.therm2 = float(current_temps[1])
+        #if current_temps[2] is not None:
+        #    thermistor_temps.therm3 = float(current_temps[2])
 
         wheel_currents.effort.clear()
         # Set wheel currents 1-6
