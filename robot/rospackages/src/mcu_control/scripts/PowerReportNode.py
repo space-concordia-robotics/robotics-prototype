@@ -6,6 +6,7 @@ from mcu_control.msg import Voltage, Currents, PowerConsumption, PowerReport
 from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, PowerReportProviderResponse
 import csv
 import datetime
+import os
 
 class SubsystemData:
     def __init__(self, numberOfMotors, description):
@@ -42,15 +43,20 @@ def provide_report(data):
     return latest_power_report
 
 def write_report():
+    folder = os.path.expanduser("~") + '/Power_Reports'
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    filename = '../../../../../Power-Report_' + timestamp + '.csv'
+    filename = folder + '/Power-Report_' + timestamp + '.csv'
     with open(filename, 'w', newline='') as report_file:
         writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
         subsystems = [wheel_data]
         for subsystem in subsystems:
             for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
-                writer.writerow([subsystem.description + ' ' + str(i) , str(motor_consumption)])
+                writer.writerow([subsystem.description + ' ' + str(i), str(motor_consumption)])
+            writer.writerow([])
             writer.writerow([subsystem.description + ' total', subsystem.total_power])
 
 def action_callback(message):
