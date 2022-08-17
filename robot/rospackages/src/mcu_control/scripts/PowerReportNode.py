@@ -25,10 +25,10 @@ class SubsystemData:
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
             # find power consumed since last datapoint
-            delta = time - self.prev_time
+            delta_hours = (time - self.prev_time) / (60 * 60)
             for i in range(len(currents)):
-                self.watt_hours[i] += currents[i] * delta
-                # NOTE: voltage missing!!
+                self.watt_hours[i] += currents[i] * delta_hours * 12
+                # NOTE: voltage not accurate!!
             # now, sum up all wheels and put in report
             self.total_power = 0
             for x in self.watt_hours:
