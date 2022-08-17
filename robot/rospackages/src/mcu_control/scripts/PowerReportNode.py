@@ -74,7 +74,11 @@ def write_report():
     with open(filename, 'w', newline='') as report_file:
         writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
+        total_consumption = 0
         for subsystem in latest_power_report.report:
+            # include in calculation of total power
+            total_consumption += subsystem.totalWattHours
+            
             # break down per sensor if there are multiple sensors per subsystem
             if len(subsystem.individualWattHours) > 1:
                 for i, motor_consumption in enumerate(subsystem.individualWattHours, 1):
@@ -86,6 +90,9 @@ def write_report():
             else:
                 writer.writerow([subsystem.description, subsystem.totalWattHours])
                 writer.writerow([])
+        # add total power consumption
+        writer.writerow(['Total', total_consumption])
+        
 
 def action_callback(message):
     """Runs when a message is sent to power_report_command, and starts or
@@ -113,6 +120,11 @@ def wheel_voltage_callback(data):
     global wheel_data
     if running:
         wheel_data.voltages = data.data
+
+def arm_voltage_callback(data):
+    global arm_data
+    if running:
+        arm_data.voltages = data.data
 
 def arm_current_callback(data):
     global arm_data, running, pub, latest_power_report
@@ -154,6 +166,7 @@ def start():
     rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback)
     rospy.Subscriber('wheel_motor_voltages', Voltage, wheel_voltage_callback)
     rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback)
+    rospy.Subscriber('arm_motor_voltages', Voltage, arm_voltage_callback)
     rospy.Subscriber('obc_current', Currents, obc_current_callback)
     rospy.Subscriber('poe_current', Currents, poe_current_callback)
 

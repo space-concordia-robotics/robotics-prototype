@@ -206,6 +206,7 @@ def publish_mock_data(voltages, temps, currents):
     DEFAULT_CURRENT_WHEEL_CURRENTS = currents.get("stable")
     DEFAULT_CURRENT_WHEEL_VOLTAGES = voltages.get("stable")
     DEFAULT_CURRENT_ARM_CURRENTS = currents.get("stable")
+    DEFAULT_CURRENT_ARM_VOLTAGES = voltages.get("stable")
     DEFAULT_CURRENT_OBC_CURRENT = currents.get("stable")
     DEFAULT_CURRENT_POE_CURRENT = currents.get("stable")
     TEMP_ARRAY_SIZE = 3
@@ -224,6 +225,7 @@ def publish_mock_data(voltages, temps, currents):
     wheel_currents = Currents()
     wheel_voltage = Voltage()
     arm_currents = Currents()
+    arm_voltages = Voltage()
     obc_current = Currents()
     poe_current = Currents()
     pub_voltage = rospy.Publisher('battery_voltage', Voltage, queue_size=10)
@@ -234,6 +236,8 @@ def publish_mock_data(voltages, temps, currents):
         'wheel_motor_voltages', Voltage, queue_size=10)
     pub_arm_current = rospy.Publisher(
         'arm_motor_currents', Currents, queue_size=10)
+    pub_arm_voltage = rospy.Publisher(
+        'arm_motor_voltages', Voltage, queue_size=10)
     pub_obc_current = rospy.Publisher(
         'obc_current', Currents, queue_size=10)
     pub_poe_current = rospy.Publisher(
@@ -297,7 +301,7 @@ def publish_mock_data(voltages, temps, currents):
         parameter_currents, DEFAULT_CURRENT_WHEEL_CURRENTS)
     rospy.loginfo("current_wheel_currents: {}".format(current_wheel_currents))
 
-    # Trying (Marc) to replicate above but for the motor voltage CHECK THIS
+    # Trying (Marc) to replicate above but for the wheel motor voltage CHECK THIS
     parameter_voltages = []
     for x in range(CURRENT_ARRAY_SIZE):
         parameter_voltages.append("PDS_mock_wheel{}_voltage".format(x+1))
@@ -305,6 +309,16 @@ def publish_mock_data(voltages, temps, currents):
     current_wheel_voltages = init_default_voluntary_param(
         parameter_voltages, DEFAULT_CURRENT_WHEEL_VOLTAGES)
     rospy.loginfo("current_wheel_voltages: {}".format(current_wheel_voltages))
+
+    # Trying (Marc) to replicate above but for the arm motor voltage CHECK THIS
+    parameter_arm_voltages = []
+
+    for x in range(CURRENT_ARRAY_SIZE):
+        parameter_arm_voltages.append("PDS_mock_arm{}_voltage".format(x+1))
+
+    current_arm_voltages = init_default_voluntary_param(
+        parameter_arm_voltages, DEFAULT_CURRENT_ARM_VOLTAGES)
+    rospy.loginfo("current_arm_voltages: {}".format(current_arm_voltages))
 
     # This is pretty hacky, just using same parameters as wheel currents essentially as this had to be done very quickly
     current_arm_currents = init_default_voluntary_param(
@@ -369,6 +383,12 @@ def publish_mock_data(voltages, temps, currents):
                     parameter_currents[x], currents, current_arm_currents[x],
                     current_noise, current_rate/rospy_rate)
 
+        for x in range(len(current_arm_voltages)):
+            if current_arm_voltages[x] is not None:
+                current_arm_voltages[x] = get_parameter_value(
+                    parameter_arm_voltages[x], voltages, current_arm_voltages[x],
+                    current_noise, voltage_rate/rospy_rate)
+
         for x in range(len(current_obc_current)):
             if current_obc_current[x] is not None:
                 current_obc_current[x] = get_parameter_value(
@@ -404,6 +424,12 @@ def publish_mock_data(voltages, temps, currents):
         for x in range(len(current_wheel_voltages)):
             if current_wheel_voltages[x] is not None:
                 wheel_voltage.data.append(float(current_wheel_voltages[x]))
+
+        # Set arm voltages 1-6 CHECK IF THIS IS RIGHT
+        arm_voltages.data.clear()
+        for x in range(len(current_arm_voltages)):
+            if current_arm_voltages[x] is not None:
+                arm_voltages.data.append(float(current_arm_voltages[x]))
         
 
         # THIS SHOULD BE DONE PROPERLY FOR ARM, OBC AND POE CURRENTS AT SOME OTHER POINT RATHER THAN JUST USING THE
@@ -428,6 +454,7 @@ def publish_mock_data(voltages, temps, currents):
         pub_wheel_current.publish(wheel_currents)
         pub_wheel_voltage.publish(wheel_voltage)
         pub_arm_current.publish(arm_currents)
+        pub_arm_voltage.publish(arm_voltages)
         pub_obc_current.publish(obc_current)
         pub_poe_current.publish(poe_current)
 
