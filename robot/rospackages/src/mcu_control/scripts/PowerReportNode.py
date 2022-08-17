@@ -35,6 +35,8 @@ class SubsystemData:
         self.prev_time = time
 
 wheel_data = SubsystemData(6, 'wheels')
+arm_data = SubsystemData(6, 'arm motors')
+subsystems = [wheel_data, arm_data]
 latest_power_report = PowerReport()
 pub = None
 running = False
@@ -43,6 +45,8 @@ def provide_report(data):
     return latest_power_report
 
 def write_report():
+    global subsystems
+
     folder = os.path.expanduser("~") + '/Power_Reports'
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -52,12 +56,12 @@ def write_report():
     with open(filename, 'w', newline='') as report_file:
         writer = csv.writer(report_file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['Description', 'Power consumption (Wh-H)'])
-        subsystems = [wheel_data]
         for subsystem in subsystems:
             for i, motor_consumption in enumerate(subsystem.watt_hours, 1):
                 writer.writerow([subsystem.description + ' ' + str(i), str(motor_consumption)])
             writer.writerow([])
             writer.writerow([subsystem.description + ' total', subsystem.total_power])
+            writer.writerow([])
 
 def action_callback(message):
     global running
@@ -78,18 +82,29 @@ def wheel_current_callback(data):
         latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power)
         rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
 
+def arm_current_callback(data):
+    global arm_data, running, pub, latest_power_report
+    if running:
+        arm_data.update(data.effort)
+        latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power)
+        rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
+
 
 def initData():
-    global wheel_data, latest_power_report
-    wheel_data.reset()
+    global subsystems, latest_power_report
+    # reset the internal power data
+    for subsystem in subsystems:
+        subsystem.reset()
+    # reset the current power report
     latest_power_report = PowerReport()
-    latest_power_report.report = [PowerConsumption(description='wheels', wattHours=0)]
+    latest_power_report.report = [PowerConsumption(description=system.description, wattHours=0) for system in subsystems]
 
 def start():
     initData()
     rospy.init_node('power_report_node', anonymous = False)
     # subscribe to PDS feeds
     rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback)
+    rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback)
     # subscribe for start/stop commands
     rospy.Subscriber('power_report_command', String, action_callback)
 
