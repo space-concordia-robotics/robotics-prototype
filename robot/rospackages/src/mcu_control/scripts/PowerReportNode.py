@@ -23,8 +23,9 @@ class SubsystemData:
         self.description = description
         # This is a default value! 
         self.voltages = [12] * number_of_motors
-    
+
     def reset(self):
+        """Resets all numbers to 0"""
         self.__init__(len(self.watt_hours), self.description)
 
     def update(self, currents):
@@ -55,8 +56,8 @@ pub = None
 running = False
 
 def provide_report(data):
-    """This is a service that provides the latest cumulative power
-    consumption figures."""
+    """This is the callback for a service that provides the latest
+    cumulative power consumption figures."""
     return latest_power_report
 
 def write_report():
@@ -108,6 +109,11 @@ def wheel_current_callback(data):
         latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power, wheel_data.watt_hours)
         rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
 
+def wheel_voltage_callback(data):
+    global wheel_data
+    if running:
+        wheel_data.voltages = data.data
+
 def arm_current_callback(data):
     global arm_data, running, pub, latest_power_report
     if running:
@@ -146,13 +152,15 @@ def start():
     rospy.init_node('power_report_node', anonymous = False)
     # subscribe to PDS feeds
     rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback)
+    rospy.Subscriber('wheel_motor_voltages', Voltage, wheel_voltage_callback)
     rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback)
     rospy.Subscriber('obc_current', Currents, obc_current_callback)
     rospy.Subscriber('poe_current', Currents, poe_current_callback)
-    
+
     # subscribe for start/stop commands
     rospy.Subscriber('power_report_command', String, action_callback)
 
+    # publisher for power consumption, and setup service that provides them 
     global pub
     pub = rospy.Publisher('power_consumption', PowerReport, queue_size = 10)
     s = rospy.Service('power_report_provider', PowerReportProvider, provide_report)

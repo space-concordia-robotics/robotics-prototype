@@ -19,5 +19,12 @@
     <param name="PDS_mock_wheel4_current" value="stable"/>
     <param name="PDS_mock_wheel5_current" value="stable"/>
     <param name="PDS_mock_wheel6_current" value="stable"/>
+
+    <param name="PDS_mock_wheel1_voltage" value="stable"/>
+    <param name="PDS_mock_wheel2_voltage" value="rise"/>
+    <param name="PDS_mock_wheel3_voltage" value="stable"/>
+    <param name="PDS_mock_wheel4_voltage" value="stable"/>
+    <param name="PDS_mock_wheel5_voltage" value="stable"/>
+    <param name="PDS_mock_wheel6_voltage" value="stable"/>
     <include file="$(find mcu_control)/launch/basestation.launch" />
 </launch>
