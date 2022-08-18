@@ -58,6 +58,8 @@ struct JoyCommsControl::Implement {
 
     int number_of_mappings = 0;
     int current_mappings_index = 0;
+
+    bool change_layout_button_held = false;
 };
 
 struct JoyCommsControl::Implement::ButtonMappings {
@@ -331,7 +333,10 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        if (joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button]) {
+        if ((joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button])
+                                                                && !change_layout_button_held) {
+            change_layout_button_held = true;
+
             int new_mapping_index;
             if (joy_msg->buttons[next_layout_button])
             {
@@ -350,9 +355,12 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
                 std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
             }
         }else{
+            change_layout_button_held = false;
             addToCommandQueue(joy_msg);
         }
     } else {
+        change_layout_button_held = false;
+
         //clear buttons_clicked array since enable button is not clicked
         //consider moving it to "not publish" when enable is not clicked
         for(int i =0; i< numberOfButtons ;i++){

@@ -25,11 +25,10 @@ private:
     enum controller_type {
         PLAYSTATION = 1,
         XBOX = 2,
-	PLAYSTATION_UBUNTU_18 = 3
+	    PLAYSTATION_UBUNTU_18 = 3
     };
 
     int controller_type;
-
 
     const std::string share_name = "BUTTON_SHARE";
     const std::string option_name = "BUTTON_OPTION";
@@ -107,8 +106,8 @@ private:
     std::string ps_u18_axis_names[8] = {"JOY_LEFT_X",
                                 "JOY_LEFT_Y",
                                 "JOY_RIGHT_X",
-				trigger_l2_name,
-				trigger_r2_name,
+                                trigger_l2_name,
+                                trigger_r2_name,
                                 "JOY_RIGHT_Y",
                                 "DPAD_X",
                                 "DPAD_Y"};
