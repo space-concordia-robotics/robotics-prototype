@@ -4,68 +4,64 @@
 //
 
 #include "CommandCenter.h"
+
 #include <etl/queue.h>
+
+#include "Arduino.h"
 
 #define COMMAND_DEBUG_MSG 0
 
-//#define DEBUG
+namespace internal_comms {
 
-#ifndef DEBUG
-#define Serial Serial1
-#endif
-
-namespace internal_comms
-{
-    Command* CommandCenter::processCommand()
-    {
+    Command* CommandCenter::processCommand() {
         uint8_t commandID = waitForSerial();
-        /* uint8_t deviceSending = waitForSerial(); */
-        /* uint8_t deviceReceiving = waitForSerial(); */
-
-        uint16_t argumentSize = waitForSerial();
-        //uint16_t argumentSize = waitForSerial();
+        uint8_t argumentSize = readArgSize();
 
         uint8_t* buffer = nullptr;
         uint16_t bytesRead = 0;
 
-        if(argumentSize > 0)
-        {
-            buffer = (uint8_t*) malloc(sizeof(uint8_t) * argumentSize);
-            bytesRead = (uint8_t) Serial.readBytes((char*)buffer, argumentSize);
+        if (argumentSize > 0) {
+            buffer = (uint8_t*)malloc(sizeof(uint8_t) * argumentSize);
+            bytesRead = (uint8_t)Serial.readBytes((char*)buffer, argumentSize);
         }
-       uint8_t stopByte = waitForSerial();
 
-        auto* cmd = (Command*) malloc(sizeof(Command));
+        uint8_t stopByte = waitForSerial();
+
+        Command* cmd = (Command*)malloc(sizeof(Command));
         cmd->commandID = commandID;
         cmd->isValid = true;
         cmd->rawArgs = buffer;
         cmd->rawArgsLength = bytesRead;
 
-        if(bytesRead != argumentSize)
-        {
-            // Possibly an issue
+        /*Serial.print("Command id: ");
+          Serial.print(commandID, HEX);
+          Serial.print(" Argsize: ");
+          Serial.print(argumentSize, DEC);
+          Serial.print(" Bytes read after argsize ");
+          Serial.print(bytesRead, DEC);
+          Serial.print(" stopByte: ");
+          Serial.print(stopByte, HEX);
+          Serial.print("\n");*/
+
+        if (bytesRead != argumentSize) {
+            // bad, but no way of dealing with it for now
         }
 
-        if(stopByte != 0)
-        {
-            //Possibly an issue
+        if (stopByte != 0x0a) {
+            // bad, but no way of dealing with it for now
         }
-        
+
         return cmd;
     }
 
-    uint16_t CommandCenter::readArgSize() {
-        uint16_t byte1 = waitForSerial();
-        uint8_t byte2 = waitForSerial();
-        uint16_t ArgumentsLength = (byte1 << 8) | byte2;
-        return ArgumentsLength;
-    }
+    uint16_t CommandCenter::readArgSize() { return waitForSerial(); }
 
-    Message* CommandCenter::createMessage(int messageID, int rawArgsLength, byte* rawArgs) {
-        auto* message = (Message*) malloc(sizeof(Message));
+    Message* CommandCenter::createMessage(int messageID, int rawArgsLength,
+            byte* rawArgs) {
+        Message* message = (Message*)malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
-        message->rawArgs = static_cast<uint8_t *>(malloc(rawArgsLength));
+        message->rawArgs = malloc(rawArgsLength);
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
@@ -78,60 +74,58 @@ namespace internal_comms
 
     uint8_t CommandCenter::waitForSerial() {
         unsigned long start = millis();
-        while(!Serial.available()){
+        while (!Serial.available()) {
             unsigned long current = millis() - start;
             if (current > 50) break;
         }
         return Serial.read();
     }
-    
-    void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin, uint8_t transmitPin)
-    {
-        pinMode(rxPin, INPUT);
-        pinMode(txPin, OUTPUT); 
+
+    // No where else uses rxPin and txPin, BUT can't get rid of them without
+    // breaking other code that is out of scope for me (Marc)
+    void CommandCenter::startSerial(uint8_t rxPin, uint8_t txPin, uint8_t enablePin,
+            uint8_t transmitPin) {
         pinMode(enablePin, INPUT);
         CommandCenter::enablePin = enablePin;
 
         Serial.begin(COMMS_BAUDRATE);
-        Serial1.begin(COMMS_BAUDRATE);
-        #ifndef DEBUG
-            Serial.transmitterEnable(transmitPin); // must disable this for testing with USB
-        #endif
+
+#ifndef DEBUG
+        pinMode(transmitPin, OUTPUT);
+        Serial.transmitterEnable(
+                transmitPin);  // must disable this for testing with USB
+#endif
     }
 
-    void CommandCenter::readCommand()
-    {
-        Command* command = CommandCenter::processCommand();
-//        Serial.write(command->rawArgsLength);
-//        for(int i = 0 ; i < command->rawArgsLength ;i++){
-//            Serial.write(command->rawArgs[i]);
-//        }
+    void CommandCenter::readCommand() {
+        if (Serial.available() > 0) {
+            Command* command = CommandCenter::processCommand();
+            if (command->isValid) {
+                this->executeCommand(command->commandID, command->rawArgs,
+                        command->rawArgsLength);
+            } else {
+                // Handle invalid command
+                // (Create error message and put it at the front of the queue so that the
+                // TX2 can resend)
+            }
 
-        if(command->isValid)
-        {
-            this->executeCommand(command->commandID, command->rawArgs, command->rawArgsLength);
+            free(command->rawArgs);
+            command->rawArgs = nullptr;
+
+            delete command;
+            command = nullptr;
+        } else {
+            return;
         }
-        else
-        {
-            // Handle invalid command
-            // (Create error message and put it at the front of the queue so that the 
-            // TX2 can resend)
-        }
-
-        free(command->rawArgs);
-        //command->rawArgs = nullptr;
-
-        delete command;
     }
 
-    void CommandCenter::sendDebug(const char* debugMessage)
-    {
-        Message* message = this->createMessage(COMMAND_DEBUG_MSG, strlen(debugMessage), (byte*)debugMessage);
+    void CommandCenter::sendDebug(const char* debugMessage) {
+        Message* message = this->createMessage(COMMAND_DEBUG_MSG,
+                strlen(debugMessage), debugMessage);
         this->queueMessage(*message);
     }
 
     void CommandCenter::sendMessage() {
-
         if (digitalRead(enablePin)) {
             if (!messageQueue.empty()) {
                 Message message = messageQueue.front();
@@ -140,31 +134,20 @@ namespace internal_comms
                 Serial.write(message.messageID);
                 Serial.write(message.rawArgsLength);
 
-                if(message.rawArgsLength > 0)
+                if (message.rawArgsLength > 0)
                     Serial.write(message.rawArgs, message.rawArgsLength);
 
                 Serial.write(0x0A);
 
-
-                free(message.rawArgs);
-                
+                free((void*)message.rawArgs);
             }
-            //else {
-                //Serial.write(1);
-                //Serial.write(0);
-            //}
         }
-
-        }
+    }
 
     void CommandCenter::sendMessage(Message& message) {
         messageQueue.push(message);
         sendMessage();
     }
 
-    void CommandCenter::endSerial()
-    {
-        Serial.end();
-    }
-}
-
+    void CommandCenter::endSerial() { Serial.end(); }
+}  // namespace internal_comms

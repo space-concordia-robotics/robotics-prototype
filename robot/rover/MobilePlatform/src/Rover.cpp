@@ -2,147 +2,145 @@
 
 namespace Rover {
 
-    Servo servoList[6];
-
+    Servo servos[4];
     SystemState systemStatus;
     RoverState roverState;
 
-    void moveWheel(const MotorNames &motorID,const motor_direction& direction,const int8_t& wheelPWM) {
+    void moveWheel(const MotorNames &motorID,const uint8_t& direction,const uint8_t& speed) {
 
-        Motor::updateDesiredMotorVelocity(motorID, direction, wheelPWM);
+        systemStatus.last_move = millis();
+        Motor::updateDesiredMotorVelocity(motorID,direction,speed);
     }
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
-            //analogWrite(motor.pwm_pin,0);
-            if(motor.desired_velocity <= 0){
-                continue;
-            };
-            Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
+           if(motor.current_velocity > 0){
+               Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,0);
+           }
         }
     }
+    // Update current velocity of the wheel, based on whether it has reached the target velocity. This effect
+    // is how acceleration is done.
+    void updateWheelVelocities(){
+        systemStatus.last_velocity_adjustment = millis();
 
-    void steerRover(const uint8_t& throttle_direction, const uint8_t & throttle, const uint8_t & steer_direction,const uint8_t & steering) {
-        //TODO : Figure out how the hell this multiplier works. WHY IS THE MAX LOWER THAN THE MIN LOL.
-        //  WHY 49 ???
-        Serial.write(throttle);
-        float multiplier = mapFloat(abs(steering), 0, 255, 0, 1);
-        if(steering == 0) {
-            multiplier = 1;
+        for(auto& motor : Motor::motorList ){
+
+          if(motor.current_velocity < motor.desired_velocity){
+                motor.current_velocity += 1;
+          }
+          else if(motor.current_velocity > motor.desired_velocity){
+                motor.current_velocity -= 1;
+          }
+          Motor::applyDesiredMotorVelocity(motor.id);
+         }
+    }
+    // This is a fixed value that represents the diameter of the point turn
+    FASTRUN void moveRover(const float & linear_y,const float& omega_z ){
+
+        float slip_track = 1.2f;
+
+        // This can be derived from the equation in the paper.
+        float right_wheels_velocity = linear_y - ( omega_z * slip_track * 0.5f);
+        float left_wheels_velocity = linear_y + ( omega_z * slip_track * 0.5f);
+
+        if(right_wheels_velocity >= 1.0){
+            right_wheels_velocity = 1.0;
         }
-        //TODO : Figure out why the hell we need to map this
-        //float leadingSideAbs = mapFloat(abs(throttle), 0, MAX_INPUT_VALUE, 0, roverState.max_output_signal);
-        float leadingSideAbs = throttle;
-
-        float trailingSideAbs = leadingSideAbs * multiplier;
-
-
-        uint8_t desiredVelocityRight;
-        uint8_t desiredVelocityLeft;
-
-        motor_direction leftMotorDirection;
-        motor_direction rightMotorDirection;
-
-        if(steer_direction == LEFT){
-            desiredVelocityRight = (uint8_t)( leadingSideAbs );
-            desiredVelocityLeft = (uint8_t)( trailingSideAbs );
+        if(left_wheels_velocity >= 1.0){
+            left_wheels_velocity = 1.0;
         }
+        // Taken from the paper
+        float r = (slip_track / 2.0f) * std::fabs(  (right_wheels_velocity +  left_wheels_velocity)/(right_wheels_velocity - left_wheels_velocity));
+
+        float r_prime = slip_track/2.0f;
+
+        uint8_t right_motor_direction;
+        uint8_t left_motor_direction;
+
+        //Point turn;
+        if(r_prime >= r){
+            if(linear_y == 0 && omega_z < 0){
+                right_motor_direction = 1;
+                left_motor_direction = 1;
+            }
+            else if(linear_y == 0 && omega_z > 0){
+                right_motor_direction = 0;
+                left_motor_direction = 0;
+            }
+            else {
+                // Since the velocity is calculated as a float, we can look at the sign bit (IEEE 754 representation) to figure out the sign of the number
+                // Also, this case is only when point turning, or when both wheels go in the same direction.
+                right_motor_direction = std::signbit(linear_y);
+                left_motor_direction = std::signbit(linear_y);
+            }
+
+            }
+        //Normal turn
         else{
-            desiredVelocityRight = (uint8_t)(trailingSideAbs );
-            desiredVelocityLeft = (uint8_t)(leadingSideAbs);
-        }
-        if(throttle_direction == FORWARD){
-            leftMotorDirection = CCW;
-            rightMotorDirection = CW;
-        }
-        else{
-            leftMotorDirection = CW;
-            rightMotorDirection = CCW;
+            left_motor_direction = !std::signbit(linear_y);
+            right_motor_direction = std::signbit(linear_y);
         }
         int current_motor = 0;
 
+        auto right_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(right_wheels_velocity),0,1.0,0,255);
+        auto left_wheels_pwm_velocity = (uint8_t ) mapFloat(std::fabs(left_wheels_velocity),0,1.0,0,255);
+
+        // Go through each motor and update the speed, but actually symmetrically alternate from the far corners which motor is selected,
+        // which makes for easier for the rover to start moving
 
         while(current_motor <= 5) {
-            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, rightMotorDirection,desiredVelocityRight);
-            //delay(25);
+            Motor::updateDesiredMotorVelocity((MotorNames) current_motor, right_motor_direction,(uint8_t )right_wheels_pwm_velocity);
 
-            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), leftMotorDirection,desiredVelocityLeft);
+            Motor::updateDesiredMotorVelocity((MotorNames) (5 - current_motor), left_motor_direction,(uint8_t )left_wheels_pwm_velocity);
 
             current_motor++;
         }
-        systemStatus.last_throttle = millis();
+        systemStatus.last_move = millis();
     }
+
     void decelerateRover(){
-
-            for(auto& motor : Motor::motorList){
-
-                if(motor.desired_velocity <= 0){
-                    continue;
-                }
-                uint8_t new_velocity = motor.desired_velocity - 1;
-
-                if(new_velocity < 5) {
-                    new_velocity= 0;
-                }
-                Motor::updateDesiredMotorVelocity(motor.id,motor.desired_direction,new_velocity);
-                delay(2);
-            }
-      }
-
-    void calculateRoverVelocity() {
-
-        using namespace Motor;
-
-        roverState.right_linear_velocity =
-                (float) (motorList[FRONT_RIGHT].desired_direction * motorList[FRONT_RIGHT].actual_velocity +
-                         motorList[MIDDLE_RIGHT].desired_direction * motorList[MIDDLE_RIGHT].actual_velocity +
-                         motorList[REAR_RIGHT].desired_direction * motorList[REAR_RIGHT].actual_velocity) * radius *
-                piRad;
-
-        roverState.left_linear_velocity =
-                (float) (motorList[FRONT_LEFT].desired_direction * motorList[FRONT_LEFT].actual_velocity +
-                         motorList[MIDDLE_LEFT].desired_direction * motorList[MIDDLE_LEFT].actual_velocity +
-                         motorList[REAR_LEFT].desired_direction * motorList[REAR_LEFT].actual_velocity) * radius *
-                piRad;
-
-        roverState.linear_velocity = (roverState.right_linear_velocity - roverState.left_linear_velocity) / 6;
-        roverState.rotational_velocity = (roverState.left_linear_velocity + roverState.right_linear_velocity) / wheelBase;
-    }
-
-    void writeToServo(const ServoNames& servo_id, const int16_t& value) {
-        servoList[servo_id].write(value);
+        for(auto& motor : Motor::motorList){
+            motor.desired_velocity = 0;
+        }
     }
 
     void attachServo(const ServoNames& servoID,const uint8_t& pin) {
-
-        servoList[servoID] = Servo();
-        servoList[servoID].attach(pin);
-    }
-
-    void closeLoop() {
-
-        roverState.max_output_signal = MAX_RPM_VALUE;
-        roverState.min_output_signal = 0;
-
-        if (systemStatus.are_motors_enabled) {
-            stopMotors();
-        }
-        systemStatus.is_open_loop = false;
+        servos[servoID].attach(pin);
+        moveServo(servoID,0);
 
     }
 
-    void openLoop() {
-
-        roverState.max_output_signal = MAX_PWM_VALUE;
-        roverState.min_output_signal = 0;
-
-        if (systemStatus.are_motors_enabled) {
-            stopMotors();
+    // Angle is given by 0-180, if the value is > 180 than it is clipped to 180
+    void moveServo(const ServoNames& servo_id, const uint8_t & value) {
+        servos[servo_id].write(value);
+    }
+    // Toggles the activity light every 500ms (configureable) if it's set to blink
+    void handleActivityLight() {
+        if (roverState.blinking && (millis() - roverState.timeBlinkUpdated) > ACTIVITY_BLINK_PERIOD) {
+            setActivityLight(!roverState.lightOn);
         }
-        for(auto& motor : Motor::motorList){
-            motor.is_open_loop = true;
-        }
-        systemStatus.is_open_loop = true;
     }
 
+    void setActivityBlinking(uint8_t on) {
+        setActivityLight(on);
+        roverState.blinking = on;
+    }
+
+    void setActivityLight(uint8_t on) {
+        if (on) {
+            roverState.light.setAll(roverState.r, roverState.g, roverState.b, ACTIVITY_BRIGHTNESS);
+        } else {
+            roverState.light.setAll(0, 0, 0, 0);
+        }
+        roverState.light.send();
+        roverState.timeBlinkUpdated = millis();
+        roverState.lightOn = (bool)on;
+    }
+
+    void setActivityColor(uint8_t r, uint8_t g, uint8_t b) {
+        roverState.r = r;
+        roverState.g = g;
+        roverState.b = b;
+    }
 
 }

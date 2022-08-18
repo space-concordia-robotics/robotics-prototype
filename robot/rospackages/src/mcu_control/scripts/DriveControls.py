@@ -81,12 +81,6 @@ def twist_to_rover_command(linear, angular):
     elif angular < -max_angular_speed:
         angular = -max_angular_speed
 
-    #linear_speed = linear / max_speed # linear_speed should now be in [-1, 1]
-    #angular_speed = angular / max_angular_speed # angular_speed should now [-1,1]
-
-    #linear_val = linear_speed * max_throttle
-    #angular_val = angular_speed * max_steering
-
     throttle = interp(linear,[-max_speed,max_speed],[-255,255])
     steering = interp(angular,[-max_angular_speed,max_angular_speed],[-255,255])
     
@@ -108,20 +102,3 @@ def twist_to_rover_command(linear, angular):
 
     print(str(args))
     return args
-
-    #print(linear_val)
-    #print(angular_val)
-
-    #if linear_val == 0:
-    #    throttle = abs(angular_val)
-    #    if angular_val < 0:
-    #        steering = 49
-    #    elif angular_val > 0:
-    #        steering = -49
-    #else:
-    #    throttle = linear_val
-    #    steering = 0
-    #print(throttle)
-    #print(steering)
-
-    #return str(round(throttle)) + ':' + str(round(steering))

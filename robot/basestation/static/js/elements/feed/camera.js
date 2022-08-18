@@ -16,6 +16,8 @@ $(document).ready(() => {
   // task handler's recognized name for camera stream task
   const CAMERA_TASK = 'camera_stream'
   const CAMERA_PORTS = 'camera_ports'
+  // ar stream tasks
+  const AR_TASK = 'ar_stream'
   // response messages from task handler
   // these values must not be altered unless they are updated in the task handler server
   const CAMERA_START_SUCCESS_RESPONSE = 'Started camera stream'
@@ -29,8 +31,11 @@ $(document).ready(() => {
   const RECORDING_ON = '../../../static/img/camera/record_on.png'
   const RECORDING_OFF = '../../../static/img/camera/record_off.png'
 
-  function getStreamURL(topicName) {
-    return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
+  function getStreamURL(topicName, arTagDetection = false) {
+    if(arTagDetection)
+        return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_ar'
+    else
+        return 'http://' + getRoverIP() + ':8080/stream?topic=/' + topicName + '/image_raw'
   }
 
   function getCameraFilename(cameraPanel) {
@@ -60,11 +65,22 @@ $(document).ready(() => {
     }, cameraStream)
   }
 
+  function startARStream(cameraStream, cameraFeed){
+      requestTask(AR_TASK, STATUS_START, () => {
+          const arTagDetectionUrl = getStreamURL(cameraStream, arTagDetection = true)
+          $('.ar-tag-detection').css("color","red");
+          cameraFeed.attr('src', arTagDetectionUrl);
+      } , reqArgs = cameraStream);
+  }
   function stopCameraStream(cameraStream, successCallback = () => {}) {
     requestTask(CAMERA_TASK, STATUS_STOP, msgs => {
         if(msgs[0])
         {
-            successCallback()
+            successCallback();
+            const topicName = getCameraFilename($('.camera-panel')) + TOPIC_SUFFIX;
+            ros.getNodes( nodes =>{
+                if (nodes.includes("/ar_tracker_"+topicName)) stopARStream(topicName, $('.camera-feed'));
+            })
         }
         else
         {
@@ -73,7 +89,10 @@ $(document).ready(() => {
 
     }, cameraStream)
   }
-
+  function stopARStream(cameraStream, cameraFeed){
+      requestTask(AR_TASK, STATUS_STOP, () =>{
+      }, reqArgs = cameraStream)
+  }
   function startRecording(stream_url, callback = () => {}) {
     const start_recording_url = '/initiate_feed_recording?stream_url=' + stream_url
     $.ajax(start_recording_url, {
@@ -135,7 +154,6 @@ $(document).ready(() => {
     cameraPower.attr('src', POWER_ON)
 
     cameraControls.attr('camera-name', cameraName)
-    console.log("memes")
   }
 
   function showStreamOff(cameraPanel) {
@@ -197,6 +215,7 @@ $(document).ready(() => {
   })
 
   $(document).on('click', '.camera-selection-element', e => {
+    $('.ar-tag-detection').css("color","black");
     let selectedStream = $(e.target)[0]
     let cameraPanel = $(e.target).parents(".camera-panel")
     let cameraNameElement = cameraPanel.find(".camera-name")
@@ -286,7 +305,8 @@ $(document).ready(() => {
 
     let streamURL = getStreamURL(getCameraFilename(cameraPanel) + TOPIC_SUFFIX)
     let isPoweredOn = cameraPower.attr("power-on") == "true"
-    if(isPoweredOn)
+    if(isPoweredOn){
+      $('.ar-tag-detection').css("color","black");
       isRecording(streamURL, is_recording => {
         if(is_recording)
         {
@@ -307,7 +327,7 @@ $(document).ready(() => {
           })
         }
       })
-    else
+    }else
       startCameraStream(cameraName, () => {
         showStreamOn(cameraPanel)
       })
@@ -348,5 +368,52 @@ $(document).ready(() => {
 
   $('.camera-popup' ).click(function() {
     window.open('/camerapopup', "", 'height=' + screen.height + ', width=' + screen.width);
+  })
+  $('.ar-tag-detection').click((e) =>{
+    let cameraPanel = $(e.target).parents('.camera-panel')
+    let cameraPower = cameraPanel.find('.camera-power')
+    let cameraFeed = cameraPanel.find('.camera-feed')
+    let cameraName = getCameraFilename(cameraPanel) + TOPIC_SUFFIX // video0Cam
+    let arTagDetectionUrl = getStreamURL(cameraName, arTagDetection = true)
+
+    if(cameraPower.attr("power-on") == "true"){
+      ros.getNodes( nodes =>{
+        const isARNodeRunning = nodes.includes("/ar_tracker_"+cameraName);
+        if (cameraFeed.attr('src') == arTagDetectionUrl){
+            //Check if already running, if yes -> Turn off AR feed. If no -> don't do anything
+            if (isARNodeRunning){
+                cameraFeed.attr('src', getStreamURL(cameraName))
+                $('.ar-tag-detection').css("color","black");
+                //Kill the AR node (wait a bit to give /web_video_server the time to unsub if it needs to)
+                setTimeout(() =>{
+                ros.getNodeDetails("/web_video_server", details =>{
+                    if (details.subscribing.includes("/"+cameraName+"/image_ar")){
+                        //Someone is still using the AR stream don't kill it
+                        return;
+                    }else{
+                        stopARStream(cameraName, cameraFeed);
+                    }
+                })
+                }, 1500)
+            }else{
+                return;
+            }
+        } else {
+            // Check if AR feed is already running. If yes switch to it, if no, turn it on + switch to it.
+            if (!isARNodeRunning){
+                //turn it on and switch to it in callback
+                startARStream(cameraName, cameraFeed);
+            }else{
+                cameraFeed.attr('src', arTagDetectionUrl)
+                $('.ar-tag-detection').css("color","red");
+            }
+        }
+      })
+    }else{
+      return;
+    }
+  })
+  $('.ar-tag-detection').mouseup(() =>{
+    $('.ar-tag-detection').blur()
   })
 })

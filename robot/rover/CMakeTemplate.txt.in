@@ -27,6 +27,7 @@ if(NOT "${${PROJECT_NAME}_user_sources}" STREQUAL "")
     set(USER_SOURCES TRUE)
 add_library(${PROJECT_NAME}_user ${${PROJECT_NAME}_user_sources})
 
+
 target_include_directories(${PROJECT_NAME}_user PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes ${CMAKE_CURRENT_SOURCE_DIR}/include @EXTERNAL_LIBARRIES_INCLUDE_DIRS@)
 target_compile_options(${PROJECT_NAME}_user PUBLIC ${ARM_GXX_FLAGS})	
 
@@ -39,7 +40,6 @@ add_executable(${PROJECT_NAME}_EXE ${PROJECT_NAME}.ino.cpp)
 target_compile_options(${PROJECT_NAME}_EXE PUBLIC ${ARM_GXX_FLAGS})
 target_include_directories(${PROJECT_NAME}_EXE PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/includes)
 target_include_directories(${PROJECT_NAME}_EXE PRIVATE @EXTERNAL_LIBRARIES_INCLUDE_DIRS@)
-
 
 set_target_properties(
         ${PROJECT_NAME}_EXE PROPERTIES
@@ -65,12 +65,7 @@ add_custom_command(OUTPUT ${PROJECT_NAME}_upload_command
         COMMAND ${TEENSY_LOADER_CLI} --mcu=${MCU} -s -v ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
         DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.hex
 )
-
 add_custom_target(${PROJECT_NAME}
         DEPENDS ${PROJECT_NAME}_upload_command
 )
 
-#if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-#    set(project_sources ${PROJECT_NAME}_user)
-#    add_subdirectory(tests)
-#endif()

@@ -1,44 +1,26 @@
-#include <Arduino.h>
 #include "../include/PinSetup.h"
 
+#include <Arduino.h>
+
 void pinSetup(void) {
-  pinMode(LED_BUILTIN, OUTPUT); // pin 13, heartbeat
+  pinMode(LED_BUILTIN, OUTPUT);  // pin 13, heartbeat
   digitalWrite(LED_BUILTIN, HIGH);
 
-  pinMode(V_SENSE, INPUT); // battery sensing
-  
   // DC motors
 
   pinMode(M1_PWM_PIN, OUTPUT);
+  analogWriteFrequency(M1_PWM_PIN, 18000);
   pinMode(M1_DIR_PIN, OUTPUT);
-  pinMode(M1_ENCODER_A, INPUT_PULLUP);
-  pinMode(M1_ENCODER_B, INPUT_PULLUP);
-  pinMode(M1_LIMIT_SW_CW, LIM_SWITCH_PULLSTATE);
-  pinMode(M1_LIMIT_SW_CCW, LIM_SWITCH_PULLSTATE);
 
   pinMode(M2_PWM_PIN, OUTPUT);
+  analogWriteFrequency(M2_PWM_PIN, 18000);
   pinMode(M2_DIR_PIN, OUTPUT);
-  pinMode(M2_ENCODER_A, INPUT_PULLUP);
-  pinMode(M2_ENCODER_B, INPUT_PULLUP);
-  pinMode(M2_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
-  pinMode(M2_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
   pinMode(M3_PWM_PIN, OUTPUT);
+  analogWriteFrequency(M3_PWM_PIN, 18000);
   pinMode(M3_DIR_PIN, OUTPUT);
-  pinMode(M3_ENCODER_A, INPUT_PULLUP);
-  pinMode(M3_ENCODER_B, INPUT_PULLUP);
-  pinMode(M3_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
-  pinMode(M3_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
 
-  pinMode(M4_DIR_PIN, OUTPUT);
   pinMode(M4_PWM_PIN, OUTPUT);
-  pinMode(M4_ENCODER_A, INPUT_PULLUP);
-  pinMode(M4_ENCODER_B, INPUT_PULLUP);
-  pinMode(M4_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
-  pinMode(M4_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
-
-  // Servos
-  pinMode(M6_LIMIT_SW_FLEX, LIM_SWITCH_PULLSTATE);
-  pinMode(M6_LIMIT_SW_EXTEND, LIM_SWITCH_PULLSTATE);
-
+  analogWriteFrequency(M4_PWM_PIN, 18000);
+  pinMode(M4_DIR_PIN, OUTPUT);
 }
