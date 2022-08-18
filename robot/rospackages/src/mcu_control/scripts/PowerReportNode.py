@@ -51,9 +51,8 @@ class SubsystemData:
 
 wheel_data = SubsystemData(6, 'wheels')
 arm_data = SubsystemData(6, 'arm motors')
-obc_data = SubsystemData(1, 'onboard computer')
-poe_data = SubsystemData(1, 'power over ethernet injector')
-subsystems = [wheel_data, arm_data, obc_data, poe_data]
+control_data = SubsystemData(1, 'control systen: onboard computer and PoE')
+subsystems = [wheel_data, arm_data, control_data]
 latest_power_report = PowerReport()
 pub = None
 
@@ -130,25 +129,16 @@ def arm_current_callback(data):
     latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power, arm_data.watt_hours)
     rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
 
-def obc_current_callback(data):
-    global obc_data, pub, latest_power_report
-    obc_data.update(data.effort)
-    latest_power_report.report[2] = PowerConsumption(obc_data.description, obc_data.total_power, obc_data.watt_hours)
-    rospy.loginfo('obc watt hours: ' + str(obc_data.total_power))
+def control_current_callback(data):
+    global control_data, pub, latest_power_report
+    control_data.update(data.effort)
+    latest_power_report.report[2] = PowerConsumption(control_data.description, control_data.total_power, control_data.watt_hours)
+    rospy.loginfo('control system watt hours: ' + str(control_data.total_power))
 
-def obc_voltage_callback(data):
-    global obc_data
-    obc_data.voltages = data.data
+def control_voltage_callback(data):
+    global control_data
+    control_data.voltages = data.data
 
-def poe_current_callback(data):
-    global poe_data, pub, latest_power_report
-    poe_data.update(data.effort)
-    latest_power_report.report[3] = PowerConsumption(poe_data.description, poe_data.total_power, poe_data.watt_hours)
-    rospy.loginfo('poe watt hours: ' + str(poe_data.total_power))
-
-def poe_voltage_callback(data):
-    global poe_data
-    poe_data.voltages = data.data
 
 def initData():
     """Reset all data for power consumption to 0."""
@@ -172,10 +162,8 @@ def subscribe_to_PDS():
                  rospy.Subscriber('wheel_motor_voltages', Voltages, wheel_voltage_callback),
                  rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
                  rospy.Subscriber('arm_motor_voltages', Voltages, arm_voltage_callback),
-                 rospy.Subscriber('obc_current', Currents, obc_current_callback),
-                 rospy.Subscriber('obc_voltage', Voltages, obc_voltage_callback),
-                 rospy.Subscriber('poe_current', Currents, poe_current_callback),
-                 rospy.Subscriber('poe_voltage', Voltages, poe_voltage_callback)]
+                 rospy.Subscriber('control_current', Currents, control_current_callback),
+                 rospy.Subscriber('control_voltage', Voltages, control_voltage_callback)]
 
 def unsubscribe_from_PDS():
     """Unsubscribes from all PDS current and voltage feeds."""

@@ -36,8 +36,7 @@
     <param name="PDS_mock_arm5_voltage" value="stable"/>
     <param name="PDS_mock_arm6_voltage" value="stable"/>
 
-    <param name="PDS_mock_poe_voltage" value="stable"/>
-    <param name="PDS_mock_obc_voltage" value="fall"/>
+    <param name="PDS_mock_control_voltage" value="stable"/>
     
     <include file="$(find mcu_control)/launch/basestation.launch" />
 </launch>

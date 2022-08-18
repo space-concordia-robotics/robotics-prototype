@@ -207,10 +207,8 @@ def publish_mock_data(voltages, temps, currents):
     DEFAULT_CURRENT_WHEEL_VOLTAGES = voltages.get("stable")
     DEFAULT_CURRENT_ARM_CURRENTS = currents.get("stable")
     DEFAULT_CURRENT_ARM_VOLTAGES = voltages.get("stable")
-    DEFAULT_CURRENT_OBC_CURRENT = currents.get("stable")
-    DEFAULT_CURRENT_OBC_VOLTAGE = voltages.get("stable")
-    DEFAULT_CURRENT_POE_CURRENT = currents.get("stable")
-    DEFAULT_CURRENT_POE_VOLTAGE = voltages.get("stable")
+    DEFAULT_CURRENT_CONTROL_CURRENT = currents.get("stable")
+    DEFAULT_CURRENT_CONTROL_VOLTAGE = voltages.get("stable")
     TEMP_ARRAY_SIZE = 3
     CURRENT_ARRAY_SIZE = 6
 
@@ -228,10 +226,8 @@ def publish_mock_data(voltages, temps, currents):
     wheel_voltage = Voltages()
     arm_currents = Currents()
     arm_voltages = Voltages()
-    obc_current = Currents()
-    obc_voltage = Voltages()
-    poe_current = Currents()
-    poe_voltage = Voltages()
+    control_current = Currents()
+    control_voltage = Voltages()
     pub_voltage = rospy.Publisher('battery_voltage', Voltages, queue_size=10)
     pub_temp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
     pub_wheel_current = rospy.Publisher(
@@ -242,14 +238,10 @@ def publish_mock_data(voltages, temps, currents):
         'arm_motor_currents', Currents, queue_size=10)
     pub_arm_voltage = rospy.Publisher(
         'arm_motor_voltages', Voltages, queue_size=10)
-    pub_obc_current = rospy.Publisher(
-        'obc_current', Currents, queue_size=10)
-    pub_obc_voltage = rospy.Publisher(
-        'obc_voltage', Voltages, queue_size=10)
-    pub_poe_current = rospy.Publisher(
-        'poe_current', Currents, queue_size=10)
-    pub_poe_voltage = rospy.Publisher(
-        'poe_voltage', Voltages, queue_size=10)
+    pub_control_current = rospy.Publisher(
+        'control_current', Currents, queue_size=10)
+    pub_control_voltage = rospy.Publisher(
+        'control_voltage', Voltages, queue_size=10)
 
     # Initialize 1 starting voltage increment rate
     # Using default value if not initialized in launch file
@@ -333,21 +325,13 @@ def publish_mock_data(voltages, temps, currents):
         parameter_currents, DEFAULT_CURRENT_ARM_CURRENTS)
     rospy.loginfo("current_arm_currents: {}".format(current_arm_currents))
 
-    current_obc_current = init_default_voluntary_param(
-        parameter_currents, DEFAULT_CURRENT_OBC_CURRENT)
-    rospy.loginfo("current_obc_currents: {}".format(current_obc_current[0]))
+    current_control_current = init_default_voluntary_param(
+        parameter_currents, DEFAULT_CURRENT_CONTROL_CURRENT)
+    rospy.loginfo("current_obc_currents: {}".format(current_control_current[0]))
 
-    parameter_obc_voltage = 'PDS_mock_obc_voltage'
-    current_obc_voltage = init_default_voluntary_param(
-        parameter_obc_voltage, DEFAULT_CURRENT_OBC_VOLTAGE)
-
-    current_poe_current = init_default_voluntary_param(
-        parameter_currents, DEFAULT_CURRENT_POE_CURRENT)
-    rospy.loginfo("current_poe_currents: {}".format(current_obc_current[0]))
-
-    parameter_poe_voltage = 'PDS_mock_poe_voltage'
-    current_poe_voltage = init_default_voluntary_param(
-        parameter_poe_voltage, DEFAULT_CURRENT_OBC_VOLTAGE)
+    parameter_control_voltage = 'PDS_mock_control_voltage'
+    current_control_voltage = init_default_voluntary_param(
+        parameter_control_voltage, DEFAULT_CURRENT_CONTROL_VOLTAGE)
 
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
@@ -404,26 +388,15 @@ def publish_mock_data(voltages, temps, currents):
                     parameter_arm_voltages[x], voltages, current_arm_voltages[x],
                     current_noise, voltage_rate/rospy_rate)
 
-        for x in range(len(current_obc_current)):
-            if current_obc_current[x] is not None:
-                current_obc_current[x] = get_parameter_value(
-                    parameter_currents[x], currents, current_obc_current[x],
+        for x in range(len(current_control_current)):
+            if current_control_current[x] is not None:
+                current_control_current[x] = get_parameter_value(
+                    parameter_currents[x], currents, current_control_current[x],
                     current_noise, current_rate/rospy_rate)
 
-        if current_obc_voltage is not None:
-            current_obc_voltage = get_parameter_value(parameter_obc_voltage,
-                                                      voltages, current_obc_voltage,
-                                                      current_noise, voltage_rate/rospy_rate)
-
-        for x in range(len(current_poe_current)):
-            if current_poe_current[x] is not None:
-                current_poe_current[x] = get_parameter_value(
-                    parameter_currents[x], currents, current_poe_current[x],
-                    current_noise, current_rate/rospy_rate)
-
-        if current_poe_voltage is not None:
-            current_poe_voltage = get_parameter_value(parameter_poe_voltage,
-                                                      voltages, current_poe_voltage,
+        if current_control_voltage is not None:
+            current_control_voltage = get_parameter_value(parameter_control_voltage,
+                                                      voltages, current_control_voltage,
                                                       current_noise, voltage_rate/rospy_rate)
 
         # Set values to objects which will get published
@@ -465,17 +438,11 @@ def publish_mock_data(voltages, temps, currents):
             if current_arm_currents[x] is not None:
                 arm_currents.effort.append(float(current_arm_currents[x]))
 
-        # Set OBC current and voltage
-        obc_current.effort.clear()
-        obc_current.effort.append(float(current_obc_current[0]))
-        obc_voltage.data.clear()
-        obc_voltage.data.append(float(current_obc_voltage))
-
-        # Set POE current and voltage
-        poe_current.effort.clear()
-        poe_current.effort.append(float(current_obc_current[0]))
-        poe_voltage.data.clear()
-        poe_voltage.data.append(float(current_poe_voltage))
+        # Set control system current and voltage
+        control_current.effort.clear()
+        control_current.effort.append(float(current_control_current[0]))
+        control_voltage.data.clear()
+        control_voltage.data.append(float(current_control_voltage))
 
         # Publish values to topics (Voltage, ThermistorTemps and Currents)
         pub_voltage.publish(voltage)
@@ -484,10 +451,8 @@ def publish_mock_data(voltages, temps, currents):
         pub_wheel_voltage.publish(wheel_voltage)
         pub_arm_current.publish(arm_currents)
         pub_arm_voltage.publish(arm_voltages)
-        pub_obc_current.publish(obc_current)
-        pub_obc_voltage.publish(obc_voltage)
-        pub_poe_current.publish(poe_current)
-        pub_poe_voltage.publish(poe_voltage)
+        pub_control_current.publish(control_current)
+        pub_control_voltage.publish(control_voltage)
 
 
         # Add delay before each iteration of loop which runs rospy
