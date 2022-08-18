@@ -24,7 +24,8 @@ private:
 
     enum controller_type {
         PLAYSTATION = 1,
-        XBOX = 2
+        XBOX = 2,
+	PLAYSTATION_UBUNTU_18 = 3
     };
 
     int controller_type;
@@ -65,6 +66,21 @@ private:
                                 "BUTTON_R3"};
 
 
+    std::string ps_u18_button_names[13] = {"BUTTON_SQUARE",
+                                "BUTTON_CROSS",
+                                "BUTTON_CIRCLE",
+                                "BUTTON_TRIANGLE",
+                                "BUTTON_L1",
+                                "BUTTON_R1",
+                                "BUTTON_L2",
+                                "BUTTON_R2",
+                                share_name,
+                                option_name,
+                                "BUTTON_L3",
+                                "BUTTON_R3",
+    				"BUTTON_HOME"};
+
+
     std::map<std::string, int> button_name_to_id_map;
 
 
@@ -87,6 +103,16 @@ private:
                                 trigger_r2_name,
                                 "DPAD_X",
                                 "DPAD_Y"};
+
+    std::string ps_u18_axis_names[8] = {"JOY_LEFT_X",
+                                "JOY_LEFT_Y",
+                                "JOY_RIGHT_X",
+				trigger_l2_name,
+				trigger_r2_name,
+                                "JOY_RIGHT_Y",
+                                "DPAD_X",
+                                "DPAD_Y"};
+
 
     std::map<std::string, int> axis_name_to_id_map;
 

@@ -82,6 +82,13 @@ void JoyCommsControl::MapButtonNamesToIds() {
         for (int i = 0; i< pImplement->numberOfAxes; ++i) {
             axis_name_to_id_map.insert(std::pair<std::string, int>(xbox_axis_names[i], i));
         }
+    }else if(controller_type == PLAYSTATION_UBUNTU_18){
+        for (int i = 0; i < pImplement->numberOfButtons; ++i) {
+            button_name_to_id_map.insert(std::pair<std::string, int>(ps_u18_button_names[i], i));
+        }
+        for (int i = 0; i< pImplement->numberOfAxes; ++i) {
+            axis_name_to_id_map.insert(std::pair<std::string, int>(ps_u18_axis_names[i], i));
+        }
     }else{
         std::cout << "error in MapButtonNamesToIds: controller type unknown" << std::endl;
         exit(1);
@@ -208,6 +215,11 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
         std::cout << "controller is PLAYSTATION controller" << std::endl;
         pImplement->numberOfButtons = sizeof(ps_button_names)/sizeof(ps_button_names[0]);
         pImplement->numberOfAxes = sizeof(ps_axis_names)/sizeof(ps_axis_names[0]);
+    }else if (controller_type == PLAYSTATION_UBUNTU_18)
+    {
+        std::cout << "controller is PLAYSTATION controller on Ubuntu 18.04" << std::endl;
+        pImplement->numberOfButtons = sizeof(ps_u18_button_names)/sizeof(ps_u18_button_names[0]);
+        pImplement->numberOfAxes = sizeof(ps_u18_axis_names)/sizeof(ps_u18_axis_names[0]);
     }else if(controller_type == XBOX){
         std::cout << "controller is XBOX controller" << std::endl;
         pImplement->numberOfButtons = sizeof(xbox_button_names)/sizeof(xbox_button_names[0]);
