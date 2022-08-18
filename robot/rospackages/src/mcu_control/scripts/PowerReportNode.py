@@ -102,9 +102,11 @@ def action_callback(message):
     if message.data == 'start':
         initData()
         subscribe_to_PDS()
+        rospy.loginfo('Power report node starting to log power consumption.')
     elif message.data == 'stop':
         unsubscribe_from_PDS()
         write_report()
+        rospy.loginfo('Power report node stopping to log power consumption.')
     else:
         rospy.logerr('invalid command')
 
@@ -113,7 +115,7 @@ def wheel_current_callback(data):
     global wheel_data, pub, latest_power_report
     wheel_data.update(data.effort)
     latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power, wheel_data.watt_hours)
-    rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
+    # rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
 
 def wheel_voltage_callback(data):
     global wheel_data
@@ -127,13 +129,13 @@ def arm_current_callback(data):
     global arm_data, pub, latest_power_report
     arm_data.update(data.effort)
     latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power, arm_data.watt_hours)
-    rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
+    # rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
 
 def control_current_callback(data):
     global control_data, pub, latest_power_report
     control_data.update(data.effort)
     latest_power_report.report[2] = PowerConsumption(control_data.description, control_data.total_power, control_data.watt_hours)
-    rospy.loginfo('control system watt hours: ' + str(control_data.total_power))
+    # rospy.loginfo('control system watt hours: ' + str(control_data.total_power))
 
 def control_voltage_callback(data):
     global control_data
