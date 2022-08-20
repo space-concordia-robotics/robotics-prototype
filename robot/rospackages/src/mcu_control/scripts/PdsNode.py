@@ -12,7 +12,7 @@ from robot.rospackages.src.mcu_control.scripts.PdsAdapter import *
 import rospy
 from std_msgs.msg import String, Float32
 from geometry_msgs.msg import Point
-from mcu_control.msg import ThermistorTemps, FanSpeeds, Voltage, Currents
+from mcu_control.msg import ThermistorTemps, FanSpeeds, Voltages, Currents
 from mcu_control.srv import *
 
 from collections import deque
@@ -102,9 +102,16 @@ def publish_pds_data():
     return
 
 def publishSwitchChannelAndBatteryData():
-    batteryVoltage = Voltage()
+    batteryVoltage = Voltages()
+    batteryVoltage.data.append(0.0) # there prob is a better way to init this idk
+
     wheelCurrents = Currents()
     armCurrents = Currents()
+    controlCurrent = Currents()
+
+    wheelVoltages = Voltages()
+    armVoltages = Voltages()
+    controlVoltage = Voltages()
 
     packetOutChannels = PacketOutReadSwitchChannel()
     packetOutBatteryChannel = PacketOutReadBatteryChannel()
@@ -128,16 +135,31 @@ def publishSwitchChannelAndBatteryData():
 
     batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
 
-    currentPds1, currentPds2, batteryVoltage.data = rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2,
-                                                                          batteryVoltageRaw)
+    currentPds1, currentPds2 = rawVoltagesToCurrentConversion(voltagesRawPds1, voltagesRawPds2)
 
-    armMotorCurrents, wheelMotorCurrents, OBCVoltage, POEVoltage = voltageChannelsParser(currentPds1, currentPds2)
+    batteryVoltage.data = rawAproxRawVoltagesConversion([batteryVoltageRaw])
 
+    armMotorCurrents, wheelMotorCurrents, controlCurrentValue = channelsParser(currentPds1, currentPds2)
+
+    armMotorVoltages, wheelMotorVoltages, controlVoltageValue = 6*batteryVoltage.data, 6*batteryVoltage.data, batteryVoltage.data[0]
+
+    # Publish currents
     armCurrents.effort = armMotorCurrents
     wheelCurrents.effort = wheelMotorCurrents
+    controlCurrent.effort = [controlCurrentValue]
 
     armCurrentPub.publish(armCurrents)
     wheelCurrentPub.publish(wheelCurrents)
+    controlCurrentPub.publish(controlCurrent)
+
+    # Publish voltages
+    armVoltages.data = armMotorVoltages
+    wheelVoltages.data = wheelMotorVoltages
+    controlVoltage.data = [controlVoltageValue]
+
+    armVoltagePub.publish(armVoltages)
+    wheelVoltagePub.publish(wheelVoltages)
+    controlVoltagePub.publish(controlVoltage)
 
     batteryVoltagePub.publish(batteryVoltage)
 
@@ -148,23 +170,31 @@ def publishTemps():
 
     tempPub.publish(temp)
 
-def rawVoltagesConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
-    return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), rawBatteryVoltageConversion(batteryVoltageRaw)
+def rawVoltagesToCurrentConversion(voltagesRawPds1, voltagesRawPds2):
+    return rawAproxRawCurrentConversion(voltagesRawPds1), rawAproxRawCurrentConversion(voltagesRawPds2)
 
-def rawAproxRawVoltagesConversion(voltagesRaw):
-    return [x * K_RAW_CONVERSION for x in voltagesRaw]
+def rawVoltagesToVoltageConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
+    return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), \
+           rawBatteryVoltageConversion(batteryVoltageRaw)
+
+def rawAproxRawCurrentConversion(raw):
+    return [((x*0.55114602 + 103.780152) / 1000) if x > 100 else 0 for x in raw]
+
+def rawAproxRawVoltagesConversion(raw):
+    return [(x*8.6374*pow(10,-4) - 0.0785959) for x in raw]
 
 def rawBatteryVoltageConversion(rawVoltage):
     return rawVoltage * K_RAW_CONVERSION_BATTERY
 
-def voltageChannelsParser(voltagesPds1, voltagesPds2):
-    armMotorVoltages = voltagesPds1[:4]
-    wheelMotorVoltages = voltagesPds2
+def channelsParser(pds1, pds2):
+    armMotor = pds1[:4]
+    armMotor.append(0.0)
+    armMotor.append(0.0) # Temp placeholder for smart servos
+    wheelMotor = pds2
 
-    OBCVoltage = voltagesPds1[4]
-    POEVoltage = voltagesPds1[5]
+    control = pds1[4] + pds1[5]
 
-    return armMotorVoltages, wheelMotorVoltages, OBCVoltage, POEVoltage
+    return armMotor, wheelMotor, control
 
 
 if __name__ == '__main__':
@@ -172,11 +202,7 @@ if __name__ == '__main__':
     rospy.init_node(node_name, anonymous = False)  # only allow one node of this type
     rospy.loginfo('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-    # PacketOutReadBatteryChannel
-    battery_voltage_pub_topic = '/battery_voltage'
-    rospy.loginfo('Beginning to publish to "' + battery_voltage_pub_topic + '" topic')
-    batteryVoltagePub = rospy.Publisher(battery_voltage_pub_topic, Voltage, queue_size = 10)
-
+    # Currents
     wheel_current_pub_topic = '/wheel_motor_currents'
     rospy.loginfo('Begining to publish to "' + wheel_current_pub_topic + '" topic')
     wheelCurrentPub = rospy.Publisher(wheel_current_pub_topic, Currents, queue_size = 10)
@@ -185,6 +211,29 @@ if __name__ == '__main__':
     rospy.loginfo('Begining to publish to "' + arm_current_pub_topic + '" topic')
     armCurrentPub = rospy.Publisher(arm_current_pub_topic, Currents, queue_size=10)
 
+    control_current_pub_topic = '/control_current'
+    rospy.loginfo('Begining to publish to "' + control_current_pub_topic + '" topic')
+    controlCurrentPub = rospy.Publisher(control_current_pub_topic, Currents, queue_size=10)
+
+    # Voltages
+    # PacketOutReadBatteryChannel
+    battery_voltage_pub_topic = '/battery_voltage'
+    rospy.loginfo('Beginning to publish to "' + battery_voltage_pub_topic + '" topic')
+    batteryVoltagePub = rospy.Publisher(battery_voltage_pub_topic, Voltages, queue_size=10)
+
+    wheel_voltage_pub_topic = '/wheel_motor_voltages'
+    rospy.loginfo('Begining to publish to "' + wheel_voltage_pub_topic + '" topic')
+    wheelVoltagePub = rospy.Publisher(wheel_voltage_pub_topic, Voltages, queue_size=10)
+
+    arm_voltage_pub_topic = '/arm_motor_voltages'
+    rospy.loginfo('Begining to publish to "' + arm_voltage_pub_topic + '" topic')
+    armVoltagePub = rospy.Publisher(arm_voltage_pub_topic, Voltages, queue_size=10)
+
+    control_pub_topic = '/control_voltage'
+    rospy.loginfo('Begining to publish to "' + control_pub_topic + '" topic')
+    controlVoltagePub = rospy.Publisher(control_pub_topic, Voltages, queue_size=10)
+
+    # Temp
     # Probably PacketOutReadTempChannel
     temp_pub_topic = '/battery_temps'
     rospy.loginfo('Begining to publish to "' + temp_pub_topic + '" topic')
