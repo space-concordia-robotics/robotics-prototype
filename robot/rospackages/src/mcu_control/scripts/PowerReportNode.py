@@ -22,8 +22,8 @@ class SubsystemData:
         self.total_power = 0
         self.prev_time = None
         self.description = description
-        # This is a default voltage value!
-        self.voltages = [15] * number_of_motors
+        # This is a default voltage value to prevent power measurement while waiting on first voltage
+        self.voltages = [0] * number_of_motors
 
     def reset(self):
         """Resets all numbers to default"""
@@ -51,8 +51,9 @@ class SubsystemData:
 
 wheel_data = SubsystemData(6, 'wheels')
 arm_data = SubsystemData(6, 'arm motors')
-control_data = SubsystemData(1, 'control systen: onboard computer and PoE')
-subsystems = [wheel_data, arm_data, control_data]
+arm_servo_data = SubsystemData(2, 'arm servos (gripper, then base)')
+control_data = SubsystemData(1, 'mobile platform: onboard computer, communications, Lidar, mast servos')
+subsystems = [wheel_data, arm_data, control_data, arm_servo_data]
 latest_power_report = PowerReport()
 pub = None
 
@@ -141,6 +142,15 @@ def control_voltage_callback(data):
     global control_data
     control_data.voltages = data.data
 
+def arm_servo_current_callback(data):
+    global arm_servo_data, pub, latest_power_report
+    arm_servo_data.update(data.effort)
+    latest_power_report.report[3] = PowerConsumption(arm_servo_data.description, arm_servo_data.total_power, arm_servo_data.watt_hours)
+
+def arm_servo_voltage_callback(data):
+    global arm_servo_data
+    arm_servo_data.voltages = data.data
+
 
 def initData():
     """Reset all data for power consumption to 0."""
@@ -165,7 +175,9 @@ def subscribe_to_PDS():
                  rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
                  rospy.Subscriber('arm_motor_voltages', Voltages, arm_voltage_callback),
                  rospy.Subscriber('control_current', Currents, control_current_callback),
-                 rospy.Subscriber('control_voltage', Voltages, control_voltage_callback)]
+                 rospy.Subscriber('control_voltage', Voltages, control_voltage_callback),
+                 rospy.Subscriber('arm_servo_voltages', Voltages, arm_servo_voltage_callback),
+                 rospy.Subscriber('arm_servo_currents', Currents, arm_servo_current_callback),]
 
 def unsubscribe_from_PDS():
     """Unsubscribes from all PDS current and voltage feeds."""
@@ -183,9 +195,16 @@ def start():
     # publisher for power consumption, and setup service that provides power reports
     global pub
     s = rospy.Service('power_report_provider', PowerReportProvider, provide_report)
+    # setup so we'll get the arm servo current frequently
+    rate = rospy.Rate(5) # ROS Rate at 5Hz
+    arm_pub = rospy.Publisher('arm_command', String, queue_size=10)
 
     rospy.loginfo('Power report node started')
-    rospy.spin()
+
+
+    while not rospy.is_shutdown():
+        arm_pub.publish('get_power')
+        rate.sleep()
 
 if __name__ == '__main__':
     start()

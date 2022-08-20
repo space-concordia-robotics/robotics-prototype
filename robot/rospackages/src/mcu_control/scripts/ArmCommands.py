@@ -1,6 +1,7 @@
 import struct
 import rospy
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
+from mcu_control.msg import Voltages, Currents
 from std_msgs.msg import String
 
 # All handlers should start with handle_ , while unrelated functions should not.
@@ -8,6 +9,10 @@ from std_msgs.msg import String
 
 feedback_pub_topic = '/arm_feedback'
 feedbackPub = rospy.Publisher(feedback_pub_topic, String, queue_size=10)
+servo_voltages_topic = '/arm_servo_voltages'
+servo_voltages_pub = rospy.Publisher(servo_voltages_topic, Voltages, queue_size=10)
+servo_currents_topic = '/arm_servo_currents'
+servo_currents_pub = rospy.Publisher(servo_currents_topic, Currents, queue_size=10)
 
 
 def handle_debug_string(data):
@@ -22,7 +27,18 @@ def handle_pong(data):
 
 
 def handle_power(data):
-    print("Received", data)
+    # order: gripper servo, base servo
+    voltages = Voltages()
+    currents = Currents()
+    index = 0
+    for i in range(2):
+        voltages.data.append((data[index] + (data[index + 1] << 8)) / 1000)
+        index += 2
+        currents.effort.append((data[index] + (data[index + 1] << 8)) / 1000)
+        index += 2
+    servo_voltages_pub.publish(voltages)
+    servo_currents_pub.publish(currents)
+    print(f"Received {voltages}, {currents}")
 
 
 def handle_send_motor_angles(data):

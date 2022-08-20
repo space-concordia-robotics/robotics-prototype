@@ -101,11 +101,24 @@ void ArmCommandCenter::getServoPower() {
 
   for (int id: ids) {
     // buffers for serial rx
-    char millivoltsBuf[4] = {0};
-    char milliampsBuf[4] = {0};
+    char millivoltsBuf[5] = {0};
+    char milliampsBuf[5] = {0};
     // receive data
+    #ifdef DEBUG
+    millivoltsBuf[0] = '5';
+    millivoltsBuf[1] = '0';
+    millivoltsBuf[2] = '0';
+    millivoltsBuf[3] = '0';
+    milliampsBuf[0] = '1';
+    milliampsBuf[1] = '0';
+    milliampsBuf[2] = '0';
+    milliampsBuf[3] = 0;
+    #endif
+
+    #ifndef DEBUG
     servoController.writeQueryCommand(id, "QV", millivoltsBuf, 4);
     servoController.writeQueryCommand(id, "QC", milliampsBuf, 4);
+    #endif
     // convert to int
     uint16_t millivolts = atoi(millivoltsBuf);
     uint16_t milliamps = atoi(milliampsBuf);
