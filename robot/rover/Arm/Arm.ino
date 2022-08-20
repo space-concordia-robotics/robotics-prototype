@@ -94,30 +94,32 @@ int extractValueFromString(const char* strValue) {
 }
 
 void ArmCommandCenter::getServoPower() {
-  const char* voltage = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QV");
-  const char* current = serialMotors[1].writeQueryCommand(GRIP_SERVO_ID, "QC");
+  const int query_buf_len = 10;
+  const int ids[] = {GRIP_SERVO_ID, BASE_SERVO_ID};
+  uint8_t msgBuffer[8] = {0};
+  uint8_t* bufferPosition = msgBuffer;
 
-  // Extract int and convert to bytes
-  int vol = extractValueFromString(velocity);
-  int cur = extractValueFromString(current);
-  uint8_t* velBuffer = (uint8_t*)malloc(4);
-  uint8_t* curBuffer = (uint8_t*)malloc(4);
-  int2bytes(velBuffer, vol);
-  int2bytes(curBuffer, cur);
-
-  // Concatenate into one buffer
-  uint8_t* buffer[4];
-  memcpy(buffer, velBuffer, sizeof(velBuffer));
-  memcpy(buffer + sizeof(velBuffer), curBuffer, sizeof(curBuffer));
-
-  // Send message with resulting buffer containing current and velocity readings
+  for (int id: ids) {
+    // buffers for serial rx
+    char millivoltsBuf[4] = {0};
+    char milliampsBuf[4] = {0};
+    // receive data
+    servoController.writeQueryCommand(id, "QV", millivoltsBuf, 4);
+    servoController.writeQueryCommand(id, "QC", milliampsBuf, 4);
+    // convert to int
+    uint16_t millivolts = atoi(millivoltsBuf);
+    uint16_t milliamps = atoi(milliampsBuf);
+    // add to buffer
+    memcpy(bufferPosition, &millivolts, 2);
+    bufferPosition += 2;
+    memcpy(bufferPosition, &milliamps, 2);
+    bufferPosition += 2;
+  }
+  
+  // Send message with resulting buffer containing milliamps and velocity readings
   internal_comms::Message* message =
-      commandCenter->createMessage(80, sizeof(buffer), buffer);
+      commandCenter->createMessage(80, sizeof(msgBuffer), msgBuffer);
   commandCenter->sendMessage(*message);
-  free(buffer);
-
-  free(velocity);
-  free(current);
 }
 
 void doMotorChecks() {

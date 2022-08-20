@@ -49,12 +49,14 @@ void LSSServoMotor::writeActionCommand(unsigned int servoId,
 /**
  * Query command
  *
- * @param servoId
- * @param queryCommand
- * @return response to query command from servo NOTE: you have to free this.
+ * @param servoId ID of the servo (remember, this is stored in the servo)
+ * @param queryCommand Command to send over, must be a query
+ * @param buf Buffer to store response
+ * @param len Length of buf
+ * @return response to query command from servo; the same buffer that was provided.
  */
 char* LSSServoMotor::writeQueryCommand(unsigned int servoId,
-                                       const char* queryCommand) {
+                                       const char* queryCommand, char* buf, int len) {
   ServosSerialBus->write('#');
   ServosSerialBus->print(servoId, DEC);
   ServosSerialBus->write(queryCommand);
@@ -64,9 +66,7 @@ char* LSSServoMotor::writeQueryCommand(unsigned int servoId,
   // it won't work otherwise
   delay(1);
 
-  char* buff = (char*)malloc(15);
+  ServosSerialBus->readBytesUntil('\r', buf, len);
 
-  ServosSerialBus->readBytesUntil('\r', buff, 15);
-
-  return buff;
+  return buf;
 }

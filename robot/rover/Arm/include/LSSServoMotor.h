@@ -19,7 +19,7 @@ class LSSServoMotor {
   void writeActionCommand(unsigned int servoId, const char* actionCommand,
                           int actionValue);
   void writeActionCommand(unsigned int servoId, const char* actionCommand);
-  char* writeQueryCommand(unsigned int servoId, const char* queryCommand);
+  char* writeQueryCommand(unsigned int servoId, const char* queryCommand, char* buf, int len);
 
  private:
   HardwareSerial* ServosSerialBus;
