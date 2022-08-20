@@ -83,6 +83,8 @@ def send_queued_commands():
 def receive_message():
     for device in range(2):
         gpio.output(SW_PINS, PIN_DESC[device])
+        if ser.in_waiting == 0:
+            time.sleep(0.001)
         if ser.in_waiting > 0:
 
             commandID = ser.read()
