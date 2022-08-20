@@ -7,15 +7,16 @@ from mcu_control.srv import PowerReportProvider, PowerReportProviderRequest, Pow
 import csv
 import datetime
 import os
+import functools
 
-class SubsystemData:
+class Subsystem:
     """This class handles the energy consumption calculations and 
     stores data needed for that. Must call update() with the new
     current data when it comes in, and set self.voltages to the
     voltage data for each sensor/motor in the subsystem as it
     is updated. Note: the length of self.voltages must be the same
     as the number of motors."""
-    def __init__(self, number_of_motors, description):
+    def __init__(self, number_of_motors, description, voltage_topic, current_topic):
         self.watt_hours = []
         for i in range(number_of_motors):
             self.watt_hours.append(0)
@@ -24,12 +25,15 @@ class SubsystemData:
         self.description = description
         # This is a default voltage value to prevent power measurement while waiting on first voltage
         self.voltages = [0] * number_of_motors
+        self.voltage_topic = voltage_topic
+        self.current_topic = current_topic
 
     def reset(self):
         """Resets all numbers to default"""
-        self.__init__(len(self.watt_hours), self.description)
+        self.__init__(len(self.watt_hours), self.description, self.voltage_topic, self.current_topic)
 
     def update(self, currents):
+        print(self.description + 'voltages ' + str(self.voltages))
         """Every time current data comes in, this is run to update the power consumption."""
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
@@ -49,11 +53,12 @@ class SubsystemData:
         # is valid)
         self.prev_time = time
 
-wheel_data = SubsystemData(6, 'wheels')
-arm_data = SubsystemData(6, 'arm motors')
-arm_servo_data = SubsystemData(2, 'arm servos (gripper, then base)')
-control_data = SubsystemData(1, 'mobile platform: onboard computer, communications, Lidar, mast servos')
+wheel_data = Subsystem(6, 'wheels', 'wheel_motor_voltages', 'wheel_motor_currents')
+arm_data = Subsystem(6, 'arm motors', 'arm_motor_voltages', 'arm_motor_currents')
+arm_servo_data = Subsystem(2, 'arm servos (gripper, then base)', 'arm_servo_voltages', 'arm_servo_currents')
+control_data = Subsystem(1, 'mobile platform: onboard computer, communications, Lidar, mast servos', 'control_voltage', 'control_current')
 subsystems = [wheel_data, arm_data, control_data, arm_servo_data]
+
 latest_power_report = PowerReport()
 pub = None
 
@@ -116,8 +121,7 @@ def wheel_current_callback(data):
     global wheel_data, pub, latest_power_report
     wheel_data.update(data.effort)
     latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power, wheel_data.watt_hours)
-    # rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
-
+    
 def wheel_voltage_callback(data):
     global wheel_data
     wheel_data.voltages = data.data
@@ -130,14 +134,12 @@ def arm_current_callback(data):
     global arm_data, pub, latest_power_report
     arm_data.update(data.effort)
     latest_power_report.report[1] = PowerConsumption(arm_data.description, arm_data.total_power, arm_data.watt_hours)
-    # rospy.loginfo('arm watt hours: ' + str(wheel_data.total_power))
-
+    
 def control_current_callback(data):
     global control_data, pub, latest_power_report
     control_data.update(data.effort)
     latest_power_report.report[2] = PowerConsumption(control_data.description, control_data.total_power, control_data.watt_hours)
-    # rospy.loginfo('control system watt hours: ' + str(control_data.total_power))
-
+    
 def control_voltage_callback(data):
     global control_data
     control_data.voltages = data.data
@@ -168,16 +170,20 @@ def initData():
 def subscribe_to_PDS():
     """Subscribes to the voltage and current feeds of the PDS and
     stores them in pds_feeds"""
-    global pds_feeds
+    global pds_feeds, subsystem_voltage_feeds, subsystem_current_feeds
     # subscribe to PDS feeds and store them
-    pds_feeds = [rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback),
-                 rospy.Subscriber('wheel_motor_voltages', Voltages, wheel_voltage_callback),
-                 rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
-                 rospy.Subscriber('arm_motor_voltages', Voltages, arm_voltage_callback),
-                 rospy.Subscriber('control_current', Currents, control_current_callback),
-                 rospy.Subscriber('control_voltage', Voltages, control_voltage_callback),
-                 rospy.Subscriber('arm_servo_voltages', Voltages, arm_servo_voltage_callback),
-                 rospy.Subscriber('arm_servo_currents', Currents, arm_servo_current_callback),]
+    def current_callback_template(data, reportIndex, current_data):
+        global pub, latest_power_report
+        data.update(current_data.effort)
+        latest_power_report.report[reportIndex] = PowerConsumption(data.description, data.total_power, data.watt_hours)
+
+    def voltage_callback_template(data, voltage_data):
+        data.voltages = voltage_data.data
+
+    pds_feeds = []
+    for reportIndex, subsystem in enumerate(subsystems):
+        pds_feeds.append(rospy.Subscriber(subsystem.current_topic, Currents, functools.partial(current_callback_template, subsystem, reportIndex)))
+        pds_feeds.append(rospy.Subscriber(subsystem.voltage_topic, Voltages, functools.partial(voltage_callback_template, subsystem)))
 
 def unsubscribe_from_PDS():
     """Unsubscribes from all PDS current and voltage feeds."""
