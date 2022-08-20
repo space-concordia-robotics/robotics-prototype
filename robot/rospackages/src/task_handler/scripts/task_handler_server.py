@@ -5,8 +5,10 @@ import os
 import time
 import sys
 import glob
+import subprocess
 from robot.rospackages.src.task_handler.scripts.Listener import Listener
 from task_handler.srv import *
+from sensor_msgs.msg import Image
 
 # return the response string after calling the task handling function
 def handle_task_request(req):
@@ -134,9 +136,9 @@ def stop_camera_task(port, active_ports, active_stream_ctr):
                         active_ports.remove(port)
                         active_streams.remove(stream)
                     else:
-                        response = 'Failed to stop ' + chosen_task + ' on port: ' + ports
+                        response = 'Failed to stop camera stream on port: ' + port
                 else:
-                    response = 'Failed to stop ' + chosen_task + ' on port: ' + port
+                    response = 'Failed to stop camera stream on port: ' + port
     else:
         response = "No active stream found on port: " + port + ', nothing to terminate'
 
@@ -214,6 +216,14 @@ def handle_task(task, status, args):
             if task == 'camera_stream':
                 response_tmp = start_camera_stream(args, active_ports, active_stream_ctr)
                 response = response_tmp if response_tmp != '' else 'Started camera stream on port ' + args
+            elif task == 'ar_stream':
+
+                ar_stream = Listener(scripts[5], 'bash', args)
+                    #subprocess.run(['kill', '-2', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
+                ar_stream.start()
+                # Wait until it's up before returning
+                rospy.wait_for_message('/{}/image_ar'.format(args), Image)
+
             else:
                 if running_tasks[i].start():
                     response = 'Started ' + chosen_task
@@ -231,6 +241,14 @@ def handle_task(task, status, args):
             if task == 'camera_stream':
                 response_tmp = stop_camera_task(args, active_ports, active_stream_ctr)
                 response = response_tmp if response_tmp != '' else 'Stopped camera stream on port ' + args
+            elif task == 'ar_stream':
+                # find pid of roslaunch process and send SIGKILL to it
+				# using SIGINT (i.e. kill -2) causes issues with proper re-initialization of this task
+                pattern = 'autonomy\.launch.*{}'.format(args)
+                # command looks like: `pgrep -f 'autonomy\.launch.*video0Cam'`
+                ar_pid = subprocess.run(['pgrep', '-f', pattern], stdout=subprocess.PIPE).stdout # returns bytes
+                if len(ar_pid) > 0:
+                    subprocess.run(['kill', '-9', str(ar_pid, 'utf-8')[:-1]]) # last char is a '\n' 
             elif len(running_tasks) >= 1 and isinstance(running_tasks[i], Listener):
                 if running_tasks[i].stop():
                     response = 'Stopped ' + chosen_task
@@ -267,13 +285,13 @@ if __name__ == "__main__":
     mcu_control_dir = current_dir + '../../mcu_control/scripts/'
 
     # tasks that can be run
-    scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh"]
+    scripts = [mcu_control_dir + "RoverNode.py", mcu_control_dir + "ArmNode.py", mcu_control_dir + "ScienceNode.py", mcu_control_dir + "PdsNode.py", current_dir + "start_ros_stream.sh", current_dir + "start_ar_stream.sh"]
 
     # set up listener objects
     running_tasks = [Listener(scripts[0], "python3"), Listener(scripts[1], "python3"), Listener(scripts[2], "python3"), Listener(scripts[3], "python3"), Listener(scripts[4], "bash", "", 1, True)]
 
     # expected client arguments for choosing task
-    known_tasks = ['rover_listener', 'arm_listener', 'science_listener', 'pds_listener', 'camera_stream', 'camera_ports']
+    known_tasks = ['rover_listener', 'arm_listener', 'science_listener', 'pds_listener', 'camera_stream', 'camera_ports', 'ar_stream']
     known_listeners = known_tasks[:-2]
 
     # keep track of currently running streams

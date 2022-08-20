@@ -25,6 +25,8 @@ add_service_files(
   ## arm
   ArmRequest.srv
   ScienceRequest.srv
+  ## for power report
+  PowerReportProvider.srv
 )
 
 add_message_files(
@@ -38,8 +40,10 @@ add_message_files(
   RoverMarkerList.msg
   ThermistorTemps.msg
   FanSpeeds.msg
-  Voltage.msg
+  Voltages.msg
   Currents.msg
+  PowerConsumption.msg
+  PowerReport.msg
 )
 
 ## Generate added messages and services with any dependencies listed here

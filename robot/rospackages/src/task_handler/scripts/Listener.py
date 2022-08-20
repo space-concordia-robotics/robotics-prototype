@@ -77,8 +77,10 @@ class Listener:
                         real_pid = get_pid("cv_camera_node")
 
                     if real_pid != -1:
-                        output, error = run_shell("kill -9", str(real_pid))
-                        print("kill -9", str(real_pid))
+                        # better to use SIGINT rather than SIGKILL because it kills all
+                        # child processes as well
+                        output, error = run_shell("kill -2", str(real_pid))
+                        print("kill -2", str(real_pid))
                     else:
                         return False
             else:
@@ -122,7 +124,6 @@ if __name__ == "__main__":
     try:
         current_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
         dispatcher = Listener(current_dir + "start_stream.sh", "bash")
-        #dispatcher = Listener(current_dir + "start_stream.sh", "bash", "/dev/video0")
         dispatcher.start()
 
         print("Is running: " + str(dispatcher.is_running()))

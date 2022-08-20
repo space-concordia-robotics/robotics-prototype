@@ -13,7 +13,7 @@ from decimal import *
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point
-from mcu_control.msg import ThermistorTemps, Voltage, Currents
+from mcu_control.msg import ThermistorTemps, Voltages, Currents
 
 
 def get_parameter_value(parameter, values, value_before_increment,
@@ -166,7 +166,7 @@ def init_default_voluntary_param(parameters, default_value):
     # Check if parameters is a string (single parameter) or an array
     # (multiple parameters) and initialize appropriately
     if isinstance(parameters, str):
-        param_value = get_param_exist("PDS_mock_voltage")
+        param_value = get_param_exist("PDS_mock_voltage") # WTF? Why is PDS_mock_voltage hardcoded here? (Marc)
         if param_value is None:
             rospy.logwarn(
                 "Parameter state None assigned to {}".format(parameters))
@@ -204,6 +204,11 @@ def publish_mock_data(voltages, temps, currents):
     DEFAULT_CURRENT_VOLTAGE = voltages.get("stable")
     DEFAULT_CURRENT_TEMPS = temps.get("stable")
     DEFAULT_CURRENT_WHEEL_CURRENTS = currents.get("stable")
+    DEFAULT_CURRENT_WHEEL_VOLTAGES = voltages.get("stable")
+    DEFAULT_CURRENT_ARM_CURRENTS = currents.get("stable")
+    DEFAULT_CURRENT_ARM_VOLTAGES = voltages.get("stable")
+    DEFAULT_CURRENT_CONTROL_CURRENT = currents.get("stable")
+    DEFAULT_CURRENT_CONTROL_VOLTAGE = voltages.get("stable")
     TEMP_ARRAY_SIZE = 3
     CURRENT_ARRAY_SIZE = 6
 
@@ -215,13 +220,28 @@ def publish_mock_data(voltages, temps, currents):
     rate = rospy.Rate(rospy_rate)
 
     # Initialize publishers (Voltage, ThermistorTemps, Currents)
-    voltage = Voltage()
+    voltage = Voltages()
     thermistor_temps = ThermistorTemps()
     wheel_currents = Currents()
-    pub_voltage = rospy.Publisher('battery_voltage', Voltage, queue_size=10)
+    wheel_voltage = Voltages()
+    arm_currents = Currents()
+    arm_voltages = Voltages()
+    control_current = Currents()
+    control_voltage = Voltages()
+    pub_voltage = rospy.Publisher('battery_voltage', Voltages, queue_size=10)
     pub_temp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
     pub_wheel_current = rospy.Publisher(
         'wheel_motor_currents', Currents, queue_size=10)
+    pub_wheel_voltage = rospy.Publisher(
+        'wheel_motor_voltages', Voltages, queue_size=10)
+    pub_arm_current = rospy.Publisher(
+        'arm_motor_currents', Currents, queue_size=10)
+    pub_arm_voltage = rospy.Publisher(
+        'arm_motor_voltages', Voltages, queue_size=10)
+    pub_control_current = rospy.Publisher(
+        'control_current', Currents, queue_size=10)
+    pub_control_voltage = rospy.Publisher(
+        'control_voltage', Voltages, queue_size=10)
 
     # Initialize 1 starting voltage increment rate
     # Using default value if not initialized in launch file
@@ -281,6 +301,38 @@ def publish_mock_data(voltages, temps, currents):
         parameter_currents, DEFAULT_CURRENT_WHEEL_CURRENTS)
     rospy.loginfo("current_wheel_currents: {}".format(current_wheel_currents))
 
+    # Trying (Marc) to replicate above but for the wheel motor voltage CHECK THIS
+    parameter_voltages = []
+    for x in range(CURRENT_ARRAY_SIZE):
+        parameter_voltages.append("PDS_mock_wheel{}_voltage".format(x+1))
+
+    current_wheel_voltages = init_default_voluntary_param(
+        parameter_voltages, DEFAULT_CURRENT_WHEEL_VOLTAGES)
+    rospy.loginfo("current_wheel_voltages: {}".format(current_wheel_voltages))
+
+    # Trying (Marc) to replicate above but for the arm motor voltage CHECK THIS
+    parameter_arm_voltages = []
+
+    for x in range(CURRENT_ARRAY_SIZE):
+        parameter_arm_voltages.append("PDS_mock_arm{}_voltage".format(x+1))
+
+    current_arm_voltages = init_default_voluntary_param(
+        parameter_arm_voltages, DEFAULT_CURRENT_ARM_VOLTAGES)
+    rospy.loginfo("current_arm_voltages: {}".format(current_arm_voltages))
+
+    # This is pretty hacky, just using same parameters as wheel currents essentially as this had to be done very quickly
+    current_arm_currents = init_default_voluntary_param(
+        parameter_currents, DEFAULT_CURRENT_ARM_CURRENTS)
+    rospy.loginfo("current_arm_currents: {}".format(current_arm_currents))
+
+    current_control_current = init_default_voluntary_param(
+        parameter_currents, DEFAULT_CURRENT_CONTROL_CURRENT)
+    rospy.loginfo("current_obc_currents: {}".format(current_control_current[0]))
+
+    parameter_control_voltage = 'PDS_mock_control_voltage'
+    current_control_voltage = init_default_voluntary_param(
+        parameter_control_voltage, DEFAULT_CURRENT_CONTROL_VOLTAGE)
+
     # Acquire parameter and set parameter states while launch file is active
     while not rospy.is_shutdown():
         """Get new current, voltage, and thermistor temps recursively
@@ -317,29 +369,91 @@ def publish_mock_data(voltages, temps, currents):
                 current_wheel_currents[x] = get_parameter_value(
                     parameter_currents[x], currents, current_wheel_currents[x],
                     current_noise, current_rate/rospy_rate)
+        
+        for x in range(len(current_wheel_voltages)):
+            if current_wheel_voltages[x] is not None:
+                current_wheel_voltages[x] = get_parameter_value(
+                    parameter_voltages[x], voltages, current_wheel_voltages[x],
+                    current_noise, voltage_rate/rospy_rate)
+
+        for x in range(len(current_arm_currents)):
+            if current_arm_currents[x] is not None:
+                current_arm_currents[x] = get_parameter_value(
+                    parameter_currents[x], currents, current_arm_currents[x],
+                    current_noise, current_rate/rospy_rate)
+
+        for x in range(len(current_arm_voltages)):
+            if current_arm_voltages[x] is not None:
+                current_arm_voltages[x] = get_parameter_value(
+                    parameter_arm_voltages[x], voltages, current_arm_voltages[x],
+                    current_noise, voltage_rate/rospy_rate)
+
+        for x in range(len(current_control_current)):
+            if current_control_current[x] is not None:
+                current_control_current[x] = get_parameter_value(
+                    parameter_currents[x], currents, current_control_current[x],
+                    current_noise, current_rate/rospy_rate)
+
+        if current_control_voltage is not None:
+            current_control_voltage = get_parameter_value(parameter_control_voltage,
+                                                      voltages, current_control_voltage,
+                                                      current_noise, voltage_rate/rospy_rate)
 
         # Set values to objects which will get published
         # Set voltage 1
         if current_voltage is not None:
-            voltage.data = float(current_voltage)
+            voltage.data = [float(current_voltage)]
+        # CHECK IF THIS CODE IS SALVAGEABLE
         # Set temperatures 1-3
-        if current_temps[0] is not None:
-            thermistor_temps.therm1 = float(current_temps[0])
-        if current_temps[1] is not None:
-            thermistor_temps.therm2 = float(current_temps[1])
-        if current_temps[2] is not None:
-            thermistor_temps.therm3 = float(current_temps[2])
+        #if current_temps[0] is not None:
+        #    thermistor_temps.therm1 = float(current_temps[0])
+        #if current_temps[1] is not None:
+        #    thermistor_temps.therm2 = float(current_temps[1])
+        #if current_temps[2] is not None:
+        #    thermistor_temps.therm3 = float(current_temps[2])
 
         wheel_currents.effort.clear()
         # Set wheel currents 1-6
         for x in range(len(current_wheel_currents)):
             if current_wheel_currents[x] is not None:
                 wheel_currents.effort.append(float(current_wheel_currents[x]))
+        # Set wheel voltages 1-6 CHECK IF THIS IS RIGHT
+        wheel_voltage.data.clear()
+        for x in range(len(current_wheel_voltages)):
+            if current_wheel_voltages[x] is not None:
+                wheel_voltage.data.append(float(current_wheel_voltages[x]))
+
+        # Set arm voltages 1-6 CHECK IF THIS IS RIGHT
+        arm_voltages.data.clear()
+        for x in range(len(current_arm_voltages)):
+            if current_arm_voltages[x] is not None:
+                arm_voltages.data.append(float(current_arm_voltages[x]))
+        
+
+        # THIS SHOULD BE DONE PROPERLY FOR ARM, OBC AND POE CURRENTS AT SOME OTHER POINT RATHER THAN JUST USING THE
+        # VALUES FROM WHEEL CURRENT IN THIS HACKY WAY
+        arm_currents.effort.clear()
+        # Set arm currents 1-6
+        for x in range(len(current_arm_currents)):
+            if current_arm_currents[x] is not None:
+                arm_currents.effort.append(float(current_arm_currents[x]))
+
+        # Set control system current and voltage
+        control_current.effort.clear()
+        control_current.effort.append(float(current_control_current[0]))
+        control_voltage.data.clear()
+        control_voltage.data.append(float(current_control_voltage))
 
         # Publish values to topics (Voltage, ThermistorTemps and Currents)
         pub_voltage.publish(voltage)
         pub_temp.publish(thermistor_temps)
         pub_wheel_current.publish(wheel_currents)
+        pub_wheel_voltage.publish(wheel_voltage)
+        pub_arm_current.publish(arm_currents)
+        pub_arm_voltage.publish(arm_voltages)
+        pub_control_current.publish(control_current)
+        pub_control_voltage.publish(control_voltage)
+
 
         # Add delay before each iteration of loop which runs rospy
         rate.sleep()

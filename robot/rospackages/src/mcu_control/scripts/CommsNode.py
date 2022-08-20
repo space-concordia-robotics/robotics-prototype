@@ -15,17 +15,13 @@ from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control.srv import *
 from mcu_control.msg import Voltage
 
+from robot.rospackages.src.mcu_control.scripts.CommandParser import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
 from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
-ARM_SELECTED = 0
-ROVER_SELECTED = 1
-PDS_SELECTED = 2
-SCIENCE_SELECTED = 3
 
 in_commands = [arm_in_commands, wheel_in_commands, None, None]
-out_commands = [arm_out_commands, wheel_out_commands, None, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -41,7 +37,7 @@ PDS = [0,1,0]
 SCIENCE = [0,1,1]
 TX2 = [1,0,0]
 PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
-SW_PINS = [19,21,23]
+SW_PINS = [15,13,11]
 
 
 ser = None
@@ -123,14 +119,6 @@ def receive_message():
             except Exception as e:
                 print(e)
 
-
-def get_command(command_name, deviceToSendTo):
-    for out_command in out_commands[deviceToSendTo]:
-        if command_name == out_command[0]:
-            return out_command
-
-    return None
-
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
     if command is not None:
@@ -139,10 +127,20 @@ def send_command(command_name, args, deviceToSendTo):
         gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-        ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+
+        if commandID != 10:
+            ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        
         #arg_length = len(command[2]).to_bytes(1,'big')
         #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
+
+        # MEGA STUPID WORKAROUND, DIRE SITUATION, PLEASE DON'T REUSE THIS
+        if commandID == 10:
+            ser.write((12).to_bytes(1, 'big'))
+            args, data_types = move_wheels_dumb_workaround(args)
+            print(f'args: {args} | dataTypes: {data_types}')
+
         for argument in zip(args, data_types):
             data = argument[0]
             data_type = argument[1]
@@ -161,6 +159,16 @@ def send_command(command_name, args, deviceToSendTo):
         ser.flush()
         gpio.output(SW_PINS, NONE)
     return False
+
+def move_wheels_dumb_workaround(args):
+    # Wheel command is different on teensy, convert to ("move_wheels", 10, 12 * [dt.ARG_UINT8])
+    newArgs = []
+
+    for i in range(0,6):
+        newArgs.append(int(args[i] < 0))
+        newArgs.append(int(abs(args[i])))
+
+    return newArgs, 12 * [dt.ARG_UINT8_ID]
 
 def arm_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to arm Teensy')
@@ -183,19 +191,6 @@ def rover_command_callback(message):
 
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
-
-
-def parse_command(message):
-    full_command = message.data.split(" ")
-    if full_command is not None:
-        command = full_command[0]
-        args = full_command[1:]
-        newArgs = []
-        for arg in args:
-            newArgs.append(float(arg))
-
-        return command, newArgs
-    return None, []
 
 def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])

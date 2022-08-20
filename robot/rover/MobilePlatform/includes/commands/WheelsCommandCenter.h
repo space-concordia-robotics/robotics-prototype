@@ -17,6 +17,9 @@
 #define COMMAND_GET_DESIRED_VELOCITY 14
 #define COMMAND_GET_BATTERY_VOLTAGE 15
 #define COMMAND_WHEELS_PING 16
+#define COMMAND_BLINK_TOGGLE 17
+#define COMMAND_BLINK_COLOR 18
+
 
 class WheelsCommandCenter : public internal_comms::CommandCenter {
 
@@ -32,6 +35,9 @@ public:
     void getRotationalVelocity(void);
     void getBatteryVoltage(void);
     void pingWheels(void);
+    
+    void handleBlink(uint8_t on);
+    void handleBlinkColor(uint8_t r, uint8_t g, uint8_t b);
 
 };
 
