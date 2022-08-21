@@ -33,7 +33,6 @@ class Subsystem:
         self.__init__(len(self.watt_hours), self.description, self.voltage_topic, self.current_topic)
 
     def update(self, currents):
-        print(self.description + 'voltages ' + str(self.voltages))
         """Every time current data comes in, this is run to update the power consumption."""
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
@@ -200,13 +199,13 @@ def start():
 
     # publisher for power consumption, and setup service that provides power reports
     global pub
-    s = rospy.Service('power_report_provider', PowerReportProvider, provide_report)
+    rospy.Service('power_report_provider', PowerReportProvider, provide_report)
+
     # setup so we'll get the arm servo current frequently
-    rate = rospy.Rate(5) # ROS Rate at 5Hz
+    rate = rospy.Rate(5) # get arm servo voltage and frequency 5 times/second
     arm_pub = rospy.Publisher('arm_command', String, queue_size=10)
 
     rospy.loginfo('Power report node started')
-
 
     while not rospy.is_shutdown():
         arm_pub.publish('get_power')
