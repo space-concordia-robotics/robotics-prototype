@@ -284,13 +284,17 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
 void JoyCommsControl::publish_command_with_rate() {
     //TODO take rate from config file for each button
     ros::Rate loop_rate(10);
+    
+    //define a vector of commands to be filled and published
+    std::vector<std_msgs::String> commands;
+
     //loop through clicked buttons
     for (int i = 0; i < pImplement->numberOfButtons; ++i)
     {
         // TODO in last condition rate is used to check existance of command. consider changing it
         if (i != pImplement->enable_button && pImplement->buttons_clicked[i] == 1 && pImplement->button_rates[pImplement->current_mappings_index][i] > 0)
         {
-            pImplement->publish_command(pImplement->button_commands[pImplement->current_mappings_index][i]);
+            commands.push_back(pImplement->button_commands[pImplement->current_mappings_index][i]);
         }
     }
 
@@ -320,7 +324,60 @@ void JoyCommsControl::publish_command_with_rate() {
             }
             std_msgs::String command;
             command.data = newCommandAsString;
-            pImplement->publish_command(command);
+            commands.push_back(command);
+        }
+    }
+
+    if(commands.size() > 0){
+        //special case for arm_command
+        if(pImplement->command_topics[pImplement->current_mappings_index] == "/arm_command"){
+            //check if the command is "set_motor_speeds" which has the special case
+            if(commands[0].data.substr(0,commands[0].data.find(' ')) == "set_motor_speeds"){
+                float motor1 = 0;
+                float motor2 = 0;
+                float motor3 = 0;
+                float motor4 = 0;
+                float motor5 = 0;
+                float motor6 = 0;
+
+                //parse the motor values into seperate motor variables
+                for(int i = 0; i < commands.size(); ++i){
+                    std::string commandAsString = commands[i].data;
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor1 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor2 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor3 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor4 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor5 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                    commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    motor6 += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                }
+
+                //rebuild the command with the values of all motors
+                std::string combinedCommandAsString = "set_motor_speeds";
+                combinedCommandAsString.append(" ").append(std::to_string(motor1));
+                combinedCommandAsString.append(" ").append(std::to_string(motor2));
+                combinedCommandAsString.append(" ").append(std::to_string(motor3));
+                combinedCommandAsString.append(" ").append(std::to_string(motor4));
+                combinedCommandAsString.append(" ").append(std::to_string(motor5));
+                combinedCommandAsString.append(" ").append(std::to_string(motor6));
+                
+                //create the combined command
+                std_msgs::String command;
+                command.data = combinedCommandAsString;
+                
+                //publish the combined command
+                pImplement->publish_command(command);
+            }
+        }else{
+            //publish normally for topics other than arm_command
+            for(int i = 0; i < commands.size(); ++i){
+                pImplement->publish_command(commands[i]);
+            }
         }
     }
     loop_rate.sleep();
