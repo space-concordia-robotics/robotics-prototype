@@ -3,6 +3,7 @@
   <arg name="joy_dev" default="/dev/input/js0"/>
   <arg name="cmd_vel_out" default="rover_cmd_vel"/>
   <arg name="joy_config_file" default="$(find mcu_control)/config/joy_config.yaml"/>
+  <arg name="joy_comms_config_file" default="$(find mcu_control)/config/joy_comms_config.yaml"/>
 
   <node name="joy_node" pkg="joy" type="joy_node">
     <param name="dev" value="$(arg joy_dev)"/>
@@ -13,6 +14,10 @@
   <node name="joy_teleop_node" pkg="teleop_twist_joy" type="teleop_node">
     <rosparam command="load" file="$(arg joy_config_file)"/>
     <remap from="cmd_vel" to="$(arg cmd_vel_out)"/>
+  </node>
+
+  <node name="joy-comms-control-node" pkg="mcu_control" type="joy_comms_control_node">
+    <rosparam command="load" file="$(arg joy_comms_config_file)"/>
   </node>
   
 </launch>
