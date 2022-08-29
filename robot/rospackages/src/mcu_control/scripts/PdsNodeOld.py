@@ -255,7 +255,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "' + subscribe_topic + '" topic')
     sub = rospy.Subscriber(subscribe_topic, String, command_callback)
 
-    rosRate = rospy.Rate(20)
+    rosRate = rospy.Rate(100)
 
     try:
         while not rospy.is_shutdown():
