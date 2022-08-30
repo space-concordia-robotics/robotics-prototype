@@ -19,12 +19,6 @@ from collections import deque
 
 command_queue = deque()
 
-PDS1_ERROR_CORRECTION = [45, 0, 0, 0, 0, 17]
-PDS2_ERROR_CORRECTION = [45, 0, 0, 0, 0, 55]
-
-K_RAW_CONVERSION = 5 / 8704
-K_RAW_CONVERSION_BATTERY = 43 / 51200
-
 # Kill power to all motors
 def handle_estop(motorsToStop):
     if bool(motorsToStop[0]):
@@ -35,7 +29,7 @@ def handle_estop(motorsToStop):
             feedbackPub.publish("[INFO]: Stopped motors for arm")
 
     if bool(motorsToStop[1]):
-        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(0,6)]).send(port, 2).isOkay()
+        pds2SetOffOkay = PacketOutSetSwitchChannel().setOff([*range(8,14)]).send(port, 2).isOkay()
         if pds2SetOffOkay is not True:
             feedbackPub.publish("[ERROR]: eStop: PDS2 board threw an exception")
         else:
@@ -57,7 +51,7 @@ def handle_enable_motors(motorsToEnable):
             feedbackPub.publish("[INFO]: Enabled motors for arm")
 
     if bool(motorsToEnable[1]):
-        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(0,6)]).send(port, 2).isOkay()
+        pds2SetOnOkay = PacketOutSetSwitchChannel().setOn([*range(8,14)]).send(port, 2).isOkay()
         if pds2SetOnOkay is not True:
             feedbackPub.publish("[ERROR]: Enable wheel motors: PDS2 board threw an exception")
         else:
@@ -101,6 +95,59 @@ def publish_pds_data():
         return
     return
 
+# 0, 1, 2, 3: ARM
+# 4: MAIN BOARD
+# 5: RADIO
+# 6, 7: not used
+#
+# 8, 9, 10, 11, 12, 13: WHEEL
+# 14: not used
+# 15: LIDAR
+#
+# ReadPowerMeasurements() ->
+# {
+#     BattVoltage: 15.6,
+#     Channels: [
+#         {
+#             channel: 1,
+#             status: true,
+#             voltage: 15.4,
+#             current: 3.3,
+#             power: 46.8
+#         },
+#         {
+#             number: 2, ...
+#
+#         ...
+#
+#         }, ...
+#
+#     ]
+# }
+#
+# ReadThermalMeasurements() ->
+# [
+#     {
+#         id: 1,
+#         temp: 25.6
+#     },
+#     {
+#         id: 4,
+#         temp: 33.1
+#     }
+# ]
+#
+# ChannelManipulation(onBitmap, offBitmap) ->
+# [
+#     {
+#         channel: 1,
+#         status: true,
+#         BIST: true
+#     },
+#
+# ..
+#
+# ]
 def publishSwitchChannelAndBatteryData():
     batteryVoltage = Voltages()
     batteryVoltage.data.append(0.0) # there prob is a better way to init this idk
@@ -114,34 +161,16 @@ def publishSwitchChannelAndBatteryData():
     controlVoltage = Voltages()
 
     packetOutChannels = PacketOutReadSwitchChannel()
-    packetOutBatteryChannel = PacketOutReadBatteryChannel()
 
-    # PDS1 - [0] to [3]: arm motors drivers | [4]: OBC | [5]: Radio POE
-    voltagesRawPds1 = packetOutChannels.send(port, 1).getMeasurement()
+    powerMeasurement = packetOutChannels.send(port).ReadPowerMeasurements()
 
-    # Error correction for raw values
-    zipVoltageRawCorrection = zip(voltagesRawPds1, PDS1_ERROR_CORRECTION)
-    index = 0
-    for voltageRaw, correction in zipVoltageRawCorrection:
-        voltagesRawPds1[index] = voltageRaw - correction
+    batteryVoltage.data = powerMeasurement["BattVoltage"]
 
-    # PDS2 - [0] to [5]: wheel motor drivers
-    voltagesRawPds2 = packetOutChannels.send(port, 2).getMeasurement()
+    armMotorChannels, wheelMotorChannels, controlChannels = channelsParser(powerMeasurement["Channels"])
 
-    zipVoltageRawCorrection = zip(voltagesRawPds2, PDS2_ERROR_CORRECTION)
-    index = 0
-    for voltageRaw, correction in zipVoltageRawCorrection:
-        voltagesRawPds2[index] = voltageRaw - correction
-
-    batteryVoltageRaw = packetOutBatteryChannel.send(port, 1).getMeasurement()
-
-    currentPds1, currentPds2 = rawVoltagesToCurrentConversion(voltagesRawPds1, voltagesRawPds2)
-
-    batteryVoltage.data = rawAproxRawVoltagesConversion([batteryVoltageRaw])
-
-    armMotorCurrents, wheelMotorCurrents, controlCurrentValue = channelsParser(currentPds1, currentPds2)
-
-    armMotorVoltages, wheelMotorVoltages, controlVoltageValue = 6*batteryVoltage.data, 6*batteryVoltage.data, batteryVoltage.data[0]
+    armMotorCurrents, armMotorVoltages = [x["current"] in armMotorChannels], [x["voltage"] in armMotorChannels]
+    wheelMotorCurrents, wheelMotorVoltages = [x["current"] in wheelMotorChannels], [x["voltage"] in wheelMotorChannels]
+    controlCurrents, controlVoltages = [x["current"] in controlChannels], [x["voltage"] in controlChannels]
 
     # Publish currents
     armCurrents.effort = armMotorCurrents
@@ -166,33 +195,19 @@ def publishSwitchChannelAndBatteryData():
 def publishTemps():
     temp = ThermistorTemps()
 
-    temp.therms = PacketOutReadTempChannel().send(port, 1).getMeasurement()
+    therms = PacketOutReadTempChannel().send(port, 1).ReadThermalMeasurements()
+
+    temp.therms = [therm["temp"] for therm in therms]
 
     tempPub.publish(temp)
 
-def rawVoltagesToCurrentConversion(voltagesRawPds1, voltagesRawPds2):
-    return rawAproxRawCurrentConversion(voltagesRawPds1), rawAproxRawCurrentConversion(voltagesRawPds2)
+def channelsParser(channels):
+    armMotor = channels[:4]
+    # armMotor.append(0.0)
+    # armMotor.append(0.0) # Temp placeholder for smart servos
+    wheelMotor = channels[8:14]
 
-def rawVoltagesToVoltageConversion(voltagesRawPds1, voltagesRawPds2, batteryVoltageRaw):
-    return rawAproxRawVoltagesConversion(voltagesRawPds1), rawAproxRawVoltagesConversion(voltagesRawPds2), \
-           rawBatteryVoltageConversion(batteryVoltageRaw)
-
-def rawAproxRawCurrentConversion(raw):
-    return [((x*0.55114602 + 103.780152) / 1000) if x > 100 else 0 for x in raw]
-
-def rawAproxRawVoltagesConversion(raw):
-    return [(x*8.6374*pow(10,-4) - 0.0785959) for x in raw]
-
-def rawBatteryVoltageConversion(rawVoltage):
-    return rawVoltage * K_RAW_CONVERSION_BATTERY
-
-def channelsParser(pds1, pds2):
-    armMotor = pds1[:4]
-    armMotor.append(0.0)
-    armMotor.append(0.0) # Temp placeholder for smart servos
-    wheelMotor = pds2
-
-    control = pds1[4] + pds1[5]
+    control = channels[4:6] + channels[15]
 
     return armMotor, wheelMotor, control
 
