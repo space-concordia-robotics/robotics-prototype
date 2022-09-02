@@ -29,11 +29,11 @@ def send_queued_commands():
 
 def send_command(command):
     if command is not None:
-        ser.write((command + '\n').encode('utf-8'))
+        ser.write((command + '\n').encode())
 
 def receive_response():
     if ser.in_waiting > 0:
-        response = ser.Readline()
+        response = ser.readline().decode("utf-8") 
         auxReplyPub.publish(response)
 
 def command_callback(message):
@@ -56,11 +56,12 @@ if __name__ == '__main__':
 
     rosRate = rospy.Rate(20)
 
-    ser = serial.Serial('', 9600, timeout=0.1)
+    ser = serial.Serial('/dev/ttyUSB0', 9600)
 
     try:
         while not rospy.is_shutdown():
             send_queued_commands()
+            receive_response()
 
             rosRate.sleep()
     except rospy.ROSInterruptException:
