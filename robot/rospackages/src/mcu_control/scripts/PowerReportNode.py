@@ -11,10 +11,7 @@ import os
 class SubsystemData:
     """This class handles the energy consumption calculations and 
     stores data needed for that. Must call update() with the new
-    current data when it comes in, and set self.voltages to the
-    voltage data for each sensor/motor in the subsystem as it
-    is updated. Note: the length of self.voltages must be the same
-    as the number of motors."""
+    power data when it comes in"""
     def __init__(self, number_of_motors, description):
         self.watt_hours = []
         for i in range(number_of_motors):
@@ -22,24 +19,19 @@ class SubsystemData:
         self.total_power = 0
         self.prev_time = None
         self.description = description
-        # This is a default voltage value!
-        self.voltages = [15] * number_of_motors
 
     def reset(self):
         """Resets all numbers to default"""
         self.__init__(len(self.watt_hours), self.description)
 
-    def update(self, currents):
+    def update(self, powers):
         """Every time current data comes in, this is run to update the power consumption."""
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
             # find power consumed since last datapoint
             delta_hours = (time - self.prev_time) / (60 * 60)
-            if len(currents) is not len(self.voltages):
-                rospy.logerr('ERROR: voltage information is not the right length')
-                return
-            for i in range(len(currents)):
-                self.watt_hours[i] += currents[i] * self.voltages[i] * delta_hours
+            for i in range(len(powers)):
+                self.watt_hours[i] += powers[i] * delta_hours
             # now, sum up all motors/sensors of the system
             self.total_power = 0
             for x in self.watt_hours:
@@ -117,14 +109,6 @@ def wheel_current_callback(data):
     latest_power_report.report[0] = PowerConsumption(wheel_data.description, wheel_data.total_power, wheel_data.watt_hours)
     # rospy.loginfo('wheel watt hours: ' + str(wheel_data.total_power))
 
-def wheel_voltage_callback(data):
-    global wheel_data
-    wheel_data.voltages = data.data
-
-def arm_voltage_callback(data):
-    global arm_data
-    arm_data.voltages = data.data
-
 def arm_current_callback(data):
     global arm_data, pub, latest_power_report
     arm_data.update(data.effort)
@@ -136,11 +120,6 @@ def control_current_callback(data):
     control_data.update(data.effort)
     latest_power_report.report[2] = PowerConsumption(control_data.description, control_data.total_power, control_data.watt_hours)
     # rospy.loginfo('control system watt hours: ' + str(control_data.total_power))
-
-def control_voltage_callback(data):
-    global control_data
-    control_data.voltages = data.data
-
 
 def initData():
     """Reset all data for power consumption to 0."""
@@ -160,12 +139,9 @@ def subscribe_to_PDS():
     stores them in pds_feeds"""
     global pds_feeds
     # subscribe to PDS feeds and store them
-    pds_feeds = [rospy.Subscriber('wheel_motor_currents', Currents, wheel_current_callback),
-                 rospy.Subscriber('wheel_motor_voltages', Voltages, wheel_voltage_callback),
-                 rospy.Subscriber('arm_motor_currents', Currents, arm_current_callback),
-                 rospy.Subscriber('arm_motor_voltages', Voltages, arm_voltage_callback),
-                 rospy.Subscriber('control_current', Currents, control_current_callback),
-                 rospy.Subscriber('control_voltage', Voltages, control_voltage_callback)]
+    pds_feeds = [rospy.Subscriber('wheel_motor_powers', Currents, wheel_current_callback),
+                 rospy.Subscriber('arm_motor_powers', Currents, arm_current_callback),
+                 rospy.Subscriber('control_power', Currents, control_current_callback)]
 
 def unsubscribe_from_PDS():
     """Unsubscribes from all PDS current and voltage feeds."""
