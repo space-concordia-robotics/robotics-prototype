@@ -36,7 +36,7 @@ def parse_report(report, wheel_pub, arm_pub, control_pub):
 
 
 if __name__ == '__main__':
-    # port = serial.Serial('/dev/ttyUSB1', 115200)
+    port = serial.Serial('/dev/ttyUSB0', 115200)
 
     node_name = 'pds_node'
     rospy.init_node(node_name, anonymous = False)  # only allow one node of this type
@@ -61,8 +61,8 @@ if __name__ == '__main__':
         report_arr = []
 
         report = ['@5591',': 14.944J',
-        '# 0: 6362mV, 1mA, 100mW, 0.936J',
-        '# 1: 6362mV, 1mA, 200mW, 0.936J',
+        '# 0: 6362mV, 1mA, 100mW, 0.936J\r\n',
+        '# 1: 6362mV, 1mA, 200mW, 0.936J\r\n',
         '# 2: 6362mV, 1mA, 300mW, 0.936J',
         '# 3: 6362mV, 1mA, 400mW, 0.936J',
         '# 4: 6362mV, 1mA, 500mW, 0.936J',
@@ -76,13 +76,12 @@ if __name__ == '__main__':
         '#12: 6362mV, 1mA, 70000mW, 0.932J',
         '#13: 6362mV, 1mA, 80000mW, 0.932J',
         '#14: 6362mV, 1mA, 90000mW, 0.932J',
-        '#15: 6362mV, 1mA, 100000mW, 0.932J']
+        '#15: 6362mV, 1mA, 100000mW, 0.932J', '\n']
         
         rate = rospy.Rate(5) # ROS Rate at 5Hz
 
         while not rospy.is_shutdown():
-            if False:
-            # if port.in_waiting > 0:
+            if port.in_waiting > 0:
                 rospy.loginfo('about to read')
                 report_arr.clear()
                 for i in range(num_lines):
@@ -92,11 +91,10 @@ if __name__ == '__main__':
                         if '!Found 8PMIC' in line:
                             line = port.read_until().decode('utf-8')
                     report_arr.append(line)
-                rospy.loginfo('power report')
-                rospy.loginfo(report_arr)
-            else:
-                parse_report(report, wheelCurrentPub, armCurrentPub, controlCurrentPub)
-                rate.sleep()
+                parse_report(report_arr, wheelCurrentPub, armCurrentPub, controlCurrentPub)
+            # else:
+            #     parse_report(report, wheelCurrentPub, armCurrentPub, controlCurrentPub)
+            #     rate.sleep()
 
                 
 
