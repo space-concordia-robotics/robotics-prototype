@@ -2,7 +2,9 @@
     <node pkg="mux_selector" type="mux_select_server.py" name="mux_select_server" output="screen" args="local"/>
     <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen"/>
     <node pkg="task_handler" type="task_handler_server.py" name="task_handler_server" output="screen" args="local"/>
-    <node pkg="mcu_control" type="MockPdsNode.py" name="mock_pds_node" output="screen"/>
+    <!-- <node pkg="mcu_control" type="MockPdsNode.py" name="mock_pds_node" output="screen"/> -->
+    <node pkg="mcu_control" type="PdsNode.py" name="pds_node" output="screen"/>
+    
     <node pkg="mcu_control" type="PowerReportNode.py" name="power_report_node" output="screen"/>
 
     <param name="PDS_mock_voltage_rate" value="0.04"/>

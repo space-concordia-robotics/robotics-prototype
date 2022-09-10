@@ -12,26 +12,28 @@ class SubsystemData:
     """This class handles the energy consumption calculations and 
     stores data needed for that. Must call update() with the new
     power data when it comes in"""
-    def __init__(self, number_of_motors, description):
+    def __init__(self, description):
         self.watt_hours = []
-        for i in range(number_of_motors):
-            self.watt_hours.append(0)
         self.total_power = 0
         self.prev_time = None
         self.description = description
 
     def reset(self):
         """Resets all numbers to default"""
-        self.__init__(len(self.watt_hours), self.description)
+        self.__init__(self.description)
 
     def update(self, powers):
         """Every time current data comes in, this is run to update the power consumption."""
         time = rospy.get_rostime().secs + (rospy.get_rostime().nsecs / 1000000000)
         if self.prev_time is not None:
+            # extend watt_hours array to length
+            while len(self.watt_hours) < len(powers):
+                self.watt_hours.append(0)
             # find power consumed since last datapoint
             delta_hours = (time - self.prev_time) / (60 * 60)
             for i in range(len(powers)):
                 self.watt_hours[i] += powers[i] * delta_hours
+
             # now, sum up all motors/sensors of the system
             self.total_power = 0
             for x in self.watt_hours:
@@ -41,9 +43,9 @@ class SubsystemData:
         # is valid)
         self.prev_time = time
 
-wheel_data = SubsystemData(6, 'wheels')
-arm_data = SubsystemData(6, 'arm motors')
-control_data = SubsystemData(1, 'control systen: onboard computer and PoE')
+wheel_data = SubsystemData('wheels')
+arm_data = SubsystemData('arm motors')
+control_data = SubsystemData('control systen: onboard computer and PoE')
 subsystems = [wheel_data, arm_data, control_data]
 latest_power_report = PowerReport()
 pub = None
