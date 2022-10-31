@@ -1,6 +1,3 @@
-[submodule "web_video_server"]
-    path = robot/rospackages/src/web_video_server
-    url = https://github.com/RobotWebTools/web_video_server
 [submodule "cv_camera"]
 	path = robot/rospackages/src/cv_camera
 	url = https://github.com/OTL/cv_camera

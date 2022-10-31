@@ -1,5 +1,0 @@
-string task
-int64 status
-string args
----
-string response
