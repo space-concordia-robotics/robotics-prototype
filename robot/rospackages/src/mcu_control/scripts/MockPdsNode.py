@@ -230,16 +230,18 @@ def publish_mock_data(voltages, temps, currents):
     control_voltage = Voltages()
     pub_voltage = rospy.Publisher('battery_voltage', Voltages, queue_size=10)
     pub_temp = rospy.Publisher('battery_temps', ThermistorTemps, queue_size=10)
+    # COMP CODE
+    # reason is, Joshua will publish power data directly
     pub_wheel_current = rospy.Publisher(
-        'wheel_motor_currents', Currents, queue_size=10)
+        'wheel_motor_powers', Currents, queue_size=10)
     pub_wheel_voltage = rospy.Publisher(
         'wheel_motor_voltages', Voltages, queue_size=10)
     pub_arm_current = rospy.Publisher(
-        'arm_motor_currents', Currents, queue_size=10)
+        'arm_motor_powers', Currents, queue_size=10)
     pub_arm_voltage = rospy.Publisher(
         'arm_motor_voltages', Voltages, queue_size=10)
     pub_control_current = rospy.Publisher(
-        'control_current', Currents, queue_size=10)
+        'control_power', Currents, queue_size=10)
     pub_control_voltage = rospy.Publisher(
         'control_voltage', Voltages, queue_size=10)
 
