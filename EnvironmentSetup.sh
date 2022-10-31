@@ -90,7 +90,7 @@ python setup.py develop
 
 
 # Install ROS
-bash install_ros.sh
+bash scripts/install_ros.sh
 
 
 # Edit ~/.bash_aliases
@@ -114,7 +114,7 @@ cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 
 # Install and setup arduino IDE + Teensyduino
-bash install_arduino_teensyduino.sh
+bash scripts/install_arduino_teensyduino.sh
 
 
 # Exit
