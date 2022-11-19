@@ -56,14 +56,19 @@ void setup() {
   HAL::addLimitSwitchCallback(1, &testCallback);
   HAL::addLimitSwitchCallback(2, &testCallback);
   HAL::addLimitSwitchCallback(3, &testCallback);*/
-  carousel->nextCuvette();
-  //carousel->previousCuvette();
 }
 
 void loop() {
   /*if (Serial1.available() > 0) {
     commandCenter->readCommand();
   }*/
+  if (Serial.available()) {
+    int num = Serial.read() - 48;
+    Serial.read();
+    if (num >= 0 && num <= 7) {
+        carousel->goToCuvette(num);
+    }
+  }
   updateSystems();
 }
 

@@ -10,31 +10,38 @@
 
 #include <string>
 
-#define NUMBER_OF_CUVETTES 8
 
 // The constructor initializes this
 Carousel *Carousel::instance = nullptr;
 
 void Carousel::setup() {
+  // These setup functions MUST be here, since the 
+  // Carousel ctor is called outside of any function,
+  // the add callback will be overwritten when
+  // HAL's callback array is initialized.
+
   // setup callback to count the number of sw pulses 
-  HAL::addLimitSwitchCallback(0, [](int state){
-    if (state) {
+  HAL::addLimitSwitchCallback(0, [](int buttonState){
+    if (buttonState) {
       Carousel::instance->limitSwitchPulses++;
+    }
+  });
+  // setup callback for the index limit switch
+  // for calibration
+  HAL::addLimitSwitchCallback(1, [](int buttonState){
+    if (buttonState && Carousel::instance->state == State::Calibrating) {
+      Carousel::instance->state = State::Not_Moving;
+      Carousel::instance->currentCuvette = 0;
+      HAL::servo(0, 142);
     }
   });
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
-  /*
   if (state == State::Calibrating) {
-    if (digitalRead(CAR_POS) == LOW) {  // pulled up
-      // if switch pressed, stop motor and have it hold the current position.
-      theServo->writeActionCommand(servoID, "H");
-      previousPositionTenths = currentServoPosition();
-      state = State::Not_Moving;
-    }
+    return;
   }
-  */
+  
   if (state == State::Moving_Carousel) {
     if (limitSwitchPulses >= cuvettesToMove) {
       HAL::servo(0, 142);
@@ -74,7 +81,7 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
     limitSwitchPulses = 0;
     this->cuvettesToMove = abs(cuvettesToMove);
     currentCuvette += cuvettesToMove;
-    currentCuvette %= 8;  // wrap around if needed
+    currentCuvette %= NUM_CUVETTES;  // wrap around if needed
     state = State::Moving_Carousel;
     // Move servo in appropriate direction based on input
     if (cuvettesToMove > 0) {
@@ -86,13 +93,11 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
 }
 
 void Carousel::goToCuvette(uint8_t cuvetteId) {
-  /*if (cuvetteId == currentCuvette) {
+  if (cuvetteId == currentCuvette) {
     return;
   }
   int difference = (int)cuvetteId - (int)currentCuvette;
-  int amount = difference % 4;
-  int direction = difference > 4 ? -1 : 1;
-  moveByDegrees(amount * direction);*/
+  moveNCuvettes(difference % NUM_CUVETTES);
 }
 
 void Carousel::nextCuvette() {
@@ -104,16 +109,14 @@ void Carousel::previousCuvette() {
 }
 
 void Carousel::startCalibrating() {
-  /*state = State::Calibrating;
-  // start moving at 10deg/s
-  theServo->writeActionCommand(servoID, "WD", 100);*/
+  state = State::Calibrating;
+  // start moving clockwise
+  HAL::servo(0, 0);
 }
 
 Carousel::Carousel(): currentCuvette(-1) {
   Carousel::instance = this;
-  HAL::servo(0, 140);
-  // for now, skip calibration
-  Carousel::instance->state = State::Not_Moving;
+  startCalibrating();
 }
 
 Carousel::~Carousel() {}

@@ -46,6 +46,7 @@ class Carousel : public Updatable {
   int cuvettesToMove;
 
  public:
+  const static uint8_t NUM_CUVETTES = 8;
   // Required for the button interrupt
   static Carousel* instance;
   // sets up interrupt callbacks
