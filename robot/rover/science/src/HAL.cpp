@@ -16,8 +16,8 @@ int HAL::powerCallbacksSize = 0;
 etl::array<Servo*, NUM_SERVOS> HAL::servos = {};
 
 void HAL::pinSetup() {
-  pinMode(LIMIT_SW_0, INPUT);
-  pinMode(LIMIT_SW_1, INPUT);
+  pinMode(LIMIT_SW_0, INPUT_PULLUP);
+  pinMode(LIMIT_SW_1, INPUT_PULLUP);
   pinMode(LED, OUTPUT);
 
   pinMode(HV_POWER_IRQ, INPUT);
@@ -58,9 +58,9 @@ void HAL::servo(uint8_t servoId, uint8_t angle) {
 uint8_t HAL::readLimitSwitch(uint8_t switchId) {
   switch (switchId) {
     case 0:
-      return digitalRead(LIMIT_SW_0);
+      return !digitalRead(LIMIT_SW_0);
     case 1:
-      return digitalRead(LIMIT_SW_1);
+      return !digitalRead(LIMIT_SW_1);
     default:
       Serial5.print("Cannot read limit switch with ID");
       Serial5.println(switchId);
