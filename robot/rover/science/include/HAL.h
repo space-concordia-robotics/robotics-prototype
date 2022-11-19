@@ -14,7 +14,7 @@
  * a limit switch is hit. The int parameter is the state of
  * the pin.
  */
-typedef void (*pinCallback)(int);
+typedef void (*pinCallback)(int, void*);
 typedef void (*voidCallback)();
 
 /**
@@ -26,8 +26,9 @@ typedef void (*voidCallback)();
 class SwitchCallback {
  public:
   int switchId;
+  void* user_ptr;
   pinCallback cb;
-  SwitchCallback(int switchId, pinCallback cb) : switchId(switchId), cb(cb){};
+  SwitchCallback(int switchId, pinCallback cb, void* user_ptr) : switchId(switchId), cb(cb), user_ptr(user_ptr){};
 };
 
 class HAL {
@@ -62,7 +63,7 @@ class HAL {
    * @param callback int-taking function (the param is the pin state) to be
    * called back
    */
-  static void addLimitSwitchCallback(int switchId, pinCallback callback);
+  static void addLimitSwitchCallback(int switchId, pinCallback callback, void *user_ptr);
 
   /**
    * @brief Adds function that will be called when there is a power problem

@@ -21,20 +21,22 @@ void Carousel::setup() {
   // HAL's callback array is initialized.
 
   // setup callback to count the number of sw pulses 
-  HAL::addLimitSwitchCallback(0, [](int buttonState){
+  HAL::addLimitSwitchCallback(0, [](int buttonState, void *user_ptr){
+    Carousel *c = (Carousel*) user_ptr;
     if (buttonState) {
-      Carousel::instance->limitSwitchPulses++;
+      c->limitSwitchPulses++;
     }
-  });
+  }, Carousel::instance);
   // setup callback for the index limit switch
   // for calibration
-  HAL::addLimitSwitchCallback(1, [](int buttonState){
-    if (buttonState && Carousel::instance->state == State::Calibrating) {
-      Carousel::instance->state = State::Not_Moving;
-      Carousel::instance->currentCuvette = 0;
+  HAL::addLimitSwitchCallback(1, [](int buttonState, void *user_ptr){
+    Carousel *c = (Carousel*) user_ptr;
+    if (buttonState && c->state == State::Calibrating) {
+      c->state = State::Not_Moving;
+      c->currentCuvette = 0;
       HAL::servo(0, 142);
     }
-  });
+  }, Carousel::instance);
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {

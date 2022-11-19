@@ -6,7 +6,7 @@
 
 // default instance of switch callback. someone tell me how to make this better
 // pls
-SwitchCallback s(-1, [](int b) {});
+SwitchCallback s(-1, [](int b, void *user_ptr) {}, nullptr);
 // Static members
 // both these C arrays are initialized empty
 SwitchCallback HAL::switchCallbacks[5] = {s, s, s, s, s};
@@ -73,7 +73,7 @@ void HAL::handleSwitches(int switchId) {
   for (size_t i = 0; i < switchCallbacksSize; i++) {
     if (switchCallbacks[i].switchId == switchId) {
       //digitalWrite(LED, !digitalRead(LED));
-      switchCallbacks[i].cb(value);
+      switchCallbacks[i].cb(value, switchCallbacks[i].user_ptr);
     }
   }
 }
@@ -81,9 +81,9 @@ void HAL::handleSwitches(int switchId) {
 void HAL::handleSwitch0() { handleSwitches(0); }
 void HAL::handleSwitch1() { handleSwitches(1); }
 
-void HAL::addLimitSwitchCallback(int switchId, pinCallback callback) {
+void HAL::addLimitSwitchCallback(int switchId, pinCallback callback, void *user_ptr) {
   if (switchCallbacksSize < (sizeof(switchCallbacks) / sizeof(switchCallbacks[0]))) {
-    SwitchCallback cb(switchId, callback);
+    SwitchCallback cb(switchId, callback, user_ptr);
     noInterrupts();
     switchCallbacks[switchCallbacksSize++] = cb;
     interrupts();
