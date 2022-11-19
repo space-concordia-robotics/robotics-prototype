@@ -54,7 +54,7 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_MOVE_DEGREES:
       if (rawArgsLength == 4) {
         float degrees = bytes_to_float(rawArgs);
-        carousel_move_degrees(degrees);
+        //carousel_move_degrees(degrees);
       }
       break;
       /*case COMMAND_NEXT_CUVETTE:
@@ -64,25 +64,25 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       carousel_previous_cuvette();
       break;*/
     case COMMAND_SET_LASER:
-      HAL::laser(rawArgs[0]);
+      //HAL::laser(rawArgs[0]);
       break;
     case COMMAND_PUMP_PUMP:
-      pumpForward(bytes_to_float(rawArgs));
+      //pumpForward(bytes_to_float(rawArgs));
       break;
     case COMMAND_PUMP_BACKPUMP:
-      pumpBackward(bytes_to_float(rawArgs));
+      //pumpBackward(bytes_to_float(rawArgs));
       break;
     case COMMAND_PUMP_STOP:
-      pumpStop();
+      //pumpStop();
       break;
     case COMMAND_SET_SERVO:
       HAL::servo(rawArgs[0], rawArgs[1]);
       break;
     case COMMAND_FUNNEL_EXEC:
-      startFunnel(bytes_to_float(rawArgs));
+      //startFunnel(bytes_to_float(rawArgs));
       break;
     case COMMAND_FUNNEL_STOP:
-      stopFunnel();
+      //stopFunnel();
       break;
     default:
       Serial5.printf("command id %d args length %d", commandID, rawArgsLength);

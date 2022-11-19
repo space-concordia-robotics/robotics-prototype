@@ -7,8 +7,12 @@
 
 #include <cstdint>
 
-#include "../internal_comms/include/LSSServoMotor.h"
 #include "Updatable.h"
+#include "Servo.h"
+
+// Forward declaration
+class Carousel;
+
 
 class Carousel : public Updatable {
  protected:
@@ -16,7 +20,6 @@ class Carousel : public Updatable {
   uint8_t currentCuvette;
 
  private:
-  int currentServoPosition();
   unsigned long timeCorrectionStarted = 0;
   float degreesCurrentMove = 0;
   /**
@@ -35,23 +38,30 @@ class Carousel : public Updatable {
     Correcting_Move_Pos,
     Correcting_Move_Neg
   };
-  LSSServoMotor* theServo;
-  uint8_t servoID;
   State state;
+  // Keeps track of the number of times
+  // the limit switch has transitioned to HIGH
+  int limitSwitchPulses;
+  // Stores the number of cuvettes to move
+  int cuvettesToMove;
 
  public:
+  // Required for the button interrupt
+  static Carousel* instance;
+  // sets up interrupt callbacks
+  static void setup();
+
   void home();
   void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);
-  void moveByDegrees(float degrees);
   void nextCuvette();
   void previousCuvette();
   uint8_t getCurrentCuvette() const { return currentCuvette; }
 
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();
-  Carousel(LSSServoMotor* theServo, uint8_t servoID);
+  Carousel();
 };
 
 #endif  // ROVER_CAROUSEL_H

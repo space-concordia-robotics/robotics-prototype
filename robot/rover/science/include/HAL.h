@@ -6,7 +6,6 @@
 #include <Servo.h>
 #include <etl/array.h>
 
-#include "../internal_comms/include/LSSServoMotor.h"
 #include "Arduino.h"
 #include "include/SciencePinSetup.h"
 
@@ -41,19 +40,7 @@ class HAL {
    * @brief Emergency stop.
    */
   static void estop();
-  /**
-   * Turns the laser on and off
-   * @param on iff on is 1, laser turns on
-   */
-  static void laser(uint8_t on);
-  /**
-   * @brief Moves the pump
-   * @param pwm value from 0-255 for speed
-   * @param forward Direction. 0 is backward, else is forward.
-   * NOTE: for the direction, will have to verify later, I (Marc Scattolin) do
-   * not know how that is setup.
-   */
-  static void pump(uint8_t pwm, uint8_t forward);
+  
   /**
    * @brief Moves the given pwm servo
    *
@@ -62,12 +49,9 @@ class HAL {
    */
   static void servo(uint8_t id, uint8_t angle);
   /**
-   * @return LSSServoMotor* The smart servo (that controls the cuvette motion)
-   */
-  static LSSServoMotor* smartServo();
-  /**
    * Read the limit switch
-   * @param switchId Id, from 0-3, of switch to read.
+   * @param switchId Id, from 0-1, of switch to read.
+   * @return 1 if pressed, 0 if not pressed
    */
   static uint8_t readLimitSwitch(uint8_t switchId);
   /**
@@ -89,13 +73,9 @@ class HAL {
   static void addPowerCallback(voidCallback callback);
 
  private:
-  static LSSServoMotor theSmartServo;
-  static int smartServoId;
-  static void handleSwitches(int switchId, int switchPin);
+  static void handleSwitches(int switchId);
   static void handleSwitch0();
   static void handleSwitch1();
-  static void handleSwitch2();
-  static void handleSwitch3();
   static void handlePower();
   static SwitchCallback switchCallbacks[5];
   static int switchCallbacksSize;
