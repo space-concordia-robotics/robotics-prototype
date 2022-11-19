@@ -70,8 +70,19 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
 void Carousel::home() {}
 
 void Carousel::moveNCuvettes(int cuvettesToMove) {
-  /*float degreesToMove = cuvettesToMove * DEGREES_PER_CUVETTE;
-  moveByDegrees(degreesToMove);*/
+  if (state == State::Not_Moving) {
+    limitSwitchPulses = 0;
+    this->cuvettesToMove = abs(cuvettesToMove);
+    currentCuvette += cuvettesToMove;
+    currentCuvette %= 8;  // wrap around if needed
+    state = State::Moving_Carousel;
+    // Move servo in appropriate direction based on input
+    if (cuvettesToMove > 0) {
+      HAL::servo(0, 0);
+    } else if (cuvettesToMove < 0) {
+      HAL::servo(0, 180);
+    }
+  }
 }
 
 void Carousel::goToCuvette(uint8_t cuvetteId) {
@@ -85,26 +96,11 @@ void Carousel::goToCuvette(uint8_t cuvetteId) {
 }
 
 void Carousel::nextCuvette() {
-  if (state == State::Not_Moving) {
-    limitSwitchPulses = 0;
-    cuvettesToMove = 1;
-    HAL::servo(0, 180);
-    currentCuvette++;
-    currentCuvette %= 8;  // wrap around if needed
-    state = State::Moving_Carousel;
-  }
+  moveNCuvettes(1);
 }
 
 void Carousel::previousCuvette() {
-  /*if (state == State::Not_Moving) {
-    moveByDegrees(DEGREES_PER_CUVETTE * 10);
-    if (currentCuvette > 0) {
-      currentCuvette--;
-    } else {
-      // wrap around if needed
-      currentCuvette = 7;
-    }
-  }*/
+  moveNCuvettes(-1);
 }
 
 void Carousel::startCalibrating() {

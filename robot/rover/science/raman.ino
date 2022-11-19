@@ -56,7 +56,8 @@ void setup() {
   HAL::addLimitSwitchCallback(1, &testCallback);
   HAL::addLimitSwitchCallback(2, &testCallback);
   HAL::addLimitSwitchCallback(3, &testCallback);*/
-  carousel->nextCuvette();
+  //carousel->nextCuvette();
+  carousel->previousCuvette();
   
 }
 
