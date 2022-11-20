@@ -10,7 +10,7 @@
 #include "include/HAL.h"
 #include "include/RamanSetup.h"
 #include "include/SciencePinSetup.h"
-#include "include/commands/ScienceCommandCenter.h"
+//#include "include/commands/ScienceCommandCenter.h"
 
 #define NUMBER_OF_UPDATABLES 1;
 
@@ -22,7 +22,7 @@ const uint8_t TRANSMIT_PIN = 11;  // PLACE HOLDER
 
 void updateSystems();
 
-internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
+//internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
 Carousel *carousel = new Carousel();
 Updatable* updatables[1] = {carousel};
