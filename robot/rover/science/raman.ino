@@ -1,49 +1,75 @@
 // USB : Debug, UART : Production
 #define USB
 
-#include "Arduino.h"
-#include <include/Laser.h>
-#include <include/Fan.h>
-#include <include/Funnel.h>
-#include <include/Pump.h>
-//#include "CommandCenter.h"
-#include "include/commands/ScienceCommandCenter.h"
-#include "include/Carousel.h"
-//#include <cstdint>
+#include <Servo.h>
 
-const uint8_t NUMBER_OF_STOPPABLES = 5;
-const uint8_t NUMBER_OF_UPDATABLES = 5;
+#include <Servo.cpp>
+
+#include "Arduino.h"
+#include "include/Carousel.h"
+#include "include/HAL.h"
+#include "include/RamanSetup.h"
+#include "include/SciencePinSetup.h"
+#include "include/commands/ScienceCommandCenter.h"
+
+#define NUMBER_OF_UPDATABLES 1;
 
 const uint8_t TX_TEENSY_4_0_PIN = 1;
 const uint8_t RX_TEENSY_4_0_PIN = 0;
-const uint8_t ENABLE_PIN = 10; // THIS IS A PLACE HOLDER UNTIL FLOW CONTROL CAN BE IMPLEMENTED
-const uint8_t TRANSMIT_PIN = 11; // PLACE HOLDER
+const uint8_t ENABLE_PIN =
+    10;  // THIS IS A PLACE HOLDER UNTIL FLOW CONTROL CAN BE IMPLEMENTED
+const uint8_t TRANSMIT_PIN = 11;  // PLACE HOLDER
 
 void updateSystems();
 
-Carousel* carousel = new Carousel();
-Laser* laser = new Laser();
-Fan* fan = new Fan();
-Funnel* funnel = new Funnel();
-Pump* pump = new Pump();
-
 internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
-Stoppable* stoppables[NUMBER_OF_STOPPABLES] = {carousel, laser, fan, funnel, pump};
-Updatable* updatables[NUMBER_OF_UPDATABLES] = {carousel, laser, fan, funnel, pump};
+Carousel *carousel = new Carousel();
+Updatable* updatables[1] = {carousel};
 unsigned long time = micros();
 
-void loop()
-{
-    if(Serial.available() > 0)
-        commandCenter->readCommand();
+/* -----
+This contains the methods needed by command center
+  ------
+  */
+/*void carousel_previous_cuvette() { carousel->previousCuvette(); }
+void carousel_next_cuvette() { carousel->nextCuvette(); }
+*/
 
-    updateSystems();
+void testCallback(int on) {
+  digitalWrite(LED, !digitalRead(LED));
 }
 
-void setup()
-{
-    commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN, TRANSMIT_PIN);
+void setup() {
+  Serial.begin(9600);
+  Carousel::setup();
+  HAL::pinSetup();
+  digitalWrite(LED, HIGH);
+  delay(500);
+  //  carousel->startCalibrating();
+  /*commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
+                             TRANSMIT_PIN);*/
+  // signal setup is done by turning off builtin LED.
+  digitalWrite(LED, LOW);
+
+  /*HAL::addLimitSwitchCallback(0, &testCallback);
+  HAL::addLimitSwitchCallback(1, &testCallback);
+  HAL::addLimitSwitchCallback(2, &testCallback);
+  HAL::addLimitSwitchCallback(3, &testCallback);*/
+}
+
+void loop() {
+  /*if (Serial1.available() > 0) {
+    commandCenter->readCommand();
+  }*/
+  if (Serial.available()) {
+    int num = Serial.read() - 48;
+    Serial.read();
+    if (num >= 0 && num <= 7) {
+        carousel->goToCuvette(num);
+    }
+  }
+  updateSystems();
 }
 
 /**
@@ -52,24 +78,11 @@ void setup()
  * is not exact for each system. An improvement would be to have a separate dt
  * for each system.
  */
-void updateSystems()
-{
-    for(auto & updatable : updatables)
-    {
-        unsigned long delta = micros() - time;
-        updatable->update(delta);
-    }
+void updateSystems() {
+  for (auto& updatable : updatables) {
+    unsigned long delta = micros() - time;
+    updatable->update(delta);
+  }
 
-    time = micros();
-}
-
-/**
- * Stops all systems immediately.
- */
-void emergencyStop()
-{
-    for(auto & stoppable : stoppables)
-    {
-        stoppable->eStop();
-    }
+  time = micros();
 }
