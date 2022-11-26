@@ -16,10 +16,10 @@ class Carousel;
 
 class Carousel : public Updatable {
  protected:
-  // current cuvette, in the range of 0-7
+  // current cuvette, in the range of 0-5
   uint8_t currentCuvette;
-  static const uint8_t ccw_speed = 180;
-  static const uint8_t cw_speed = 0;
+  static const uint8_t ccw_speed = 150;
+  static const uint8_t cw_speed = 30;
   static const uint8_t stopped_speed = 142;
 
  private:
@@ -55,7 +55,7 @@ class Carousel : public Updatable {
   int cuvettesToMove;
 
  public:
-  const static uint8_t NUM_CUVETTES = 8;
+  const static uint8_t NUM_CUVETTES = 6;
   // Required for the button interrupt
   static Carousel* instance;
   // sets up interrupt callbacks
