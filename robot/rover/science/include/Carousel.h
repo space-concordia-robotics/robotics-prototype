@@ -18,6 +18,9 @@ class Carousel : public Updatable {
  protected:
   // current cuvette, in the range of 0-7
   uint8_t currentCuvette;
+  static const uint8_t ccw_speed = 180;
+  static const uint8_t cw_speed = 0;
+  static const uint8_t stopped_speed = 142;
 
  private:
   unsigned long timeCorrectionStarted = 0;

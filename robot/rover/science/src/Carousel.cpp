@@ -36,7 +36,7 @@ void Carousel::setup() {
     if (buttonState && c->state == State::Calibrating) {
       c->state = State::Not_Moving;
       c->currentCuvette = 0;
-      HAL::servo(0, 142);
+      HAL::servo(0, Carousel::stopped_speed);
     }
   }, Carousel::instance);
 }
@@ -48,7 +48,7 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
   
   if (state == State::Moving_Carousel) {
     if (limitSwitchPulses >= cuvettesToMove) {
-      HAL::servo(0, 142);
+      HAL::servo(0, Carousel::stopped_speed);
       state = State::Not_Moving;
       cuvettesToMove = 0;
       limitSwitchPulses = 0;
@@ -92,9 +92,9 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
     state = State::Moving_Carousel;
     // Move servo in appropriate direction based on input
     if (cuvettesToMove > 0) {
-      HAL::servo(0, 0);
+      HAL::servo(0, Carousel::cw_speed);
     } else {
-      HAL::servo(0, 180);
+      HAL::servo(0, Carousel::ccw_speed);
     }
   }
 }
@@ -118,7 +118,7 @@ void Carousel::previousCuvette() {
 void Carousel::startCalibrating() {
   state = State::Calibrating;
   // start moving clockwise
-  HAL::servo(0, 0);
+  HAL::servo(0, Carousel::cw_speed);
 }
 
 Carousel::Carousel(): currentCuvette(-1), btn0LastPulse(0) {
