@@ -3,7 +3,6 @@
 
 #include "Arduino.h"
 #include "CommandCenter.h"
-#include "include/ArmDebug.h"
 #include "include/DcMotor.h"
 #include "include/SerialMotor.h"
 #include "include/commands/ArmCommandCenter.h"

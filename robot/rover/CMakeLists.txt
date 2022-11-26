@@ -208,27 +208,16 @@ foreach(path ${INOFILES})
  set(Project_Name ${name})
 
  if(${name} STREQUAL "Arm")
-  set(PROJECT_LIBRARIES Servo internal_comms)
+     set(PROJECT_LIBRARIES Servo internal_comms)
+
  elseif(${name} STREQUAL "raman")
-  set(PROJECT_LIBRARIES internal_comms)
- elseif(${name} STREQUAL "comms_demo")
-  set(PROJECT_LIBRARIES internal_comms)
- # this particular project is important and should be supported, issue #409 opened for this
- # for now it will be skipped
- elseif(${name} STREQUAL "PDS")
- continue()
- elseif(${name} STREQUAL "PDS2")
- continue()
+     set(PROJECT_LIBRARIES internal_comms)
 
  elseif(${name} STREQUAL "MobilePlatform")
- 
- set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 SparkFunGPS SoftwareSerial TinyGPS SPI)
- set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
- elseif(${name} STREQUAL "PidController")
- set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
- set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
- 
+     set(PROJECT_LIBRARIES internal_comms Servo Wire LSM303 SparkFunGPS SoftwareSerial TinyGPS SPI)
+     set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
+
  endif()
  
   #write the template with the child project name in child project directory and execute the CMakeLists.txt file in there when created
