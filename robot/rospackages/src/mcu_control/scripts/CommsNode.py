@@ -155,7 +155,7 @@ def send_command(command_name, args, deviceToSendTo):
                 ser.write(arg_int.to_bytes(1,'big'))
 
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+                ser.write(bytearray(struct.pack("f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "'+rover_command_topic+'" topic')
     sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
     
-    rover_twist_topic = '/rover_cmd_vel'
+    rover_twist_topic = '/cmd_vel'
     rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
     rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
 

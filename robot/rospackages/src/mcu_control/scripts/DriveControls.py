@@ -7,7 +7,7 @@ last_speed_change_ms = None
 linear_acceleration_rate = 0.5
 angular_acceleration_rate = 0.75
 
-max_speed = 0.5 # Maximum rover speed in (m/s)
+max_speed = 1 # Maximum rover speed in (m/s)
 max_angular_speed = 1 # Maximum angular speed in (rad/s)
 
 max_throttle = 255
@@ -70,35 +70,38 @@ def twist_to_rover_command(linear, angular):
     """ 
     Converts Twist command to serial 
     """
-
+    print(linear)
+    print(angular)	
     if linear > max_speed:
         linear = max_speed
     elif linear < -max_speed:
         linear = -max_speed
-
+	
     if angular > max_angular_speed:
         angular = max_angular_speed
     elif angular < -max_angular_speed:
         angular = -max_angular_speed
-
-    throttle = interp(linear,[-max_speed,max_speed],[-255,255])
-    steering = interp(angular,[-max_angular_speed,max_angular_speed],[-255,255])
+        
+        
+    args = [linear,angular]
+    #throttle = interp(linear,[-max_speed,max_speed],[-255,255])
+    #steering = interp(angular,[-max_angular_speed,max_angular_speed],[-255,255])
     
-    args = []
+    #args = []
 
-    if throttle < 0 :
-        args.append(0)
-    else :
-        args.append(1)
+    #if throttle < 0 :
+    #    args.append(0)
+    #else :
+    #    args.append(1)
 
-    args.append(abs(throttle))
+    #args.append(abs(throttle))
+		
+    #if steering < 0 :
+    #    args.append(0)
+    #else :
+    #    args.append(1)
 
-    if steering < 0 :
-        args.append(0)
-    else :
-        args.append(1)
+    #args.append(abs(steering))
 
-    args.append(abs(steering))
-
-    print(str(args))
+    #print(str(args))
     return args

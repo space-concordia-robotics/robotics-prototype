@@ -69,17 +69,16 @@ science_queue = deque()
 def twist_rover_callback(twist_msg):
     """ Handles the twist message and sends it to the wheel MCU """
     linear, angular = accelerate_twist(twist_msg)
-    #print(linear)
-    #rospy.loginfo('hi')
+    slip_track = 1.2
+    
+    left_wheel_speed = linear +  (angular * 0.5 * slip_track)
+    right_wheel_speed = linear - (angular * 0.5 * slip_track)
+     
+    print("Left wheel speed : %f",left_wheel_speed)
+    print("Right wheel speed : %f",right_wheel_speed)
+    
     args = twist_to_rover_command(linear, angular)
-    #command = str.encode(string_command)
-    #ser.write(command) # send move command to wheel teensy
-    #ser.reset_input_buffer(
-
     rover_queue.append(['move_rover',args,ROVER_SELECTED])
-
-
-    #ser.reset_output_buffer()
 
 def main():
 
@@ -160,7 +159,6 @@ def send_command(command_name, args, deviceToSendTo):
         ser.write(commandID.to_bytes(1, 'big'))
         ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
         #arg_length = len(command[2]).to_bytes(1,'big')
-        #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
         for argument in zip(args, data_types):
             data = argument[0]
@@ -174,7 +172,7 @@ def send_command(command_name, args, deviceToSendTo):
                 ser.write(arg_int.to_bytes(1,'big'))
 
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+            	ser.write(bytearray(struct.pack("f", data))) # This is likely correct now, will need to consult
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
@@ -189,14 +187,6 @@ def arm_command_callback(message):
 
     temp_struct = [command, args, ARM_SELECTED]
     arm_queue.append(temp_struct)
-
-def rover_command_callback(message):
-    rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
-    command, args = parse_command(message)
-
-    temp_struct = [command, args, ROVER_SELECTED]
-    rover_queue.append(temp_struct)
-
 
 def rover_command_callback(message):
     rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
@@ -248,7 +238,7 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "'+rover_command_topic+'" topic')
     sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
     
-    rover_twist_topic = '/rover_cmd_vel'
+    rover_twist_topic = '/cmd_vel'
     rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
     rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
 

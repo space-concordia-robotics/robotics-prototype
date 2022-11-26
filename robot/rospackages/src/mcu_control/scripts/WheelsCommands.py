@@ -39,7 +39,7 @@ def handle_send_battery_voltage(data):
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 wheel_out_commands = [ ("ping", 0, []),
 			("move_servo", 1, 2 * [dt.ARG_UINT8]),			
-			("move_rover", 2, 4 * [dt.ARG_UINT8]),
+			("move_rover", 2, 2 * [dt.ARG_FLOAT32]),
 			("move_wheel", 3, 3 * [dt.ARG_UINT8]), 
 			("move_wheels", 4, 12 * [dt.ARG_UINT8]), 
 			("motors_estop", 5, []),
