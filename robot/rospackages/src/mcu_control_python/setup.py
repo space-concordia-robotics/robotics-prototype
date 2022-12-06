@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'CommsNode = mcu_control_python.CommsNode',
+            'CommsNode = mcu_control_python.CommsNode:main',
         ],
     },
 )

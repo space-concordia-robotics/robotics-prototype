@@ -21,18 +21,17 @@ from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.Wheels
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.DriveControls import *
 import robot.rospackages.src.mcu_control_python.mcu_control_python.definitions.CommsDataTypes as dt
 
-local_mode = sys.argv[1] == 'local'
+# TODO: Use ROS2 params instead of local commandline args
+local_mode = False
+if len(sys.argv) >= 2:
+    local_mode = sys.argv[1] == 'local'
+
 if not local_mode:
     import Jetson.GPIO as gpio
 
 # over USB, there is no way to select a device, so this node
 # needs to know which one it's 'hearing' from.
 # device is set by second argument to node.
-receive_device_arg = sys.argv[2]
-if receive_device_arg == 'arm':
-    receive_device = ARM_SELECTED
-elif receive_device_arg == 'rover':
-    receive_device = ROVER_SELECTED
 
 in_commands = [arm_in_commands, wheel_in_commands, None, None]
 
@@ -73,15 +72,24 @@ def twist_rover_callback(twist_msg):
     args = twist_to_rover_command(linear, angular)
     rover_queue.append(['move_rover',args,ROVER_SELECTED])
 
-def main():
-    rate = comms_node.create_rate(180)
+def main(args=None):
+    if not local_mode:
+        ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+    else:
+        ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+
+    rclpy.init(args=args)
+
+    comms_node = CommsNode()
+
+    rate = comms_node.create_rate(10)
 
     try:
         while rclpy.ok():
             rclpy.spin_once(comms_node)
             send_queued_commands()
             receive_message()
-            rate.sleep()
+            # rate.sleep()
 
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
@@ -204,17 +212,17 @@ class CommsNode(Node):
         super().__init__(node_name)
         self.get_logger().info('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
-        angle_pub_topic = '/arm_joint_states'
-        self.get_logger().info('Beginning to publish to "' + angle_pub_topic + '" topic')
-        anglePub = self.create_publisher(JointState, angle_pub_topic, 10)
+        #angle_pub_topic = '/arm_joint_states'
+        #self.get_logger().info('Beginning to publish to "' + angle_pub_topic + '" topic')
+        #anglePub = self.create_publisher(JointState, angle_pub_topic, 10)
 
         # v_bat_topic = '/battery_voltage'
         # ros_logger.info('Beginning to publish to "' + v_bat_topic + '" topic')
         # vBatPub = self.create_publisher(v_bat_topic, Voltage, 10)
 
-        feedback_pub_topic = '/arm_feedback'
-        self.get_logger().info('Beginning to publish to "' + feedback_pub_topic + '" topic')
-        feedbackPub = self.create_publisher(String, feedback_pub_topic, 10)
+        #feedback_pub_topic = '/arm_feedback'
+        #self.get_logger().info('Beginning to publish to "' + feedback_pub_topic + '" topic')
+        #feedbackPub = self.create_publisher(String, feedback_pub_topic, 10)
 
         arm_command_topic = '/arm_command'
         self.get_logger().info('Beginning to subscribe to "' + arm_command_topic + '" topic')
@@ -228,8 +236,8 @@ class CommsNode(Node):
         self.get_logger().info('Beginning to subscribe to "' + rover_twist_topic + '" topic')
         rover_twist_sub = self.create_subscription(Twist, rover_twist_topic, twist_rover_callback, 10)
 
-        service_name = '/arm_request'
-        self.get_logger().info('Waiting for "' + service_name + '" service request from client')
+        #service_name = '/arm_request'
+        #self.get_logger().info('Waiting for "' + service_name + '" service request from client')
         # serv = rospy.Service(service_name, ArmRequest, handle_client)
 
     def arm_command_callback(self, message):
@@ -246,18 +254,7 @@ class CommsNode(Node):
         temp_struct = [command, args, ROVER_SELECTED]
         rover_queue.append(temp_struct)
 
-if __name__ == '__main__':
-    if not local_mode:
-        ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
-    else:
-        ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
-
-    ros_logger = None
-
-    rclpy.init()
-
-    comms_node = CommsNode()
-
-    main()
-
-
+if not local_mode:
+    ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+else:
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
