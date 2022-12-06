@@ -5,17 +5,19 @@
 #ifndef ROBOTICS_PROTOTYPE_JOY_COMMS_CONTROL_H
 #define ROBOTICS_PROTOTYPE_JOY_COMMS_CONTROL_H
 
+#include "rclcpp/rclcpp.hpp"
+
 namespace ros { class NodeHandle; }
 
-class JoyCommsControl {
+class JoyCommsControl : public rclcpp::Node {
 public:
-    JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param);
+    JoyCommsControl();
     void MapButtonNamesToIds();
     int getButtonIdFromName(std::string button_name);
     int getAxisIdFromName(std::string button_name);
     bool isButton(std::string control_name);
-    void getControllerMappings(ros::NodeHandle *nh_param);
-    void getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_param);
+    void getControllerMappings();
+    void getCommandTopics();
     void publish_command_with_rate();
     struct Implement;
 

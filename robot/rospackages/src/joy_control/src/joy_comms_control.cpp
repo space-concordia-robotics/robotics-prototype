@@ -2,10 +2,8 @@
 // Created by william on 2021-12-26.
 //
 
-#include "ros/ros.h"
-#include <ros/console.h>
-#include "sensor_msgs/Joy.h"
-#include "std_msgs/String.h"
+#include "sensor_msgs/msg/joy.hpp"
+#include "std_msgs/msg/string.hpp"
 
 #include <map>
 #include <string>
@@ -15,28 +13,30 @@
 
 #include "joy_comms_control.h"
 
+using std::placeholders::_1;
+
 struct JoyCommsControl::Implement {
     struct ButtonMappings;
 
-    void joyCallback(const sensor_msgs::Joy::ConstPtr &joy);
+    void joyCallback(const sensor_msgs::msg::Joy::ConstPtr &joy);
 
-    void addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg);
+    void addToCommandQueue(const sensor_msgs::msg::Joy::ConstPtr &joy_msg);
 
-    void publish_command(std_msgs::String command);
+    void publish_command(std_msgs::msg::String command);
 
     void manageQueue();
 
-    ros::Subscriber joy_sub;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub;
 
     int enable_button;
 
-    std::vector<std_msgs::String>  stop_commands;
+    std::vector<std_msgs::msg::String> stop_commands;
 
     bool sent_disable_msg;
 
     std::vector<std::string>  command_topics;
 
-    std::vector<ros::Publisher>  comms_pubs;
+    std::vector<rclcpp::Publisher<std_msgs::msg::String>::SharedPtr> comms_pubs;
 
     int next_layout_button;
     int previous_layout_button;
@@ -44,12 +44,12 @@ struct JoyCommsControl::Implement {
     int trigger_r2;
 
     int numberOfButtons;
-    std::vector<std::vector<std_msgs::String>> button_commands;
+    std::vector<std::vector<std_msgs::msg::String>> button_commands;
     std::vector<std::vector<int>> button_rates;
     std::vector<int> buttons_clicked;
 
     int numberOfAxes;
-    std::vector<std::vector<std_msgs::String>> axis_commands;
+    std::vector<std::vector<std_msgs::msg::String>> axis_commands;
     std::vector<std::vector<int>> axis_rates;
     std::vector<std::vector<int>> axis_ranges;
     std::vector<int>  axes_moved;
@@ -64,7 +64,7 @@ struct JoyCommsControl::Implement {
 
 struct JoyCommsControl::Implement::ButtonMappings {
     int buttonId;
-    std_msgs::String command_string;
+    std_msgs::msg::String command_string;
     int command_publish_rate;
 };
 
@@ -109,10 +109,10 @@ bool JoyCommsControl::isButton(std::string control_name) {
     return button_name_to_id_map.count(control_name);
 }
 
-void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
+void JoyCommsControl::getControllerMappings() {
     // Get controller mappings from ROS params
     XmlRpc::XmlRpcValue mappingsXML;
-    nh_param->getParam("controller_mappings", mappingsXML);
+    mappingsXML = this->get_parameter("controller_mappings").get_value<XmlRpc::XmlRpcValue>();
 
     Implement::ButtonMappings currentButtonMap;
     std::string button_name, command;
@@ -123,11 +123,11 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
         for (int i = 0; i < mappingsXML.size(); ++i) {
             //set up the command vectors for each mapping
             //buttons
-            std::vector<std_msgs::String> buttons;
+            std::vector<std_msgs::msg::String> buttons;
             std::vector<int> buttonRates;
             for (size_t i = 0; i < pImplement->numberOfButtons; i++)
             {
-                std_msgs::String command;
+                std_msgs::msg::String command;
                 buttons.push_back(command);
 
                 buttonRates.push_back(-1);                
@@ -135,12 +135,12 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
             pImplement->button_commands.push_back(buttons);
             pImplement->button_rates.push_back(buttonRates);
             //axes
-            std::vector<std_msgs::String> axes;
+            std::vector<std_msgs::msg::String> axes;
             std::vector<int> axesRates;
             std::vector<int> axesRanges;
             for (size_t i = 0; i < pImplement->numberOfAxes; i++)
             {
-                std_msgs::String command;
+                std_msgs::msg::String command;
                 axes.push_back(command);
 
                 axesRates.push_back(-1);
@@ -184,33 +184,33 @@ void JoyCommsControl::getControllerMappings(ros::NodeHandle *nh_param) {
 }
 
 
-void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
+void JoyCommsControl::getCommandTopics() {
     XmlRpc::XmlRpcValue topicsXML;
     XmlRpc::XmlRpcValue stopCommandsXML;
 
-    nh_param->getParam("command_topics", topicsXML);
-    nh_param->getParam("stop_commands", stopCommandsXML);
+    topicsXML = this->get_parameter("command_topics").get_value<XmlRpc::XmlRpcValue>();
+    stopCommandsXML = this->get_parameter("stop_commands").get_value<XmlRpc::XmlRpcValue>();
 
     if (topicsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < topicsXML.size(); ++i) {
             pImplement->command_topics.push_back(static_cast<std::string>(topicsXML[i]).c_str());
-            pImplement->comms_pubs.push_back(nh->advertise<std_msgs::String>(pImplement->command_topics[i], 1, true));
+            pImplement->comms_pubs.push_back(this->create_publisher<std_msgs::msg::String>(pImplement->command_topics[i], 1));
         }
     }
     if (stopCommandsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < stopCommandsXML.size(); ++i) {
-            std_msgs::String stopCommand;
+            std_msgs::msg::String stopCommand;
             stopCommand.data = static_cast<std::string>(stopCommandsXML[i]).c_str();
             pImplement->stop_commands.push_back(stopCommand);
         }
     }
 }
 
-JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param) {
+JoyCommsControl::JoyCommsControl() {
 
     pImplement = new Implement;
 
-    nh_param->param<int>("controller_type", controller_type, 1);
+    controller_type = this->get_parameter("command_topics").get_value<int>();
 
     if (controller_type == PLAYSTATION)
     {
@@ -237,10 +237,10 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
     pImplement->axes_percentage.resize(pImplement->numberOfAxes);
     
     MapButtonNamesToIds();
-    nh_param->param<int>("enable_button", pImplement->enable_button, 0);
+    pImplement->enable_button = this->get_parameter("enable_button").get_value<int>();
     std::string next, previous;
-    nh_param->param<std::string>("next_layout_button", next, option_name);
-    nh_param->param<std::string>("previous_layout_button", previous, share_name);
+    next = this->get_parameter("next_layout_button").get_value<std::string>();
+    previous = this->get_parameter("previous_layout_button").get_value<std::string>();
 
     pImplement->next_layout_button = button_name_to_id_map[next];
     pImplement->previous_layout_button = button_name_to_id_map[previous];
@@ -248,16 +248,16 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
     pImplement->trigger_l2 = axis_name_to_id_map[trigger_l2_name];
     pImplement->trigger_r2 = axis_name_to_id_map[trigger_r2_name];
 
-    getControllerMappings(nh_param);
+    getControllerMappings();
 
     pImplement->sent_disable_msg = false;
 
-    getCommandTopics(nh, nh_param);
+    getCommandTopics();
 
-    pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback, pImplement);
+    pImplement->joy_sub = this->create_subscription<sensor_msgs::msg::Joy>("joy", 1, std::bind(&JoyCommsControl::Implement::joyCallback, pImplement, _1));
 }
 
-void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg) {
+void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::msg::Joy::ConstPtr &joy_msg) {
     std::vector<int> buttons = joy_msg->buttons;
     for (int i = 0; i < buttons.size(); ++i)
     {
@@ -283,10 +283,10 @@ void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::Const
 
 void JoyCommsControl::publish_command_with_rate() {
     //TODO take rate from config file for each button
-    ros::Rate loop_rate(10);
+    rclcpp::Rate loop_rate(10);
     
     //define a vector of commands to be filled and published
-    std::vector<std_msgs::String> commands;
+    std::vector<std_msgs::msg::String> commands;
 
     //loop through clicked buttons
     for (int i = 0; i < pImplement->numberOfButtons; ++i)
@@ -322,7 +322,7 @@ void JoyCommsControl::publish_command_with_rate() {
                 commandAsString = newCommandAsString;
                 index = commandAsString.find('%');
             }
-            std_msgs::String command;
+            std_msgs::msg::String command;
             command.data = newCommandAsString;
             commands.push_back(command);
         }
@@ -352,7 +352,7 @@ void JoyCommsControl::publish_command_with_rate() {
                 }
 
                 //create the combined command
-                std_msgs::String command;
+                std_msgs::msg::String command;
                 command.data = combinedCommandAsString;
                 
                 //publish the combined command
@@ -368,12 +368,12 @@ void JoyCommsControl::publish_command_with_rate() {
     loop_rate.sleep();
 }
 
-void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
+void JoyCommsControl::Implement::publish_command(std_msgs::msg::String command) {
     comms_pubs[current_mappings_index].publish(command);
     sent_disable_msg = false;
 }
 
-void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
+void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
         if ((joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button])
                                                                 && !change_layout_button_held) {
@@ -420,15 +420,15 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
 }
 
 int main(int argc, char *argv[]) {
-    ros::init(argc, argv, "joy_comms_control_node");
+    rclcpp::init(argc, argv);
 
-    ros::NodeHandle nh(""), nh_param("~");
-    JoyCommsControl joy_control(&nh, &nh_param);
+    JoyCommsControl joy_control();
+    std::shared_ptr<JoyCommsControl> joy_control_shared_ptr = &joy_control;
 
     std::cerr<< "WARNING: After running the joy_node from the joy package, press the R2 and L2 triggers once before using the controller." << std::endl;
-    while (ros::ok())
+    while (rclcpp::ok())
     {
         joy_control.publish_command_with_rate();
-        ros::spinOnce();
+        rclcpp::spinOnce(joy_control_shared_ptr);
     }
 }
