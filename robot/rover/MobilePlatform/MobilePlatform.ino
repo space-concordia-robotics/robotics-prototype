@@ -1,7 +1,7 @@
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define Serial Serial1
@@ -18,7 +18,13 @@ internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 void attachMotors();
 void attachServos();
 
+void blink(){
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(500);
 
+}
 void setup() {
 
     pinMode(LED_BUILTIN,OUTPUT);
@@ -35,6 +41,7 @@ void setup() {
 
 void loop() {
     if (Serial.available() > 0) {
+        blink();
         commandCenter->readCommand();
     }
     // Sort of un-used at the moment, but this can periodically transmit messages to the OBC which can define the status

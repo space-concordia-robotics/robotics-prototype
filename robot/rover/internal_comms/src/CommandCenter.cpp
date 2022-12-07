@@ -61,7 +61,7 @@ namespace internal_comms {
         Message* message = (Message*)malloc(sizeof(Message));
         message->messageID = messageID;
         message->rawArgsLength = rawArgsLength;
-        message->rawArgs = (uint8_t *)malloc(rawArgsLength);
+        message->rawArgs = (uint8_t*) malloc(rawArgsLength);
         memcpy(message->rawArgs, rawArgs, rawArgsLength);
         return message;
     }
@@ -121,7 +121,7 @@ namespace internal_comms {
 
     void CommandCenter::sendDebug(const char* debugMessage) {
         Message* message = this->createMessage(COMMAND_DEBUG_MSG,
-                strlen(debugMessage), (byte*)debugMessage);
+                strlen(debugMessage), (byte *)debugMessage);
         this->queueMessage(*message);
     }
 

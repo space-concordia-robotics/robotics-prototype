@@ -11,6 +11,7 @@ namespace Rover {
         systemStatus.last_move = millis();
         Motor::updateDesiredMotorVelocity(motorID,direction,speed);
     }
+
     void stopMotors(){
         for(auto& motor : Motor::motorList ){
            if(motor.current_velocity > 0){
