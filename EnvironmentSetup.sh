@@ -50,10 +50,7 @@ FINAL_MESSAGE="
 The script will now exit, you should test the installation using these steps:
 1. Open a new terminal window to apply changes
 -> it should automatically start with virtual env activated and you should be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
-2. Test python by executing 'pytest' while in the 'robotics-prototype' directory
-3. verify ROS installation using 'roscore'
-4. Test GUI by running 'rosgui' and then 'startgui'
--> to see the GUI open a browser (chrome) and go to localhost:5000
+2. verify ROS installation using 'roscore'
 #################################"
 
 REPO="/home/$USER/Programming/robotics-prototype"
@@ -90,7 +87,7 @@ python setup.py develop
 
 
 # Install ROS
-bash install_ros.sh
+bash scripts/install_ros.sh
 
 
 # Edit ~/.bash_aliases
@@ -114,7 +111,7 @@ cp branch_name_verification_hook.py .git/hooks/post-checkout
 
 
 # Install and setup arduino IDE + Teensyduino
-bash install_arduino_teensyduino.sh
+bash scripts/install_arduino_teensyduino.sh
 
 
 # Exit

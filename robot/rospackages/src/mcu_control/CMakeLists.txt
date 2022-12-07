@@ -7,6 +7,7 @@ project(mcu_control)
 find_package(catkin REQUIRED COMPONENTS
   ## all
   rospy
+  roscpp
   std_msgs
   message_generation
   sensor_msgs
@@ -25,6 +26,8 @@ add_service_files(
   ## arm
   ArmRequest.srv
   ScienceRequest.srv
+  ## for power report
+  PowerReportProvider.srv
 )
 
 add_message_files(
@@ -38,8 +41,10 @@ add_message_files(
   RoverMarkerList.msg
   ThermistorTemps.msg
   FanSpeeds.msg
-  Voltage.msg
+  Voltages.msg
   Currents.msg
+  PowerConsumption.msg
+  PowerReport.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -60,7 +65,7 @@ catkin_package(
 #  LIBRARIES mux_selector
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
-CATKIN_DEPENDS message_runtime
+CATKIN_DEPENDS message_runtime roscpp
 )
 
 ###########
@@ -70,6 +75,10 @@ CATKIN_DEPENDS message_runtime
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+ include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(joy_comms_control_node src/joy_comms_control.cpp)
+
+target_link_libraries(joy_comms_control_node ${catkin_LIBRARIES})

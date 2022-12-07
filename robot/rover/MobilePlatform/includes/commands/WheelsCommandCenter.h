@@ -12,7 +12,10 @@
 
 #define COMMAND_GET_BATTERY_VOLTAGE 6
 
-class WheelsCommandCenter : public internal_comms::CommandCenter {
+#define COMMAND_BLINK_TOGGLE 17
+#define COMMAND_BLINK_COLOR 18
+
+        class WheelsCommandCenter : public internal_comms::CommandCenter {
 
     void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) override;
 
@@ -25,6 +28,9 @@ public:
 
     void getBatteryVoltage();
 
+
+    void handleBlink(uint8_t on);
+    void handleBlinkColor(uint8_t r, uint8_t g, uint8_t b);
 
 };
 

@@ -337,64 +337,64 @@ if __name__ == '__main__':
 	while not done:
 
 		#Check if user closed window
-	    clock.tick(10)
-	    for event in pygame.event.get():
-	    	if event.type == pygame.QUIT:
-	            done=True
-	    	if event.type == pygame.KEYDOWN:
-	            	if event.key == pygame.K_UP:
-	            		set_point[1] += increment
-	            	if event.key == pygame.K_DOWN:
-	            		set_point[1] -= increment
-	            	if event.key == pygame.K_RIGHT:
-	            		set_point[0] += increment
-	            	if event.key == pygame.K_LEFT:
-	            		set_point[0] -= increment
-	            	if event.key == pygame.K_PERIOD:
-	            		set_point[2] += increment
-	            	if event.key == pygame.K_COMMA:
-	            		set_point[2] -= increment
+        clock.tick(10)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done=True
+            if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        set_point[1] += increment
+                    if event.key == pygame.K_DOWN:
+                        set_point[1] -= increment
+                    if event.key == pygame.K_RIGHT:
+                        set_point[0] += increment
+                    if event.key == pygame.K_LEFT:
+                        set_point[0] -= increment
+                    if event.key == pygame.K_PERIOD:
+                        set_point[2] += increment
+                    if event.key == pygame.K_COMMA:
+                        set_point[2] -= increment
 
 			#Update arm view
-	    	screen.fill(WHITE)
+            screen.fill(WHITE)
 
-		#INVERSE KINEMATICS MODE
-	    	set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
-	    	#if (set_point[0] <= 0 and set_point[2] <= 0):
-	    		#Bset_point_2D[0] *= -1
-	    	top_point = [set_point[0], set_point[2]]
-	    	Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
-
-
-			#Sideview
-	    	Sideview.actual_position = UpdateArmSideValues(Asimov.setangles)
-	    	Sideview.projected_position = GenerateRepresentativeCoordinates(Sideview.actual_position, Sideview.X, Sideview.Y)
-	    	draw(Sideview, 4)
-	    	pygame.draw.circle(screen, RED, [int(Sideview.projected_position[0][0][0]),int(Sideview.projected_position[0][0][1])] , 10)
-	    	drawText(screen, "Side View", BLACK, [Sideview.X, Sideview.Y + 50])
+        #INVERSE KINEMATICS MODE
+            set_point_2D = [math.sqrt( pow(set_point[0],2) + pow(set_point[2],2) ), set_point[1]]
+            #if (set_point[0] <= 0 and set_point[2] <= 0):
+                #Bset_point_2D[0] *= -1
+            top_point = [set_point[0], set_point[2]]
+            Asimov.ComputeIK(set_point[0], set_point[1], set_point[2] , wrist_angle)
 
 
-			#Topview
-	    	Topview.actual_position = UpdateArmTopValues(Asimov.setangles)
-	    	Topview.projected_position = GenerateRepresentativeCoordinates(Topview.actual_position, Topview.X, Topview.Y, 1)
-	    	draw(Topview, 1)
-	    	pygame.draw.circle(screen, RED, [int(Topview.projected_position[0][0][0]),int(Topview.projected_position[0][0][1])] , 10)
-	    	drawText(screen, "Top View", BLACK, [Topview.X, Topview.Y + 50])
+            #Sideview
+            Sideview.actual_position = UpdateArmSideValues(Asimov.setangles)
+            Sideview.projected_position = GenerateRepresentativeCoordinates(Sideview.actual_position, Sideview.X, Sideview.Y)
+            draw(Sideview, 4)
+            pygame.draw.circle(screen, RED, [int(Sideview.projected_position[0][0][0]),int(Sideview.projected_position[0][0][1])] , 10)
+            drawText(screen, "Side View", BLACK, [Sideview.X, Sideview.Y + 50])
 
-			#Draw a circle around target point
-	    	desired_side_point = GenerateRepresentativeCoordinates(set_point_2D , Sideview.X, Sideview.Y, 0)
-	    	pygame.draw.circle(screen, BLUE, desired_side_point , 15, 3)
 
-	    	desired_top_point = GenerateRepresentativeCoordinates(top_point , Topview.X, Topview.Y, 0)
-	    	pygame.draw.circle(screen, BLUE, desired_top_point , 15, 3)
+            #Topview
+            Topview.actual_position = UpdateArmTopValues(Asimov.setangles)
+            Topview.projected_position = GenerateRepresentativeCoordinates(Topview.actual_position, Topview.X, Topview.Y, 1)
+            draw(Topview, 1)
+            pygame.draw.circle(screen, RED, [int(Topview.projected_position[0][0][0]),int(Topview.projected_position[0][0][1])] , 10)
+            drawText(screen, "Top View", BLACK, [Topview.X, Topview.Y + 50])
+
+            #Draw a circle around target point
+            desired_side_point = GenerateRepresentativeCoordinates(set_point_2D , Sideview.X, Sideview.Y, 0)
+            pygame.draw.circle(screen, BLUE, desired_side_point , 15, 3)
+
+            desired_top_point = GenerateRepresentativeCoordinates(top_point , Topview.X, Topview.Y, 0)
+            pygame.draw.circle(screen, BLUE, desired_top_point , 15, 3)
 
 		#WORKSPACE MODE
-	    	if workspace_enable is True:
-	    		for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
-	    			pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
+            if workspace_enable is True:
+                for i in range(0, int(math.pow(Asimov.workspace_sample_size,3))):
+                    pygame.draw.circle(screen, BLUE, workspace_rep[i] , 3)
 
 
 		#This is required to update the display
-	    pygame.display.flip()
+        pygame.display.flip()
 
 	pygame.quit()

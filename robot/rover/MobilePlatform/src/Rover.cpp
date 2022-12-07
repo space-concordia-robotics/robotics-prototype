@@ -122,4 +122,33 @@ namespace Rover {
     void moveServo(const ServoNames& servo_id, const uint8_t & value) {
         servos[servo_id].write(value);
     }
+    // Toggles the activity light every 500ms (configureable) if it's set to blink
+    void handleActivityLight() {
+        if (roverState.blinking && (millis() - roverState.timeBlinkUpdated) > ACTIVITY_BLINK_PERIOD) {
+            setActivityLight(!roverState.lightOn);
+        }
+    }
+
+    void setActivityBlinking(uint8_t on) {
+        setActivityLight(on);
+        roverState.blinking = on;
+    }
+
+    void setActivityLight(uint8_t on) {
+        if (on) {
+            roverState.light.setAll(roverState.r, roverState.g, roverState.b, ACTIVITY_BRIGHTNESS);
+        } else {
+            roverState.light.setAll(0, 0, 0, 0);
+        }
+        roverState.light.send();
+        roverState.timeBlinkUpdated = millis();
+        roverState.lightOn = (bool)on;
+    }
+
+    void setActivityColor(uint8_t r, uint8_t g, uint8_t b) {
+        roverState.r = r;
+        roverState.g = g;
+        roverState.b = b;
+    }
+
 }

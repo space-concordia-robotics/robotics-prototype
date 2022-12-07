@@ -238,9 +238,3 @@ foreach(path ${INOFILES})
  DEPENDS science_cleanup
  )
 
-#Add the NIR an an external since it does not use the ARM compiler
-ExternalProject_Add(NIR
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/science/NIR
-        BUILD_ALWAYS 1
-        INSTALL_COMMAND ""
-        )

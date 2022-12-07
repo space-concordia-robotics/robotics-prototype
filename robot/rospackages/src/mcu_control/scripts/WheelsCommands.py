@@ -43,7 +43,9 @@ wheel_out_commands = [ ("ping", 0, []),
 			("move_wheel", 3, 3 * [dt.ARG_UINT8]), 
 			("move_wheels", 4, 12 * [dt.ARG_UINT8]), 
 			("motors_estop", 5, []),
-                       ("get_battery_voltage", 6, [])]
+            ("get_battery_voltage", 6, [])]
+            ("blink_toggle", 17, [dt.ARG_UINT8]), 
+            ("blink_color", 18, [dt.ARG_UINT8, dt.ARG_UINT8, dt.ARG_UINT8])]
 
 wheel_in_commands = [
     ("debug_string", 0, handle_debug_string),

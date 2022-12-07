@@ -1,3 +1,5 @@
+#include "APA102.h"
+
 #include "Rover.h"
 #include "commands/WheelsCommandCenter.h"
 
@@ -26,9 +28,10 @@ void blink(){
 
 }
 void setup() {
-
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(V_SENSE_PIN, INPUT);
+    pinMode(ACTIVITY_CLK, OUTPUT);
+    pinMode(ACTIVITY_MOSI, OUTPUT);
 
     commandCenter->startSerial( RX_TEENSY_3_6_PIN,TX_TEENSY_3_6_PIN, ENABLE_PIN, TRANSMIT_PIN);
 
@@ -44,6 +47,7 @@ void loop() {
         blink();
         commandCenter->readCommand();
     }
+    Rover::handleActivityLight();
     // Sort of un-used at the moment, but this can periodically transmit messages to the OBC which can define the status
     // of the rover.
 
@@ -94,6 +98,17 @@ void WheelsCommandCenter::moveWheel(const uint8_t& wheelNumber,const uint8_t& di
 void WheelsCommandCenter::pingWheels(void) {
     internal_comms::Message* message = commandCenter->createMessage(1, 0, nullptr);
     commandCenter->sendMessage(*message);
+}
+
+// Defines functions from WheelsCommandCenter.h
+void WheelsCommandCenter::handleBlink(uint8_t on) {
+    Rover::setActivityColor(ACTIVITY_DEFAULT_COLOR);
+    Rover::setActivityBlinking(on);
+}
+
+void WheelsCommandCenter::handleBlinkColor(uint8_t r, uint8_t g, uint8_t b) {
+    Rover::setActivityColor(r, g, b);
+    Rover::setActivityBlinking(1);
 }
 
 void WheelsCommandCenter::getBatteryVoltage() {
