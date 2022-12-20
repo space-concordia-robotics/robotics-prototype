@@ -2,6 +2,8 @@
 // Created by william on 2021-12-26.
 //
 
+//#define BOOST_BIND_NO_PLACEHOLDERS
+
 #include "sensor_msgs/msg/joy.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -9,18 +11,30 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <boost/thread/thread.hpp>
 
 #include "joy_comms_control.h"
 
-using std::placeholders::_1;
+// TODO: move to util header or something
+std::vector<std::string> split (const std::string &s, char delim) {
+  std::vector<std::string> result;
+  std::stringstream ss (s);
+  std::string item;
+
+  while (getline (ss, item, delim)) {
+    result.push_back (item);
+  }
+
+  return result;
+}
 
 struct JoyCommsControl::Implement {
     struct ButtonMappings;
 
-    void joyCallback(const sensor_msgs::msg::Joy::ConstPtr &joy);
+    void joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy);
 
-    void addToCommandQueue(const sensor_msgs::msg::Joy::ConstPtr &joy_msg);
+    void addToCommandQueue(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
 
     void publish_command(std_msgs::msg::String command);
 
@@ -110,107 +124,111 @@ bool JoyCommsControl::isButton(std::string control_name) {
 }
 
 void JoyCommsControl::getControllerMappings() {
-    // Get controller mappings from ROS params
-    XmlRpc::XmlRpcValue mappingsXML;
-    mappingsXML = this->get_parameter("controller_mappings").get_value<XmlRpc::XmlRpcValue>();
+  // Get controller mappings from ROS params
 
-    Implement::ButtonMappings currentButtonMap;
-    std::string button_name, command;
-    int buttonId;
-    XmlRpc::XmlRpcValue mappingObject;
-    if (mappingsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        //for each layout
-        for (int i = 0; i < mappingsXML.size(); ++i) {
-            //set up the command vectors for each mapping
-            //buttons
-            std::vector<std_msgs::msg::String> buttons;
-            std::vector<int> buttonRates;
-            for (size_t i = 0; i < pImplement->numberOfButtons; i++)
-            {
-                std_msgs::msg::String command;
-                buttons.push_back(command);
+  std::vector<rclcpp::Parameter> mappings = this->get_parameters({"controller_mappings"});
 
-                buttonRates.push_back(-1);                
-            }
-            pImplement->button_commands.push_back(buttons);
-            pImplement->button_rates.push_back(buttonRates);
-            //axes
-            std::vector<std_msgs::msg::String> axes;
-            std::vector<int> axesRates;
-            std::vector<int> axesRanges;
-            for (size_t i = 0; i < pImplement->numberOfAxes; i++)
-            {
-                std_msgs::msg::String command;
-                axes.push_back(command);
+  Implement::ButtonMappings currentButtonMap;
+  std::string button_name, command;
+  int buttonId;
+  std::vector<std::string> mappingObject;
+  if (mappings.at(0).get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY) {
+    //for each layout
+    for (int i = 0; i < mappings.size(); i++) {
+      //set up the command vectors for each mapping
+      //buttons
+      std::vector <std_msgs::msg::String> buttons;
+      std::vector<int> buttonRates;
+      for (size_t i = 0; i < pImplement->numberOfButtons; i++) {
+        std_msgs::msg::String command;
+        buttons.push_back(command);
 
-                axesRates.push_back(-1);
-                axesRanges.push_back(-1);
-            }
-            pImplement->axis_commands.push_back(axes);
-            pImplement->axis_rates.push_back(axesRates);
-            pImplement->axis_ranges.push_back(axesRanges);
+        buttonRates.push_back(-1);
+      }
+      pImplement->button_commands.push_back(buttons);
+      pImplement->button_rates.push_back(buttonRates);
+      //axes
+      std::vector <std_msgs::msg::String> axes;
+      std::vector<int> axesRates;
+      std::vector<int> axesRanges;
+      for (size_t i = 0; i < pImplement->numberOfAxes; i++) {
+        std_msgs::msg::String command;
+        axes.push_back(command);
 
-            //for each button
-            for (int j = 0; j < mappingsXML[i].size(); ++j){
+        axesRates.push_back(-1);
+        axesRanges.push_back(-1);
+      }
+      pImplement->axis_commands.push_back(axes);
+      pImplement->axis_rates.push_back(axesRates);
+      pImplement->axis_ranges.push_back(axesRanges);
 
-                mappingObject = mappingsXML[i][j];
+      //for each button
+      for (int j = 0; j < mappings.at(i).as_string_array().size(); ++j) {
 
-                button_name = static_cast<std::string>(mappingObject[0]).c_str();
-                command = static_cast<std::string>(mappingObject[1]).c_str();
-                //check if control pressed is a button or an axes by the name of the control and compare to the maps
-                //if button add to button comands else add to axes commands
-                if(isButton(button_name)){
-                    buttonId = getButtonIdFromName(button_name);
+        mappingObject = split(mappings.at(i).as_string_array().at(j), ',');
 
-                    pImplement->button_commands[i][buttonId].data = command;
+        button_name = mappingObject.at(0);
+        command = mappingObject.at(1);
+        //check if control pressed is a button or an axes by the name of the control and compare to the maps
+        //if button add to button comands else add to axes commands
+        if (isButton(button_name)) {
+          buttonId = getButtonIdFromName(button_name);
 
-                    pImplement->button_rates[i][buttonId] = mappingObject[2];
-                }else{
-                    buttonId = getAxisIdFromName(button_name);
+          pImplement->button_commands[i][buttonId].data = command;
 
-                    pImplement->axis_commands[i][buttonId].data = command;
+          pImplement->button_rates[i][buttonId] = std::stoi(mappingObject.at(2));
+        } else {
+          buttonId = getAxisIdFromName(button_name);
 
-                    pImplement->axis_rates[i][buttonId] = mappingObject[2];
+          pImplement->axis_commands[i][buttonId].data = command;
 
-                    pImplement->axis_ranges[i][buttonId] = mappingObject[3];
-                }
-            }
-            pImplement->number_of_mappings = i+1;
+          pImplement->axis_rates[i][buttonId] = std::stoi(mappingObject[2]);
+
+          pImplement->axis_ranges[i][buttonId] = std::stoi(mappingObject[3]);
         }
-        pImplement->current_mappings_index = 0;
-    }else{
-        std::cout << "mappingsXML type is not XmlRpc::XmlRpcValue::TypeArray. Make sure the paramater controller_mappings is there" << std::endl;
+        pImplement->number_of_mappings = i + 1;
+      }
+      pImplement->current_mappings_index = 0;
     }
+  } else {
+      RCLCPP_ERROR(this->get_logger(),
+                   "mappings param type is not rclcpp::ParameterType::PARAMETER_STRING_ARRAY. Make sure the parameter controller_mappings is there");
+  }
 }
-
 
 void JoyCommsControl::getCommandTopics() {
-    XmlRpc::XmlRpcValue topicsXML;
-    XmlRpc::XmlRpcValue stopCommandsXML;
+  auto topics_param = this->get_parameter("command_topics");
+  auto stop_commands_param = this->get_parameter("stop_commands");
 
-    topicsXML = this->get_parameter("command_topics").get_value<XmlRpc::XmlRpcValue>();
-    stopCommandsXML = this->get_parameter("stop_commands").get_value<XmlRpc::XmlRpcValue>();
-
-    if (topicsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        for (int i = 0; i < topicsXML.size(); ++i) {
-            pImplement->command_topics.push_back(static_cast<std::string>(topicsXML[i]).c_str());
-            pImplement->comms_pubs.push_back(this->create_publisher<std_msgs::msg::String>(pImplement->command_topics[i], 1));
-        }
+  if (topics_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY) {
+    auto topics = topics_param.as_string_array();
+    for (int i = 0; i < topics.size(); ++i) {
+      pImplement->command_topics.push_back(topics[i].c_str());
+      pImplement->comms_pubs.push_back(this->create_publisher<std_msgs::msg::String>(pImplement->command_topics[i], 1));
     }
-    if (stopCommandsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        for (int i = 0; i < stopCommandsXML.size(); ++i) {
-            std_msgs::msg::String stopCommand;
-            stopCommand.data = static_cast<std::string>(stopCommandsXML[i]).c_str();
-            pImplement->stop_commands.push_back(stopCommand);
-        }
+  }
+  if (stop_commands_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY) {
+    auto stop_commands = this->get_parameter("stop_commands").as_string_array();
+    for (int i = 0; i < stop_commands.size(); ++i) {
+      std_msgs::msg::String stopCommand;
+      stopCommand.data = stop_commands[i].c_str();
+      pImplement->stop_commands.push_back(stopCommand);
     }
+  }
 }
 
-JoyCommsControl::JoyCommsControl() {
+JoyCommsControl::JoyCommsControl() : Node("joy_comms_control_node") {
+    this->declare_parameter("enable_button");
+    this->declare_parameter("next_layout_button");
+    this->declare_parameter("previous_layout_button");
+    this->declare_parameter("controller_type");
+    this->declare_parameter("stop_commands");
+    this->declare_parameter("command_topics");
+    this->declare_parameter("controller_mappings");
 
     pImplement = new Implement;
 
-    controller_type = this->get_parameter("command_topics").get_value<int>();
+    controller_type = static_cast<enum controller_type>(this->get_parameter("controller_type").get_value<int>());
 
     if (controller_type == PLAYSTATION)
     {
@@ -254,10 +272,15 @@ JoyCommsControl::JoyCommsControl() {
 
     getCommandTopics();
 
-    pImplement->joy_sub = this->create_subscription<sensor_msgs::msg::Joy>("joy", 1, std::bind(&JoyCommsControl::Implement::joyCallback, pImplement, _1));
+    pImplement->joy_sub =
+            this->create_subscription<sensor_msgs::msg::Joy>("joy",
+                                                             1,
+                                                             [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+                                                                 this->pImplement->joyCallback(msg);
+                                                             });
 }
 
-void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::msg::Joy::ConstPtr &joy_msg) {
+void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
     std::vector<int> buttons = joy_msg->buttons;
     for (int i = 0; i < buttons.size(); ++i)
     {
@@ -369,11 +392,11 @@ void JoyCommsControl::publish_command_with_rate() {
 }
 
 void JoyCommsControl::Implement::publish_command(std_msgs::msg::String command) {
-    comms_pubs[current_mappings_index].publish(command);
+    comms_pubs[current_mappings_index]->publish(command);
     sent_disable_msg = false;
 }
 
-void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::ConstPtr &joy_msg) {
+void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
         if ((joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button])
                                                                 && !change_layout_button_held) {
@@ -392,7 +415,7 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::ConstP
             {
                 std::cout << "Mapping already active. Nothing changed" << std::endl;
             }else{
-                comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
+                comms_pubs[current_mappings_index]->publish(stop_commands[current_mappings_index]);
                 current_mappings_index = new_mapping_index;
                 std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
             }
@@ -413,7 +436,7 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::ConstP
         }
 
         if (!sent_disable_msg) {
-            comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
+            comms_pubs[current_mappings_index]->publish(stop_commands[current_mappings_index]);
             sent_disable_msg = true;
         }
     }
@@ -422,13 +445,13 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::msg::Joy::ConstP
 int main(int argc, char *argv[]) {
     rclcpp::init(argc, argv);
 
-    JoyCommsControl joy_control();
-    std::shared_ptr<JoyCommsControl> joy_control_shared_ptr = &joy_control;
+//    JoyCommsControl joy_control();
+    std::shared_ptr<JoyCommsControl> joy_control_shared_ptr = std::make_shared<JoyCommsControl>();
 
     std::cerr<< "WARNING: After running the joy_node from the joy package, press the R2 and L2 triggers once before using the controller." << std::endl;
     while (rclcpp::ok())
     {
-        joy_control.publish_command_with_rate();
-        rclcpp::spinOnce(joy_control_shared_ptr);
+        joy_control_shared_ptr->publish_command_with_rate();
+        rclcpp::spin_some(joy_control_shared_ptr);
     }
 }

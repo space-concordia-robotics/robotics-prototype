@@ -1,0 +1,16 @@
+<launch>
+
+  <arg name="joy_dev" default="/dev/input/js0"/>
+  <arg name="joy_comms_config_file" default="$(find-pkg-share joy_control)/joy_comms_config.yaml"/>
+
+  <node name="joy_node" pkg="joy" exec="joy_node">
+      <param name="dev" value="$(var joy_dev)"/>
+      <param name="coalesce_interval" value="0.05"/>
+      <param name="autorepeat_rate" value="10.0"/>
+    </node>
+
+  <node name="joy_comms_control_node" pkg="joy_control" exec="joy_comms_control_node">
+      <param from="$(var joy_comms_config_file)"/>
+    </node>
+
+</launch>

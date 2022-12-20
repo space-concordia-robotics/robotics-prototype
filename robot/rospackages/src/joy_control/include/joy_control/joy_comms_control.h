@@ -30,7 +30,7 @@ private:
 	    PLAYSTATION_UBUNTU_18 = 3
     };
 
-    int controller_type;
+    controller_type controller_type;
 
     const std::string share_name = "BUTTON_SHARE";
     const std::string option_name = "BUTTON_OPTION";

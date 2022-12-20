@@ -26,6 +26,12 @@ include_directories(include/joy_control)
 add_executable(joy_comms_control_node src/joy_comms_control.cpp)
 ament_target_dependencies(joy_comms_control_node rclcpp std_msgs sensor_msgs)
 
+install(TARGETS
+        joy_comms_control_node
+        DESTINATION lib/${PROJECT_NAME})
+
+install(FILES config/joy_comms_config.yaml DESTINATION share/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
