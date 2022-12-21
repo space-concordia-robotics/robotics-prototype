@@ -20,11 +20,14 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(include/joy_control)
 
 add_executable(joy_comms_control_node src/joy_comms_control.cpp)
 ament_target_dependencies(joy_comms_control_node rclcpp std_msgs sensor_msgs)
+
+target_link_libraries(joy_comms_control_node ${Boost_LIBRARIES})
 
 install(TARGETS
         joy_comms_control_node

@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="mcu_control" exec="CommsNode" name="comms_node" output="screen"/>
+    <node pkg="mcu_control_python" exec="CommsNode" name="comms_node" output="screen" />
 
     <include file="$(find-pkg-share joy_control)/joy_comms_manual.xml" />
 </launch>
