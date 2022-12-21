@@ -30,7 +30,8 @@ install(TARGETS
         joy_comms_control_node
         DESTINATION lib/${PROJECT_NAME})
 
-install(FILES config/joy_comms_config.yaml DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config/ DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
