@@ -13,7 +13,7 @@ export ROS_HOSTNAME=localhost
 
 source ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
 source ~/Programming/robotics-prototype/venv/bin/activate
-source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
+source ~/Programming/robotics-prototype/robot/rover/config/.bash_aliases
 
 #------ POST ROS INSTALLATION ------
 alias eb='nano ~/.bashrc'
