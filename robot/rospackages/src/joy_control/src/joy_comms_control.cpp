@@ -126,7 +126,7 @@ bool JoyCommsControl::isButton(std::string control_name) {
 void JoyCommsControl::getControllerMappings() {
   // Get controller mappings from ROS params
 
-  std::vector<rclcpp::Parameter> mappings = this->get_parameters({"controller_mappings"});
+  std::vector<rclcpp::Parameter> mappings = this->get_parameters({"arm_mappings", "wheel_mappings"});
 
   Implement::ButtonMappings currentButtonMap;
   std::string button_name, command;
@@ -224,7 +224,8 @@ JoyCommsControl::JoyCommsControl() : Node("joy_comms_control_node") {
     this->declare_parameter("controller_type");
     this->declare_parameter("stop_commands");
     this->declare_parameter("command_topics");
-    this->declare_parameter("controller_mappings");
+    this->declare_parameter("arm_mappings");
+    this->declare_parameter("wheel_mappings");
 
     pImplement = new Implement;
 

@@ -52,19 +52,21 @@ private:
                                 "BUTTON_DPAD_LEFT",
                                 "BUTTON_DPAD_RIGHT"};
 
-    std::string ps_button_names[13] = {"BUTTON_CROSS",
+    std::string ps_button_names[15] = {"BUTTON_CROSS",
                                 "BUTTON_CIRCLE",
-                                "BUTTON_TRIANGLE",
                                 "BUTTON_SQUARE",
+                                "BUTTON_TRIANGLE",
+                                share_name,
+                                "BUTTON_HOME",
+                                option_name,
+                                "BUTTON_L3",
+                                "BUTTON_R3",
                                 "BUTTON_L1",
                                 "BUTTON_R1",
-                                "BUTTON_L2",
-                                "BUTTON_R2",
-                                share_name,
-                                option_name,
-                                "BUTTON_HOME",
-                                "BUTTON_L3",
-                                "BUTTON_R3"};
+                                "BUTTON_DPAD_UP",
+                                "BUTTON_DPAD_DOWN",
+                                "BUTTON_DPAD_LEFT",
+                                "BUTTON_DPAD_RIGHT"};
 
 
     std::string ps_u18_button_names[13] = {"BUTTON_SQUARE",
@@ -98,12 +100,10 @@ private:
 
     std::string ps_axis_names[8] = {"JOY_LEFT_X",
                                 "JOY_LEFT_Y",
-                                trigger_l2_name,
                                 "JOY_RIGHT_X",
                                 "JOY_RIGHT_Y",
-                                trigger_r2_name,
-                                "DPAD_X",
-                                "DPAD_Y"};
+                                trigger_l2_name,
+                                trigger_r2_name};
 
     std::string ps_u18_axis_names[8] = {"JOY_LEFT_X",
                                 "JOY_LEFT_Y",

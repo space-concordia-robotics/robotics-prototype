@@ -1,6 +1,6 @@
 joy_comms_control_node:
   ros__parameters:
-    enable_button: 5
+    enable_button: 10
     next_layout_button: "BUTTON_OPTION"
     previous_layout_button: "BUTTON_SHARE"
     controller_type: 1
@@ -13,7 +13,7 @@ joy_comms_control_node:
       ["/arm_command",
        "/rover_command"]
     #number of mappings has to match the number of topics in command_topics and commands in stop_commands
-    controller_mappings:
+    arm_mappings:
       ["TRIGGER_R2,set_motor_speeds %a 0 0 0 0 0,10,250",
       "TRIGGER_L2,set_motor_speeds -%a 0 0 0 0 0,10,250",
       "JOY_LEFT_Y,set_motor_speeds 0 %a 0 0 0 0,10,250",
@@ -22,7 +22,7 @@ joy_comms_control_node:
       "JOY_RIGHT_X,set_motor_speeds 0 0 0 0 %a 0,10,250",
       "BUTTON_CIRCLE,set_motor_speeds 0 0 0 0 0 250,10,250",
       "BUTTON_SQUARE,set_motor_speeds 0 0 0 0 0 -250,10,250"]
-    controller_mappings:
+    wheel_mappings:
       ["TRIGGER_L2,move_wheels %a %a %a -%a -%a -%a,10,250",
       "TRIGGER_R2,move_wheels -%a -%a -%a %a %a %a,10,250",
       "JOY_RIGHT_X,move_wheels %a %a %a %a %a %a,10,250",
