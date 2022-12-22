@@ -274,11 +274,9 @@ JoyCommsControl::JoyCommsControl() : Node("joy_comms_control_node") {
     getCommandTopics();
 
     pImplement->joy_sub =
-            this->create_subscription<sensor_msgs::msg::Joy>("joy",
-                                                             1,
-                                                             [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
-                                                                 this->pImplement->joyCallback(msg);
-                                                             });
+            this->create_subscription<sensor_msgs::msg::Joy>("joy", 1,
+                                                             std::bind(&JoyCommsControl::Implement::joyCallback,
+                                                                       this->pImplement, std::placeholders::_1));
 }
 
 void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::msg::Joy::SharedPtr joy_msg) {
