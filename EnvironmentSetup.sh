@@ -4,18 +4,11 @@
 APPEND_TO_BASH="
 
 #------ ROBOTICS SETTINGS ------
-# competition mode
-#export ROS_MASTER_URI=http://172.16.1.30:11311
-#export ROS_HOSTNAME=$USER
-# local mode
-export ROS_MASTER_URI=http://localhost:11311
-export ROS_HOSTNAME=localhost
-
-source ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+source ~/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash
 source ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 
-#------ POST ROS INSTALLATION ------
+#------ POST ROS2 INSTALLATION ------
 alias eb='nano ~/.bashrc'
 alias sb='source ~/.bashrc'
 alias gs='git status'
@@ -41,7 +34,7 @@ alias rover="cd $ROVER"
 alias arm="cd $ROVER/ArmDriverUnit"
 alias wheels="cd $ROVER/MobilePlatform"
 alias rostings="cd $ROSPACKAGES"
-alias mcu="cd $ROSPACKAGES/src/mcu_control/scripts"
+alias mcu="cd $ROSPACKAGES/src/mcu_control_python/mcu_control_python"
 alias util="cd $ROBOTICS_WS/robot/util"'
 
 FINAL_MESSAGE="
