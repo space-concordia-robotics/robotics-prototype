@@ -5,31 +5,18 @@ This repo contains the Robotics software team code.
 
 ## Contributing and Development Environment
 
-This project uses python virtual environments, so it is necessary the ensure that the virtual environment is properly setup and indeed uses python3.6+.
-
-### Style and format
-
-So far we only have standardized solutions for our python style and conventions. The configurations for formatting are stored in `.style.yapf` and for linting in `.pylintrc`. These will be eventually automated using git hooks, as documented per [issue #417](https://github.com/space-concordia-robotics/robotics-prototype/issues/417). While it's not mandatory, it is encouraged to try to setup whatever IDE/editor you are using to reference these configuration files.
-
-#### Atom
-If you're using Atom (it can be installed via Ubuntu software), setting up should be fairly easy.
-
-- Run `apm install --packages-file .atom/package-list.txt` (from project root). This should install all needed packages.
-- Note that the config file `./atom/config.cson` (still in the project root) is where the configurations for said packages are stored/versioned for this project.
-
-If you wish to quickly test these in the command line, refer to the testing steps in [PR #415](https://github.com/space-concordia-robotics/robotics-prototype/pull/415).
+This project uses python virtual environments, so it is necessary to ensure that the virtual environment is properly setup and indeed uses python3.8+.
 
 ## Automatic Setup
 **Notes:**
 - Make sure you have at least 10GB of **free space** to complete the installation. More is always better.
-- Don't forget the `--recursive` when cloning, or you might run into issues.
 - The script will take about an hour to complete (depends on internet speed and specs). Please monitor the process for any potential errors.
 - You should be prompted once (maybe more) for sudo password.
-Apart from that, you can can sit back and relax :slightly_smiling_face:
+Apart from that, you can sit back and relax :slightly_smiling_face:
 
 To use the automatic setup script you must first clone the repo using the command below. **Make sure that you do not have a directory named `robotics-prototype` in `/home/$USER/Programming` or it will be overwritten.**
 ```
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype ~/Programming/robotics-prototype
+$ git clone git@github.com:space-concordia-robotics/robotics-prototype.git ~/Programming/robotics-prototype
 ```
 When you have cloned the repo you can then execute `EnvironmentSetup.sh` which will setup the environment. Make sure to uninstall previous ROS installations or the script will exit.
 ```
@@ -38,12 +25,9 @@ $ ./EnvironmentSetup.sh
 ```
 After you have restarted your terminal you can run the GUI
 
-### Running the GUI
+### Running the GUI TODO: port GUI to ROS2
 1. Make sure your virtual environment is activated.
-2. In one terminal window run `rosgui`
-3. In another run `startgui`
-
-After either option, head over to [localhost:5000](/localhost:5000) on your browser.
+2. In a terminal window run `rosrun controller script`
 
 
 ## Manual setup
@@ -51,27 +35,27 @@ If for some reason the automatic script doesn't work, you can follow these steps
 
 
 ### Prerequisites
-Make sure you are using Ubuntu 18.04 (The ROS distribution we use doesn't support anything newer than 18.04).
+It is recommended to be using Ubuntu 22.04 (although it is possible to use other linux distros, Windows or MacOS if desired).
 
 
 Install required packages
 ```
-$ sudo apt install python3.6-venv git python-pip net-tools
+$ sudo apt install python-venv git python-pip
 ```
 
-Clone the repo recursively.
+Clone the repo.
 ```
 $ cd ~/
 $ mkdir Programming
 $ cd Programming
-$ git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype
+$ git clone git@github.com:space-concordia-robotics/robotics-prototype.git
 ```
 A local repository should now be created. `robotics-prototype` is the root directory for this project.
 
 ### Setup [virtualenv](https://docs.python.org/3.6/library/venv.html#modulevenvhttps://virtualenv.pypa.io/en/stable/userguide/)
 ```
 $ cd robotics-prototype
-$ python3.6 -m venv venv
+$ python -m venv venv
 $ source venv/bin/activate
 ```
 You should see a `(venv)` appear at the beginning of your terminal prompt (in Linux and Mac at least) indicating that you are working inside the virtualenv. Now when you install something:
@@ -102,45 +86,29 @@ After the script is done, you should be able to run arduino by `cd $HOME/arduino
 
 To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
 
-### Install [ROS-Melodic](http://wiki.ros.org/melodic)
+### Install [ROS-Galactic](https://docs.ros.org/en/galactic/index.html)
 ```
 bash ./install_ros.sh
 ```
-To see exactly what happened during the installation of ROS-Melodic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
+To see exactly what happened during the installation of ROS-Galactic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
-To verify ROS-Melodic has been successfully installed, you should do
+To verify ROS-Galactic has been successfully installed, you should do
 ```
-$ roscore
+$ ros2
+$ printenv ROS_DISTRO
 ```
-In the output you should see included: `* /rosdistro: melodic`
+In the output of the last command you should see included: `galactic`
 
 To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
-
-To verify that rosbridge is working, deactivate `venv` with `deactivate`
-```
-$ roslaunch rosbridge_server rosbridge_websocket.launch
-```
-You will need `venv` activated for everything you do except the above command until [this issue](https://github.com/space-concordia-robotics/robotics-prototype/issues/197) is resolved
 
 ### .bashrc edits
 You should add this to your `~/.bashrc` file. To automatically open `~/.bashrc` using the GNU nano text editor, you can run `eb`. (this shortcut was added in your .bashrc file during the scripted ROS installation, among a few others)
 ```
-#competition mode
-#export ROS_MASTER_URI=http://172.16.1.30:11311
-#export ROS_HOSTNAME=$USER
-
-. ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
+. ~/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash
 . ~/Programming/robotics-prototype/venv/bin/activate
 source ~/Programming/robotics-prototype/robot/basestation/config/.bash_aliases
 ```
 **Open a new terminal for changes to apply**. You should automatically have a virtual environment activated. The last line added a couple of aliases. You can read the .bash_aliases file to see all the new aliases.
-
-### Setup env.js
-You will need to provide the IP that the GUI will work with. By running this script, everything is handled.
-
-```
-./robot/basestation/env.sh >| robot/basestation/static/js/env.js
-```
 
 ### Setup git hooks
 
@@ -148,18 +116,6 @@ Git hooks are important for performing repository validity checks. To setup git 
 
 - `cp commit_message_hook.py .git/hooks/prepare-commit-msg`
 - `cp branch_name_verification_hook.py .git/hooks/post-checkout`
-
-### Run the GUI
-Firstly, in a new terminal you should run `rosgui` (this is one of the new aliases in .bash_aliases that you added) to launch a ROS server
-
-Back in the original terminal, you can make use of the `base` alias, to be automatically directed to the basestation directory, and then run the app.py file.
-
-```
-$ base
-$ python app.py
-```
-Alternatively, after running `rosgui` you can run `startgui` to run the GUI. If you run `startgui` it will also run the `updateEnv` alias which makes sure that `env.js` is setup.
-
 
 ### The commit hook prepender and branch verification hook
 
@@ -182,9 +138,5 @@ Lastly, the branch-verification-hook will verify if the names of newly created b
 ### Using Git
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 
-### Cloning and Pulling
-We are using git submodules in `robotics-prototype`. This means that we are using code that is external to our repository. To ensure that it also downloads all the packages from the external repository, use the commands below :
-
-Clone : `git clone --recursive https://github.com/space-concordia-robotics/robotics-prototype`
-
-Pull : `git pull; git submodule update --init --recursive`
+### Cloning and Pulling Updates for Dependencies
+TODO: write instructions for using vcs-import to download dependencies to ROS workspace
