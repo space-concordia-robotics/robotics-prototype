@@ -6,6 +6,7 @@
 .pytest*
 *.egg-info
 *sh.exe.stackdump
+dist
 venv
 env
 .envrc
