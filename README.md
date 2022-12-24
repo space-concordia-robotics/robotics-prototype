@@ -140,7 +140,7 @@ For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com
 
 ### Cloning and Pulling Updates for Dependencies
 We managed our third party dependencies with the cli tool: "vcs import"
-- `sudo apt-get install python-vcstools`
+- `sudo apt-get install python-vcstools ros-foxy-image-common`
 \
 \
 In the robot/rospackages/ directory run:

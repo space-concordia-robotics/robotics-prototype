@@ -1,0 +1,9 @@
+repositories:
+    src/third-party-deps/cv_camera:
+        type: git
+        url: git@github.com:Kapernikov/cv_camera.git
+        version: master
+    src/third-party-deps/image_common:
+            type: git
+            url: git@github.com:ros-perception/image_common.git
+            version: galactic
