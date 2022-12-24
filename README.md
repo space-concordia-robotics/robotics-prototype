@@ -139,4 +139,10 @@ Lastly, the branch-verification-hook will verify if the names of newly created b
 For a quick primer on our workflow using git, [CLICK HERE :)](https://github.com/space-concordia-robotics/robotics-prototype/wiki/Git-Workflow-and-Conventions)
 
 ### Cloning and Pulling Updates for Dependencies
-TODO: write instructions for using vcs-import to download dependencies to ROS workspace
+We managed our third party dependencies with the cli tool: "vcs import"
+- `sudo apt-get install python-vcstools`
+\
+\
+In the robot/rospackages/ directory run:
+- `vcs import < in-house-dependencies.repos`
+- `vcs import < third-party-dependencies.repos`
