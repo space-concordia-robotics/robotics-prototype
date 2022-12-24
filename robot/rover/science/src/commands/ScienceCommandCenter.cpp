@@ -10,7 +10,7 @@
 #define COMMAND_ESTOP 25
 
 #define COMMAND_NEXT_TEST_TUBE 42
-//#define COMMAND_GO_TO_TEST_TUBE 43
+#define COMMAND_GO_TO_TEST_TUBE 43
 //#define COMMAND_GET_TEST_TUBE 44
 
 float bytes_to_float(const uint8_t* rawPointer) {
@@ -25,6 +25,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 
 // These declare method, in raman.ino, that are needed by the command center
 void carousel_next_test_tube();
+void carousel_go_to_test_tube(uint8_t index);
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -39,6 +40,12 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         float degrees = bytes_to_float(rawArgs);
         carousel_move_degrees(degrees);
       }*/
+    case COMMAND_GO_TO_TEST_TUBE:
+      if (rawArgsLength == 1) {
+        carousel_go_to_test_tube(rawArgs[0]);
+      } else {
+        digitalWrite(LED, !digitalRead(LED));  
+      }
     default:
       Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));

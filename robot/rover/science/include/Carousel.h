@@ -20,7 +20,7 @@ class Carousel : public Updatable {
   uint8_t currentCuvette;
   static const uint8_t ccw_speed = 150;
   static const uint8_t cw_speed = 30;
-  static const uint8_t stopped_speed = 142;
+  static const uint8_t stopped_speed = 90;
 
  private:
   unsigned long timeCorrectionStarted = 0;
@@ -30,7 +30,7 @@ class Carousel : public Updatable {
   // min milliseconds between button rising edges.
   // If button rising is detected faster than this,
   // assume it is bouncing 
-  static unsigned long const DEBOUNCE_THRESHOLD = 100;
+  static unsigned long const DEBOUNCE_THRESHOLD = 150;
   /**
    * max amount of time to continue correcting a carousel move
    */
@@ -56,10 +56,9 @@ class Carousel : public Updatable {
 
  public:
   const static uint8_t NUM_CUVETTES = 6;
-  // Required for the button interrupt
-  static Carousel* instance;
+  
   // sets up interrupt callbacks
-  static void setup();
+  void setup();
 
   void home();
   void startCalibrating();

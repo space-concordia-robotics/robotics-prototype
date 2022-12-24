@@ -33,13 +33,14 @@ This contains the methods needed by command center
   ------
 */
 void carousel_next_test_tube() { carousel->moveNCuvettes(1); }
+void carousel_go_to_test_tube(uint8_t index) { carousel->goToCuvette(index); }
 
 void setup() {
   HAL::pinSetup();
 
   digitalWrite(LED, HIGH);
   Serial.begin(9600);
-  Carousel::setup();
+  carousel->setup();
   commandCenter->startSerial(TX_TEENSY_4_0_PIN, RX_TEENSY_4_0_PIN, ENABLE_PIN,
                              TRANSMIT_PIN);
   // signal setup is done by turning off builtin LED.

@@ -11,8 +11,6 @@
 #include <string>
 
 
-// The constructor initializes this
-Carousel *Carousel::instance = nullptr;
 
 void Carousel::setup() {
   // These setup functions MUST be here, since the 
@@ -20,6 +18,8 @@ void Carousel::setup() {
   // the add callback will be overwritten when
   // HAL's callback array is initialized.
 
+  startCalibrating();
+  
   // setup callback to count the number of sw pulses 
   HAL::addLimitSwitchCallback(0, [](int buttonState, void *user_ptr){
     Carousel *c = (Carousel*) user_ptr;
@@ -28,7 +28,8 @@ void Carousel::setup() {
       c->limitSwitchPulses++;
       c->btn0LastPulse = millis();
     }
-  }, Carousel::instance);
+  }, this);
+
   // setup callback for the index limit switch
   // for calibration
   HAL::addLimitSwitchCallback(1, [](int buttonState, void *user_ptr){
@@ -38,7 +39,7 @@ void Carousel::setup() {
       c->currentCuvette = 0;
       HAL::servo(0, Carousel::stopped_speed);
     }
-  }, Carousel::instance);
+  }, this);
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
@@ -122,8 +123,6 @@ void Carousel::startCalibrating() {
 }
 
 Carousel::Carousel(): currentCuvette(-1), btn0LastPulse(0) {
-  Carousel::instance = this;
-  startCalibrating();
 }
 
 Carousel::~Carousel() {}
