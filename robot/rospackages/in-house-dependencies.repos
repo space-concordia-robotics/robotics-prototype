@@ -1,0 +1,9 @@
+repositories:
+    src/in-house-deps/autonomy-packages:
+        type: git
+        url: git@github.com:space-concordia-robotics/autonomy-packages.git
+        version: master
+    src/in-house-deps/controller:
+        type: git
+        url: git@github.com:space-concordia-robotics/Controller.git
+        version: main

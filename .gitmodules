@@ -1,9 +1,0 @@
-[submodule "cv_camera"]
-	path = robot/rospackages/src/cv_camera
-	url = https://github.com/OTL/cv_camera
-[submodule "tf2_web_republisher"]
-	path = robot/rospackages/src/tf2_web_republisher
-	url = https://github.com/RobotWebTools/tf2_web_republisher
-[submodule "autonomy-packages"]
-	path = robot/rospackages/src/autonomy-packages
-	url = https://github.com/space-concordia-robotics/autonomy-packages
