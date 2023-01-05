@@ -1,0 +1,4 @@
+src/third-party-deps/zed-ros2-wrapper:
+        type: git
+        url: git@github.com:stereolabs/zed-ros2-wrapper.git
+        version: master

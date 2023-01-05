@@ -4,3 +4,6 @@ rospkg==1.1.7
 ffmpeg-python==0.2.0
 Twisted==22.10.0
 Jetson.GPIO
+
+# New ones for ROS2
+lark==1.1.5
