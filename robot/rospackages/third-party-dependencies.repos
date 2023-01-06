@@ -7,7 +7,6 @@ repositories:
         type: git
         url: git@github.com:ros-perception/image_common.git
         version: galactic
-
     src/third-party-deps/pcl_msgs:
         type: git    
         url: git@github.com:ros-perception/pcl_msgs.git   

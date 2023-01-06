@@ -1,0 +1,9 @@
+repositories:
+    src/third-party-deps/ros2_aruco:
+        type: git
+        url: git@github.com:JMU-ROBOTICS-VIVA/ros2_aruco.git
+        version: main
+    src/third-party-deps/zed-ros2-wrapper:
+        type: git
+        url: git@github.com:stereolabs/zed-ros2-wrapper.git
+        version: eloquent
