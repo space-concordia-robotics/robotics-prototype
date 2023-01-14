@@ -36,18 +36,16 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       break;
     case COMMAND_NEXT_TEST_TUBE:
       carousel_next_test_tube();
-      /*if (rawArgsLength == 4) {
-        float degrees = bytes_to_float(rawArgs);
-        carousel_move_degrees(degrees);
-      }*/
+      break;
     case COMMAND_GO_TO_TEST_TUBE:
       if (rawArgsLength == 1) {
         carousel_go_to_test_tube(rawArgs[0]);
       } else {
         digitalWrite(LED, !digitalRead(LED));  
       }
+      break;
     default:
-      Serial5.printf("command id %d args length %d", commandID, rawArgsLength);
+      //Serial.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));
   }
 }
