@@ -11,7 +11,7 @@
 
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
-//#define COMMAND_GET_TEST_TUBE 44
+#define COMMAND_START_CALIBRATING 44
 
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
@@ -26,6 +26,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 // These declare method, in raman.ino, that are needed by the command center
 void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
+void carousel_calibrate();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -43,6 +44,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       } else {
         digitalWrite(LED, !digitalRead(LED));  
       }
+      break;
+    case COMMAND_START_CALIBRATING:
+      carousel_calibrate();
       break;
     default:
       //Serial.printf("command id %d args length %d", commandID, rawArgsLength);

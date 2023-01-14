@@ -7,7 +7,7 @@ from std_msgs.msg import String
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 
-science_out_commands = [("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8])]
+science_out_commands = [("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8]), ("start_calibrating", 44, [dt.ARG_UINT8])]
 
 
 science_in_commands = []
