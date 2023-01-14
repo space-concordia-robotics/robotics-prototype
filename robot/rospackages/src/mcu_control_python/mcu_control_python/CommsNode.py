@@ -255,6 +255,6 @@ class CommsNode(Node):
         rover_queue.append(temp_struct)
 
 if not local_mode:
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
 else:
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
