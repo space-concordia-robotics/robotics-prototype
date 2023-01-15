@@ -1,1 +1,0 @@
-mcu_control/PowerConsumption[] report
