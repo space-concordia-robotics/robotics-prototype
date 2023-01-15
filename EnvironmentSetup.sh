@@ -29,3 +29,7 @@ echo "Setting up Git hooks..."
 cp commit_message_hook.py .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py ./git/hooks/post-checkout
 
+echo "Building ROS Workspace"
+cd robot/rospackages/
+rosdep install -i --from-path src --rosdistro foxy -y
+colcon build
