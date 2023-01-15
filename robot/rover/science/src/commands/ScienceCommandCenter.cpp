@@ -3,12 +3,13 @@
 //
 
 #include "include/commands/ScienceCommandCenter.h"
-
+#include "../../../internal_comms/include/CommandCenter.h"
 #include "../../include/SciencePinSetup.h"
 #include "include/HAL.h"
 
 #define COMMAND_ESTOP 25
 
+#define COMMAND_GET_CAROUSEL_INDEX 40
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
 #define COMMAND_START_CALIBRATING 44
@@ -27,6 +28,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
 void carousel_calibrate();
+int8_t carousel_get_carousel_index();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -48,6 +50,13 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_START_CALIBRATING:
       carousel_calibrate();
       break;
+    case COMMAND_GET_CAROUSEL_INDEX:
+      {
+        uint8_t index = carousel_get_carousel_index();
+        internal_comms::Message* returnMsg = createMessage(41, 1, &index);
+        sendMessage(*returnMsg);
+        break;
+      }
     default:
       //Serial.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));

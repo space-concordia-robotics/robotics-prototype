@@ -122,6 +122,14 @@ void Carousel::startCalibrating() {
   HAL::servo(0, Carousel::cw_speed);
 }
 
+int8_t Carousel::getCarouselIndex() const {
+  if (state == State::Uncalibrated || state == State::Calibrating) {
+    return -1;
+  } else {
+    return currentCuvette;
+  }
+}
+
 Carousel::Carousel(): currentCuvette(-1), btn0LastPulse(0) {
 }
 

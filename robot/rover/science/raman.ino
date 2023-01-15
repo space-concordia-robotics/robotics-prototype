@@ -35,6 +35,7 @@ This contains the methods needed by command center
 void carousel_next_test_tube() { carousel->moveNCuvettes(1); }
 void carousel_go_to_test_tube(uint8_t index) { carousel->goToCuvette(index); }
 void carousel_calibrate() { carousel->startCalibrating(); }
+int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
 
 void setup() {
   HAL::pinSetup();

@@ -66,7 +66,7 @@ class Carousel : public Updatable {
   void moveNCuvettes(int cuvettesToMove);
   void nextCuvette();
   void previousCuvette();
-  uint8_t getCurrentCuvette() const { return currentCuvette; }
+  int8_t getCarouselIndex() const;
 
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();

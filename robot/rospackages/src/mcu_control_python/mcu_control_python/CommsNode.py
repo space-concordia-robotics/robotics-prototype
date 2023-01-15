@@ -34,7 +34,7 @@ if not local_mode:
 # needs to know which one it's 'hearing' from.
 # device is set by second argument to node.
 
-in_commands = [arm_in_commands, wheel_in_commands, None, science_in_commands]
+in_commands = [arm_in_commands, wheel_in_commands, [], science_in_commands]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -123,7 +123,17 @@ def receive_message():
             print(commandID)
             commandID = int.from_bytes(commandID, "big")
 
-            handler = get_handler(commandID, device)
+            if local_mode:
+                # We can't know who sent the message in 
+                # local comms node, so find the first
+                # receive ID that mathes (should be unique)
+                for d in range(4):
+                    handler = get_handler(commandID, d)
+                    if handler != None:
+                        break
+            else:
+                handler = get_handler(commandID, device)
+            
             # print("CommandID:", commandID)
             if handler is None:
                 print("No command with ID ", commandID, " was found")
