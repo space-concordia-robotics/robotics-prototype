@@ -1,11 +1,25 @@
 # Source ros workspace
 source /opt/ros/foxy/setup.bash
+source ~/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash
 
 # Source python virtual enviroment
 source ~/Programming/robotics-prototype/venv/bin/activate
 
-alias robotics='cd ~/Programming/robotics-prototype/
-alias rover='cd ~/Programming/robotics-prototype/robot/rover/
+ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
+BASE="$ROBOTICS_WS/robot/basestation"
+ROVER="$ROBOTICS_WS/robot/rover"
+ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
+
+alias ..="cd .."
+alias b="cd -"
+alias robotics="cd $ROBOTICS_WS"
+alias base="cd $BASE"
+alias rover="cd $ROVER"
+alias arm="cd $ROVER/ArmDriverUnit"
+alias wheels="cd $ROVER/MobilePlatform"
+alias rostings="cd $ROSPACKAGES"
+alias mcu="cd $ROSPACKAGES/src/mcu_control_python/mcu_control_python"
+alias util="cd $ROBOTICS_WS/robot/util"'
 
 ex ()
 {

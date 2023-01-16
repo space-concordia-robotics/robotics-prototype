@@ -18,7 +18,7 @@ sudo apt -qq update
 sudo apt -qq upgrade -y
 
 echo "Installing ROS... (will take a while)"
-sudo apt -qq install ros-foxy-desktop
+sudo apt -qq install ros-foxy-ros-base
 sudo apt -qq install ros-dev-tools
 
 echo "Done installing ROS"
