@@ -7,7 +7,7 @@ sudo apt -qq update -y
 
 echo "Setting up python virtual environment and installing requirements..."
 
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
 sudo apt-get install -y python3-pip
