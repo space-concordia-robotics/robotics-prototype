@@ -29,6 +29,9 @@ echo "Setting up Git hooks..."
 cp commit_message_hook.py .git/hooks/prepare-commit-msg
 cp branch_name_verification_hook.py ./git/hooks/post-checkout
 
+echo "Install Workspace Dependencies"
+sudo apt-get install -y ros-humble-pcl-msgs ros-humble-image-pipeline ros-humble-image-common ros-humble-vision-opencv ros-humble-perception-pcl ros-humble-ros2-ouster
+
 echo "Building ROS Workspace"
 cd robot/rospackages/
 rosdep install -i --from-path src --rosdistro foxy -y
