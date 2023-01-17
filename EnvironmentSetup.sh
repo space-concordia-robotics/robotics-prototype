@@ -10,7 +10,7 @@ echo "Setting up python virtual environment and installing requirements..."
 python3 -m venv venv
 source venv/bin/activate
 
-sudo apt-get install -y python3-pip
+sudo apt-get install -y python3-pip python3-venv
 
 pip install -U pip
 pip install -r requirements.txt
