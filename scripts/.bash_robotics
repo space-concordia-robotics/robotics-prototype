@@ -1,5 +1,5 @@
 # Source ros workspace
-source /opt/ros/foxy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash
 
 # Source python virtual enviroment
