@@ -86,18 +86,18 @@ After the script is done, you should be able to run arduino by `cd $HOME/arduino
 
 To verify that Teensyduino was properly setup, go to `Tools --> Board` and make sure you see options that include "Teensy" in their names. To be extra sure, you can try uploading a sketch to a teensy as well.
 
-### Install [ROS-Galactic](https://docs.ros.org/en/galactic/index.html)
+### Install [ROS-Humble](https://docs.ros.org/en/humble/index.html)
 ```
 bash ./install_ros.sh
 ```
-To see exactly what happened during the installation of ROS-Galactic, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
+To see exactly what happened during the installation of ROS-Humble, you can read the script file located in which ever directory it was downloaded in. Your `~/.bashrc` file was modified, and so to make use of the new changes, **you should restart your terminal**.
 
-To verify ROS-Galactic has been successfully installed, you should do
+To verify ROS-Humble has been successfully installed, you should do
 ```
 $ ros2
 $ printenv ROS_DISTRO
 ```
-In the output of the last command you should see included: `galactic`
+In the output of the last command you should see included: `humble`
 
 To stop a running process in the command line, press <kbd>Ctrl-C</kbd>
 
