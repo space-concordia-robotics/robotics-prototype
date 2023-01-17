@@ -218,14 +218,14 @@ void JoyCommsControl::getCommandTopics() {
 }
 
 JoyCommsControl::JoyCommsControl() : Node("joy_comms_control_node") {
-    this->declare_parameter("enable_button");
-    this->declare_parameter("next_layout_button");
-    this->declare_parameter("previous_layout_button");
-    this->declare_parameter("controller_type");
-    this->declare_parameter("stop_commands");
-    this->declare_parameter("command_topics");
-    this->declare_parameter("arm_mappings");
-    this->declare_parameter("wheel_mappings");
+    this->declare_parameter("enable_button", rclcpp::ParameterValue());
+    this->declare_parameter("next_layout_button", rclcpp::ParameterValue());
+    this->declare_parameter("previous_layout_button", rclcpp::ParameterValue());
+    this->declare_parameter("controller_type", rclcpp::ParameterValue());
+    this->declare_parameter("stop_commands", rclcpp::ParameterValue());
+    this->declare_parameter("command_topics", rclcpp::ParameterValue());
+    this->declare_parameter("arm_mappings", rclcpp::ParameterValue());
+    this->declare_parameter("wheel_mappings", rclcpp::ParameterValue());
 
     pImplement = new Implement;
 
