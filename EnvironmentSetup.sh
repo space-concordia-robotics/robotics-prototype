@@ -10,10 +10,12 @@ echo "Setting up python virtual environment and installing requirements..."
 python -m venv venv
 source venv/bin/activate
 
+sudo apt-get install -y python3-pip
+
 pip install -U pip
 pip install -r requirements.txt
 
-python setup.py develop
+python3 setup.py develop
 
 echo "Installing ROS..."
 bash scripts/install_ros.sh
