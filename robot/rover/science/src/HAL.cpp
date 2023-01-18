@@ -39,7 +39,6 @@ void HAL::pinSetup() {
 }
 
 void HAL::estop() {
-  // TODO: check if this is really how to stop the servos
   for (int i = 0; i < NUM_SERVOS; i++) {
     servo(i, 90);
   }
