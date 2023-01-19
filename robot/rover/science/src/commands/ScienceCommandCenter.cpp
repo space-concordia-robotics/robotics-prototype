@@ -8,6 +8,7 @@
 #include "include/HAL.h"
 
 #define COMMAND_ESTOP 25
+#define COMMAND_SET_SERVO_ANGLE 26
 
 #define COMMAND_GET_CAROUSEL_INDEX 40
 #define COMMAND_NEXT_TEST_TUBE 42
@@ -37,6 +38,15 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_ESTOP:
       HAL::estop();
       break;
+    case COMMAND_SET_SERVO_ANGLE:
+      {
+        if (rawArgsLength == 2) {
+          HAL::servo(rawArgs[0], rawArgs[1]);
+        } else {
+          digitalWrite(LED, !digitalRead(LED));
+        }
+        break;
+      }
     case COMMAND_NEXT_TEST_TUBE:
       carousel_next_test_tube();
       break;
@@ -44,7 +54,7 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       if (rawArgsLength == 1) {
         carousel_go_to_test_tube(rawArgs[0]);
       } else {
-        digitalWrite(LED, !digitalRead(LED));  
+        digitalWrite(LED, !digitalRead(LED));
       }
       break;
     case COMMAND_START_CALIBRATING:

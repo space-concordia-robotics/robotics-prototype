@@ -46,8 +46,8 @@ void HAL::estop() {
 
 void HAL::servo(uint8_t servoId, uint8_t angle) {
   if (servoId >= NUM_SERVOS) {
-    Serial5.print("Cannot set servo with id ");
-    Serial5.println(servoId);
+    //Serial5.print("Cannot set servo with id ");
+    //Serial5.println(servoId);
   } else {
     servos[servoId]->write(angle);
   }
