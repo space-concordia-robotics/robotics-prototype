@@ -13,7 +13,6 @@ import rospy
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control.srv import *
-from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.CommandParser import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
@@ -196,7 +195,7 @@ def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
@@ -205,10 +204,6 @@ if __name__ == '__main__':
     angle_pub_topic = '/arm_joint_states'
     rospy.loginfo('Beginning to publish to "'+angle_pub_topic+'" topic')
     anglePub = rospy.Publisher(angle_pub_topic, JointState, queue_size=10)
-
-    v_bat_topic = '/battery_voltage'
-    rospy.loginfo('Beginning to publish to "'+v_bat_topic+'" topic')
-    vBatPub = rospy.Publisher(v_bat_topic, Voltage, queue_size=10)
 
     feedback_pub_topic = '/arm_feedback'
     rospy.loginfo('Beginning to publish to "'+feedback_pub_topic+'" topic')
