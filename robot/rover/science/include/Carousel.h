@@ -15,52 +15,45 @@ class Carousel;
 
 
 class Carousel : public Updatable {
- protected:
-  // current cuvette, in the range of 0-5
-  uint8_t currentCuvette;
+ private:
+  // min milliseconds to wait after seeing switch keeping a solid state
+  // to register that it has actually changed
+  static unsigned long const DEBOUNCE_THRESHOLD = 50;
+
   static const uint8_t ccw_speed = 150;
   static const uint8_t cw_speed = 30;
   static const uint8_t stopped_speed = 90;
-
- private:
-  unsigned long timeCorrectionStarted = 0;
-  float degreesCurrentMove = 0;
-  // Timestamp when btn 0 was last pressed, for debounce
-  unsigned long btn0LastPulse;
-  // min milliseconds between button rising edges.
-  // If button rising is detected faster than this,
-  // assume it is bouncing 
-  static unsigned long const DEBOUNCE_THRESHOLD = 150;
-  /**
-   * max amount of time to continue correcting a carousel move
-   */
-  static const unsigned long CORRECTION_MAX = 500;
-  /**
-   * stores the position the last time the motor was stopped.
-   */
-  int previousPositionTenths = 0;
+  
+  // For debounce
+  unsigned long lastDebounceTime;
+  int lastButtonState;
+  int buttonState;
+  
+  // current cuvette, in the range of 0-7
+  uint8_t currentCuvette;
+  
   enum State {
     Uncalibrated,
     Calibrating,
     Not_Moving,
-    Moving_Carousel,
-    Correcting_Move_Pos,
-    Correcting_Move_Neg
+    Moving_Carousel
   };
   State state;
-  // Keeps track of the number of times
-  // the limit switch has transitioned to HIGH
+
+  // Keeps track of the number of times the limit switch has
+  // transitioned to HIGH since current move has started
   int limitSwitchPulses;
-  // Stores the number of cuvettes to move
   int cuvettesToMove;
 
+  // checks switch that toggles every time it moves past a carousel
+  void checkSwitch();
+
  public:
-  const static uint8_t NUM_CUVETTES = 6;
+  const static uint8_t NUM_CUVETTES = 8;
   
-  // sets up interrupt callbacks
+  // sets up interrupt callback
   void setup();
 
-  void home();
   void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);

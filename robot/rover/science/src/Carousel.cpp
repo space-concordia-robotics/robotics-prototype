@@ -19,16 +19,6 @@ void Carousel::setup() {
   // HAL's callback array is initialized.
 
   startCalibrating();
-  
-  // setup callback to count the number of sw pulses 
-  HAL::addLimitSwitchCallback(0, [](int buttonState, void *user_ptr){
-    Carousel *c = (Carousel*) user_ptr;
-    // This checks debouncing and that the state is high
-    if (buttonState && (millis() - (c->btn0LastPulse)) > DEBOUNCE_THRESHOLD) {
-      c->limitSwitchPulses++;
-      c->btn0LastPulse = millis();
-    }
-  }, this);
 
   // setup callback for the index limit switch
   // for calibration
@@ -43,11 +33,11 @@ void Carousel::setup() {
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
+  checkSwitch();
+
   if (state == State::Calibrating) {
     return;
-  }
-  
-  if (state == State::Moving_Carousel) {
+  } else if (state == State::Moving_Carousel) {
     if (limitSwitchPulses >= cuvettesToMove) {
       HAL::servo(0, Carousel::stopped_speed);
       state = State::Not_Moving;
@@ -55,31 +45,7 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
       limitSwitchPulses = 0;
     }
   }
-  /*
-  if (state == State::Correcting_Move_Pos) {
-    if (digitalRead(CAR_POS) == LOW) {  // switch pressed (pulled up)
-      theServo->writeActionCommand(servoID, "H");
-      state = State::Not_Moving;
-    } else if (millis() - timeCorrectionStarted > CORRECTION_MAX) {
-      theServo->writeActionCommand(servoID, "WD", -90);
-      timeCorrectionStarted = millis();
-      state = State::Correcting_Move_Neg;
-    }
-  }
-  if (state == State::Correcting_Move_Neg) {
-    if (digitalRead(CAR_POS) == LOW) {  // switch pressed (pulled up)
-      theServo->writeActionCommand(servoID, "H");
-      state = State::Not_Moving;
-    } else if (millis() - timeCorrectionStarted > CORRECTION_MAX) {
-      // if reached max time, give up.
-      theServo->writeActionCommand(servoID, "H");
-      state = State::Not_Moving;
-    }
-  }
-  */
 }
-
-void Carousel::home() {}
 
 void Carousel::moveNCuvettes(int cuvettesToMove) {
   if (cuvettesToMove == 0) {
@@ -117,9 +83,15 @@ void Carousel::previousCuvette() {
 }
 
 void Carousel::startCalibrating() {
-  state = State::Calibrating;
-  // start moving clockwise
-  HAL::servo(0, Carousel::cw_speed);
+  if (HAL::readLimitSwitch(1)) {
+    // If the switch is already pressed, no need to calibrate
+    state = State::Not_Moving;
+    currentCuvette = 0;
+    HAL::servo(0, Carousel::stopped_speed);
+  } else {
+    state = State::Calibrating;
+    HAL::servo(0, Carousel::cw_speed);
+  }
 }
 
 int8_t Carousel::getCarouselIndex() const {
@@ -130,7 +102,36 @@ int8_t Carousel::getCarouselIndex() const {
   }
 }
 
-Carousel::Carousel(): currentCuvette(-1), btn0LastPulse(0) {
+void Carousel::checkSwitch() {
+  int reading = HAL::readLimitSwitch(0);
+
+  // If the switch changed, due to noise or pressing:
+  if (reading != lastButtonState) {
+    // reset the debouncing timer
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > DEBOUNCE_THRESHOLD) {
+    // whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state:
+
+    if (reading != buttonState) {
+      buttonState = reading;
+      // count pulse when button goes to HIGH
+      if (buttonState == HIGH) {
+        limitSwitchPulses++;
+      }
+    }
+  }
+
+  lastButtonState = reading;
+}
+
+Carousel::Carousel(): currentCuvette(-1), state(State::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0) {
+  lastDebounceTime = 0;
+  lastButtonState = HAL::readLimitSwitch(0);
+  buttonState = lastButtonState;
+
 }
 
 Carousel::~Carousel() {}
