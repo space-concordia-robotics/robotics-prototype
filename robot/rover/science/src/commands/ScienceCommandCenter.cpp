@@ -11,7 +11,8 @@
 #define COMMAND_SET_SERVO_ANGLE 26
 #define COMMAND_READ_LIMIT_SWITCH 27
 
-#define COMMAND_GET_CAROUSEL_INDEX 40
+#define COMMAND_GET_CAROUSEL_INDEX 39
+#define COMMAND_PREVIOUS_TEST_TUBE 41
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
 #define COMMAND_START_CALIBRATING 44
@@ -27,6 +28,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 }
 
 // These declare method, in raman.ino, that are needed by the command center
+void carousel_previous_test_tube();
 void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
 void carousel_calibrate();
@@ -59,6 +61,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       }
       break;
     }
+    case COMMAND_PREVIOUS_TEST_TUBE:
+      carousel_previous_test_tube();
+      break;
     case COMMAND_NEXT_TEST_TUBE:
       carousel_next_test_tube();
       break;
@@ -75,7 +80,7 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_GET_CAROUSEL_INDEX:
       {
         uint8_t index = carousel_get_carousel_index();
-        internal_comms::Message* returnMsg = createMessage(41, 1, &index);
+        internal_comms::Message* returnMsg = createMessage(40, 1, &index);
         sendMessage(*returnMsg);
         break;
       }
