@@ -61,8 +61,9 @@ uint8_t HAL::readLimitSwitch(uint8_t switchId) {
     case 1:
       return !digitalRead(LIMIT_SW_1);
     default:
-      Serial5.print("Cannot read limit switch with ID");
-      Serial5.println(switchId);
+      //Serial5.print("Cannot read limit switch with ID");
+      //Serial5.println(switchId);
+      return 2;
   }
 }
 

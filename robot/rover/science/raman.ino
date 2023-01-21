@@ -8,7 +8,6 @@
 #include "Arduino.h"
 #include "include/Carousel.h"
 #include "include/HAL.h"
-#include "include/RamanSetup.h"
 #include "include/SciencePinSetup.h"
 #include "include/commands/ScienceCommandCenter.h"
 

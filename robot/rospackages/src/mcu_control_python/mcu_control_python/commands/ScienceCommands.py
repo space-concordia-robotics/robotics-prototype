@@ -8,10 +8,15 @@ def handle_carousel_index(data):
     carouselIndex = struct.unpack('b', data)  # 1 byte
     print("Received carousel index: ", carouselIndex)
 
+def handle_limit_switch_value(data):
+    switchValue = struct.unpack('b', data)  # 1 byte
+    print("Received limit switch value: ", switchValue)
+
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 
 science_out_commands = [("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8]), ("start_calibrating", 44, [dt.ARG_UINT8]),
-                        ("get_carousel_index", 40, []), ("estop", 25, []), ("set_servo_angle", 26, [dt.ARG_UINT8, dt.ARG_UINT8])]
+                        ("get_carousel_index", 40, []), ("estop", 25, []), ("set_servo_angle", 26, [dt.ARG_UINT8, dt.ARG_UINT8]),
+                        ("read_limit_switch", 27, [dt.ARG_UINT8])]
 
 
-science_in_commands = [("carousel_index", 41, handle_carousel_index)]
+science_in_commands = [("carousel_index", 41, handle_carousel_index), ("limit_switch_value", 28, handle_limit_switch_value)]

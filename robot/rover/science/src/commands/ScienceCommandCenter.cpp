@@ -9,6 +9,7 @@
 
 #define COMMAND_ESTOP 25
 #define COMMAND_SET_SERVO_ANGLE 26
+#define COMMAND_READ_LIMIT_SWITCH 27
 
 #define COMMAND_GET_CAROUSEL_INDEX 40
 #define COMMAND_NEXT_TEST_TUBE 42
@@ -47,6 +48,17 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         }
         break;
       }
+    case COMMAND_READ_LIMIT_SWITCH:
+    {
+      if (rawArgsLength == 1) {
+        uint8_t value = HAL::readLimitSwitch(rawArgs[0]);
+        internal_comms::Message* returnMsg = createMessage(28, 1, &value);
+        sendMessage(*returnMsg);
+      } else {
+        digitalWrite(LED, !digitalRead(LED));
+      }
+      break;
+    }
     case COMMAND_NEXT_TEST_TUBE:
       carousel_next_test_tube();
       break;
