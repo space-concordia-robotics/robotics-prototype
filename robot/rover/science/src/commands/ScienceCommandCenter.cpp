@@ -11,7 +11,7 @@
 #define COMMAND_SET_SERVO_ANGLE 26
 #define COMMAND_READ_LIMIT_SWITCH 27
 
-#define COMMAND_GET_CAROUSEL_INDEX 39
+#define COMMAND_GET_STATUS 39
 #define COMMAND_PREVIOUS_TEST_TUBE 41
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
@@ -33,6 +33,7 @@ void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
 void carousel_calibrate();
 int8_t carousel_get_carousel_index();
+bool carousel_get_moving();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -77,10 +78,10 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
     case COMMAND_START_CALIBRATING:
       carousel_calibrate();
       break;
-    case COMMAND_GET_CAROUSEL_INDEX:
+    case COMMAND_GET_STATUS:
       {
-        uint8_t index = carousel_get_carousel_index();
-        internal_comms::Message* returnMsg = createMessage(40, 1, &index);
+        int8_t msg[2] = {carousel_get_carousel_index(), carousel_get_moving()};
+        internal_comms::Message* returnMsg = createMessage(40, 2, (byte*)msg);
         sendMessage(*returnMsg);
         break;
       }

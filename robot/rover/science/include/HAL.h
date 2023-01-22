@@ -54,7 +54,7 @@ class HAL {
    * @param switchId Id, from 0-1, of switch to read.
    * @return 1 if pressed, 0 if not pressed
    */
-  static uint8_t readLimitSwitch(uint8_t switchId);
+  static int8_t readLimitSwitch(uint8_t switchId);
   /**
    * @brief Adds function that will be called when the limit switch changes
    * state.

@@ -10,6 +10,13 @@
 #include "Updatable.h"
 #include "Servo.h"
 
+enum CarouselState {
+    Uncalibrated,
+    Calibrating,
+    Not_Moving,
+    Moving_Carousel
+};
+
 // Forward declaration
 class Carousel;
 
@@ -32,13 +39,7 @@ class Carousel : public Updatable {
   // current cuvette, in the range of 0-7
   uint8_t currentCuvette;
   
-  enum State {
-    Uncalibrated,
-    Calibrating,
-    Not_Moving,
-    Moving_Carousel
-  };
-  State state;
+  CarouselState state;
 
   // Keeps track of the number of times the limit switch has
   // transitioned to HIGH since current move has started
@@ -60,6 +61,7 @@ class Carousel : public Updatable {
   void nextCuvette();
   void previousCuvette();
   int8_t getCarouselIndex() const;
+  CarouselState getState() const;
 
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();

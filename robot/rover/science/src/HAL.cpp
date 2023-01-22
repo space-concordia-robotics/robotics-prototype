@@ -54,7 +54,7 @@ void HAL::servo(uint8_t servoId, uint8_t angle) {
 }
 
 
-uint8_t HAL::readLimitSwitch(uint8_t switchId) {
+int8_t HAL::readLimitSwitch(uint8_t switchId) {
   switch (switchId) {
     case 0:
       return !digitalRead(LIMIT_SW_0);
@@ -63,7 +63,7 @@ uint8_t HAL::readLimitSwitch(uint8_t switchId) {
     default:
       //Serial5.print("Cannot read limit switch with ID");
       //Serial5.println(switchId);
-      return 2;
+      return -1;
   }
 }
 
