@@ -38,13 +38,22 @@ class Carousel : public Updatable {
   
   // current cuvette, in the range of 0-7
   uint8_t currentCuvette;
-  
+  // holds if moving, calibrating, etc
   CarouselState state;
 
   // Keeps track of the number of times the limit switch has
   // transitioned to HIGH since current move has started
   int limitSwitchPulses;
   int cuvettesToMove;
+
+  // For automation
+  bool automating;
+  int numberAutomated;
+  unsigned long int timeStopped; // when stopped at current cuvette; 0 when not yet stopped
+  // How long to stop at each cuvette; note the last time is not used
+  const long unsigned int delayTimes[4] = {1000, 2000, 3000, 0};
+  const int numAutomationSteps = sizeof(delayTimes)/sizeof(delayTimes[0]);
+  void handleAutomation();
 
   // checks switch that toggles every time it moves past a carousel
   void checkSwitch();
@@ -54,15 +63,19 @@ class Carousel : public Updatable {
   
   // sets up interrupt callback
   void setup();
-
+  
+  // Basic commands
   void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);
   void nextCuvette();
   void previousCuvette();
+  // getters
   int8_t getCarouselIndex() const;
   CarouselState getState() const;
-
+  bool isMoving() const;
+  // automation commands
+  void startAutoTesting();
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();
   Carousel();

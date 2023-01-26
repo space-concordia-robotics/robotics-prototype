@@ -17,6 +17,8 @@
 #define COMMAND_GO_TO_TEST_TUBE 43
 #define COMMAND_START_CALIBRATING 44
 
+#define COMMAND_START_AUTO_TESTING 31
+
 float bytes_to_float(const uint8_t* rawPointer) {
   float f;
   // I'm not going down the rabbit hole to figure out why the bytes in the float
@@ -34,6 +36,7 @@ void carousel_go_to_test_tube(uint8_t index);
 void carousel_calibrate();
 int8_t carousel_get_carousel_index();
 bool carousel_get_moving();
+void start_auto_testing();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -85,6 +88,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         sendMessage(*returnMsg);
         break;
       }
+    case COMMAND_START_AUTO_TESTING:
+      start_auto_testing();
+      break;
     default:
       //Serial.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));

@@ -5,10 +5,17 @@
 #include "include/Carousel.h"
 #include "include/SciencePinSetup.h"
 #include "include/HAL.h"
+#include "include/commands/ScienceCommandCenter.h"
 
 #include <stdlib.h>
 
 #include <string>
+
+extern internal_comms::CommandCenter* commandCenter;
+void m_sendDebug(const char* message) {
+  internal_comms::Message* msg = commandCenter->createMessage(0, strlen(message), (byte*)message);
+  commandCenter->sendMessage(*msg);
+}
 
 
 
@@ -33,6 +40,9 @@ void Carousel::setup() {
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
   checkSwitch();
+  if (automating) {
+    handleAutomation();
+  }
 
   if (state == CarouselState::Calibrating) {
     return;
@@ -93,8 +103,35 @@ void Carousel::startCalibrating() {
   }
 }
 
+
+void Carousel::startAutoTesting() {
+  // TODO: what to do when moving
+  if (state == CarouselState::Not_Moving) {
+    automating = true;
+    int startIndex = numAutomationSteps * numberAutomated;
+    
+    if (currentCuvette == startIndex) {
+      timeStopped = millis();
+    } else {
+      timeStopped = 0;
+      goToCuvette(startIndex);
+    }
+  }  
+}
+
 CarouselState Carousel::getState() const {
   return state;
+}
+
+bool Carousel::isMoving() const {
+  switch (state) {
+    case CarouselState::Calibrating:
+    case CarouselState::Moving_Carousel:
+      return true;
+    case CarouselState::Not_Moving:
+    case CarouselState::Uncalibrated:
+      return false;
+  }
 }
 
 int8_t Carousel::getCarouselIndex() const {
@@ -130,7 +167,32 @@ void Carousel::checkSwitch() {
   lastButtonState = reading;
 }
 
-Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0) {
+
+void Carousel::handleAutomation() {
+  if (automating) {
+    if (!isMoving()) {
+      int automationStep = currentCuvette % numAutomationSteps;
+      if (timeStopped == 0) {
+        timeStopped = millis();
+      }
+
+      if (automationStep == numAutomationSteps - 1) {
+          // moving to last automation step; no longer need this to control it
+          automating = false;
+          numberAutomated++;
+          return;
+      }
+
+      if (millis() - timeStopped >= delayTimes[automationStep]) {
+        moveNCuvettes(1);
+        timeStopped = 0;
+      }
+    }
+  }
+}
+
+Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0),
+                    automating(false), timeStopped(0), numberAutomated(0) {
   lastDebounceTime = 0;
   lastButtonState = HAL::readLimitSwitch(0);
   buttonState = lastButtonState;

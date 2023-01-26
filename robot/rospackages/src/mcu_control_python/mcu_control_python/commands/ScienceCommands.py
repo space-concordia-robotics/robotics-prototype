@@ -19,7 +19,7 @@ def handle_limit_switch_value(data):
 
 science_out_commands = [("previous_test_tube", 41, []), ("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8]), ("start_calibrating", 44, [dt.ARG_UINT8]),
                         ("get_status", 39, []), ("estop", 25, []), ("set_servo_angle", 26, [dt.ARG_UINT8, dt.ARG_UINT8]),
-                        ("read_limit_switch", 27, [dt.ARG_UINT8])]
+                        ("read_limit_switch", 27, [dt.ARG_UINT8]), ("start_auto_testing", 31, [])]
 
 
 science_in_commands = [("status", 40, handle_status), ("limit_switch_value", 28, handle_limit_switch_value)]
