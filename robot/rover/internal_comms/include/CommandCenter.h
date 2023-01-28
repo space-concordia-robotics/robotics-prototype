@@ -50,6 +50,12 @@ namespace internal_comms
             virtual void executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) = 0;
 
             /**
+             * Gets the identifier string for this particular teensy.
+             * 
+            */
+            virtual const char* getIdentifier();
+
+            /**
             * Reads serial to next command
             * and returns a command struct
             *

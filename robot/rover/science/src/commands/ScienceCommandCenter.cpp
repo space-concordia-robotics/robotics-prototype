@@ -7,3 +7,7 @@
 void ScienceCommandCenter::executeCommand(const uint8_t commandID, const uint8_t* rawArgs, const uint8_t rawArgsLength) {
 
 }
+
+const char* ScienceCommandCenter::getIdentifier() {
+    return "SCIENCE";
+}

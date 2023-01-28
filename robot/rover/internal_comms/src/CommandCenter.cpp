@@ -97,12 +97,23 @@ namespace internal_comms {
 #endif
     }
 
+    const char* CommandCenter::getIdentifier() {
+        return "ERROR";
+    }
+
     void CommandCenter::readCommand() {
         if (Serial.available() > 0) {
             Command* command = CommandCenter::processCommand();
             if (command->isValid) {
-                this->executeCommand(command->commandID, command->rawArgs,
+                if (command->commandID == 255) {
+                    // a command ID of 255 means the OBC is asking the teensy to ID itself
+                    sendDebug(getIdentifier());
+                    sendMessage();
+                    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+                } else {
+                    this->executeCommand(command->commandID, command->rawArgs,
                         command->rawArgsLength);
+                }
             } else {
                 // Handle invalid command
                 // (Create error message and put it at the front of the queue so that the
