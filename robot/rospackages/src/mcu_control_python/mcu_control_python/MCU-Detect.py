@@ -1,19 +1,19 @@
-from os import listdir
 import serial
-
+import serial.tools.list_ports as list_ports
 
 def get_ports():
-    starting_folder = "/dev/serial/by-id"
     ports = {}
 
-    for dir in listdir(starting_folder):
-        test_device = starting_folder + "/" + dir
-        ser = serial.Serial(test_device, 57600, timeout=1)
+    for port_info in list_ports.comports():
+        device_path = port_info.device
+        ser = serial.Serial(device_path, 57600, timeout=1)
         ser.write(b'\xFF\x00\x0A')
-        id = ser.read()
-        argslen = int.from_bytes(ser.read(), "big")
-        identifier = ser.read(argslen).decode("utf-8")
-        ports[identifier] = test_device
+        id = int.from_bytes(ser.read(), "big")
+        if id == 0:
+            argslen = int.from_bytes(ser.read(), "big")
+            identifier = ser.read(argslen).decode("utf-8")
+            if len(identifier) > 0:
+                ports[identifier] = device_path
     
     print(ports)
     return ports
