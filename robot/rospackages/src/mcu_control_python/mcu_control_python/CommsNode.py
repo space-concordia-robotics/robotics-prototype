@@ -12,6 +12,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Header, Float32
 from sensor_msgs.msg import JointState
+import serial.tools.list_ports as list_ports
+
 # from robot.rospackages.src.mcu_control.srv import *
 # from mcu_control.msg import Voltage
 
@@ -30,30 +32,17 @@ if len(sys.argv) >= 2:
 if not local_mode:
     import Jetson.GPIO as gpio
 
-# over USB, there is no way to select a device, so this node
-# needs to know which one it's 'hearing' from.
-# device is set by second argument to node.
+# These strings (ARM, WHEEL, etc) are sent out by the teensies
+# so commsnode detects which is which at startup
+in_commands = {"ARM": arm_in_commands, "WHEEL": wheel_in_commands, "PDS": [], "SCIENCE": science_in_commands}
 
-in_commands = [arm_in_commands, wheel_in_commands, [], science_in_commands]
-
-def get_handler(commandId, selectedDevice):
-    for in_command in in_commands[selectedDevice]:
+def get_handler(commandId, identifier):
+    for in_command in in_commands[identifier]:
         if commandId == in_command[1]:
             return in_command[2]
     return None
 
-# Pin definitions
-NONE = [1,1,1]
-ARM = [0,0,1]
-ROVER = [0,0,0]
-PDS = [0,1,0]
-SCIENCE = [0,1,1]
-TX2 = [1,0,0]
-PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
-SW_PINS = [15,13,11]
-
-
-ser = None
+serials = None
 
 STOP_BYTE = 0x0A
 
@@ -74,11 +63,8 @@ def twist_rover_callback(twist_msg):
     rover_queue.append(['move_rover',args,ROVER_SELECTED])
 
 def main(args=None):
-    if not local_mode:
-        # TODO check the port
-        ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
-    else:
-        ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+    global serials
+    serials = get_ports()
 
     rclpy.init(args=args)
 
@@ -95,7 +81,8 @@ def main(args=None):
 
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
-    ser.close()
+    for device in serials:
+        device.close()
     comms_node.destroy_node()
     rclpy.shutdown()
 
@@ -103,36 +90,26 @@ def main(args=None):
 def send_queued_commands():
     if (len(arm_queue) > 0):
         arm_command = arm_queue.popleft()
-        send_command(arm_command[0], arm_command[1], arm_command[2])
+        send_command(arm_command[0], arm_command[1], arm_command[2], "ARM")
 
     if (len(rover_queue) > 0):
         rover_command = rover_queue.popleft()
-        send_command(rover_command[0], rover_command[1], rover_command[2])
+        send_command(rover_command[0], rover_command[1], rover_command[2], "WHEEL")
     
     if (len(science_queue) > 0):
         science_command = science_queue.popleft()
-        send_command(science_command[0], science_command[1], science_command[2])
+        send_command(science_command[0], science_command[1], science_command[2], "SCIENCE")
 
 def receive_message():
-    for device in range(2):
-        if not local_mode:
-            gpio.output(SW_PINS, PIN_DESC[device])
-        if ser.in_waiting > 0:
+    for identifier in serials:
+        ser = serials[identifier]
 
+        if ser.in_waiting > 0:
             commandID = ser.read()
             print(commandID)
             commandID = int.from_bytes(commandID, "big")
 
-            if local_mode:
-                # We can't know who sent the message in 
-                # local comms node, so find the first
-                # receive ID that mathes (should be unique)
-                for d in range(4):
-                    handler = get_handler(commandID, d)
-                    if handler != None:
-                        break
-            else:
-                handler = get_handler(commandID, device)
+            handler = get_handler(commandID, identifier)
             
             # print("CommandID:", commandID)
             if handler is None:
@@ -164,18 +141,25 @@ def receive_message():
             except Exception as e:
                 print(e)
 
-def send_command(command_name, args, deviceToSendTo):
+def send_command(command_name, args, deviceToSendTo, identifier=None):
     command = get_command(command_name, deviceToSendTo)
+    if identifier:
+        if identifier in serials:
+            serial_port = serials[identifier]
+        else:
+            print("ERROR: no serial port for device ", identifier)
+            return
+    
     if command is not None:
         commandID = command[1]
 
         if not local_mode:
             gpio.output(SW_PINS, TX2)
 
-        ser.write(commandID.to_bytes(1, 'big'))
+        serial_port.write(commandID.to_bytes(1, 'big'))
 
         if commandID != 10:
-            ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+            serial_port.write(get_arg_bytes(command).to_bytes(1, 'big'))
         
         #arg_length = len(command[2]).to_bytes(1,'big')
         #ser.write(arg_length)
@@ -183,7 +167,7 @@ def send_command(command_name, args, deviceToSendTo):
 
         # MEGA STUPID WORKAROUND, DIRE SITUATION, PLEASE DON'T REUSE THIS
         if commandID == 10:
-            ser.write((12).to_bytes(1, 'big'))
+            serial_port.write((12).to_bytes(1, 'big'))
             args, data_types = move_wheels_dumb_workaround(args)
             print(f'args: {args} | dataTypes: {data_types}')
 
@@ -196,13 +180,13 @@ def send_command(command_name, args, deviceToSendTo):
                 if arg_int < 0:
                     arg_int = arg_int + 256
 
-                ser.write(arg_int.to_bytes(1,'big'))
+                serial_port.write(arg_int.to_bytes(1,'big'))
 
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+                serial_port.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
 
-        ser.write(STOP_BYTE.to_bytes(1, 'big'))
-        ser.flush()
+        serial_port.write(STOP_BYTE.to_bytes(1, 'big'))
+        serial_port.flush()
 
         if not local_mode:
             gpio.output(SW_PINS, NONE)
@@ -220,6 +204,27 @@ def move_wheels_dumb_workaround(args):
 
 def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
+
+
+def get_ports():
+    ports = {}
+
+    for port_info in list_ports.comports():
+        device_path = port_info.device
+        test_serial = serial.Serial(device_path, 57600, timeout=1)
+        test_serial.write(b'\xFF\x00\x0A')
+        id = int.from_bytes(test_serial.read(), "big")
+        if id == 0:
+            argslen = int.from_bytes(test_serial.read(), "big")
+            identifier = test_serial.read(argslen).decode("utf-8")
+            stop_byte = test_serial.read()
+            if len(identifier) > 0 and stop_byte == b'\n':
+                ports[identifier] = test_serial
+            else:
+                test_serial.close()
+    
+    print(ports)
+    return ports
 
 class CommsNode(Node):
 
@@ -280,8 +285,3 @@ class CommsNode(Node):
 
         temp_struct = [command, args, SCIENCE_SELECTED]
         science_queue.append(temp_struct)
-
-if not local_mode:
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
-else:
-    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
