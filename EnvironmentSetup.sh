@@ -3,7 +3,10 @@
 
 echo "Updating apt lists..."
 
-sudo apt -qq update -y
+#------ ROBOTICS SETTINGS ------
+source ~/Programming/robotics-prototype/robot/rospackages/install/local_setup.bash
+source ~/Programming/robotics-prototype/venv/bin/activate
+source ~/Programming/robotics-prototype/robot/rover/config/.bash_aliases
 
 echo "Setting up python virtual environment and installing requirements..."
 

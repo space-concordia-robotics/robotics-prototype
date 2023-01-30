@@ -18,6 +18,7 @@ from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.CommandParser import *
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ScienceCommands import science_out_commands, science_in_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.DriveControls import *
 import robot.rospackages.src.mcu_control_python.mcu_control_python.definitions.CommsDataTypes as dt
 
@@ -33,7 +34,7 @@ if not local_mode:
 # needs to know which one it's 'hearing' from.
 # device is set by second argument to node.
 
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
+in_commands = [arm_in_commands, wheel_in_commands, [], science_in_commands]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -74,6 +75,7 @@ def twist_rover_callback(twist_msg):
 
 def main(args=None):
     if not local_mode:
+        # TODO check the port
         ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
     else:
         ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
@@ -106,6 +108,10 @@ def send_queued_commands():
     if (len(rover_queue) > 0):
         rover_command = rover_queue.popleft()
         send_command(rover_command[0], rover_command[1], rover_command[2])
+    
+    if (len(science_queue) > 0):
+        science_command = science_queue.popleft()
+        send_command(science_command[0], science_command[1], science_command[2])
 
 def receive_message():
     for device in range(2):
@@ -117,7 +123,17 @@ def receive_message():
             print(commandID)
             commandID = int.from_bytes(commandID, "big")
 
-            handler = get_handler(commandID, device)
+            if local_mode:
+                # We can't know who sent the message in 
+                # local comms node, so find the first
+                # receive ID that mathes (should be unique)
+                for d in range(4):
+                    handler = get_handler(commandID, d)
+                    if handler != None:
+                        break
+            else:
+                handler = get_handler(commandID, device)
+            
             # print("CommandID:", commandID)
             if handler is None:
                 print("No command with ID ", commandID, " was found")
@@ -232,6 +248,10 @@ class CommsNode(Node):
         self.get_logger().info('Beginning to subscribe to "' + rover_command_topic + '" topic')
         sub = self.create_subscription(String, rover_command_topic, self.rover_command_callback, 10)
 
+        science_command_topic = '/science_command'
+        self.get_logger().info('Beginning to subscribe to "' + science_command_topic + '" topic')
+        sub = self.create_subscription(String, science_command_topic, self.science_command_callback, 10)
+
         rover_twist_topic = '/rover_cmd_vel'
         self.get_logger().info('Beginning to subscribe to "' + rover_twist_topic + '" topic')
         rover_twist_sub = self.create_subscription(Twist, rover_twist_topic, twist_rover_callback, 10)
@@ -253,8 +273,15 @@ class CommsNode(Node):
 
         temp_struct = [command, args, ROVER_SELECTED]
         rover_queue.append(temp_struct)
+    
+    def science_command_callback(self, message):
+        self.get_logger().info('received: ' + message.data + ' command, sending to science Teensy')
+        command, args = parse_command(message)
+
+        temp_struct = [command, args, SCIENCE_SELECTED]
+        science_queue.append(temp_struct)
 
 if not local_mode:
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
 else:
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
