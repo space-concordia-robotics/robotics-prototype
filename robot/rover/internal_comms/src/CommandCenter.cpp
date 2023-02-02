@@ -97,10 +97,6 @@ namespace internal_comms {
 #endif
     }
 
-    const char* CommandCenter::getIdentifier() {
-        return "ERROR";
-    }
-
     void CommandCenter::readCommand() {
         if (Serial.available() > 0) {
             Command* command = CommandCenter::processCommand();

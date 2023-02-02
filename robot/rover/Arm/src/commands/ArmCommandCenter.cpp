@@ -74,3 +74,7 @@ void ArmCommandCenter::executeCommand(const uint8_t cmdID,
     }
   }
 }
+
+const char* ArmCommandCenter::getIdentifier() {
+    return "ARM";
+}

@@ -37,9 +37,10 @@ if not local_mode:
 in_commands = {"ARM": arm_in_commands, "WHEEL": wheel_in_commands, "PDS": [], "SCIENCE": science_in_commands}
 
 def get_handler(commandId, identifier):
-    for in_command in in_commands[identifier]:
-        if commandId == in_command[1]:
-            return in_command[2]
+    if identifier in in_commands:
+        for in_command in in_commands[identifier]:
+            if commandId == in_command[1]:
+                return in_command[2]
     return None
 
 serials = None

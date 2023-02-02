@@ -110,3 +110,6 @@ void WheelsCommandCenter::executeCommand(const uint8_t cmdID, const uint8_t* raw
 }
 
 
+const char* WheelsCommandCenter::getIdentifier() {
+    return "WHEEL";
+}
