@@ -169,30 +169,35 @@ void Carousel::checkSwitch() {
 
 
 void Carousel::handleAutomation() {
-  if (automating) {
-    if (!isMoving()) {
-      int automationStep = currentCuvette % numAutomationSteps;
-      if (timeStopped == 0) {
-        timeStopped = millis();
-      }
+  if (automating && !isMoving()) {
+    int automationStep = currentCuvette % numAutomationSteps;
+    if (timeStopped == 0) {
+      timeStopped = millis();
+    }
 
-      if (automationStep == numAutomationSteps - 1) {
-          // moving to last automation step; no longer need this to control it
+    if (spinningCarousel && !isMoving()) {
+        // done spinning the carousel to mix
+        spinningCarousel = false;
+        
+        if (automationStep == numAutomationSteps - 1) {
+          // If on last cuvette, stop
           automating = false;
           numberAutomated++;
-          return;
-      }
-
-      if (millis() - timeStopped >= delayTimes[automationStep]) {
-        moveNCuvettes(1);
-        timeStopped = 0;
-      }
+        } else {
+          // Otherwise move to next step
+          moveNCuvettes(1);
+          timeStopped = 0;
+        }
+    } else if (millis() - timeStopped >= delayTimes[automationStep]) {
+      // once done waiting, spin carousel once
+      spinningCarousel = true;
+      moveNCuvettes(NUM_CUVETTES);
     }
   }
 }
 
 Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0),
-                    automating(false), timeStopped(0), numberAutomated(0) {
+                    automating(false), timeStopped(0), numberAutomated(0), spinningCarousel(false) {
   lastDebounceTime = 0;
   lastButtonState = HAL::readLimitSwitch(0);
   buttonState = lastButtonState;

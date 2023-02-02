@@ -36,7 +36,7 @@ class Carousel : public Updatable {
   int lastButtonState;
   int buttonState;
   
-  // current cuvette, in the range of 0-7
+  // current cuvette, in the range of 0-5
   uint8_t currentCuvette;
   // holds if moving, calibrating, etc
   CarouselState state;
@@ -48,10 +48,13 @@ class Carousel : public Updatable {
 
   // For automation
   bool automating;
-  int numberAutomated;
-  unsigned long int timeStopped; // when stopped at current cuvette; 0 when not yet stopped
-  // How long to stop at each cuvette; note the last time is not used
-  const long unsigned int delayTimes[4] = {1000, 2000, 3000, 0};
+  int numberAutomated; // number of times whole automation has run
+  bool onLastCuvette;
+  unsigned long int timeStopped; // when stopped at current cuvette; 0 when not yet stopped7
+  // indicating whether or not currently in the stage of spinning the carousel to mix
+  bool spinningCarousel;
+  // How long to stop at each cuvette
+  const long unsigned int delayTimes[3] = {1000, 2000, 3000};
   const int numAutomationSteps = sizeof(delayTimes)/sizeof(delayTimes[0]);
   void handleAutomation();
 
@@ -59,7 +62,7 @@ class Carousel : public Updatable {
   void checkSwitch();
 
  public:
-  const static uint8_t NUM_CUVETTES = 8;
+  const static uint8_t NUM_CUVETTES = 6;
   
   // sets up interrupt callback
   void setup();
