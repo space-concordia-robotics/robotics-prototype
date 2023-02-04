@@ -53,17 +53,21 @@ class Carousel : public Updatable {
   // For automation
   enum AutomationState {
     NotAutomating,
+    AdvancingToFirst,
     Advancing,
     SpinningCarousel,
     WaitingForSample,
     WaitingForReaction
   };
   int numberAutomated; // number of times whole automation has run
+  int automationStep; // which test tube we are working on
   unsigned long int timeStopped; // when stopped at current cuvette; 0 when not yet stopped7
   AutomationState automationState;
-  // How long to stop at each cuvette
+  // How long to stop at each cuvette (milliseconds)
   const long unsigned int delayTimes[3] = {1000, 2000, 3000};
+  // How long to wait for reaction b/w sample and reagent (milliseconds)
   const long unsigned int reactionTimes[3] = {2000, 3000, 4000};
+
   const int numAutomationSteps = sizeof(delayTimes)/sizeof(delayTimes[0]);
   void handleAutomation();
   bool isAutomating();

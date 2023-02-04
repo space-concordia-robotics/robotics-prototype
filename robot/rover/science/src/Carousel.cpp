@@ -108,12 +108,13 @@ void Carousel::startAutoTesting() {
   // TODO: what to do when moving
   if (!isMoving()) {
     int startIndex = numAutomationSteps * numberAutomated;
-    
+    automationStep = 0;
+
     if (currentCuvette == startIndex) {
       automationState = AutomationState::WaitingForSample;
       timeStopped = millis();
     } else {
-      automationState = AutomationState::Advancing;
+      automationState = AutomationState::AdvancingToFirst;
       timeStopped = 0;
       goToCuvette(startIndex);
     }
@@ -172,16 +173,14 @@ void Carousel::checkSwitch() {
 void Carousel::handleAutomation() {
   // NOTE: this is only run when the carousel is not moving
   if (isAutomating() && !isMoving()) {
-    int automationStep = currentCuvette % numAutomationSteps;
     if (timeStopped == 0) {
       timeStopped = millis();
     }
 
     switch (automationState) {
-      case AutomationState::Advancing:
-        // done advancing to next cuvette
-        automationState = AutomationState::WaitingForSample;
+      case AutomationState::AdvancingToFirst:
         timeStopped = millis();
+        automationState = AutomationState::WaitingForSample;
         break;
 
       case AutomationState::WaitingForSample:
@@ -193,23 +192,29 @@ void Carousel::handleAutomation() {
         break;
 
       case AutomationState::SpinningCarousel:
-        // done spinning the carousel to mix, start waiting
+        // done spinning the carousel to mix, advance to next test tube for camera
+        automationState = AutomationState::Advancing;
+        moveNCuvettes(1);
+        timeStopped = 0;
+        break;
+
+      case AutomationState::Advancing:
+        // Test tube in front of camera, wait for reaction
         timeStopped = millis();
         automationState = AutomationState::WaitingForReaction;
         break;
 
       case AutomationState::WaitingForReaction:
         if (millis() - timeStopped >= reactionTimes[automationStep]) {
-          // Now done waiting for reaction
           if (automationStep == numAutomationSteps - 1) {
             // If on last cuvette, stop
             automationState = AutomationState::NotAutomating;
             numberAutomated++;
           } else {
-            // Otherwise move to next step
-            automationState = AutomationState::Advancing;
-            moveNCuvettes(1);
-            timeStopped = 0;
+            // Now done waiting for reaction, start waiting for sample
+            automationState = AutomationState::WaitingForSample;
+            timeStopped = millis();
+            automationStep++;
           }
         }
         break;
@@ -222,7 +227,7 @@ bool Carousel::isAutomating() {
 }
 
 Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0),
-                    timeStopped(0), numberAutomated(0), automationState(AutomationState::NotAutomating){
+                    timeStopped(0), numberAutomated(0), automationState(AutomationState::NotAutomating), automationStep(0) {
   lastDebounceTime = 0;
   lastButtonState = HAL::readLimitSwitch(0);
   buttonState = lastButtonState;
