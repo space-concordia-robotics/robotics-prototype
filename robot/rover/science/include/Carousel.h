@@ -27,9 +27,13 @@ class Carousel : public Updatable {
   // to register that it has actually changed
   static unsigned long const DEBOUNCE_THRESHOLD = 50;
 
-  static const uint8_t ccw_speed = 150;
-  static const uint8_t cw_speed = 30;
   static const uint8_t stopped_speed = 90;
+  // speeds used when going from one test tube to the other
+  static const uint8_t ccw_speed = 110;
+  static const uint8_t cw_speed = 70;
+  // speeds used when spinning to mix sample with reagent
+  static const uint8_t cw_spin_speed = 0;
+  static const uint8_t ccw_spin_speed = 180;
   
   // For debounce
   unsigned long lastDebounceTime;
@@ -55,7 +59,6 @@ class Carousel : public Updatable {
     WaitingForReaction
   };
   int numberAutomated; // number of times whole automation has run
-  bool onLastCuvette;
   unsigned long int timeStopped; // when stopped at current cuvette; 0 when not yet stopped7
   AutomationState automationState;
   // How long to stop at each cuvette
@@ -78,13 +81,16 @@ class Carousel : public Updatable {
   void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);
+  // speed is adjusted based on whether it's moving clockwise or counterclockwise 
+  void moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_speed);
   void nextCuvette();
   void previousCuvette();
+  
   // getters
   int8_t getCarouselIndex() const;
   CarouselState getState() const;
   bool isMoving() const;
-  // automation commands
+  
   void startAutoTesting();
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();

@@ -56,10 +56,11 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
 }
 
 void Carousel::moveNCuvettes(int cuvettesToMove) {
-  if (cuvettesToMove == 0) {
-    return;
-  }
-  if (state == CarouselState::Not_Moving) {
+  moveNCuvettes(cuvettesToMove, Carousel::cw_speed, Carousel::ccw_speed);
+}
+
+void Carousel::moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_speed) {
+  if (cuvettesToMove != 0 && state == CarouselState::Not_Moving) {
     limitSwitchPulses = 0;
     this->cuvettesToMove = abs(cuvettesToMove);
     currentCuvette += cuvettesToMove;
@@ -67,9 +68,9 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
     state = CarouselState::Moving_Carousel;
     // Move servo in appropriate direction based on input
     if (cuvettesToMove > 0) {
-      HAL::servo(0, Carousel::cw_speed);
+      HAL::servo(0, cw_speed);
     } else {
-      HAL::servo(0, Carousel::ccw_speed);
+      HAL::servo(0, ccw_speed);
     }
   }
 }
@@ -187,7 +188,7 @@ void Carousel::handleAutomation() {
         if (millis() - timeStopped >= delayTimes[automationStep]) {
           // once done waiting, spin carousel once
           automationState = AutomationState::SpinningCarousel;
-          moveNCuvettes(NUM_CUVETTES);
+          moveNCuvettes(NUM_CUVETTES, Carousel::cw_spin_speed, Carousel::ccw_spin_speed);
         }
         break;
 
