@@ -17,7 +17,8 @@ def handle_limit_switch_value(data):
 
 # https://docs.google.com/spreadsheets/d/1bE3h0ZCqPAUhW6Gn6G0fKEoOPdopGTZnmmWK1VuVurI/edit#gid=1131090349
 
-science_out_commands = [("previous_test_tube", 41, []), ("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8]), ("start_calibrating", 44, [dt.ARG_UINT8]),
+science_out_commands = [("previous_test_tube", 41, []), ("next_test_tube", 42, []), ("go_to_test_tube", 43, [dt.ARG_UINT8]), 
+                        ("start_calibrating", 44, [dt.ARG_UINT8]), ("spin_mix", 45, []),
                         ("get_status", 39, []), ("estop", 25, []), ("set_servo_angle", 26, [dt.ARG_UINT8, dt.ARG_UINT8]),
                         ("read_limit_switch", 27, [dt.ARG_UINT8]), ("start_auto_testing", 31, [])]
 

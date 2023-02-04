@@ -104,23 +104,6 @@ void Carousel::startCalibrating() {
 }
 
 
-void Carousel::startAutoTesting() {
-  // TODO: what to do when moving
-  if (!isMoving()) {
-    int startIndex = numAutomationSteps * numberAutomated;
-    automationStep = 0;
-
-    if (currentCuvette == startIndex) {
-      automationState = AutomationState::WaitingForSample;
-      timeStopped = millis();
-    } else {
-      automationState = AutomationState::AdvancingToFirst;
-      timeStopped = 0;
-      goToCuvette(startIndex);
-    }
-  }  
-}
-
 CarouselState Carousel::getState() const {
   return state;
 }
@@ -142,6 +125,10 @@ int8_t Carousel::getCarouselIndex() const {
   } else {
     return currentCuvette;
   }
+}
+
+void Carousel::spinMix() {
+  moveNCuvettes(NUM_CUVETTES, cw_spin_speed, ccw_spin_speed);
 }
 
 void Carousel::checkSwitch() {
@@ -169,6 +156,23 @@ void Carousel::checkSwitch() {
   lastButtonState = reading;
 }
 
+
+void Carousel::startAutoTesting() {
+  // TODO: what to do when moving
+  if (!isMoving()) {
+    int startIndex = numAutomationSteps * numberAutomated;
+    automationStep = 0;
+
+    if (currentCuvette == startIndex) {
+      automationState = AutomationState::WaitingForSample;
+      timeStopped = millis();
+    } else {
+      automationState = AutomationState::AdvancingToFirst;
+      timeStopped = 0;
+      goToCuvette(startIndex);
+    }
+  }
+}
 
 void Carousel::handleAutomation() {
   // NOTE: this is only run when the carousel is not moving

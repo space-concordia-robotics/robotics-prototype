@@ -38,6 +38,7 @@ void carousel_calibrate() { carousel->startCalibrating(); }
 int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
 bool carousel_get_moving() { return carousel->isMoving(); }
 void start_auto_testing() { carousel->startAutoTesting(); }
+void carousel_spin_mix() {carousel->spinMix(); }
 
 void setup() {
   HAL::pinSetup();

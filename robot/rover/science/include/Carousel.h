@@ -89,6 +89,7 @@ class Carousel : public Updatable {
   void moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_speed);
   void nextCuvette();
   void previousCuvette();
+  void spinMix();
   
   // getters
   int8_t getCarouselIndex() const;

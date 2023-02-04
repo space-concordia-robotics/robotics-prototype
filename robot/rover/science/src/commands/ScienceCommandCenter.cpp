@@ -16,6 +16,7 @@
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
 #define COMMAND_START_CALIBRATING 44
+#define COMMAND_SPIN_MIX 45
 
 #define COMMAND_START_AUTO_TESTING 31
 
@@ -34,6 +35,7 @@ void carousel_previous_test_tube();
 void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
 void carousel_calibrate();
+void carousel_spin_mix();
 int8_t carousel_get_carousel_index();
 bool carousel_get_moving();
 void start_auto_testing();
@@ -80,6 +82,9 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       break;
     case COMMAND_START_CALIBRATING:
       carousel_calibrate();
+      break;
+    case COMMAND_SPIN_MIX:
+      carousel_spin_mix();
       break;
     case COMMAND_GET_STATUS:
       {
