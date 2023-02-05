@@ -42,16 +42,43 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
   if (isAutomating()) {
     handleAutomation();
   }
+  switch (state) {
+    case CarouselState::Calibrating:
+      return;
 
-  if (state == CarouselState::Calibrating) {
-    return;
-  } else if (state == CarouselState::Moving_Carousel) {
-    if (limitSwitchPulses >= cuvettesToMove) {
-      HAL::servo(0, Carousel::stopped_speed);
-      state = CarouselState::Not_Moving;
-      cuvettesToMove = 0;
-      limitSwitchPulses = 0;
-    }
+    case CarouselState::Moving_Carousel:
+      if (limitSwitchPulses >= cuvettesToMove) {
+        state = CarouselState::Waiting_Motor_Stop;
+        HAL::servo(0, Carousel::stopped_speed);
+        timeStopped = millis();
+        cuvettesToMove = 0;
+        limitSwitchPulses = 0;
+      }
+      break;
+
+    case CarouselState::Waiting_Motor_Stop:
+      if (millis() - timeStopped > WAIT_TIME_MOTOR_STOP) {
+        if (HAL::readLimitSwitch(0)) {
+          state = CarouselState::Not_Moving;
+        } else {
+          state = CarouselState::Correcting;
+          limitSwitchPulses = 0;
+          if (moved_cw) {
+            HAL::servo(0, Carousel::ccw_correct_speed);
+          } else {
+            HAL::servo(0, Carousel::cw_correct_speed);
+          }
+          timeStopped = millis();
+        }
+      }
+      break;
+
+      case CarouselState::Correcting:
+        if (limitSwitchPulses > 0) {
+          HAL::servo(0, Carousel::stopped_speed);
+          state = CarouselState::Not_Moving;
+        }
+        break;
   }
 }
 
@@ -69,8 +96,10 @@ void Carousel::moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_s
     // Move servo in appropriate direction based on input
     if (cuvettesToMove > 0) {
       HAL::servo(0, cw_speed);
+      moved_cw = true;
     } else {
       HAL::servo(0, ccw_speed);
+      moved_cw = false;
     }
   }
 }
@@ -112,10 +141,14 @@ bool Carousel::isMoving() const {
   switch (state) {
     case CarouselState::Calibrating:
     case CarouselState::Moving_Carousel:
+    case CarouselState::Waiting_Motor_Stop:
+    case CarouselState::Correcting:
       return true;
     case CarouselState::Not_Moving:
     case CarouselState::Uncalibrated:
       return false;
+    default:
+      return true;
   }
 }
 
@@ -190,7 +223,7 @@ bool Carousel::isAutomating() {
 }
 
 Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0),
-                    automationState(AutomationState::NotAutomating) {
+                    automationState(AutomationState::NotAutomating), moved_cw(false) {
   lastDebounceTime = 0;
   lastButtonState = HAL::readLimitSwitch(0);
   buttonState = lastButtonState;

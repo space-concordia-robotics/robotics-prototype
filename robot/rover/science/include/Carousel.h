@@ -14,7 +14,9 @@ enum CarouselState {
     Uncalibrated,
     Calibrating,
     Not_Moving,
-    Moving_Carousel
+    Moving_Carousel,
+    Waiting_Motor_Stop,
+    Correcting
 };
 
 // Forward declaration
@@ -26,6 +28,10 @@ class Carousel : public Updatable {
   // min milliseconds to wait after seeing switch keeping a solid state
   // to register that it has actually changed
   static unsigned long const DEBOUNCE_THRESHOLD = 50;
+  // Milliseconds to wait after the motor is done moving, to see
+  // if it went past the limit switch
+  static unsigned long const WAIT_TIME_MOTOR_STOP = 250;
+  unsigned long timeStopped = 0;
 
   static const uint8_t stopped_speed = 90;
   // speeds used when going from one test tube to the other
@@ -34,6 +40,10 @@ class Carousel : public Updatable {
   // speeds used when spinning to mix sample with reagent
   static const uint8_t cw_spin_speed = 0;
   static const uint8_t ccw_spin_speed = 180;
+  // speeds used when correcting a movement
+  static const uint8_t cw_correct_speed = 80;
+  static const uint8_t ccw_correct_speed = 100;
+  
   
   // For debounce
   unsigned long lastDebounceTime;
@@ -49,6 +59,7 @@ class Carousel : public Updatable {
   // transitioned to HIGH since current move has started
   int limitSwitchPulses;
   int cuvettesToMove;
+  bool moved_cw; // The direction of the current movement
 
   // For automation
   enum AutomationState {
