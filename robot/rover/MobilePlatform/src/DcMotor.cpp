@@ -14,11 +14,20 @@ namespace Motor {
 
         pinMode(pwmPin, OUTPUT);
         pinMode(dirPin, OUTPUT);
+        
         analogWriteFrequency(pwmPin, 18000);
+        if (pwmPin == 6) {
+            analogWriteFrequency(30, 200);
+            analogWriteResolution(16);
+        }
     }
 
     void stop(const MotorNames &motorID){
-        analogWrite(motorList[motorID].pwm_pin,0);
+        if (motorID == MIDDLE_RIGHT) {
+            analogWrite(motorList[motorID].pwm_pin, 19661);
+        } else {
+            analogWrite(motorList[motorID].pwm_pin, 0);
+        }
     }
     void updateDesiredMotorVelocity(const MotorNames &motorID, const uint8_t &desired_direction,
                                     const uint8_t &desired_velocity) {
@@ -40,6 +49,18 @@ namespace Motor {
 
         digitalWrite(motor.dir_pin, motor.desired_direction);
 
-        analogWrite(motor.pwm_pin, motor.current_velocity);
+        if (motor.id == MIDDLE_RIGHT) {
+
+            int newPWM = motor.desired_velocity;
+            if (motor.desired_direction == 1) {
+                newPWM = 19661 - newPWM*7;
+            } else {
+                newPWM = 19661 + newPWM*7;
+            }
+
+            analogWrite(30, newPWM);
+        } 
+
+        analogWrite(motor.pwm_pin, motor.current_velocity*256);
     }
 }
