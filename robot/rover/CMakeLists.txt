@@ -120,6 +120,7 @@ include_directories(
 	${ARM_TOOLS}/arm/arm-none-eabi/include/
 	${TEENSY_LIBRARIES}
     ${CMAKE_SOURCE_DIR}/internal_comms/include
+    ${CMAKE_SOURCE_DIR}/smart_servo/include
 )
 # TODO : use target include directories instead of this (especially the last line)
 
@@ -191,6 +192,7 @@ include_directories(${ETL_PATH}/include)
 
 #libraries should be created before the executables
 add_subdirectory(internal_comms)
+add_subdirectory(smart_servo)
 
 #go through each .ino project file that was found
 foreach(path ${INOFILES})
@@ -208,11 +210,11 @@ foreach(path ${INOFILES})
  set(Project_Name ${name})
 
  if(${name} STREQUAL "Arm")
-  set(PROJECT_LIBRARIES Servo internal_comms)
+  set(PROJECT_LIBRARIES Servo internal_comms smart_servo)
  elseif(${name} STREQUAL "raman")
-  set(PROJECT_LIBRARIES internal_comms)
+  set(PROJECT_LIBRARIES internal_comms smart_servo)
  elseif(${name} STREQUAL "comms_demo")
-  set(PROJECT_LIBRARIES internal_comms)
+  set(PROJECT_LIBRARIES internal_comms smart_servo)
  # this particular project is important and should be supported, issue #409 opened for this
  # for now it will be skipped
  elseif(${name} STREQUAL "PDS")

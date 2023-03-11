@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "LSSServoMotor.h"
+#include "../../smart_servo/include/LSSServoMotor.h"
 
 class SerialMotor {
  public:

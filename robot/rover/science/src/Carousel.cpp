@@ -17,7 +17,6 @@ void m_sendDebug(const char* message) {
 }
 
 
-
 void Carousel::setup() {
   // These setup functions MUST be here. Because the 
   // Carousel ctor is called outside of any function,
@@ -30,15 +29,20 @@ void Carousel::setup() {
     if (buttonState && c->state == CarouselState::Calibrating) {
       c->state = CarouselState::Not_Moving;
       c->currentCuvette = 0;
-      HAL::servo(0, Carousel::stopped_speed);
+      c->servo.writeActionCommand(c->servoId, "H");
     }
+  }, this);
+
+  // limit switch callback (when correcting)
+  HAL::addLimitSwitchCallback(0, [](int buttonState, void *user_ptr){
+    Carousel *c = (Carousel*) user_ptr;
+    c->limitSwitchHit = true;
   }, this);
 
   startCalibrating();
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
-  checkSwitch();
   if (isAutomating()) {
     handleAutomation();
   }
@@ -47,60 +51,45 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
       return;
 
     case CarouselState::Moving_Carousel:
-      if (limitSwitchPulses >= cuvettesToMove) {
-        state = CarouselState::Waiting_Motor_Stop;
-        HAL::servo(0, Carousel::stopped_speed);
-        timeStopped = millis();
-        cuvettesToMove = 0;
-        limitSwitchPulses = 0;
-      }
-      break;
-
-    case CarouselState::Waiting_Motor_Stop:
-      if (millis() - timeStopped > WAIT_TIME_MOTOR_STOP) {
+      if (queryServoStopped()) {
         if (HAL::readLimitSwitch(0)) {
           state = CarouselState::Not_Moving;
         } else {
-          state = CarouselState::Correcting;
-          limitSwitchPulses = 0;
-          if (moved_cw) {
-            HAL::servo(0, Carousel::ccw_correct_speed);
-          } else {
-            HAL::servo(0, Carousel::cw_correct_speed);
-          }
+          state = CarouselState::Correcting_cw;
+          servo.writeActionCommand(servoId, "WD", calibration_speed);
+          limitSwitchHit = false;
           timeStopped = millis();
         }
       }
       break;
 
-      case CarouselState::Correcting:
-        if (limitSwitchPulses > 0) {
-          HAL::servo(0, Carousel::stopped_speed);
+      case CarouselState::Correcting_cw:
+        if (limitSwitchHit) {
           state = CarouselState::Not_Moving;
+        } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
+          state = CarouselState::Correcting_ccw;
+          servo.writeActionCommand(servoId, "WD", -calibration_speed);
+        }
+        break;
+
+      case CarouselState::Correcting_ccw:
+        if (limitSwitchHit) {
+          state = CarouselState::Not_Moving;
+        } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
+          state = CarouselState::Correcting_cw;
+          servo.writeActionCommand(servoId, "WD", calibration_speed);
         }
         break;
   }
 }
 
 void Carousel::moveNCuvettes(int cuvettesToMove) {
-  moveNCuvettes(cuvettesToMove, Carousel::cw_speed, Carousel::ccw_speed);
-}
-
-void Carousel::moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_speed) {
   if (cuvettesToMove != 0 && state == CarouselState::Not_Moving) {
-    limitSwitchPulses = 0;
-    this->cuvettesToMove = abs(cuvettesToMove);
     currentCuvette += cuvettesToMove;
     currentCuvette %= NUM_CUVETTES;  // wrap around if needed
     state = CarouselState::Moving_Carousel;
     // Move servo in appropriate direction based on input
-    if (cuvettesToMove > 0) {
-      HAL::servo(0, cw_speed);
-      moved_cw = true;
-    } else {
-      HAL::servo(0, ccw_speed);
-      moved_cw = false;
-    }
+    servo.writeActionCommand(servoId, "MD", cuvettesToMove * DEGREES_PER_CUVETTE);
   }
 }
 
@@ -125,10 +114,9 @@ void Carousel::startCalibrating() {
     // If the switch is already pressed, no need to calibrate
     state = CarouselState::Not_Moving;
     currentCuvette = 0;
-    HAL::servo(0, Carousel::stopped_speed);
   } else {
     state = CarouselState::Calibrating;
-    HAL::servo(0, Carousel::cw_speed);
+    servo.writeActionCommand(servoId, "WD", calibration_speed);
   }
 }
 
@@ -137,12 +125,18 @@ CarouselState Carousel::getState() const {
   return state;
 }
 
+bool Carousel::queryServoStopped() {
+  char* response = servo.writeQueryCommand(servoId, "Q");
+  int code = atoi(&response[3]);
+  return code == 6 || code == 1;
+}
+
 bool Carousel::isMoving() const {
   switch (state) {
     case CarouselState::Calibrating:
     case CarouselState::Moving_Carousel:
-    case CarouselState::Waiting_Motor_Stop:
-    case CarouselState::Correcting:
+    case CarouselState::Correcting_cw:
+    case CarouselState::Correcting_ccw:
       return true;
     case CarouselState::Not_Moving:
     case CarouselState::Uncalibrated:
@@ -161,32 +155,7 @@ int8_t Carousel::getCarouselIndex() const {
 }
 
 void Carousel::spinMix() {
-  moveNCuvettes(NUM_CUVETTES, cw_spin_speed, ccw_spin_speed);
-}
-
-void Carousel::checkSwitch() {
-  int reading = HAL::readLimitSwitch(0);
-
-  // If the switch changed, due to noise or pressing:
-  if (reading != lastButtonState) {
-    // reset the debouncing timer
-    lastDebounceTime = millis();
-  }
-
-  if ((millis() - lastDebounceTime) > DEBOUNCE_THRESHOLD) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
-
-    if (reading != buttonState) {
-      buttonState = reading;
-      // count pulse when button goes to HIGH
-      if (buttonState == HIGH) {
-        limitSwitchPulses++;
-      }
-    }
-  }
-
-  lastButtonState = reading;
+  moveNCuvettes(NUM_CUVETTES);
 }
 
 
@@ -194,7 +163,7 @@ void Carousel::startAutoTesting() {
   // TODO: what to do when moving
   if (!isMoving()) {
     automationState = AutomationState::SpinningCarousel;
-    moveNCuvettes(NUM_CUVETTES, Carousel::cw_spin_speed, Carousel::ccw_spin_speed);
+    //moveNCuvettes(NUM_CUVETTES, Carousel::cw_spin_speed, Carousel::ccw_spin_speed);
   }
 }
 
@@ -222,11 +191,9 @@ bool Carousel::isAutomating() {
   return automationState != AutomationState::NotAutomating;
 }
 
-Carousel::Carousel(): currentCuvette(-1), state(CarouselState::Uncalibrated), limitSwitchPulses(0), cuvettesToMove(0),
-                    automationState(AutomationState::NotAutomating), moved_cw(false) {
-  lastDebounceTime = 0;
-  lastButtonState = HAL::readLimitSwitch(0);
-  buttonState = lastButtonState;
+Carousel::Carousel(int servoId): currentCuvette(-1), state(CarouselState::Uncalibrated),
+                    automationState(AutomationState::NotAutomating), servoId(servoId),
+                    limitSwitchHit(false), servo(&Serial5) {
 }
 
 Carousel::~Carousel() {}

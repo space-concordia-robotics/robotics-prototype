@@ -7,16 +7,18 @@
 
 #include <cstdint>
 
+#include <Arduino.h>
 #include "Updatable.h"
 #include "Servo.h"
+#include "../../smart_servo/include/LSSServoMotor.h"
 
 enum CarouselState {
     Uncalibrated,
     Calibrating,
     Not_Moving,
     Moving_Carousel,
-    Waiting_Motor_Stop,
-    Correcting
+    Correcting_cw,
+    Correcting_ccw
 };
 
 // Forward declaration
@@ -25,42 +27,25 @@ class Carousel;
 
 class Carousel : public Updatable {
  private:
-  // min milliseconds to wait after seeing switch keeping a solid state
-  // to register that it has actually changed
-  static unsigned long const DEBOUNCE_THRESHOLD = 50;
-  // Milliseconds to wait after the motor is done moving, to see
-  // if it went past the limit switch
-  static unsigned long const WAIT_TIME_MOTOR_STOP = 250;
   unsigned long timeStopped = 0;
 
-  static const uint8_t stopped_speed = 90;
-  // speeds used when going from one test tube to the other
-  static const uint8_t ccw_speed = 110;
-  static const uint8_t cw_speed = 70;
-  // speeds used when spinning to mix sample with reagent
-  static const uint8_t cw_spin_speed = 0;
-  static const uint8_t ccw_spin_speed = 180;
-  // speeds used when correcting a movement
-  static const uint8_t cw_correct_speed = 80;
-  static const uint8_t ccw_correct_speed = 100;
-  
-  
-  // For debounce
-  unsigned long lastDebounceTime;
-  int lastButtonState;
-  int buttonState;
+  // speed used when spinning to mix/calibration, 10s degrees/s
+  // ie 100 means 10 degrees per second
+  static const int16_t spin_speed = 100;
+  static const int16_t calibration_speed = 50;
+
+  LSSServoMotor servo;
+  int servoId;
   
   // current cuvette, in the range of 0-5
   uint8_t currentCuvette;
   // holds if moving, calibrating, etc
   CarouselState state;
 
-  // Keeps track of the number of times the limit switch has
-  // transitioned to HIGH since current move has started
-  int limitSwitchPulses;
-  int cuvettesToMove;
-  bool moved_cw; // The direction of the current movement
-
+  // Used to correct a move, if the smart servo drifts
+  bool limitSwitchHit;
+  static unsigned long const MAX_CORRECT_TIME = 1000;
+  
   // For automation
   enum AutomationState {
     SpinningCarousel,
@@ -78,6 +63,7 @@ class Carousel : public Updatable {
 
  public:
   const static uint8_t NUM_CUVETTES = 6;
+  const static uint16_t DEGREES_PER_CUVETTE = (int)((360.0 / NUM_CUVETTES) * 10); 
   
   // sets up interrupt callback
   void setup();
@@ -86,11 +72,11 @@ class Carousel : public Updatable {
   void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);
-  // speed is adjusted based on whether it's moving clockwise or counterclockwise 
-  void moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_speed);
   void nextCuvette();
   void previousCuvette();
   void spinMix();
+
+  bool queryServoStopped();
   
   // getters
   int8_t getCarouselIndex() const;
@@ -100,7 +86,7 @@ class Carousel : public Updatable {
   void startAutoTesting();
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();
-  Carousel();
+  Carousel(int servoId);
 };
 
 #endif  // ROVER_CAROUSEL_H
