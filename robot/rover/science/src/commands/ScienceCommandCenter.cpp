@@ -39,6 +39,7 @@ void carousel_spin_mix();
 int8_t carousel_get_carousel_index();
 bool carousel_get_moving();
 void start_auto_testing();
+void carousel_estop();
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -46,6 +47,7 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
   switch (commandID) {
     case COMMAND_ESTOP:
       HAL::estop();
+      carousel_estop();
       break;
     case COMMAND_SET_SERVO_ANGLE:
       {

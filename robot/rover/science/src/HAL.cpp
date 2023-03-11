@@ -29,6 +29,7 @@ void HAL::pinSetup() {
     Servo* newServo = new Servo();
     servos[i] = newServo;
     servos[i]->attach(SERVO_0_PIN + i);
+    servos[i]->write(90);
   }
 
   attachInterrupt(digitalPinToInterrupt(LIMIT_SW_0), handleSwitch0, CHANGE);

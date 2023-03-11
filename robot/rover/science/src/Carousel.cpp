@@ -16,7 +16,10 @@ void m_sendDebug(const char* message) {
   commandCenter->sendMessage(*msg);
 }
 
-
+void Carousel::estop() {
+  state = CarouselState::Not_Moving;
+  HAL::servo(0, Carousel::stopped_speed);
+}
 
 void Carousel::setup() {
   // These setup functions MUST be here. Because the 
@@ -28,13 +31,27 @@ void Carousel::setup() {
   HAL::addLimitSwitchCallback(1, [](int buttonState, void *user_ptr){
     Carousel *c = (Carousel*) user_ptr;
     if (buttonState && c->state == CarouselState::Calibrating) {
-      c->state = CarouselState::Not_Moving;
       c->currentCuvette = 0;
+      // Make it correct after the calibration
+      c->timeStopped = millis();
+      c->state = CarouselState::Waiting_Motor_Stop;
+      c->moved_cw = true;
       HAL::servo(0, Carousel::stopped_speed);
     }
   }, this);
 
   startCalibrating();
+}
+
+void Carousel::startCorrecting() {
+  state = CarouselState::Correcting;
+  timeStopped = millis();
+  limitSwitchPulses = 0;
+  if (moved_cw) {
+    HAL::servo(0, Carousel::ccw_correct_speed);
+  } else {
+    HAL::servo(0, Carousel::cw_correct_speed);
+  }
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
@@ -61,22 +78,32 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
         if (HAL::readLimitSwitch(0)) {
           state = CarouselState::Not_Moving;
         } else {
-          state = CarouselState::Correcting;
-          limitSwitchPulses = 0;
-          if (moved_cw) {
-            HAL::servo(0, Carousel::ccw_correct_speed);
-          } else {
-            HAL::servo(0, Carousel::cw_correct_speed);
-          }
-          timeStopped = millis();
+          startCorrecting();
         }
       }
       break;
 
       case CarouselState::Correcting:
-        if (limitSwitchPulses > 0) {
+        // If taking too long to correct, temp increase speed to
+        // advance past it and correct back the other way
+        /*if (millis() - timeStopped > CORRECTING_TIMEOUT) {
+          state = CarouselState::Correcting_Stuck;
+          digitalWrite(LED, !digitalRead(LED));
+          if (moved_cw) {
+            HAL::servo(0, Carousel::ccw_speed);
+          } else {
+            HAL::servo(0, Carousel::cw_speed);
+          }
+        } else */ if (limitSwitchPulses > 0) {
           HAL::servo(0, Carousel::stopped_speed);
           state = CarouselState::Not_Moving;
+        }
+        break;
+      
+      case CarouselState::Correcting_Stuck:
+        if (limitSwitchPulses > 0) {
+          moved_cw != moved_cw;
+          startCorrecting();
         }
         break;
   }
@@ -101,6 +128,7 @@ void Carousel::moveNCuvettes(int cuvettesToMove, uint8_t cw_speed, uint8_t ccw_s
       HAL::servo(0, ccw_speed);
       moved_cw = false;
     }
+    delay(200);
   }
 }
 

@@ -16,7 +16,8 @@ enum CarouselState {
     Not_Moving,
     Moving_Carousel,
     Waiting_Motor_Stop,
-    Correcting
+    Correcting,
+    Correcting_Stuck
 };
 
 // Forward declaration
@@ -27,22 +28,23 @@ class Carousel : public Updatable {
  private:
   // min milliseconds to wait after seeing switch keeping a solid state
   // to register that it has actually changed
-  static unsigned long const DEBOUNCE_THRESHOLD = 50;
+  static unsigned long const DEBOUNCE_THRESHOLD = 4;
   // Milliseconds to wait after the motor is done moving, to see
   // if it went past the limit switch
   static unsigned long const WAIT_TIME_MOTOR_STOP = 250;
+  static unsigned long const CORRECTING_TIMEOUT = 2000;
   unsigned long timeStopped = 0;
 
   static const uint8_t stopped_speed = 90;
   // speeds used when going from one test tube to the other
-  static const uint8_t ccw_speed = 110;
-  static const uint8_t cw_speed = 70;
+  static const uint8_t ccw_speed = 100;
+  static const uint8_t cw_speed = 80;
   // speeds used when spinning to mix sample with reagent
   static const uint8_t cw_spin_speed = 0;
   static const uint8_t ccw_spin_speed = 180;
   // speeds used when correcting a movement
-  static const uint8_t cw_correct_speed = 80;
-  static const uint8_t ccw_correct_speed = 100;
+  static const uint8_t cw_correct_speed = 88;
+  static const uint8_t ccw_correct_speed = 92;
   
   
   // For debounce
@@ -76,7 +78,10 @@ class Carousel : public Updatable {
   // checks switch that toggles every time it moves past a carousel
   void checkSwitch();
 
+  void startCorrecting();
+
  public:
+  void estop();
   const static uint8_t NUM_CUVETTES = 6;
   
   // sets up interrupt callback

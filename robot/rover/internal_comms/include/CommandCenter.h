@@ -9,7 +9,7 @@
 #include <etl/queue.h>
 
 // USB debug flag
-// #define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
 #define Serial Serial1
