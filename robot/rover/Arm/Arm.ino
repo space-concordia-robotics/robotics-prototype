@@ -76,10 +76,15 @@ void setMotorSpeeds(float* angles) {
   }
   for (int i = 0; i < NUM_SMART_SERVOS; i++) {
     int angle = (int)(angles[NUM_DC_MOTORS + i]);
-    serialMotors[i].setSpeed(angle);
+    // serialMotors[i].setSpeed(angle);
+    if (angle > 1) {
+    serialMotors[i].moveDegrees(4);
+    }
+    if (angle < -1) {
+    serialMotors[i].moveDegrees(-4);
+    }
   }
 }
-
 void doMotorChecks() {
   // Do motor checks (ex stop after certain time of no messages)
   for (int i = 0; i < NUM_DC_MOTORS; i++) {
