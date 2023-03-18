@@ -27,6 +27,7 @@ class SerialMotor {
   void doChecks();
   void stop();
   void moveDegrees(int degrees);
+  void moveOpenedClosed(int degrees);
   unsigned int millisStartedMove=0;
 
  private:

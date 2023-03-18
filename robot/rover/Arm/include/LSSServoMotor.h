@@ -19,6 +19,9 @@ class LSSServoMotor {
   void writeActionCommand(unsigned int servoId, const char* actionCommand,
                           int actionValue);
   void writeActionCommand(unsigned int servoId, const char* actionCommand);
+  void writeModifiedActionCommand(unsigned int servoId,
+                                       const char* actionCommand,
+                                       int actionValue, const char* modifier, int modifierValue);
   char* writeQueryCommand(unsigned int servoId, const char* queryCommand);
 
  private:

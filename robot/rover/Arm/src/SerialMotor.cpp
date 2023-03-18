@@ -5,7 +5,7 @@ SerialMotor::SerialMotor(LSSServoMotor* motor, int motorID, float gearRatio)
       gearRatio(gearRatio),
       motorID(motorID),
       currentSpeed(0) {
-      theMotor->writeActionCommand(motorID, "SD", 20);
+      theMotor->writeActionCommand(motorID, "SD", 100);
       
       }
 
@@ -33,9 +33,31 @@ void SerialMotor::stop() {
 }
 
 void SerialMotor::moveDegrees(int degrees) {
+  static int counter = 0;
   if (millis() - millisStartedMove > 80) {
-  millisStartedMove = millis();
-  theMotor->writeActionCommand(motorID, "MD", degrees*100);
+    counter = 0;
+    millisStartedMove = millis();
+    
+    //theMotor->writeModifiedActionCommand(motorID, "D", degrees*450, "CH", 500);
+    //theMotor->writeActionCommand(motorID, "MD", degrees*100);
+    
+    theMotor->writeModifiedActionCommand(motorID, "MD", degrees*100, "SD", 500);
+    
+  } else {
+    counter++;
+  }  
+  
+  /*if (counter >= 3) {
+    moveOpenedClosed(degrees);
+  }*/
+}
+
+void SerialMotor::moveOpenedClosed(int degrees) {
+  if (degrees > 0) {
+    theMotor->writeModifiedActionCommand(motorID, "D", 1800, "CH", 400); 
+  }
+  if (degrees < 0) {
+    theMotor->writeModifiedActionCommand(motorID, "D", -1800, "CH", 400);
   }
 }
 
