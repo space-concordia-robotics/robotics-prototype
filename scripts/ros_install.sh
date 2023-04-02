@@ -7,7 +7,8 @@ sudo update-locale LC_ALL=en_CA.UTF-8 LANG=en_CA.UTF-8
 export LANG=en_CA.UTF-8
 
 echo "Adding ROS source..."
-sudo apt -qq install software-properties-common
+sudo apt-get -qq install software-properties-common
+sudo apt-get update -y
 sudo add-apt-repository universe
 
 sudo apt -qq install curl
@@ -22,4 +23,3 @@ sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
 echo "Done installing ROS"
-
