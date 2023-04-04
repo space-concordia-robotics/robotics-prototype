@@ -26,15 +26,14 @@ sudo apt-get install python3-rospkg -y
 sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
-ROS_VERSION=$(rosversion --distro)
 
-
-if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_VERSION} = "${ROS_DISTRO_TO_INSTALL}" ]; #$? returns 0 when previous command executes successfully
+if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ];
 then
 	source /opt/ros/humble/setup.bash
-        echo "Done installing ROS ${ROS_VERSION}"
+        echo "Done installing ROS ${ROS_DISTRO}"
+	printenv | grep -i ROS
 else
-    	echo "Install Failed ${ROS_VERSION}"
+    	echo "Install Failed ${ROS_DISTRO}"
 	exit 1
 fi
 
