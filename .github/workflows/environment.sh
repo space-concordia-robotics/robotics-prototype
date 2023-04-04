@@ -12,6 +12,7 @@ pip install -r requirements.txt
 
 python setup.py develop
 
+# Enviroment setup for arduino install
 sudo apt-get install snapd -y
-sudo apt-get install zip unzip
-
+sudo apt-get install zip unzip -y
+sudo apt-get install wget -y

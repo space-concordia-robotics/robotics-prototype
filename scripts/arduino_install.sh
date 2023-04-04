@@ -13,8 +13,8 @@ mv arduino-ide_*_Linux_64bit/ arduino-ide
 ./arduino-ide/arduino-ide &
 
 sleep 6
-
-killall arduino-ide
+	
+pkill arduino-ide
 
 cat ~/.arduinoIDE/arduino-cli.yaml | yq '.board_manager.additional_urls=["https://www.pjrc.com/teensy/package_teensy_index.json"]' | tee ~/.arduinoIDE/arduino-cli.tmp
 mv ~/.arduinoIDE/arduino-cli.tmp ~/.arduinoIDE/arduino-cli.yaml
