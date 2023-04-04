@@ -11,3 +11,7 @@ pip install -U pip
 pip install -r requirements.txt
 
 python setup.py develop
+
+sudo apt-get install snapd -y
+sudo apt-get install zip unzip
+
