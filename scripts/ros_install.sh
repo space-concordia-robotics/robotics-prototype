@@ -7,6 +7,7 @@ sudo update-locale LC_ALL=en_CA.UTF-8 LANG=en_CA.UTF-8
 export LANG=en_CA.UTF-8
 
 echo "Adding ROS source..."
+ROS_VERSION_TO_INSTALL="humble"
 sudo apt-get -qq install software-properties-common
 sudo apt-get update -y
 sudo add-apt-repository universe -y
@@ -18,16 +19,17 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 
 echo "Updating sources and upgrading system packages..."
 sudo apt -qq update
-sudo apt -qq upgrade -y
+sudo apt -qq upgrade
 
 echo "Installing ROS... (will take a while)"
+sudo apt-get install python-rospkg -y
 sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
 ROS_VERSION=$(rosversion -d)
 
 
-if [ -e /opt/ros/humble/setup.sh ] && [ $? == 0 ] && [ ${ROS_VERSION}!="<unknown>" ]; #$? returns 0 when previous command executes successfully
+if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_VERSION} == "${ROS_VERSION_TO_INSTALL}" ]; #$? returns 0 when previous command executes successfully
 then
 	source /opt/ros/humble/setup.bash
         echo "Done installing ROS ${ROS_VERSION}"
