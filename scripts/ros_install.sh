@@ -26,14 +26,14 @@ sudo apt-get install python3-rospkg -y
 sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
-
+# Check if ros was successfully installed
 if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ];
 then
 	source /opt/ros/humble/setup.bash
         echo "Done installing ROS ${ROS_DISTRO}"
 	printenv | grep -i ROS
 else
-    	echo "Install Failed ${ROS_DISTRO}"
+    	echo "Install Failed "
 	exit 1
 fi
 
