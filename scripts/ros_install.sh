@@ -27,11 +27,12 @@ sudo apt -qq install ros-dev-tools
 ROS_VERSION=$(rosversion -d)
 
 
-if [ -e /opt/ros/humble/setup.sh ] && [ $? == 0 ]; #$? returns 0 when previous command executes successfully
+if [ -e /opt/ros/humble/setup.sh ] && [ $? == 0 ] && [ ${ROS_VERSION}!="<unknown>" ]; #$? returns 0 when previous command executes successfully
 then
+	source /opt/ros/humble/setup.bash
         echo "Done installing ROS ${ROS_VERSION}"
 else
-        echo "Install Failed"
+    	echo "Install Failed ${ROS_VERSION}"
 	exit 1
 fi
 
