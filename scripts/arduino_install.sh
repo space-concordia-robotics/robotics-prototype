@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo systemctl restart snapd snapd.socket
 sudo snap install yq --channel=v4/stable
 
 echo "Downloading latest release of Arduino 2.0 IDE..."
@@ -7,7 +8,7 @@ cd /home/$USER/
 curl -s https://api.github.com/repos/arduino/arduino-ide/releases/latest | grep "browser_download_url.*Linux_64bit.zip" | cut -d : -f 2,3 | tr -d \" | wget -i -
 
 echo "Unzipping..."
-unzip -q *Linux_64bit.zip 
+unzip -qq *Linux_64bit.zip 
 mv arduino-ide_*_Linux_64bit/ arduino-ide
 
 ./arduino-ide/arduino-ide &
