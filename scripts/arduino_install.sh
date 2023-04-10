@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo systemctl restart snapd snapd.socket
+sudo service snapd restart
 sudo snap install yq --channel=v4/stable
 
 echo "Downloading latest release of Arduino 2.0 IDE..."
