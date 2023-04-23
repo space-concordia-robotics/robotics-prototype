@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="example_image_publisher" pkg="image_publisher" exec="image_publisher_node">
+    <param name="filename" value="/dev/video0"/>
+    <param name="framerate" value="30"/>
+    <param name="width" value="640"/>
+    <param name="height" value="480"/>
+    <param name="pixel_format" value="yuyv"/>
+    <remap from="image_raw" to="camera/image_raw"/>
+  </node>
+
+</launch>
