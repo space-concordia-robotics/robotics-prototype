@@ -1,19 +1,30 @@
 <launch>
-  <node name="video0" pkg="cv_camera" type="cv_camera_node">
-    <param name="image_width" type="int" value="1280" />
-    <param name="image_height" type="int" value="720" />
-    <param name="device_id" value="0" />
+  <arg name="camera_name_0" default="video0" />
+  <arg name="camera_name_1" default="video1" />
+  <arg name="camera_name_2" default="video2" />
+
+  <node name="video0" pkg="usb_cam" type="usb_cam_node">
+    <param name="video_device" value="/dev/video1" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <remap from="/usb_cam/image_raw" to="$(arg camera_name_0)/image_raw" />
+    <remap from="/usb_cam/image_raw/compressed" to="$(arg camera_name_0)/image_raw/compressed" />
+    <remap from="/usb_cam/camera_info" to="$(arg camera_name_0)/camera_info" />
   </node>
-  <node name="video1" pkg="cv_camera" type="cv_camera_node">
-    <param name="image_width" type="int" value="1280" />
-    <param name="image_height" type="int" value="720" />
-    <param name="device_id" value="1" />
+  <node name="video1" pkg="usb_cam" type="usb_cam_node">
+    <param name="video_device" value="/dev/video3" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <remap from="/usb_cam/image_raw" to="$(arg camera_name_1)/image_raw" />
+    <remap from="/usb_cam/image_raw/compressed" to="$(arg camera_name_1)/image_raw/compressed" />
+    <remap from="/usb_cam/camera_info" to="$(arg camera_name_1)/camera_info" />
   </node>
-  <node name="video2" pkg="cv_camera" type="cv_camera_node">
-    <param name="image_width" type="int" value="1280" />
-    <param name="image_height" type="int" value="720" />
-    <param name="device_id" value="2" />
-  </node>
-  <node name="web_video_server" pkg="web_video_server" type="web_video_server">
+  <node name="video2" pkg="usb_cam" type="usb_cam_node">
+    <param name="video_device" value="/dev/video5" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <remap from="/usb_cam/image_raw" to="$(arg camera_name_2)/image_raw" />
+    <remap from="/usb_cam/image_raw/compressed" to="$(arg camera_name_2)/image_raw/compressed" />
+    <remap from="/usb_cam/camera_info" to="$(arg camera_name_2)/camera_info" />
   </node>
 </launch>
