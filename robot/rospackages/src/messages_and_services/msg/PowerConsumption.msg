@@ -1,0 +1,3 @@
+string description
+float64 total_watt_hours
+float64[] individual_watt_hours

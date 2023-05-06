@@ -1,0 +1,2 @@
+float64 desired_dir
+float64 dist_from_base

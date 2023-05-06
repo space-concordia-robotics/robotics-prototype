@@ -1,42 +1,48 @@
 <launch>
-    <node pkg="mux_selector" type="mux_select_server.py" name="mux_select_server" output="screen" args="local"/>
-    <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen"/>
-    <node pkg="task_handler" type="task_handler_server.py" name="task_handler_server" output="screen" args="local"/>
-    <node pkg="mcu_control" type="MockPdsNode.py" name="mock_pds_node" output="screen"/>
-    <node pkg="mcu_control" type="PowerReportNode.py" name="power_report_node" output="screen"/>
+    <!-- <node pkg="mux_selector" exec="mux_select_server" name="mux_select_server" output="screen" args="local"/>
+    <node pkg="web_video_server" exec="web_video_server" name="web_video_server" output="screen"/>
+    <node pkg="task_handler" exec="task_handler_server" name="task_handler_server" output="screen" args="local"/> -->
+    <node pkg="mcu_control_python" exec="PowerReportNode" name="power_report_node" output="screen"/>
+    <node pkg="mcu_control_python" exec="MockPdsNode" name="mock_pds_node" output="screen">
+        <param name="PDS_mock_voltage_rate" value="0.04"/>
+        <param name="PDS_mock_temp_rate" value="1"/>
+        <param name="PDS_mock_current_rate" value="0.025"/>
+        <param name="PDS_mock_voltage_noise" value="0.05"/>
+        <param name="PDS_mock_temperature_noise" value="0.05"/>
+        <param name="PDS_mock_current_noise" value="0.01"/>
+        <param name="PDS_mock_voltage" value="stable"/>
+        <param name="PDS_mock_temp1" value="stable"/>
+        <param name="PDS_mock_temp2" value="stable"/>
+        <param name="PDS_mock_temp3" value="stable"/>
 
-    <param name="PDS_mock_voltage_rate" value="0.04"/>
-    <param name="PDS_mock_temp_rate" value="1"/>
-    <param name="PDS_mock_current_rate" value="0.025"/>
-    <param name="PDS_mock_voltage_noise" value="0.05"/>
-    <param name="PDS_mock_temperature_noise" value="0.05"/>
-    <param name="PDS_mock_current_noise" value="0.01"/>
-    <param name="PDS_mock_voltage" value="stable"/>
-    <param name="PDS_mock_temp1" value="stable"/>
-    <param name="PDS_mock_temp2" value="stable"/>
-    <param name="PDS_mock_temp3" value="stable"/>
-    <param name="PDS_mock_wheel1_current" value="stable"/>
-    <param name="PDS_mock_wheel2_current" value="stable"/>
-    <param name="PDS_mock_wheel3_current" value="stable"/>
-    <param name="PDS_mock_wheel4_current" value="stable"/>
-    <param name="PDS_mock_wheel5_current" value="stable"/>
-    <param name="PDS_mock_wheel6_current" value="stable"/>
+        <param name="PDS_mock_wheel1_current" value="stable"/>
+        <param name="PDS_mock_wheel2_current" value="stable"/>
+        <param name="PDS_mock_wheel3_current" value="stable"/>
+        <param name="PDS_mock_wheel4_current" value="stable"/>
+        <param name="PDS_mock_wheel5_current" value="stable"/>
+        <param name="PDS_mock_wheel6_current" value="stable"/>
 
-    <param name="PDS_mock_wheel1_voltage" value="stable"/>
-    <param name="PDS_mock_wheel2_voltage" value="rise"/>
-    <param name="PDS_mock_wheel3_voltage" value="stable"/>
-    <param name="PDS_mock_wheel4_voltage" value="stable"/>
-    <param name="PDS_mock_wheel5_voltage" value="stable"/>
-    <param name="PDS_mock_wheel6_voltage" value="stable"/>
+        <param name="PDS_mock_wheel1_voltage" value="stable"/>
+        <param name="PDS_mock_wheel2_voltage" value="rise"/>
+        <param name="PDS_mock_wheel3_voltage" value="stable"/>
+        <param name="PDS_mock_wheel4_voltage" value="stable"/>
+        <param name="PDS_mock_wheel5_voltage" value="stable"/>
+        <param name="PDS_mock_wheel6_voltage" value="stable"/>
 
-    <param name="PDS_mock_arm1_voltage" value="stable"/>
-    <param name="PDS_mock_arm2_voltage" value="stable"/>
-    <param name="PDS_mock_arm3_voltage" value="stable"/>
-    <param name="PDS_mock_arm4_voltage" value="stable"/>
-    <param name="PDS_mock_arm5_voltage" value="stable"/>
-    <param name="PDS_mock_arm6_voltage" value="stable"/>
+        <param name="PDS_mock_arm1_voltage" value="stable"/>
+        <param name="PDS_mock_arm2_voltage" value="stable"/>
+        <param name="PDS_mock_arm3_voltage" value="stable"/>
+        <param name="PDS_mock_arm4_voltage" value="stable"/>
+        <param name="PDS_mock_arm5_voltage" value="stable"/>
+        <param name="PDS_mock_arm6_voltage" value="stable"/>
 
-    <param name="PDS_mock_control_voltage" value="stable"/>
-    
-    <include file="$(find mcu_control)/launch/basestation.launch" />
+        <param name="PDS_mock_arm1_current" value="stable"/>
+        <param name="PDS_mock_arm2_current" value="stable"/>
+        <param name="PDS_mock_arm3_current" value="stable"/>
+        <param name="PDS_mock_arm4_current" value="stable"/>
+        <param name="PDS_mock_arm5_current" value="stable"/>
+        <param name="PDS_mock_arm6_current" value="stable"/>
+
+        <param name="PDS_mock_control_voltage" value="stable"/>
+    </node>
 </launch>

@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="mcu_control_python" exec="TestParam" name="mock_pds_node" output="screen">
+        <param name="my_str" value="sdfgh"/>
+    </node>
+</launch>

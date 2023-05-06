@@ -21,6 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'CommsNode = mcu_control_python.CommsNode:main',
+            'MockPdsNode = mcu_control_python.MockPdsNode:main',
+            'PowerReportNode = mcu_control_python.PowerReportNode:main',
+            'TestParam = mcu_control_python.TestParam:main'
         ],
     },
 )
