@@ -35,7 +35,7 @@ This contains the methods needed by command center
 void carousel_previous_test_tube() { carousel->moveNCuvettes(-1); }
 void carousel_next_test_tube() { carousel->moveNCuvettes(1); }
 void carousel_go_to_test_tube(uint8_t index) { carousel->goToCuvette(index); }
-void carousel_calibrate() { carousel->startCalibrating(); }
+void carousel_calibrate() { /*carousel->startCalibrating();*/ }
 int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
 bool carousel_get_moving() { return carousel->isMoving(); }
 void start_auto_testing() { carousel->startAutoTesting(); }

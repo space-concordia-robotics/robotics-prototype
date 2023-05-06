@@ -13,12 +13,8 @@
 #include "../../smart_servo/include/LSSServoMotor.h"
 
 enum CarouselState {
-    Uncalibrated,
-    Calibrating,
     Not_Moving,
-    Moving_Carousel,
-    Correcting_cw,
-    Correcting_ccw
+    Moving_Carousel
 };
 
 // Forward declaration
@@ -32,7 +28,6 @@ class Carousel : public Updatable {
   // speed used when spinning to mix/calibration, 10s degrees/s
   // ie 100 means 10 degrees per second
   static const int16_t spin_speed = 100;
-  static const int16_t calibration_speed = 50;
 
   LSSServoMotor servo;
   int servoId;
@@ -41,10 +36,6 @@ class Carousel : public Updatable {
   uint8_t currentCuvette;
   // holds if moving, calibrating, etc
   CarouselState state;
-
-  // Used to correct a move, if the smart servo drifts
-  bool limitSwitchHit;
-  static unsigned long const MAX_CORRECT_TIME = 1000;
   
   // For automation
   enum AutomationState {
@@ -69,7 +60,6 @@ class Carousel : public Updatable {
   void setup();
   
   // Basic commands
-  void startCalibrating();
   void goToCuvette(uint8_t cuvetteId);
   void moveNCuvettes(int cuvettesToMove);
   void nextCuvette();
