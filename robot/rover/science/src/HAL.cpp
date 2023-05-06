@@ -24,7 +24,10 @@ void HAL::pinSetup() {
   pinMode(LV_POWER_IRQ, INPUT);
   pinMode(HV_POWER_ACK, OUTPUT);
   pinMode(LV_POWER_ACK, OUTPUT);
-  Serial5.begin(57600);  // debug serial
+  
+  // For smart servo
+  Serial5.begin(115200);
+  
   for (int i = 0; i < NUM_SERVOS; i++) {
     Servo* newServo = new Servo();
     servos[i] = newServo;

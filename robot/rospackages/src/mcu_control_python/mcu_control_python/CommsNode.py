@@ -206,6 +206,8 @@ def send_command(command_name, args, deviceToSendTo):
 
         if not local_mode:
             gpio.output(SW_PINS, NONE)
+    else:
+        print(f"Command {command_name} not found")
     return False
 
 def move_wheels_dumb_workaround(args):
