@@ -230,6 +230,9 @@ foreach(path ${INOFILES})
  elseif(${name} STREQUAL "PidController")
  set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
  set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
+
+ elseif(${name} STREQUAL "LIBS")
+ set(PROJECT_LIBRARIES SPI)
  
  endif()
  
