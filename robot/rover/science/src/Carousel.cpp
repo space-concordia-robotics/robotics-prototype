@@ -54,6 +54,7 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
       if (queryServoStopped()) {
         if (HAL::readLimitSwitch(0)) {
           state = CarouselState::Not_Moving;
+          servo.writeActionCommand(servoId, "H");
         } else {
           state = CarouselState::Correcting_cw;
           servo.writeActionCommand(servoId, "WD", calibration_speed);
@@ -63,23 +64,27 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
       }
       break;
 
-      case CarouselState::Correcting_cw:
-        if (limitSwitchHit) {
-          state = CarouselState::Not_Moving;
-        } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
-          state = CarouselState::Correcting_ccw;
-          servo.writeActionCommand(servoId, "WD", -calibration_speed);
-        }
-        break;
+    case CarouselState::Correcting_cw:
+      if (limitSwitchHit) {
+        state = CarouselState::Not_Moving;
+        servo.writeActionCommand(servoId, "H");
+      } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
+        state = CarouselState::Correcting_ccw;
+        timeStopped = millis();
+        servo.writeActionCommand(servoId, "WD", -calibration_speed);
+      }
+      break;
 
-      case CarouselState::Correcting_ccw:
-        if (limitSwitchHit) {
-          state = CarouselState::Not_Moving;
-        } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
-          state = CarouselState::Correcting_cw;
-          servo.writeActionCommand(servoId, "WD", calibration_speed);
-        }
-        break;
+    case CarouselState::Correcting_ccw:
+      if (limitSwitchHit) {
+        state = CarouselState::Not_Moving;
+        servo.writeActionCommand(servoId, "H");
+      } else if (millis() - timeStopped > MAX_CORRECT_TIME) {
+        state = CarouselState::Correcting_cw;
+        timeStopped = millis();
+        servo.writeActionCommand(servoId, "WD", calibration_speed);
+      }
+      break;
   }
 }
 
@@ -90,6 +95,8 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
     state = CarouselState::Moving_Carousel;
     // Move servo in appropriate direction based on input
     servo.writeActionCommand(servoId, "MD", cuvettesToMove * DEGREES_PER_CUVETTE);
+    // Wait to prevent motor from saying it is not moving immediately
+    delay(10);
   }
 }
 
@@ -113,6 +120,7 @@ void Carousel::startCalibrating() {
   if (HAL::readLimitSwitch(1)) {
     // If the switch is already pressed, no need to calibrate
     state = CarouselState::Not_Moving;
+    servo.writeActionCommand(servoId, "H");
     currentCuvette = 0;
   } else {
     state = CarouselState::Calibrating;

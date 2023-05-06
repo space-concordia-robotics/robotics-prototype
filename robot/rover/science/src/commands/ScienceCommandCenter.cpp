@@ -97,7 +97,6 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       start_auto_testing();
       break;
     default:
-      //Serial.printf("command id %d args length %d", commandID, rawArgsLength);
       digitalWrite(LED, !digitalRead(LED));
   }
 }
