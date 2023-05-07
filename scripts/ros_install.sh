@@ -15,7 +15,7 @@ sudo add-apt-repository universe -y
 sudo apt -qq install curl
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list >/dev/null
 
 echo "Updating sources and upgrading system packages..."
 sudo apt -qq update
@@ -27,13 +27,11 @@ sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
 # Check if ros was successfully installed
-if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ];
-then
+if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ]; then
 	source /opt/ros/humble/setup.bash
-        echo "Done installing ROS ${ROS_DISTRO}"
+	echo "Done installing ROS ${ROS_DISTRO}"
 	printenv | grep -i ROS
 else
-    	echo "Install Failed "
+	echo "Install Failed "
 	exit 1
 fi
-
