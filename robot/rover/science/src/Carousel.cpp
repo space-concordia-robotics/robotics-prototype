@@ -4,7 +4,6 @@
 
 #include "include/Carousel.h"
 #include "include/SciencePinSetup.h"
-#include "include/HAL.h"
 #include "include/commands/ScienceCommandCenter.h"
 #include <stdlib.h>
 
@@ -41,6 +40,10 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
   if (cuvettesToMove != 0 && state == CarouselState::Not_Moving) {
     currentCuvette += cuvettesToMove;
     currentCuvette %= NUM_CUVETTES;  // wrap around if needed
+    if (currentCuvette < 0) {
+      currentCuvette += NUM_CUVETTES;
+    }
+    
     state = CarouselState::Moving_Carousel;
     // Move servo to appropriate angle based on input
     servo.writeActionCommand(servoId, "MD", cuvettesToMove * DEGREES_PER_CUVETTE);

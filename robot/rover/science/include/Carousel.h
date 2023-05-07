@@ -33,7 +33,7 @@ class Carousel : public Updatable {
   int servoId;
   
   // current cuvette, in the range of 0-5
-  uint8_t currentCuvette;
+  int8_t currentCuvette;
   // holds if moving, calibrating, etc
   CarouselState state;
   
@@ -53,7 +53,7 @@ class Carousel : public Updatable {
   void checkSwitch();
 
  public:
-  const static uint8_t NUM_CUVETTES = 6;
+  const static int8_t NUM_CUVETTES = 6;
   const static uint16_t DEGREES_PER_CUVETTE = (int)((360.0 / NUM_CUVETTES) * 10); 
   
   // sets up interrupt callback
