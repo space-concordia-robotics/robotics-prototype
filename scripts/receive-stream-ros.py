@@ -1,15 +1,12 @@
 import os
-import select
 import cv2
 import numpy as np
 import ffmpeg
 import rospy
 from sensor_msgs.msg import CompressedImage
 
-# Set the ROS topic for the input H264 stream
 input_topic = '/encoded_video'
 
-# Create a ROS subscriber to receive the H264 stream
 rospy.init_node('h264_decoder')
 frame_width = 640
 frame_height = 480
@@ -26,16 +23,12 @@ os.set_blocking(process.stdout.fileno(), False)
 
 raw_frame = bytes()
 
-# Define the callback function to receive the H264 stream
 def callback(msg):
-    print('func start')
-
-    # Decode the compressed H264 stream using FFmpeg
     input_bytes = bytes(msg.data)
 
-    # Write the compressed H264 stream to FFmpeg's input pipe
     process.stdin.write(input_bytes)
 
+def read_decoded_frames():
     global raw_frame
 
     # Read the decoded video frames from FFmpeg
@@ -57,11 +50,13 @@ def callback(msg):
         .reshape([frame_height, frame_width, 3])
     )
 
+    cv2.imshow('output', frame)
+    cv2.waitKey(1)
+
     raw_frame = bytes()
     print('func end')
 
 rospy.Subscriber(input_topic, CompressedImage, callback)
 
-# Enter the ROS spin loop
-rospy.spin()
-
+while not rospy.is_shutdown():
+    read_decoded_frames()
