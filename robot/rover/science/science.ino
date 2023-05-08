@@ -7,7 +7,6 @@
 
 #include "Arduino.h"
 #include "include/Carousel.h"
-#include "include/HAL.h"
 #include "include/SciencePinSetup.h"
 #include "include/commands/ScienceCommandCenter.h"
 
@@ -32,15 +31,20 @@ unsigned long time = micros();
 This contains the methods needed by command center
   ------
 */
+int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
+bool carousel_get_moving() { return carousel->isMoving(); }
+
 void carousel_previous_test_tube() { carousel->moveNCuvettes(-1); }
 void carousel_next_test_tube() { carousel->moveNCuvettes(1); }
 void carousel_go_to_test_tube(uint8_t index) { carousel->goToCuvette(index); }
 void carousel_spin_mix() {carousel->spinMix(); }
-int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
-bool carousel_get_moving() { return carousel->isMoving(); }
+
+void carousel_estop() {carousel->estop(); }
 
 void setup() {
-  HAL::pinSetup();
+  pinMode(LED, OUTPUT);
+  // For smart servo
+  Serial5.begin(115200);
 
   Serial.begin(9600);
   

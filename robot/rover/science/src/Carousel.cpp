@@ -70,6 +70,10 @@ void Carousel::previousCuvette() {
   moveNCuvettes(-1);
 }
 
+void Carousel::estop() {
+  servo.writeActionCommand(servoId, "L");
+}
+
 CarouselState Carousel::getState() const {
   return state;
 }

@@ -57,6 +57,8 @@ class Carousel : public Updatable {
   void previousCuvette();
   void spinMix();
 
+  void estop();
+
   bool queryServoStopped();
   
   // getters

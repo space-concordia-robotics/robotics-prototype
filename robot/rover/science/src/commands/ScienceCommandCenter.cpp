@@ -5,7 +5,6 @@
 #include "include/commands/ScienceCommandCenter.h"
 #include "../../../internal_comms/include/CommandCenter.h"
 #include "../../include/SciencePinSetup.h"
-#include "include/HAL.h"
 
 #define COMMAND_GET_STATUS 39
 #define COMMAND_PREVIOUS_TEST_TUBE 41
@@ -28,14 +27,16 @@ float bytes_to_float(const uint8_t* rawPointer) {
 }
 
 // These declare method, in raman.ino, that are needed by the command center
+int8_t  carousel_get_carousel_index();
+bool carousel_get_moving();
+
 void carousel_previous_test_tube();
 void carousel_next_test_tube();
 void carousel_go_to_test_tube(uint8_t index);
-void carousel_calibrate();
 void carousel_spin_mix();
-int8_t carousel_get_carousel_index();
-bool carousel_get_moving();
-void start_auto_testing();
+
+void carousel_estop();
+
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
                                           const uint8_t* rawArgs,
@@ -70,16 +71,11 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
       break;
 
     case COMMAND_ESTOP:
-      HAL::estop();
+      carousel_estop();
       break;
 
     case COMMAND_SET_SERVO_ANGLE:
       {
-        if (rawArgsLength == 2) {
-          HAL::servo(rawArgs[0], rawArgs[1]);
-        } else {
-          digitalWrite(LED, !digitalRead(LED));
-        }
         break;
       }
 
