@@ -18,15 +18,12 @@ void m_sendDebug(const char* message) {
 
 void Carousel::setup() {
   // Set absolute position offset
-  servo.writeActionCommand(servoId, "O", 1800);
+  servo.writeActionCommand(servoId, "O", angleOffset);
   // Initialize to 0
   servo.writeActionCommand(servoId, "D", 0);
 }
 
 void Carousel::update(unsigned long deltaMicroSeconds) {
-  if (isAutomating()) {
-    handleAutomation();
-  }
   switch (state) {
     case CarouselState::Moving_Carousel:
       if (queryServoStopped()) {
@@ -39,14 +36,19 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
 void Carousel::moveNCuvettes(int cuvettesToMove) {
   if (cuvettesToMove != 0 && state == CarouselState::Not_Moving) {
     currentCuvette += cuvettesToMove;
-    currentCuvette %= NUM_CUVETTES;  // wrap around if needed
+    virtualAngle += cuvettesToMove * DEGREES_PER_CUVETTE;
+
+    // wrap around if needed
+    currentCuvette %= NUM_CUVETTES; 
     if (currentCuvette < 0) {
       currentCuvette += NUM_CUVETTES;
     }
-    
+
     state = CarouselState::Moving_Carousel;
-    // Move servo to appropriate angle based on input
-    servo.writeActionCommand(servoId, "MD", cuvettesToMove * DEGREES_PER_CUVETTE);
+    // Set absolute position offset in case motor connected later
+    servo.writeActionCommand(servoId, "O", angleOffset);
+    // Move servo
+    servo.writeActionCommand(servoId, "D", virtualAngle);
     // Wait to prevent motor from saying it is not moving immediately
     delay(10);
   }
@@ -98,41 +100,8 @@ void Carousel::spinMix() {
 }
 
 
-void Carousel::startAutoTesting() {
-  // TODO: what to do when moving
-  if (!isMoving()) {
-    automationState = AutomationState::SpinningCarousel;
-    //moveNCuvettes(NUM_CUVETTES, Carousel::cw_spin_speed, Carousel::ccw_spin_speed);
-  }
-}
-
-void Carousel::handleAutomation() {
-  // NOTE: this is only run when the carousel is not moving
-  if (isAutomating() && !isMoving()) {
-
-    switch (automationState) {
-      case AutomationState::SpinningCarousel:
-        // done spinning the carousel to mix, advance to next test tube for camera
-        automationState = AutomationState::Advancing;
-        moveNCuvettes(1);
-        break;
-
-      case AutomationState::Advancing:
-        // Test tube in front of camera, stop
-        automationState = AutomationState::NotAutomating;
-        break;
-
-    }
-  }
-}
-
-bool Carousel::isAutomating() {
-  return automationState != AutomationState::NotAutomating;
-}
-
-Carousel::Carousel(int servoId): currentCuvette(0), state(CarouselState::Not_Moving),
-                    automationState(AutomationState::NotAutomating), servoId(servoId),
-                    servo(&Serial5) {
+Carousel::Carousel(int servoId, int32_t angleOffset): currentCuvette(0), state(CarouselState::Not_Moving),
+                    servoId(servoId), servo(&Serial5), virtualAngle(0), angleOffset(angleOffset) {
 }
 
 Carousel::~Carousel() {}

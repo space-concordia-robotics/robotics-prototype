@@ -23,34 +23,24 @@ class Carousel;
 
 class Carousel : public Updatable {
  private:
-  unsigned long timeStopped = 0;
-
-  // speed used when spinning to mix/calibration, 10s degrees/s
-  // ie 100 means 10 degrees per second
-  static const int16_t spin_speed = 100;
-
   LSSServoMotor servo;
   int servoId;
+
+  // Used to ensure that a break in communication does not cause a desync.
+  // The idea is to send the servo absolute commands about where to go, but
+  // if they are kept in the range 0-360 degrees, when crossing from 300-0 (test tube 6 to 0),
+  // the servo goes the long way around. Keeping track of the virtual angle the servo stores (which
+  // can go beyond 360 deg) prevents that. See https://wiki.lynxmotion.com/info/wiki/lynxmotion/view/lynxmotion-smart-servo/lss-communication-protocol/#HPositioninDegrees28D29
+  int32_t virtualAngle;
+
+  // Used as an offset relative to the absolute encoder on the servo
+  int32_t angleOffset;
   
   // current cuvette, in the range of 0-5
   int8_t currentCuvette;
   // holds if moving, calibrating, etc
   CarouselState state;
-  
-  // For automation
-  enum AutomationState {
-    SpinningCarousel,
-    Advancing,
-    NotAutomating
-  };
-
-  AutomationState automationState;
-
-  void handleAutomation();
-  bool isAutomating();
-
-  // checks switch that toggles every time it moves past a carousel
-  void checkSwitch();
+ 
 
  public:
   const static int8_t NUM_CUVETTES = 6;
@@ -76,7 +66,7 @@ class Carousel : public Updatable {
   void startAutoTesting();
   virtual void update(unsigned long deltaMicroSeconds) override;
   virtual ~Carousel();
-  Carousel(int servoId);
+  Carousel(int servoId, int32_t angleOffset);
 };
 
 #endif  // ROVER_CAROUSEL_H
