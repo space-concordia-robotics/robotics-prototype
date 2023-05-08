@@ -75,9 +75,12 @@ CarouselState Carousel::getState() const {
 }
 
 bool Carousel::queryServoStopped() {
-  char* response = servo.writeQueryCommand(servoId, "Q");
-  int code = atoi(&response[3]);
-  return code == 6 || code == 1;
+  if (servo.writeQueryCommand(servoId, "Q", queryBuffer, sizeof(queryBuffer))) {
+    int code = atoi(&queryBuffer[3]);
+    return code == 6 || code == 1;
+  } else {
+    return false;
+  }
 }
 
 bool Carousel::isMoving() const {

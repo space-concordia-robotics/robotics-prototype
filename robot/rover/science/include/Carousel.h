@@ -25,6 +25,7 @@ class Carousel : public Updatable {
  private:
   LSSServoMotor servo;
   int servoId;
+  char queryBuffer[15]; // Buffer for queries sent to servo
 
   // Used to ensure that a break in communication does not cause a desync.
   // The idea is to send the servo absolute commands about where to go, but
@@ -38,7 +39,7 @@ class Carousel : public Updatable {
   
   // current cuvette, in the range of 0-5
   int8_t currentCuvette;
-  // holds if moving, calibrating, etc
+
   CarouselState state;
  
 
