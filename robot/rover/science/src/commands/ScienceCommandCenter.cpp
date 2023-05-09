@@ -36,6 +36,7 @@ void carousel_go_to_test_tube(uint8_t index);
 void carousel_spin_mix();
 
 void carousel_estop();
+void carousel_set_servo_angle(float angle);
 
 
 void ScienceCommandCenter::executeCommand(const uint8_t commandID,
@@ -76,6 +77,12 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
 
     case COMMAND_SET_SERVO_ANGLE:
       {
+        if (rawArgsLength == 4) {
+          float angle = bytes_to_float(rawArgs);
+          carousel_set_servo_angle(angle);
+        } else {
+          digitalWrite(LED, !digitalRead(LED));
+        }
         break;
       }
 

@@ -40,6 +40,7 @@ void carousel_go_to_test_tube(uint8_t index) { carousel->goToCuvette(index); }
 void carousel_spin_mix() {carousel->spinMix(); }
 
 void carousel_estop() {carousel->estop(); }
+void carousel_set_servo_angle(float angle) {carousel->setServoAngle(angle); }
 
 void setup() {
   pinMode(LED, OUTPUT);

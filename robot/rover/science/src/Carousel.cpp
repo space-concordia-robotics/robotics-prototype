@@ -34,7 +34,7 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
 }
 
 void Carousel::moveNCuvettes(int cuvettesToMove) {
-  if (cuvettesToMove != 0 && state == CarouselState::Not_Moving) {
+  if (state == CarouselState::Not_Moving) {
     currentCuvette += cuvettesToMove;
     virtualAngle += cuvettesToMove * DEGREES_PER_CUVETTE;
 
@@ -47,7 +47,7 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
     state = CarouselState::Moving_Carousel;
     // Set absolute position offset in case motor connected later
     servo.writeActionCommand(servoId, "O", angleOffset);
-    // Move servo
+    // Move servo to position
     servo.writeActionCommand(servoId, "D", virtualAngle);
     // Wait to prevent motor from saying it is not moving immediately
     delay(10);
@@ -55,9 +55,6 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
 }
 
 void Carousel::goToCuvette(uint8_t cuvetteId) {
-  if (cuvetteId == currentCuvette) {
-    return;
-  }
   int difference = (int)cuvetteId - (int)currentCuvette;
   moveNCuvettes(difference % NUM_CUVETTES);
 }
@@ -68,10 +65,6 @@ void Carousel::nextCuvette() {
 
 void Carousel::previousCuvette() {
   moveNCuvettes(-1);
-}
-
-void Carousel::estop() {
-  servo.writeActionCommand(servoId, "L");
 }
 
 CarouselState Carousel::getState() const {
@@ -104,6 +97,21 @@ int8_t Carousel::getCarouselIndex() const {
 
 void Carousel::spinMix() {
   moveNCuvettes(NUM_CUVETTES);
+}
+
+void Carousel::estop() {
+  servo.writeActionCommand(servoId, "L");
+  state = CarouselState::Not_Moving;
+}
+
+void Carousel::setServoAngle(float angle) {
+  int32_t relativeAngle = virtualAngle % 3600;
+  int32_t angle_int = (int32_t)(angle * 10); // servo angles are in 10ths of degrees
+  int32_t angleDifference = angle_int - relativeAngle;
+
+  // Move servo to position and ensure starts moving so it doesn't report stopped
+  servo.writeActionCommand(servoId, "D", virtualAngle + angleDifference);
+  delay(10);
 }
 
 

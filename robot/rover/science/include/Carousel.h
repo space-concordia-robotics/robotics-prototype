@@ -29,7 +29,7 @@ class Carousel : public Updatable {
 
   // Used to ensure that a break in communication does not cause a desync.
   // The idea is to send the servo absolute commands about where to go, but
-  // if they are kept in the range 0-360 degrees, when crossing from 300-0 (test tube 6 to 0),
+  // if they are kept in the range 0-360 degrees, when crossing from 360-0 (test tube 5 to 0),
   // the servo goes the long way around. Keeping track of the virtual angle the servo stores (which
   // can go beyond 360 deg) prevents that. See https://wiki.lynxmotion.com/info/wiki/lynxmotion/view/lynxmotion-smart-servo/lss-communication-protocol/#HPositioninDegrees28D29
   int32_t virtualAngle;
@@ -58,6 +58,7 @@ class Carousel : public Updatable {
   void spinMix();
 
   void estop();
+  void setServoAngle(float angle);
 
   bool queryServoStopped();
   
