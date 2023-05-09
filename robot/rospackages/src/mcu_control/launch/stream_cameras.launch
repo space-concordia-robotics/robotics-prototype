@@ -1,0 +1,23 @@
+<launch>
+
+  <arg name="camera_path_0" default="/dev/video1" />
+  <arg name="camera_path_1" default="/dev/video2" />
+  <arg name="camera_path_2" default="/dev/video3" />
+
+  <node name="video0_stream" pkg="mcu_control" type="stream_cam.py">
+      <param name="device_path" value="$(arg camera_path_0)"/>
+      <remap from="encoded_video" to="video0/compressed" />
+    </node>
+
+  <node name="video1_stream" pkg="mcu_control" type="stream_cam.py">
+      <param name="device_path" value="$(arg camera_path_1)"/>
+      <remap from="encoded_video" to="video1/compressed" />
+    </node>
+
+  <node name="video2_stream" pkg="mcu_control" type="stream_cam.py">
+      <param name="device_path" value="$(arg camera_path_2)"/>
+      <remap from="encoded_video" to="video2/compressed" />
+    </node>
+
+
+</launch>

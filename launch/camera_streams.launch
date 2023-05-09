@@ -7,6 +7,7 @@
     <param name="video_device" value="/dev/video1" />
     <param name="image_width" value="640" />
     <param name="image_height" value="480" />
+    <param name="pixel_format" value="mjpeg" />
     <remap from="/usb_cam/image_raw" to="$(arg camera_name_0)/image_raw" />
     <remap from="/usb_cam/image_raw/compressed" to="$(arg camera_name_0)/image_raw/compressed" />
     <remap from="/usb_cam/camera_info" to="$(arg camera_name_0)/camera_info" />
