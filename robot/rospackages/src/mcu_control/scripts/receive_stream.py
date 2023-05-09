@@ -19,7 +19,7 @@ video_options = {
     'probesize': '300000',
     'fflags': 'nobuffer'}
 
-process = ffmpeg.input('pipe:', format='mpegts', **video_options).output('-', format='rawvideo', pix_fmt='bgr24').run_async(pipe_stdin=True, pipe_stdout=True)
+process = ffmpeg.input('pipe:', format='mpegts', **video_options).output('-', format='rawvideo', pix_fmt='bgr24').run_async(pipe_stdin=True, pipe_stdout=True, pipe_stderr=True)
 
 os.set_blocking(process.stdout.fileno(), False)
 

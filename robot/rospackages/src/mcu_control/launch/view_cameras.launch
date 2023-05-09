@@ -4,15 +4,15 @@
   <arg name="camera_topic_1" default="/video1/compressed" />
   <arg name="camera_topic_2" default="/video2/compressed" />
 
-  <node name="video0_view" pkg="mcu_control" type="receive_stream_ros.py">
+  <node name="video0_view" pkg="mcu_control" type="receive_stream.py">
       <param name="input_topic" value="$(arg camera_topic_0)"/>
     </node>
 
-  <node name="video1_view" pkg="mcu_control" type="receive_stream_ros.py">
+  <node name="video1_view" pkg="mcu_control" type="receive_stream.py">
       <param name="input_topic" value="$(arg camera_topic_1)"/>
     </node>
 
-  <node name="video2_view" pkg="mcu_control" type="receive_stream_ros.py">
+  <node name="video2_view" pkg="mcu_control" type="receive_stream.py">
       <param name="input_topic" value="$(arg camera_topic_2)"/>
     </node>
 

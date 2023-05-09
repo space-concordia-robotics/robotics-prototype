@@ -60,7 +60,7 @@ video_options = {
 
 output_stream = ffmpeg.output(input_stream.video, '-', format=output_format, **video_options)
 
-process = ffmpeg.run_async(output_stream, pipe_stdout=True)
+process = ffmpeg.run_async(output_stream, pipe_stdout=True, pipe_stderr=True)
 video_publisher = rospy.Publisher('encoded_video', CompressedImage, queue_size=1)
 
 while not rospy.is_shutdown():
