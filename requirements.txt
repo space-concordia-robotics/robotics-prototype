@@ -3,4 +3,5 @@ pyserial==3.4
 rospkg==1.1.7
 ffmpeg-python==0.2.0
 Twisted==22.10.0
+ffmpeg-python==0.2.0
 Jetson.GPIO

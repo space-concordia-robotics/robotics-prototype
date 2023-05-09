@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import cv2
 import numpy as np
@@ -5,7 +7,7 @@ import ffmpeg
 import rospy
 from sensor_msgs.msg import CompressedImage
 
-input_topic = '/encoded_video'
+input_topic = rospy.get_param('~input_topic', '/encoded_video')
 
 rospy.init_node('h264_decoder')
 frame_width = 640
