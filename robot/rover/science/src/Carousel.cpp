@@ -33,15 +33,15 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
   }
 }
 
-void Carousel::moveNCuvettes(int cuvettesToMove) {
+void Carousel::moveNTestTubes(int testTubesToMove) {
   if (state == CarouselState::Not_Moving) {
-    currentCuvette += cuvettesToMove;
-    virtualAngle += cuvettesToMove * DEGREES_PER_CUVETTE;
+    currentTestTube += testTubesToMove;
+    virtualAngle += testTubesToMove * DEGREES_PER_TEST_TUBE;
 
     // wrap around if needed
-    currentCuvette %= NUM_CUVETTES; 
-    if (currentCuvette < 0) {
-      currentCuvette += NUM_CUVETTES;
+    currentTestTube %= NUM_TEST_TUBES; 
+    if (currentTestTube < 0) {
+      currentTestTube += NUM_TEST_TUBES;
     }
 
     state = CarouselState::Moving_Carousel;
@@ -54,17 +54,17 @@ void Carousel::moveNCuvettes(int cuvettesToMove) {
   }
 }
 
-void Carousel::goToCuvette(uint8_t cuvetteId) {
-  int difference = (int)cuvetteId - (int)currentCuvette;
-  moveNCuvettes(difference % NUM_CUVETTES);
+void Carousel::goToTestTube(uint8_t testTubeId) {
+  int difference = (int)testTubeId - (int)currentTestTube;
+  moveNTestTubes(difference % NUM_TEST_TUBES);
 }
 
-void Carousel::nextCuvette() {
-  moveNCuvettes(1);
+void Carousel::nextTestTube() {
+  moveNTestTubes(1);
 }
 
-void Carousel::previousCuvette() {
-  moveNCuvettes(-1);
+void Carousel::previousTestTube() {
+  moveNTestTubes(-1);
 }
 
 CarouselState Carousel::getState() const {
@@ -92,11 +92,11 @@ bool Carousel::isMoving() const {
 }
 
 int8_t Carousel::getCarouselIndex() const {
-  return currentCuvette;
+  return currentTestTube;
 }
 
 void Carousel::spinMix() {
-  moveNCuvettes(NUM_CUVETTES);
+  moveNTestTubes(NUM_TEST_TUBES);
 }
 
 void Carousel::estop() {
@@ -104,6 +104,8 @@ void Carousel::estop() {
   state = CarouselState::Not_Moving;
 }
 
+// Does not change virtualAngle so that nextTestTube etc will behave as 
+// if this was never called, ie will go to the correct absolute position.
 void Carousel::setServoAngle(float angle) {
   int32_t relativeAngle = virtualAngle % 3600;
   int32_t angle_int = (int32_t)(angle * 10); // servo angles are in 10ths of degrees
@@ -115,8 +117,8 @@ void Carousel::setServoAngle(float angle) {
 }
 
 
-Carousel::Carousel(int servoId, int32_t angleOffset): currentCuvette(0), state(CarouselState::Not_Moving),
-                    servoId(servoId), servo(&Serial5), virtualAngle(0), angleOffset(angleOffset) {
+Carousel::Carousel(int servoId, int32_t angleOffset): currentTestTube(0), state(CarouselState::Not_Moving),
+                    servoId(servoId), servo(&SMART_SERVO_SERIAL), virtualAngle(0), angleOffset(angleOffset) {
 }
 
 Carousel::~Carousel() {}

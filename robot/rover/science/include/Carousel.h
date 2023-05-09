@@ -37,24 +37,24 @@ class Carousel : public Updatable {
   // Used as an offset relative to the absolute encoder on the servo
   int32_t angleOffset;
   
-  // current cuvette, in the range of 0-5
-  int8_t currentCuvette;
+  // current test tube, in the range of 0-5
+  int8_t currentTestTube;
 
   CarouselState state;
  
 
  public:
-  const static int8_t NUM_CUVETTES = 6;
-  const static uint16_t DEGREES_PER_CUVETTE = (int)((360.0 / NUM_CUVETTES) * 10); 
+  const static int8_t NUM_TEST_TUBES = 6;
+  const static uint16_t DEGREES_PER_TEST_TUBE = (int)((360.0 / NUM_TEST_TUBES) * 10); 
   
   // sets up interrupt callback
   void setup();
   
   // Basic commands
-  void goToCuvette(uint8_t cuvetteId);
-  void moveNCuvettes(int cuvettesToMove);
-  void nextCuvette();
-  void previousCuvette();
+  void goToTestTube(uint8_t testTubeId);
+  void moveNTestTubes(int testTubesToMove);
+  void nextTestTube();
+  void previousTestTube();
   void spinMix();
 
   void estop();
