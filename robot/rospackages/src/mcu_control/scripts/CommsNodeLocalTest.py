@@ -34,8 +34,8 @@ SCIENCE_SELECTED = 3
 # needs to know which one it's 'hearing' from.
 receive_device = ARM_SELECTED
 
-in_commands = [arm_in_commands, wheel_in_commands, science_in_commands, None]
-out_commands = [arm_out_commands, wheel_out_commands, science_out_commands, None]
+in_commands = [arm_in_commands, wheel_in_commands, None, science_in_commands]
+out_commands = [arm_out_commands, wheel_out_commands, None, science_out_commands]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:

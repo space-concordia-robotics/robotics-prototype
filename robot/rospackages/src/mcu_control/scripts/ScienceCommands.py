@@ -1,5 +1,5 @@
 import struct
-import robot.rospackages.src.mcu_control_python.mcu_control_python.definitions.CommsDataTypes as dt
+import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 from std_msgs.msg import String
 
 # All handlers should start with handle_ , while unrelated functions should not.
