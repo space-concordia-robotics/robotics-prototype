@@ -21,6 +21,7 @@ from mcu_control.msg import Voltage
 
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control.scripts.ScienceCommands import science_out_commands, science_in_commands
 from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 ARM_SELECTED = 0
@@ -33,8 +34,8 @@ SCIENCE_SELECTED = 3
 # needs to know which one it's 'hearing' from.
 receive_device = ARM_SELECTED
 
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
-out_commands = [arm_out_commands, wheel_out_commands, None, None]
+in_commands = [arm_in_commands, wheel_in_commands, science_in_commands, None]
+out_commands = [arm_out_commands, wheel_out_commands, science_out_commands, None]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -101,6 +102,10 @@ def send_queued_commands():
     if (len(rover_queue) > 0):
         rover_command = rover_queue.popleft()
         send_command(rover_command[0], rover_command[1], rover_command[2])
+    
+    if (len(science_queue) > 0):
+        science_command = science_queue.popleft()
+        send_command(science_command[0], science_command[1], science_command[2])
 
 def receive_message():
     # for device in range(1):
@@ -197,13 +202,12 @@ def rover_command_callback(message):
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
 
-
-def rover_command_callback(message):
-    rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
+def science_command_callback(message):
+    rospy.loginfo('received: ' + message.data + ' command, sending to science Teensy')
     command, args = parse_command(message)
 
-    temp_struct = [command, args, ROVER_SELECTED]
-    rover_queue.append(temp_struct)
+    temp_struct = [command, args, SCIENCE_SELECTED]
+    science_queue.append(temp_struct)
 
 
 def parse_command(message):
@@ -248,6 +252,10 @@ if __name__ == '__main__':
     rospy.loginfo('Beginning to subscribe to "'+rover_command_topic+'" topic')
     sub = rospy.Subscriber(rover_command_topic, String, rover_command_callback)
     
+    science_command_topic = '/science_command'
+    rospy.loginfo('Beginning to subscribe to "'+science_command_topic+'" topic')
+    sub = rospy.Subscriber(science_command_topic, String, science_command_callback)    
+
     rover_twist_topic = '/rover_cmd_vel'
     rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
     rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
