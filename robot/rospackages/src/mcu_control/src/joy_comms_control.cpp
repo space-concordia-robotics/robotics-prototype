@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <math>
 #include <algorithm>
 #include <boost/thread/thread.hpp>
 
@@ -348,8 +347,8 @@ void JoyCommsControl::publish_command_with_rate() {
                         commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
                         motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
                         // clamp value
-                        motors[j] = std::min(motors[j], 250);
-                        motors[j] = std::max(motors[j], -250);
+                        motors[j] = motors[j] < -250 ? -250 : motors[j];
+                        motors[j] = motors[j] > 250 ? 250 :  motors[j];
                     }
                 }
 
