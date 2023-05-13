@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <math>
 #include <algorithm>
 #include <boost/thread/thread.hpp>
 
