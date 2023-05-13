@@ -62,7 +62,7 @@ struct JoyCommsControl::Implement {
 
     bool change_layout_button_held = false;
 
-    int motor_max = 250;
+    float motor_max = 250.0;
 };
 
 struct JoyCommsControl::Implement::ButtonMappings {
@@ -356,8 +356,8 @@ void JoyCommsControl::publish_command_with_rate() {
                             commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
                             motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
                             // clamp value
-                            motors[j] = std::min(motors[j], motor_max);
-                            motors[j] = std::max(motors[j], -motor_max);
+                            motors[j] = std::min(motors[j], pImplement->motor_max);
+                            motors[j] = std::max(motors[j], -(pImplement->motor_max));
                         }
                     }
                 }
