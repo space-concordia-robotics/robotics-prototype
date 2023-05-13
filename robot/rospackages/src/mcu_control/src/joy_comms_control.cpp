@@ -62,6 +62,8 @@ struct JoyCommsControl::Implement {
     int current_mappings_index = 0;
 
     bool change_layout_button_held = false;
+
+    int motor_max = 250;
 };
 
 struct JoyCommsControl::Implement::ButtonMappings {
@@ -317,7 +319,13 @@ void JoyCommsControl::publish_command_with_rate() {
                     newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
                 }else{//the axis is treated as an axes. pass percentage multiplied by range
                     int range = pImplement->axis_ranges[pImplement->current_mappings_index][i];
-                    newCommandAsString.append(std::to_string(pImplement->axes_percentage[i] * range));
+                    float value = pImplement->axes_percentage[i] * range;
+                    if (commandAsString[index - 1] == '-') {
+                        value *= -1;
+                        // remove the - sign
+                        newCommandAsString = newCommandAsString.substr(1);
+                    }
+                    newCommandAsString.append(std::to_string(value));
                     newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
                 }
 
@@ -330,8 +338,8 @@ void JoyCommsControl::publish_command_with_rate() {
         }
     }
 
-    if(commands.size() > 0){
-        //special case for arm_command and wheel command
+    if(commands.size() > 0) {
+        //special case for arm_command and rover_commmand command
         if(pImplement->command_topics[pImplement->current_mappings_index] == "/arm_command"
            || pImplement->command_topics[pImplement->current_mappings_index] == "/rover_command") {
             //check if the command is "set_motor_speeds" or "rover_command" which have the special case
@@ -344,12 +352,14 @@ void JoyCommsControl::publish_command_with_rate() {
                 for(int i = 0; i < commands.size(); ++i){
                     std::string commandAsString = commands[i].data;
                     for(int j =0; j < 6; ++j) {
-                        // TODO: fix hackiness
-                        commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
-                        motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
-                        // clamp value
-                        motors[j] = std::min(motors[j], 250);
-                        motors[j] = std::max(motors[j], -250);
+                        // Only do this if it is the appropriate command
+                        if (commandAsString.rfind(command_name, 0) == 0) {
+                            commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
+                            motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                            // clamp value
+                            motors[j] = std::min(motors[j], motor_max);
+                            motors[j] = std::max(motors[j], -motor_max);
+                        }
                     }
                 }
 
