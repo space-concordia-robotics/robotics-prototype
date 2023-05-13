@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <math>
+#include <algorithm>
 #include <boost/thread/thread.hpp>
 
 #include "joy_comms_control.h"
@@ -329,24 +331,30 @@ void JoyCommsControl::publish_command_with_rate() {
     }
 
     if(commands.size() > 0){
-        //special case for arm_command
-        if(pImplement->command_topics[pImplement->current_mappings_index] == "/arm_command"){
-            //check if the command is "set_motor_speeds" which has the special case
-            if(commands[0].data.substr(0,commands[0].data.find(' ')) == "set_motor_speeds"){
+        //special case for arm_command and wheel command
+        if(pImplement->command_topics[pImplement->current_mappings_index] == "/arm_command"
+           || pImplement->command_topics[pImplement->current_mappings_index] == "/rover_command") {
+            //check if the command is "set_motor_speeds" or "rover_command" which have the special case
+            std::string command_name = commands[0].data.substr(0,commands[0].data.find(' '));
+            if(command_name == "set_motor_speeds" || command_name == "move_wheels") {
                 float motors [6];
                 std::fill(motors, motors+6, 0);
 
                 //parse the motor values into seperate motor variables
                 for(int i = 0; i < commands.size(); ++i){
                     std::string commandAsString = commands[i].data;
-                    for(int j =0; j < 6; ++j){
-                        commandAsString = commandAsString.substr(commandAsString.find(' ')+1, commandAsString.length());
+                    for(int j =0; j < 6; ++j) {
+                        // TODO: fix hackiness
+                        commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
                         motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
+                        // clamp value
+                        motors[j] = std::min(motors[j], 250);
+                        motors[j] = std::max(motors[j], -250);
                     }
                 }
 
                 //rebuild the command with the values of all motors
-                std::string combinedCommandAsString = "set_motor_speeds";
+                std::string combinedCommandAsString = command_name;
                 for(int i =0; i < 6; ++i){
                     combinedCommandAsString.append(" ").append(std::to_string(motors[i]));
                 }
@@ -367,6 +375,8 @@ void JoyCommsControl::publish_command_with_rate() {
     }
     loop_rate.sleep();
 }
+
+
 
 void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
     comms_pubs[current_mappings_index].publish(command);
