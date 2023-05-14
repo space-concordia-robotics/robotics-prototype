@@ -322,7 +322,7 @@ void JoyCommsControl::publish_command_with_rate() {
                     if (commandAsString[index - 1] == '-') {
                         value *= -1;
                         // remove the - sign
-                        newCommandAsString = newCommandAsString.substr(1);
+                        newCommandAsString.pop_back();
                     }
                     newCommandAsString.append(std::to_string(value));
                     newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
