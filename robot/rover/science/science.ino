@@ -23,7 +23,7 @@ void updateSystems();
 internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
 // TODO: set the servo id to a correct one
-Carousel *carousel = new Carousel(0, 1800);
+Carousel *carousel = new Carousel(0, 570);
 Updatable* updatables[1] = {carousel};
 unsigned long time = micros();
 
