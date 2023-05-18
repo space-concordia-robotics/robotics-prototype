@@ -319,6 +319,13 @@ void JoyCommsControl::publish_command_with_rate() {
                 }else{//the axis is treated as an axes. pass percentage multiplied by range
                     int range = pImplement->axis_ranges[pImplement->current_mappings_index][i];
                     float value = pImplement->axes_percentage[i] * range;
+                    
+                    // handle -
+                    if (newCommandAsString.back() == '-') {
+                        value *= -1;
+                        newCommandAsString.pop_back();
+                    }
+
                     newCommandAsString.append(std::to_string(value));
                     newCommandAsString.append(commandAsString.substr(index+2, commandAsString.length()));
                 }

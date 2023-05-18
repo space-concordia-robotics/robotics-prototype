@@ -22,6 +22,6 @@ controller_mappings:
     - ["BUTTON_SQUARE","set_motor_speeds 0 0 0 0 0 -250",10,250]
   - - ["TRIGGER_L2","move_wheels %a %a %a -%a -%a -%a",10,250]
     - ["TRIGGER_R2","move_wheels -%a -%a -%a %a %a %a",10,250]
-    - ["JOY_RIGHT_X","move_wheels %a %a %a %a %a %a",10,250]
+    - ["JOY_RIGHT_X","move_wheels -%a -%a -%a -%a -%a -%a",10,250]
     - ["BUTTON_CROSS","blink_toggle 1",10,250]
     - ["BUTTON_CIRCLE","blink_toggle 0",10,250]
