@@ -329,6 +329,7 @@ void JoyCommsControl::publish_command_with_rate() {
             std_msgs::String command;
             command.data = newCommandAsString;
             commands.push_back(command);
+            // std::cout << "adding command: " << command << " axis index " << i << " axis range " << pImplement->axis_ranges[pImplement->current_mappings_index][i] << "\n";
         }
     }
 
@@ -345,16 +346,19 @@ void JoyCommsControl::publish_command_with_rate() {
                 //parse the motor values into seperate motor variables
                 for(int i = 0; i < commands.size(); ++i){
                     std::string commandAsString = commands[i].data;
-                    for(int j =0; j < 6; ++j) {
-                        // Only do this if it is the appropriate command
-                        if (commandAsString.rfind(command_name, 0) == 0) {
+                    // Only do this if it is the appropriate command
+                    if (commandAsString.rfind(command_name, 0) == 0) {
+                        for(int j = 0; j < 6; ++j) {
                             commandAsString = commandAsString.substr(commandAsString.find(' ') + 1, commandAsString.length());
                             motors[j] += std::stof(commandAsString.substr(0, commandAsString.find(' ')));
-                            // clamp value
-                            motors[j] = std::min(motors[j], pImplement->motor_max);
-                            motors[j] = std::max(motors[j], -(pImplement->motor_max));
                         }
                     }
+                }
+
+                // clamp value
+                for (int i = 0; i < 6; i++) {
+                    motors[i] = std::min(motors[i], pImplement->motor_max);
+                    motors[i] = std::max(motors[i], -(pImplement->motor_max));
                 }
 
                 //rebuild the command with the values of all motors
