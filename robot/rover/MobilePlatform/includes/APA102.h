@@ -10,6 +10,7 @@ public:
   void setColor(int index, int r, int g, int b, int brightness = 31);
   void setAll(int r, int g, int b, int brightness = 31);
   void setToOff();
+  void shiftOut(int dataPin, int clockPin, unsigned char data);
  private:
   int numOfLEDs;
   int bufSize;

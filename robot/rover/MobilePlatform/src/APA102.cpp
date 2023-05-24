@@ -25,7 +25,7 @@ APA102::APA102(int numOfLEDs, int mosiPin, int clockPin)
 }
 void APA102::send() {
   for (int i = 0; i < bufSize; i++) {
-    shiftOut(mosiPin, clockPin, MSBFIRST, buf[i]);
+    this->shiftOut(mosiPin, clockPin, buf[i]);
   }
 }
 
@@ -44,4 +44,21 @@ void APA102::setAll(int r, int g, int b, int brightness) {
 
 void APA102::setToOff() {
   setAll(0, 0, 0, 0);
+}
+
+void APA102::shiftOut(int dataPin, int clockPin, unsigned char data) {
+    const int DELAY = 20;
+    digitalWrite(clockPin, HIGH);
+    for(int i = 0; i < 8; i++) {
+        delayMicroseconds(DELAY);
+        digitalWrite(clockPin, LOW);
+        if(data & 0x80)
+            digitalWrite(dataPin, HIGH);
+        else
+            digitalWrite(dataPin, LOW);
+        data <<= 1;
+        delayMicroseconds(DELAY);
+        digitalWrite(clockPin, HIGH);
+    }
+    digitalWrite(dataPin, LOW);
 }
