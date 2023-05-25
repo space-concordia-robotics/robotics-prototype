@@ -76,7 +76,7 @@ namespace internal_comms {
         unsigned long start = millis();
         while (!Serial.available()) {
             unsigned long current = millis() - start;
-            if (current > 50) break;
+            if (current > 75) break;
         }
         return Serial.read();
     }
