@@ -11,4 +11,8 @@
     <param name="device_id" value="3" />
     <param name="rate" value="5" />
   </node>
+  <node name="video3" pkg="cv_camera" type="cv_camera_node">
+    <param name="device_id" value="4" />
+    <param name="rate" value="5" />
+  </node>
 </launch>
