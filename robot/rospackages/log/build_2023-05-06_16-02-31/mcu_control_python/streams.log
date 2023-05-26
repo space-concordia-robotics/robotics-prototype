@@ -1,0 +1,33 @@
+[0.453s] Invoking command in '/home/marc/Programming/robotics-prototype/robot/rospackages/src/mcu_control_python': PS1=(venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/prefix_override:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(venv) /usr/bin/python3 setup.py egg_info --egg-base ../../build/mcu_control_python build --build-base /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build install --record /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/install.log --install-scripts $base/lib/mcu_control_python --single-version-externally-managed
+[0.608s] /usr/lib/python3/dist-packages/setuptools/dist.py:723: UserWarning: Usage of dash-separated 'script-dir' will not be supported in future versions. Please use the underscore name 'script_dir' instead
+[0.608s]   warnings.warn(
+[0.614s] running egg_info
+[0.614s] writing ../../build/mcu_control_python/mcu_control_python.egg-info/PKG-INFO
+[0.614s] writing dependency_links to ../../build/mcu_control_python/mcu_control_python.egg-info/dependency_links.txt
+[0.614s] writing entry points to ../../build/mcu_control_python/mcu_control_python.egg-info/entry_points.txt
+[0.615s] writing requirements to ../../build/mcu_control_python/mcu_control_python.egg-info/requires.txt
+[0.615s] writing top-level names to ../../build/mcu_control_python/mcu_control_python.egg-info/top_level.txt
+[0.616s] reading manifest file '../../build/mcu_control_python/mcu_control_python.egg-info/SOURCES.txt'
+[0.617s] writing manifest file '../../build/mcu_control_python/mcu_control_python.egg-info/SOURCES.txt'
+[0.617s] running build
+[0.617s] running build_py
+[0.618s] copying mcu_control_python/CommsNode.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python
+[0.618s] copying mcu_control_python/__init__.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python
+[0.618s] running install
+[0.618s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[0.619s]   warnings.warn(
+[0.619s] running install_lib
+[0.619s] copying /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python/CommsNode.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python
+[0.619s] copying /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python/__init__.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python
+[0.619s] byte-compiling /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python/CommsNode.py to CommsNode.cpython-310.pyc
+[0.621s] byte-compiling /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python/__init__.py to __init__.cpython-310.pyc
+[0.621s] running install_data
+[0.622s] copying resource/mcu_control_python -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/share/ament_index/resource_index/packages
+[0.622s] copying package.xml -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/share/mcu_control_python
+[0.622s] running install_egg_info
+[0.624s] removing '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python-0.0.0-py3.10.egg-info' (and everything under it)
+[0.624s] Copying ../../build/mcu_control_python/mcu_control_python.egg-info to /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python-0.0.0-py3.10.egg-info
+[0.625s] running install_scripts
+[0.642s] Installing CommsNode script to /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/mcu_control_python
+[0.642s] writing list of installed files to '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/install.log'
+[0.678s] Invoked command in '/home/marc/Programming/robotics-prototype/robot/rospackages/src/mcu_control_python' returned '0': PS1=(venv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/prefix_override:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(venv) /usr/bin/python3 setup.py egg_info --egg-base ../../build/mcu_control_python build --build-base /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build install --record /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/install.log --install-scripts $base/lib/mcu_control_python --single-version-externally-managed

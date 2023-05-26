@@ -1,0 +1,232 @@
+[0.000000] (-) TimerEvent: {}
+[0.001211] (joy_control) JobQueued: {'identifier': 'joy_control', 'dependencies': OrderedDict()}
+[0.001247] (mcu_control_python) JobQueued: {'identifier': 'mcu_control_python', 'dependencies': OrderedDict()}
+[0.001267] (joy_control) JobStarted: {'identifier': 'joy_control'}
+[0.008782] (mcu_control_python) JobStarted: {'identifier': 'mcu_control_python'}
+[0.014969] (joy_control) JobProgress: {'identifier': 'joy_control', 'progress': 'cmake'}
+[0.016084] (joy_control) JobProgress: {'identifier': 'joy_control', 'progress': 'build'}
+[0.016807] (joy_control) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control', '--', '-j16', '-l16'], 'cwd': '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('LANGUAGE', 'en_CA:en'), ('USER', 'marc'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/marc'), ('OLDPWD', '/home/marc/Programming/robotics-prototype/robot'), ('DESKTOP_SESSION', 'ubuntu'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('PS1', '(venv) \\[\\e]0;\\u@\\h: \\w\\a\\]${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$'), ('SYSTEMD_EXEC_PID', '2232'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'marc'), ('ARDUINO_PATH', '/home/marc/arduino-1.8.13'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'marc'), ('TERM', 'xterm-256color'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/home/marc/Programming/robotics-prototype/venv/bin:/home/marc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/marc-Inspiron-5515:@/tmp/.ICE-unix/2214,unix/marc-Inspiron-5515:/tmp/.ICE-unix/2214'), ('XDG_MENU_PREFIX', 'gnome-'), ('GNOME_TERMINAL_SCREEN', '/org/gnome/Terminal/screen/4d17bdbd_1775_4944_82cb_b2e1347916b4'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('LANG', 'en_CA.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('VIRTUAL_ENV_PROMPT', '(venv)'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.C9KC41'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('GNOME_TERMINAL_SERVICE', ':1.210'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('QT_ACCESSIBILITY', '1'), ('ROS_MASTER_URI', 'http://localhost:11311'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VIRTUAL_ENV', '/home/marc/Programming/robotics-prototype/venv'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages:/home/marc/Programming/robotics-prototype:/home/marc/Programming/robotics-atp'), ('ROS_HOSTNAME', 'localhost'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('CMAKE_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/opt/ros/humble')]), 'shell': False}
+[0.037981] (joy_control) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.4 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.099557] (-) TimerEvent: {}
+[0.150743] (joy_control) StdoutLine: {'line': b'-- Found rclcpp: 16.0.4 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.179647] (joy_control) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.4 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.181520] (joy_control) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.4 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.186192] (joy_control) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.4 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.195146] (joy_control) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.199697] (-) TimerEvent: {}
+[0.207595] (joy_control) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.254999] (joy_control) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.1 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.256094] (joy_control) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.2 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[0.299830] (-) TimerEvent: {}
+[0.350760] (joy_control) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[0.399962] (-) TimerEvent: {}
+[0.460561] (mcu_control_python) Command: {'cmd': ['/usr/bin/python3', 'setup.py', 'egg_info', '--egg-base', '../../build/mcu_control_python', 'build', '--build-base', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build', 'install', '--record', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/install.log', '--install-scripts', '$base/lib/mcu_control_python', '--single-version-externally-managed'], 'cwd': '/home/marc/Programming/robotics-prototype/robot/rospackages/src/mcu_control_python', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'LANGUAGE': 'en_CA:en', 'USER': 'marc', 'XDG_SESSION_TYPE': 'wayland', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/home/marc', 'OLDPWD': '/home/marc/Programming/robotics-prototype/robot', 'DESKTOP_SESSION': 'ubuntu', 'ROS_PYTHON_VERSION': '3', 'GNOME_SHELL_SESSION_MODE': 'ubuntu', 'GTK_MODULES': 'gail:atk-bridge', 'PS1': '(venv) \\[\\e]0;\\u@\\h: \\w\\a\\]${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$', 'SYSTEMD_EXEC_PID': '2232', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'IM_CONFIG_PHASE': '1', 'WAYLAND_DISPLAY': 'wayland-0', 'COLCON_PREFIX_PATH': '/home/marc/Programming/robotics-prototype/robot/rospackages/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'marc', 'ARDUINO_PATH': '/home/marc/arduino-1.8.13', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'USERNAME': 'marc', 'TERM': 'xterm-256color', 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/home/marc/Programming/robotics-prototype/venv/bin:/home/marc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin', 'SESSION_MANAGER': 'local/marc-Inspiron-5515:@/tmp/.ICE-unix/2214,unix/marc-Inspiron-5515:/tmp/.ICE-unix/2214', 'XDG_MENU_PREFIX': 'gnome-', 'GNOME_TERMINAL_SCREEN': '/org/gnome/Terminal/screen/4d17bdbd_1775_4944_82cb_b2e1347916b4', 'GNOME_SETUP_DISPLAY': ':1', 'XDG_RUNTIME_DIR': '/run/user/1000', 'DISPLAY': ':0', 'LANG': 'en_CA.UTF-8', 'XDG_CURRENT_DESKTOP': 'ubuntu:GNOME', 'VIRTUAL_ENV_PROMPT': '(venv)', 'XMODIFIERS': '@im=ibus', 'XDG_SESSION_DESKTOP': 'ubuntu', 'XAUTHORITY': '/run/user/1000/.mutter-Xwaylandauth.C9KC41', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'GNOME_TERMINAL_SERVICE': ':1.210', 'SSH_AGENT_LAUNCHER': 'gnome-keyring', 'SSH_AUTH_SOCK': '/run/user/1000/keyring/ssh', 'AMENT_PREFIX_PATH': '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control:/opt/ros/humble', 'SHELL': '/bin/bash', 'QT_ACCESSIBILITY': '1', 'ROS_MASTER_URI': 'http://localhost:11311', 'GDMSESSION': 'ubuntu', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'VIRTUAL_ENV': '/home/marc/Programming/robotics-prototype/venv', 'QT_IM_MODULE': 'ibus', 'PWD': '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python', 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg', 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/prefix_override:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages:/home/marc/Programming/robotics-prototype:/home/marc/Programming/robotics-atp', 'ROS_HOSTNAME': 'localhost', 'COLCON': '1', 'VTE_VERSION': '6800', 'CMAKE_PREFIX_PATH': '/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control'}, 'shell': False}
+[0.499880] (joy_control) StdoutLine: {'line': b'-- Found sensor_msgs: 4.2.3 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[0.500118] (-) TimerEvent: {}
+[0.600778] (-) TimerEvent: {}
+[0.607261] (joy_control) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.6 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[0.616316] (mcu_control_python) StderrLine: {'line': b"/usr/lib/python3/dist-packages/setuptools/dist.py:723: UserWarning: Usage of dash-separated 'script-dir' will not be supported in future versions. Please use the underscore name 'script_dir' instead\n"}
+[0.616584] (mcu_control_python) StderrLine: {'line': b'  warnings.warn(\n'}
+[0.622150] (mcu_control_python) StdoutLine: {'line': b'running egg_info\n'}
+[0.622725] (mcu_control_python) StdoutLine: {'line': b'writing ../../build/mcu_control_python/mcu_control_python.egg-info/PKG-INFO\n'}
+[0.622958] (mcu_control_python) StdoutLine: {'line': b'writing dependency_links to ../../build/mcu_control_python/mcu_control_python.egg-info/dependency_links.txt\n'}
+[0.623192] (mcu_control_python) StdoutLine: {'line': b'writing entry points to ../../build/mcu_control_python/mcu_control_python.egg-info/entry_points.txt\n'}
+[0.623344] (mcu_control_python) StdoutLine: {'line': b'writing requirements to ../../build/mcu_control_python/mcu_control_python.egg-info/requires.txt\n'}
+[0.623452] (mcu_control_python) StdoutLine: {'line': b'writing top-level names to ../../build/mcu_control_python/mcu_control_python.egg-info/top_level.txt\n'}
+[0.624539] (mcu_control_python) StdoutLine: {'line': b"reading manifest file '../../build/mcu_control_python/mcu_control_python.egg-info/SOURCES.txt'\n"}
+[0.625642] (mcu_control_python) StdoutLine: {'line': b"writing manifest file '../../build/mcu_control_python/mcu_control_python.egg-info/SOURCES.txt'\n"}
+[0.625969] (mcu_control_python) StdoutLine: {'line': b'running build\n'}
+[0.626146] (mcu_control_python) StdoutLine: {'line': b'running build_py\n'}
+[0.626480] (mcu_control_python) StdoutLine: {'line': b'copying mcu_control_python/CommsNode.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python\n'}
+[0.626770] (mcu_control_python) StdoutLine: {'line': b'copying mcu_control_python/__init__.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python\n'}
+[0.626944] (mcu_control_python) StdoutLine: {'line': b'running install\n'}
+[0.627085] (mcu_control_python) StderrLine: {'line': b'/usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.\n'}
+[0.627235] (mcu_control_python) StderrLine: {'line': b'  warnings.warn(\n'}
+[0.627462] (mcu_control_python) StdoutLine: {'line': b'running install_lib\n'}
+[0.627592] (mcu_control_python) StdoutLine: {'line': b'copying /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python/CommsNode.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python\n'}
+[0.627705] (mcu_control_python) StdoutLine: {'line': b'copying /home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/build/lib/mcu_control_python/__init__.py -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python\n'}
+[0.627910] (mcu_control_python) StdoutLine: {'line': b'byte-compiling /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python/CommsNode.py to CommsNode.cpython-310.pyc\n'}
+[0.629531] (mcu_control_python) StdoutLine: {'line': b'byte-compiling /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python/__init__.py to __init__.cpython-310.pyc\n'}
+[0.629882] (mcu_control_python) StdoutLine: {'line': b'running install_data\n'}
+[0.630348] (mcu_control_python) StdoutLine: {'line': b'copying resource/mcu_control_python -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/share/ament_index/resource_index/packages\n'}
+[0.630599] (mcu_control_python) StdoutLine: {'line': b'copying package.xml -> /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/share/mcu_control_python\n'}
+[0.630755] (mcu_control_python) StdoutLine: {'line': b'running install_egg_info\n'}
+[0.632364] (mcu_control_python) StdoutLine: {'line': b"removing '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[0.632687] (mcu_control_python) StdoutLine: {'line': b'Copying ../../build/mcu_control_python/mcu_control_python.egg-info to /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages/mcu_control_python-0.0.0-py3.10.egg-info\n'}
+[0.633571] (mcu_control_python) StdoutLine: {'line': b'running install_scripts\n'}
+[0.650698] (mcu_control_python) StdoutLine: {'line': b'Installing CommsNode script to /home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/mcu_control_python\n'}
+[0.651109] (mcu_control_python) StdoutLine: {'line': b"writing list of installed files to '/home/marc/Programming/robotics-prototype/robot/rospackages/build/mcu_control_python/install.log'\n"}
+[0.686347] (mcu_control_python) CommandEnded: {'returncode': 0}
+[0.698545] (mcu_control_python) JobEnded: {'identifier': 'mcu_control_python', 'rc': 0}
+[0.700884] (-) TimerEvent: {}
+[0.715199] (joy_control) StdoutLine: {'line': b"-- Added test 'copyright' to check source files copyright and LICENSE\n"}
+[0.716144] (joy_control) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[0.716359] (joy_control) StdoutLine: {'line': b'-- Configured cppcheck include dirs: /home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/include/joy_control\n'}
+[0.716478] (joy_control) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[0.716917] (joy_control) StdoutLine: {'line': b"-- Added test 'cpplint' to check C / C++ code against the Google style\n"}
+[0.717075] (joy_control) StdoutLine: {'line': b'-- Configured cpplint exclude dirs and/or files: \n'}
+[0.717323] (joy_control) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[0.717997] (joy_control) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[0.718157] (joy_control) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[0.718316] (joy_control) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[0.719374] (joy_control) StdoutLine: {'line': b'-- Configuring done\n'}
+[0.730556] (joy_control) StdoutLine: {'line': b'-- Generating done\n'}
+[0.733421] (joy_control) StdoutLine: {'line': b'-- Build files have been written to: /home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control\n'}
+[0.753168] (joy_control) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target joy_comms_control_node\x1b[0m\n'}
+[0.771266] (joy_control) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/joy_comms_control_node.dir/src/joy_comms_control.cpp.o\x1b[0m\n'}
+[0.801050] (-) TimerEvent: {}
+[0.901409] (-) TimerEvent: {}
+[1.001741] (-) TimerEvent: {}
+[1.102161] (-) TimerEvent: {}
+[1.202585] (-) TimerEvent: {}
+[1.303049] (-) TimerEvent: {}
+[1.403488] (-) TimerEvent: {}
+[1.503914] (-) TimerEvent: {}
+[1.604504] (-) TimerEvent: {}
+[1.704907] (-) TimerEvent: {}
+[1.805294] (-) TimerEvent: {}
+[1.905681] (-) TimerEvent: {}
+[2.006071] (-) TimerEvent: {}
+[2.106460] (-) TimerEvent: {}
+[2.206972] (-) TimerEvent: {}
+[2.307353] (-) TimerEvent: {}
+[2.407737] (-) TimerEvent: {}
+[2.508118] (-) TimerEvent: {}
+[2.608508] (-) TimerEvent: {}
+[2.709184] (-) TimerEvent: {}
+[2.809578] (-) TimerEvent: {}
+[2.909964] (-) TimerEvent: {}
+[2.911561] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid JoyCommsControl::getControllerMappings()\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[2.911823] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:137:23:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<rclcpp::Parameter>::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.911943] (joy_control) StderrLine: {'line': b'  137 |     for (int i = 0; \x1b[01;35m\x1b[Ki < mappings.size()\x1b[m\x1b[K; i++) {\n'}
+[2.912044] (joy_control) StderrLine: {'line': b'      |                     \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.912294] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:142:28:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Ksize_t\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} and \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.912448] (joy_control) StderrLine: {'line': b'  142 |       for (size_t i = 0; \x1b[01;35m\x1b[Ki < pImplement->numberOfButtons\x1b[m\x1b[K; i++) {\n'}
+[2.912621] (joy_control) StderrLine: {'line': b'      |                          \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.912728] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:154:28:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Ksize_t\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} and \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.912831] (joy_control) StderrLine: {'line': b'  154 |       for (size_t i = 0; \x1b[01;35m\x1b[Ki < pImplement->numberOfAxes\x1b[m\x1b[K; i++) {\n'}
+[2.912927] (joy_control) StderrLine: {'line': b'      |                          \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.913024] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:166:25:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<std::__cxx11::basic_string<char> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.913144] (joy_control) StderrLine: {'line': b'  166 |       for (int j = 0; \x1b[01;35m\x1b[Kj < mappings.at(i).as_string_array().size()\x1b[m\x1b[K; ++j) {\n'}
+[2.913242] (joy_control) StderrLine: {'line': b'      |                       \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.913750] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid JoyCommsControl::getCommandTopics()\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[2.913942] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:205:23:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<std::__cxx11::basic_string<char> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.914058] (joy_control) StderrLine: {'line': b'  205 |     for (int i = 0; \x1b[01;35m\x1b[Ki < topics.size()\x1b[m\x1b[K; ++i) {\n'}
+[2.914158] (joy_control) StderrLine: {'line': b'      |                     \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.917976] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:212:23:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<std::__cxx11::basic_string<char> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.918215] (joy_control) StderrLine: {'line': b'  212 |     for (int i = 0; \x1b[01;35m\x1b[Ki < stop_commands.size()\x1b[m\x1b[K; ++i) {\n'}
+[2.918324] (joy_control) StderrLine: {'line': b'      |                     \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.932112] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid JoyCommsControl::Implement::addToCommandQueue(sensor_msgs::msg::Joy_<std::allocator<void> >::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[2.932354] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:284:23:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<int, std::allocator<int> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.932471] (joy_control) StderrLine: {'line': b'  284 |     for (int i = 0; \x1b[01;35m\x1b[Ki < buttons.size()\x1b[m\x1b[K; ++i)\n'}
+[2.932571] (joy_control) StderrLine: {'line': b'      |                     \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.932668] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:289:23:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<float, std::allocator<float> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.932795] (joy_control) StderrLine: {'line': b'  289 |     for (int i = 0; \x1b[01;35m\x1b[Ki < axes.size()\x1b[m\x1b[K; ++i)\n'}
+[2.932891] (joy_control) StderrLine: {'line': b'      |                     \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.933139] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid JoyCommsControl::publish_command_with_rate()\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[2.933309] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:333:25:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kconst size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Kconst long unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.933443] (joy_control) StderrLine: {'line': b'  333 |             while(\x1b[01;35m\x1b[Kindex != std::string::npos\x1b[m\x1b[K){\n'}
+[2.933544] (joy_control) StderrLine: {'line': b'      |                   \x1b[01;35m\x1b[K~~~~~~^~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.933895] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:362:34:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<std_msgs::msg::String_<std::allocator<void> > >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.934080] (joy_control) StderrLine: {'line': b'  362 |                 for(int i = 0; \x1b[01;35m\x1b[Ki < commands.size()\x1b[m\x1b[K; ++i){\n'}
+[2.934191] (joy_control) StderrLine: {'line': b'      |                                \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.934429] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:385:30:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 and \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<std_msgs::msg::String_<std::allocator<void> > >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.934597] (joy_control) StderrLine: {'line': b'  385 |             for(int i = 0; \x1b[01;35m\x1b[Ki < commands.size()\x1b[m\x1b[K; ++i){\n'}
+[2.934727] (joy_control) StderrLine: {'line': b'      |                            \x1b[01;35m\x1b[K~~^~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[2.935132] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kvoid JoyCommsControl::Implement::joyCallback(sensor_msgs::msg::Joy_<std::allocator<void> >::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[2.935326] (joy_control) StderrLine: {'line': b'\x1b[01m\x1b[K/home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control/src/joy_comms_control.cpp:399:33:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kcomparison of integer expressions of different signedness: \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<int, std::allocator<int> >::size_type\x1b[m\x1b[K\xe2\x80\x99 {aka \xe2\x80\x98\x1b[01m\x1b[Klong unsigned int\x1b[m\x1b[K\xe2\x80\x99} and \xe2\x80\x98\x1b[01m\x1b[Kint\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wsign-compare\x07-Wsign-compare\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[2.935458] (joy_control) StderrLine: {'line': b'  399 |     if (\x1b[01;35m\x1b[Kjoy_msg->buttons.size() > enable_button\x1b[m\x1b[K && joy_msg->buttons[enable_button]) {\n'}
+[2.935560] (joy_control) StderrLine: {'line': b'      |         \x1b[01;35m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[3.010143] (-) TimerEvent: {}
+[3.110540] (-) TimerEvent: {}
+[3.210939] (-) TimerEvent: {}
+[3.311319] (-) TimerEvent: {}
+[3.411708] (-) TimerEvent: {}
+[3.512083] (-) TimerEvent: {}
+[3.612476] (-) TimerEvent: {}
+[3.712864] (-) TimerEvent: {}
+[3.813245] (-) TimerEvent: {}
+[3.913638] (-) TimerEvent: {}
+[4.014026] (-) TimerEvent: {}
+[4.114385] (-) TimerEvent: {}
+[4.214750] (-) TimerEvent: {}
+[4.315137] (-) TimerEvent: {}
+[4.415535] (-) TimerEvent: {}
+[4.515978] (-) TimerEvent: {}
+[4.616643] (-) TimerEvent: {}
+[4.717085] (-) TimerEvent: {}
+[4.817530] (-) TimerEvent: {}
+[4.917981] (-) TimerEvent: {}
+[5.018431] (-) TimerEvent: {}
+[5.118901] (-) TimerEvent: {}
+[5.219350] (-) TimerEvent: {}
+[5.319798] (-) TimerEvent: {}
+[5.420254] (-) TimerEvent: {}
+[5.520706] (-) TimerEvent: {}
+[5.621194] (-) TimerEvent: {}
+[5.721665] (-) TimerEvent: {}
+[5.822109] (-) TimerEvent: {}
+[5.922555] (-) TimerEvent: {}
+[6.023016] (-) TimerEvent: {}
+[6.123461] (-) TimerEvent: {}
+[6.223909] (-) TimerEvent: {}
+[6.324359] (-) TimerEvent: {}
+[6.424801] (-) TimerEvent: {}
+[6.525244] (-) TimerEvent: {}
+[6.625711] (-) TimerEvent: {}
+[6.726183] (-) TimerEvent: {}
+[6.826622] (-) TimerEvent: {}
+[6.927085] (-) TimerEvent: {}
+[7.027531] (-) TimerEvent: {}
+[7.127979] (-) TimerEvent: {}
+[7.228433] (-) TimerEvent: {}
+[7.328981] (-) TimerEvent: {}
+[7.429429] (-) TimerEvent: {}
+[7.529871] (-) TimerEvent: {}
+[7.630321] (-) TimerEvent: {}
+[7.730796] (-) TimerEvent: {}
+[7.831303] (-) TimerEvent: {}
+[7.931772] (-) TimerEvent: {}
+[8.032313] (-) TimerEvent: {}
+[8.132756] (-) TimerEvent: {}
+[8.233200] (-) TimerEvent: {}
+[8.333625] (-) TimerEvent: {}
+[8.434041] (-) TimerEvent: {}
+[8.534490] (-) TimerEvent: {}
+[8.634961] (-) TimerEvent: {}
+[8.697081] (joy_control) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking CXX executable joy_comms_control_node\x1b[0m\n'}
+[8.735108] (-) TimerEvent: {}
+[8.835503] (-) TimerEvent: {}
+[8.936346] (-) TimerEvent: {}
+[9.036743] (-) TimerEvent: {}
+[9.137209] (-) TimerEvent: {}
+[9.163183] (joy_control) StdoutLine: {'line': b'[100%] Built target joy_comms_control_node\n'}
+[9.172790] (joy_control) CommandEnded: {'returncode': 0}
+[9.191512] (joy_control) JobProgress: {'identifier': 'joy_control', 'progress': 'install'}
+[9.198955] (joy_control) Command: {'cmd': ['/usr/bin/cmake', '--install', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control'], 'cwd': '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('LANGUAGE', 'en_CA:en'), ('USER', 'marc'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/marc'), ('OLDPWD', '/home/marc/Programming/robotics-prototype/robot'), ('DESKTOP_SESSION', 'ubuntu'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('PS1', '(venv) \\[\\e]0;\\u@\\h: \\w\\a\\]${debian_chroot:+($debian_chroot)}\\[\\033[01;32m\\]\\u@\\h\\[\\033[00m\\]:\\[\\033[01;34m\\]\\w\\[\\033[00m\\]\\$'), ('SYSTEMD_EXEC_PID', '2232'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'marc'), ('ARDUINO_PATH', '/home/marc/arduino-1.8.13'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'marc'), ('TERM', 'xterm-256color'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/home/marc/Programming/robotics-prototype/venv/bin:/home/marc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/marc-Inspiron-5515:@/tmp/.ICE-unix/2214,unix/marc-Inspiron-5515:/tmp/.ICE-unix/2214'), ('XDG_MENU_PREFIX', 'gnome-'), ('GNOME_TERMINAL_SCREEN', '/org/gnome/Terminal/screen/4d17bdbd_1775_4944_82cb_b2e1347916b4'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('LANG', 'en_CA.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('VIRTUAL_ENV_PROMPT', '(venv)'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.C9KC41'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('GNOME_TERMINAL_SERVICE', ':1.210'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('QT_ACCESSIBILITY', '1'), ('ROS_MASTER_URI', 'http://localhost:11311'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('VIRTUAL_ENV', '/home/marc/Programming/robotics-prototype/venv'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages:/home/marc/Programming/robotics-prototype:/home/marc/Programming/robotics-atp'), ('ROS_HOSTNAME', 'localhost'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('CMAKE_PREFIX_PATH', '/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/opt/ros/humble')]), 'shell': False}
+[9.204090] (joy_control) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[9.210460] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/lib/joy_control/joy_comms_control_node\n'}
+[9.215145] (joy_control) StdoutLine: {'line': b'-- Set runtime path of "/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/lib/joy_control/joy_comms_control_node" to ""\n'}
+[9.215403] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control\n'}
+[9.215537] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/joy_comms_config.yaml\n'}
+[9.215681] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control\n'}
+[9.215751] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/joy_comms_manual.xml\n'}
+[9.215841] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/ament_index/resource_index/package_run_dependencies/joy_control\n'}
+[9.215916] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/ament_index/resource_index/parent_prefix_path/joy_control\n'}
+[9.215984] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/environment/ament_prefix_path.sh\n'}
+[9.216035] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/environment/ament_prefix_path.dsv\n'}
+[9.216108] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/environment/path.sh\n'}
+[9.216182] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/environment/path.dsv\n'}
+[9.216242] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/local_setup.bash\n'}
+[9.216289] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/local_setup.sh\n'}
+[9.216342] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/local_setup.zsh\n'}
+[9.216396] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/local_setup.dsv\n'}
+[9.216443] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/package.dsv\n'}
+[9.216491] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/ament_index/resource_index/packages/joy_control\n'}
+[9.216539] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/cmake/joy_controlConfig.cmake\n'}
+[9.216590] (joy_control) StdoutLine: {'line': b'-- Up-to-date: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/cmake/joy_controlConfig-version.cmake\n'}
+[9.216642] (joy_control) StdoutLine: {'line': b'-- Installing: /home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control/share/joy_control/package.xml\n'}
+[9.219723] (joy_control) CommandEnded: {'returncode': 0}
+[9.237361] (-) TimerEvent: {}
+[9.251487] (joy_control) JobEnded: {'identifier': 'joy_control', 'rc': 0}
+[9.252068] (-) EventReactorShutdown: {}

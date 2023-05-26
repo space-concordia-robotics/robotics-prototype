@@ -1,0 +1,43 @@
+[0.020s] Invoking command in '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/opt/ros/humble VIRTUAL_ENV_PROMPT=(venv) /usr/bin/cmake /home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control -DCMAKE_INSTALL_PREFIX=/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control
+[0.093s] -- The C compiler identification is GNU 11.3.0
+[0.156s] -- The CXX compiler identification is GNU 11.3.0
+[0.164s] -- Detecting C compiler ABI info
+[0.232s] -- Detecting C compiler ABI info - done
+[0.242s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.242s] -- Detecting C compile features
+[0.244s] -- Detecting C compile features - done
+[0.249s] -- Detecting CXX compiler ABI info
+[0.326s] -- Detecting CXX compiler ABI info - done
+[0.335s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.335s] -- Detecting CXX compile features
+[0.336s] -- Detecting CXX compile features - done
+[0.338s] -- Found ament_cmake: 1.3.3 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.497s] -- Found Python3: /home/marc/Programming/robotics-prototype/venv/bin/python3.10 (found version "3.10.6") found components: Interpreter 
+[0.576s] -- Found rclcpp: 16.0.2 (/opt/ros/humble/share/rclcpp/cmake)
+[0.606s] -- Found rosidl_generator_c: 3.1.4 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.610s] -- Found rosidl_adapter: 3.1.4 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.617s] -- Found rosidl_generator_cpp: 3.1.4 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.631s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.658s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.721s] -- Found rmw_implementation_cmake: 6.1.1 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.723s] -- Found rmw_fastrtps_cpp: 6.2.2 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.824s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.849s] -- Found FastRTPS: /opt/ros/humble/include  
+[0.889s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[0.900s] -- Looking for pthread.h
+[0.980s] -- Looking for pthread.h - found
+[0.981s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[1.056s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[1.057s] -- Found Threads: TRUE  
+[1.220s] -- Found sensor_msgs: 4.2.2 (/opt/ros/humble/share/sensor_msgs/cmake)
+[1.413s] [31mCMake Error at /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
+[1.413s]   Could NOT find Boost (missing: Boost_INCLUDE_DIR system)
+[1.413s] Call Stack (most recent call first):
+[1.414s]   /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)
+[1.414s]   /usr/share/cmake-3.22/Modules/FindBoost.cmake:2360 (find_package_handle_standard_args)
+[1.414s]   CMakeLists.txt:23 (find_package)
+[1.414s] 
+[1.414s] [0m
+[1.414s] -- Configuring incomplete, errors occurred!
+[1.414s] See also "/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control/CMakeFiles/CMakeOutput.log".
+[1.426s] Invoked command in '/home/marc/Programming/robotics-prototype/robot/rospackages/build/joy_control' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/marc/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python:/opt/ros/humble VIRTUAL_ENV_PROMPT=(venv) /usr/bin/cmake /home/marc/Programming/robotics-prototype/robot/rospackages/src/joy_control -DCMAKE_INSTALL_PREFIX=/home/marc/Programming/robotics-prototype/robot/rospackages/install/joy_control

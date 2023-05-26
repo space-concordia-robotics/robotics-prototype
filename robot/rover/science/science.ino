@@ -23,7 +23,7 @@ void updateSystems();
 internal_comms::CommandCenter* commandCenter = new ScienceCommandCenter();
 
 // TODO: set the servo id to a correct one
-Carousel *carousel = new Carousel(0, 570);
+Carousel *carousel = new Carousel(0, 720);
 Updatable* updatables[1] = {carousel};
 unsigned long time = micros();
 
@@ -33,6 +33,7 @@ This contains the methods needed by command center
 */
 int8_t  carousel_get_carousel_index() { return carousel->getCarouselIndex(); }
 bool carousel_get_moving() { return carousel->isMoving(); }
+int32_t carousel_get_virtual() {return carousel->virtualAngle; }
 
 void carousel_previous_test_tube() { carousel->moveNTestTubes(-1); }
 void carousel_next_test_tube() { carousel->moveNTestTubes(1); }

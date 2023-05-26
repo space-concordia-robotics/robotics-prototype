@@ -7,6 +7,8 @@
 #include "../../include/SciencePinSetup.h"
 
 #define COMMAND_GET_STATUS 39
+#define COMMAND_GET_VIRTUAL 37 // sending on 38
+
 #define COMMAND_PREVIOUS_TEST_TUBE 41
 #define COMMAND_NEXT_TEST_TUBE 42
 #define COMMAND_GO_TO_TEST_TUBE 43
@@ -29,6 +31,7 @@ float bytes_to_float(const uint8_t* rawPointer) {
 // These declare method, in raman.ino, that are needed by the command center
 int8_t  carousel_get_carousel_index();
 bool carousel_get_moving();
+uint16_t carousel_get_virtual();
 
 void carousel_previous_test_tube();
 void carousel_next_test_tube();
@@ -50,6 +53,15 @@ void ScienceCommandCenter::executeCommand(const uint8_t commandID,
         sendMessage(*returnMsg);
         break;
       }
+    case COMMAND_GET_VIRTUAL:
+    {
+      float virtual_angle = carousel_get_virtual();
+      char buffer[32];
+      itoa(virtual_angle, buffer, 10);
+      internal_comms::Message* returnMsg = createMessage(38, strlen(buffer), (byte*)buffer);
+      sendMessage(*returnMsg);
+      break;
+    }
 
     case COMMAND_PREVIOUS_TEST_TUBE:
       carousel_previous_test_tube();
