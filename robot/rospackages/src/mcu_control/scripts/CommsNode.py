@@ -239,9 +239,17 @@ if __name__ == '__main__':
     if local_mode:
         ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
     else:
-        ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
-        ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
-        ser = ser_hardware
+        start = time.time()
+        # loop for a max of 60sec
+        while time.time() - start < 60:
+            try:
+                ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+                ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+                ser = ser_hardware
+                break
+            except serial.SerialException as e:
+                rospy.logwarn("Retrying connection to science, error occured " + str(e))
+                time.sleep(1)
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
