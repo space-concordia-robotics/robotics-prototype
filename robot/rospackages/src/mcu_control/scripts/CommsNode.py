@@ -55,6 +55,9 @@ SW_PINS = [15,13,11]
 
 
 ser = None
+# HACK bcs science teensy is USB
+ser_science = None
+ser_hardware = None
 
 STOP_BYTE = 0x0A
 
@@ -86,6 +89,8 @@ def main():
 
 
 def send_queued_commands():
+    global ser, ser_science
+
     if (len(arm_queue) > 0):
         arm_command = arm_queue.popleft()
         send_command(arm_command[0], arm_command[1], arm_command[2])
@@ -95,8 +100,13 @@ def send_queued_commands():
         send_command(rover_command[0], rover_command[1], rover_command[2])
     
     if (len(science_queue) > 0):
+        # HACK for science on rover
+        if not local_mode:
+            ser = ser_science
         science_command = science_queue.popleft()
         send_command(science_command[0], science_command[1], science_command[2])
+        if not local_mode:
+            ser = ser_hardware
 
 if local_mode:
     # in local mode can only simulate connection to one device
@@ -106,6 +116,12 @@ else:
 
 def receive_message():
     for device in device_range:
+        if not local_mode:
+            if device == SCIENCE_SELECTED:
+                ser = ser_science
+            else:
+                ser = ser_hardware
+
         gpio.output(SW_PINS, PIN_DESC[device])
         if ser.in_waiting > 0:
 
@@ -144,6 +160,7 @@ def receive_message():
                 print(e)
 
 def send_command(command_name, args, deviceToSendTo):
+    print("port: ", ser.port)
     command = get_command(command_name, deviceToSendTo)
     if command is not None:
         commandID = command[1]
@@ -222,7 +239,9 @@ if __name__ == '__main__':
     if local_mode:
         ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
     else:
-        ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+        ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+        ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+        ser = ser_hardware
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
