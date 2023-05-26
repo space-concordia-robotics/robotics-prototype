@@ -28,6 +28,18 @@ void Carousel::update(unsigned long deltaMicroSeconds) {
         state = CarouselState::Not_Moving;
       }
       break;
+    case CarouselState::Negative_Correct:
+        // really unfortunate hack I have to do. Basically, on the real rover,
+        // moving the carousel counter clockwise doesn't work properly, it under or over-shoots
+        // What this does, is when moving backwards, goes even further back, then goes
+        // to the desired virtual angle. This is the part which moves to desired position.
+      if (queryServoStopped()) {
+        delay(500);
+        state = CarouselState::Moving_Carousel;
+        servo.writeActionCommand(servoId, "D", virtualAngle);
+        delay(10);
+      }
+      break;
 
     case CarouselState::Spin_Mix_Negative:
       if (queryServoStopped()) {
@@ -63,10 +75,19 @@ void Carousel::moveNTestTubes(int testTubesToMove) {
       currentTestTube += NUM_TEST_TUBES;
     }
 
-    state = CarouselState::Moving_Carousel;
-    // Set absolute position offset in case motor connected later
+
     // Move servo to position
-    servo.writeActionCommand(servoId, "D", virtualAngle);
+    if (testTubesToMove < 0) {
+      // really unfortunate hack I have to do. Basically, on the real rover,
+      // moving the carousel counter clockwise doesn't work properly, it under or over-shoots
+      // What this does, is when moving backwards, goes even further back, then goes
+      // to the desired virtual angle. Check the Update function to see it move to the desired position.
+      state = CarouselState::Negative_Correct;
+      servo.writeActionCommand(servoId, "D", virtualAngle - 600);
+    } else {
+      state = CarouselState::Moving_Carousel;
+      servo.writeActionCommand(servoId, "D", virtualAngle);
+    }
     // Wait to prevent motor from saying it is not moving immediately
     delay(10);
   }

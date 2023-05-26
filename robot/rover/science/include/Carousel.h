@@ -16,7 +16,8 @@ enum CarouselState {
     Not_Moving,
     Moving_Carousel,
     Spin_Mix_Positive,
-    Spin_Mix_Negative
+    Spin_Mix_Negative,
+    Negative_Correct
 };
 
 // Forward declaration
