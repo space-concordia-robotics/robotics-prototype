@@ -1,8 +1,0 @@
-[31mCMake Error at /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
-  Could NOT find Boost (missing: Boost_INCLUDE_DIR system)
-Call Stack (most recent call first):
-  /usr/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)
-  /usr/share/cmake-3.22/Modules/FindBoost.cmake:2360 (find_package_handle_standard_args)
-  CMakeLists.txt:23 (find_package)
-
-[0m
