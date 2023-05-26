@@ -34,4 +34,4 @@ science_out_commands = [("previous_test_tube", 41, []), ("next_test_tube", 42, [
                         ("set_servo_angle", 26, [dt.ARG_FLOAT32]), ("get_virtual_angle", 37, [])]
 
 
-science_in_commands = [("status", 38, handle_status), ("status", 40, handle_status), ("limit_switch_value", 28, handle_limit_switch_value)]
+science_in_commands = [("virtual angle", 38, handle_debug_str), ("status", 40, handle_status), ("limit_switch_value", 28, handle_limit_switch_value)]
