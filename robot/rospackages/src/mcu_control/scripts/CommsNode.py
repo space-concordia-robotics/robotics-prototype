@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # *** To run in local mode, add 'local' as a cmdline argument ***
 
+import os
 import sys
 import traceback
 import time
@@ -123,7 +124,7 @@ def receive_message():
                 ser = ser_hardware
 
         gpio.output(SW_PINS, PIN_DESC[device])
-        if ser.in_waiting > 0:
+        if ser is not None and ser.in_waiting > 0:
 
             commandID = ser.read()
             print(commandID)
@@ -162,7 +163,7 @@ def receive_message():
 def send_command(command_name, args, deviceToSendTo):
     print("port: ", ser.port)
     command = get_command(command_name, deviceToSendTo)
-    if command is not None:
+    if ser is not None and command is not None:
         commandID = command[1]
 
         gpio.output(SW_PINS, TX2)
@@ -238,18 +239,22 @@ def get_arg_bytes(command_tuple):
 if __name__ == '__main__':
     if local_mode:
         ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
-    else:
+    elif os.path.exists('/dev/ttyACM0'):
+        rospy.loginfo('Science MCU is mounted at USB, attempting to open serial port')
         start = time.time()
         # loop for a max of 60sec
         while time.time() - start < 60:
             try:
-                ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
                 ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
                 ser = ser_hardware
+                ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
                 break
             except serial.SerialException as e:
                 rospy.logwarn("Retrying connection to science, error occured " + str(e))
                 time.sleep(1)
+    else:
+        ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+        ser = ser_hardware
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
