@@ -11,6 +11,7 @@ class JoyCommsControl {
 public:
     JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param);
     void MapButtonNamesToIds();
+    void mapControlModeToColor();
     int getButtonIdFromName(std::string button_name);
     int getAxisIdFromName(std::string button_name);
     bool isButton(std::string control_name);
@@ -114,6 +115,18 @@ private:
 
 
     std::map<std::string, int> axis_name_to_id_map;
+
+    std::truple<int, int, int> light_colors[4] = {{250, 0, 0},
+                                                  {0, 250, 0},
+                                                  {0, 0, 250},
+                                                  (0, 250, 250}};
+
+    std::map<std::string, std::truple<int, int, int>> control_mode_to_color;
+
+    const LIGHT_CONTROL_COMMAND = "blink_color {} {} {}";
+
+    const std::string LIGHT_INDICATOR_TOPIC = "/rover_command";
+    ros::Publisher* plight_indicator_pub;
 
     Implement* pImplement;
 };

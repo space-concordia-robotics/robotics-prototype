@@ -100,6 +100,14 @@ void JoyCommsControl::MapButtonNamesToIds() {
     }
 }
 
+void JoyComsControl::mapControlModeToColor() {
+    int command_topic_num = 0;
+    for (std::string command_topic : command_topics) {
+        control_mode_to_color.insert(std::pair<std::string, std::truple<int, int, int>>(command_topic, light_colors[command_topic_num]);
+	command_topic_num++;
+    }
+}
+
 int JoyCommsControl::getButtonIdFromName(std::string button_name) {
     return button_name_to_id_map[button_name];
 }
@@ -198,6 +206,10 @@ void JoyCommsControl::getCommandTopics(ros::NodeHandle *nh, ros::NodeHandle *nh_
         for (int i = 0; i < topicsXML.size(); ++i) {
             pImplement->command_topics.push_back(static_cast<std::string>(topicsXML[i]).c_str());
             pImplement->comms_pubs.push_back(nh->advertise<std_msgs::String>(pImplement->command_topics[i], 1, true));
+
+	    if (pImplement->command_topics[i] == "/rover_command") {
+	        plight_indicator_pub = &pImplement->comms_pubs.at(i);
+	    }
         }
     }
     if (stopCommandsXML.getType() == XmlRpc::XmlRpcValue::TypeArray) {
@@ -258,6 +270,8 @@ JoyCommsControl::JoyCommsControl(ros::NodeHandle *nh, ros::NodeHandle *nh_param)
     getCommandTopics(nh, nh_param);
 
     pImplement->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &JoyCommsControl::Implement::joyCallback, pImplement);
+    
+    mapControlModeToColor();
 }
 
 void JoyCommsControl::Implement::addToCommandQueue(const sensor_msgs::Joy::ConstPtr &joy_msg) {
@@ -420,6 +434,10 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
                 comms_pubs[current_mappings_index].publish(stop_commands[current_mappings_index]);
                 current_mappings_index = new_mapping_index;
                 std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
+
+		std::truple<int, int, int> mode_color = control_mode_to_color[command_topics[current_mappings_index]];
+
+                plight_indicator_pub->publisher(std::format(LIGHT_CONTROL_COMMAND, control_mode_to_color[0], control_mode_to_color[1], control_mode_to_color[2]));
             }
         }else{
             change_layout_button_held = false;
