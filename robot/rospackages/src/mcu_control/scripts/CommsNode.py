@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+# *** To run in local mode, add 'local' as a cmdline argument ***
 
+import os
 import sys
 import traceback
 import time
@@ -7,7 +9,6 @@ import re
 import serial
 import struct
 from collections import deque
-import Jetson.GPIO as gpio
 from geometry_msgs.msg import Twist
 import rospy
 from std_msgs.msg import String, Header, Float32
@@ -17,10 +18,25 @@ from robot.rospackages.src.mcu_control.srv import *
 from robot.rospackages.src.mcu_control.scripts.CommandParser import *
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control.scripts.ScienceCommands import science_out_commands, science_in_commands
 from robot.rospackages.src.mcu_control.scripts.DriveControls import *
 import robot.rospackages.src.mcu_control.scripts.CommsDataTypes as dt
 
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
+if len(sys.argv) > 0:
+    local_mode = "local" in sys.argv
+    local_selected_device = SCIENCE_SELECTED
+else:
+    local_mode = False
+
+if local_mode:
+    # imports an object called gpio that does nothing when
+    # any method is called on it, to stub gpio
+    from robot.rospackages.src.mcu_control.scripts.CommandParser import emptyObject as gpio
+else:
+    import Jetson.GPIO as gpio
+
+
+in_commands = [arm_in_commands, wheel_in_commands, None, science_in_commands]
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -40,6 +56,9 @@ SW_PINS = [15,13,11]
 
 
 ser = None
+# HACK bcs science teensy is USB
+ser_science = None
+ser_hardware = None
 
 STOP_BYTE = 0x0A
 
@@ -71,6 +90,8 @@ def main():
 
 
 def send_queued_commands():
+    global ser, ser_science
+
     if (len(arm_queue) > 0):
         arm_command = arm_queue.popleft()
         send_command(arm_command[0], arm_command[1], arm_command[2])
@@ -78,11 +99,32 @@ def send_queued_commands():
     if (len(rover_queue) > 0):
         rover_command = rover_queue.popleft()
         send_command(rover_command[0], rover_command[1], rover_command[2])
+    
+    if (len(science_queue) > 0):
+        # HACK for science on rover
+        if not local_mode:
+            ser = ser_science
+        science_command = science_queue.popleft()
+        send_command(science_command[0], science_command[1], science_command[2])
+        if not local_mode:
+            ser = ser_hardware
+
+if local_mode:
+    # in local mode can only simulate connection to one device
+    device_range = [local_selected_device]
+else:
+    device_range = range(4)
 
 def receive_message():
-    for device in range(2):
+    for device in device_range:
+        if not local_mode:
+            if device == SCIENCE_SELECTED:
+                ser = ser_science
+            else:
+                ser = ser_hardware
+
         gpio.output(SW_PINS, PIN_DESC[device])
-        if ser.in_waiting > 0:
+        if ser is not None and ser.in_waiting > 0:
 
             commandID = ser.read()
             print(commandID)
@@ -119,8 +161,9 @@ def receive_message():
                 print(e)
 
 def send_command(command_name, args, deviceToSendTo):
+    print("port: ", ser.port)
     command = get_command(command_name, deviceToSendTo)
-    if command is not None:
+    if ser is not None and command is not None:
         commandID = command[1]
 
         gpio.output(SW_PINS, TX2)
@@ -183,19 +226,35 @@ def rover_command_callback(message):
     temp_struct = [command, args, ROVER_SELECTED]
     rover_queue.append(temp_struct)
 
-
-def rover_command_callback(message):
-    rospy.loginfo('received: ' + message.data + ' command, sending to wheels Teensy')
+def science_command_callback(message):
+    rospy.loginfo('received: ' + message.data + ' command, sending to science Teensy')
     command, args = parse_command(message)
 
-    temp_struct = [command, args, ROVER_SELECTED]
-    rover_queue.append(temp_struct)
+    temp_struct = [command, args, SCIENCE_SELECTED]
+    science_queue.append(temp_struct)
 
 def get_arg_bytes(command_tuple):
     return sum(element[1] for element in command_tuple[2])
 
 if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+    if local_mode:
+        ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+    elif os.path.exists('/dev/ttyACM0'):
+        rospy.loginfo('Science MCU is mounted at USB, attempting to open serial port')
+        start = time.time()
+        # loop for a max of 60sec
+        while time.time() - start < 60:
+            try:
+                ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+                ser = ser_hardware
+                ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+                break
+            except serial.SerialException as e:
+                rospy.logwarn("Retrying connection to science, error occured " + str(e))
+                time.sleep(1)
+    else:
+        ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+        ser = ser_hardware
 
     node_name = 'comms_node'
     rospy.init_node(node_name, anonymous=False) # only allow one node of this type
@@ -220,6 +279,10 @@ if __name__ == '__main__':
     rover_twist_topic = '/rover_cmd_vel'
     rover_twist_sub = rospy.Subscriber(rover_twist_topic, Twist,twist_rover_callback)
     rospy.loginfo('Beginning to subscribe to "'+rover_twist_topic + '" topic')
+
+    science_command_topic = '/science_command'
+    rospy.loginfo('Beginning to subscribe to "'+science_command_topic+'" topic')
+    sub = rospy.Subscriber(science_command_topic, String, science_command_callback)    
 
     service_name = '/arm_request'
     rospy.loginfo('Waiting for "'+service_name+'" service request from client')

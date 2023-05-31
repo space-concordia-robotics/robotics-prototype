@@ -1,13 +1,14 @@
 from robot.rospackages.src.mcu_control.scripts.ArmCommands import arm_out_commands
 from robot.rospackages.src.mcu_control.scripts.WheelsCommands import wheel_out_commands
 from robot.rospackages.src.mcu_control.scripts.PdsCommands import pds_out_commands
+from robot.rospackages.src.mcu_control.scripts.ScienceCommands import science_out_commands
 
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
 
-out_commands = [arm_out_commands, wheel_out_commands, pds_out_commands, None]
+out_commands = [arm_out_commands, wheel_out_commands, pds_out_commands, science_out_commands]
 
 def parse_command(message):
     full_command = message.data.split(" ")
@@ -27,3 +28,15 @@ def get_command(command_name, deviceToSendTo):
             return out_command
 
     return None
+
+
+class EmptyMock(object):
+    """ Class which does nothing when any method is called.
+        Used to stub gpio calls in CommsNode local mode.
+    """
+    def __getattr__(self, name):
+        def _missing(*args, **kwargs):
+            return None
+        return _missing
+
+emptyObject = EmptyMock()
