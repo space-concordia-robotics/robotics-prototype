@@ -27,8 +27,10 @@ sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
 # Check if ros was successfully installed
-if [ -e /opt/ros/humble/setup.sh ] && [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ]; then
+if [ -e /opt/ros/humble/setup.sh ]; then
 	source /opt/ros/humble/setup.bash
+fi
+if [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ]; then
 	echo "Done installing ROS ${ROS_DISTRO}"
 	printenv | grep -i ROS
 else
