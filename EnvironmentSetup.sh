@@ -20,8 +20,8 @@ python3 setup.py develop
 echo "Installing ROS..."
 bash scripts/install_ros.sh
 
-echo "Installing Arduino IDE 2.0..."
-bash scripts/arduino_install.sh
+echo "Installing Arduino IDE..."
+bash scripts/OLD_install-arduino_teensyduino
 
 cp scripts/.bash_robotics ~/.bash_robotics
 echo "source ~/.bash_robotics" >> ~/.bashrc
