@@ -36,5 +36,5 @@ sudo apt-get install -y ros-humble-pcl-msgs ros-humble-image-pipeline ros-humble
 
 echo "Building ROS Workspace"
 cd robot/rospackages/
-rosdep install -i --from-path src --rosdistro foxy -y
+rosdep install -i --from-path src --rosdistro humble -y
 colcon build
