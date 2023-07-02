@@ -18,7 +18,7 @@ pip install -r requirements.txt
 python3 setup.py develop
 
 echo "Installing ROS..."
-bash scripts/install_ros.sh
+bash scripts/ros_install.sh
 
 echo "Installing Arduino IDE..."
 bash scripts/OLD_install-arduino_teensyduino
