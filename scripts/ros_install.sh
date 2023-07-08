@@ -26,6 +26,12 @@ sudo apt-get install python3-rospkg -y
 sudo apt -qq install ros-humble-desktop
 sudo apt -qq install ros-dev-tools
 
+echo "Initialize rosdep and install dependencies"
+sudo sh rosdep init
+rosdep update
+cd $REPO/robot/rospackages
+rosdep install --from-paths src -y --ignore-src -y
+
 # Check if ros was successfully installed
 if [ -e /opt/ros/humble/setup.sh ]; then
 	source /opt/ros/humble/setup.bash
