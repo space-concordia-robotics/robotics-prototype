@@ -5,7 +5,13 @@ sudo apt -qq install locales -y
 sudo locale-gen en_CA en_CA.UTF-8
 sudo update-locale LC_ALL=en_CA.UTF-8 LANG=en_CA.UTF-8
 export LANG=en_CA.UTF-8
-REPO=/home/$USER/Programming/robotics-prototype
+
+# Set REPO variable
+if [ -z ${GITHUB_WORKSPACE} ]; then
+	REPO=/home/$USER/Programming/robotics-prototype
+else
+	REPO=$GITHUB_WORKSPACE
+fi
 
 echo "Adding ROS source..."
 ROS_DISTRO_TO_INSTALL="humble"
