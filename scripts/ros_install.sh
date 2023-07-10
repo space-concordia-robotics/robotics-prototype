@@ -5,6 +5,7 @@ sudo apt -qq install locales -y
 sudo locale-gen en_CA en_CA.UTF-8
 sudo update-locale LC_ALL=en_CA.UTF-8 LANG=en_CA.UTF-8
 export LANG=en_CA.UTF-8
+REPO=/home/$USER/Programming/robotics-prototype
 
 echo "Adding ROS source..."
 ROS_DISTRO_TO_INSTALL="humble"
@@ -12,22 +13,22 @@ sudo apt-get -qq install software-properties-common
 sudo apt-get update -y
 sudo add-apt-repository universe -y
 
-sudo apt -qq install curl
+sudo apt install curl -y
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list >/dev/null
 
 echo "Updating sources and upgrading system packages..."
-sudo apt -qq update
-sudo apt -qq upgrade
+sudo apt -qq update -y
+sudo apt -qq upgrade -y
 
 echo "Installing ROS... (will take a while)"
 sudo apt-get install python3-rospkg -y
-sudo apt -qq install ros-humble-desktop
-sudo apt -qq install ros-dev-tools
+sudo apt install ros-humble-desktop -y
+sudo apt install ros-dev-tools -y
 
 echo "Initialize rosdep and install dependencies"
-sudo sh rosdep init
+sudo rosdep init
 rosdep update
 cd $REPO/robot/rospackages
 rosdep install --from-paths src -y --ignore-src -y
