@@ -33,7 +33,7 @@ sudo apt-get install python3-rospkg -y
 sudo apt install ros-humble-desktop -y
 sudo apt install ros-dev-tools -y
 
-echo "Initialize rosdep and install dependencies"
+echo "Initialize rosdep and install dependencies..."
 sudo rosdep init
 rosdep update
 cd $REPO/robot/rospackages
@@ -47,6 +47,6 @@ if [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ]; then
 	echo "Done installing ROS ${ROS_DISTRO}"
 	printenv | grep -i ROS
 else
-	echo "Install Failed "
+	echo "Install Failed"
 	exit 1
 fi
