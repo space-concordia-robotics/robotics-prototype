@@ -9,7 +9,7 @@ jobs:
     steps:
 
       - name: Clone repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         run: |
@@ -21,7 +21,7 @@ jobs:
 
       - name: Install teensyduino and run cmake on codebase
         run: |
-          ./scripts/arduino_install.sh
+          ./scripts/OLD_install-arduino_teensyduino.sh
 
 
           #      - name: Run pytest

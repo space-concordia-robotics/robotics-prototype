@@ -18,10 +18,10 @@ pip install -r requirements.txt
 python3 setup.py develop
 
 echo "Installing ROS..."
-bash scripts/install_ros.sh
+bash scripts/ros_install.sh
 
-echo "Installing Arduino IDE 2.0..."
-bash scripts/arduino_install.sh
+echo "Installing Arduino IDE..."
+bash scripts/OLD_install-arduino_teensyduino
 
 cp scripts/.bash_robotics ~/.bash_robotics
 echo "source ~/.bash_robotics" >> ~/.bashrc
@@ -36,5 +36,5 @@ sudo apt-get install -y ros-humble-pcl-msgs ros-humble-image-pipeline ros-humble
 
 echo "Building ROS Workspace"
 cd robot/rospackages/
-rosdep install -i --from-path src --rosdistro foxy -y
+rosdep install -i --from-path src --rosdistro humble -y
 colcon build
