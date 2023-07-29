@@ -1,3 +1,5 @@
+source ~/.bashrc
+
 # Set REPO variable
 if [ -z ${GITHUB_WORKSPACE} ]; then
 	REPO=/home/$USER/Programming/robotics-prototype
