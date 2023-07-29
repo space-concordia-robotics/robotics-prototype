@@ -5,10 +5,10 @@ else
 	REPO=$GITHUB_WORKSPACE
 fi
 
-cd $REPO/robot/rospackages
+cd $REPO/robot/rover
 # Check if build directory already exists
-if [ ! -d ~/Programming/robotics-prototype/robot/rover/build ]; then
-	echo "creating build directory"
+if [ ! -d $REPO/robot/rover/build ]; then
+	echo "Creating build directory"
 	mkdir build
 fi
 cd build
