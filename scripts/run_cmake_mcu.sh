@@ -1,7 +1,14 @@
-cd ~/Programming/robotics-prototype/robot/rover
+# Set REPO variable
+if [ -z ${GITHUB_WORKSPACE} ]; then
+	REPO=/home/$USER/Programming/robotics-prototype
+else
+	REPO=$GITHUB_WORKSPACE
+fi
+
+cd $REPO/robot/rover
 # Check if build directory already exists
-if [ ! -d ~/Programming/robotics-prototype/robot/rover/build ]; then
-	echo "creating build directory"
+if [ ! -d $REPO/robot/rover/build ]; then
+	echo "Creating build directory"
 	mkdir build
 fi
 cd build
