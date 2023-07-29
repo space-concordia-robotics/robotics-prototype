@@ -44,6 +44,8 @@ if [ -e /opt/ros/humble/setup.sh ]; then
 	source /opt/ros/humble/setup.bash
 fi
 if [ ${ROS_DISTRO} = "${ROS_DISTRO_TO_INSTALL}" ]; then
+	echo "Building ROS packages..."
+	colcon build
 	echo "Done installing ROS ${ROS_DISTRO}"
 	printenv | grep -i ROS
 else
