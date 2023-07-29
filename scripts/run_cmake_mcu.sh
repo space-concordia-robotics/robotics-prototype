@@ -1,4 +1,4 @@
-source ~/.bashrc
+. ~/.bashrc
 
 # Set REPO variable
 if [ -z ${GITHUB_WORKSPACE} ]; then
