@@ -375,8 +375,9 @@ void JoyCommsControl::Implement::publish_command(std_msgs::String command) {
 
 void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
     if (joy_msg->buttons.size() > enable_button && joy_msg->buttons[enable_button]) {
-        if ((joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button])
-                                                                && !change_layout_button_held) {
+        bool switchingLayout = joy_msg->buttons[next_layout_button] || joy_msg->buttons[previous_layout_button];
+
+        if (switchingLayout && !change_layout_button_held) {
             change_layout_button_held = true;
 
             int new_mapping_index;
@@ -396,8 +397,10 @@ void JoyCommsControl::Implement::joyCallback(const sensor_msgs::Joy::ConstPtr &j
                 current_mappings_index = new_mapping_index;
                 std::cout << "Mapping changed. Will publish on topic: " << command_topics[current_mappings_index] << std::endl;
             }
-        }else{
+        } else if (!switchingLayout) {
             change_layout_button_held = false;
+            addToCommandQueue(joy_msg);
+        } else {
             addToCommandQueue(joy_msg);
         }
     } else {
