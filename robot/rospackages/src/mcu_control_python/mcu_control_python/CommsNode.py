@@ -74,7 +74,7 @@ def twist_rover_callback(twist_msg):
 
 def main(args=None):
     if not local_mode:
-        ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+        ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
     else:
         ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
 
@@ -82,7 +82,7 @@ def main(args=None):
 
     comms_node = CommsNode()
 
-    rate = comms_node.create_rate(10)
+    # rate = comms_node.create_rate(10)
 
     try:
         while rclpy.ok():
@@ -255,6 +255,6 @@ class CommsNode(Node):
         rover_queue.append(temp_struct)
 
 if not local_mode:
-    ser = serial.Serial('/dev/ttyS0', 57600, timeout=1)
+    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
 else:
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
