@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+# *** To run in local mode, add 'local' as a cmdline argument ***
 
+import os
 import sys
 import traceback
 import time
@@ -29,11 +31,25 @@ if len(sys.argv) >= 2:
 if not local_mode:
     import Jetson.GPIO as gpio
 
+in_commands = [arm_in_commands, wheel_in_commands, None, None]
+
 # over USB, there is no way to select a device, so this node
 # needs to know which one it's 'hearing' from.
 # device is set by second argument to node.
 
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
+if len(sys.argv) > 0:
+    local_mode = "local" in sys.argv
+    local_selected_device = SCIENCE_SELECTED
+else:
+    local_mode = False
+
+if local_mode:
+    # imports an object called gpio that does nothing when
+    # any method is called on it, to stub gpio
+    from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.CommandParser import emptyObject as gpio
+else:
+    import Jetson.GPIO as gpio
+
 
 def get_handler(commandId, selectedDevice):
     for in_command in in_commands[selectedDevice]:
@@ -99,6 +115,8 @@ def main(args=None):
 
 
 def send_queued_commands():
+    global ser, ser_science
+    
     if (len(arm_queue) > 0):
         arm_command = arm_queue.popleft()
         send_command(arm_command[0], arm_command[1], arm_command[2])
@@ -107,12 +125,17 @@ def send_queued_commands():
         rover_command = rover_queue.popleft()
         send_command(rover_command[0], rover_command[1], rover_command[2])
 
-def receive_message():
-    for device in range(2):
-        if not local_mode:
-            gpio.output(SW_PINS, PIN_DESC[device])
-        if ser.in_waiting > 0:
+if local_mode:
+    # in local mode can only simulate connection to one device
+    device_range = [local_selected_device]
+else:
+    device_range = range(2)
 
+def receive_message():
+    for device in device_range:
+        gpio.output(SW_PINS, PIN_DESC[device])
+        
+        if ser is not None and ser.in_waiting > 0:
             commandID = ser.read()
             print(commandID)
             commandID = int.from_bytes(commandID, "big")
@@ -150,7 +173,7 @@ def receive_message():
 
 def send_command(command_name, args, deviceToSendTo):
     command = get_command(command_name, deviceToSendTo)
-    if command is not None:
+    if ser is not None and command is not None:
         commandID = command[1]
 
         if not local_mode:
@@ -208,6 +231,12 @@ def get_arg_bytes(command_tuple):
 class CommsNode(Node):
 
     def __init__(self):
+        global ser
+        if local_mode:
+            ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+        else:
+            ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+
         node_name = 'comms_node'
         super().__init__(node_name)
         self.get_logger().info('Initialized "' + node_name + '" node for pub/sub/service functionality')
@@ -254,7 +283,4 @@ class CommsNode(Node):
         temp_struct = [command, args, ROVER_SELECTED]
         rover_queue.append(temp_struct)
 
-if not local_mode:
-    ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
-else:
-    ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+ser = None

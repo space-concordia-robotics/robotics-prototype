@@ -27,3 +27,14 @@ def get_command(command_name, deviceToSendTo):
             return out_command
 
     return None
+
+class EmptyMock(object):
+    """ Class which does nothing when any method is called.
+        Used to stub gpio calls in CommsNode local mode.
+    """
+    def __getattr__(self, name):
+        def _missing(*args, **kwargs):
+            return None
+        return _missing
+
+emptyObject = EmptyMock()
