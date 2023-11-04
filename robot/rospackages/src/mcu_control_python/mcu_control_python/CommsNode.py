@@ -253,6 +253,8 @@ class CommsNode(Node):
 
     def __init__(self):
         global ser, ser_hardware, ser_science
+        node_name = 'comms_node'
+        super().__init__(node_name)
         if local_mode:
             ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
         elif os.path.exists('/dev/ttyACM0'):
@@ -271,8 +273,6 @@ class CommsNode(Node):
         else:
             ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
 
-        node_name = 'comms_node'
-        super().__init__(node_name)
         self.get_logger().info('Initialized "' + node_name + '" node for pub/sub/service functionality')
 
         #angle_pub_topic = '/arm_joint_states'

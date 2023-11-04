@@ -1,13 +1,14 @@
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ArmCommands import arm_out_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.WheelsCommands import wheel_out_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.PdsCommands import pds_out_commands
+from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ScienceCommands import science_out_commands
 
 ARM_SELECTED = 0
 ROVER_SELECTED = 1
 PDS_SELECTED = 2
 SCIENCE_SELECTED = 3
 
-out_commands = [arm_out_commands, wheel_out_commands, pds_out_commands, None]
+out_commands = [arm_out_commands, wheel_out_commands, pds_out_commands, science_out_commands]
 
 def parse_command(message):
     full_command = message.data.split(" ")
