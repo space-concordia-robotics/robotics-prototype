@@ -20,6 +20,7 @@ from sensor_msgs.msg import JointState
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.CommandParser import *
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ArmCommands import arm_out_commands, arm_in_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.WheelsCommands import wheel_out_commands, wheel_in_commands
+from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.ScienceCommands import science_out_commands, science_in_commands
 from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.DriveControls import *
 import robot.rospackages.src.mcu_control_python.mcu_control_python.definitions.CommsDataTypes as dt
 
@@ -30,8 +31,6 @@ if len(sys.argv) >= 2:
 
 if not local_mode:
     import Jetson.GPIO as gpio
-
-in_commands = [arm_in_commands, wheel_in_commands, None, None]
 
 # over USB, there is no way to select a device, so this node
 # needs to know which one it's 'hearing' from.
@@ -49,6 +48,9 @@ if local_mode:
     from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.CommandParser import emptyObject as gpio
 else:
     import Jetson.GPIO as gpio
+
+in_commands = [arm_in_commands, wheel_in_commands, None, science_in_commands]
+
 
 
 def get_handler(commandId, selectedDevice):
@@ -69,6 +71,9 @@ SW_PINS = [15,13,11]
 
 
 ser = None
+# Hack since science teensy is USB
+ser_hardware = None
+ser_science = None
 
 STOP_BYTE = 0x0A
 
@@ -124,15 +129,31 @@ def send_queued_commands():
     if (len(rover_queue) > 0):
         rover_command = rover_queue.popleft()
         send_command(rover_command[0], rover_command[1], rover_command[2])
+    
+    if (len(science_queue) > 0):
+        # HACK for USB science
+        if not local_mode:
+            ser = ser_science
+        science_command = science_queue.popleft()
+        send_command(science_command[0], science_command[1], science_command[2])
+        if not local_mode:
+            ser = ser_hardware
+
 
 if local_mode:
     # in local mode can only simulate connection to one device
     device_range = [local_selected_device]
 else:
-    device_range = range(2)
+    device_range = range(4)
 
 def receive_message():
     for device in device_range:
+        if not local_mode:
+            if device == SCIENCE_SELECTED:
+                ser = ser_science
+            else:
+                ser = ser_hardware
+
         gpio.output(SW_PINS, PIN_DESC[device])
         
         if ser is not None and ser.in_waiting > 0:
@@ -231,9 +252,22 @@ def get_arg_bytes(command_tuple):
 class CommsNode(Node):
 
     def __init__(self):
-        global ser
+        global ser, ser_hardware, ser_science
         if local_mode:
             ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+        elif os.path.exists('/dev/ttyACM0'):
+            self.get_logger().info('Science MCU is mounted at USB, attempting to open serial port')
+            start = time.time()
+            # loop for a max of 60sec
+            while time.time() - start < 60:
+                try:
+                    ser_hardware = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
+                    ser = ser_hardware
+                    ser_science = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+                    break
+                except serial.SerialException as e:
+                    self.get_logger().warn("Retrying connection to science, error occured " + str(e))
+                    time.sleep(1)
         else:
             ser = serial.Serial('/dev/ttyTHS2', 57600, timeout = 1)
 
@@ -261,6 +295,10 @@ class CommsNode(Node):
         self.get_logger().info('Beginning to subscribe to "' + rover_command_topic + '" topic')
         sub = self.create_subscription(String, rover_command_topic, self.rover_command_callback, 10)
 
+        science_command_topic = '/science_command'
+        self.get_logger().info('Beginning to subscribe to "' + science_command_topic + '" topic')
+        sub = self.create_subscription(String, science_command_topic, self.science_command_callback, 10)    
+
         rover_twist_topic = '/rover_cmd_vel'
         self.get_logger().info('Beginning to subscribe to "' + rover_twist_topic + '" topic')
         rover_twist_sub = self.create_subscription(Twist, rover_twist_topic, twist_rover_callback, 10)
@@ -282,5 +320,14 @@ class CommsNode(Node):
 
         temp_struct = [command, args, ROVER_SELECTED]
         rover_queue.append(temp_struct)
+    
+    def science_command_callback(self, message):
+        self.get_logger().info('received: ' + message.data + ' command, sending to science Teensy')
+        command, args = parse_command(message)
+
+        temp_struct = [command, args, SCIENCE_SELECTED]
+        science_queue.append(temp_struct)
 
 ser = None
+ser_science = None
+ser_hardware = None
