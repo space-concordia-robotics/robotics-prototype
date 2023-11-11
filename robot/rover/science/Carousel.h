@@ -14,10 +14,7 @@
 
 enum CarouselState {
     Not_Moving,
-    Moving_Carousel,
-    Spin_Mix_Positive,
-    Spin_Mix_Negative,
-    Negative_Correct
+    Moving_Carousel
 };
 
 // Forward declaration
@@ -29,6 +26,7 @@ class Carousel : public Updatable {
   LSSServoMotor servo;
   int servoId;
   char queryBuffer[15]; // Buffer for queries sent to servo
+
 
   // Used as an offset relative to the absolute encoder on the servo
   int32_t angleOffset;
@@ -43,7 +41,11 @@ class Carousel : public Updatable {
   const static int8_t NUM_TEST_TUBES = 6;
   const static uint16_t DEGREES_PER_TEST_TUBE = (int)((360.0 / NUM_TEST_TUBES) * 10); 
 
-  // current virtual angle of carousel  
+  // Used to ensure that a break in communication does not cause a desync.
+  // The idea is to send the servo absolute commands about where to go, but
+  // if they are kept in the range 0-360 degrees, when crossing from 360-0 (test tube 5 to 0),
+  // the servo goes the long way around. Keeping track of the virtual angle the servo stores (which
+  // can go beyond 360 deg) prevents that. See https://wiki.lynxmotion.com/info/wiki/lynxmotion/view/lynxmotion-smart-servo/lss-communication-protocol/#HPositioninDegrees28D29
   int32_t virtualAngle;
 
   // sets up interrupt callback
