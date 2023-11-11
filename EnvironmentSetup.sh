@@ -1,118 +1,40 @@
-#!/usr/bin/env bash
-# Setup script which install the Space Concordia Robotics Software team's development environment.
+#!/bin/bash
+# Setup script for Space Concordia Development Environment
 
-APPEND_TO_BASH="
+echo "Updating apt lists..."
 
-#------ ROBOTICS SETTINGS ------
-# competition mode
-#export ROS_MASTER_URI=http://172.16.1.30:11311
-#export ROS_HOSTNAME=$USER
-# local mode
-export ROS_MASTER_URI=http://localhost:11311
-export ROS_HOSTNAME=localhost
+sudo apt -qq update -y
 
-source ~/Programming/robotics-prototype/robot/rospackages/devel/setup.bash
-source ~/Programming/robotics-prototype/venv/bin/activate
-source ~/Programming/robotics-prototype/robot/rover/config/.bash_aliases
+echo "Setting up python virtual environment and installing requirements..."
 
-#------ POST ROS INSTALLATION ------
-alias eb='nano ~/.bashrc'
-alias sb='source ~/.bashrc'
-alias gs='git status'
-alias gp='git pull'
-alias cw='cd ~/Programming/robotics-prototype/robot/rospackages/'
-alias cm='cw && catkin_make'
-"
+sudo apt-get install -y python3-pip python3-venv
 
-APPEND_TO_BASH_ALIASES='
-ROBOTICS_WS="/home/$USER/Programming/robotics-prototype"
-BASE="$ROBOTICS_WS/robot/basestation"
-ROVER="$ROBOTICS_WS/robot/rover"
-ROSPACKAGES="$ROBOTICS_WS/robot/rospackages"
-BASH_A="~/.bash_aliases"
-NANORC="~/.nanorc"
-
-# general shortcuts
-alias ..="cd .."
-alias b="cd -"
-alias robotics="cd $ROBOTICS_WS"
-alias base="cd $BASE"
-alias rover="cd $ROVER"
-alias arm="cd $ROVER/ArmDriverUnit"
-alias wheels="cd $ROVER/MobilePlatform"
-alias rostings="cd $ROSPACKAGES"
-alias mcu="cd $ROSPACKAGES/src/mcu_control/scripts"
-alias util="cd $ROBOTICS_WS/robot/util"'
-
-FINAL_MESSAGE="
-
-#################################
-The script will now exit, you should test the installation using these steps:
-1. Open a new terminal window to apply changes
--> it should automatically start with virtual env activated and you should be able to use aliases that you can lookup in your ~/.bashrc and ~/.bash_aliases files
-2. verify ROS installation using 'roscore'
-#################################"
-
-REPO="/home/$USER/Programming/robotics-prototype"
-ROS_VERSION="melodic"
-
-# check if in proper directory
-SCRIPT_LOCATION=$REPO/EnvironmentSetup.sh
-if [ ! -f $SCRIPT_LOCATION ]
-then
-    # -e enables text editing, \e[#m sets a text colour or background colour. \e[0 ends the edit.
-    echo -e "\e[31m\e[47mYou did not setup the repo directory correctly. Refer to README\e[0m"
-    exit 1
-fi
-
-
-# install prereqs
-sudo apt update -y
-sudo apt install python3.6-venv git python3-pip -y
-
-# necessary for `ifconfig` in env.sh
-sudo apt install net-tools
-
-# Setup venv
-python3.6 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
-
-# Install Requirements
 pip install -U pip
 pip install -r requirements.txt
 
-# Setup python and allow for module imports from within repo
-python setup.py develop
+python3 setup.py develop
 
+echo "Installing ROS..."
+bash scripts/ros_install.sh
 
-# Install ROS
-bash scripts/install_ros.sh
+echo "Installing Arduino IDE..."
+bash scripts/OLD_install-arduino_teensyduino
 
-
-# Edit ~/.bash_aliases
-# Ensures that you can connect to someones else's ip to access GUI
-# Add aliases to terminal
-# Makes your terminal start in (venv)
-echo "$APPEND_TO_BASH" >> ~/.bashrc
-echo "$APPEND_TO_BASH_ALIASES" >> ~/.bash_aliases
+cp scripts/.bash_robotics ~/.bash_robotics
+echo "source ~/.bash_robotics" >> ~/.bashrc
 source ~/.bashrc
 
-
-# Run env.sh
-cd $REPO/robot/basestation
-./env.sh >| static/js/env.js
-
-
-# Setup git hooks
-cd $REPO
+echo "Setting up Git hooks..."
 cp commit_message_hook.py .git/hooks/prepare-commit-msg
-cp branch_name_verification_hook.py .git/hooks/post-checkout
+cp branch_name_verification_hook.py ./git/hooks/post-checkout
 
+echo "Install Workspace Dependencies"
+sudo apt-get install -y ros-humble-pcl-msgs ros-humble-image-pipeline ros-humble-image-common ros-humble-vision-opencv ros-humble-perception-pcl ros-humble-ros2-ouster
 
-# Install and setup arduino IDE + Teensyduino
-bash scripts/install_arduino_teensyduino.sh
-
-
-# Exit
-echo "$FINAL_MESSAGE"
+echo "Building ROS Workspace"
+cd robot/rospackages/
+rosdep install -i --from-path src --rosdistro humble -y
+colcon build

@@ -1,3 +1,0 @@
-<launch>
-  <node name="markers_node" pkg="mcu_control" type="MarkersNode.py" />
-</launch>

@@ -1,3 +1,0 @@
-string description
-float64 totalWattHours
-float64[] individualWattHours

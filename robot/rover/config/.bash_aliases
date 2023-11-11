@@ -15,7 +15,7 @@ alias rover="cd $ROVER"
 alias arm="cd $ROVER/ArmDriverUnit"
 alias wheels="cd $ROVER/MobilePlatform"
 alias rostings="cd $ROSPACKAGES"
-alias mcunode="cd $ROSPACKAGES/src/mcu_control/scripts"
+alias mcunode="cd $ROSPACKAGES/src/mcu_control_python/mcu_control_python"
 alias upload="cmake --build $ROVER/build --target "
 alias cmake_clean="cmake --build $ROVER/build --target cleanup && rm -rf $ROVER/build"
 

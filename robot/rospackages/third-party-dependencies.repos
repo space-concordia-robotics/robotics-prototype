@@ -1,0 +1,5 @@
+repositories:
+    src/third-party-deps/ros2_aruco:
+        type: git    
+        url: git@github.com:JMU-ROBOTICS-VIVA/ros2_aruco.git    
+        version: main

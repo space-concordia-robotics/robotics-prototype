@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>camera_vision</name>
+  <name>mcu_control_python</name>
   <version>0.0.0</version>
-  <description>Space Concordia Robotics package for camera vision of our Rover and Arm</description>
-  <maintainer email="williamwells2013@hotmail.com">William Wells</maintainer>
-  <license>MIT</license>
+  <description>TODO: Package description</description>
+  <maintainer email="williamwells2013@hotmail.com">william</maintainer>
+  <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -14,5 +14,8 @@
 
   <export>
     <build_type>ament_python</build_type>
+    <exec_depend>rclpy</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
   </export>
+
 </package>

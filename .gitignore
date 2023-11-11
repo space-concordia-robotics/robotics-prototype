@@ -6,6 +6,7 @@
 .pytest*
 *.egg-info
 *sh.exe.stackdump
+dist
 venv
 env
 .envrc
@@ -16,6 +17,8 @@ emailer.log
 rosRoverStart.log
 status_done
 build
+install
+log
 cmake-build-debug
 devel
 odroid_rx.txt
@@ -41,3 +44,6 @@ robot/rover/comms_demo/arduino_demos/pong_bing/CMakeLists.txt
 compile_commands.json
 
 Power-Report*.csv
+
+in-house-deps/
+third-party-deps/

@@ -4,12 +4,12 @@ on: push
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
-    container: ros:melodic-ros-base
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base
     steps:
 
       - name: Clone repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Environment
         run: |
@@ -17,11 +17,16 @@ jobs:
 
       - name: Configure ROS environment
         run: |
-          ./.github/workflows/ros.sh
+          ./scripts/ros_install.sh
 
-      - name: Install teensyduino and run cmake on codebase
+      - name: Install teensyduino
         run: |
-          ./.github/workflows/teensyduino.sh
+          ./scripts/OLD_install-arduino_teensyduino.sh
+          
+      - name: Run cmake for building MCU code
+        run: |
+          ./scripts/run_cmake_mcu.sh
+
 
 
           #      - name: Run pytest

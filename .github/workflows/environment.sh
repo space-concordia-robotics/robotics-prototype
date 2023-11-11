@@ -2,12 +2,17 @@
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install python3.6-venv git python3-pip net-tools -y
+sudo apt-get install -y python3-pip python3-venv
 
-python3.6 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
 pip install -U pip
 pip install -r requirements.txt
 
 python setup.py develop
+
+# Enviroment setup for arduino install
+sudo apt-get install snapd -y
+sudo apt-get install zip unzip -y
+sudo apt-get install wget -y
