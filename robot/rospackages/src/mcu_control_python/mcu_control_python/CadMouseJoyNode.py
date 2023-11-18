@@ -92,8 +92,6 @@ def main(args=None):
 
   cad_mouse_node = CadMouseJoyNode()
 
-  # rate = comms_node.create_rate(10)
-
   try:
     cad_mouse_node.readMouseInput()
 
