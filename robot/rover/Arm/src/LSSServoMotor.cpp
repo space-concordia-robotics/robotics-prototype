@@ -26,7 +26,30 @@ void LSSServoMotor::writeActionCommand(unsigned int servoId,
   // it won't work otherwise
   delay(1);
 }
+/**
+ * Modified action command
+ *
+ * @param servoId
+ * @param actionCommand
+ * @param actionValue
+ * @param modifier
+ * @param modifierValue
+ */
+void LSSServoMotor::writeModifiedActionCommand(unsigned int servoId,
+                                       const char* actionCommand,
+                                       int actionValue, const char* modifier, int modifierValue) {
+  ServosSerialBus->write('#');
+  ServosSerialBus->print(servoId, DEC);
+  ServosSerialBus->write(actionCommand);
+  ServosSerialBus->print(actionValue, DEC);
+  ServosSerialBus->write(modifier);
+  ServosSerialBus->print(modifierValue, DEC);
+  ServosSerialBus->write('\r');
 
+  // This delay is very important in order to avoid spamming the smart servos,
+  // it won't work otherwise
+  delay(1);
+}
 /**
  * Action command
  *
