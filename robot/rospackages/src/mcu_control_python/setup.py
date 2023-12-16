@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'CommsNode = mcu_control_python.CommsNode:main',
-            'CadMouseJoyNode = mcu_control_python.CadMouseJoyNode:main'
+            'CadMouseJoyNode = mcu_control_python.CadMouseJoyNode:main',
+            'IKNode = mcu_control_python.IKNode:main'
         ],
     },
 )

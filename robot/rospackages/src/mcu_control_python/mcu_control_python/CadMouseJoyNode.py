@@ -3,9 +3,7 @@
 import rclpy
 from sensor_msgs.msg import Joy
 from std_msgs.msg import Header
-import sys
 from rclpy.node import Node
-from rclpy.clock import Clock
 
 devpath = "/dev/cadmouse"
 
@@ -36,16 +34,16 @@ class CadMouseJoyNode(Node):
               if axis_raw > 32768:
                 axis_raw = axis_raw - 65536
               axis[i] = axis_raw
-            print(axis)
+            # print(axis)
           elif id == 3:
             button_raw = data[1]
             button[0] = (button_raw & 0x1) != 0
             button[1] = (button_raw & 0x2) != 0
-            print("Button: " + str(button))
+            # print("Button: " + str(button))
           elif id == 23:
             battery = data[1]
             charged = data[2] != 0
-            print("Battery:" + str(battery) + ", Charging: " + str(charged))
+            # print("Battery:" + str(battery) + ", Charging: " + str(charged))
 
           self.publishJoyMsg(axis, button)
     except KeyboardInterrupt:
