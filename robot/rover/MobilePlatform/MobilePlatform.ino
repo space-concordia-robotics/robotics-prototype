@@ -34,7 +34,7 @@ void blink(int dur)
 
 void gpsIRQ()
 {
-	noInterrupts()
+	noInterrupts();
 	if (Rover::systemStatus.is_gps_enabled)
 	{
 		if (myI2CGPS.available())
@@ -48,11 +48,11 @@ void gpsIRQ()
 			double lat = myGPS.location.lat();
 			double lng = myGPS.location.lng();
 
-			uint8_t* lat_buffer = nullptr;
-			uint8_t* lng_buffer = nullptr;
+			uint8_t lat_buffer[8];
+			uint8_t lng_buffer[8];
 
 			double2bytes(lat_buffer, lat);
-			double2bytes(lat_buffer, lng);
+			double2bytes(lng_buffer, lng);
 
 			byte data_buffer[16];
 			memcpy(data_buffer, lat_buffer, 8);
@@ -63,7 +63,7 @@ void gpsIRQ()
 			commandCenter->queueMessage(*msg);
 		}
 	}
-	interrupts()
+	interrupts();
 }
 
 void setup()
