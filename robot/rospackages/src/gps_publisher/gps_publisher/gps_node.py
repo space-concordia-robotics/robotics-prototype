@@ -23,7 +23,9 @@ class GpsPublisherNode(Node):
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_UNKNOWN
 
         self.publisher.publish(gps_msg)
-        self.get_logger().info("Published GPS data")
+        self.get_logger().info(
+            f"Published GPS data: Latitude={gps_msg.latitude}, Longitude={gps_msg.longitude}, Altitude={gps_msg.altitude}"
+        )
 
 
 def main(args=None):
