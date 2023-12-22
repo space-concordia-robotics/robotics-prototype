@@ -1,4 +1,0 @@
-<launch>
-    <node pkg="mcu_control_python" exec="CadMouseJoyNode" name="cad_mouse_joy_node" output="screen" />
-    <node pkg="mcu_control_python" exec="IKNode" name="ik_node" output="screen" />
-</launch>

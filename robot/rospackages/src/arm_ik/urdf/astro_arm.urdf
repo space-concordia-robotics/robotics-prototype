@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="arm_ik">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.016815898215029 -0.000646792484468791 -0.0161543323059765"
+        rpy="0 0 0" />
+      <mass
+        value="2.87663698583371" />
+      <inertia
+        ixx="0.00671849195911235"
+        ixy="-3.24634684932069E-07"
+        ixz="2.73000319727751E-06"
+        iyy="0.00288847750009624"
+        iyz="-7.21282567155266E-08"
+        izz="0.00894526200396734" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <!-- <mesh
+          filename="package://arm_ik/meshes/base_link.STL" /> -->
+        <mesh filename="file://$(find arm_ik)/meshes/base_linkABC.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="upper_base_link">
+    <inertial>
+      <origin
+        xyz="-0.0038368 0.0098764 -0.074989"
+        rpy="0 0 0" />
+      <mass
+        value="1.3101" />
+      <inertia
+        ixx="0.0018154"
+        ixy="6.5132E-06"
+        ixz="-2.2075E-06"
+        iyy="0.0020013"
+        iyz="-2.6621E-09"
+        izz="0.0017456" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/upper_base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/upper_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder Swivel"
+    type="continuous">
+    <origin
+      xyz="0 -0.002 0.1394"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="upper_base_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="proximal_link">
+    <inertial>
+      <origin
+        xyz="0.18405 0.0047152 0.016324"
+        rpy="0 0 0" />
+      <mass
+        value="2.5893" />
+      <inertia
+        ixx="0.0014781"
+        ixy="5.8031E-07"
+        ixz="-8.2366E-08"
+        iyy="0.010627"
+        iyz="-4.461E-07"
+        izz="0.011155" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/proximal_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/proximal_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Shoulder Flex"
+    type="continuous">
+    <origin
+      xyz="0 0 0"
+      rpy="1.5708 -1.5708 0" />
+    <parent
+      link="upper_base_link" />
+    <child
+      link="proximal_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="distal_link">
+    <inertial>
+      <origin
+        xyz="0.268962536861442 0.00174787760208386 -0.022054025985296"
+        rpy="0 0 0" />
+      <mass
+        value="1.65763295767324" />
+      <inertia
+        ixx="0.000733133181234556"
+        ixy="-3.3070252972667E-06"
+        ixz="-7.60070618966037E-08"
+        iyy="0.00946569839264885"
+        iyz="3.50054787431311E-09"
+        izz="0.00944877781067006" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/distal_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/distal_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Elbow Flex"
+    type="continuous">
+    <origin
+      xyz="0.41275 0 0.00160019999999994"
+      rpy="0 0 0" />
+    <parent
+      link="proximal_link" />
+    <child
+      link="distal_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="wrist">
+    <inertial>
+      <origin
+        xyz="0.146945140504818 0.0048536044581637 -0.00361786227152743"
+        rpy="0 0 0" />
+      <mass
+        value="0.756215199930812" />
+      <inertia
+        ixx="0.000154987411792308"
+        ixy="1.57006724938043E-06"
+        ixz="-7.99415159596611E-08"
+        iyy="0.000409442352674975"
+        iyz="-1.66648181978693E-08"
+        izz="0.000390490734818008" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/wrist.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://arm_ik/meshes/wrist.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Wrist Flex"
+    type="continuous">
+    <origin
+      xyz="0.4064 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="distal_link" />
+    <child
+      link="wrist" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+</robot>
