@@ -34,7 +34,6 @@ void blink(int dur)
 
 void gpsIRQ()
 {
-	noInterrupts();
 	if (Rover::systemStatus.is_gps_enabled)
 	{
 		if (myI2CGPS.available())
@@ -63,7 +62,6 @@ void gpsIRQ()
 			commandCenter->queueMessage(*msg);
 		}
 	}
-	interrupts();
 }
 
 void setup()
