@@ -1,5 +1,4 @@
 #include "APA102.h"
-
 #include <SparkFun_I2C_GPS_Arduino_Library.h>
 #include <TinyGPS++.h>
 #include "Rover.h"
@@ -14,6 +13,7 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
+elapsedMillis sinceGpsUpdate;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
@@ -34,6 +34,7 @@ void blink(int dur)
 
 void gpsIRQ()
 {
+	Serial.println("GPSIRQ");
 	if (Rover::systemStatus.is_gps_enabled)
 	{
 		if (myI2CGPS.available())
@@ -46,7 +47,7 @@ void gpsIRQ()
 			blink(100);
 			double lat = myGPS.location.lat();
 			double lng = myGPS.location.lng();
-
+			double alt = myGPS.altitude.meters();
 			uint8_t lat_buffer[8];
 			uint8_t lng_buffer[8];
 
@@ -61,6 +62,15 @@ void gpsIRQ()
 				data_buffer);
 			commandCenter->queueMessage(*msg);
 		}
+	}
+}
+
+void updateGpsTimer(int interval_ms = 1000)
+{
+	if (sinceGpsUpdate >= interval_ms)
+	{
+		gpsIRQ();
+		sinceGpsUpdate = 0;
 	}
 }
 
@@ -86,8 +96,6 @@ void setup()
 	// Here different parameters of how the system should behave can be set
 	Rover::systemStatus.is_throttle_timeout_enabled = true;
 	Rover::systemStatus.is_gps_enabled = true;
-
-	gpsTimer.begin(gpsIRQ, 1000000);
 }
 
 void loop()
@@ -112,7 +120,8 @@ void loop()
 	{
 		Rover::decelerateRover();
 	}
-
+	// Update gps data every second
+	updateGpsTimer(1000);
 	// In case there are any messages queued in the transmit buffer, they should be sent.
 	commandCenter->sendMessage();
 }
