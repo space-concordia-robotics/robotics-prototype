@@ -13,13 +13,12 @@ const uint8_t TX_TEENSY_3_6_PIN = 1;
 const uint8_t RX_TEENSY_3_6_PIN = 0;
 const uint8_t ENABLE_PIN = 15;
 const uint8_t TRANSMIT_PIN = 14;
-elapsedMillis sinceGpsUpdate;
 
 internal_comms::CommandCenter* commandCenter = new WheelsCommandCenter();
 
 I2CGPS myI2CGPS;
 TinyGPSPlus myGPS;
-IntervalTimer gpsTimer;
+elapsedMillis sinceGpsUpdate;
 
 void attachMotors();
 void attachServos();
@@ -34,7 +33,6 @@ void blink(int dur)
 
 void gpsIRQ()
 {
-	Serial.println("GPSIRQ");
 	if (Rover::systemStatus.is_gps_enabled)
 	{
 		if (myI2CGPS.available())
