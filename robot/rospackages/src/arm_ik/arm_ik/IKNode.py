@@ -43,7 +43,8 @@ class IkNode(Node):
     # Joint lengths
     self.L1 = 1.354
     self.L2 = 1.333
-    self.L3 = 0.1
+    # self.L3 = 0.4992
+    self.L3 = 1.250
 
     # Cylindrical coordinates and angles
     self.calculate_cylindical()
@@ -67,6 +68,12 @@ class IkNode(Node):
     """ Performs IK calculation and stores values in self.angles.
         Returns True if within range, False otherwise"""
     try:
+      # if self.pitch >= math.pi / 2:
+      #   pitch2 = (math.pi / 2) - self.pitch
+      #   cu = self.L3 * math.sin(pitch2) - self.u
+      #   cv = self.L3 * math.cos(pitch2) - self.v
+      #   self.get_logger().warn(f"in special case for end effector pointing up")
+      # else:
       cu = self.u - self.L3 * math.sin(self.pitch)
       cv = self.v - self.L3 * math.cos(self.pitch)
       if cu == 0 or cv == 0:
@@ -87,8 +94,9 @@ class IkNode(Node):
       b3 = math.acos(B3)
 
       # contains Shoulder Swivel, Shoulder Flex, Elbow Flex, Wrist Flex (in that order)
-      self.angles = [float(self.phi), (math.pi / 2) - (b1 + a1), 
-                     math.pi - b2, math.pi - (self.pitch + a2 + b3)]
+      self.angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
+                      math.pi - b2, math.pi - (self.pitch + a2 + b3)]
+      self.get_logger().info(f"angles: {self.angles}")
       return True
 
     except ValueError as e:
@@ -102,12 +110,12 @@ class IkNode(Node):
     self.y += (-y / 30000) # forward-back of mouse
     self.z += (-z / 30000) # vertical axis of mouse
     self.th += (yaw / 150) # use rotation axis that is activated by spinning the top
-    self.pitch += (roll / 150)
+    self.pitch += (roll / 30000)
     self.calculate_cylindical()
     # Perform IK. If out of range, restore point where it was
     if not self.calculate_angles():
       self.x, self.y, self.z, self.th, self.pitch = old_values
-    # self.get_logger().info(f"Current location: {self.x} {self.y} {self.z} roll {self.th}")
+    # self.get_logger().info(f"Current location: {self.x} {self.y} {self.z} roll {self.th} pitch {self.pitch}")
     # self.get_logger().info(f"Cylindical coordinates: u {self.u} v {self.v} phi {self.phi}")
 
   def calculate_cylindical(self):
@@ -116,7 +124,10 @@ class IkNode(Node):
     if self.x == 0:
       self.phi = 0
     else:
-      self.phi = math.atan(self.y / self.x)
+      if self.x >= 0:
+        self.phi = math.atan(self.y / self.x)
+      else:
+        self.phi = math.pi + math.atan(self.y / self.x)
 
 
 def main(args=None):
