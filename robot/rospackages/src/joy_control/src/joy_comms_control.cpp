@@ -221,14 +221,15 @@ void JoyCommsControl::getCommandTopics() {
 }
 
 JoyCommsControl::JoyCommsControl() : Node("joy_comms_control_node") {
-    this->declare_parameter("enable_button", rclcpp::ParameterValue());
-    this->declare_parameter("next_layout_button", rclcpp::ParameterValue());
-    this->declare_parameter("previous_layout_button", rclcpp::ParameterValue());
-    this->declare_parameter("controller_type", rclcpp::ParameterValue());
-    this->declare_parameter("stop_commands", rclcpp::ParameterValue());
-    this->declare_parameter("command_topics", rclcpp::ParameterValue());
-    this->declare_parameter("arm_mappings", rclcpp::ParameterValue());
-    this->declare_parameter("wheel_mappings", rclcpp::ParameterValue());
+    // Add dummy values to fix compilation error
+    this->declare_parameter("enable_button", rclcpp::ParameterValue(5));
+    this->declare_parameter("next_layout_button", rclcpp::ParameterValue("BUTTON_OPTION"));
+    this->declare_parameter("previous_layout_button", rclcpp::ParameterValue("BUTTON_SHARE"));
+    this->declare_parameter("controller_type", rclcpp::ParameterValue(3));
+    this->declare_parameter("stop_commands", rclcpp::ParameterValue(std::vector<std::string>{}));
+    this->declare_parameter("command_topics", rclcpp::ParameterValue(std::vector<std::string>{}));
+    this->declare_parameter("arm_mappings", rclcpp::ParameterValue(std::vector<std::string>{}));
+    this->declare_parameter("wheel_mappings", rclcpp::ParameterValue(std::vector<std::string>{}));
 
     pImplement = new Implement;
 

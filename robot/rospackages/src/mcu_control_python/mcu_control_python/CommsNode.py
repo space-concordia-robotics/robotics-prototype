@@ -25,9 +25,13 @@ from robot.rospackages.src.mcu_control_python.mcu_control_python.commands.DriveC
 import robot.rospackages.src.mcu_control_python.mcu_control_python.definitions.CommsDataTypes as dt
 
 # TODO: Use ROS2 params instead of local commandline args
-local_mode = False
+local_mode, skip_serial = False, False
+ser = None
 if len(sys.argv) >= 2:
-    local_mode = sys.argv[1] == 'local'
+    # Skip gpio commands to test teensy code locally
+    local_mode = 'local' in sys.argv
+    # Skip all serial connections (to test controls)
+    skip_serial = 'skip_serial' in sys.argv
 
 if not local_mode:
     import Jetson.GPIO as gpio
@@ -36,11 +40,8 @@ if not local_mode:
 # needs to know which one it's 'hearing' from.
 # device is set by second argument to node.
 
-if len(sys.argv) > 0:
-    local_mode = "local" in sys.argv
+if local_mode:
     local_selected_device = SCIENCE_SELECTED
-else:
-    local_mode = False
 
 if local_mode:
     # imports an object called gpio that does nothing when
@@ -94,10 +95,11 @@ def twist_rover_callback(twist_msg):
     rover_queue.append(['move_rover',args,ROVER_SELECTED])
 
 def main(args=None):
-    if not local_mode:
-        ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
-    else:
-        ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
+    if not skip_serial:
+        if not local_mode:
+            ser = serial.Serial('/dev/ttyTHS2', 57600, timeout=1)
+        else:
+            ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
 
     rclpy.init(args=args)
 
@@ -255,7 +257,9 @@ class CommsNode(Node):
         global ser, ser_hardware, ser_science
         node_name = 'comms_node'
         super().__init__(node_name)
-        if local_mode:
+        if skip_serial:
+            pass
+        elif local_mode:
             ser = serial.Serial('/dev/ttyACM0', 57600, timeout = 1)
         elif os.path.exists('/dev/ttyACM0'):
             self.get_logger().info('Science MCU is mounted at USB, attempting to open serial port')
