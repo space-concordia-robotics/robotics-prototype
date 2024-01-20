@@ -149,6 +149,8 @@ else:
     device_range = range(4)
 
 def receive_message():
+    global ser
+
     for device in device_range:
         if not local_mode:
             if device == SCIENCE_SELECTED:
@@ -195,6 +197,8 @@ def receive_message():
                 print(e)
 
 def send_command(command_name, args, deviceToSendTo):
+    global ser
+
     command = get_command(command_name, deviceToSendTo)
     if ser is not None and command is not None:
         commandID = command[1]
