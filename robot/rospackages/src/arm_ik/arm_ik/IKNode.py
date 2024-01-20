@@ -43,7 +43,6 @@ class IkNode(Node):
     # Joint lengths
     self.L1 = 1.354
     self.L2 = 1.333
-    # self.L3 = 0.4992
     self.L3 = 1.250
 
     # Cylindrical coordinates and angles
@@ -70,21 +69,21 @@ class IkNode(Node):
     try:
       # cu and cv are the coordinates of the critical point
       cu = self.u - self.L3 * math.sin(self.pitch)
-      cv = self.v - self.L3 * math.cos(self.pitch)
+      cv = self.v + self.L3 * math.cos(self.pitch)
 
       if cu == 0 or cv == 0:
         return
       
-      if cu < 0:
-        self.get_logger().warn(f"cu < 0")
+      # if cu < 0:
+      #   self.get_logger().warn(f"cu < 0")
+      # if cv < 0:
+      #   self.get_logger().warn("cv < 0")
 
       # In this context, cu and cv are lengths, so must be positive
       a1 = math.atan(abs(cv / cu))
       a2 = math.atan(abs(cu / cv))
 
-      # self.get_logger().warn(f"cu {cu} cv {cv} a1 {a1} a2 {a2}")
-
-      L = math.sqrt(cu ** 2 + cv ** 2)
+      L = math.sqrt((cu ** 2) + (cv ** 2))
       B1 = (self.L1 ** 2 + L ** 2 - self.L2 ** 2) / (2 * self.L1 * L)
       B2 = (self.L1 ** 2 + self.L2 ** 2 - L ** 2) / (2 * self.L1 * self.L2)
       B3 = (self.L2 ** 2 + L ** 2 - self.L1 ** 2) / (2 * self.L2 * L)
@@ -96,18 +95,19 @@ class IkNode(Node):
       b2 = math.acos(B2)
       b3 = math.acos(B3)
 
-      self.get_logger().info(f"cu {cu} cv {cv} a1 {a1} a2 {a2} L {L} b1 {b1} b2 {b2} b3 {b3}")
+      # self.get_logger().info(f"cu {cu} cv {cv} a1 {a1} a2 {a2} L {L} b1 {b1} b2 {b2} b3 {b3}")
 
       # contains Shoulder Swivel, Shoulder Flex, Elbow Flex, Wrist Flex (in that order)
       if cu < 0:
         self.angles = [float(self.phi), -((math.pi / 2) - a1 + b1),
                   math.pi - b2, math.pi - (self.pitch + b3)]
+      elif cv < 0:
+        self.angles = [float(self.phi), (math.pi) - (b1 + a2),
+                  math.pi - b2, math.pi / 2 - (self.pitch + b3 + a1)]
       else:
         self.angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
                           math.pi - b2, math.pi - (self.pitch + a2 + b3)]
-      self.get_logger().info(f"angles: {self.angles}")
-      # self.get_logger().info(f"pos: {self.x} {self.y} {self.z}")
-      self.get_logger().info(f"u {self.u} v {self.v} pitch {self.pitch}")
+      # self.get_logger().info(f"angles: {self.angles}")
       return True
 
     except ValueError as e:
