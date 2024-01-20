@@ -68,20 +68,23 @@ class IkNode(Node):
     """ Performs IK calculation and stores values in self.angles.
         Returns True if within range, False otherwise"""
     try:
-      # if self.pitch >= math.pi / 2:
-      #   pitch2 = (math.pi / 2) - self.pitch
-      #   cu = self.L3 * math.sin(pitch2) - self.u
-      #   cv = self.L3 * math.cos(pitch2) - self.v
-      #   self.get_logger().warn(f"in special case for end effector pointing up")
-      # else:
+      # cu and cv are the coordinates of the critical point
       cu = self.u - self.L3 * math.sin(self.pitch)
       cv = self.v - self.L3 * math.cos(self.pitch)
+
       if cu == 0 or cv == 0:
         return
+      
+      if cu < 0:
+        self.get_logger().warn(f"cu < 0")
+
+      # In this context, cu and cv are lengths, so must be positive
+      a1 = math.atan(abs(cv / cu))
+      a2 = math.atan(abs(cu / cv))
+
+      # self.get_logger().warn(f"cu {cu} cv {cv} a1 {a1} a2 {a2}")
 
       L = math.sqrt(cu ** 2 + cv ** 2)
-      a1 = math.atan(cv / cu)
-      a2 = math.atan(cu / cv)
       B1 = (self.L1 ** 2 + L ** 2 - self.L2 ** 2) / (2 * self.L1 * L)
       B2 = (self.L1 ** 2 + self.L2 ** 2 - L ** 2) / (2 * self.L1 * self.L2)
       B3 = (self.L2 ** 2 + L ** 2 - self.L1 ** 2) / (2 * self.L2 * L)
@@ -93,10 +96,18 @@ class IkNode(Node):
       b2 = math.acos(B2)
       b3 = math.acos(B3)
 
+      self.get_logger().info(f"cu {cu} cv {cv} a1 {a1} a2 {a2} L {L} b1 {b1} b2 {b2} b3 {b3}")
+
       # contains Shoulder Swivel, Shoulder Flex, Elbow Flex, Wrist Flex (in that order)
-      self.angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
-                      math.pi - b2, math.pi - (self.pitch + a2 + b3)]
+      if cu < 0:
+        self.angles = [float(self.phi), -((math.pi / 2) - a1 + b1),
+                  math.pi - b2, math.pi - (self.pitch + b3)]
+      else:
+        self.angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
+                          math.pi - b2, math.pi - (self.pitch + a2 + b3)]
       self.get_logger().info(f"angles: {self.angles}")
+      # self.get_logger().info(f"pos: {self.x} {self.y} {self.z}")
+      self.get_logger().info(f"u {self.u} v {self.v} pitch {self.pitch}")
       return True
 
     except ValueError as e:
@@ -127,6 +138,7 @@ class IkNode(Node):
       if self.x >= 0:
         self.phi = math.atan(self.y / self.x)
       else:
+        # domain issue: atan is limited to -pi/2 to pi/2 so it loops over when x < 0
         self.phi = math.pi + math.atan(self.y / self.x)
 
 
