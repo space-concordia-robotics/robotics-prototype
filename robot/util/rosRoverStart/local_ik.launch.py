@@ -32,7 +32,14 @@ def generate_launch_description():
             package='arm_ik',
             executable='IKNode',
             name='ik_node',
-            output='screen'),
+            output='screen',
+            parameters=[
+                {'joint_lengths': [1.354, 1.333, 1.250]},
+                {'joint_angle_mins': [-180.0, -90.0, -170.0, -150.0]},
+                {'joint_angle_maxes': [180, 90.0, 170.0, 150.0]},
+                {'sensitivity': 2.0}
+            ]
+                        ),
         Node(
             package='arm_ik',
             executable='CadMouseJoyNode',
