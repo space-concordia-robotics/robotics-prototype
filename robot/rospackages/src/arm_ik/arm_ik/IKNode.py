@@ -129,13 +129,9 @@ class IkNode(Node):
       cu = self.u - self.L3 * math.sin(self.pitch)
       cv = self.v + self.L3 * math.cos(self.pitch)
 
-      if cu == 0 or cv == 0:
-        return
-      
-      # if cu < 0:
-      #   self.get_logger().warn(f"cu < 0")
-      # if cv < 0:
-      #   self.get_logger().warn("cv < 0")
+      if cu < 0 and cv < 0:
+        self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} out of range")
+        return False
 
       # In this context, cu and cv are lengths, so must be positive
       a1 = math.atan(abs(cv / cu))
@@ -173,7 +169,7 @@ class IkNode(Node):
         self.get_logger().warn(f"Outside joint limits")
         return False
 
-      # self.get_logger().info(f"angles: {self.angles}")
+      self.get_logger().info(f"angles: {self.angles}")
       return True
 
     except ValueError as e:
@@ -209,8 +205,14 @@ class IkNode(Node):
       if self.x >= 0:
         self.phi = math.atan(self.y / self.x)
       else:
-        # domain issue: atan is limited to -pi/2 to pi/2 so it loops over when x < 0
-        self.phi = math.pi + math.atan(self.y / self.x)
+        if self.y >= 0:
+          # In second quadrant
+          # domain issue: atan is limited to -pi/2 to pi/2 so it loops over when x < 0
+          self.phi = math.pi + math.atan(self.y / self.x)
+        else:
+          # In third quadrant
+          self.phi = -(math.pi - math.atan(self.y / self.x))
+  
   
   def calculate_cartesian(self):
     # The v axis is the same as the z axis, the u is perpendicular to it
