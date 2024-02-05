@@ -6,25 +6,23 @@ from std_msgs.msg import Header
 
 
 class GpsPublisherNode(Node):
-    def __init__(self):
+    def __init__(self, gps_pub_topic="/gps_data"):
         super().__init__("gps_publisher_node")
-        self.publisher = self.create_publisher(NavSatFix, "gps_data", 10)
+        self.publisher = self.create_publisher(NavSatFix, gps_pub_topic, 10)
         self.timer = self.create_timer(1.0, self.publish_gps_data)
 
-    def publish_gps_data(self):
+    def publish_gps_data(self, latitude, longitude, altitude=0.0):
         gps_msg = NavSatFix()
         gps_msg.header = Header()
-
-        # Place holder gps values
-        gps_msg.latitude = 37.7749
-        gps_msg.longitude = -122.4194
-        gps_msg.altitude = 0.0
-        gps_msg.position_covariance = [0.0] * 9
-        gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_UNKNOWN
+        gps_msg.header.stamp = self.get_clock().now().to_msg()
+        gps_msg.header.frame_id = "gps"
+        gps_msg.latitude = latitude
+        gps_msg.longitude = longitude
+        gps_msg.altitude = altitude  # currently unused
 
         self.publisher.publish(gps_msg)
         self.get_logger().info(
-            f"Published GPS data: Latitude={gps_msg.latitude}, Longitude={gps_msg.longitude}, Altitude={gps_msg.altitude}"
+            f"Published GPS data: Latitude={gps_msg.latitude}, Longitude={gps_msg.longitude}"
         )
 
 
