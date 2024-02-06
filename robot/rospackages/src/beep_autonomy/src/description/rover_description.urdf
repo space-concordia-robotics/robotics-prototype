@@ -4,25 +4,25 @@
   <!-- Define robot constants -->
   <xacro:property name="scale_factor" value="1"/>
 
-  <xacro:property name="base_width" value="0.2"/>
-  <xacro:property name="base_length" value="0.42"/>
-  <xacro:property name="base_height" value="0.1"/>
+  <xacro:property name="base_width" value="0.31"/>
+  <xacro:property name="base_length" value="0.84"/>
+  <xacro:property name="base_height" value="0.18"/>
 
-  <xacro:property name="wheel_radius" value="0.065"/>
-  <xacro:property name="wheel_width" value="0.1"/>
+  <xacro:property name="wheel_radius" value="0.15"/>
+  <xacro:property name="wheel_width" value="0.125"/>
   <xacro:property name="wheel_yoff" value="0.25"/>
   <xacro:property name="wheel_zoff" value="0.05"/>
   <xacro:property name="wheel_xoff" value="0.12"/>
 
-  <xacro:property name="wheel_spacing" value="0.25"/>
-  <xacro:property name="wheel_height" value="0.15"/>
+  <xacro:property name="wheel_spacing" value="0.45"/>
+  <xacro:property name="wheel_height" value="0.25"/>
 
   
   
   <xacro:property name="bogey_pivot_zoff" value="0"/>
-  <xacro:property name="bogey_width" value="0.05"/>
+  <xacro:property name="bogey_width" value="0.065"/>
 
-  <xacro:property name="back_pivot_zoff" value="0.05"/>
+  <xacro:property name="pivot_zoff" value="0.05"/>
   
 
 
@@ -48,21 +48,36 @@
   <link name="base_link">
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <visual>
+      <origin xyz="-0.06 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${base_length} ${base_width} ${base_height}"/>
+        <box size="0.68 ${base_width} ${base_height}"/>
       </geometry>
       <material name="Cyan">
         <color rgba="0 1.0 1.0 1.0"/>
       </material>
     </visual>
+    <visual>
+      <origin xyz="0.37 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="0.18 ${base_width} 0.08"/>
+      </geometry>
+    </visual>
     
     <collision>
+      <origin xyz="-0.06 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${base_length} ${base_width} ${base_height}"/>
+        <box size="0.68 ${base_width} ${base_height}"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.37 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="0.18 ${base_width} 0.08"/>
       </geometry>
     </collision>
 
-    <xacro:box_inertia m="0.1" w="${base_length}" d="${base_width}" h="${base_height}" xoff="0" yoff="0" zoff="0"/>
+    <xacro:box_inertia m="15" w="0.68" d="${base_width}" h="${base_height}" xoff="-0.06" yoff="0" zoff="0"/>
+    <xacro:box_inertia m="1" w="0.18" d="${base_width}" h="0.08" xoff="0.37" yoff="0" zoff="0"/>
   </link>
 
   <!-- Robot Footprint -->
@@ -89,64 +104,43 @@
                 <box size="${wheel_spacing*1.2} ${bogey_width} ${bogey_width}"/>
             </geometry>
           </collision>
-          <xacro:box_inertia m="0.1" w="${bogey_width}" d="${wheel_spacing*1.2}" h="${bogey_width}" xoff="0" yoff="0" zoff="0"/>
+          <xacro:box_inertia m="1" w="${bogey_width}" d="${wheel_spacing*1.2}" h="${bogey_width}" xoff="0" yoff="0" zoff="0"/>
       </link>
-      <joint name="${prefix}_joint" type="continuous">
+      <joint name="${prefix}_joint" type="revolute">
+          <limit effort="1000.0" lower="-0.5" upper="0.5" velocity="0.5"/>
           <parent link="base_link"/>
           <child link="${prefix}_link"/>
-          <origin xyz="${wheel_spacing/2} ${y_reflect*(base_width/2+bogey_width/2)} ${-back_pivot_zoff}" rpy="0.0 0.0 0.0"/>
+          <origin xyz="${wheel_spacing/2} ${y_reflect*(base_width/2+bogey_width/2)} ${-pivot_zoff}" rpy="0.0 0.0 0.0"/>
           <axis xyz="0 1 0"/>
       </joint>
   </xacro:macro>
   
-  <!-- <xacro:bogey prefix="bogey_l" y_reflect="1"/>
-  <xacro:bogey prefix="bogey_r" y_reflect="-1"/> -->
+  <xacro:bogey prefix="bogey_l" y_reflect="1"/>
+  <xacro:bogey prefix="bogey_r" y_reflect="-1"/>
 
-  <!--Back Pivot-->
-  <!-- <link name="back_pivot_link">
-    <visual>
-      <origin xyz="${(wheel_spacing-base_length/2)*3/4} 0.0 0.0" rpy="0.0 ${pi/2} 0.0"/>
-      <geometry>
-        <cylinder radius="${wheel_spacing/2-base_length/4}" length="${wheel_spacing/2-base_length/4}"/>
-      </geometry>
-    </visual>
+  <link name="bogey_b_link">
     <visual>
       <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${wheel_spacing-base_length/2} ${base_width+2*bogey_width} ${wheel_spacing-base_length/2}"/>
-      </geometry>
-    </visual>
-    <visual>
-      <origin xyz="0.0 ${(base_width+2*bogey_width-(wheel_spacing-base_length/2))/2} ${-(wheel_height-back_pivot_zoff)/2}" rpy="0.0 0.0 0.0"/>
-      <geometry>
-        <box size="${wheel_spacing-base_length/2} ${wheel_spacing-base_length/2} ${(wheel_height-back_pivot_zoff)+wheel_spacing-base_length/2}"/>
-      </geometry>
-    </visual>
-    <visual>
-      <origin xyz="0.0 ${-(base_width+2*bogey_width-(wheel_spacing-base_length/2))/2} ${-(wheel_height-back_pivot_zoff)/2}" rpy="0.0 0.0 0.0"/>
-      <geometry>
-        <box size="${wheel_spacing-base_length/2} ${wheel_spacing-base_length/2} ${(wheel_height-back_pivot_zoff)+wheel_spacing-base_length/2}"/>
+        <box size="${bogey_width} ${base_width+2*bogey_width} ${bogey_width}"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 ${-(wheel_height-back_pivot_zoff)/2}" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <geometry>
-        <box size="${wheel_spacing-base_length/2} ${base_width+2*bogey_width} ${(wheel_height-back_pivot_zoff)}"/>
+        <box size="${bogey_width} ${base_width+bogey_width} ${bogey_width}"/>
       </geometry>
     </collision>
-    <xacro:box_inertia m="2" w="${base_width+2*bogey_width}" d="${wheel_spacing-base_length/2}" h="${(wheel_height-back_pivot_zoff)}" xoff="0" yoff="0" zoff="${-(wheel_height-back_pivot_zoff)/2}"/>
+    <xacro:box_inertia m="1" w="${base_width+2*bogey_width}" d="${bogey_width}" h="${bogey_width}" xoff="0" yoff="0" zoff="0"/>
   </link>
-  
-  <joint name="back_pivot_joint" type="continuous">
+  <joint name="bogey_b_joint" type="continuous">
     <parent link="base_link"/>
-    <child link="back_pivot_link"/>
-    <origin xyz="${-wheel_spacing} 0.0 ${-back_pivot_zoff}" rpy="0.0 0.0 0.0"/>
-  </joint> -->
-
-  
+    <child link="bogey_b_link"/>
+    <origin xyz="${-wheel_spacing} 0.0 ${-pivot_zoff}" rpy="0.0 0.0 0.0"/>
+  </joint>  
 
   <!-- Wheels -->
-  <xacro:macro name="wheel" params="prefix x_off y_off z_off x_reflect y_reflect type">
+  <xacro:macro name="wheel" params="parent prefix x_off y_off z_off x_reflect y_reflect type">
     <link name="${prefix}_link">
       <visual>
         <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
@@ -164,11 +158,11 @@
         </geometry>
       </collision>
       
-      <xacro:cylinder_inertia m="0.1" r="${wheel_radius}" h="${wheel_width}"/>
+      <xacro:cylinder_inertia m="1" r="${wheel_radius}" h="${wheel_width}"/>
     </link>
 
     <joint name="${prefix}_joint" type="${type}">
-      <parent link="base_link"/>
+      <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_reflect*x_off} ${y_reflect*(y_off)} ${z_off}" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
@@ -177,48 +171,29 @@
     
   </xacro:macro>
   
-  <xacro:wheel prefix="wheel_l_f" x_off="${wheel_spacing}" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="1" y_reflect="1" type="continuous"/>
-  <xacro:wheel prefix="wheel_l_m" x_off="0" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="1" y_reflect="1" type="continuous"/>
-  <xacro:wheel prefix="wheel_l_b" x_off="${wheel_spacing}" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="-1" y_reflect="1" type="continuous"/>
-  <xacro:wheel prefix="wheel_r_f" x_off="${wheel_spacing}" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="1" y_reflect="-1" type="continuous"/>
-  <xacro:wheel prefix="wheel_r_m" x_off="0" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="1" y_reflect="-1" type="continuous"/>
-  <xacro:wheel prefix="wheel_r_b" x_off="${wheel_spacing}" y_off="${base_width/2+wheel_width/2}" z_off="${-wheel_height}" x_reflect="-1" y_reflect="-1" type="continuous"/>
+  <xacro:wheel parent="bogey_l" prefix="wheel_l_f" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="1" y_reflect="1" type="continuous"/>
+  <xacro:wheel parent="bogey_l" prefix="wheel_l_m" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="1" type="continuous"/>
+  <xacro:wheel parent="bogey_b" prefix="wheel_l_b" x_off="0" y_off="${base_width/2+bogey_width+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="1" type="continuous"/>
+  <xacro:wheel parent="bogey_r" prefix="wheel_r_f" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="1" y_reflect="-1" type="continuous"/>
+  <xacro:wheel parent="bogey_r" prefix="wheel_r_m" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="-1" type="continuous"/>
+  <xacro:wheel parent="bogey_b" prefix="wheel_r_b" x_off="0" y_off="${base_width/2+bogey_width+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="-1" type="continuous"/>
   
-  <!-- <xacro:wheel parent_object="bogey_l" prefix="wheel_l_f" x_off="${wheel_spacing/2}" y_off="${bogey_width}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="1" y_reflect="1"/>
-  <xacro:wheel parent_object="bogey_l" prefix="wheel_l_m" x_off="${wheel_spacing/2}" y_off="${bogey_width}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="-1" y_reflect="1"/>
-  <xacro:wheel parent_object="bogey_r" prefix="wheel_r_f" x_off="${wheel_spacing/2}" y_off="${bogey_width}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="1" y_reflect="-1"/>
-  <xacro:wheel parent_object="bogey_r" prefix="wheel_r_m" x_off="${wheel_spacing/2}" y_off="${bogey_width}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="-1" y_reflect="-1"/>
-  <xacro:wheel parent_object="back_pivot" prefix="wheel_l_b" x_off="0" y_off="${bogey_width+(base_width+bogey_width)/2}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="1" y_reflect="1"/>
-  <xacro:wheel parent_object="back_pivot" prefix="wheel_r_b" x_off="0" y_off="${bogey_width+(base_width+bogey_width)/2}" z_off="${-(wheel_height-back_pivot_zoff)}" x_reflect="1" y_reflect="-1"/> -->
+  
 
 
-  <link name="imu_link">
-    <visual>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </visual>
-  
-    <collision>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
-  
-    <xacro:box_inertia m="0.1" w="0.1" d="0.1" h="0.1" xoff="0" yoff="0" zoff="0"/>
-  </link>
+  <link name="imu_link"/>
   
   <joint name="imu_joint" type="fixed">
     <parent link="base_link"/>
     <child link="imu_link"/>
-    <origin xyz="0 0 0.01"/>
+    <origin xyz="0.37 0 0.12"/>
   </joint>
   
   <gazebo reference="imu_link">
     <sensor name="imu_sensor" type="imu">
      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
         <ros>
-          <!-- <namespace>/beep</namespace> -->
+          
           <remapping>~/out:=imu</remapping>
         </ros>
         <initial_orientation_as_reference>false</initial_orientation_as_reference>
@@ -282,33 +257,71 @@
       </imu>
     </sensor>
   </gazebo>
-  
+  <gazebo>
+    <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <joint_name>wheel_l_f_joint</joint_name>
+        <joint_name>wheel_l_m_joint</joint_name>
+        <joint_name>wheel_l_b_joint</joint_name>
+        <joint_name>wheel_r_f_joint</joint_name>
+        <joint_name>wheel_r_m_joint</joint_name>
+        <joint_name>wheel_r_b_joint</joint_name>
+        <joint_name>bogey_l_joint</joint_name>
+        <joint_name>bogey_r_joint</joint_name>
+    </plugin>
+</gazebo>
+  <gazebo>
+    <plugin name='wheel_slip' filename='libgazebo_ros_wheel_slip.so'>
+      <ros>
+        
+      </ros>
+      <wheel link_name="wheel_l_f_link">
+        <slip_compliance_lateral>1</slip_compliance_lateral>
+        <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
+        <wheel_normal_force>1</wheel_normal_force>
+      </wheel>
+      <wheel link_name="wheel_r_f_link">
+        <slip_compliance_lateral>1</slip_compliance_lateral>
+        <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
+        <wheel_normal_force>1</wheel_normal_force>
+      </wheel>
+      <wheel link_name="wheel_l_b_link">
+        <slip_compliance_lateral>1</slip_compliance_lateral>
+        <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
+        <wheel_normal_force>1</wheel_normal_force>
+      </wheel>
+      <wheel link_name="wheel_r_b_link">
+        <slip_compliance_lateral>1</slip_compliance_lateral>
+        <slip_compliance_longitudinal>1</slip_compliance_longitudinal>
+        <wheel_normal_force>1</wheel_normal_force>
+      </wheel>
+    </plugin>
+  </gazebo>
   <gazebo>
     <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
       <ros>
-          <!-- <namespace>/beep</namespace> -->
+          
       </ros>      
-      <!-- <num_wheel_pairs>3</num_wheel_pairs> -->
-      <!-- <left_joint>wheel_l_f_joint</left_joint> -->
+      <num_wheel_pairs>3</num_wheel_pairs>
+      <left_joint>wheel_l_f_joint</left_joint>
       <left_joint>wheel_l_m_joint</left_joint>
-      <!-- <left_joint>wheel_l_b_joint</left_joint> -->
-      <!-- <right_joint>wheel_r_f_joint</right_joint> -->
+      <left_joint>wheel_l_b_joint</left_joint>
+      <right_joint>wheel_r_f_joint</right_joint>
       <right_joint>wheel_r_m_joint</right_joint>
-      <!-- <right_joint>wheel_r_b_joint</right_joint> -->
+      <right_joint>wheel_r_b_joint</right_joint>
 
       <wheel_separation>${wheel_width+base_width}</wheel_separation>
       <wheel_diameter>${2*wheel_radius}</wheel_diameter>
 
 
 
-      <max_wheel_torque>1000</max_wheel_torque>
+      <max_wheel_torque>20</max_wheel_torque>
       <max_wheel_acceleration>1.0</max_wheel_acceleration>
       
       <command_topic>cmd_vel</command_topic>
 
       <publish_odom>true</publish_odom>
       <publish_odom_tf>false</publish_odom_tf>
-      <publish_wheel_tf>true</publish_wheel_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
       
       
       
@@ -341,7 +354,7 @@
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+    <origin xyz="0.37 0 0.12" rpy="0 0 0"/>
   </joint>
   
   <gazebo reference="lidar_link">
@@ -365,8 +378,8 @@
           </vertical>
         </scan>
         <range>
-          <min>0.120000</min>
-          <max>3.5</max>
+          <min>0.150000</min>
+          <max>90</max>
           <resolution>0.015000</resolution>
         </range>
         <noise>
@@ -385,7 +398,7 @@
     </sensor>
   </gazebo>
 
-  <!-- <link name="gps_link" >
+  <link name="gps_link" >
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -434,19 +447,7 @@
         <frame_name>gps_link</frame_name>
       </plugin>
     </sensor>
-  </gazebo> -->
-<!-- 
-  <gazebo>
-    <plugin name="turtlebot3_joint_state" filename="libgazebo_ros_joint_state_publisher.so">
-      <ros>
-        
-        <remapping>~/out:=joint_states</remapping>
-      </ros>
-      <update_rate>30</update_rate>
-      <joint_name>wheel_l_m_joint</joint_name>
-      <joint_name>wheel_r_m_joint</joint_name>
-    </plugin> 
-  </gazebo> -->
+  </gazebo>
   
 
 
