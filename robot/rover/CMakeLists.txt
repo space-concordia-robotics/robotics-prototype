@@ -60,9 +60,9 @@ set(SPARKFUN_GPS_PATH ${ARDUINO_EXTERNAL_LIB}/SparkFun_I2C_GPS_Reading_and_Contr
 set(SPARKFUN_GPS_URL https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library)
 set(SPARKFUN_GPS_VERSION v1.0.2)
 
-set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
-set(ADAFRUIT_URL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
-set(ADAFRUIT_VERSION 1.0.9)
+###set(ADAFRUIT_PATH ${ARDUINO_EXTERNAL_LIB}/Adafruit_Motor_Shield_V2_Library)
+##set(ADAFRUIT_URL https://github.com/adafruit/Adafruit_Motor_Shield_V2_Library)
+#set(ADAFRUIT_VERSION 1.0.9)
 
 set(LSM303_PATH ${ARDUINO_EXTERNAL_LIB}/LSM303)
 set(LSM303_URL https://github.com/pololu/lsm303-arduino)
@@ -78,7 +78,7 @@ set(ETL_VERSION 19.4.3)
 
 project(rover)
 checkLibraries(ArduinoBlue ${ARDUINO_BLUE_VERSION}  ${ARDUINO_BLUE_URL})
-checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
+#checkLibraries(Adafruit_Motor_Shield_V2_Library ${ADAFRUIT_VERSION} ${ADAFRUIT_URL})
 checkLibraries(LSM303 ${LSM303_VERSION} ${LSM303_URL})
 checkLibraries(SparkFun_I2C_GPS_Reading_and_Control ${SPARKFUN_GPS_VERSION} ${SPARKFUN_GPS_URL})
 checkLibraries(TinyGPS ${TINYGPS_VERSION} ${TINYGPS_URL})
@@ -182,7 +182,7 @@ createCppLibrary(${ENCODER_PATH}/Encoder.cpp Encoder "")
 createCppLibrary("${WIRE_PATH}/Wire.cpp;${WIRE_PATH}/WireIMXRT.cpp;${WIRE_PATH}/WireKinetis.cpp" Wire "")
 
 #create the external teensy libraries
-createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
+#createCppLibrary("${ADAFRUIT_PATH}/Adafruit_MotorShield.cpp;${ADAFRUIT_PATH}/utility/Adafruit_MS_PWMServoDriver.cpp" Adafruit ${ADAFRUIT_PATH}/utility)
 createCppLibrary(${SPARKFUN_GPS_PATH}/SparkFun_I2C_GPS_Arduino_Library.cpp SparkFunGPS "")
 createCppLibrary(${LSM303_PATH}/LSM303.cpp LSM303 ${LSM303_PATH})
 createCppLibrary(${TINYGPS_PATH}/TinyGPS++.cpp TinyGPS "")
@@ -228,8 +228,8 @@ foreach(path ${INOFILES})
  set(EXTERNAL_LIBARRIES_INCLUDE_DIRS ${LSM303_PATH} ${ARDUINO_BLUE_PATH} ${SPARKFUN_GPS_PATH} ${TINYGPS_PATH} ${ETL_PATH})
 
  elseif(${name} STREQUAL "PidController")
- set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
- set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
+# set(PROJECT_LIBRARIES Adafruit Encoder Wire Servo)
+# set(EXTERNAL_LIBRARIES_INCLUDE_DIRS ${ADAFRUIT_PATH})
  
  endif()
  
