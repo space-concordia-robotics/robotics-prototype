@@ -354,7 +354,7 @@
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0.37 0 0.12" rpy="0 0 0"/>
+    <origin xyz="0.37 0 0.2" rpy="0 0 0"/>
   </joint>
   
   <gazebo reference="lidar_link">
@@ -395,6 +395,7 @@
         <output_type>sensor_msgs/PointCloud2</output_type>
         <frame_name>lidar_link</frame_name>
       </plugin>
+      
     </sensor>
   </gazebo>
 
@@ -448,7 +449,7 @@
       </plugin>
     </sensor>
   </gazebo>
-  
+
 
 
 </robot>

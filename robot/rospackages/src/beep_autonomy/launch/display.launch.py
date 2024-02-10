@@ -10,9 +10,9 @@ def generate_launch_description():
     pkg_share = launch_ros.substitutions.FindPackageShare(package='beep_autonomy').find('beep_autonomy')
     bringup_dir = launch_ros.substitutions.FindPackageShare(package='nav2_bringup').find('nav2_bringup')
     default_model_path = os.path.join(pkg_share, 'src/description/rover_description.urdf')
-    default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
+    default_rviz_config_path = os.path.join(pkg_share, 'rviz/default_view.rviz')
     default_params_file=os.path.join(pkg_share, 'config/nav2_params_no_map.yaml')
-    world_path=os.path.join(pkg_share, 'world/my_world.sdf')
+    world_path=os.path.join(pkg_share, 'world/sonoma.world')
     
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
@@ -196,7 +196,7 @@ def generate_launch_description():
         executable='lifecycle_manager',
         name='lifecycle_manager_navigation',
         output='screen',
-        arguments=['--ros-args', '--log-level', log_level],
+        arguments=['--ros-args', '--log-level', 'info'],
         parameters=[{'use_sim_time': use_sim_time},
                     {'autostart': autostart},
                     {'node_names': lifecycle_nodes}]

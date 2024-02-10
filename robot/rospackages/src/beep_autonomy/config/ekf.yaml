@@ -55,7 +55,7 @@ ekf_filter_node_odom:
 ekf_filter_node_map:
   ros__parameters:
     frequency: 30.0
-    two_d_mode: true  # Recommended to use 2d mode for nav2 in mostly planar environments
+    two_d_mode: false # Recommended to use 2d mode for nav2 in mostly planar environments
     print_diagnostics: true
     debug: false
     publish_tf: true
@@ -124,4 +124,4 @@ navsat_transform:
     broadcast_utm_transform: true
     publish_filtered_gps: true
     use_odometry_yaw: true
-    wait_for_datum: false 
+    wait_for_datum: false

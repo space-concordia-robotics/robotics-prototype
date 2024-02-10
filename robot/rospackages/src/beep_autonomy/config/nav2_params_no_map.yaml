@@ -193,19 +193,19 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 100.0
+      publish_frequency: 100.0
       global_frame: map
       robot_base_frame: base_link
-      robot_radius: 0.22
+      footprint: "[[0.6,0.25],[0.6,-0.25],[-0.6,-0.25],[-0.6,0.25]]"
       resolution: 0.1
       # When using GPS navigation you will potentially traverse huge environments which are not practical to
       # fit on a big static costmap. Thus it is recommended to use a rolling global costmap large enough to 
       # contain each pair of successive waypoints. See: https://github.com/ros-planning/navigation2/issues/2174
       rolling_window: True
-      width: 50
-      height: 50
-      track_unknown_space: true
+      width: 500
+      height: 500
+      track_unknown_space: false
       # no static map
       plugins: ["obstacle_layer", "inflation_layer"]
       obstacle_layer:
@@ -214,13 +214,15 @@ global_costmap:
         observation_sources: scan
         scan:
           topic: /scan
+          footprint_clearing_enabled: true
           max_obstacle_height: 2.0
+          min_obstacle_height: 0.25
           clearing: True
           marking: True
           data_type: "PointCloud2"
           raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.5
+          obstacle_max_range: 50
           obstacle_min_range: 0.0
           # outdoors there will probably be more inf points
           inf_is_valid: true
@@ -286,7 +288,7 @@ behavior_server:
     robot_base_frame: base_link
     transform_tolerance: 0.1
     simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
+    max_rotational_vel: 10.0
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
 
@@ -305,7 +307,7 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.26, 0.0, 1.0]
+    max_velocity: [0.26, 0.0, 10.0]
     min_velocity: [-0.26, 0.0, -1.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
