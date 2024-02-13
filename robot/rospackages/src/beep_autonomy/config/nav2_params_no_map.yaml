@@ -12,7 +12,8 @@ bt_navigator:
     robot_base_frame: base_link
     odom_topic: /odom
     bt_loop_duration: 10
-    default_server_timeout: 20
+    default_server_timeout: 200
+    wait_for_service_timeout: 5000
     navigators: ["navigate_to_pose", "navigate_through_poses"]
     navigate_to_pose:
       plugin: "nav2_bt_navigator/NavigateToPoseNavigator"
@@ -222,7 +223,7 @@ global_costmap:
           data_type: "PointCloud2"
           raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 50
+          obstacle_max_range: 50.0
           obstacle_min_range: 0.0
           # outdoors there will probably be more inf points
           inf_is_valid: true
