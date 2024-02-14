@@ -8,8 +8,10 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
+from std_msgs.msg import String
 import threading
 
+# Publishes angles in radians for the motors
 
 devpath = "/dev/cadmouse"
 
@@ -32,6 +34,7 @@ class IkNode(Node):
     self.declare_parameter('joint_angle_mins', [-180.0, -180.0, -180.0, -180.0])
     self.declare_parameter('joint_angle_maxes', [180.0, 180.0, 180.0, 180.0])
     self.declare_parameter('sensitivity', 1.0)
+    self.declare_parameter('mode', "")
 
     qos_profile = QoSProfile(depth=10)
     self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
@@ -66,34 +69,53 @@ class IkNode(Node):
 
     # Sensitivity
     self.sensitivity = self.get_parameter('sensitivity').get_parameter_value().double_value
-    
-    # Get initial state from absolute encoders to initialize
-    # the angle values and coordinates
-    self.initialize_angles_coords()
+
+    # Mode - if 2D y value stays 0
+    self.mode = self.get_parameter('mode').get_parameter_value().string_value
 
     joy_topic = '/cad_mouse_joy'
     self.joy_sub = self.create_subscription(Joy, joy_topic, self.joy_callback, 10)
     self.get_logger().info('Created publisher for topic "'+joy_topic)
+
+    # Get the initial angle values 
+    absenc_topic = '/absenc_values'
+    self.absenc_sub = self.create_subscription(String, absenc_topic, self.absenc_callback, 10)
+    self.get_logger().info('Created publisher for topic "'+joy_topic)
+    self.abs_angles = None
+
+    # Wait till get initial value from encoders
+    r = self.create_rate(30)
+    while self.abs_angles == None:
+      self.spin_once()
+      r.sleep()
+
+
+    # Get initial state from absolute encoders to initialize
+    # the angle values and coordinates
+    self.initialize_angles_coords()
+    
   
   def initialize_angles_coords(self):
-    # This will get the values from the actual absolute encoders. For now, hardcode example
-    angles = [0.0, 0.79, 0.79, 0.79]
-    self.angles = angles
+    absenc_angles = self.abs_angles
 
     # Start in cylindrical coords
     # The first angle swivel, it's the phi angle in the cylindrical coords system
-    self.phi = angles[0]
+    self.phi = absenc_angles[0]
 
     # This calculates u and v from the angles
     # The last three angles are flex, so add the displacement caused by these joints
-    self.u, self.v = self.coords_from_flex(angles[1:])
+    self.u, self.v = self.coords_from_flex(absenc_angles[1:])
 
     # The pitch is the angle of the gripper (wrt the previous joint) 
     # it must be set as well since this is an angle which is set directly
-    self.pitch = angles[-1]
+    self.pitch = absenc_angles[-1]
 
     # Turn to cartesian (stored in self.x, y, z)
     self.calculate_cartesian()
+  
+
+  def absenc_callback(self, message):
+    self.abs_angles = [math.radians(x) for x in message.value]
 
 
   def coords_from_flex(self, angles):
@@ -169,7 +191,7 @@ class IkNode(Node):
         self.get_logger().warn(f"Outside joint limits")
         return False
 
-      self.get_logger().info(f"angles: {self.angles}")
+      # self.get_logger().info(f"angles: {self.angles}")
       return True
 
     except ValueError as e:
@@ -190,6 +212,11 @@ class IkNode(Node):
       self.pitch = new_pitch
 
     self.calculate_cylindical()
+
+    # if 2d, force y to be 0
+    if self.mode == "2D":
+      self.y = 0
+
     # Perform IK. If out of range, restore point where it was
     if not self.calculate_angles():
       self.x, self.y, self.z, self.th, self.pitch = old_values
