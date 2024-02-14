@@ -3,7 +3,7 @@ joy_comms_control_node:
     enable_button: 5
     next_layout_button: "BUTTON_OPTION"
     previous_layout_button: "BUTTON_SHARE"
-    controller_type: 3
+    controller_type: 2
     #number of commands has to match the number of mappings in controller_mappings and topics in command_topics
     stop_commands:
       ["motors_stop",

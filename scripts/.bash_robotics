@@ -21,6 +21,9 @@ alias rostings="cd $ROSPACKAGES"
 alias mcu="cd $ROSPACKAGES/src/mcu_control_python/mcu_control_python"
 alias util="cd $ROBOTICS_WS/robot/util"
 
+# Add venv packages to python path (required to allow colcon python packages to work with virtual environment)
+export PYTHONPATH=$PYTHONPATH:~/Programming/robotics-prototype/venv/lib/python3.8/site-packages/
+
 #ex ()
 #{
 #  if [ -f $1 ] ; then
