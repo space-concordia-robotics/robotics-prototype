@@ -10,6 +10,7 @@ from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 import threading
+from absenc_interface.msg import EncoderValues
 
 # Publishes angles in radians for the motors
 
@@ -63,9 +64,6 @@ class IkNode(Node):
     # Convert them to radians
     self.mins = [math.radians(x)  for x in mins]
     self.maxes = [math.radians(x)  for x in maxes]
-    # Pitch is set not by IK but by the user, handled separately
-    self.pitch_min = self.mins[3]
-    self.pitch_max = self.maxes[3]
 
     # Sensitivity
     self.sensitivity = self.get_parameter('sensitivity').get_parameter_value().double_value
@@ -79,24 +77,20 @@ class IkNode(Node):
 
     # Get the initial angle values 
     absenc_topic = '/absenc_values'
-    self.absenc_sub = self.create_subscription(String, absenc_topic, self.absenc_callback, 10)
-    self.get_logger().info('Created publisher for topic "'+joy_topic)
     self.abs_angles = None
+    self.initialized = False
+    self.angles = None
+    self.absenc_sub = self.create_subscription(EncoderValues, absenc_topic, self.absenc_callback, 10)
+    self.get_logger().info('Created subscriber for topic "'+absenc_topic)
 
-    # Wait till get initial value from encoders
-    r = self.create_rate(30)
-    while self.abs_angles == None:
-      self.spin_once()
-      r.sleep()
-
-
-    # Get initial state from absolute encoders to initialize
-    # the angle values and coordinates
-    self.initialize_angles_coords()
+  
+  def have_abs_angles(self):
+    return len(self.abs_angles) > 0
     
   
   def initialize_angles_coords(self):
     absenc_angles = self.abs_angles
+    self.get_logger().info(f"encoder angles: {absenc_angles}")
 
     # Start in cylindrical coords
     # The first angle swivel, it's the phi angle in the cylindrical coords system
@@ -106,16 +100,25 @@ class IkNode(Node):
     # The last three angles are flex, so add the displacement caused by these joints
     self.u, self.v = self.coords_from_flex(absenc_angles[1:])
 
-    # The pitch is the angle of the gripper (wrt the previous joint) 
-    # it must be set as well since this is an angle which is set directly
-    self.pitch = absenc_angles[-1]
+    # The pitch is the angle of the gripper (wrt to the vertical)
+    self.pitch = 0
+    # accumulate all angles
+    for i in absenc_angles:
+      self.pitch += i
+    # make pitch angle with respect to bottom
+    self.pitch = math.pi - self.pitch
 
     # Turn to cartesian (stored in self.x, y, z)
     self.calculate_cartesian()
+    self.get_logger().info(f"Initial coordinates {self.x} {self.y} {self.z}")
   
 
   def absenc_callback(self, message):
-    self.abs_angles = [math.radians(x) for x in message.value]
+    # self.get_logger().info(f"Callback for absenc value")
+    angle_1 = 360 - message.angle_1 if message.angle_1 > 180 else message.angle_1
+    angle_2 = message.angle_2
+    angle_3 = 360 + message.angle_3 if message.angle_3 < -180 else message.angle_3
+    self.abs_angles = [0, math.radians(angle_1), math.radians(angle_2), math.radians(angle_3)]
 
 
   def coords_from_flex(self, angles):
@@ -132,6 +135,11 @@ class IkNode(Node):
 
   
   def publish_joint_state(self):
+    # If not initialized, initialize from abs enc values
+    if not self.angles and self.abs_angles and not self.initialized:
+      self.initialize_angles_coords()
+      self.initialized = True
+
     # If not initialized yet, don't publish
     if self.angles:
       joint_state = JointState()
@@ -152,7 +160,7 @@ class IkNode(Node):
       cv = self.v + self.L3 * math.cos(self.pitch)
 
       if cu < 0 and cv < 0:
-        self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} out of range")
+        self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} out of range, cu {cu} cv {cv}")
         return False
 
       # In this context, cu and cv are lengths, so must be positive
@@ -188,7 +196,7 @@ class IkNode(Node):
       if self.validAngles(angles):
         self.angles = angles
       else:
-        self.get_logger().warn(f"Outside joint limits")
+        self.get_logger().warn(f"Outside joint limits, angles: {angles}")
         return False
 
       # self.get_logger().info(f"angles: {self.angles}")
@@ -208,14 +216,14 @@ class IkNode(Node):
 
     # Pitch is the one angle which is directly set, so check bounds here
     new_pitch = self.pitch + (self.sensitivity * roll / 30000)
-    if self.validPitch(new_pitch):
-      self.pitch = new_pitch
+    self.pitch = new_pitch    
 
     self.calculate_cylindical()
 
     # if 2d, force y to be 0
     if self.mode == "2D":
       self.y = 0
+    self.get_logger().info(f"Pitch: {self.pitch}")
 
     # Perform IK. If out of range, restore point where it was
     if not self.calculate_angles():
@@ -255,9 +263,6 @@ class IkNode(Node):
         return False
       
     return True
-  
-  def validPitch(self, new_pitch):
-    return self.pitch_min <= new_pitch and new_pitch <= self.pitch_max
 
 
 def main(args=None):
@@ -276,5 +281,6 @@ def main(args=None):
         loop_rate.sleep()
     except KeyboardInterrupt:
         print("Node shutting down due to shutting down node.")
+        break
 
   rclpy.shutdown()

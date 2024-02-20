@@ -70,6 +70,7 @@ PIN_DESC=[ARM,ROVER,PDS,SCIENCE]
 SW_PINS = [29,31,33] # GPIO01, GPIO11, GPIO13 - https://developer.nvidia.com/embedded/learn/jetson-orin-nano-devkit-user-guide/hardware_spec.html
 
 
+local_mode = False
 ser = None
 # Hack since science teensy is USB
 ser_hardware = None
@@ -105,7 +106,7 @@ def main(args=None):
 
     # rate = comms_node.create_rate(10)
 
-    print('wacl')
+    print('waasdasdscl')
     try:
         while rclpy.ok():
             print('spin')
@@ -203,19 +204,11 @@ def send_command(command_name, args, deviceToSendTo):
             gpio.output(SW_PINS, TX2)
 
         ser.write(commandID.to_bytes(1, 'big'))
-
-        if commandID != 10:
-            ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        ser.write(get_arg_bytes(command).to_bytes(1, 'big'))
+        print(commandID.to_bytes(1, 'big'))
+        print(get_arg_bytes(command).to_bytes(1, 'big'))
         
-        #arg_length = len(command[2]).to_bytes(1,'big')
-        #ser.write(arg_length)
         data_types = [element[0] for element in command[2]]
-
-        # MEGA STUPID WORKAROUND, DIRE SITUATION, PLEASE DON'T REUSE THIS
-        if commandID == 10:
-            ser.write((12).to_bytes(1, 'big'))
-            args, data_types = move_wheels_dumb_workaround(args)
-            print(f'args: {args} | dataTypes: {data_types}')
 
         for argument in zip(args, data_types):
             data = argument[0]
@@ -229,7 +222,7 @@ def send_command(command_name, args, deviceToSendTo):
                 ser.write(arg_int.to_bytes(1,'big'))
 
             elif data_type == dt.ARG_FLOAT32_ID:
-                ser.write(bytearray(struct.pack(">f", data))) # This is likely correct now, will need to consult
+                ser.write(bytearray(struct.pack(">f", data)))
 
         ser.write(STOP_BYTE.to_bytes(1, 'big'))
         ser.flush()
