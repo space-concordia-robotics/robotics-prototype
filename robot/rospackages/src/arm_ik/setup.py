@@ -30,7 +30,6 @@ setup(
     entry_points={
         'console_scripts': [
             'IKNode = arm_ik.IKNode:main',
-            'AbsencControlSystem = arm_ik.AbsencControlSystem:main',
             'CadMouseJoyNode = arm_ik.CadMouseJoyNode:main',
             'state_publisher = arm_ik.state_publisher:main'
         ],

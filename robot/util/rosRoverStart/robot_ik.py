@@ -23,12 +23,12 @@ def generate_launch_description():
             name='absenc_node',
             output='screen'
         ),
-        Node(
-            package='arm_ik',
-            executable='AbsencControlSystem',
-            name='absenc_control_system',
-            output='screen'
-        ),
+        # Node(
+        #     package='arm_ik',
+        #     executable='AbsencControlSystem',
+        #     name='absenc_control_system',
+        #     output='screen'
+        # ),
         Node(
             package='arm_ik',
             executable='IKNode',

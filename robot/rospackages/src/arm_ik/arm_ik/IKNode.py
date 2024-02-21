@@ -115,10 +115,7 @@ class IkNode(Node):
 
   def absenc_callback(self, message):
     # self.get_logger().info(f"Callback for absenc value")
-    angle_1 = 360 - message.angle_1 if message.angle_1 > 180 else message.angle_1
-    angle_2 = message.angle_2
-    angle_3 = 360 + message.angle_3 if message.angle_3 < -180 else message.angle_3
-    self.abs_angles = [0, math.radians(angle_1), math.radians(angle_2), math.radians(angle_3)]
+    self.abs_angles = [0, math.radians(message.angle_1), math.radians(message.angle_2), math.radians(message.angle_3)]
 
 
   def coords_from_flex(self, angles):
