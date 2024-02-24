@@ -1,0 +1,4 @@
+[submodule "robot/rospackages/src/ouster-ros"]
+	path = robot/rospackages/src/ouster-ros
+	url = https://github.com/ouster-lidar/ouster-ros/tree/ros2
+	branch = ros2
