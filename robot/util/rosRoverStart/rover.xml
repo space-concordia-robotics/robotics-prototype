@@ -2,4 +2,7 @@
     <node pkg="mcu_control_python" exec="CommsNode" name="comms_node" output="screen" />
 
     <include file="$(find-pkg-share joy_control)/joy_comms_manual.xml" />
+
+    <include file="$(find-pkg-share ros2_aruco)/launch/aruco_recognition.launch.py" />
+
 </launch>
