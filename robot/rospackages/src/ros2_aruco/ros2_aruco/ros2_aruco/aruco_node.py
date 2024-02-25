@@ -135,7 +135,6 @@ class ArucoNode(rclpy.node.Node):
         self.create_subscription(
             Image, image_topic, self.image_callback, qos_profile_sensor_data
         )
-
         # Set up publishers
         self.poses_pub = self.create_publisher(PoseArray, "aruco_poses", 10)
         self.markers_pub = self.create_publisher(ArucoMarkers, "aruco_markers", 10)
@@ -207,6 +206,8 @@ class ArucoNode(rclpy.node.Node):
 
             self.poses_pub.publish(pose_array)
             self.markers_pub.publish(markers)
+        else:
+            self.get_logger().warn("marker_ids in aruco_node is none")
 
 
 def main():
