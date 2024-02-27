@@ -3,9 +3,9 @@
 gpsPublisherNode::gpsPublisherNode(const std::string& gpsTopic) : Node("gpsPublisherNode")
 {
 	publisher_ = this->create_publisher<NavSatFix>(gpsTopic, 10);
+	RCLCPP_INFO(this->get_logger(), "Started publishing GPS data to %s", gpsTopic.c_str());
 	timer_ =
 		this->create_wall_timer(std::chrono::milliseconds(500), std::bind(&gpsPublisherNode::publishGpsData, this));
-
 }
 
 void gpsPublisherNode::publishGpsData()
