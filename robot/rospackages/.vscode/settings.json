@@ -1,0 +1,20 @@
+{
+  "python.autoComplete.extraPaths": [
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/ros2_aruco_interfaces/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/ros2_aruco/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/camera_vision/lib/python3.10/site-packages",
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages",
+    "/home/omar/Programming/robotics-prototype"
+  ],
+  "python.analysis.extraPaths": [
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/ros2_aruco_interfaces/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/ros2_aruco/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/mcu_control_python/lib/python3.10/site-packages",
+    "/home/omar/Programming/robotics-prototype/robot/rospackages/install/camera_vision/lib/python3.10/site-packages",
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages",
+    "/home/omar/Programming/robotics-prototype"
+  ]
+}
