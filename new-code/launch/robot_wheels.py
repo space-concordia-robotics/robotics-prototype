@@ -5,6 +5,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
     return LaunchDescription([
         Node(
@@ -17,6 +18,12 @@ def generate_launch_description():
             package='wheels_controller',
             executable='wheels_controller_node',
             name='wheels_controller_node',
+            output='screen'
+        ),
+        Node(
+            package='gps',
+            executable='gpsPublisherNode',
+            name='gpsPublisherNode',
             output='screen'
         ),
     ])
