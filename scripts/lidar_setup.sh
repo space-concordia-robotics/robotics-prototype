@@ -1,12 +1,12 @@
 connect_lidar(){
-	sudo ip addr flush dev eth1
-	ip addr show dev eth1
-	sudo ip addr add 10.5.5.1/24 dev eth1
+	sudo ip addr flush dev enx7cc2c6359329
+	ip addr show dev enx7cc2c6359329
+	sudo ip addr add 10.5.5.1/24 dev enx7cc2c6359329
 	echo "-------------------CONNECT LIDAR-------------------"
 	echo "------------(Press any key to continue)------------"
 	read -n 1 -s
-	sudo ip link set eth1 up
-	ip addr show dev eth1
+	sudo ip link set enx7cc2c6359329 up
+	ip addr show dev enx7cc2c6359329
 }
 stop_dnsmasq(){
 	sudo systemctl stop dnsmasq
@@ -16,13 +16,14 @@ do_dnsmasq(){
 	echo "------------(Press any key to continue)------------"
 	echo '---(Press CTRL-C when seeing "os1-992005000098")---'
 	read -n 1 -s
-	sudo dnsmasq -C /dev/null -kd -F 10.5.5.96,10.5.5.96 -i eth1 --bind-dynamic
+	sudo dnsmasq -C /dev/null -kd -F 10.5.5.96,10.5.5.96 -i enx7cc2c6359329 --bind-dynamic
 }
 ping_lidar(){
 	ping -c1 os1-992005000098.local
 }
 launch_ouster(){
-	ros2 launch ouster_ros sensor.launch.xml sensor_hostname:=os1-992005000098.local metadata:=metadata.json
+	ros2 launch ouster_ros driver.launch.py 
+	#sensor_hostname:=os1-992005000098.local metadata:=metadata.json
 }
 while true; do
 	echo "Connect lidar:	Press 1"

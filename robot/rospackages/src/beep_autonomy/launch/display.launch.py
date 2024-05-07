@@ -12,7 +12,7 @@ def generate_launch_description():
     default_model_path = os.path.join(pkg_share, 'src/description/rover_description.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/default_view.rviz')
     default_params_file=os.path.join(pkg_share, 'config/nav2_params_no_map.yaml')
-    world_path=os.path.join(pkg_share, 'world/sonoma.world')
+    world_path=os.path.join(pkg_share, 'world/my_world.sdf')
     
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
@@ -228,8 +228,8 @@ def generate_launch_description():
         robot_state_publisher_node,
         spawn_entity,
         odom_node,
-        map_node,
-        navsat_node,
+        # map_node,
+        # navsat_node,
         rviz_node,
         controller_node,
         smoother_node,
