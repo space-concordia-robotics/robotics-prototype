@@ -110,8 +110,7 @@ def generate_launch_description():
                        'behavior_server',
                        'bt_navigator',
                        'waypoint_follower',
-                       'velocity_smoother',
-                       'zed_state_publisher']
+                       'velocity_smoother']
     controller_node=launch_ros.actions.Node(
         package='nav2_controller',
         executable='controller_server',
@@ -223,7 +222,8 @@ def generate_launch_description():
     lidar_launch=launch.actions.IncludeLaunchDescription(
         launch.launch_description_sources.PythonLaunchDescriptionSource(
             [ouster_dir,'/launch/driver.launch.py']),
-            launch_arguments={'params_file':ouster_dir+'/config/driver_params.yaml'}.items()
+            launch_arguments={'params_file':ouster_dir+'/config/driver_params.yaml',
+                                'viz':'false'}.items()
     )
 
     zed2_launch=launch.actions.IncludeLaunchDescription(
@@ -234,8 +234,8 @@ def generate_launch_description():
 
     slam_launch=launch.actions.IncludeLaunchDescription(
         launch.launch_description_sources.PythonLaunchDescriptionSource(
-            [slam_dir,'/launch/online_async_launch.py']
-        )
+            [slam_dir,'/launch/online_async_launch.py']),
+            launch_arguments={'use_sim_time':'false'}.items()
     )
 
     return launch.LaunchDescription([
@@ -281,7 +281,7 @@ def generate_launch_description():
         velocity_smoother_node,
         # amcl_node,
         lifecycle_manager_node,
-        # lidar_launch,
+        lidar_launch,
         zed2_launch,
         slam_launch
     ])

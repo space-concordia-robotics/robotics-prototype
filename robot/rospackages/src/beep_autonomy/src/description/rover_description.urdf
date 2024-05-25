@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <robot name="rover" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find zed_wrapper)/urdf/zed_macro.urdf.xacro" />
+  <!-- <xacro:zed_camera name="$(arg camera_name)" model="$(arg camera_model)" /> -->
+
 
   <!-- Define robot constants -->
   <xacro:property name="scale_factor" value="1"/>
@@ -81,6 +84,15 @@
   </link>
 
   <!-- Robot Footprint -->
+  <link name="zed_camera_link"/>
+
+  <joint name="zed_joint" type="fixed">  
+    <parent link="zed_camera_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="-0.4 0 -${(wheel_radius+wheel_height)}"/>
+  </joint>
+  
+
   <link name="base_footprint"/>
 
   <joint name="base_joint" type="fixed">
@@ -177,14 +189,6 @@
   <xacro:wheel parent="bogey_r" prefix="wheel_r_f" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="1" y_reflect="-1" type="fixed"/>
   <xacro:wheel parent="bogey_r" prefix="wheel_r_m" x_off="${wheel_spacing/2}" y_off="${bogey_width/2+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="-1" type="fixed"/>
   <xacro:wheel parent="bogey_b" prefix="wheel_r_b" x_off="0" y_off="${base_width/2+bogey_width+wheel_width/2}" z_off="${-(wheel_height-pivot_zoff)}" x_reflect="-1" y_reflect="-1" type="fixed"/>
-  
-  <link name="zed_camera_link"/>
-
-  <joint name="zed_joint" type="fixed">  
-    <parent link="base_link"/>
-    <child link="zed_camera_link"/>
-    <origin xyz="0.4 0 0"/>
-  </joint>
 
   <link name="os_sensor"/>
   

@@ -6,7 +6,7 @@
 #include "sensor_msgs/msg/joy.hpp"
 // #include "arm_controller/msg/arm_motor_values.hpp"
 #include <std_msgs/msg/float32_multi_array.hpp>
-#include <JetsonGPIO.h>
+// #include <JetsonGPIO.h>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -19,10 +19,12 @@
 #include <iostream>
 #include <fcntl.h>
 #define SET_MOTOR_SPEED 0x4E
+#define MAX_MOTOR_SPEED 1024.f
 
 class ArmControllerNode : public rclcpp::Node{
 public:
     ArmControllerNode();
+    ~ArmControllerNode();
     void JoyMessageCallback(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
     void ArmMessageCallback(const std_msgs::msg::Float32MultiArray::SharedPtr arm_val_msgs);
 
@@ -31,6 +33,11 @@ private :
     rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr arm_vals_msg_callback;
     
     int fd;
+    // The mapping seems to change randomly between reboots. Stores the
+    // inferred type of the controller.
+    // Type 0 is where L2 and R2 are at axes[2] and axes[5],
+    // Type 1 is where L2 and R2 are at axes[4] and axes[5]
+    int controller_type = -1;
 };
 
 #endif

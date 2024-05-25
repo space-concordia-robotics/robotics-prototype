@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 HOME="/home/nvidia"
-REPO_HOME="$HOME/robotics-orin"
+REPO_HOME="$HOME/Programming/robotics-orin"
 OPT_HUMBLE_SETUP="/opt/ros/humble/setup.bash"
 ROS_PACKAGES_SETUP="$REPO_HOME/install/local_setup.sh"
 ROSLAUNCH_FILE="$REPO_HOME/launch/robot.py"
