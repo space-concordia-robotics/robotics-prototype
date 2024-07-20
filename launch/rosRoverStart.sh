@@ -3,7 +3,7 @@ HOME="/home/nvidia"
 REPO_HOME="$HOME/Programming/robotics-orin"
 OPT_HUMBLE_SETUP="/opt/ros/humble/setup.bash"
 ROS_PACKAGES_SETUP="$REPO_HOME/install/local_setup.sh"
-ROSLAUNCH_FILE="$REPO_HOME/launch/robot.py"
+ROSLAUNCH_FILE="$REPO_HOME/launch/robot_ik.py"
 CANBUS_SETUP_FILE="$REPO_HOME/configure-can0.sh"
 ARM_CONFIGURE_FILE="$REPO_HOME/configure-arm.sh"
 
