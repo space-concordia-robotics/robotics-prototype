@@ -1,24 +1,29 @@
 #include "wheels_controller_node.h"
 
-WheelsControllerNode::WheelsControllerNode(): Node("wheels_controller") {
+WheelsControllerNode::WheelsControllerNode() : LifecycleNode("wheels_controller_node"){
     this->declare_parameter("can_path", "can0");
     this->declare_parameter("multiplier", 500);
-    
     this->declare_parameter("linear_acceleration_rate", 0.25);
     this->declare_parameter("angular_acceleration_rate", 0.25);
     this->declare_parameter("initial_ramp_factor", 3);
+    this->declare_parameter("local_mode", false);
+}
+
+callbackReturn WheelsControllerNode::on_configure(const rclcpp_lifecycle::State &){
+    
 
     // this->declare_parameter("turning_rate", 2000);
     // float linear_acceleration_rate = 0.5
 
     start = std::chrono::system_clock::now();
 
-
-    if(CANController::configureCAN("can0") != SUCCESS){
-        RCLCPP_ERROR(this->get_logger(),"Error accessing CAN interface \n");
-        rclcpp::shutdown();
+    if (!this->get_parameter("local_mode").as_bool()) {
+        if(CANController::configureCAN("can0") != SUCCESS){
+            RCLCPP_ERROR(this->get_logger(),"Error accessing CAN interface \n");
+            rclcpp::shutdown();
+        }
+        RCLCPP_INFO(this->get_logger(),"Initialized node : %s\n",this->get_name());
     }
-    RCLCPP_INFO(this->get_logger(),"Initialized node : %s\n",this->get_name());
 
     /*)
      * This command will inform a motor controller to start transmitting periodic status frames.
@@ -32,40 +37,73 @@ WheelsControllerNode::WheelsControllerNode(): Node("wheels_controller") {
     // odom_timer = this->create_wall_timer( 50ms, std::bind(&WheelsControllerNode::OdomCallback, this));
     
     joy_msg_callback = this->create_subscription<sensor_msgs::msg::Joy>(
-            "joy", 10, std::bind(&WheelsControllerNode::JoyMessageCallback, this, std::placeholders::_1)
-            );
-
-    twist_msg_callback = this->create_subscription<geometry_msgs::msg::Twist>(
-            "cmd_vel", 10, std::bind(&WheelsControllerNode::TwistMessageCallback, this, std::placeholders::_1)
-            );
-    twist_msg_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);     
-    
-    // odom_publisher = this->create_publisher<nav_msgs::msg::Odometry>("odom", 10);     
-
-    // zed2_odom_callback = this->create_subscription<nav_msgs::msg::Odometry>(
-            // "zed/zed_node/odom", 10, std::bind(&WheelsControllerNode::Zed2OdomCallback, this, std::placeholders::_1));
-    
-   
+        "joy", 10, std::bind(&WheelsControllerNode::JoyMessageCallback, this, std::placeholders::_1)
+    );
     sil_publisher = this->create_publisher<std_msgs::msg::String>("SIL_Color", 10);
+    twist_msg_callback = this->create_subscription<geometry_msgs::msg::Twist>(
+        "cmd_vel", 10, std::bind(&WheelsControllerNode::TwistMessageCallback, this, std::placeholders::_1)
+    );
+    twist_msg_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);     
 
-     navigation_goal_status_sub_ = this->create_subscription<action_msgs::msg::GoalStatusArray>(
-    "navigate_to_pose/_action/status",
-    rclcpp::SystemDefaultsQoS(),
-    [this](const action_msgs::msg::GoalStatusArray::SharedPtr msg) {
-        int status = msg->status_list.back().status;
-        if(status == 2){
-            this->is_manual_control = false;
-        }
-        else if(status == 4){
-            this->reached_goal = true;
-        }
-        else{
-            this->is_manual_control = true;     
-        }
-
+    navigation_goal_status_sub_ = this->create_subscription<action_msgs::msg::GoalStatusArray>(
+        "navigate_to_pose/_action/status",
+        rclcpp::SystemDefaultsQoS(),
+        [this](const action_msgs::msg::GoalStatusArray::SharedPtr msg){
+            int status = msg->status_list.back().status;
+            if(status == 2){
+                this->is_manual_control = false;
+            }
+            else if(status == 4){
+                this->reached_goal = true;
+            }
+            else{
+                this->is_manual_control = true;     
+            }
     });
 
+    RCLCPP_INFO(get_logger(), "on_configure() is called.");
+    return callbackReturn::SUCCESS;
 }
+
+callbackReturn WheelsControllerNode::on_activate(const rclcpp_lifecycle::State & state){
+    LifecycleNode::on_activate(state);
+
+    RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
+
+    return callbackReturn::SUCCESS;
+}
+
+callbackReturn WheelsControllerNode::on_deactivate(const rclcpp_lifecycle::State & state){
+    LifecycleNode::on_deactivate(state);
+
+    RCUTILS_LOG_INFO_NAMED(get_name(), "on_deactivate() is called.");
+
+    return callbackReturn::SUCCESS;
+}
+
+callbackReturn WheelsControllerNode::on_cleanup(const rclcpp_lifecycle::State &){
+    timer.reset();
+    twist_msg_publisher.reset();
+    sil_publisher.reset();
+
+    RCUTILS_LOG_INFO_NAMED(get_name(), "on cleanup is called.");
+    return callbackReturn::SUCCESS;
+}
+
+callbackReturn WheelsControllerNode::on_shutdown(const rclcpp_lifecycle::State & state){
+    timer.reset();
+    twist_msg_publisher.reset();
+    sil_publisher.reset();
+    
+    RCUTILS_LOG_INFO_NAMED(
+        get_name(),
+        "on shutdown is called from state %s.",
+        state.label().c_str()
+    );
+    rclcpp::shutdown();
+    return callbackReturn::SUCCESS;
+}
+
 // void WheelsControllerNode::publishOdom(){
 //     odom_publisher->publish(current_odom); 
 // }
@@ -88,10 +126,27 @@ WheelsControllerNode::WheelsControllerNode(): Node("wheels_controller") {
 
 //     odom_publisher->publish(odom_msg);
     
-// }
+// } 
 
 void WheelsControllerNode::JoyMessageCallback(const sensor_msgs::msg::Joy::SharedPtr joy_msg){
-
+    if (controller_type == -1) {
+        // Detection for logitech joystick
+        if (joy_msg->buttons.size() == 12) {
+            RCLCPP_INFO(this->get_logger(), "Controller type 2");
+            controller_type = 2;
+        }
+        // Infer controller type. Assume that L2 and R2 are not pressed on startup,
+        // and so will be at values 1.0.
+        if (joy_msg->axes[2] == 1.0 && joy_msg->axes[5] == 1.0) {
+            RCLCPP_INFO(this->get_logger(), "Controller type 0");
+            controller_type = 0;
+        } else if (joy_msg->axes[4] == 1.0 && joy_msg->axes[5] == 1.0) {
+            RCLCPP_INFO(this->get_logger(), "Controller type 1");
+            controller_type = 1;
+        } else {
+            return;
+        }
+    }
 
     if(joy_msg->buttons[0] ==1){
         color = "#0000FF";
@@ -104,23 +159,56 @@ void WheelsControllerNode::JoyMessageCallback(const sensor_msgs::msg::Joy::Share
     }
     
     // Only move if holding down R1 only (that is, L1 has to be unpressed and R1 pressed)
-     if( ! ( joy_msg->buttons[9] == 1 && joy_msg->buttons[10] == 0 ) ){
-        return;
+    if (controller_type == 0) {
+        if(!(joy_msg->buttons[4] == 0 && joy_msg->buttons[5] == 1)) {
+            publishStop();
+            return;
+        }
+    } else if (controller_type == 1) {
+        if (!( joy_msg->buttons[9] == 0 && joy_msg->buttons[10] == 1)){
+            publishStop();
+            return;
+        }
+    } else {
+        // For logitech joystick, only move if button 3 is pressed.
+        if (!(joy_msg->buttons[2] == 1)) {
+            publishStop();
+            return;
+        }
     }
-    float linear_y_axes_val = joy_msg->axes[1];
-    float angular_z_axes_val = joy_msg->axes[2];
+
+    float linear_y_axes_val, angular_z_axes_val;
+
+    if (controller_type == 2) {
+        linear_y_axes_val = -joy_msg->axes[1];
+        angular_z_axes_val = joy_msg->axes[0];
+    } else {
+        linear_y_axes_val = -joy_msg->axes[1];
+        angular_z_axes_val = joy_msg->axes[0];
+    }
+
 
     geometry_msgs::msg::Twist twist_msg = geometry_msgs::msg::Twist{};
     twist_msg.linear.x = linear_y_axes_val;
     twist_msg.angular.z = angular_z_axes_val;
 
     twist_msg_publisher->publish(twist_msg);
+}
 
-    
-}   
+void WheelsControllerNode::publishStop() {
+    geometry_msgs::msg::Twist twist_msg = geometry_msgs::msg::Twist{};
+    twist_msg.linear.x = 0;
+    twist_msg.angular.z = 0;
+
+    twist_msg_publisher->publish(twist_msg);
+}
 
 void WheelsControllerNode::pollControllersCallback(){
-    
+    if (this->get_parameter("local_mode").as_bool()) {
+        // In local mode, don't do CANx
+        return;
+    }
+
     /*
         Rover not moving
     */
@@ -318,8 +406,9 @@ int main(int argc, char * argv[])
     
     rclcpp::executors::MultiThreadedExecutor exec;
     
-    auto controller_node = std::make_shared<WheelsControllerNode>();
-    exec.add_node(controller_node);
+    std::shared_ptr<WheelsControllerNode> wheels_controller_node = std::make_shared<WheelsControllerNode>();
+
+    exec.add_node(wheels_controller_node->get_node_base_interface());
     exec.spin();
 
     // rclcpp::spin(std::make_shared<WheelsControllerNode>());

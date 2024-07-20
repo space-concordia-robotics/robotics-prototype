@@ -20,13 +20,15 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
 add_executable(sil_node src/SIL_color_publisher_node.cpp)
-ament_target_dependencies(sil_node rclcpp std_msgs nav2_msgs)
+ament_target_dependencies(sil_node rclcpp std_msgs nav2_msgs "lifecycle_msgs" "rclcpp_lifecycle")
 
 install(TARGETS
   sil_node

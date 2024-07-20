@@ -8,6 +8,7 @@
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
+  <depend>lifecycle_msgs</depend>
   <depend>std_msgs</depend>
 
   <!-- <depend>absenc_interface</depend> -->

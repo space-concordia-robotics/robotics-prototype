@@ -14,6 +14,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
 # find_package(rosidl_default_generators REQUIRED)
 find_package(JetsonGPIO)
 
@@ -25,7 +27,7 @@ include_directories(include)
 add_executable(arm_controller_node src/arm_controller_node.cpp)
 # rosidl_target_interfaces(arm_controller_node ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-ament_target_dependencies(arm_controller_node rclcpp sensor_msgs std_msgs)
+ament_target_dependencies(arm_controller_node rclcpp sensor_msgs std_msgs lifecycle_msgs rclcpp_lifecycle)
 target_link_libraries(arm_controller_node JetsonGPIO::JetsonGPIO)
 
 install(TARGETS

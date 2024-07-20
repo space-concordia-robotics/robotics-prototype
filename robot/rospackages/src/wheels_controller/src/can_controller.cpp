@@ -38,7 +38,7 @@ uint8_t CANController::configureCAN(const char* fd_path){
  uint8_t CANController::sendBlockingFrame(struct can_frame& frame){
     while (true){
         auto status = sendFrame(frame);
-        if (errno != 105); break;
+        if (errno != 105) break;
         errno = 0;
         usleep(100);
     }

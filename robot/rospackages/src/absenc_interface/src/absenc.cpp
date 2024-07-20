@@ -1,6 +1,24 @@
 #include "absenc.h"
-    
-ABSENC_Error_t ABSENC::OpenPort(const char* fileName, uint16_t baud_rate){
+#include <iostream>
+
+const char* strAbsencErr(int err) {
+    switch(err) {
+        case NO_ERROR:
+            return "No error occurred";
+        case ERR_SERIAL_FAILURE:
+            return "Serial failure";
+        case ERR_SLAVE_INVALID:
+            return "Slave invalid";
+        case ERR_NO_RESPONSE:
+            return "No response";
+        case ERR_FRAME_CORRUPTED:
+            return "Frame corrupted";
+        default:
+            return "Unknown code";
+    }
+}
+
+ABSENC_Error_t AbsencDriver::OpenPort(const char* fileName, uint16_t baud_rate, int& s_fd){
     errno = 0; 
 
     s_fd = open(fileName, O_RDWR); 
@@ -36,7 +54,7 @@ ABSENC_Error_t ABSENC::OpenPort(const char* fileName, uint16_t baud_rate){
     }
     return no_error; 
 }
-ABSENC_Error_t ABSENC::PollSlave(int slvnum, ABSENC_Meas_t * meas){
+ABSENC_Error_t AbsencDriver::PollSlave(int slvnum, ABSENC_Meas_t * meas, int s_fd){
      if(slvnum < 0 || slvnum > 9) {
         return ABSENC_Error_t {
             ERR_SLAVE_INVALID, 
@@ -103,6 +121,14 @@ ABSENC_Error_t ABSENC::PollSlave(int slvnum, ABSENC_Meas_t * meas){
             __LINE__, 
         }; 
     }
+
+    // Debug code
+    // if (nrecv > 0) {
+    //     printf("Received %s\n", rxbuf);
+    // } else {
+    //     printf("Received nothing\n");
+    // }
+    
     if(nrecv < (int)sizeof(rxbuf)){
         return ABSENC_Error_t{
             ERR_FRAME_CORRUPTED, 
@@ -150,7 +176,7 @@ ABSENC_Error_t ABSENC::PollSlave(int slvnum, ABSENC_Meas_t * meas){
     return no_error; 
 }
 
-ABSENC_Error_t ABSENC::ClosePort() {
+ABSENC_Error_t AbsencDriver::ClosePort(int s_fd) {
     close(s_fd); 
     return no_error; 
 }

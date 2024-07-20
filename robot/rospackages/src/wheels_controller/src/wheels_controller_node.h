@@ -15,6 +15,10 @@
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 
+#include "lifecycle_msgs/msg/transition.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
+
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include <chrono>
 using namespace std::chrono;
@@ -27,23 +31,34 @@ using namespace std::chrono;
 #define DEVICE_6_ID 6
 
 using namespace std::literals::chrono_literals;
+typedef rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn callbackReturn;
 
-class WheelsControllerNode : public rclcpp::Node{
-public:
+class WheelsControllerNode : public rclcpp_lifecycle::LifecycleNode{
+  public:
     WheelsControllerNode();
+    callbackReturn on_configure(const rclcpp_lifecycle::State &);
+    callbackReturn on_activate(const rclcpp_lifecycle::State & state);
+    callbackReturn on_deactivate(const rclcpp_lifecycle::State & state);
+    callbackReturn on_cleanup(const rclcpp_lifecycle::State &);
+    callbackReturn on_shutdown(const rclcpp_lifecycle::State & state);
+
     void TwistMessageCallback(const geometry_msgs::msg::Twist::SharedPtr twist_msg);
     void JoyMessageCallback(const sensor_msgs::msg::Joy::SharedPtr joy_msg);
-
-private :
+  private :
 
     void AccelerateTwist(geometry_msgs::msg::Twist);
     float AccelerateValue(float current, float desired, float rate, float dt);
     
     void publishOdom();
+    void publishStop();
 
     // void Zed2OdomCallback(const nav_msgs::msg::Odometry::SharedPtr odom_msg);
 
     //rclcpp::callback_group::CallbackGroup::SharedPtr update_group;
+    rclcpp::TimerBase::SharedPtr timer_;
+		// rclcpp::Publisher::SharedPtr pub_;
+    std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<std_msgs::msg::String>> pub_;
+    
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr twist_msg_callback;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_msg_publisher;
     
@@ -81,6 +96,13 @@ private :
 
   rclcpp::Subscription<nav2_msgs::action::NavigateToPose::Impl::GoalStatusMessage>::SharedPtr
     navigation_goal_status_sub_;
+
+  // The mapping seems to change randomly between reboots. Stores the
+  // inferred type of the controller.
+  // Type 0 is where L2 and R2 are at axes[2] and axes[5],
+  // Type 1 is where L2 and R2 are at axes[4] and axes[5],
+  // Type 2 is the flight joystick
+  int controller_type = -1;
 
    //navigation_goal_status_sub_ = node->create_subscription<action_msgs::msg::GoalStatusArray>;
 };

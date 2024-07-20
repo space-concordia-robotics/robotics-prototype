@@ -9,6 +9,9 @@ endif ()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+
 
 if (BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
@@ -22,11 +25,18 @@ if (BUILD_TESTING)
     ament_lint_auto_find_test_dependencies()
 endif ()
 
-add_executable(gps_node src/gpsPublisherNode.cpp
+add_executable(gps_node 
+        src/gpsPublisherNode.cpp 
         src/gps2.cpp)
-ament_target_dependencies(gps_node rclcpp std_msgs sensor_msgs)
+ament_target_dependencies(gps_node rclcpp std_msgs sensor_msgs lifecycle_msgs rclcpp_lifecycle)
+
+add_executable(gps_serviceclient_node
+        src/gpsServiceClientNode.cpp)
+ament_target_dependencies(gps_serviceclient_node rclcpp std_msgs sensor_msgs lifecycle_msgs rclcpp_lifecycle)
+
 install(TARGETS
         gps_node
+        gps_serviceclient_node
         DESTINATION lib/${PROJECT_NAME}
 )
 

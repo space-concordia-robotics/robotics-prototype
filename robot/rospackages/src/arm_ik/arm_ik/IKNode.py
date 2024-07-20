@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 
 import rclpy
+import rclpy.executors
 from sensor_msgs.msg import Joy
-from rclpy.node import Node
 import math
-from rclpy.node import Node
 from rclpy.qos import QoSProfile
-from geometry_msgs.msg import Quaternion
+from rclpy.lifecycle import State, TransitionCallbackReturn, LifecycleNode
 from sensor_msgs.msg import JointState
-from std_msgs.msg import String
-import threading
-# from absenc_interface.msg import EncoderValues
+from absenc_interface.msg import EncoderValues
 
 # Publishes angles in radians for the motors
 
 devpath = "/dev/cadmouse"
+
+def map_range(value, min, max, new_min, new_max):
+  value = value - min
+  value = value / (max - min)
+  value = value * (new_max - new_min)
+  value = value + new_min
+  return value
 
 def any_out_of_range(min, max, *values):
   for value in values:
@@ -23,7 +27,7 @@ def any_out_of_range(min, max, *values):
   return False
 
 
-class IkNode(Node):
+class IkNode(LifecycleNode):
   
   def __init__(self):
     node_name = 'ik_node'
@@ -36,11 +40,14 @@ class IkNode(Node):
     self.declare_parameter('joint_angle_maxes', [180.0, 180.0, 180.0, 180.0])
     self.declare_parameter('sensitivity', 1.0)
     self.declare_parameter('mode', "")
+    self.declare_parameter('solution', 0)
+    self.declare_parameter('local_mode', False)
 
-    qos_profile = QoSProfile(depth=10)
-    self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
+    self.abs_angles = None
+    self.initialized = False
+    self.angles = None
 
-    # Cartesian coordinates of desired location of end effector
+      # Cartesian coordinates of desired location of end effector
     self.x = 1
     self.y = 0
     self.z = 1
@@ -63,34 +70,68 @@ class IkNode(Node):
     maxes = self.get_parameter('joint_angle_maxes').get_parameter_value().double_array_value
     # Convert them to radians
     self.mins = [math.radians(x)  for x in mins]
-    self.maxes = [math.radians(x)  for x in maxes]
+    self.maxes = [math.radians(x)  for x in maxes]  
 
     # Sensitivity
     self.sensitivity = self.get_parameter('sensitivity').get_parameter_value().double_value
-
+    # Local mode
+    self.local_mode = self.get_parameter('local_mode').get_parameter_value().bool_value
+    # Which IK solution to use
+    self.solution = self.get_parameter('solution').get_parameter_value().integer_value
     # Mode - if 2D y value stays 0
     self.mode = self.get_parameter('mode').get_parameter_value().string_value
 
-    joy_topic = '/cad_mouse_joy'
+    self.timer = self.create_timer(1/30, self.publish_joint_state)
+
+  def on_configure(self, state: State) -> TransitionCallbackReturn:
+    qos_profile = QoSProfile(depth=10)
+    self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)  
+
+    cad_joy_topic = '/cad_mouse_joy'
+    self.cad_joy_sub = self.create_subscription(Joy, cad_joy_topic, self.cad_joy_callback, 10)
+    self.get_logger().info('Created publisher for topic "' + cad_joy_topic + '"')
+
+    joy_topic = '/joy'
     self.joy_sub = self.create_subscription(Joy, joy_topic, self.joy_callback, 10)
-    self.get_logger().info('Created publisher for topic "'+joy_topic)
+    self.get_logger().info('Created publisher for topic "' + joy_topic + '"')
 
     # Get the initial angle values 
     absenc_topic = '/absenc_values'
-    self.abs_angles = None
-    self.initialized = False
-    self.angles = None
-    self.abs_angles = [0.0, 0.0, 0.0, 0.0]
-    #self.absenc_sub = self.create_subscription(EncoderValues, absenc_topic, self.absenc_callback, 10)
-    #self.get_logger().info('Created subscriber for topic "'+absenc_topic)
+    
+    if self.local_mode:
+      self.abs_angles = [0.0, math.radians(0.04), math.radians(13.65), math.radians(-14.42)]
+      self.initialize_angles_coords()
+    # Will hold the previous joy message (used to toggle values)
+    self.last_message = None
 
+    self.absenc_sub = self.create_subscription(EncoderValues, absenc_topic, self.absenc_callback, 10)
+    self.get_logger().info('Created subscriber for topic "'+absenc_topic)
+
+    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'configure'")
+    return TransitionCallbackReturn.SUCCESS
+
+  def on_activate(self, state: State) -> TransitionCallbackReturn:
+    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'activate'")
+    return TransitionCallbackReturn.SUCCESS
+  
+  def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'deactivate'")
+    return TransitionCallbackReturn.SUCCESS
+  
+  def on_shutdown(self, state: State) -> TransitionCallbackReturn:
+    self.destroy_lifecycle_publisher(self.joint_pub)
+
+    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'shutdown'")
+    
+    rclpy.shutdown()
+    return TransitionCallbackReturn.SUCCESS
   
   def have_abs_angles(self):
     return len(self.abs_angles) > 0
-    
   
   def initialize_angles_coords(self):
     absenc_angles = self.abs_angles
+    self.angles = self.abs_angles
     self.get_logger().info(f"encoder angles: {absenc_angles}")
 
     # Start in cylindrical coords
@@ -112,12 +153,17 @@ class IkNode(Node):
     # Turn to cartesian (stored in self.x, y, z)
     self.calculate_cartesian()
     self.get_logger().info(f"Initial coordinates {self.x} {self.y} {self.z}")
+
+    # Move slightly toward the origin to prevent floating point error from causing angle 0.0 0.0 0.0 from triggering out of range
+    if absenc_angles == [0.0, 0.0, 0.0, 0.0]:
+      self.x -= math.copysign(1, self.x) * 0.0000000000000004
+      self.y -= math.copysign(1, self.y) * 0.0000000000000004
+      self.z -= math.copysign(1, self.z) * 0.0000000000000004
+
+    self.initialized = True
   
-
   def absenc_callback(self, message):
-    #self.get_logger().info(f"Callback for absenc value")
-    self.abs_angles = [0, math.radians(message.angle_1), math.radians(message.angle_2), math.radians(message.angle_3)]
-
+    self.abs_angles = [0.0, math.radians(message.angle_1), math.radians(message.angle_2), math.radians(message.angle_3)]
 
   def coords_from_flex(self, angles):
     # Finds the 2d coords from a series of flex joints (ie arms rotating)
@@ -131,15 +177,17 @@ class IkNode(Node):
       v += length * math.cos(cumulative_angle)
     return u, v
 
-  
   def publish_joint_state(self):
     # If not initialized, initialize from abs enc values
     if not self.angles and self.abs_angles and not self.initialized:
       self.initialize_angles_coords()
-      self.initialized = True
 
     # If not initialized yet, don't publish
-    if self.angles:
+    if self.initialized:
+      if not self.angles:
+        self.get_logger().warn("Angles not initialized")
+        return
+
       joint_state = JointState()
 
       now = self.get_clock().now()
@@ -147,7 +195,6 @@ class IkNode(Node):
       joint_state.name = ["Shoulder Swivel", "Shoulder Flex", "Elbow Flex", "Wrist Flex"]
       joint_state.position = self.angles
       self.joint_pub.publish(joint_state)
-
   
   def calculate_angles(self):
     """ Performs IK calculation and stores values in self.angles.
@@ -157,7 +204,7 @@ class IkNode(Node):
       cu = self.u - self.L3 * math.sin(self.pitch)
       cv = self.v + self.L3 * math.cos(self.pitch)
 
-      if cu < 0 and cv < 0:
+      if cu >= 0 and cv < 0:
         self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} out of range, cu {cu} cv {cv}")
         return False
 
@@ -170,7 +217,8 @@ class IkNode(Node):
       B2 = (self.L1 ** 2 + self.L2 ** 2 - L ** 2) / (2 * self.L1 * self.L2)
       B3 = (self.L2 ** 2 + L ** 2 - self.L1 ** 2) / (2 * self.L2 * L)
       if any_out_of_range(-1, 1, B1, B2, B3):
-        self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} pitch {self.pitch} (uvp) {self.u} {self.v} {self.phi} out of range")
+        self.get_logger().warn(f"Point (xyz) {self.x} {self.y} {self.z} pitch {self.pitch} " +
+                               f"(uvp) {self.u} {self.v} {self.phi} out of range (B1 B2 B3) {B1} {B2} {B3}")
         return False
       
       b1 = math.acos(B1)
@@ -181,19 +229,45 @@ class IkNode(Node):
       # self.get_logger().info(f"cu {cu} cv {cv} a1 {a1} a2 {a2} L {L} b1 {b1} b2 {b2} b3 {b3}")
 
       # contains Shoulder Swivel, Shoulder Flex, Elbow Flex, Wrist Flex (in that order)
-      if cu < 0:
-        angles = [float(self.phi), -((math.pi / 2) - a1 + b1),
-                  math.pi - b2, math.pi - (self.pitch + b3)]
-      elif cv < 0:
-        angles = [float(self.phi), (math.pi) - (b1 + a2),
-                  math.pi - b2, math.pi / 2 - (self.pitch + b3 + a1)]
-      else:
-        angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
+      solution0_angles = None
+      solution1_angles = None
+
+      if cu < 0 and cv > 0: # second quadrant
+        solution0_angles = [float(self.phi), -((math.pi/2) - a1 + b1),
+                  math.pi - b2, math.pi - (self.pitch + b3 - a2)]
+        x = self.pitch - a2 - b3
+        solution1_angles = [float(self.phi), -(math.pi / 2) + a1 + b1, -(math.pi - b2), math.pi - x]
+      elif cv < 0 and cu <= 0: # Third quadrant
+        solution0_angles = None
+        # solution0_angles = [float(self.phi), (math.pi) - (b1 + a2),
+        #           math.pi - b2, math.pi / 2 - (self.pitch + b3 + a1)]
+        x = b1 - a1
+        y = a2 - b3
+        a_3 = y - (2 * math.pi - self.pitch)
+
+        solution1_angles = [float(self.phi), -(math.pi/2 - x), -(math.pi - b2), -a_3]
+      elif cu >= 0 and cv >= 0: # first quadrant (fourth is not implemented)
+        solution0_angles = [float(self.phi), (math.pi / 2) - (b1 + a1),
                           math.pi - b2, math.pi - (self.pitch + a2 + b3)]
-      if self.validAngles(angles):
-        self.angles = angles
+        # If want to pick alternate solution
+        a3 = a2 - b3
+        solution1_angles = [solution0_angles[0], solution0_angles[1] + 2 * b1, b2 - math.pi, math.pi - (a3 + self.pitch)]
       else:
-        self.get_logger().warn(f"Outside joint limits, angles: {angles}")
+        self.get_logger().warn(f"Fourth (ERROR)")
+
+
+      # Try to use desired solution
+      if self.solution == 0 and self.validAngles(solution0_angles):
+        self.angles = solution0_angles
+      elif self.solution == 1 and self.validAngles(solution1_angles):
+        self.angles = solution1_angles
+      # If can't use desired solution use any valid one
+      elif self.validAngles(solution0_angles):
+        self.angles = solution0_angles
+      elif self.validAngles(solution1_angles):
+        self.angles = solution1_angles
+      else:
+        self.get_logger().warn(f"Outside joint limits, angles: {solution0_angles} {solution1_angles}")
         return False
 
       # self.get_logger().info(f"angles: {self.angles}")
@@ -202,7 +276,7 @@ class IkNode(Node):
     except ValueError as e:
       self.get_logger().error(f"Caught error {e} with coordinates (x,y,z) {self.x} {self.y} {self.z} (u,v,phi,pitch) {self.u} {self.v} {self.phi} {self.pitch}")
   
-  def joy_callback(self, message: Joy):
+  def cad_joy_callback(self, message: Joy):
     # self.get_logger().info(f"Received from cad mouse")
     old_values = (self.x, self.y, self.z, self.th, self.pitch)
     left_button, right_button = message.buttons
@@ -218,8 +292,42 @@ class IkNode(Node):
 
     # Pitch is the one angle which is directly set, so check bounds here
     new_pitch = self.pitch + (self.sensitivity * roll / 30000)
-    self.pitch = new_pitch    
+    self.pitch = new_pitch
 
+    self.perform_calculations(old_values)
+
+
+  def joy_callback(self, message: Joy):
+    # For logitech joystick, moving wheels if button 3 is pressed; don't move arm
+    if message.buttons[2] == 1:
+        return
+
+    # self.get_logger().info(f"Received from cad mouse")
+    old_values = (self.x, self.y, self.z, self.th, self.pitch)
+    x, y, spin, trim, dpad_x, dpad_y = message.axes
+    trim  = map_range(trim, -1.0, 1.0, 0.5, 3.0)
+
+    # Move up and down with trigger and button 2
+    up_down = message.buttons[0] - message.buttons[1]
+
+    # Toggle between solutions with button 8 (index 7)
+    if self.last_message and self.last_message.buttons[7] != message.buttons[7] and message.buttons[7] == 1:
+      self.solution = 0 if self.solution == 1 else 1
+
+    self.x += (self.sensitivity * -y / 75) # forward-back of joystick moves along x
+    self.y += (self.sensitivity * x / 75) # left-right would move along y axis (doesn't since in 2D mode)
+    self.z += (trim * self.sensitivity * -up_down / 75) # trigger/button 2 moves up/down
+    self.th += (self.sensitivity * spin / 75) # spin of joystick (yaw) spins base
+
+    # Pitch is the one angle which is directly set, so check bounds here
+    new_pitch = self.pitch + (self.sensitivity * dpad_x / 50)
+    self.pitch = new_pitch
+
+    self.perform_calculations(old_values)
+    
+    self.last_message = message
+
+  def perform_calculations(self, old_values):
     self.calculate_cylindical()
 
     # if 2d, force y to be 0
@@ -264,6 +372,9 @@ class IkNode(Node):
 
   
   def validAngles(self, angles):
+    if angles == None or len(angles) != len(self.mins):
+      return False
+    
     for angle, min, max in zip(angles, self.mins, self.maxes):
       # Validate angle is between min and max
       if not(min <= angle and angle <= max):
@@ -277,17 +388,7 @@ def main(args=None):
 
   ik_node = IkNode()
 
-  # Spin in a separate thread
-  thread = threading.Thread(target=rclpy.spin, args=(ik_node, ), daemon=True)
-  thread.start()
-
-  loop_rate = ik_node.create_rate(30)
-  while rclpy.ok():
-    try:
-        ik_node.publish_joint_state()
-        loop_rate.sleep()
-    except KeyboardInterrupt:
-        print("Node shutting down due to shutting down node.")
-        break
+  rclpy.spin(ik_node)
+  ik_node.destroy_node()
 
   rclpy.shutdown()

@@ -63,7 +63,8 @@ target_link_libraries(${PROJECT_NAME}
   ${avutil_LIBRARIES}
   ${swscale_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  /usr/lib/aarch64-linux-gnu/libv4l2.so
+  # /usr/lib/x86_64-linux-gnu/libv4l2.so
+  /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/libv4l2.so
 
   )
 

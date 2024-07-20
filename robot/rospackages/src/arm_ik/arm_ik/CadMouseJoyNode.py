@@ -18,11 +18,11 @@ class CadMouseJoyNode(Node):
     self.joy_pub = self.create_publisher(Joy, joy_topic, 1)
     self.get_logger().info('Created publisher for topic "'+joy_topic)
 
-    self.declare_parameter('deadzone', value=10)
+    self.declare_parameter('deadzones', value=[10, 10, 10, 10, 10, 10])
 
 
   def readMouseInput(self):
-    self.deadzone = self.get_parameter('deadzone').get_parameter_value().integer_value
+    self.deadzones = self.get_parameter('deadzones').get_parameter_value().integer_array_value
 
     axis = [0, 0, 0, 0, 0, 0]
     button = [False, False]
@@ -41,7 +41,7 @@ class CadMouseJoyNode(Node):
               axis[i] = axis_raw
               
               # Apply deadzone
-              if axis[i] < self.deadzone and axis[i] > -self.deadzone:
+              if axis[i] < self.deadzones[i] and axis[i] > -self.deadzones[i]:
                 axis[i] = 0
 
             # print(axis)
@@ -78,7 +78,7 @@ class CadMouseJoyNode(Node):
       #while os.getcwd().split("/")[-1] != "robotics-orin" and os.getcwd() != "/":
       #  os.chdir("..")
       # os.system("cat robot/util/udev-rules/10-cadmouse.rules")
-      os.system("sudo cp ~/robotics-orin/util/udev-rules/10-cadmouse.rules /lib/udev/rules.d/10-cadmouse.rules && sudo udevadm trigger && echo done")
+      os.system("sudo cp ~/Programming/robotics-orin/util/udev-rules/10-cadmouse.rules /lib/udev/rules.d/10-cadmouse.rules && sudo udevadm trigger && echo done")
       print("attempting to run again...")
       time.sleep(4)
       self.readMouseInput()

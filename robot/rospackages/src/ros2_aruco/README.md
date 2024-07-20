@@ -12,10 +12,6 @@ pip3 install opencv-contrib-python transforms3d
 
 This node locates Aruco AR markers in images and publishes their ids and poses.
 
-Subscriptions:
-* `/camera/image_raw` (`sensor_msgs.msg.Image`)
-* `/camera/camera_info` (`sensor_msgs.msg.CameraInfo`)
-
 Published Topics:
 * `/aruco_poses` (`geometry_msgs.msg.PoseArray`) - Poses of all detected markers (suitable for rviz visualization)
 * `/aruco_markers` (`ros2_aruco_interfaces.msg.ArucoMarkers`) - Provides an array of all poses along with the corresponding marker ids
@@ -23,9 +19,11 @@ Published Topics:
 Parameters:
 * `marker_size` - size of the markers in meters (default .0625)
 * `aruco_dictionary_id` - dictionary that was used to generate markers (default `DICT_5X5_250`)
-* `image_topic` - image topic to subscribe to (default `/camera/image_raw`)
-* `camera_info_topic` - Camera info topic to subscribe to (default `/camera/camera_info`)
-* `camera_frame` - Camera optical frame to use (default to the frame id provided by the camera info message.)
+* `poll_delay_seconds` - how many seconds to wait between captures
+* `camera_index` - which camera index to open (0 corresponds to /dev/video0)
+* `camera_destination_index` - If present, will attempt to use v4l2loopback 
+                                to allow another process to access the camera.
+                                Needs ffmpeg and v4l2loopback-dev installed.
 
 ## Running Marker Detection
 
