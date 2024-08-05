@@ -123,16 +123,38 @@ class IkNode(LifecycleNode):
 
         return TransitionCallbackReturn.SUCCESS
 
-  def on_activate(self, state: State) -> TransitionCallbackReturn:
-    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'activate'")
-    return TransitionCallbackReturn.SUCCESS
-  
-  def on_deactivate(self, state: State) -> TransitionCallbackReturn:
-    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'deactivate'")
-    return TransitionCallbackReturn.SUCCESS
-  
-  def on_shutdown(self, state: State) -> TransitionCallbackReturn:
-    self.destroy_lifecycle_publisher(self.joint_pub)
+    def on_cleanup(self, previous_state: previous_state) -> TransitionCallbackReturn:
+        self.get_logger().info(
+            f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'unconfigured'"
+        )
+        self.destroy_publisher(self.joint_pub)
+        self.destroy_timer(self.timer)
+
+        if self.cad_joy_sub:
+            self.destroy_subscription(self.cad_joy_sub)
+            self.cad_joy_sub = None
+
+        if self.joy_sub:
+            self.destroy_subscription(self.joy_sub)
+            self.joy_sub = None
+
+        if self.absenc_sub:
+            self.destroy_subscription(self.absenc_sub)
+            self.absenc_sub = None
+
+        return super().on_cleanup(previous_state)
+
+    def on_activate(self, previous_state: previous_state) -> TransitionCallbackReturn:
+        self.get_logger().info(
+            f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'activate'"
+        )
+        return super().on_activate(previous_state)
+
+    def on_deactivate(self, previous_state: previous_state) -> TransitionCallbackReturn:
+        self.get_logger().info(
+            f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'deactivate'"
+        )
+        return super().on_deactivate(previous_state)
 
     def on_shutdown(self, previous_state: previous_state) -> TransitionCallbackReturn:
         self.destroy_lifecycle_publisher(self.joint_pub)
