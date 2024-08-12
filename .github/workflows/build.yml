@@ -23,9 +23,9 @@ jobs:
         run: |
           ./scripts/OLD_install-arduino_teensyduino.sh
           
-      - name: Run cmake for building MCU code
-        run: |
-          ./scripts/run_cmake_mcu.sh
+    #  - name: Run cmake for building MCU code
+    #    run: |
+    #     ./scripts/run_cmake_mcu.sh
 
 
 

@@ -1,0 +1,40 @@
+/aruco_node:
+  ros__parameters:
+    poll_delay_seconds: 0.1
+    marker_size: 0.050
+    aruco_dictionary_id: "DICT_5X5_250"
+    camera_index: 2
+    # camera_destination_index: 10
+    # Data comes from the C920 in the lab (on the gripper), calibrated with an 8x6 grid.
+    camera_matrix: [1431.3944 ,    0.     ,  890.65546,
+                    0.     , 1433.52778,  497.59295,
+                    0.     ,    0.     ,    1.     ]
+    distortion_coefficients: [0.058807, -0.181086, 0.002435, -0.003756, 0.000000]
+
+# This was the complete set of calibration data:
+# image_width: 1920
+# image_height: 1080
+# camera_name: narrow_stereo
+# camera_matrix:
+#   rows: 3
+#   cols: 3
+#   data: [1431.3944 ,    0.     ,  890.65546,
+#             0.     , 1433.52778,  497.59295,
+#             0.     ,    0.     ,    1.     ]
+# distortion_model: plumb_bob
+# distortion_coefficients:
+#   rows: 1
+#   cols: 5
+#   data: [0.058807, -0.181086, 0.002435, -0.003756, 0.000000]
+# rectification_matrix:
+#   rows: 3
+#   cols: 3
+#   data: [1., 0., 0.,
+#          0., 1., 0.,
+#          0., 0., 1.]
+# projection_matrix:
+#   rows: 3
+#   cols: 4
+#   data: [1408.47852,    0.     ,  873.88624,    0.     ,
+#             0.     , 1441.61267,  498.62912,    0.     ,
+#             0.     ,    0.     ,    1.     ,    0.     ]
