@@ -5,11 +5,9 @@ import rclpy.executors
 from sensor_msgs.msg import Joy
 import math
 from rclpy.qos import QoSProfile
-from rclpy.lifecycle import previous_state, TransitionCallbackReturn, LifecycleNode
-from sensor_msgs.msg import Jointprevious_state
+from rclpy.lifecycle import State, TransitionCallbackReturn, LifecycleNode
+from sensor_msgs.msg import JointState
 from absenc_interface.msg import EncoderValues
-
-# Publishes angles in radians for the motors
 
 devpath = "/dev/cadmouse"
 
@@ -29,6 +27,7 @@ def any_out_of_range(min, max, *values):
     return False
 
 
+# Publishes angles in radians for the motors
 class IkNode(LifecycleNode):
 
     def __init__(self):
@@ -61,7 +60,11 @@ class IkNode(LifecycleNode):
         # The angle of the last joint with respect to vertical
         self.pitch = 0
 
-    def on_configure(self, previous_state: previous_state) -> TransitionCallbackReturn:
+    def on_configure(self, previous_state: State) -> TransitionCallbackReturn:
+
+        self.get_logger().info(
+            f"on_configure(), previous state was: '{previous_state}'"
+        )
 
         self.setup_initial_joint_params()
 
@@ -80,11 +83,11 @@ class IkNode(LifecycleNode):
         # Mode - if 2D y value stays 0
         self.mode = self.get_parameter("mode").get_parameter_value().string_value
 
-        self.timer = self.create_timer(1 / 30, self.publish_joint_previous_state)
+        self.timer = self.create_timer(1 / 30, self.publish_joint_state)
 
         qos_profile = QoSProfile(depth=10)
-        self.joint_pub = self.create_publisher(
-            Jointprevious_state, "joint_previous_states", qos_profile
+        self.joint_pub = self.create_lifecycle_publisher(
+            JointState, "joint_states", qos_profile
         )
 
         cad_joy_topic = "/cad_mouse_joy"
@@ -117,13 +120,9 @@ class IkNode(LifecycleNode):
         )
         self.get_logger().info('Created subscriber for topic "' + absenc_topic)
 
-        self.get_logger().info(
-            f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'configure'"
-        )
-
         return TransitionCallbackReturn.SUCCESS
 
-    def on_cleanup(self, previous_state: previous_state) -> TransitionCallbackReturn:
+    def on_cleanup(self, previous_state: State) -> TransitionCallbackReturn:
         self.get_logger().info(
             f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'unconfigured'"
         )
@@ -144,19 +143,19 @@ class IkNode(LifecycleNode):
 
         return super().on_cleanup(previous_state)
 
-    def on_activate(self, previous_state: previous_state) -> TransitionCallbackReturn:
+    def on_activate(self, previous_state: State) -> TransitionCallbackReturn:
         self.get_logger().info(
             f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'activate'"
         )
         return super().on_activate(previous_state)
 
-    def on_deactivate(self, previous_state: previous_state) -> TransitionCallbackReturn:
+    def on_deactivate(self, previous_state: State) -> TransitionCallbackReturn:
         self.get_logger().info(
             f"LifecycleNode '{self.get_name()} is in previous_state '{previous_state.label}. Transitioning to 'deactivate'"
         )
         return super().on_deactivate(previous_state)
 
-    def on_shutdown(self, previous_state: previous_state) -> TransitionCallbackReturn:
+    def on_shutdown(self, previous_state: State) -> TransitionCallbackReturn:
         self.destroy_lifecycle_publisher(self.joint_pub)
 
         self.get_logger().info(
@@ -222,9 +221,10 @@ class IkNode(LifecycleNode):
             v += length * math.cos(cumulative_angle)
         return u, v
 
-    def publish_joint_previous_state(self):
+    def publish_joint_state(self):
         # If not initialized, initialize from abs enc values
         if not self.angles and self.abs_angles and not self.initialized:
+            self.get_logger().warn("1 publish_joint_state")
             self.initialize_angles_coords()
 
         # If not initialized yet, don't publish
@@ -233,18 +233,19 @@ class IkNode(LifecycleNode):
                 self.get_logger().warn("Angles not initialized")
                 return
 
-            joint_previous_state = Jointprevious_state()
+            self.get_logger().warn("2 publish_joint_state")
+            joint_state = JointState()
 
             now = self.get_clock().now()
-            joint_previous_state.header.stamp = now.to_msg()
-            joint_previous_state.name = [
+            joint_state.header.stamp = now.to_msg()
+            joint_state.name = [
                 "Shoulder Swivel",
                 "Shoulder Flex",
                 "Elbow Flex",
                 "Wrist Flex",
             ]
-            joint_previous_state.position = self.angles
-            self.joint_pub.publish(joint_previous_state)
+            joint_state.position = self.angles
+            self.joint_pub.publish(joint_state)
 
     def calculate_angles(self):
         """Performs IK calculation and stores values in self.angles.
@@ -278,9 +279,6 @@ class IkNode(LifecycleNode):
             b1 = math.acos(B1)
             b2 = math.acos(B2)
             b3 = math.acos(B3)
-
-            # self.get_logger().info(f"u {self.u} v {self.v} pitch {self.pitch}")
-            # self.get_logger().info(f"cu {cu} cv {cv} a1 {a1} a2 {a2} L {L} b1 {b1} b2 {b2} b3 {b3}")
 
             # contains Shoulder Swivel, Shoulder Flex, Elbow Flex, Wrist Flex (in that order)
             solution0_angles = None
@@ -357,7 +355,7 @@ class IkNode(LifecycleNode):
             )
 
     def cad_joy_callback(self, message: Joy):
-        # self.get_logger().info(f"Received from cad mouse")
+        self.get_logger().info(f"Received from cad mouse `{message}")
         old_values = (self.x, self.y, self.z, self.th, self.pitch)
         left_button, right_button = message.buttons
         x, y, z, pitch, roll, yaw = message.axes
