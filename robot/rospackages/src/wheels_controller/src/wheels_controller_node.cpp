@@ -36,15 +36,7 @@ callbackReturn WheelsControllerNode::on_configure(const rclcpp_lifecycle::State 
     
     // odom_timer = this->create_wall_timer( 50ms, std::bind(&WheelsControllerNode::OdomCallback, this));
     
-    joy_msg_callback = this->create_subscription<sensor_msgs::msg::Joy>(
-        "joy", 10, std::bind(&WheelsControllerNode::JoyMessageCallback, this, std::placeholders::_1)
-    );
-    sil_publisher = this->create_publisher<std_msgs::msg::String>("SIL_Color", 10);
-    twist_msg_callback = this->create_subscription<geometry_msgs::msg::Twist>(
-        "cmd_vel", 10, std::bind(&WheelsControllerNode::TwistMessageCallback, this, std::placeholders::_1)
-    );
-    twist_msg_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);     
-
+    
     navigation_goal_status_sub_ = this->create_subscription<action_msgs::msg::GoalStatusArray>(
         "navigate_to_pose/_action/status",
         rclcpp::SystemDefaultsQoS(),
@@ -69,6 +61,16 @@ callbackReturn WheelsControllerNode::on_activate(const rclcpp_lifecycle::State &
     LifecycleNode::on_activate(state);
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
+
+    joy_msg_callback = this->create_subscription<sensor_msgs::msg::Joy>(
+        "joy", 10, std::bind(&WheelsControllerNode::JoyMessageCallback, this, std::placeholders::_1)
+    );
+    sil_publisher = this->create_publisher<std_msgs::msg::String>("SIL_Color", 10);
+    twist_msg_callback = this->create_subscription<geometry_msgs::msg::Twist>(
+        "cmd_vel", 10, std::bind(&WheelsControllerNode::TwistMessageCallback, this, std::placeholders::_1)
+    );
+    twist_msg_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);     
+
 
     return callbackReturn::SUCCESS;
 }

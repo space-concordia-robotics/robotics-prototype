@@ -9,8 +9,6 @@ callbackReturn ArmControllerNode::on_configure(const rclcpp_lifecycle::State &){
     bool local_mode = this->get_parameter("local_mode").as_bool();
     RCLCPP_INFO(this->get_logger(),"entered on_configured");
 
-
-
     if (!local_mode){
         fd = open("/dev/ttyTHS0",O_RDWR);
         if(fd < 0){
@@ -47,13 +45,7 @@ callbackReturn ArmControllerNode::on_configure(const rclcpp_lifecycle::State &){
 //  GPIO::setup(31, GPIO::OUT, GPIO::LOW);
 //  GPIO::setup(33, GPIO::OUT, GPIO::LOW);
 
-    joy_msg_callback = this->create_subscription<sensor_msgs::msg::Joy>(
-        "joy", 10, std::bind(&ArmControllerNode::JoyMessageCallback, this, std::placeholders::_1)
-    );
     
-    arm_vals_msg_callback = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-        "arm_values", 10, std::bind(&ArmControllerNode::ArmMessageCallback, this, std::placeholders::_1)
-    );
 
     RCLCPP_INFO(get_logger(), "on_configure() is called.");
     return callbackReturn::SUCCESS;
@@ -63,6 +55,14 @@ callbackReturn ArmControllerNode::on_activate(const rclcpp_lifecycle::State & st
     LifecycleNode::on_activate(state);
 
     RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
+
+    joy_msg_callback = this->create_subscription<sensor_msgs::msg::Joy>(
+        "joy", 10, std::bind(&ArmControllerNode::JoyMessageCallback, this, std::placeholders::_1)
+    );
+    
+    arm_vals_msg_callback = this->create_subscription<std_msgs::msg::Float32MultiArray>(
+        "arm_values", 10, std::bind(&ArmControllerNode::ArmMessageCallback, this, std::placeholders::_1)
+    );
 
     return callbackReturn::SUCCESS;
 }

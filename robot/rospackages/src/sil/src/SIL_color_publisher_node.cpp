@@ -26,11 +26,6 @@ class Configuration : public rclcpp_lifecycle::LifecycleNode{
     callbackReturn on_configure(const rclcpp_lifecycle::State &){
       this->declare_parameter("sil_path", "/dev/ttyUSB1");
 
-      pub_ = this->create_publisher<std_msgs::msg::String>("SIL_Color", 10);
-
-      subscription_ = this->create_subscription<std_msgs::msg::String>(
-        "SIL_Color", 10, std::bind(&Configuration::topic_callback, this, std::placeholders::_1));
-
       //Opens LED strip communication
       fd = open(this->get_parameter("sil_path").as_string().c_str(), O_RDWR);
 
@@ -54,6 +49,11 @@ class Configuration : public rclcpp_lifecycle::LifecycleNode{
 
       RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 
+      pub_ = this->create_publisher<std_msgs::msg::String>("SIL_Color", 10);
+
+      subscription_ = this->create_subscription<std_msgs::msg::String>(
+        "SIL_Color", 10, std::bind(&Configuration::topic_callback, this, std::placeholders::_1));
+        
       return callbackReturn::SUCCESS;
     }
 

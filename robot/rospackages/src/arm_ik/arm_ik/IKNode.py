@@ -43,6 +43,11 @@ class IkNode(LifecycleNode):
     self.declare_parameter('solution', 0)
     self.declare_parameter('local_mode', False)
 
+    # topic names
+    self.cad_joy_topic = '/cad_mouse_joy'
+    self.joy_topic = '/joy'
+    self.absenc_topic = '/absenc_values'
+
     self.abs_angles = None
     self.initialized = False
     self.angles = None
@@ -62,12 +67,14 @@ class IkNode(LifecycleNode):
     self.L1 = lengths[0]
     self.L2 = lengths[1]
     self.L3 = lengths[2]
+
     # For convenience, store as array and as individual values
     self.lengths = lengths
 
     # Joint angle limits
     mins = self.get_parameter('joint_angle_mins').get_parameter_value().double_array_value
     maxes = self.get_parameter('joint_angle_maxes').get_parameter_value().double_array_value
+    
     # Convert them to radians
     self.mins = [math.radians(x)  for x in mins]
     self.maxes = [math.radians(x)  for x in maxes]  
@@ -84,34 +91,32 @@ class IkNode(LifecycleNode):
     self.timer = self.create_timer(1/30, self.publish_joint_state)
 
   def on_configure(self, state: State) -> TransitionCallbackReturn:
-    qos_profile = QoSProfile(depth=10)
-    self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)  
-
-    cad_joy_topic = '/cad_mouse_joy'
-    self.cad_joy_sub = self.create_subscription(Joy, cad_joy_topic, self.cad_joy_callback, 10)
-    self.get_logger().info('Created publisher for topic "' + cad_joy_topic + '"')
-
-    joy_topic = '/joy'
-    self.joy_sub = self.create_subscription(Joy, joy_topic, self.joy_callback, 10)
-    self.get_logger().info('Created publisher for topic "' + joy_topic + '"')
+    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'configure'")
 
     # Get the initial angle values 
-    absenc_topic = '/absenc_values'
-    
     if self.local_mode:
       self.abs_angles = [0.0, math.radians(0.04), math.radians(13.65), math.radians(-14.42)]
       self.initialize_angles_coords()
     # Will hold the previous joy message (used to toggle values)
-    self.last_message = None
+    self.last_message = None    
 
-    self.absenc_sub = self.create_subscription(EncoderValues, absenc_topic, self.absenc_callback, 10)
-    self.get_logger().info('Created subscriber for topic "'+absenc_topic)
-
-    self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'configure'")
     return TransitionCallbackReturn.SUCCESS
 
   def on_activate(self, state: State) -> TransitionCallbackReturn:
     self.get_logger().info(f"LifecycleNode '{self.get_name()} is in state '{state.label}. Transitioning to 'activate'")
+
+    qos_profile = QoSProfile(depth=10)
+    self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)  
+
+    self.cad_joy_sub = self.create_subscription(Joy, self.cad_joy_topic, self.cad_joy_callback, 10)
+    self.get_logger().info('Created publisher for topic "' + self.cad_joy_topic + '"')
+
+    self.joy_sub = self.create_subscription(Joy, self.joy_topic, self.joy_callback, 10)
+    self.get_logger().info('Created publisher for topic "' + self.joy_topic + '"')
+
+    self.absenc_sub = self.create_subscription(EncoderValues, self.absenc_topic, self.absenc_callback, 10)
+    self.get_logger().info('Created subscriber for topic "'+ self.absenc_topic)
+
     return TransitionCallbackReturn.SUCCESS
   
   def on_deactivate(self, state: State) -> TransitionCallbackReturn:

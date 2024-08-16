@@ -45,10 +45,6 @@
     // RCLCPP_DEBUG_STREAM(get_logger(), state.label());
 
     bool local_mode = this->get_parameter("local_mode").as_bool();
-
-    angles_publisher = this->create_publisher<absenc_interface::msg::EncoderValues>("absenc_values", 10);
-
-    arm_publisher = this->create_publisher<std_msgs::msg::String>("arm_command", 10);
     
     timer = this->create_wall_timer(
     std::chrono::milliseconds(this->get_parameter("absenc_polling_rate").as_int()), 
@@ -74,6 +70,20 @@
       }
     }
 
+    
+    RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
+    return callbackReturn::SUCCESS;
+  }
+
+  callbackReturn Absenc::on_activate(const rclcpp_lifecycle::State & state){
+    LifecycleNode::on_activate(state);
+
+    RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
+
+    angles_publisher = this->create_publisher<absenc_interface::msg::EncoderValues>("absenc_values", 10);
+
+    arm_publisher = this->create_publisher<std_msgs::msg::String>("arm_command", 10);
+
     subscription = this->create_subscription<sensor_msgs::msg::JointState>(
       "joint_states", 10, std::bind(&Absenc::ikValuesCallback, this, std::placeholders::_1));
 
@@ -87,14 +97,6 @@
 
     arm_controller_publisher = this->create_publisher<std_msgs::msg::Float32MultiArray>("arm_values",10);
     
-    RCUTILS_LOG_INFO_NAMED(get_name(), "on_configure() is called.");
-    return callbackReturn::SUCCESS;
-  }
-
-  callbackReturn Absenc::on_activate(const rclcpp_lifecycle::State & state){
-    LifecycleNode::on_activate(state);
-
-    RCUTILS_LOG_INFO_NAMED(get_name(), "on_activate() is called.");
 
     return callbackReturn::SUCCESS;
   }
