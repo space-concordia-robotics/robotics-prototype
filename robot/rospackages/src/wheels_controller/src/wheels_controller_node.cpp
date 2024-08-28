@@ -143,7 +143,11 @@ void WheelsControllerNode::JoyMessageCallback(const sensor_msgs::msg::Joy::Share
         } else if (joy_msg->axes[4] == 1.0 && joy_msg->axes[5] == 1.0) {
             RCLCPP_INFO(this->get_logger(), "Controller type 1");
             controller_type = 1;
+        } else if (joy_msg->axes[3] == 1.0 && joy_msg->axes[4] == 1.0) {
+            RCLCPP_INFO(this->get_logger(), "Controller type 3");
+            controller_type = 3;
         } else {
+            RCLCPP_INFO(this->get_logger(), "Can't detect controller type");
             return;
         }
     }
@@ -159,7 +163,7 @@ void WheelsControllerNode::JoyMessageCallback(const sensor_msgs::msg::Joy::Share
     }
     
     // Only move if holding down R1 only (that is, L1 has to be unpressed and R1 pressed)
-    if (controller_type == 0) {
+    if (controller_type == 0 || controller_type == 3) {
         if(!(joy_msg->buttons[4] == 0 && joy_msg->buttons[5] == 1)) {
             publishStop();
             return;
@@ -191,6 +195,7 @@ void WheelsControllerNode::JoyMessageCallback(const sensor_msgs::msg::Joy::Share
     geometry_msgs::msg::Twist twist_msg = geometry_msgs::msg::Twist{};
     twist_msg.linear.x = linear_y_axes_val;
     twist_msg.angular.z = angular_z_axes_val;
+    // RCLCPP_INFO(this->get_logger(), "Twist message: %f %f", twist_msg.linear.x, twist_msg.angular.z);
 
     twist_msg_publisher->publish(twist_msg);
 }
