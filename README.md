@@ -2,16 +2,16 @@
 The code in this repo was built around ROS Humble. First [install that](https://docs.ros.org/en/humble/Installation.html).
 Then, from this folder:
 - I recommend you setup a [Python venv](https://docs.python.org/3/library/venv.html). See steps below.
-- Install rosdep, colcon, catkin, and pip (if not already) (`sudo apt install python3-colcon-common-extensions catkin_pkg python3-pip python3-rosdep2`)
+- Install rosdep, colcon, catkin, and pip (if not already) (`sudo apt install python3-colcon-common-extensions python3-pip python3-rosdep2`)
 - Init and update rosdep (`sudo rosdep init && rosdep update`)
-- Run rosdep so it installs packages: `rosdep install --from-paths src --ignore-src -r -y`. Enter your password when prompted.
+- Run rosdep so it installs packages: `rosdep install --from-paths robot/rospackages/src --ignore-src -r -y`. Enter your password when prompted.
 - Install misc python deps (`pip install -r requirements.txt`)
-- Install JetsonGPIO [from GitHub](https://github.com/pjueon/JetsonGPIO/blob/master/docs/installation_guide.md). This must be 
-manually installed. The default options will work.
+- Install JetsonGPIO [from GitHub](https://github.com/pjueon/JetsonGPIO/blob/master/docs/installation_guide.md). This must be manually installed. The default options will work.
+- `cd robot/rospackages`
 - Build: `colcon build --symlink-install --packages-skip usb_cam` (usb_cam can only compile on the Jetson).
 
 #### Setup venv
-Run `python3 -m venv ./space-env` from the robotics-orin folder.
+Run `python3 -m venv ./space-env` from the robotics-prototype folder. Then source it to activate it: `source space-env/bin/activate`. NOTE: it may be necessary to install a dependency: `sudo apt install python3.10-venv`.
 
 So you will use this frequently, add the source to your ~/.bashrc: `echo "source ${PWD}/space-env/bin/activate" >> ~/.bashrc`.
 That way it will run automatically.

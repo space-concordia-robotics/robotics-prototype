@@ -22,7 +22,19 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'multiplier': 2000},
-            {'local_mode': True}
+            {'local_mode': False}
+        ],
+        namespace='/',
+    )
+
+
+    aik_sc = LifecycleNode(
+        package='service_client',
+        executable='service_client',
+        name='aik_sc',
+        output='screen',
+        parameters=[
+            {"node": 'wheels_controller_node'},
         ],
         namespace='/',
     )
@@ -30,6 +42,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         wheels_controller_driver,
+        aik_sc,
         LifecycleNode(
             package='joy',
             executable='joy_node',
