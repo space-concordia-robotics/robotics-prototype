@@ -1,0 +1,6 @@
+
+### slam config file ###
+slam_toolbox:
+    ros__parameters:
+        # Resolution of the map in meters
+        resolution: 0.01
