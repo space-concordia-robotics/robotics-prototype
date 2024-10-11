@@ -9,14 +9,53 @@ Run this **from the robotics-prototype folder**
 - Install misc python deps (`pip install -r requirements.txt`)
 - Install JetsonGPIO [from GitHub](https://github.com/pjueon/JetsonGPIO/blob/master/docs/installation_guide.md). This must be manually installed. The default options will work.
 - `cd robot/rospackages`
-- If you want to use ZED2 stuff, [install the zed sdk](https://www.stereolabs.com/en-ca/developers/release) 
-- Build: `colcon build --symlink-install --packages-skip usb_cam LidarSlam` (usb_cam can only compile on the Jetson).
+- If you want to use ZED2 stuff, [install CUDA](https://developer.nvidia.com/cuda-downloads) and [install the zed sdk](https://www.stereolabs.com/en-ca/developers/release). Pick the
+`ZED SDK for JetPack 6.0 GA (L4T 36.3) 4.1 (Jetson Orin, CUDA 12.2)` package.
+- Build. On the Jetson use this command: `colcon build --symlink-install --packages-skip usb_cam LidarSlam --cmake-args -DCMAKE_BUILD_TYPE=Release` (usb_cam can only compile on the Jetson, LidarSlam needs to be built separately). Run this **from the rospackages folder**.
+If you are on your laptop, you'll need to add more packages to `--packages-skip`, such as `zed-ros2-wrapper`, and 
+`outer-ros`
 
 #### Setup venv
 Run `python3 -m venv ./space-env` from the robotics-prototype folder. Then source it to activate it: `source space-env/bin/activate`. NOTE: it may be necessary to install a dependency: `sudo apt install python3.10-venv`.
 
 So you will use this frequently, add the source to your ~/.bashrc: `echo "source ${PWD}/space-env/bin/activate" >> ~/.bashrc`.
 That way it will run automatically.
+
+#### Compile LidarSlam
+Install nanoflann: `sudo apt-get install -y libnanoflann-dev`. Then, compile:
+`colcon build --base-paths src/slam/ros2_wrapping --cmake-args -DCMAKE_BUILD_TYPE=Release`
+NOTE: do this from the `robot/rospackages` folder.
+
+#### Setup the lidar
+Install additional packages:
+```
+sudo apt install -y             \
+    ros-$ROS_DISTRO-pcl-ros     \
+    ros-$ROS_DISTRO-tf2-eigen   \
+    ros-$ROS_DISTRO-rviz2
+```
+```
+sudo apt install -y         \
+    build-essential         \
+    libeigen3-dev           \
+    libjsoncpp-dev          \
+    libspdlog-dev           \
+    libcurl4-openssl-dev    \
+    cmake                   \
+    python3-colcon-common-extensions
+```
+Then, the lidar package will compile.
+
+
+Make sure that the ethernet interface the Lidar is set to is set to `link-local only`. This can be done within the 
+ubunutu GUI. The [Networking guide](https://static.ouster.dev/sensor-docs/image_route1/image_route2/networking_guide/networking_guide.html)
+can help, but this should be be only configuration that's necessary. The network config scripts **should**
+not be necessary anymore. To test if it's on the network, run the following command:
+`ping -c1 os1-992005000098.local`. Then, to *test* if it launches, run this command **in robot/rospackages**:
+`ros2 launch ouster_ros driver.launch.py  params_file:='src/beep_autonomy/config/ouster_driver_params.yaml'`
+
+### Running Autonomy
+Run `ros2 launch beep_autonomy video.launch.py`
 
 ### Running arm and wheels controls
 First, run `sudo ./scripts/configure-can0.sh` and `sudo ./scripts/configure-arm.sh`. The 
