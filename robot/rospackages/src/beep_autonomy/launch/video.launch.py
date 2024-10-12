@@ -46,7 +46,7 @@ def generate_launch_description():
         launch.launch_description_sources.PythonLaunchDescriptionSource(
             [slam_dir,'/launch/online_async_launch.py']),
             launch_arguments={'use_sim_time':LaunchConfiguration('use_sim_time'), 
-                            'base_frame': 'zed_camera_link', 'slam_params_file': os.path.join(pkg_share, 'config/slam.yaml')}.items()
+                            'slam_params_file': os.path.join(pkg_share, 'config/slam.yaml')}.items()
     )
 
     zed_launch=launch.actions.IncludeLaunchDescription(

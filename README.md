@@ -53,6 +53,7 @@ can help, but this should be be only configuration that's necessary. The network
 not be necessary anymore. To test if it's on the network, run the following command:
 `ping -c1 os1-992005000098.local`. Then, to *test* if it launches, run this command **in robot/rospackages**:
 `ros2 launch ouster_ros driver.launch.py  params_file:='src/beep_autonomy/config/ouster_driver_params.yaml'`
+To configure the network from a terminal (without GUI), use the `sudo nmtui` command.
 
 ### Running Autonomy
 Run `ros2 launch beep_autonomy video.launch.py`

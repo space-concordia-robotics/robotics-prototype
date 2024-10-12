@@ -5,7 +5,9 @@
   <xacro:arg name="use_zed_localization" default="false" />
 
   <xacro:include filename="$(find zed_wrapper)/urdf/zed_macro.urdf.xacro" />
-  <xacro:zed_camera name="$(arg camera_name)" model="$(arg camera_model)" />
+  <xacro:zed_camera name="$(arg camera_name)" model="$(arg camera_model)">
+    <gnss_origin/>
+  </xacro:zed_camera>
 
 
   <!-- Define robot constants -->
