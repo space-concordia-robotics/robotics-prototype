@@ -64,6 +64,18 @@ def generate_launch_description():
                                 'viz':'false'}.items()
     )
 
+    # This node maps the PointCloud2 from the lidar to a LaserScan
+    # The ouster driver does this automatically, but it seems to take the 
+    # top slice of the lidar (so it misses obstacles near the ground)
+    scan_publisher = launch_ros.actions.Node(
+        package='pointcloud_to_laserscan',
+        executable='pointcloud_to_laserscan_node',
+        name='pointcloud_to_laserscan_node',
+        remappings=[
+            ("/cloud_in", "/ouster/points"),
+        ]
+    )
+
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='false',
                                     description='Flag to enable use_sim_time'),
@@ -76,5 +88,6 @@ def generate_launch_description():
 
         slam_launch,
         lidar_launch,
-        zed_launch
+        zed_launch,
+        scan_publisher
     ])
