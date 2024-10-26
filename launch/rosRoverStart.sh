@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 HOME="/home/nvidia"
-REPO_HOME="$HOME/Programming/robotics-orin"
+REPO_HOME="$HOME/Programming/robotics-prototype"
 OPT_HUMBLE_SETUP="/opt/ros/humble/setup.bash"
-ROS_PACKAGES_SETUP="$REPO_HOME/install/local_setup.sh"
-ROSLAUNCH_FILE="$REPO_HOME/launch/robot_ik.py"
-CANBUS_SETUP_FILE="$REPO_HOME/configure-can0.sh"
-ARM_CONFIGURE_FILE="$REPO_HOME/configure-arm.sh"
+ROS_PACKAGES_SETUP="$REPO_HOME/robot/rospackages/install/local_setup.sh"
+ROSLAUNCH_FILE="$REPO_HOME/launch/robot_wheels.py" # TEMPORARY for Frosh
+CANBUS_SETUP_FILE="$REPO_HOME/scripts/configure-can0.sh"
+ARM_CONFIGURE_FILE="$REPO_HOME/scripts/configure-arm.sh"
 
 # source venv
 cd $REPO_HOME

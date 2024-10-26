@@ -47,3 +47,8 @@ Power-Report*.csv
 
 in-house-deps/
 third-party-deps/
+
+
+
+# Added by Marc
+space-env/
