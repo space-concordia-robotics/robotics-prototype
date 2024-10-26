@@ -1,7 +1,8 @@
 ### Setup
 **TL,DR**: Run the venv and compilation setups. If you want to run arm
 and wheels controls, or use the Aruco node, there are additional steps.
-Then, you can run a launch file. For instance, to run the simulation of
+Then compile with `colcon build --symlink-install --packages-skip usb_cam`.
+Now, you can run a launch file. For instance, to run the simulation of
 IK, run `ros2 launch arm_ik local_ik.launch.py`. **NOTE**: VS Code's
 integrated terminal causes issues with RVIZ, so I recommend you use
 a traditional terminal emulator (Terminator or Terminal).
