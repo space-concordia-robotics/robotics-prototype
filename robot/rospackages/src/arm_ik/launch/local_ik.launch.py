@@ -3,7 +3,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+from launch_ros.actions import Node, LifecycleNode
 
 def generate_launch_description():
     urdf_file_name = 'astro_arm.urdf'
@@ -35,7 +35,7 @@ def generate_launch_description():
                         get_package_share_directory('arm_ik'),
                         'urdf.rviz')]
         ),
-        Node(
+        LifecycleNode(
             package='arm_ik',
             executable='IKNode',
             name='ik_node',
@@ -49,8 +49,19 @@ def generate_launch_description():
                 {'solution': 0},
                 {'angle_set': 'vertical'},
                 {'local_mode': True}
-            ]
-                        ),
+            ],
+            namespace='/'
+        ),
+        LifecycleNode(
+            package='service_client',
+            executable='service_client',
+            name='aik_sc',
+            output='screen',
+            parameters=[
+                {"node": 'ik_node'},
+            ],
+            namespace='/',
+        ),
         # Node(
         #     package='arm_ik',
         #     executable='CadMouseJoyNode',
