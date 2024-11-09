@@ -1,4 +1,4 @@
-#include "GpsPublisherNode.h"
+#include "gps/GpsPublisherNode.h"
 
 GpsPublisherNode::GpsPublisherNode(const std::string& gpsTopic) : Node("gps_publisher")
 {
