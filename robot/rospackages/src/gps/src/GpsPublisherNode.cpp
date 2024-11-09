@@ -31,7 +31,7 @@ GpsData GpsPublisherNode::extractGpsData()
     int32_t latitude{}, longitude{}, height{};
 
     // TODO: change function called here and remove multiplying factor stuff (will be done in gps code)
-    gps_.pollNAV_PVT(res, latitude, longitude, height);
+    // gps_.pollNAV_PVT(res, latitude, longitude, height);
     GpsData gps_data{};
     gps_data.latitude = float(latitude) * MULTIPLYING_FACTOR;
     gps_data.longitude = float(longitude) * MULTIPLYING_FACTOR;
