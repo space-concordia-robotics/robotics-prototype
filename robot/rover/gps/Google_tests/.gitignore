@@ -1,0 +1,25 @@
+# GTest build directories
+/build/
+/cmake-build-debug/
+/cmake-build-release/
+
+# GTest binary files
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# GTest CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# GTest generated files
+Testing/
+CTestTestfile.cmake
+test_detail.xml
+test_output.txt
