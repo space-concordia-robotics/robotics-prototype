@@ -32,7 +32,8 @@ setup(
         'console_scripts': [
             'IKNode = arm_ik.IKNode:main',
             'CadMouseJoyNode = arm_ik.CadMouseJoyNode:main',
-            'state_publisher = arm_ik.state_publisher:main'
+            'state_publisher = arm_ik.state_publisher:main',
+            'joymap_node = arm_ik.JoyMapper:main'
         ],
     },
 )
