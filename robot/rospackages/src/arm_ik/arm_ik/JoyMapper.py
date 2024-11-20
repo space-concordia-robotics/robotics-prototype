@@ -73,7 +73,6 @@ class JoyMapper(Node):
         self.get_logger().info("Destroying joymap_node")
         super().destroy_node()
 
-
 def main(args=None):
     rclpy.init(args=args)
     joy_mapper_node = JoyMapper()
