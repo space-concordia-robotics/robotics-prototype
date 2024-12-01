@@ -11,10 +11,9 @@ set(HEADER_FILES
         src/serdes/UbxDeserializer.hpp
         src/connection/UbxAbstractConnection.hpp
         src/connection/UbxI2CConnection.hpp
-        src/connection/I2CTransactionBuilder.cpp
-        src/connection/I2CTransactionBuilder.h
         src/connection/LinuxI2CTransactionBuilder.cpp
         src/connection/LinuxI2CTransactionBuilder.hpp
+        src/packet/SatelliteInfo.hpp
 )
 
 set(SOURCE_FILES
@@ -25,10 +24,9 @@ set(SOURCE_FILES
         src/connection/UbxI2CConnection.cpp
         src/connection/LinuxI2CTransactionBuilder.cpp
         src/packet/UbxPacketNavSat.cpp
-        src/connection/I2CTransactionBuilder.cpp
-        src/connection/I2CTransactionBuilder.h
         src/connection/LinuxI2CTransactionBuilder.cpp
         src/connection/LinuxI2CTransactionBuilder.hpp
+        src/packet/UbxPacketNavSat.hpp
 )
 
 add_library(gps_node STATIC ${SOURCE_FILES} ${HEADER_FILES})
