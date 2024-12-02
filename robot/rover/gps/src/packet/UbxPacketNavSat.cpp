@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <vector>
+#include <stdexcept>
 
 #include "UbxPacket.hpp"
 #include "../serdes/UbxDeserializer.hpp"
@@ -7,20 +8,20 @@
 
 #include "UbxPacketNavSat.hpp"
 
-uint16_t UbxPacketNavSat::PID = 0x3501;
 
 void UbxPacketNavSat::ensurePid(uint16_t pid) const
 {
-	if (pid != PID) {
-//		throw std::runtime_error("Invalid PID");
+	if (pid != this->pid) {
+		throw std::invalid_argument(
+			"Invalid PID for UbxPacketNavSat. Expected: " + std::to_string(this->pid)
+			+ ", Got: " + std::to_string(pid));
 	}
 }
 
 // Deserializing constructor
-UbxPacketNavSat::UbxPacketNavSat(const std::vector<uint8_t>& frame)
-	: UbxPacket(frame), isPollingPacket{false}
+UbxPacketNavSat::UbxPacketNavSat(const std::vector<uint8_t>& frame) : UbxPacket(frame), isPollingPacket{false}
 {
-	this->ensurePid(PID);
+	this->ensurePid(pid);
 	UbxDeserializer des{this->payload};
 	this->iTOW = des.readU4();
 	this->version = des.readU1();
@@ -33,9 +34,10 @@ UbxPacketNavSat::UbxPacketNavSat(const std::vector<uint8_t>& frame)
 	}
 }
 
+//	TODO omar: use DEFAULT_ID instead of PID here?
 // Serializing constructor for polling
 UbxPacketNavSat::UbxPacketNavSat()
-	: UbxPacket(PID, {}), isPollingPacket{true}
+	: UbxPacket(DEFAULT_ID, {}), isPollingPacket{true}
 {
 }
 

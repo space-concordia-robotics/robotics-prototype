@@ -6,7 +6,6 @@
 #include "UbxPacket.hpp"
 #include "../serdes/UbxDeserializer.hpp"
 
-// UbxPacketNavSat: Handles satellite navigation data
 class UbxPacketNavSat : public UbxPacket {
  private:
 	uint32_t iTOW{};
@@ -15,10 +14,9 @@ class UbxPacketNavSat : public UbxPacket {
 	std::vector<SatelliteInfo> satellites;
 
  public:
-	static uint16_t PID;
+	static const uint16_t DEFAULT_ID = 0x3501;
 	const bool isPollingPacket;
 
-	// Ensures the packet ID matches
 	void ensurePid(uint16_t pid) const override;
 
 	// Deserializing constructor
