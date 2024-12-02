@@ -6,6 +6,12 @@
 #include "UbxPacket.hpp"
 #include "../serdes/UbxDeserializer.hpp"
 
+/**
+ * @brief Represents a UBlox NAV-SAT packet.
+ *
+ * This class encapsulates a NAV-SAT packet, providing methods for
+ * deserialization and access to satellite information.
+ */
 class UbxPacketNavSat : public UbxPacket {
  private:
 	uint32_t iTOW{};
