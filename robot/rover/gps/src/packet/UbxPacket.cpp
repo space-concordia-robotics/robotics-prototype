@@ -1,12 +1,12 @@
+#include <stdexcept>
 #include "UbxPacket.hpp"
 #include "serdes/UbxSerializer.hpp"
 #include "serdes/UbxDeserializer.hpp"
 
 // Serializing Constructor
-UbxPacket::UbxPacket(uint16_t pid, const std::vector<uint8_t>& payload)
+UbxPacket::UbxPacket(uint16_t pid, const std::vector<uint8_t>& payload) : pid{pid}
 {
 	this->preamble = 0x62B5;
-	this->pid = pid;
 	this->payload = payload;
 	this->chksum = this->calculateChksum();
 	UbxSerializer ser(8 + payload.size());
@@ -19,6 +19,7 @@ UbxPacket::UbxPacket(uint16_t pid, const std::vector<uint8_t>& payload)
 			.getPayloadReadOnly();
 }
 
+
 UbxPacket::UbxPacket(const std::vector<uint8_t>& frame)
 {
 	UbxDeserializer des(frame);
@@ -30,8 +31,11 @@ UbxPacket::UbxPacket(const std::vector<uint8_t>& frame)
 
 	uint16_t checksum = this->calculateChksum();
 	if (checksum != this->chksum) {
-		// TODO: throw an exception
-		// For now we can ignore it
+		throw std::runtime_error("Checksum mismatch: Calculated checksum is "
+								 + std::to_string(checksum)
+								 + ", but received checksum is "
+								 + std::to_string(this->chksum)
+		);
 	}
 
 	this->serializedFrame = frame;
@@ -67,9 +71,18 @@ std::vector<uint8_t> UbxPacket::serialize() const
 	return this->serializedFrame;
 }
 
+/**
+ * @brief Ensures the packet has the expected PID.
+ *
+ * This function checks whether the packet's PID matches the provided value.
+ * If the PIDs do not match, it throws a runtime error.
+ *
+ * @param pid The expected PID to validate against.
+ * @throws std::runtime_error If the packet's PID does not match the expected value.
+ */
 void UbxPacket::ensurePid(uint16_t pid) const
 {
 	if (this->pid != pid) {
-		// TODO: throw exception later
+		throw std::runtime_error("Invalid PID");
 	}
 }

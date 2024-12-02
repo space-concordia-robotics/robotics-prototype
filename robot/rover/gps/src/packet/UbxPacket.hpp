@@ -16,10 +16,28 @@ class UbxPacket {
  public:
 	virtual ~UbxPacket() = default;
 
-	// Serializing constructor
+/**
+ * @brief Constructs a UbxPacket with the specified PID and payload.
+ *
+ * This serializing constructor is used to create a UbxPacket for sending data. It initializes
+ * the packet preamble, calculates the checksum, and serializes the packet into a
+ * frame ready for transmission.
+ *
+ * @param pid The packet identifier (PID) for this UBX packet.
+ * @param payload The payload data to include in the packet.
+ */
 	UbxPacket(uint16_t pid, const std::vector<uint8_t>& payload);
 
-	// Deserializing constructor
+	/**
+ * @brief Constructs a UbxPacket by deserializing data from a frame.
+ *
+ * This constructor initializes a UbxPacket object by parsing a serialized frame
+ * and extracting its components: preamble, PID, payload, and checksum.
+ * It also verifies that the checksum in the frame matches the calculated checksum.
+ *
+ * @param frame A vector of bytes representing the serialized packet data.
+ * @throws std::runtime_error If the checksum in the frame does not match the calculated checksum.
+ */
 	explicit UbxPacket(const std::vector<uint8_t>& frame);
 
 
