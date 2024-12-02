@@ -4,7 +4,6 @@
 
 #include "UbxPacket.hpp"
 #include "../serdes/UbxDeserializer.hpp"
-#include "SatelliteInfo.hpp"
 
 #include "UbxPacketNavSat.hpp"
 

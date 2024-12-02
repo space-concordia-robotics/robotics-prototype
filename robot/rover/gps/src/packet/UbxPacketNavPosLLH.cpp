@@ -1,6 +1,5 @@
 #include "UbxPacketNavPosLLH.hpp"
 #include "serdes/UbxDeserializer.hpp"
-#include "SatelliteInfo.hpp"
 
 //	TODO omar: use DEFAULT_ID instead of PID here?
 // Serializing constructor for polling

@@ -12,7 +12,6 @@ set(HEADER_FILES
         src/connection/UbxI2CConnection.hpp
         src/connection/LinuxI2CTransactionBuilder.cpp
         src/connection/LinuxI2CTransactionBuilder.hpp
-        src/packet/SatelliteInfo.hpp
         src/packet/UbxPacket.hpp
         src/packet/UbxPacketNavSat.hpp
         src/packet/UbxPacketNavPosLLH.hpp
