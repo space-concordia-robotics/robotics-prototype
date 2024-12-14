@@ -19,7 +19,8 @@ setup(
         (os.path.join('share', package_name), glob('urdf/*.urdf')),
         (os.path.join('share', package_name), glob('rviz/*.rviz')),
         # ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
-        (os.path.join('share', package_name, "meshes"), glob('meshes/*.STL'))
+        (os.path.join('share', package_name, 'meshes'), glob('meshes/*.STL')),
+        (os.path.join('share', package_name, 'config'), glob('arm_ik/config/*.yaml'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
