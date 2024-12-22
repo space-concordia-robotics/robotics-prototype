@@ -31,9 +31,14 @@ set(SOURCE_FILES
 )
 
 add_library(gps_node STATIC ${SOURCE_FILES} ${HEADER_FILES})
-
-
 include_directories(src)
+target_include_directories(gps_node PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+install(TARGETS gps_node
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include)
 
 
 add_subdirectory(Google_tests)
