@@ -8,7 +8,7 @@ Wants=ip-emailer.service
 # For some unkown reason this service stopped working when running as user nvidia
 User=root
 Type=simple
-ExecStart=/home/nvidia/Programming/robotics-prototype/robot/util/rosRoverStart/runRosRoverStart.sh
+ExecStart=/home/nvidia/Programming/robotics-prototype/launch/runRosRoverStart.sh
 
 [Install]
 WantedBy=multi-user.target
