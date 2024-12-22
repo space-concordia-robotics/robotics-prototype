@@ -1,4 +1,19 @@
 ### Setup
+**TL,DR**: Run the venv and compilation setups. If you want to run arm
+and wheels controls, or use the Aruco node, there are additional steps.
+Then compile with `colcon build --symlink-install --packages-skip usb_cam`.
+Now, you can run a launch file. For instance, to run the simulation of
+IK, run `ros2 launch arm_ik local_ik.launch.py`. **NOTE**: VS Code's
+integrated terminal causes issues with RVIZ, so I recommend you use
+a traditional terminal emulator (Terminator or Terminal).
+
+#### Setup venv
+We highly recommend you setup a [Python venv](https://docs.python.org/3/library/venv.html).
+Run `python3 -m venv ./space-env` from the `robotics-orin` folder. This will create a python
+venv in the `space-env` folder. To make it always run on startup, run the following command
+to add it to your bashrc: `echo "source ${PWD}/space-env/bin/activate" >> ~/.bashrc`
+
+#### Setup to compile repo
 The code in this repo was built around ROS Humble. First [install that](https://docs.ros.org/en/humble/Installation.html).
 Then, from this folder:
 - I recommend you setup a [Python venv](https://docs.python.org/3/library/venv.html). See steps below.
@@ -68,16 +83,16 @@ Then, on another computer, run `ros2 run joy joy_node` that is **on the same net
 as the rover, and with a Logitech X3D joystick plugged in (allowing a wider range
 of input methods is in progress).
 
-#### Setting up ros2_aruco
+### Setting up ros2_aruco
 
-##### Short version
+#### Short version
 Run these commands:
 - `pip install transforms3d`
 - Find where your python packages are installed (eg run the above command again) and source it in `~/.bashrc`. This line should
 **look like** the following: `export PYTHONPATH="/home/marc/Programming/robotics-orin/space-env/lib/python3.10/site-packages:$PYTHONPATH"`
 - If need to duplicate video: `sudo apt install ffmpeg v4l2loopback-dkms v4l2loopback-utils v4l-utils`
 
-##### Long version
+#### Long version
 To get this working, you may see the following error:
 ```
 Installing the transforms3d library by hand required. Please run

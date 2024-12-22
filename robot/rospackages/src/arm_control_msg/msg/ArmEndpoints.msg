@@ -1,0 +1,3 @@
+float32 gripper_spin
+float32 gripper_open_close
+float32 base_motor

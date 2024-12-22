@@ -12,7 +12,7 @@ callbackReturn ArmControllerNode::on_configure(const rclcpp_lifecycle::State &){
 
 
     if (!local_mode){
-        fd = open("/dev/ttyTHS0",O_RDWR);
+        fd = open("/dev/ttyTHS1",O_RDWR);
         if(fd < 0){
             int errno0 = errno;
             RCLCPP_ERROR(this->get_logger(),"Error opening file : %i. Message: %s\n",errno0, strerror(errno));

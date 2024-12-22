@@ -7,8 +7,11 @@
 *.egg-info
 *sh.exe.stackdump
 dist
+
 venv
+space-env/
 env
+
 .envrc
 stress-test-results_*
 node_modules
