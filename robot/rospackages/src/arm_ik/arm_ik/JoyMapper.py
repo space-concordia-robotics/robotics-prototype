@@ -12,14 +12,12 @@ import yaml
 import os
 
 class JoyMapper(Node):
-    
   
     def __init__(self):
         node_name = 'joymap_node'
         super().__init__(node_name)
         self.get_logger().info('Initialized "'+node_name+'" node for functionality')
 
-        # Define the path to the motors configuration file
         package_root = get_package_share_directory('arm_ik')
         motors_file = os.path.join(package_root, 'config', 'motors-config.yaml')
 
@@ -76,7 +74,6 @@ class JoyMapper(Node):
             self.arm_inverse_kinematics(buttons, axes)
         elif self.mode == 'wheels':
             self.wheels_control(axes)
-
         
     def switch_mode(self):
         """Switch between modes."""
@@ -87,10 +84,9 @@ class JoyMapper(Node):
 
     def wheels_control(self, axes):
         wheels_motors = self.wheels_motors
-        wheels_movement_range = self.motion_range
         twist_msg = Twist()
-        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] * wheels_movement_range # Set forward/backward speed
-        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] * wheels_movement_range # Set turning speed
+        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] # Set forward/backward speed
+        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] # Set turning speed
         self.wheels_publisher.publish(twist_msg)
         self.get_logger().info(f'Published wheels Twist message: {twist_msg}')
 
