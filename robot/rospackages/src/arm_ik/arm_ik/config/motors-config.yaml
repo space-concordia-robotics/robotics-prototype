@@ -1,6 +1,7 @@
 joy_mapper_config:
   ros__parameters:
-    arm_forward_:
+    sensitivity: 255
+    arm_motors:
       arm_scale_0:
         type: button
         negative: 6
@@ -21,8 +22,26 @@ joy_mapper_config:
       gripper_open_close_5:
         type: button
         arm_open_close: [0, 1]
-      sensitivity: 255
-    arm_inverse_motors:
+    arm_endpoints:
+      x: 
+        type: axis
+        index: 0
+      y:
+        type: axis
+        index: 1
+      pitch: 
+        type: axis
+        index: 3
+    arm_axes:
+      gripper_spin:
+        type: axis
+        index: 4
+      gripper_open_close:
+        type: button
+        arm_open_close: [0, 1]
+      base_motor:
+        type: axis
+        index: 1
     wheels_motors:
       linear_y:
         type: axis
