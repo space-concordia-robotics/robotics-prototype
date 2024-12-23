@@ -7,7 +7,6 @@ from rclpy.qos import QoSProfile
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
-import time  
 
 import yaml
 import os
@@ -37,8 +36,11 @@ class JoyMapper(Node):
 
         # Extract configurations
         if self.config:
-            self.arm_motors = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('arm_forward_motors', {})
+            self.motion_range = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('sensitivity', {})
+            self.arm_motors = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('arm_motors', {})
             self.wheels_motors = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('wheels_motors', {})
+            self.arm_axes = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('arm_axes', {})
+            self.arm_endpoints = self.config.get('joy_mapper_config', {}).get('ros__parameters', {}).get('arm_endpoints', {})
 
         self.mode = 'wheels'
         self.mode_switch_button = 9 
@@ -61,11 +63,8 @@ class JoyMapper(Node):
         buttons = list(report.buttons)
         axes = list(report.axes)
 
-        # Output delay
-        time.sleep(1)
-
         # Log the string of joystick data
-        joy_data_str = f"Buttons: {buttons}, Axes: {axes}"
+        # joy_data_str = f"Buttons: {buttons}, Axes: {axes}"
         # self.get_logger().info(f"Published joystick data: {joy_data_str}")
 
         if buttons[self.mode_switch_button]:
@@ -74,9 +73,10 @@ class JoyMapper(Node):
         if self.mode == 'arm_forward_kinematics':
             self.arm_forward_kinematics(buttons, axes)
         elif self.mode == 'arm_inverse_kinematics':
-            pass
+            self.arm_inverse_kinematics(buttons, axes)
         elif self.mode == 'wheels':
             self.wheels_control(axes)
+
         
     def switch_mode(self):
         """Switch between modes."""
@@ -87,9 +87,10 @@ class JoyMapper(Node):
 
     def wheels_control(self, axes):
         wheels_motors = self.wheels_motors
+        wheels_movement_range = self.motion_range
         twist_msg = Twist()
-        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] # Set forward/backward speed
-        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] # Set turning speed
+        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] * wheels_movement_range # Set forward/backward speed
+        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] * wheels_movement_range # Set turning speed
         self.wheels_publisher.publish(twist_msg)
         self.get_logger().info(f'Published wheels Twist message: {twist_msg}')
 
@@ -97,7 +98,7 @@ class JoyMapper(Node):
     def arm_forward_kinematics(self, buttons, axes):
 
         arm_motors = self.arm_motors
-        sensitivity = arm_motors.get('sensitivity', {})
+        sensitivity = self.motion_range
         arm_movement_range = sensitivity * (-1 if buttons[arm_motors['arm_scale_0']['negative']] else 
                                     1 if buttons[arm_motors['arm_scale_0']['positive']] else 0)
         gripper_movement_range = sensitivity * (-1 if buttons[arm_motors['gripper_scale_4']['negative']] else 
@@ -121,8 +122,34 @@ class JoyMapper(Node):
         self.get_logger().info(f'Published forward_kin values: {arm_values}')
 
     def arm_inverse_kinematics(self, buttons, axes):
-        pass
+        arm_endpoints = self.arm_endpoints
+        arm_axes = self.arm_axes
+        sensitivity = self.motion_range
+
+        endpoints_values = [
+            axes[arm_endpoints['x']['index']] * sensitivity,  # X-axis
+            axes[arm_endpoints['y']['index']] * sensitivity * (-1 if buttons[5] else 
+            1 if buttons[7] else 0),  # Y-axis
+            axes[arm_endpoints['pitch']['index']] * sensitivity  # Pitch
+        ]
+
+        axes_values = [
+            axes[arm_axes['gripper_spin']['index']] * sensitivity,  # Gripper spin
+            (-1 if buttons[arm_axes['gripper_open_close']['arm_open_close'][0]] else 
+            1 if buttons[arm_axes['gripper_open_close']['arm_open_close'][1]] else 0) * sensitivity,  # Gripper open/close
+            axes[arm_axes['base_motor']['index']] * sensitivity  # Base motor
+        ]
         
+        # Publish the arm values
+        arm_endpoints_msg = Float32MultiArray(data=endpoints_values)
+        self.arm_endpoint_publisher.publish(arm_endpoints_msg)
+
+        arm_axes_msg = Float32MultiArray(data=axes_values)
+        self.arm_axes_publisher.publish(arm_axes_msg)
+        
+        self.get_logger().info(f"Published IK endpoints: {endpoints_values}")
+        self.get_logger().info(f"Published IK axes: {axes_values}")
+
 
     def destroy_node(self):
         self.get_logger().info("Destroying joymap_node")
