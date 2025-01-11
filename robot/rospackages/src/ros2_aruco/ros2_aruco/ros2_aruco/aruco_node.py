@@ -27,7 +27,8 @@ Version: 10/26/2020
 """
 
 import rclpy
-import rclpy.node
+from rclpy.lifecycle import LifecycleNode
+from rclpy.lifecycle.node import TransitionCallbackReturn, LifecycleState
 from rclpy.qos import qos_profile_sensor_data
 from cv_bridge import CvBridge
 import numpy as np
@@ -65,7 +66,7 @@ def estimatePoseSingleMarkers(corners, marker_size, mtx, distortion):
     return rvecs, tvecs, trash
 
 
-class ArucoNode(rclpy.node.Node):
+class ArucoNode(LifecycleNode):
     def declare_params(self):
         # Declare and read parameters
         self.declare_parameter(
@@ -158,7 +159,13 @@ class ArucoNode(rclpy.node.Node):
         self.ffmpeg_process = self.video_capture = None
 
         # Declare params in separate function to de-clutter __init__
-        self.declare_params()
+        self.declare_params() 
+        self.get_logger().info("System is in unconfigured state")
+
+     
+    def on_configure(self, state: LifecycleState):
+
+        self.get_logger().info( f"System is in on_configure, previous state was: '{state.label}'")
 
         self.marker_size = (
             self.get_parameter("marker_size").get_parameter_value().double_value
@@ -222,6 +229,10 @@ class ArucoNode(rclpy.node.Node):
         self.detect_timer = self.create_timer(poll_delay_seconds, self.image_callback)
         self.open_video_timer = self.create_timer(1.0, self.cam_callback)
 
+        #Cancelling the start of the timer in on_configure
+        self.detect_timer.cancel()
+        self.open_video_timer.cancel()
+
         if cv2.__version__ < "4.7.0":
             self.aruco_dictionary = cv2.aruco.Dictionary_get(dictionary_id)
             self.aruco_parameters = cv2.aruco.DetectorParameters_create()
@@ -229,6 +240,43 @@ class ArucoNode(rclpy.node.Node):
             aruco_dictionary = cv2.aruco.getPredefinedDictionary(dictionary_id)
             parameters = cv2.aruco.DetectorParameters()
             self.detector = cv2.aruco.ArucoDetector(aruco_dictionary, parameters)
+        
+        
+        return TransitionCallbackReturn.SUCCESS
+    
+    #Placeholder callback
+    def on_activate(self, state: LifecycleState):
+        self.get_logger().info(f"System in on_activate, previous state was: '{state.label}' ")
+        #The publisher will activate as soon as the node transitions to on_activate
+        self.detect_timer.reset()
+        self.open_video_timer.reset()
+        return super().on_activate(state)
+    
+    #Placeholder callback
+    def on_deactivate(self, state: LifecycleState):
+        self.get_logger().info(f"System is currently in on_deactivate, previous state was: '{state.label}'")
+        self.detect_timer.cancel()
+        self.open_video_timer.cancel()
+        return super().on_deactivate(state)
+    
+    def on_cleanup(self, state: LifecycleState):
+
+        self.get_logger().info(f"System is currently in on_cleanup, previous state was: '{state.label}'")
+        self.destroy_lifecycle_publisher(self.poses_pub)
+        self.destroy_lifecycle_publisher(self.markers_pub)
+        self.destroy_timer(self.detect_timer)
+        self.destroy_timer(self.open_video_timer)
+
+        return TransitionCallbackReturn.SUCCESS
+    
+    def on_shutdown(self, state: LifecycleState):
+
+        self.get_logger().info(f"System is currently in on_shutdown, previous state was: '{state.label}'")
+        self.destroy_lifecycle_publisher(self.poses_pub)
+        self.destroy_lifecycle_publisher(self.markers_pub)
+        self.destroy_timer(self.detect_timer)
+        self.destroy_timer(self.open_video_timer)
+        return TransitionCallbackReturn.SUCCESS
 
     def cam_callback(self):
         try:
