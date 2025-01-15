@@ -1,0 +1,6 @@
+[submodule "robot/rospackages/src/zed-ros2-wrapper"]
+	path = robot/rospackages/src/zed-ros2-wrapper
+	url = https://github.com/stereolabs/zed-ros2-wrapper.git
+[submodule "robot/rospackages/src/ouster-ros"]
+	path = robot/rospackages/src/ouster-ros
+	url = https://github.com/ouster-lidar/ouster-ros.git

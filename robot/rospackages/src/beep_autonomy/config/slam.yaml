@@ -1,0 +1,9 @@
+
+### slam config file ###
+slam_toolbox:
+    ros__parameters:
+        # Resolution of the map in meters
+        resolution: 0.02
+        scan_topic: /scan
+        base_frame: zed_camera_link
+        minimum_travel_distance: 0.1
