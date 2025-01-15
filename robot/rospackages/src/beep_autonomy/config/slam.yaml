@@ -6,4 +6,4 @@ slam_toolbox:
         resolution: 0.02
         scan_topic: /scan
         base_frame: zed_camera_link
-        minimum_travel_distance: 0.01
+        minimum_travel_distance: 0.1
