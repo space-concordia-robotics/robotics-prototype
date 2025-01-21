@@ -44,6 +44,7 @@ class JoyMapper(Node):
 
         self.mode = 'wheels'
         self.mode_switch_button = 9 
+        self.mode_switch_button_pressed = False
 
         map_topic = '/joy'
         
@@ -68,7 +69,11 @@ class JoyMapper(Node):
         # self.get_logger().info(f"Published joystick data: {joy_data_str}")
 
         if buttons[self.mode_switch_button]:
+            self.mode_switch_button_pressed = True
+        elif not buttons[self.mode_switch_button] and self.mode_switch_button_pressed:
+            # Button released after being pressed
             self.switch_mode()
+            self.mode_switch_button_pressed = False
 
         if self.mode == 'arm_forward_kinematics':
             self.arm_forward_kinematics(buttons, axes)
@@ -87,10 +92,9 @@ class JoyMapper(Node):
 
     def wheels_control(self, axes):
         wheels_motors = self.wheels_motors
-        wheels_movement_range = self.motion_range
         twist_msg = Twist()
-        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] * wheels_movement_range # Set forward/backward speed
-        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] * wheels_movement_range # Set turning speed
+        twist_msg.linear.y = axes[wheels_motors["linear_y"]['index']] # Set forward/backward speed
+        twist_msg.angular.z = axes[wheels_motors["angular_z"]['index']] # Set turning speed
         self.wheels_publisher.publish(twist_msg)
         self.get_logger().info(f'Published wheels Twist message: {twist_msg}')
 
