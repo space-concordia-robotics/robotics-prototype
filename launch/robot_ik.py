@@ -18,7 +18,7 @@ def generate_launch_description():
         name='wheels_controller',
         output='screen',
         parameters=[
-            {'multiplier': 2000},
+            {'multiplier': 5000},
             {'local_mode': localMode}
         ],
         namespace='/',

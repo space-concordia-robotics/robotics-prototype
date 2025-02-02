@@ -246,8 +246,8 @@ void WheelsControllerNode::pollControllersCallback(){
     float slip_track = 1.2f;
     //this->angular_z *= -1.f;
     // This can be derived from the equation in the paper (to be fucking linked).
-    float right_wheels_velocity = this->linear_y - ( -this->angular_z * slip_track * 0.5f);
-    float left_wheels_velocity = this->linear_y + ( -this->angular_z * slip_track * 0.5f);
+    float right_wheels_velocity = this->linear_y - ( this->angular_z * slip_track * 0.5f);
+    float left_wheels_velocity = this->linear_y + ( this->angular_z * slip_track * 0.5f);
 
     float right_wheels_vel_rpm = right_wheels_velocity * this->get_parameter("multiplier").as_int();
     float left_wheels_vel_rpm = left_wheels_velocity * this->get_parameter("multiplier").as_int();
@@ -257,11 +257,11 @@ void WheelsControllerNode::pollControllersCallback(){
     */
     RevMotorController::velocityControl(1,right_wheels_vel_rpm);    
     RevMotorController::velocityControl(2,right_wheels_vel_rpm);
-    RevMotorController::velocityControl(3,right_wheels_vel_rpm*0.5);
+    RevMotorController::velocityControl(3,right_wheels_vel_rpm);
     
     RevMotorController::velocityControl(4,left_wheels_vel_rpm);
     RevMotorController::velocityControl(5,left_wheels_vel_rpm);
-    RevMotorController::velocityControl(6,left_wheels_vel_rpm*0.5);
+    RevMotorController::velocityControl(6,left_wheels_vel_rpm);
     
     uint64_t mask = 0x7E;
     RevMotorController::startMotor(mask);
