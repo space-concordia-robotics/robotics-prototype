@@ -249,5 +249,11 @@
       <elevation>488.0</elevation>
       <heading_deg>180</heading_deg>
     </spherical_coordinates>
+
+    <include>
+      <name>tag</name>
+      <pose>3 0 0.5 0 0 0</pose>
+      <uri>model://aruco_cube</uri>
+    </include>
   </world>
 </sdf>

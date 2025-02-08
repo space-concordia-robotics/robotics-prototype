@@ -9,13 +9,10 @@ from launch.actions import SetEnvironmentVariable
 def generate_launch_description():
     pkg_share = launch_ros.substitutions.FindPackageShare(package='beep_autonomy').find('beep_autonomy')
     bringup_dir = launch_ros.substitutions.FindPackageShare(package='nav2_bringup').find('nav2_bringup')
-    zed2_dir=launch_ros.substitutions.FindPackageShare(package='zed_wrapper').find('zed_wrapper')
-    ouster_dir=launch_ros.substitutions.FindPackageShare(package='ouster_ros').find('ouster_ros')
-    slam_dir=launch_ros.substitutions.FindPackageShare(package='slam_toolbox').find('slam_toolbox')
     default_model_path = os.path.join(pkg_share, 'src/description/rover_description.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/default_view.rviz')
     default_params_file=os.path.join(pkg_share, 'config/nav2_params_no_map.yaml')
-    world_path=os.path.join(pkg_share, 'world/sonoma.world')
+    world_path=os.path.join(pkg_share, 'world/my_world.sdf')
     
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
@@ -29,7 +26,7 @@ def generate_launch_description():
         name='joint_state_publisher',
         arguments=[default_model_path],
         condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui')),
-        # parameters=[{'use_sim_time':LaunchConfiguration('use_sim_time')}],
+        parameters=[{'use_sim_time':LaunchConfiguration('use_sim_time')}],
     )
     joint_state_publisher_gui_node = launch_ros.actions.Node(
         package='joint_state_publisher_gui',
@@ -43,7 +40,6 @@ def generate_launch_description():
         name='rviz2',
         output='screen',
         arguments=['-d', LaunchConfiguration('rvizconfig')],
-        condition=launch.conditions.IfCondition(LaunchConfiguration('use_rviz'))
     )
     spawn_entity = launch_ros.actions.Node(
     	package='gazebo_ros', 
@@ -194,20 +190,7 @@ def generate_launch_description():
         remappings=remappings +
                 [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel')]
     )
-    # ros2 launch zed_display_rviz2 display_zed_cam.launch.py camera_model:=zed2
 
-    amcl_node=launch_ros.actions.Node(
-        package='nav2_amcl',
-        executable='amcl',
-        name='amcl',
-        output='screen',
-        respawn=use_respawn,
-        respawn_delay=2.0,
-        
-        arguments=['--ros-args', '--log-level', log_level],
-        remappings=[('/tf','tf'),('/tf_static','tf_static')]
-    )
-    
     lifecycle_manager_node=launch_ros.actions.Node(
         package='nav2_lifecycle_manager',
         executable='lifecycle_manager',
@@ -217,25 +200,6 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time},
                     {'autostart': autostart},
                     {'node_names': lifecycle_nodes}]
-    )
-
-    lidar_launch=launch.actions.IncludeLaunchDescription(
-        launch.launch_description_sources.PythonLaunchDescriptionSource(
-            [ouster_dir,'/launch/driver.launch.py']),
-            launch_arguments={'params_file':ouster_dir+'/config/driver_params.yaml',
-                                'viz':'false'}.items()
-    )
-
-    zed2_launch=launch.actions.IncludeLaunchDescription(
-        launch.launch_description_sources.PythonLaunchDescriptionSource(
-            [zed2_dir,'/launch/zed_camera.launch.py']),
-            launch_arguments={'camera_model':'zed2','use_sim_time':'false'}.items()
-    )
-
-    slam_launch=launch.actions.IncludeLaunchDescription(
-        launch.launch_description_sources.PythonLaunchDescriptionSource(
-            [slam_dir,'/launch/online_async_launch.py']),
-            launch_arguments={'use_sim_time':'false'}.items()
     )
 
     return launch.LaunchDescription([
@@ -258,19 +222,14 @@ def generate_launch_description():
                                             description='Whether to respawn if a node crashes. Applied when composition is disabled.'),
         launch.actions.DeclareLaunchArgument(name='log_level', default_value='info',
                                             description='log level'),
-        launch.actions.DeclareLaunchArgument(name='use_rviz', default_value='true',
-                                            description='use rviz'),
-        # launch.actions.ExecuteProcess(cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so', world_path], output='screen'),
-        # joint_state_publisher_node,
+        launch.actions.ExecuteProcess(cmd=['gazebo', '--verbose', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so', world_path], output='screen'),
+        joint_state_publisher_node,
         # joint_state_publisher_gui_node,
-        # lidar_launch,
         robot_state_publisher_node,
-        # spawn_entity,
+        spawn_entity,
         odom_node,
-        
         # map_node,
         # navsat_node,
-        
         rviz_node,
         controller_node,
         smoother_node,
@@ -279,9 +238,5 @@ def generate_launch_description():
         bt_navigator_node,
         waypoint_follower_node,
         velocity_smoother_node,
-        # amcl_node,
-        lifecycle_manager_node,
-        lidar_launch,
-        zed2_launch,
-        slam_launch
+        lifecycle_manager_node
     ])

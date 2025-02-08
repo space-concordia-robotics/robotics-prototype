@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="Aruco cube">
+    <static>true</static>
+    <link name="main_cube">
+      <collision name="body_collision">
+        <geometry>
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="body_visual">
+        <geometry>
+            <box>
+                <size>1 1 1</size>
+            </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://aruco_cube/materials/scripts</uri>
+            <uri>model://aruco_cube/materials/textures</uri>
+            <name>RepeatedAruco1</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
