@@ -14,7 +14,11 @@ Parameters:
     aruco_dictionary_id - dictionary that was used to generate markers
                           (default DICT_5X5_250)
     poll_delay_seconds - how many seconds to wait between captures
-    camera_index - which camera index to open
+    camera_index - Which camera index to open from device file (uses
+                    this unless the index is negative)
+    camera_topic - Which topic to receive camera images from 
+    camera_info_topic - Which topic to receive camera calibration
+                        info from.
     camera_destination_index - If present, will attempt to use v4l2loopback 
                                 to allow another process to access the camera.
                                 Needs ffmpeg and v4l2loopback-dev installed.
@@ -105,6 +109,24 @@ class ArucoNode(rclpy.node.Node):
         )
 
         self.declare_parameter(
+            name="camera_topic",
+            value="/camera/image_raw",
+            descriptor=ParameterDescriptor(
+                type=ParameterType.PARAMETER_INTEGER,
+                description="From which topic to capture camera images.",
+            ),
+        )
+
+        self.declare_parameter(
+            name="camera_info_topic",
+            value="/camera/camera_info",
+            descriptor=ParameterDescriptor(
+                type=ParameterType.PARAMETER_INTEGER,
+                description="From which topic to receive camera calibration info.",
+            ),
+        )
+
+        self.declare_parameter(
             name="camera_destination_index",
             value=-1,
             descriptor=ParameterDescriptor(
@@ -180,6 +202,16 @@ class ArucoNode(rclpy.node.Node):
         )
         self.get_logger().info(f"Camera index: {self.camera_index}")
 
+        self.camera_topic = (
+            self.get_parameter("camera_topic").get_parameter_value().string_value
+        )
+        self.get_logger().info(f"Camera topic: {self.camera_topic}")
+
+        self.camera_info_topic = (
+            self.get_parameter("camera_info_topic").get_parameter_value().string_value
+        )
+        self.get_logger().info(f"Camera info topic: {self.camera_topic}")
+
         self.camera_destination_index = (
             self.get_parameter("camera_destination_index").get_parameter_value().integer_value
         )
@@ -218,9 +250,20 @@ class ArucoNode(rclpy.node.Node):
         self.poses_pub = self.create_publisher(PoseArray, "aruco_poses", 10)
         self.markers_pub = self.create_publisher(ArucoMarkers, "aruco_markers", 10)
 
-        # Setup timers for opening camera (to allow easy retry) and for detecting aruco tags
-        self.detect_timer = self.create_timer(poll_delay_seconds, self.image_callback)
-        self.open_video_timer = self.create_timer(1.0, self.cam_callback)
+        # If have an invalid index, use topic and opencv bridge
+        if self.camera_index < 0:
+            self.create_subscription(
+                Image, self.camera_topic, self.camera_topic_callback, qos_profile_sensor_data
+            )
+            self.info_sub = self.create_subscription(
+                CameraInfo, self.camera_info_topic, self.info_callback, qos_profile_sensor_data
+            )
+            self.bridge = CvBridge()
+
+        else:
+            # Setup timers for opening camera (to allow easy retry) and for detecting aruco tags
+            self.detect_timer = self.create_timer(poll_delay_seconds, self.image_callback)
+            self.open_video_timer = self.create_timer(1.0, self.cam_callback)
 
         if cv2.__version__ < "4.7.0":
             self.aruco_dictionary = cv2.aruco.Dictionary_get(dictionary_id)
@@ -239,6 +282,22 @@ class ArucoNode(rclpy.node.Node):
             self.get_logger().warn(f"Could not open camera at {self.camera_index}, trying again")
             return
 
+    def info_callback(self, info_msg):
+        self.info_msg = info_msg
+        self.camera_matrix = np.reshape(np.array(self.info_msg.k), (3, 3))
+        self.distortion_coefficients = np.array(self.info_msg.d)
+        # Assume that camera parameters will remain the same...
+        self.destroy_subscription(self.info_sub)
+
+
+    def camera_topic_callback(self, img_msg: Image):
+        if self.info_msg is None:
+            self.get_logger().warn("No camera calibration info")
+            return
+        cv_image = self.bridge.imgmsg_to_cv2(img_msg, desired_encoding="mono8")
+        self.process_cv_image(cv_image)
+
+
     def image_callback(self):
         if self.video_capture is None:
             self.get_logger().info(f"Still waiting on video stream")
@@ -248,8 +307,9 @@ class ArucoNode(rclpy.node.Node):
             return
 
         rval, frame = self.video_capture.read()
-        
-        cv_image = frame
+        self.process_cv_image(frame)
+
+    def process_cv_image(self, cv_image):
         markers = ArucoMarkers()
         pose_array = PoseArray()
 
@@ -289,7 +349,6 @@ class ArucoNode(rclpy.node.Node):
             else:
                 for marker_id in marker_ids:
                     markers.marker_ids.append(marker_id[0])
-
             self.poses_pub.publish(pose_array)
             self.markers_pub.publish(markers)
 

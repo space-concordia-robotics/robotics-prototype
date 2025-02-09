@@ -1,6 +1,8 @@
 # ros2_aruco
 
 ROS2 Wrapper for OpenCV Aruco Marker Tracking
+Takes images from either device file (eg `/dev/video0`) or
+a ros topic.
 
 This package depends on a recent version of OpenCV python bindings and transforms3d library:
 
@@ -20,7 +22,12 @@ Parameters:
 * `marker_size` - size of the markers in meters (default .0625)
 * `aruco_dictionary_id` - dictionary that was used to generate markers (default `DICT_5X5_250`)
 * `poll_delay_seconds` - how many seconds to wait between captures
-* `camera_index` - which camera index to open (0 corresponds to /dev/video0)
+* `camera_index` - which camera device index to open (0 corresponds to /dev/video0). Default
+                    to `0`. **Always pulls from the device file unless** `camera_index` is 
+                    set to a negative number.
+* `camera_topic` - Which topic to open the camera from. (Default `/camera/image_raw`)
+* `camera_info_topic` - Which topic to receive camera info from (Default `/camera/camera_info`)
+                        Only used when capturing from ros topic
 * `camera_destination_index` - If present, will attempt to use v4l2loopback 
                                 to allow another process to access the camera.
                                 Needs ffmpeg and v4l2loopback-dev installed.

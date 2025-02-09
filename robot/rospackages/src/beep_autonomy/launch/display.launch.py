@@ -8,6 +8,7 @@ from launch.actions import SetEnvironmentVariable
 
 def generate_launch_description():
     pkg_share = launch_ros.substitutions.FindPackageShare(package='beep_autonomy').find('beep_autonomy')
+    slam_dir=launch_ros.substitutions.FindPackageShare(package='slam_toolbox').find('slam_toolbox')
     bringup_dir = launch_ros.substitutions.FindPackageShare(package='nav2_bringup').find('nav2_bringup')
     default_model_path = os.path.join(pkg_share, 'src/description/rover_description.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/default_view.rviz')
@@ -20,6 +21,14 @@ def generate_launch_description():
         parameters=[{'robot_description': Command(['xacro ', LaunchConfiguration('model')])},
                     {'use_sim_time':LaunchConfiguration('use_sim_time')}]
     )
+
+    slam_launch=launch.actions.IncludeLaunchDescription(
+        launch.launch_description_sources.PythonLaunchDescriptionSource(
+            [slam_dir,'/launch/online_async_launch.py']),
+            launch_arguments={'use_sim_time':LaunchConfiguration('use_sim_time'), 
+                            'slam_params_file': os.path.join(pkg_share, 'config/slam.yaml')}.items()
+    )
+    
     joint_state_publisher_node = launch_ros.actions.Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
@@ -202,6 +211,17 @@ def generate_launch_description():
                     {'node_names': lifecycle_nodes}]
     )
 
+    aruco_node = launch_ros.actions.Node(
+        package='ros2_aruco',
+        executable='aruco_node',
+        parameters=[{'marker_size': 0.05},
+                    {'aruco_dictionary_id': "DICT_5X5_250"},
+                    {'camera_index': -1},
+                    {'camera_topic': '/camera1/image_raw'},
+                    {'camera_info_topic': '/camera1/camera_info'},
+                    {'use_sim_time':LaunchConfiguration('use_sim_time')}]
+    )
+
     return launch.LaunchDescription([
         launch.actions.SetEnvironmentVariable('RCUTILS_LOGGING_BUFFERED_STREAM', '1'),
         launch.actions.DeclareLaunchArgument(name='namespace',default_value='',
@@ -238,5 +258,7 @@ def generate_launch_description():
         bt_navigator_node,
         waypoint_follower_node,
         velocity_smoother_node,
-        lifecycle_manager_node
+        lifecycle_manager_node,
+        aruco_node,
+        slam_launch
     ])
