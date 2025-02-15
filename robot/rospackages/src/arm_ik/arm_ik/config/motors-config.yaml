@@ -1,0 +1,102 @@
+joy_mapper_config:
+  ros__parameters:
+    sensitivity: 255
+    arm_motors:
+      arm_scale_0:
+        type: button
+        negative: 6
+        positive: 7
+      arm_value_1:
+        type: axis
+        index: 4
+      arm_value_2:
+        type: axis
+        index: 0
+      arm_value_3:
+        type: axis
+        index: 1
+      gripper_scale_4:
+        type: button
+        negative: 4
+        positive: 5
+      gripper_open_close_5:
+        type: button
+        arm_open_close: [0, 1]
+    arm_endpoints:
+      x: 
+        type: axis
+        index: 0
+      y:
+        type: axis
+        index: 1
+      pitch: 
+        type: axis
+        index: 3
+    arm_axes:
+      gripper_spin:
+        type: axis
+        index: 4
+      gripper_open_close:
+        type: button
+        arm_open_close: [0, 1]
+      base_motor:
+        type: axis
+        index: 1
+    wheels_motors:
+      linear_y:
+        type: axis
+        index: 1
+      angular_z:
+        type: axis
+        index: 0
+    env2: 
+      arm_motors:
+        arm_scale_0:
+          type: axes
+          negative: 4
+          positive: 5
+        arm_value_1:
+          type: axis
+          index: 3
+        arm_value_2:
+          type: axis
+          index: 0
+        arm_value_3:
+          type: axis
+          index: 1
+        gripper_scale_4:
+          type: button
+          negative: 9
+          positive: 10
+        gripper_open_close_5:
+          type: button
+          arm_open_close: [1, 2]
+      arm_endpoints:
+        x: 
+          type: axis
+          index: 0
+        y:
+          type: axis
+          index: 1
+        pitch: 
+          type: button
+          index: 11
+      arm_axes:
+        gripper_spin:
+          type: axis
+          index: 5
+        gripper_open_close:
+          type: button
+          arm_open_close: [0, 1]
+        base_motor:
+          type: axis
+          index: 1
+      wheels_motors:
+        linear_y:
+          type: axis
+          index: 1
+        angular_z:
+          type: axis
+          index: 0
+        
+

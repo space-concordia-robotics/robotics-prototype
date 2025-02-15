@@ -19,7 +19,8 @@ setup(
         (os.path.join('share', package_name), glob('urdf/*.urdf')),
         (os.path.join('share', package_name), glob('rviz/*.rviz')),
         # ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
-        (os.path.join('share', package_name, "meshes"), glob('meshes/*.STL'))
+        (os.path.join('share', package_name, 'meshes'), glob('meshes/*.STL')),
+        (os.path.join('share', package_name, 'config'), glob('arm_ik/config/*.yaml'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -27,12 +28,14 @@ setup(
     maintainer_email='marcscattolin@gmail.com',
     description='TODO: Package description',
     license='Apache-2.0',
-    tests_require=['pytest'],
+    # tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'IKNode = arm_ik.IKNode:main',
             'CadMouseJoyNode = arm_ik.CadMouseJoyNode:main',
-            'state_publisher = arm_ik.state_publisher:main'
+            'state_publisher = arm_ik.state_publisher:main',
+            'joymap_node = arm_ik.JoyMapper:main',
+            'joy_remap = arm_ik.JoyRemap:main'
         ],
     },
 )
