@@ -23,15 +23,11 @@ class JoyMapper(Node):
         # Define the path to the motors configuration file
         package_root = get_package_share_directory('arm_ik')
         motors_file = os.path.join(package_root, 'config', 'motors-config.yaml')
-        controller_remap_file = os.path.join(package_root, 'config', 'motors-config.yaml')
 
         try:
             with open(motors_file, 'r') as file:
                 self.config = yaml.safe_load(file)
                 self.get_logger().info('Successfully loaded motors configuration.')
-            with open(controller_remap_file, 'r') as file:
-                self.config = yaml.safe_load(file)
-                self.get_logger().info('Successfully loaded remap configuration.')
         except FileNotFoundError:
             self.get_logger().error(f"Configuration file not found: {motors_file}")
             self.config = None
