@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+
+<robot name="ceres_rover">
+
+    <material name="blue" >
+        <color rgba="0 0 0.5 1"/>
+    </material>
+
+    <material name="red">
+        <color rgba="1 0 0 1"/>
+    </material>
+
+    <material name="grey">
+        <color rgba="0.5 0.5 0.5 1"/>
+    </material>
+
+    <link name="base_structure_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/base_struct.stl" scale="0.001 0.001 0.001"/> 
+            </geometry>
+            <origin xyz="0 0 0" rpy="1.57 0 0" />
+            <material name="blue"/>
+        </visual>
+    </link>
+
+    <link name="base_pivot_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/base_pivot.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.04887 0.05876 -0.06" rpy="1.34 -0.32 -1.389"/>
+            <material name="red"/>
+        </visual>
+    </link>
+
+    <link name="shoulder_gearbox_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/shoulder_gearbox.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.105 -0.071 0.0715" rpy="0 1.57 1.57"/>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <link name="bicep_tube_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/bicep_tube.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.1025 -0.192 -0.086" rpy="0 -0.15 1.57"/>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <link name="bicep_gearbox_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/bicep_gearbox.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.0190 -0.099 -0.092" rpy="0 -0.15 1.57"/>
+            <material name="red"/>
+        </visual>
+    </link>
+
+    <link name="forearm_tube_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/forearm_tube.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.02678 -0.0094 -0.54" rpy="0 0 2.09"/>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <link name="forearm_gearbox_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/forearm_gearbox.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.09 -0.040 -0.056" rpy="-1.55 0 1.89"/>
+            <material name="red"/>
+        </visual>
+    </link>
+
+    <link name="wrist_gearbox_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/wrist_gearbox.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="-0.05 0.055 0.040" rpy="0 1.38 -1.57"/>
+            <material name="red"/>
+        </visual>
+    </link>
+
+    <link name="gripper_gearbox_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/gripper_gearbox.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.011 -0.205 0.020" rpy="0 1.57 1.57"/>
+            <material name="grey"/>
+        </visual>
+    </link>
+
+    <link name="gripper_claw_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://new_arm_ik/meshes/arm_parts/cycloidal_drive/gripper_claw.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <origin xyz="0.016 -0.246 0.0736" rpy="-1.57 1.57 0"/>
+            <material name="blue"/>
+        </visual>
+    </link>
+
+
+    <joint name="base_structure_joint" type="continuous">
+        <parent link="base_structure_link"/>
+        <child link="base_pivot_link"/>
+        <origin xyz="0.156 -0.074 0.104" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <joint name="base_pivot_shoulder_gearbox_joint" type="continuous">
+        <parent link="base_pivot_link"/>
+        <child link="shoulder_gearbox_link"/>
+        <origin xyz="0 0 0.082" rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+
+    <joint name="shoulder_tube_joint" type="fixed">
+        <parent link="shoulder_gearbox_link"/>
+        <child link="bicep_tube_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <joint name="bicep_tube_gearbox_joint" type="continuous">
+        <parent link="bicep_tube_link"/>
+        <child link="bicep_gearbox_link"/>
+        <origin xyz="0.0837 -0.224 0.3530" rpy="0 0 0"/>
+        <axis xyz="1 0 0"/>
+    </joint>
+    
+    <joint name="bicep_gearbox_forearm_tube_joint" type="continuous">
+        <parent link="bicep_gearbox_link"/>
+        <child link="forearm_tube_link"/>
+        <origin xyz="-0.09562 -0.058 0.01" rpy="2.181 0 0"/>
+        <axis xyz=" 0 0 1"/>
+    </joint>
+
+    <joint name="forearm_gearbox_joint" type="fixed">
+        <parent link="forearm_tube_link"/>
+        <child link="forearm_gearbox_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    
+
+    <joint name="forearm_tube_wrist_gearbox_joint" type="continuous">
+        <parent link="forearm_tube_link"/>
+        <child link="wrist_gearbox_link"/>
+        <origin xyz="0 0 0.345" rpy="0 0 0"/>
+        <axis xyz=" 1 0 0"/>
+    </joint>
+
+    <joint name="wrist_gearbox_gripper_gearbox_joint" type="fixed">
+        <parent link="wrist_gearbox_link"/>
+        <child link="gripper_gearbox_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+     <joint name="gripper_claw_joint" type="continuous">
+        <parent link="gripper_gearbox_link"/>
+        <child link="gripper_claw_link"/>
+        <origin xyz="-0.007 -0.11 -0.002" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+
+</robot>
