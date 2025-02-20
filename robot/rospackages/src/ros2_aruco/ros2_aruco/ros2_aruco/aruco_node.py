@@ -39,7 +39,7 @@ import cv2
 import tf_transformations
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseArray, Pose
+from geometry_msgs.msg import PoseArray, Pose, PoseStamped
 from ros2_aruco_interfaces.msg import ArucoMarkers
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 import subprocess
@@ -248,6 +248,7 @@ class ArucoNode(rclpy.node.Node):
 
         # Set up publishers
         self.poses_pub = self.create_publisher(PoseArray, "aruco_poses", 10)
+        self.goal_pub = self.create_publisher(PoseStamped, "goal_pose", 10)
         self.markers_pub = self.create_publisher(ArucoMarkers, "aruco_markers", 10)
 
         # If have an invalid index, use topic and opencv bridge
@@ -350,6 +351,13 @@ class ArucoNode(rclpy.node.Node):
                 for marker_id in marker_ids:
                     markers.marker_ids.append(marker_id[0])
             self.poses_pub.publish(pose_array)
+            # Publish goal
+            if len(pose_array.poses) > 0:
+                goal = PoseStamped()
+                goal.header.frame_id = "camera_link"
+                goal.pose = pose_array.poses[0]
+                self.goal_pub.publish(goal)
+            self.goal_pub
             self.markers_pub.publish(markers)
 
 
