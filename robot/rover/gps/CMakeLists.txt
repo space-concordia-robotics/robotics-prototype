@@ -15,6 +15,7 @@ set(HEADER_FILES
         src/packet/UbxPacket.hpp
         src/packet/UbxPacketNavSat.hpp
         src/packet/UbxPacketNavPosLLH.hpp
+        src/controller/GPSController.hpp
 )
 
 set(SOURCE_FILES
@@ -28,6 +29,7 @@ set(SOURCE_FILES
         src/packet/UbxPacket.cpp
         src/packet/UbxPacketNavSat.cpp
         src/packet/UbxPacketNavPosLLH.cpp
+        src/controller/GPSController.cpp
 )
 
 add_library(gps_node STATIC ${SOURCE_FILES} ${HEADER_FILES})

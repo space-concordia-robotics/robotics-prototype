@@ -14,15 +14,16 @@
  *
  * @see UbxPacket for common packet functionality.
  */
-class UbxPacketNavPosLLH : public UbxPacket {
+class UbxPacketNavPosLLH : public UbxPacket
+{
  private:
-	uint32_t iTOW{};        // GPS time of week of the navigation epoch.
+	uint32_t iTOW{}; // GPS time of week of the navigation epoch.
 	int32_t longitude{};
 	int32_t latitude{};
-	int32_t height_mm{};     // Height above ellipsoid in millimeters
-	int32_t hMSL_mm{};       // Height above mean sea level in millimeters
-	uint32_t hAcc_mm{};      // Horizontal accuracy estimate in millimeters
-	uint32_t vAcc_mm{};      // Vertical accuracy estimate
+	int32_t height_mm{}; // Height above ellipsoid in millimeters
+	int32_t hMSL_mm{}; // Height above mean sea level in millimeters
+	uint32_t hAcc_mm{}; // Horizontal accuracy estimate in millimeters
+	uint32_t vAcc_mm{}; // Vertical accuracy estimate
 
  public:
 	static const uint16_t DEFAULT_ID = 0x0201;
@@ -64,5 +65,5 @@ class UbxPacketNavPosLLH : public UbxPacket {
 
 	uint32_t getVerticalAccuracy_mm() const;
 
-
+	void ensurePid(uint16_t pid) const override;
 };

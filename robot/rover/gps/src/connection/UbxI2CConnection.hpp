@@ -5,7 +5,8 @@
 #include "UbxAbstractConnection.hpp"
 #include "../src/packet/UbxPacket.hpp"
 
-class UbxI2CConnection : public UbxAbstractConnection {
+class UbxI2CConnection : public UbxAbstractConnection
+{
  protected:
 	int fd;
 	uint8_t devaddr;

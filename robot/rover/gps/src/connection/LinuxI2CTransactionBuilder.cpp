@@ -19,8 +19,8 @@ int LinuxI2CTransactionBuilder::openDevice(const std::string& path)
 {
 	// "/dev/i2c-x"
 	int fd = open(path.c_str(), O_RDWR);
-	if (fd < 0) {
-		// TODO: throw exception?
+	if (fd < 0)
+	{
 		std::cerr << "Failed to open i2C device " << path << ". Error: " << strerror(errno) << std::endl;
 		errno = 0;
 		return -1;
@@ -31,7 +31,8 @@ int LinuxI2CTransactionBuilder::openDevice(const std::string& path)
 void LinuxI2CTransactionBuilder::closeDevice(int fd)
 {
 	int status = close(fd);
-	if (fd < 0) {
+	if (fd < 0)
+	{
 		// TODO: throw exception?
 		std::cerr << "Failed to close i2C device. Error: " << strerror(errno) << std::endl;
 		errno = 0;
@@ -44,7 +45,7 @@ LinuxI2CTransactionBuilder::LinuxI2CTransactionBuilder(uint8_t devAddr) :
 }
 
 LinuxI2CTransactionBuilder::LinuxI2CTransactionBuilder(uint8_t devAddr, int reserveSize) :
-	devAddr{devAddr}
+	devAddr{ devAddr }
 {
 	this->segments.reserve(reserveSize);
 }
@@ -131,7 +132,8 @@ LinuxI2CTransactionBuilder& LinuxI2CTransactionBuilder::readAny(T& data)
 
 int LinuxI2CTransactionBuilder::doTransaction(int fd)
 {
-	if (this->segments.size() == 0) {
+	if (this->segments.size() == 0)
+	{
 		// Nothing to perform. Return as successful.
 		return 0;
 	}
@@ -142,7 +144,8 @@ int LinuxI2CTransactionBuilder::doTransaction(int fd)
 
 	// Perform compound I2C transaction
 	int status = ioctl(fd, I2C_RDWR, &transaction);
-	if (status < 0) {
+	if (status < 0)
+	{
 		// TODO: print out more information on the transaction?
 		// TODO: make this an exception?
 		std::cerr << "[I2C Error] Transaction error " << strerror(errno) << std::endl;

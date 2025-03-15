@@ -1,19 +1,22 @@
 #include "UbxPacketNavPosLLH.hpp"
+
+#include <stdexcept>
+
 #include "serdes/UbxDeserializer.hpp"
 
 //	TODO omar: use DEFAULT_ID instead of PID here?
 // Serializing constructor for polling
 UbxPacketNavPosLLH::UbxPacketNavPosLLH()
-	: UbxPacket(DEFAULT_ID, {}), isPollingPacket{true}
+	: UbxPacket(DEFAULT_ID, {}), isPollingPacket{ true }
 {
 }
 
 
 UbxPacketNavPosLLH::UbxPacketNavPosLLH(const std::vector<uint8_t>& frame)
-	: UbxPacket(frame), isPollingPacket{false}
+	: UbxPacket(frame), isPollingPacket{ false }
 {
 	UbxPacket::ensurePid(pid);
-	UbxDeserializer des{this->payload};
+	UbxDeserializer des{ this->payload };
 	this->iTOW = des.readU4();
 	this->longitude = des.readI4();
 	this->latitude = des.readI4();
@@ -56,4 +59,15 @@ uint32_t UbxPacketNavPosLLH::getHorizontalAccuracy_mm() const
 uint32_t UbxPacketNavPosLLH::getVerticalAccuracy_mm() const
 {
 	return vAcc_mm;
+}
+
+
+void UbxPacketNavPosLLH::ensurePid(uint16_t pid) const
+{
+	if (pid != this->pid)
+	{
+		throw std::invalid_argument(
+			"Invalid PID for UbxPacketNavSat. Expected: " + std::to_string(this->pid)
+			+ ", Got: " + std::to_string(pid));
+	}
 }

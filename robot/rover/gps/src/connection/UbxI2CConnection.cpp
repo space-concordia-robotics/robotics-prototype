@@ -6,11 +6,14 @@
 
 #include "packet/UbxPacket.hpp"
 
-
 UbxI2CConnection::UbxI2CConnection(const std::string& devicePath, uint8_t devaddr) :
-	fd{LinuxI2CTransactionBuilder::openDevice(devicePath)},
-	devaddr{devaddr}
+	fd{ LinuxI2CTransactionBuilder::openDevice(devicePath) },
+	devaddr{ devaddr }
 {
+	if (fd < 0)
+	{
+		throw std::runtime_error("Failed to open I2C device " + devicePath + ". Error: " + strerror(errno));
+	}
 }
 
 UbxI2CConnection::~UbxI2CConnection()
@@ -20,20 +23,21 @@ UbxI2CConnection::~UbxI2CConnection()
 
 int UbxI2CConnection::bytesAvailable() const
 {
-	LinuxI2CTransactionBuilder t{this->devaddr};
+	LinuxI2CTransactionBuilder t{ this->devaddr };
 	std::array<uint8_t, 2> readBuffer{};
 
-	t.writeArray({0xFD});
+	t.writeArray({ 0xFD });
 	t.readArray(readBuffer);
 	t.doTransaction(this->fd);
 
-	return (int) readBuffer[0] << 8 | (int) readBuffer[1];
+	return (int)readBuffer[0] << 8 | (int)readBuffer[1];
 }
 
 bool UbxI2CConnection::recvFrame(std::vector<uint8_t>& frame)
 {
 	int bytesToRead = this->bytesAvailable();
-	if (bytesToRead <= 0) {
+	if (bytesToRead <= 0)
+	{
 		// No bytes available
 		return false;
 	}
@@ -41,7 +45,8 @@ bool UbxI2CConnection::recvFrame(std::vector<uint8_t>& frame)
 	std::vector<uint8_t> buf(bytesToRead);
 	for (int bytesToReadNow = bytesToRead <= MAX_TRANSACTION_SIZE ? bytesToRead : MAX_TRANSACTION_SIZE;
 		 bytesToRead > 0;
-		 bytesToRead -= bytesToReadNow) {
+		 bytesToRead -= bytesToReadNow)
+	{
 	}
 	return true;
 }

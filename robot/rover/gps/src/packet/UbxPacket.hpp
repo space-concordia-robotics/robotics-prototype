@@ -3,7 +3,8 @@
 #include <vector>
 #include <cstdint>
 
-class UbxPacket {
+class UbxPacket
+{
  protected:
 	uint16_t preamble;
 	uint16_t pid;
@@ -16,16 +17,16 @@ class UbxPacket {
  public:
 	virtual ~UbxPacket() = default;
 
-/**
- * @brief Constructs a UbxPacket with the specified PID and payload.
- *
- * This serializing constructor is used to create a UbxPacket for sending data. It initializes
- * the packet preamble, calculates the checksum, and serializes the packet into a
- * frame ready for transmission.
- *
- * @param pid The packet identifier (PID) for this UBX packet.
- * @param payload The payload data to include in the packet.
- */
+	/**
+	 * @brief Constructs a UbxPacket with the specified PID and payload.
+	 *
+	 * This serializing constructor is used to create a UbxPacket for sending data. It initializes
+	 * the packet preamble, calculates the checksum, and serializes the packet into a
+	 * frame ready for transmission.
+	 *
+	 * @param pid The packet identifier (PID) for this UBX packet.
+	 * @param payload The payload data to include in the packet.
+	 */
 	UbxPacket(uint16_t pid, const std::vector<uint8_t>& payload);
 
 	/**
@@ -70,5 +71,4 @@ class UbxPacket {
 	}
 
 	virtual void ensurePid(uint16_t pid) const = 0;
-
 };
