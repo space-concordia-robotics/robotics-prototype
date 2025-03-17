@@ -2,7 +2,7 @@ wheel
 pyserial==3.4
 rospkg==1.1.7
 ffmpeg-python==0.2.0
-twisted==22.10.0
+twisted==24.7.0
 Jetson.GPIO
 lark==1.1.5
 pytest==7.2.0
