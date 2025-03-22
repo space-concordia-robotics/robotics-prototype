@@ -9,7 +9,7 @@ a traditional terminal emulator (Terminator or Terminal).
 
 #### Setup venv
 We highly recommend you setup a [Python venv](https://docs.python.org/3/library/venv.html).
-Run `python3 -m venv ./space-env` from the `robotics-orin` folder. This will create a python
+Run `python3 -m venv ./space-env` from the `robotics-prototype` folder. This will create a python
 venv in the `space-env` folder. To make it always run on startup, run the following command
 to add it to your bashrc: `echo "source ${PWD}/space-env/bin/activate" >> ~/.bashrc`
 
@@ -45,7 +45,7 @@ of input methods is in progress).
 Run these commands:
 - `pip install transforms3d`
 - Find where your python packages are installed (eg run the above command again) and source it in `~/.bashrc`. This line should
-**look like** the following: `export PYTHONPATH="/home/marc/Programming/robotics-orin/space-env/lib/python3.10/site-packages:$PYTHONPATH"`
+**look like** the following: `export PYTHONPATH="~/Programming/robotics-prototype/space-env/lib/python3.10/site-packages:$PYTHONPATH"`
 - If need to duplicate video: `sudo apt install ffmpeg v4l2loopback-dkms v4l2loopback-utils v4l-utils`
 
 #### Long version
@@ -56,7 +56,7 @@ Installing the transforms3d library by hand required. Please run
 ```
 Run this command (in my case without the sudo and with pip) and it should work.
 Adding to PYTHONPATH is likely necessary. You will add a command like the following to `~/.bashrc`: 
-`export PYTHONPATH="/home/marc/Programming/robotics-orin/space-env/lib/python3.10/site-packages:$PYTHONPATH"`
+`export PYTHONPATH="/home/marc/Programming/robotics-prototype/space-env/lib/python3.10/site-packages:$PYTHONPATH"`
 
 Another thing to consider is that while python3-opencv (installed with apt, from rosdep) works with
 this package, it also works with opencv-python (installed through pip). There is a version difference,
