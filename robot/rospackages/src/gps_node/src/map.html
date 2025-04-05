@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Rover Location</title>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>    <!-- loads Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />  <!-- loads Leaflet's CSS to style map -->
+
+</head>
+<body>
+    
+    <body style="margin:0; padding:0;">
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+
+    <script> //JS code
+
+        const map = L.map('map').setView([48.8566, 2.3522], 15); // creates Leaflet map, set default coordinates to Paris
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);   //OSM to display map
+
+        const roverMarker = L.marker([48.8566, 2.3522]).addTo(map).bindPopup('Rover Location').openPopup(); // add marker & popup message
+
+        const ws = new WebSocket("ws://localhost:9090");  // manual approach to subscribe to ROS2 topic, could also use ROSLIB.js to do the same automatically (?)
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                op: "subscribe",
+                topic: "/rover_coordinates"
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);    //parse websocket data
+            if(data.msg){
+                const lat = data.msg.latitude;
+                const lon = data.msg.longitude;
+
+                roverMarker.setLatLng([lat,lon]);   //update marker's position
+                map.panTo([lat,lon]);               //pan map to ensure the map centers on the rover's position
+            }
+        };
+
+    </script>
+</body>
+</html>
